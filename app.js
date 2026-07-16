@@ -85,14 +85,17 @@ function abrirDetalhes(id) {
     .then(data => {
       const v = data.vaga || data;
       vagaSelecionada = v;
-      document.getElementById('det-empresa').textContent = v.empresa || '';
+      document.getElementById('det-empresa').textContent = v.empresa || 'Confidencial';
       document.getElementById('det-titulo').textContent = v.titulo;
       document.getElementById('det-local').textContent = v.cidade || '—';
-      document.getElementById('det-modalidade').textContent = v.modalidade || '—';
-      document.getElementById('det-tipo').textContent = v.tipo_contrato || '—';
-      document.getElementById('det-salario').textContent = v.salario || 'A combinar';
+      document.getElementById('det-contrato').textContent = v.tipo_contrato || '—';
+      document.getElementById('det-nivel').textContent = v.nivel || '—';
+      document.getElementById('det-area').textContent = v.area || '—';
+      const sal = (v.salario_min && v.salario_max) ? `R$ ${v.salario_min} - R$ ${v.salario_max}` : 'A combinar';
+      document.getElementById('det-salario').textContent = sal;
       document.getElementById('det-descricao').textContent = v.descricao || 'Sem descrição';
       document.getElementById('det-requisitos').textContent = v.requisitos || '—';
+      document.getElementById('det-beneficios').textContent = v.beneficios || '—';
       atualizarBotaoCandidatar(v.id);
       document.getElementById('modal-detalhes').classList.add('aberto');
     })
@@ -209,7 +212,7 @@ async function enviarCodigo(btn) {
   btn.textContent = 'Enviando...';
   try {
     const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 25000);
+    const timeoutId = setTimeout(() => ctrl.abort(), 35000);
     const r = await fetch(API + '/api/candidato/iniciar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
