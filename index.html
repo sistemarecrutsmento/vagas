@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vagas — Encontre sua oportunidade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-escuro: #4A1F25;
+      --vinho-claro: #8B3A45;
+      --branco: #FFFFFF;
+      --preto: #1A1A1A;
+      --cinza: #F5F5F5;
+      --cinza-medio: #888;
+      --borda: #E5E5E5;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--branco);
+      color: var(--preto);
+      line-height: 1.6;
+    }
+    /* Header */
+    header {
+      background: var(--vinho);
+      color: var(--branco);
+      padding: 20px 0;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .logo span { font-weight: 300; opacity: 0.9; }
+    nav { display: flex; gap: 28px; align-items: center; }
+    nav a { color: var(--branco); text-decoration: none; font-weight: 500; font-size: 15px; opacity: 0.95; }
+    nav a:hover { opacity: 1; }
+    .btn-perfil {
+      background: var(--branco); color: var(--vinho);
+      padding: 10px 20px; border-radius: 6px; font-weight: 600;
+      text-decoration: none; font-size: 14px;
+    }
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--vinho) 0%, var(--vinho-escuro) 100%);
+      color: var(--branco);
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero h1 { font-size: 48px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 16px; }
+    .hero p { font-size: 19px; opacity: 0.9; max-width: 600px; margin: 0 auto 32px; }
+    .search-box {
+      max-width: 600px; margin: 0 auto;
+      display: flex; gap: 8px;
+      background: var(--branco); padding: 8px; border-radius: 8px;
+    }
+    .search-box input {
+      flex: 1; border: none; padding: 14px 16px;
+      font-size: 16px; outline: none; color: var(--preto);
+    }
+    .search-box button {
+      background: var(--preto); color: var(--branco);
+      border: none; padding: 0 24px; border-radius: 6px;
+      font-weight: 600; cursor: pointer; font-size: 15px;
+    }
+    /* Filtros */
+    .filtros { padding: 32px 0; background: var(--cinza); border-bottom: 1px solid var(--borda); }
+    .filtros-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .filtro-chip {
+      background: var(--branco); border: 1px solid var(--borda);
+      padding: 8px 16px; border-radius: 20px; font-size: 14px;
+      cursor: pointer; transition: all 0.2s; font-weight: 500;
+    }
+    .filtro-chip:hover { border-color: var(--vinho); }
+    .filtro-chip.ativo { background: var(--vinho); color: var(--branco); border-color: var(--vinho); }
+    /* Vagas */
+    .vagas-section { padding: 60px 0; min-height: 400px; }
+    .section-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .section-sub { color: var(--cinza-medio); margin-bottom: 32px; }
+    .vagas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+    .vaga-card {
+      background: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 12px;
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .vaga-card:hover { border-color: var(--vinho); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(114,47,55,0.08); }
+    .vaga-card .empresa { font-size: 13px; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .vaga-card h3 { font-size: 20px; font-weight: 700; margin: 8px 0 12px; color: var(--preto); }
+    .vaga-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tag { background: var(--cinza); padding: 4px 10px; border-radius: 4px; font-size: 12px; color: var(--preto); }
+    .vaga-card .salario { color: var(--vinho); font-weight: 700; font-size: 16px; }
+    .vaga-card .local { color: var(--cinza-medio); font-size: 13px; margin-top: 4px; }
+    .vaga-card .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--borda); }
+    .vaga-card .data { font-size: 12px; color: var(--cinza-medio); }
+    .vaga-card .cta { color: var(--vinho); font-weight: 600; font-size: 14px; }
+    /* Empty */
+    .empty { text-align: center; padding: 80px 20px; color: var(--cinza-medio); }
+    .empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.4; }
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+    }
+    .modal-overlay.aberto { display: flex; }
+    .modal {
+      background: var(--branco); border-radius: 12px;
+      max-width: 700px; width: 100%; max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      padding: 24px 32px; border-bottom: 1px solid var(--borda);
+      display: flex; justify-content: space-between; align-items: start;
+    }
+    .modal-header h2 { font-size: 24px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--cinza-medio); }
+    .modal-body { padding: 32px; }
+    .modal-body p { margin-bottom: 16px; }
+    .modal-body .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; padding: 20px; background: var(--cinza); border-radius: 8px; }
+    .modal-body .info-grid div { font-size: 14px; }
+    .modal-body .info-grid strong { color: var(--vinho); display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .modal-footer { padding: 24px 32px; border-top: 1px solid var(--borda); display: flex; gap: 12px; justify-content: flex-end; }
+    .btn { padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 15px; text-decoration: none; display: inline-block; }
+    .btn-primary { background: var(--vinho); color: var(--branco); }
+    .btn-primary:hover { background: var(--vinho-escuro); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: var(--cinza); color: var(--preto); }
+    /* Auth Modal */
+    .auth-tabs { display: flex; border-bottom: 2px solid var(--borda); margin-bottom: 24px; }
+    .auth-tab { flex: 1; padding: 14px; background: none; border: none; font-weight: 600; cursor: pointer; color: var(--cinza-medio); border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .auth-tab.ativo { color: var(--vinho); border-color: var(--vinho); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--borda);
+      border-radius: 6px; font-size: 15px; font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--vinho); }
+    .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+    .alert-erro { background: #FEE; color: #C00; border: 1px solid #FCC; }
+    .alert-ok { background: #EFE; color: #060; border: 1px solid #CFC; }
+    /* Loading */
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Footer */
+    footer { background: var(--preto); color: var(--branco); padding: 40px 0; text-align: center; margin-top: 80px; }
+    footer p { opacity: 0.6; font-size: 14px; }
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 32px; }
+      .vagas-grid { grid-template-columns: 1fr; }
+      .modal-body .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <div class="logo">VAGAS<span>.IO</span></div>
+      <nav>
+        <a href="#" onclick="carregarVagas(); return false;">Vagas</a>
+        <a href="#" onclick="abrirAuth(); return false;" id="nav-perfil">Entrar</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Encontre seu próximo desafio</h1>
+      <p>Vagas de empresas que valorizam seu talento. Candidate-se em 1 clique.</p>
+      <div class="search-box">
+        <input type="text" id="busca" placeholder="Cargo, empresa ou cidade..." onkeyup="if(event.key==='Enter') carregarVagas()">
+        <button onclick="carregarVagas()">Buscar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="filtros">
+    <div class="container">
+      <div class="filtros-row" id="filtros-categorias">
+        <button class="filtro-chip ativo" data-cat="">Todas</button>
+        <button class="filtro-chip" data-cat="TI">TI</button>
+        <button class="filtro-chip" data-cat="Vendas">Vendas</button>
+        <button class="filtro-chip" data-cat="Administrativo">Administrativo</button>
+        <button class="filtro-chip" data-cat="Operacional">Operacional</button>
+        <button class="filtro-chip" data-cat="Marketing">Marketing</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="vagas-section">
+    <div class="container">
+      <h2 class="section-title">Vagas abertas</h2>
+      <p class="section-sub" id="contador">Carregando...</p>
+      <div class="vagas-grid" id="vagas-grid">
+        <div class="empty"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal de Detalhes -->
+  <div class="modal-overlay" id="modal-detalhes">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="empresa" id="det-empresa" style="color:var(--vinho);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;"></div>
+          <h2 id="det-titulo"></h2>
+        </div>
+        <button class="modal-close" onclick="fecharModal('detalhes')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-grid">
+          <div><strong>Localização</strong><span id="det-local"></span></div>
+          <div><strong>Modalidade</strong><span id="det-modalidade"></span></div>
+          <div><strong>Salário</strong><span id="det-salario" style="color:var(--vinho);font-weight:700;"></span></div>
+          <div><strong>Tipo</strong><span id="det-tipo"></span></div>
+        </div>
+        <h3 style="margin-bottom:12px;font-size:18px;">Descrição da vaga</h3>
+        <p id="det-descricao"></p>
+        <h3 style="margin:24px 0 12px;font-size:18px;">Requisitos</h3>
+        <p id="det-requisitos"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="fecharModal('detalhes')">Fechar</button>
+        <button class="btn btn-primary" id="det-cta" onclick="candidatar()">Candidatar-se</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Auth -->
+  <div class="modal-overlay" id="modal-auth">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <h2>Acesse sua conta</h2>
+        <button class="modal-close" onclick="fecharModal('auth')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="auth-tabs">
+          <button class="auth-tab ativo" data-tab="login" onclick="trocarTab('login')">Entrar</button>
+          <button class="auth-tab" data-tab="cadastro" onclick="trocarTab('cadastro')">Cadastrar</button>
+        </div>
+        <div id="alert-auth"></div>
+        <!-- LOGIN -->
+        <div id="form-login">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="seu@email.com">
+          </div>
+          <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="login-senha" placeholder="••••••">
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="fazerLogin()">Entrar</button>
+        </div>
+        <!-- CADASTRO -->
+        <div id="form-cadastro" style="display:none;">
+          <div class="form-group">
+            <label>Nome completo</label>
+            <input type="text" id="cad-nome" placeholder="Seu nome">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="cad-email" placeholder="seu@email.com">
+          </div>
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="tel" id="cad-telefone" placeholder="(00) 00000-0000">
+          </div>
+          <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres">
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="fazerCadastro()">Criar conta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 Vagas.io — Plataforma de recrutamento</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
