@@ -173,16 +173,16 @@ async function candidatar(vagaId) {
 // ===== AUTH / CADASTRO =====
 function abrirModal(id) {
   if (id === 'cad') {
-    document.getElementById('cad-etapa-1').style.display = 'block';
-    document.getElementById('cad-etapa-2').style.display = 'none';
-    document.getElementById('cad-etapa-3').style.display = 'none';
+    document.getElementById('cad-etapa-1').style.setProperty('display', 'block', 'important');
+    document.getElementById('cad-etapa-2').style.setProperty('display', 'none', 'important');
+    document.getElementById('cad-etapa-3').style.setProperty('display', 'none', 'important');
     if (emailVerificado) {
       document.getElementById('cad-email').value = emailVerificado;
     }
   }
   if (id === 'login') {
-    document.getElementById('login-etapa-1').style.display = 'block';
-    document.getElementById('login-etapa-2').style.display = 'none';
+    document.getElementById('login-etapa-1').style.setProperty('display', 'block', 'important');
+    document.getElementById('login-etapa-2').style.setProperty('display', 'none', 'important');
     if (emailVerificado) {
       document.getElementById('login-email').value = emailVerificado;
     }
@@ -398,8 +398,8 @@ async function loginEnviarCodigo(btn) {
       } else if (devBox) {
         devBox.style.display = 'none';
       }
-      document.getElementById('login-etapa-1').style.display = 'none';
-      document.getElementById('login-etapa-2').style.display = 'block';
+      document.getElementById('login-etapa-1').style.setProperty('display', 'none', 'important');
+      document.getElementById('login-etapa-2').style.setProperty('display', 'block', 'important');
     } else {
       alert('Erro: ' + (data.erro || ''));
     }
