@@ -36,7 +36,10 @@ async function carregarVagas() {
     if (busca) params.set('busca', busca);
     if (categoriaAtiva) params.set('area', categoriaAtiva);
     if (params.toString()) url += '?' + params;
-    const r = await fetch(url);
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 30000);
+    const r = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(timeoutId);
     const data = await r.json();
     const vagas = data.vagas || [];
     if (vagas.length === 0) {
@@ -67,14 +70,20 @@ async function carregarVagas() {
     `).join('');
     contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;">Erro ao carregar vagas. Tente novamente.</div>`;
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;">
+      <div class="empty-icon">⚠️</div><h3>Não foi possível carregar as vagas</h3>
+      <p>O servidor pode estar iniciando. Tente novamente.</p>
+      <button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="carregarVagas()">Tentar novamente</button>
+    </div>`;
+    contador.textContent = 'Não foi possível carregar';
   }
 }
 
 function abrirDetalhes(id) {
   fetch(API + '/api/vagas/' + id)
     .then(r => r.json())
-    .then(v => {
+    .then(data => {
+      const v = data.vaga || data;
       vagaSelecionada = v;
       document.getElementById('det-empresa').textContent = v.empresa || '';
       document.getElementById('det-titulo').textContent = v.titulo;
