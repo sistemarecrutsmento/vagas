@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html><head><title>DEBUG</title></head><body>
+<pre id="log" style="font-family:monospace;font-size:11px;white-space:pre-wrap;word-break:break-all;">INICIANDO DEBUG...\n</pre>
+<script>
+const log = (msg) => {
+  document.getElementById('log').textContent += msg + '\n';
+};
+
+// Captura QUALQUER erro
+window.addEventListener('error', e => {
+  log('❌ ERROR: ' + e.message + ' @ ' + e.filename + ':' + e.lineno + ':' + e.colno);
+  log('   stack: ' + (e.error?.stack || 'no stack'));
+});
+window.addEventListener('unhandledrejection', e => {
+  log('❌ PROMISE: ' + (e.reason?.message || e.reason));
+});
+
+// Sobrescreve console.log
+const origLog = console.log;
+console.log = function(...args) {
+  log('LOG: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+  origLog.apply(console, args);
+};
+console.error = function(...args) {
+  log('ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+  origLog.apply(console, args);
+};
+console.warn = function(...args) {
+  log('WARN: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+  origLog.apply(console, args);
+};
+
+log('Listeners instalados. Carregando app.js...');
+</script>
+<script src="app.js"></script>
+<script>
+document.getElementById('log').textContent += '\n=== app.js CARREGADO ===\n';
+setTimeout(() => {
+  document.getElementById('log').textContent += '\n=== 2s depois ===\n';
+  document.getElementById('log').textContent += 'typeof carregarVagas: ' + typeof window.carregarVagas + '\n';
+  document.getElementById('log').textContent += 'typeof API: ' + typeof window.API + '\n';
+  document.getElementById('log').textContent += 'API value: ' + window.API + '\n';
+  document.getElementById('log').textContent += 'carregando-grid: ' + document.getElementById('vagas-grid')?.outerHTML?.substring(0, 200) + '\n';
+}, 2000);
+
+// Tenta carregar vagas manualmente
+setTimeout(() => {
+  if (typeof carregarVagas === 'function') {
+    document.getElementById('log').textContent += '\n=== Chamando carregarVagas() ===\n';
+    try {
+      carregarVagas();
+      document.getElementById('log').textContent += '✓ carregarVagas() chamado\n';
+    } catch (e) {
+      document.getElementById('log').textContent += '❌ carregarVagas() explodiu: ' + e.message + '\n' + e.stack + '\n';
+    }
+  } else {
+    document.getElementById('log').textContent += '\n❌ carregarVagas NÃO EXISTE\n';
+  }
+}, 3000);
+</script>
+</body></html>
