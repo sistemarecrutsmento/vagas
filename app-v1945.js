@@ -245,6 +245,7 @@ async function enviarCodigo(btn) {
       console.log('[ZAPIA] DEPOIS de irParaEtapa(2)');
     } else {
       console.error('[ZAPIA] erro:', data);
+      alert('Erro: ' + (data.erro || 'Não foi possível enviar'));
     }
   } catch (e) {
     if (e.name === 'AbortError') {
@@ -604,3 +605,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// ============================================
+// EXPOR NO WINDOW (para onclick inline funcionar)
+// ============================================
+window.enviarCodigo = enviarCodigo;
+window.verificarCodigo = verificarCodigo;
+window.loginEnviarCodigo = loginEnviarCodigo;
+window.loginVerificarCodigo = loginVerificarCodigo;
+window.abrirModal = abrirModal;
+window.fecharModal = fecharModal;
+window.irParaEtapa = irParaEtapa;
+window.cadastrarPerfil = salvarPerfil;
