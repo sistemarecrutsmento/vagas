@@ -54,22 +54,27 @@ async function carregarVagas() {
       if (contador) contador.textContent = '0 vagas encontradas';
       return;
     }
-    grid.innerHTML = vagas.map(v => `
+    grid.innerHTML = vagas.map(v => {
+      const sMin = Number(v.salario_min) || null;
+      const sMax = Number(v.salario_max) || null;
+      const salTexto = (sMin && sMax) ? `R$ ${sMin.toLocaleString('pt-BR')} - R$ ${sMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
+      return `
       <div class="vaga-card" onclick="abrirDetalhes(${v.id})">
         <div class="empresa">${v.empresa || 'Empresa'}</div>
         <h3>${v.titulo}</h3>
         <div class="vaga-tags">
-          ${v.categoria ? `<span class="tag">${v.categoria}</span>` : ''}
+          ${v.area ? `<span class="tag">${v.area}</span>` : ''}
           ${v.modalidade ? `<span class="tag">${v.modalidade}</span>` : ''}
           ${v.cidade ? `<span class="tag">📍 ${v.cidade}</span>` : ''}
         </div>
-        <div class="salario">${v.salario || 'A combinar'}</div>
+        <div class="salario">${salTexto}</div>
         <div class="footer">
           <span class="data">${formatarData(v.criada_em)}</span>
           <span class="cta">Ver detalhes →</span>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
     if (contador) contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;">
@@ -94,16 +99,27 @@ function abrirDetalhes(id) {
       setTxt('det-contrato', v.tipo_contrato || '—');
       setTxt('det-nivel', v.nivel || '—');
       setTxt('det-area', v.area || '—');
-      const sal = (v.salario_min && v.salario_max) ? `R$ ${v.salario_min} - R$ ${v.salario_max}` : (v.salario || 'A combinar');
+      const salMin = Number(v.salario_min) || null;
+      const salMax = Number(v.salario_max) || null;
+      const sal = (salMin && salMax) ? `R$ ${salMin.toLocaleString('pt-BR')} - R$ ${salMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
       setTxt('det-salario', sal);
       setTxt('det-descricao', v.descricao || 'Sem descrição');
       setTxt('det-requisitos', v.requisitos || '—');
       setTxt('det-beneficios', v.beneficios || '—');
-      // Processo seletivo (se o backend devolver)
+      // Processo seletivo (vem do admin em 'etapas' como JSON [{nome:"..."}])
       const procEl = document.getElementById('det-processo');
       if (procEl) {
-        if (v.processo_seletivo) {
-          procEl.innerHTML = v.processo_seletivo;
+        let etapas = v.etapas;
+        // Pode vir como string JSON (banco TEXT) ou array
+        if (typeof etapas === 'string') {
+          try { etapas = JSON.parse(etapas); } catch (e) { etapas = null; }
+        }
+        if (Array.isArray(etapas) && etapas.length) {
+          procEl.innerHTML = `<ol class="processo-lista">` + etapas.map((e, i) => {
+            const nome = (typeof e === 'string') ? e : (e.nome || e.titulo || `Etapa ${i+1}`);
+            const desc = (typeof e === 'string') ? '' : (e.descricao || '');
+            return `<li><span class="proc-numero">${i+1}</span><div><strong>${nome}</strong>${desc ? `<p>${desc}</p>` : ''}</div></li>`;
+          }).join('') + `</ol>`;
         } else {
           procEl.innerHTML = `
             <ol class="processo-lista">
