@@ -1,61 +1,64 @@
 <!DOCTYPE html>
-<html><head><title>DEBUG</title></head><body>
-<pre id="log" style="font-family:monospace;font-size:11px;white-space:pre-wrap;word-break:break-all;">INICIANDO DEBUG...\n</pre>
-<script>
-const log = (msg) => {
-  document.getElementById('log').textContent += msg + '\n';
-};
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Debug</title>
+<style>
+  body { font-family: monospace; background: #1a1a1a; color: #fff; padding: 20px; }
+  pre { background: #000; padding: 12px; border-radius: 6px; white-space: pre-wrap; }
+  .ok { color: #6c6; }
+  .err { color: #f66; }
+  .warn { color: #fc6; }
+  button { padding: 8px 16px; background: #7a1f3d; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin: 4px; }
+  input { padding: 8px; width: 300px; }
+</style>
+</head>
+<body>
+<h1>🔧 DEBUG - Recrutamento</h1>
+<div id="log"></div>
+<hr>
+<h2>Teste de /iniciar</h2>
+<input id="em" value="debug.test.2026@example.com" />
+<button onclick="testIniciar()">Enviar</button>
+<div id="log2"></div>
 
-// Captura QUALQUER erro
-window.addEventListener('error', e => {
-  log('❌ ERROR: ' + e.message + ' @ ' + e.filename + ':' + e.lineno + ':' + e.colno);
-  log('   stack: ' + (e.error?.stack || 'no stack'));
-});
+<script>
+const API = "https://recrutamento-api.onrender.com";
+const log = document.getElementById('log');
+const log2 = document.getElementById('log2');
+const app = (s, cls='') => log.innerHTML += `<pre class="${cls}">${s}</pre>`;
+const app2 = (s, cls='') => log2.innerHTML += `<pre class="${cls}">${s}</pre>`;
+
+window.onerror = (msg, src, ln, col, err) => {
+  app(`❌ ERRO: ${msg}\n   em ${src}:${ln}:${col}\n   ${err?.stack || ''}`, 'err');
+};
 window.addEventListener('unhandledrejection', e => {
-  log('❌ PROMISE: ' + (e.reason?.message || e.reason));
+  app(`❌ PROMISE: ${e.reason}`, 'err');
 });
 
-// Sobrescreve console.log
-const origLog = console.log;
-console.log = function(...args) {
-  log('LOG: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
-  origLog.apply(console, args);
-};
-console.error = function(...args) {
-  log('ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
-  origLog.apply(console, args);
-};
-console.warn = function(...args) {
-  log('WARN: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
-  origLog.apply(console, args);
-};
+app(`📄 Página carregada`, 'ok');
+app(`🌐 API: ${API}`);
+app(`📅 ${new Date().toISOString()}`);
 
-log('Listeners instalados. Carregando app.js...');
-</script>
-<script src="app.js"></script>
-<script>
-document.getElementById('log').textContent += '\n=== app.js CARREGADO ===\n';
-setTimeout(() => {
-  document.getElementById('log').textContent += '\n=== 2s depois ===\n';
-  document.getElementById('log').textContent += 'typeof carregarVagas: ' + typeof window.carregarVagas + '\n';
-  document.getElementById('log').textContent += 'typeof API: ' + typeof window.API + '\n';
-  document.getElementById('log').textContent += 'API value: ' + window.API + '\n';
-  document.getElementById('log').textContent += 'carregando-grid: ' + document.getElementById('vagas-grid')?.outerHTML?.substring(0, 200) + '\n';
-}, 2000);
-
-// Tenta carregar vagas manualmente
-setTimeout(() => {
-  if (typeof carregarVagas === 'function') {
-    document.getElementById('log').textContent += '\n=== Chamando carregarVagas() ===\n';
-    try {
-      carregarVagas();
-      document.getElementById('log').textContent += '✓ carregarVagas() chamado\n';
-    } catch (e) {
-      document.getElementById('log').textContent += '❌ carregarVagas() explodiu: ' + e.message + '\n' + e.stack + '\n';
-    }
-  } else {
-    document.getElementById('log').textContent += '\n❌ carregarVagas NÃO EXISTE\n';
+async function testIniciar() {
+  log2.innerHTML = '';
+  const email = document.getElementById('em').value;
+  app2(`⏳ Enviando ${email}...`, 'warn');
+  const t0 = Date.now();
+  try {
+    const r = await fetch(API + '/api/candidato/iniciar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const t1 = Date.now();
+    app2(`✅ Resposta ${r.status} em ${t1-t0}ms`);
+    const data = await r.json();
+    app2(`📦 ${JSON.stringify(data, null, 2)}`, 'ok');
+  } catch (e) {
+    app2(`❌ ${e.name}: ${e.message}`, 'err');
   }
-}, 3000);
+}
 </script>
-</body></html>
+</body>
+</html>
