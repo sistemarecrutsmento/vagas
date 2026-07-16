@@ -195,60 +195,51 @@ function fecharModal(id) {
 }
 
 function irParaEtapa(n) {
-  document.getElementById('cad-etapa-1').style.display = n === 1 ? 'block' : 'none';
-  document.getElementById('cad-etapa-2').style.display = n === 2 ? 'block' : 'none';
-  document.getElementById('cad-etapa-3').style.display = n === 3 ? 'block' : 'none';
+  const e1 = document.getElementById('cad-etapa-1');
+  const e2 = document.getElementById('cad-etapa-2');
+  const e3 = document.getElementById('cad-etapa-3');
+  if (n === 1) { e1.style.setProperty('display', 'block', 'important'); e2.style.setProperty('display', 'none', 'important'); e3.style.setProperty('display', 'none', 'important'); }
+  if (n === 2) { e1.style.setProperty('display', 'none', 'important'); e2.style.setProperty('display', 'block', 'important'); e3.style.setProperty('display', 'none', 'important'); }
+  if (n === 3) { e1.style.setProperty('display', 'none', 'important'); e2.style.setProperty('display', 'none', 'important'); e3.style.setProperty('display', 'block', 'important'); }
 }
 
 // ETAPA 1: enviar código para o email
 async function enviarCodigo(btn) {
-  console.log('[ZAPIA] enviarCodigo chamada');
   const email = document.getElementById('cad-email').value.trim().toLowerCase();
   if (!email || !email.includes('@') || !email.includes('.')) {
-    console.warn('[ZAPIA] email inválido');
+    alert('Informe um e-mail válido');
     return;
   }
-  console.log('[ZAPIA] email ok:', email);
   const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
-    const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 35000);
     const r = await fetch(API + '/api/candidato/iniciar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-      signal: ctrl.signal
+      body: JSON.stringify({ email })
     });
-    clearTimeout(timeoutId);
-    console.log('[ZAPIA] /iniciar resposta:', r.status);
     const data = await r.json();
-    console.log('[ZAPIA] /iniciar data:', data);
     if (r.ok) {
       emailVerificado = email;
       localStorage.setItem('candidato_email', email);
-      document.getElementById('cad-email-2').value = email;
-      // Se o backend devolveu o código (modo DEV sem SMTP), mostra em destaque
+      const cadEmail2 = document.getElementById('cad-email-2');
+      if (cadEmail2) cadEmail2.value = email;
       const devBox = document.getElementById('codigo-dev');
       if (data.codigo_debug && devBox) {
-        devBox.innerHTML = '🔧 <b>Modo DEV:</b> o envio de e-mail está desativado. Seu código é <b>' + data.codigo_debug + '</b>';
+        devBox.innerHTML = '🔧 <b>Modo DEV:</b> seu código é <b>' + data.codigo_debug + '</b>';
         devBox.style.display = 'block';
       } else if (devBox) {
         devBox.style.display = 'none';
       }
-      document.getElementById('codigo-enviado-msg').textContent = 'Enviamos um código de 6 dígitos para ' + email;
+      const msgEl = document.getElementById('codigo-enviado-msg');
+      if (msgEl) msgEl.textContent = 'Enviamos um código de 6 dígitos para ' + email;
       irParaEtapa(2);
-      console.log('[ZAPIA] Avançou para etapa 2');
     } else {
-      console.error('[ZAPIA] erro:', data);
+      alert('Erro: ' + (data.erro || 'Não foi possível enviar'));
     }
   } catch (e) {
-    if (e.name === 'AbortError') {
-      alert('O servidor demorou demais. Tente novamente em alguns segundos.');
-    } else {
-      alert('Erro de conexão. Tente novamente.');
-    }
+    alert('Erro de conexão. Tente novamente.');
   } finally {
     btn.disabled = false;
     btn.textContent = oldText;
@@ -600,20 +591,16 @@ document.addEventListener('DOMContentLoaded', () => {
       e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
     });
   }
-
-  // Fallback robusto: também registra o envio por evento, sem depender do onclick inline
-  const cadBtn = document.querySelector('#cad-etapa-1 button.btn-primary');
-  if (cadBtn) {
-    cadBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      enviarCodigo(this);
-    });
-  }
-  const loginBtn = document.querySelector('#login-etapa-1 button.btn-primary');
-  if (loginBtn) {
-    loginBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      loginEnviarCodigo(this);
-    });
-  }
 });
+
+// ============================================
+// EXPOR NO WINDOW (para onclick inline funcionar)
+// ============================================
+window.enviarCodigo = enviarCodigo;
+window.verificarCodigo = verificarCodigo;
+window.loginEnviarCodigo = loginEnviarCodigo;
+window.loginVerificarCodigo = loginVerificarCodigo;
+window.abrirModal = abrirModal;
+window.fecharModal = fecharModal;
+window.irParaEtapa = irParaEtapa;
+window.cadastrarPerfil = salvarPerfil;
