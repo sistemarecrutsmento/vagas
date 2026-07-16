@@ -203,14 +203,12 @@ function irParaEtapa(n) {
 
 // ETAPA 1: enviar código para o email
 async function enviarCodigo(btn) {
-  document.title = '[ZAPIA-ENVIAR] ' + Date.now();
   console.log('[ZAPIA] enviarCodigo chamada');
   const email = document.getElementById('cad-email').value.trim().toLowerCase();
   if (!email || !email.includes('@') || !email.includes('.')) {
     console.warn('[ZAPIA] email inválido');
     return;
   }
-  document.title = '[ZAPIA-EMAIL=' + email + '] ' + Date.now();
   console.log('[ZAPIA] email ok:', email);
   const oldText = btn.textContent;
   btn.disabled = true;
@@ -225,7 +223,6 @@ async function enviarCodigo(btn) {
       signal: ctrl.signal
     });
     clearTimeout(timeoutId);
-    document.title = '[ZAPIA-RESPOSTA=' + r.status + '] ' + Date.now();
     console.log('[ZAPIA] /iniciar resposta:', r.status);
     const data = await r.json();
     console.log('[ZAPIA] /iniciar data:', data);
@@ -235,6 +232,7 @@ async function enviarCodigo(btn) {
       document.getElementById('cad-email-2').value = email;
       // Se o backend devolveu o código (modo DEV sem SMTP), mostra em destaque
       const devBox = document.getElementById('codigo-dev');
+      console.log('[ZAPIA] devBox=', devBox, 'data.codigo_debug=', data.codigo_debug);
       if (data.codigo_debug && devBox) {
         devBox.innerHTML = '🔧 <b>Modo DEV:</b> o envio de e-mail está desativado. Seu código é <b>' + data.codigo_debug + '</b>';
         devBox.style.display = 'block';
@@ -242,9 +240,9 @@ async function enviarCodigo(btn) {
         devBox.style.display = 'none';
       }
       document.getElementById('codigo-enviado-msg').textContent = 'Enviamos um código de 6 dígitos para ' + email;
+      console.log('[ZAPIA] chamando irParaEtapa(2)');
       irParaEtapa(2);
-      document.title = '[ZAPIA-ETAPA2] ' + Date.now();
-      console.log('[ZAPIA] Avançou para etapa 2');
+      console.log('[ZAPIA] DEPOIS de irParaEtapa(2)');
     } else {
       console.error('[ZAPIA] erro:', data);
     }
