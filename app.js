@@ -208,11 +208,18 @@ async function candidatar(vagaId) {
 // ===== MODAIS =====
 function abrirModal(id) {
   if (id === 'cad') {
-    // Mostra etapa 2 (perfil). A etapa 1 (criar conta) só aparece se não estiver logado.
     const cadEtapa1 = document.getElementById('cad-etapa-1');
-    if (cadEtapa1) cadEtapa1.style.setProperty('display', 'none', 'important');
-    document.getElementById('cad-etapa-2').style.setProperty('display', 'block', 'important');
+    const cadEtapa2 = document.getElementById('cad-etapa-2');
     const cadEtapa3 = document.getElementById('cad-etapa-3');
+    // Se já tem token (criou conta mas falta perfil) → vai direto pra etapa 2
+    // Senão → etapa 1 (criar conta com email+senha)
+    if (tokenCandidato) {
+      if (cadEtapa1) cadEtapa1.style.setProperty('display', 'none', 'important');
+      if (cadEtapa2) cadEtapa2.style.setProperty('display', 'block', 'important');
+    } else {
+      if (cadEtapa1) cadEtapa1.style.setProperty('display', 'block', 'important');
+      if (cadEtapa2) cadEtapa2.style.setProperty('display', 'none', 'important');
+    }
     if (cadEtapa3) cadEtapa3.style.setProperty('display', 'none', 'important');
     if (emailLogado) {
       const el = document.getElementById('cad-email');
