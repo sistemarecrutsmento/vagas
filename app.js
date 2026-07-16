@@ -1,18 +1,16 @@
 // ============================================
 // VAGAS.IO — Front-end do Candidato
 // Conecta com backend: https://recrutamento-api.onrender.com
-// Fluxo: /api/candidato/iniciar → /verificar (código email) → /cadastrar
+// Fluxo: /api/candidato/iniciar → /verificar (código email) → /cadastrar (com CPF)
 // ============================================
 
 const API = 'https://recrutamento-api.onrender.com';
 let categoriaAtiva = '';
 let vagaSelecionada = null;
-let emailVerificado = null;     // email que passou por verificação
-let tokenCandidato = null;      // JWT do candidato
+let emailVerificado = null;
+let tokenCandidato = null;
 let cadastroCompleto = false;
-let etapaCadastro = 1;          // 1=iniciar, 2=verificar código, 3=perfil
 
-// Init
 window.addEventListener('DOMContentLoaded', () => {
   carregarVagas();
   checarAuth();
@@ -24,21 +22,21 @@ window.addEventListener('DOMContentLoaded', () => {
       carregarVagas();
     });
   });
-  document.getElementById('busca').addEventListener('input', debounce(carregarVagas, 400));
 });
-
-function debounce(fn, ms) {
-  let t;
-  return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
-}
 
 // ===== API: VAGAS =====
 async function carregarVagas() {
   const grid = document.getElementById('vagas-grid');
   const contador = document.getElementById('contador');
   grid.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+  const busca = document.getElementById('busca').value;
   try {
-    const r = await fetch(API + '/api/vagas');
+    let url = API + '/api/vagas';
+    const params = new URLSearchParams();
+    if (busca) params.set('busca', busca);
+    if (categoriaAtiva) params.set('area', categoriaAtiva);
+    if (params.toString()) url += '?' + params;
+    const r = await fetch(url);
     const data = await r.json();
     const vagas = data.vagas || [];
     if (vagas.length === 0) {
@@ -56,12 +54,11 @@ async function carregarVagas() {
         <div class="empresa">${v.empresa || 'Empresa'}</div>
         <h3>${v.titulo}</h3>
         <div class="vaga-tags">
-          ${v.area ? `<span class="tag">${v.area}</span>` : ''}
-          ${v.tipo_contrato ? `<span class="tag">${v.tipo_contrato}</span>` : ''}
-          ${v.nivel ? `<span class="tag">${v.nivel}</span>` : ''}
-          ${v.cidade ? `<span class="tag">📍 ${v.cidade}${v.estado ? '/' + v.estado : ''}</span>` : ''}
+          ${v.categoria ? `<span class="tag">${v.categoria}</span>` : ''}
+          ${v.modalidade ? `<span class="tag">${v.modalidade}</span>` : ''}
+          ${v.cidade ? `<span class="tag">📍 ${v.cidade}</span>` : ''}
         </div>
-        <div class="salario">${formatarSalario(v.salario_min, v.salario_max)}</div>
+        <div class="salario">${v.salario || 'A combinar'}</div>
         <div class="footer">
           <span class="data">${formatarData(v.criada_em)}</span>
           <span class="cta">Ver detalhes →</span>
@@ -70,48 +67,48 @@ async function carregarVagas() {
     `).join('');
     contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;">Erro ao carregar vagas.</div>`;
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;">Erro ao carregar vagas. Tente novamente.</div>`;
   }
-}
-
-function formatarSalario(min, max) {
-  if (!min && !max) return 'A combinar';
-  const fmt = v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0 });
-  if (min && max) return `${fmt(min)} – ${fmt(max)}`;
-  return `A partir de ${fmt(min || max)}`;
 }
 
 function abrirDetalhes(id) {
   fetch(API + '/api/vagas/' + id)
     .then(r => r.json())
-    .then(d => {
-      const v = d.vaga;
+    .then(v => {
       vagaSelecionada = v;
       document.getElementById('det-empresa').textContent = v.empresa || '';
       document.getElementById('det-titulo').textContent = v.titulo;
-      document.getElementById('det-local').textContent = (v.cidade || '—') + (v.estado ? '/' + v.estado : '');
-      document.getElementById('det-contrato').textContent = v.tipo_contrato || '—';
-      document.getElementById('det-nivel').textContent = v.nivel || '—';
-      document.getElementById('det-area').textContent = v.area || '—';
-      document.getElementById('det-salario').textContent = formatarSalario(v.salario_min, v.salario_max);
-      document.getElementById('det-descricao').textContent = v.descricao || 'Sem descrição.';
-      document.getElementById('det-requisitos').textContent = v.requisitos || 'Não informado.';
-      document.getElementById('det-beneficios').textContent = v.beneficios || 'Não informado.';
+      document.getElementById('det-local').textContent = v.cidade || '—';
+      document.getElementById('det-modalidade').textContent = v.modalidade || '—';
+      document.getElementById('det-tipo').textContent = v.tipo_contrato || '—';
+      document.getElementById('det-salario').textContent = v.salario || 'A combinar';
+      document.getElementById('det-descricao').textContent = v.descricao || 'Sem descrição';
+      document.getElementById('det-requisitos').textContent = v.requisitos || '—';
       atualizarBotaoCandidatar(v.id);
       document.getElementById('modal-detalhes').classList.add('aberto');
-    });
+    })
+    .catch(() => alert('Erro ao carregar detalhes da vaga'));
 }
 
 function atualizarBotaoCandidatar(vagaId) {
   const btn = document.getElementById('btn-candidatar');
   if (!tokenCandidato) {
     btn.textContent = '🔒 Faça login para se candidatar';
-    btn.onclick = () => { fecharModal('detalhes'); abrirModal('cad'); };
+    btn.disabled = false;
+    btn.onclick = () => { fecharModal('detalhes'); abrirModal('login'); };
   } else if (!cadastroCompleto) {
     btn.textContent = '📝 Complete seu cadastro para candidatar-se';
-    btn.onclick = () => { fecharModal('detalhes'); abrirModal('cad'); irParaEtapa(3); };
+    btn.disabled = false;
+    btn.onclick = () => {
+      emailVerificado = localStorage.getItem('candidato_email') || emailVerificado;
+      document.getElementById('cad-email-2').value = emailVerificado || '';
+      fecharModal('detalhes');
+      abrirModal('cad');
+      irParaEtapa(3);
+    };
   } else {
     btn.textContent = '✅ Candidatar-se a esta vaga';
+    btn.disabled = false;
     btn.onclick = () => candidatar(vagaId);
   }
 }
@@ -129,6 +126,11 @@ async function candidatar(vagaId) {
     if (r.ok) {
       btn.textContent = '✓ Candidatura enviada!';
       btn.style.background = '#2E7D32';
+    } else if (r.status === 401) {
+      // Token expirou ou é inválido
+      logout();
+      btn.textContent = '🔒 Faça login para se candidatar';
+      btn.onclick = () => { fecharModal('detalhes'); abrirModal('login'); };
     } else {
       btn.textContent = '❌ ' + (data.erro || 'Erro');
       btn.disabled = false;
@@ -145,11 +147,16 @@ function abrirModal(id) {
     document.getElementById('cad-etapa-1').style.display = 'block';
     document.getElementById('cad-etapa-2').style.display = 'none';
     document.getElementById('cad-etapa-3').style.display = 'none';
-    document.getElementById('cad-email-2').value = emailVerificado || document.getElementById('cad-email').value;
+    if (emailVerificado) {
+      document.getElementById('cad-email').value = emailVerificado;
+    }
   }
   if (id === 'login') {
     document.getElementById('login-etapa-1').style.display = 'block';
     document.getElementById('login-etapa-2').style.display = 'none';
+    if (emailVerificado) {
+      document.getElementById('login-email').value = emailVerificado;
+    }
   }
   document.getElementById('modal-' + id).classList.add('aberto');
 }
@@ -159,31 +166,35 @@ function fecharModal(id) {
 }
 
 function irParaEtapa(n) {
-  etapaCadastro = n;
   document.getElementById('cad-etapa-1').style.display = n === 1 ? 'block' : 'none';
   document.getElementById('cad-etapa-2').style.display = n === 2 ? 'block' : 'none';
   document.getElementById('cad-etapa-3').style.display = n === 3 ? 'block' : 'none';
 }
 
 // ETAPA 1: enviar código para o email
-async function enviarCodigo() {
+async function enviarCodigo(btn) {
   const email = document.getElementById('cad-email').value.trim().toLowerCase();
-  if (!email || !email.includes('@')) {
+  if (!email || !email.includes('@') || !email.includes('.')) {
     alert('Informe um e-mail válido');
     return;
   }
-  const btn = event.target;
+  const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 25000);
     const r = await fetch(API + '/api/candidato/iniciar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email }),
+      signal: ctrl.signal
     });
+    clearTimeout(timeoutId);
     const data = await r.json();
     if (r.ok) {
       emailVerificado = email;
+      localStorage.setItem('candidato_email', email);
       document.getElementById('cad-email-2').value = email;
       document.getElementById('codigo-enviado-msg').textContent = 'Enviamos um código de 6 dígitos para ' + email;
       irParaEtapa(2);
@@ -191,21 +202,25 @@ async function enviarCodigo() {
       alert('Erro: ' + (data.erro || 'Não foi possível enviar'));
     }
   } catch (e) {
-    alert('Erro de conexão. Tente novamente.');
+    if (e.name === 'AbortError') {
+      alert('O servidor demorou demais. Tente novamente em alguns segundos.');
+    } else {
+      alert('Erro de conexão. Tente novamente.');
+    }
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Enviar código';
+    btn.textContent = oldText;
   }
 }
 
 // ETAPA 2: verificar código
-async function verificarCodigo() {
+async function verificarCodigo(btn) {
   const codigo = document.getElementById('cad-codigo').value.trim();
   if (!codigo || codigo.length !== 6) {
     alert('Digite o código de 6 dígitos recebido por e-mail');
     return;
   }
-  const btn = event.target;
+  const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Verificando...';
   try {
@@ -219,7 +234,6 @@ async function verificarCodigo() {
       tokenCandidato = data.token;
       localStorage.setItem('candidato_token', tokenCandidato);
       localStorage.setItem('candidato_email', emailVerificado);
-      // checar se já tem perfil completo
       await checarPerfil();
       irParaEtapa(3);
     } else {
@@ -229,37 +243,48 @@ async function verificarCodigo() {
     alert('Erro de conexão');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Verificar código';
+    btn.textContent = oldText;
   }
 }
 
 async function checarPerfil() {
+  if (!tokenCandidato) return;
   try {
     const r = await fetch(API + '/api/candidato/perfil', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
+    if (r.status === 401) {
+      logout();
+      return;
+    }
     const data = await r.json();
     if (data.candidato) {
       cadastroCompleto = true;
-      // preencher form
       const c = data.candidato;
-      document.getElementById('perfil-nome').value = c.nome || '';
-      document.getElementById('perfil-cpf').value = c.cpf || '';
-      document.getElementById('perfil-celular').value = c.celular || '';
-      document.getElementById('perfil-nascimento').value = c.data_nascimento || '';
-      document.getElementById('perfil-sexo').value = c.sexo || '';
-      document.getElementById('perfil-cidade').value = c.cidade || '';
-      document.getElementById('perfil-estado').value = c.estado || '';
-      document.getElementById('perfil-formacao').value = c.formacao || '';
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+      setVal('perfil-nome', c.nome);
+      setVal('perfil-cpf', c.cpf);
+      setVal('perfil-celular', c.celular);
+      setVal('perfil-nascimento', c.data_nascimento);
+      setVal('perfil-sexo', c.sexo);
+      setVal('perfil-cidade', c.cidade);
+      setVal('perfil-estado', c.estado);
+      setVal('perfil-formacao', c.formacao);
+      atualizarHeaderUsuario();
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Falha ao checar perfil:', e);
+  }
 }
 
 // ETAPA 3: salvar perfil
-async function salvarPerfil() {
+async function salvarPerfil(btn) {
+  const cpfRaw = document.getElementById('perfil-cpf').value.trim();
+  const cpf = cpfRaw.replace(/\D/g, '');
   const perfil = {
     nome: document.getElementById('perfil-nome').value.trim(),
-    cpf: document.getElementById('perfil-cpf').value.trim(),
+    cpf: cpf,
+    email: emailVerificado,
     celular: document.getElementById('perfil-celular').value.trim(),
     data_nascimento: document.getElementById('perfil-nascimento').value || null,
     sexo: document.getElementById('perfil-sexo').value || null,
@@ -267,11 +292,9 @@ async function salvarPerfil() {
     estado: document.getElementById('perfil-estado').value.trim().toUpperCase(),
     formacao: document.getElementById('perfil-formacao').value.trim()
   };
-  if (!perfil.nome || !perfil.cpf) {
-    alert('Nome e CPF são obrigatórios');
-    return;
-  }
-  const btn = event.target;
+  if (!perfil.nome) { alert('Nome é obrigatório'); return; }
+  if (!perfil.cpf || perfil.cpf.length !== 11) { alert('CPF é obrigatório (11 dígitos)'); return; }
+  const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Salvando...';
   try {
@@ -283,9 +306,21 @@ async function salvarPerfil() {
     const data = await r.json();
     if (r.ok) {
       cadastroCompleto = true;
-      alert('✅ Cadastro concluído! Agora você pode se candidatar às vagas.');
       fecharModal('cad');
       atualizarHeaderUsuario();
+      alert('✅ Cadastro concluído! Agora você pode se candidatar às vagas.');
+      // Se o modal de detalhes estava aberto, atualizar o botão
+      if (vagaSelecionada) {
+        const btnCand = document.getElementById('btn-candidatar');
+        if (btnCand) {
+          btnCand.textContent = '✅ Candidatar-se a esta vaga';
+          btnCand.disabled = false;
+          btnCand.onclick = () => candidatar(vagaSelecionada.id);
+        }
+      }
+    } else if (r.status === 401) {
+      logout();
+      alert('Sessão expirada. Faça login novamente.');
     } else {
       alert('Erro: ' + (data.erro || 'Não foi possível salvar'));
     }
@@ -293,28 +328,33 @@ async function salvarPerfil() {
     alert('Erro de conexão');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Salvar e continuar';
+    btn.textContent = oldText;
   }
 }
 
 // LOGIN (reenviar código)
-async function loginEnviarCodigo() {
+async function loginEnviarCodigo(btn) {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   if (!email || !email.includes('@')) {
     alert('Informe um e-mail válido');
     return;
   }
-  const btn = event.target;
+  const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 25000);
     const r = await fetch(API + '/api/candidato/iniciar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email }),
+      signal: ctrl.signal
     });
+    clearTimeout(timeoutId);
     if (r.ok) {
       emailVerificado = email;
+      localStorage.setItem('candidato_email', email);
       document.getElementById('login-email-2').value = email;
       document.getElementById('login-etapa-1').style.display = 'none';
       document.getElementById('login-etapa-2').style.display = 'block';
@@ -323,20 +363,24 @@ async function loginEnviarCodigo() {
       alert('Erro: ' + (data.erro || ''));
     }
   } catch (e) {
-    alert('Erro de conexão');
+    if (e.name === 'AbortError') {
+      alert('O servidor demorou demais. Tente novamente.');
+    } else {
+      alert('Erro de conexão');
+    }
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Enviar código';
+    btn.textContent = oldText;
   }
 }
 
-async function loginVerificarCodigo() {
+async function loginVerificarCodigo(btn) {
   const codigo = document.getElementById('login-codigo').value.trim();
   if (!codigo || codigo.length !== 6) {
     alert('Código inválido');
     return;
   }
-  const btn = event.target;
+  const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Entrando...';
   try {
@@ -353,7 +397,13 @@ async function loginVerificarCodigo() {
       await checarPerfil();
       fecharModal('login');
       atualizarHeaderUsuario();
-      alert('✅ Login efetuado!');
+      if (cadastroCompleto) {
+        alert('✅ Login efetuado!');
+      } else {
+        // Se não tem perfil, abre direto a etapa 3 do cadastro
+        abrirModal('cad');
+        irParaEtapa(3);
+      }
     } else {
       alert('Erro: ' + (data.erro || 'Código inválido'));
     }
@@ -361,15 +411,16 @@ async function loginVerificarCodigo() {
     alert('Erro de conexão');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Entrar';
+    btn.textContent = oldText;
   }
 }
 
 function checarAuth() {
   const t = localStorage.getItem('candidato_token');
-  if (t) {
+  const e = localStorage.getItem('candidato_email');
+  if (t && e) {
     tokenCandidato = t;
-    emailVerificado = localStorage.getItem('candidato_email');
+    emailVerificado = e;
     checarPerfil().then(atualizarHeaderUsuario);
   }
 }
@@ -377,9 +428,12 @@ function checarAuth() {
 function atualizarHeaderUsuario() {
   const btnEntrar = document.querySelector('header .btn-outline');
   if (!btnEntrar) return;
-  if (tokenCandidato) {
+  if (tokenCandidato && cadastroCompleto) {
     btnEntrar.textContent = '👤 ' + (emailVerificado || 'Perfil');
     btnEntrar.onclick = () => abrirPainelCandidato();
+  } else if (tokenCandidato) {
+    btnEntrar.textContent = '📝 Completar cadastro';
+    btnEntrar.onclick = () => { abrirModal('cad'); irParaEtapa(3); };
   } else {
     btnEntrar.textContent = 'Entrar';
     btnEntrar.onclick = () => abrirModal('login');
@@ -388,30 +442,34 @@ function atualizarHeaderUsuario() {
 
 async function abrirPainelCandidato() {
   if (!cadastroCompleto) {
-    irParaEtapa(3);
     abrirModal('cad');
+    irParaEtapa(3);
     return;
   }
-  // buscar candidaturas
   try {
     const r = await fetch(API + '/api/candidato/candidaturas', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
+    if (r.status === 401) {
+      logout();
+      alert('Sessão expirada');
+      return;
+    }
     const data = await r.json();
     const lista = data.candidaturas || [];
     const html = lista.length === 0
-      ? '<div class="empty"><p>Você ainda não se candidatou a nenhuma vaga.</p></div>'
+      ? '<div class="empty"><div class="empty-icon">📭</div><p>Você ainda não se candidatou a nenhuma vaga.</p></div>'
       : lista.map(c => `
         <div class="cand-item">
           <div>
-            <strong>${c.titulo}</strong>
-            <div class="muted">${c.empresa} • ${c.cidade || ''}</div>
+            <strong>${c.titulo || 'Vaga'}</strong>
+            <div class="muted">${c.empresa || ''} • ${c.cidade || ''}</div>
           </div>
           <span class="status status-${c.status}">${statusLabel(c.status)}</span>
         </div>
       `).join('');
     document.getElementById('minhas-cand-lista').innerHTML = html;
-    document.getElementById('minhas-cand-email').textContent = emailVerificado;
+    document.getElementById('minhas-cand-email').textContent = emailVerificado || '';
     document.getElementById('modal-minhas').classList.add('aberto');
   } catch (e) {
     alert('Erro ao buscar candidaturas');
@@ -423,7 +481,8 @@ function statusLabel(s) {
     em_analise: 'Em análise',
     aprovado: 'Aprovado',
     reprovado: 'Reprovado',
-    contratado: 'Contratado'
+    contratado: 'Contratado',
+    entrevista: 'Entrevista'
   }[s] || s;
 }
 
@@ -433,8 +492,9 @@ function logout() {
   tokenCandidato = null;
   cadastroCompleto = false;
   emailVerificado = null;
-  fecharModal('minhas');
   atualizarHeaderUsuario();
+  // Fechar todos os modais
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('aberto'));
 }
 
 // fechar modal ao clicar fora
@@ -453,3 +513,64 @@ function formatarData(iso) {
   if (diff < 7) return `${diff} dias atrás`;
   return d.toLocaleDateString('pt-BR');
 }
+
+// Formatar CPF automaticamente
+document.addEventListener('DOMContentLoaded', () => {
+  const cpfInput = document.getElementById('perfil-cpf');
+  if (cpfInput) {
+    cpfInput.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      e.target.value = v;
+    });
+  }
+  const celInput = document.getElementById('perfil-celular');
+  if (celInput) {
+    celInput.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      v = v.replace(/^(\d{2})(\d)/, '($1) $2');
+      v = v.replace(/(\d)(\d{4})$/, '$1-$2');
+      e.target.value = v;
+    });
+  }
+  const codigoInput = document.getElementById('cad-codigo');
+  if (codigoInput) {
+    codigoInput.addEventListener('input', e => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    });
+  }
+  const codigoInput2 = document.getElementById('login-codigo');
+  if (codigoInput2) {
+    codigoInput2.addEventListener('input', e => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    });
+  }
+
+  // Máscara de CPF
+  const cpfInput = document.getElementById('perfil-cpf');
+  if (cpfInput) {
+    cpfInput.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      e.target.value = v;
+    });
+  }
+
+  // Máscara de celular
+  const celInput = document.getElementById('perfil-celular');
+  if (celInput) {
+    celInput.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length <= 10) {
+        v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      } else {
+        v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      }
+      e.target.value = v;
+    });
+  }
+});
