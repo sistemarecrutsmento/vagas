@@ -113,7 +113,8 @@ function atualizarBotaoCandidatar(vagaId) {
     btn.disabled = false;
     btn.onclick = () => {
       emailVerificado = localStorage.getItem('candidato_email') || emailVerificado;
-      document.getElementById('cad-email-2').value = emailVerificado || '';
+      const cadEmail2 = document.getElementById('cad-email-2');
+      if (cadEmail2) cadEmail2.value = emailVerificado || '';
       fecharModal('detalhes');
       abrirModal('cad');
       irParaEtapa(3);
@@ -389,7 +390,8 @@ async function loginEnviarCodigo(btn) {
     if (r.ok) {
       emailVerificado = email;
       localStorage.setItem('candidato_email', email);
-      document.getElementById('login-email-2').value = email;
+      const loginEmail2 = document.getElementById('login-email-2');
+      if (loginEmail2) loginEmail2.value = email;
       // Se o backend devolveu o código (modo DEV sem SMTP), mostra em destaque
       const devBox = document.getElementById('codigo-dev-login');
       if (data.codigo_debug && devBox) {
