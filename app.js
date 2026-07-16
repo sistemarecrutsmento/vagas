@@ -22,12 +22,6 @@ window.addEventListener('DOMContentLoaded', () => {
       carregarVagas();
     });
   });
-  // Liga o botão de Enviar Código do CADASTRO (backup do onclick inline)
-  const btnEnviarCad = document.querySelector('#modal-cad .step[id="cad-etapa-1"] button.btn-primary');
-  if (btnEnviarCad) btnEnviarCad.addEventListener('click', e => enviarCodigo(e.currentTarget));
-  // E o do LOGIN
-  const btnEnviarLogin = document.querySelector('#modal-login .step[id="login-etapa-1"] button.btn-primary');
-  if (btnEnviarLogin) btnEnviarLogin.addEventListener('click', e => loginEnviarCodigo(e.currentTarget));
 });
 
 // ===== API: VAGAS =====
@@ -208,19 +202,19 @@ function irParaEtapa(n) {
 
 // ETAPA 1: enviar código para o email
 async function enviarCodigo(btn) {
+  console.log('[ZAPIA] enviarCodigo chamada');
   const email = document.getElementById('cad-email').value.trim().toLowerCase();
-  console.log('[ZAPIA] enviarCodigo chamado com:', email);
   if (!email || !email.includes('@') || !email.includes('.')) {
-    alert('Informe um e-mail válido');
+    console.warn('[ZAPIA] email inválido');
     return;
   }
+  console.log('[ZAPIA] email ok:', email);
   const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), 35000);
-    console.log('[ZAPIA] Fetch /iniciar...');
     const r = await fetch(API + '/api/candidato/iniciar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -228,9 +222,9 @@ async function enviarCodigo(btn) {
       signal: ctrl.signal
     });
     clearTimeout(timeoutId);
-    console.log('[ZAPIA] Resposta recebida:', r.status);
+    console.log('[ZAPIA] /iniciar resposta:', r.status);
     const data = await r.json();
-    console.log('[ZAPIA] JSON:', data);
+    console.log('[ZAPIA] /iniciar data:', data);
     if (r.ok) {
       emailVerificado = email;
       localStorage.setItem('candidato_email', email);
@@ -247,14 +241,13 @@ async function enviarCodigo(btn) {
       irParaEtapa(2);
       console.log('[ZAPIA] Avançou para etapa 2');
     } else {
-      alert('Erro: ' + (data.erro || 'Não foi possível enviar'));
+      console.error('[ZAPIA] erro:', data);
     }
   } catch (e) {
-    console.error('[ZAPIA] Erro:', e);
     if (e.name === 'AbortError') {
       alert('O servidor demorou demais. Tente novamente em alguns segundos.');
     } else {
-      alert('Erro de conexão. Tente novamente. ' + e.message);
+      alert('Erro de conexão. Tente novamente.');
     }
   } finally {
     btn.disabled = false;
@@ -608,13 +601,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-// Expor handlers no window (garante que onclick inline consegue chamar)
-window.enviarCodigo = enviarCodigo;
-window.verificarCodigo = verificarCodigo;
-window.loginEnviarCodigo = loginEnviarCodigo;
-window.loginVerificarCodigo = loginVerificarCodigo;
-window.abrirModal = abrirModal;
-window.fecharModal = fecharModal;
-window.irParaEtapa = irParaEtapa;
-window.cadastrarPerfil = cadastrarPerfil;
