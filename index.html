@@ -175,6 +175,66 @@
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--vinho); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
+    /* ====== PAINEL DO CANDIDATO ====== */
+    .modal-painel { padding: 24px; }
+    .modal-xlarge { max-width: 1000px; width: 95%; }
+    .modal-body-painel { display: grid; grid-template-columns: 280px 1fr; gap: 24px; padding: 0; }
+    .painel-lateral { background: var(--cinza); padding: 24px; border-radius: 8px; }
+    .painel-perfil { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--borda); margin-bottom: 20px; }
+    .painel-foto { width: 80px; height: 80px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 12px; }
+    .painel-perfil h3 { font-size: 18px; color: var(--preto); margin-bottom: 4px; }
+    .painel-email { font-size: 13px; color: var(--cinza-medio); }
+
+    .painel-progresso { padding-bottom: 20px; border-bottom: 1px solid var(--borda); margin-bottom: 20px; }
+    .progresso-titulo { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .progresso-titulo strong { color: var(--vinho); font-size: 16px; }
+    .barra { background: white; height: 8px; border-radius: 4px; overflow: hidden; }
+    .barra-fill { background: var(--vinho); height: 100%; width: 0; transition: width .3s; }
+    .progresso-dica { font-size: 12px; color: var(--cinza-medio); margin-top: 8px; }
+
+    .painel-menu { display: flex; flex-direction: column; gap: 4px; }
+    .painel-tab { background: transparent; border: none; text-align: left; padding: 10px 14px; border-radius: 6px; font-size: 14px; color: var(--preto); cursor: pointer; font-weight: 500; }
+    .painel-tab:hover { background: white; }
+    .painel-tab.ativo { background: var(--vinho); color: white; }
+    .painel-tab-sair { color: var(--vermelho); margin-top: 8px; }
+    .painel-tab-sair:hover { background: #FFF3F3; }
+
+    .painel-conteudo { padding: 4px 8px 4px 0; }
+    .painel-titulo { font-size: 20px; color: var(--vinho); margin-bottom: 16px; }
+    .painel-secao { display: none; }
+    .painel-secao.ativo { display: block; }
+
+    /* Abas do perfil */
+    .perfil-abas { display: flex; gap: 4px; border-bottom: 2px solid var(--borda); margin-bottom: 20px; flex-wrap: wrap; }
+    .perfil-aba { background: transparent; border: none; padding: 10px 16px; font-size: 14px; color: var(--cinza-medio); cursor: pointer; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .perfil-aba:hover { color: var(--preto); }
+    .perfil-aba.ativo { color: var(--vinho); border-bottom-color: var(--vinho); }
+    .perfil-bloco { display: none; }
+    .perfil-bloco.ativo { display: block; }
+    .perfil-form { display: flex; flex-direction: column; gap: 16px; }
+    .perfil-acoes { margin-top: 8px; }
+
+    /* Timeline de candidatura */
+    .cand-card { background: var(--cinza); border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+    .cand-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .cand-card h4 { color: var(--vinho); font-size: 16px; margin-bottom: 2px; }
+    .cand-card .cand-empresa { font-size: 13px; color: var(--cinza-medio); }
+    .cand-timeline { display: flex; align-items: center; gap: 6px; padding-top: 12px; border-top: 1px solid var(--borda); overflow-x: auto; }
+    .cand-etapa { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; text-align: center; position: relative; }
+    .cand-etapa::after { content: ''; position: absolute; top: 14px; left: 50%; right: -50%; height: 2px; background: var(--borda); z-index: 0; }
+    .cand-etapa:last-child::after { display: none; }
+    .cand-etapa-bola { width: 28px; height: 28px; border-radius: 50%; background: var(--borda); color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; z-index: 1; position: relative; }
+    .cand-etapa.ativa .cand-etapa-bola { background: var(--vinho); color: white; }
+    .cand-etapa.concluida .cand-etapa-bola { background: var(--verde); color: white; }
+    .cand-etapa-label { font-size: 11px; color: var(--cinza-medio); }
+    .cand-etapa.ativa .cand-etapa-label, .cand-etapa.concluida .cand-etapa-label { color: var(--preto); font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .modal-body-painel { grid-template-columns: 1fr; }
+      .cand-timeline { gap: 2px; }
+      .cand-etapa { min-width: 70px; }
+    }
+
     @media (max-width: 768px) {
       .hero h1 { font-size: 32px; }
       .vagas-grid { grid-template-columns: 1fr; }
@@ -385,22 +445,177 @@
   </div>
 </div>
 
-<!-- MODAL MINHAS CANDIDATURAS -->
-<div class="modal-overlay" id="modal-minhas">
-  <div class="modal">
+<!-- MODAL PAINEL DO CANDIDATO -->
+<div class="modal-overlay modal-painel" id="modal-minhas">
+  <div class="modal modal-xlarge">
     <div class="modal-header">
-      <div><h2>Minhas candidaturas</h2><p style="font-size:13px;color:var(--cinza-medio);" id="minhas-cand-email"></p></div>
+      <h2>Minha conta</h2>
       <button class="modal-close" onclick="fecharModal('minhas')">×</button>
     </div>
-    <div class="modal-body" id="minhas-cand-lista">
-      <div class="empty"><div class="spinner"></div></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="logout()">Sair</button>
+    <div class="modal-body modal-body-painel">
+
+      <!-- Lado esquerdo: perfil + progresso -->
+      <aside class="painel-lateral">
+        <div class="painel-perfil">
+          <div class="painel-foto" id="painel-foto">👤</div>
+          <h3 id="painel-nome">—</h3>
+          <p id="painel-email" class="painel-email">—</p>
+        </div>
+        <div class="painel-progresso">
+          <div class="progresso-titulo">
+            <span>Perfil completo</span>
+            <strong id="painel-progresso-pct">0%</strong>
+          </div>
+          <div class="barra"><div class="barra-fill" id="painel-progresso-fill"></div></div>
+          <p class="progresso-dica" id="painel-progresso-dica">Complete seu perfil para aumentar suas chances.</p>
+        </div>
+        <nav class="painel-menu">
+          <button class="painel-tab ativo" data-tab="cands">📋 Minhas candidaturas</button>
+          <button class="painel-tab" data-tab="perfil">👤 Editar perfil</button>
+          <button class="painel-tab" data-tab="senha">🔑 Trocar senha</button>
+          <button class="painel-tab painel-tab-sair" onclick="logout()">🚪 Sair</button>
+        </nav>
+      </aside>
+
+      <!-- Lado direito: conteúdo da aba -->
+      <section class="painel-conteudo">
+        <!-- ABA: MINHAS CANDIDATURAS -->
+        <div class="painel-secao ativo" id="painel-secao-cands">
+          <h3 class="painel-titulo">Minhas candidaturas</h3>
+          <div id="painel-cands-lista"><div class="empty"><div class="spinner"></div></div></div>
+        </div>
+
+        <!-- ABA: EDITAR PERFIL (com sub-abas) -->
+        <div class="painel-secao" id="painel-secao-perfil">
+          <h3 class="painel-titulo">Meu perfil</h3>
+          <div class="perfil-abas">
+            <button class="perfil-aba ativo" data-sub="dados">Dados pessoais</button>
+            <button class="perfil-aba" data-sub="endereco">Endereço</button>
+            <button class="perfil-aba" data-sub="escolaridade">Escolaridade</button>
+            <button class="perfil-aba" data-sub="acessibilidade">Acessibilidade</button>
+          </div>
+
+          <form class="perfil-form" id="perfil-form" onsubmit="event.preventDefault();salvarPerfilCompleto(this)">
+            <!-- Dados pessoais -->
+            <div class="perfil-bloco ativo" data-bloco="dados">
+              <div class="form-row">
+                <div class="form-group"><label>Nome completo *</label><input type="text" id="pe-nome" required></div>
+                <div class="form-group"><label>CPF *</label><input type="text" id="pe-cpf" placeholder="000.000.000-00" maxlength="14"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Data de nascimento</label><input type="date" id="pe-nascimento"></div>
+                <div class="form-group"><label>Sexo</label>
+                  <select id="pe-sexo">
+                    <option value="">Prefiro não informar</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Celular</label><input type="tel" id="pe-celular" placeholder="(00) 00000-0000"></div>
+                <div class="form-group"><label>E-mail</label><input type="email" id="pe-email" disabled></div>
+              </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="perfil-bloco" data-bloco="endereco">
+              <div class="form-row">
+                <div class="form-group"><label>CEP</label><input type="text" id="pe-cep" placeholder="00000-000" maxlength="9"></div>
+                <div class="form-group"><label>Cidade</label><input type="text" id="pe-cidade"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>UF</label><input type="text" id="pe-estado" maxlength="2" placeholder="BA"></div>
+                <div class="form-group"><label>Bairro</label><input type="text" id="pe-bairro"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group" style="grid-column:1/-1"><label>Logradouro</label><input type="text" id="pe-logradouro" placeholder="Rua, avenida..."></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Número</label><input type="text" id="pe-numero"></div>
+                <div class="form-group"><label>Complemento</label><input type="text" id="pe-complemento"></div>
+              </div>
+            </div>
+
+            <!-- Escolaridade -->
+            <div class="perfil-bloco" data-bloco="escolaridade">
+              <div class="form-row">
+                <div class="form-group"><label>Formação</label>
+                  <select id="pe-formacao">
+                    <option value="">Selecione...</option>
+                    <option value="Ensino fundamental">Ensino fundamental</option>
+                    <option value="Ensino médio">Ensino médio</option>
+                    <option value="Ensino técnico">Ensino técnico</option>
+                    <option value="Graduação">Graduação</option>
+                    <option value="Pós-graduação">Pós-graduação</option>
+                    <option value="Mestrado">Mestrado</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>Instituição</label><input type="text" id="pe-instituicao"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Curso</label><input type="text" id="pe-curso"></div>
+                <div class="form-group"><label>Situação</label>
+                  <select id="pe-situacao">
+                    <option value="">Selecione...</option>
+                    <option value="concluido">Concluído</option>
+                    <option value="cursando">Cursando</option>
+                    <option value="trancado">Trancado</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group"><label>Primeiro emprego?</label>
+                <select id="pe-primeiro-emprego">
+                  <option value="false">Não</option>
+                  <option value="true">Sim</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Acessibilidade -->
+            <div class="perfil-bloco" data-bloco="acessibilidade">
+              <div class="form-group"><label>Possui alguma necessidade de acessibilidade?</label>
+                <select id="pe-acessibilidade">
+                  <option value="">Nenhuma</option>
+                  <option value="cadeirante">Cadeirante</option>
+                  <option value="deficiencia_visual">Deficiência visual</option>
+                  <option value="deficiencia_auditiva">Deficiência auditiva</option>
+                  <option value="mobilidade_reduzida">Mobilidade reduzida</option>
+                  <option value="outra">Outra</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" id="pe-comunicacoes" style="width:auto;">
+                  Quero receber comunicações de novas vagas
+                </label>
+              </div>
+            </div>
+
+            <div class="perfil-acoes">
+              <button type="submit" class="btn btn-primary">Salvar perfil</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ABA: TROCAR SENHA -->
+        <div class="painel-secao" id="painel-secao-senha">
+          <h3 class="painel-titulo">Trocar senha</h3>
+          <form class="perfil-form" onsubmit="event.preventDefault();trocarSenha(this)">
+            <div class="form-group"><label>Senha atual *</label><input type="password" id="senha-atual" required minlength="6"></div>
+            <div class="form-group"><label>Nova senha * (mínimo 6 caracteres)</label><input type="password" id="senha-nova" required minlength="6"></div>
+            <div class="form-group"><label>Confirme a nova senha *</label><input type="password" id="senha-nova-conf" required minlength="6"></div>
+            <div class="perfil-acoes">
+              <button type="submit" class="btn btn-primary">Atualizar senha</button>
+            </div>
+          </form>
+        </div>
+      </section>
     </div>
   </div>
 </div>
 
-<script src="app.js?v=20260716-2035"></script>
+<script src="app.js?v=20260716-2050"></script>
 </body>
 </html>
