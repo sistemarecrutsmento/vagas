@@ -463,17 +463,21 @@ function checarAuth() {
 
 function atualizarHeaderUsuario() {
   const btnEntrar = document.querySelector('header .btn-outline');
+  const btnCad = document.getElementById('btn-cadastrar');
   if (!btnEntrar) return;
   if (tokenCandidato && cadastroCompleto) {
     const nome = localStorage.getItem('candidato_nome') || emailLogado;
     btnEntrar.textContent = '👤 ' + nome;
     btnEntrar.onclick = () => abrirPainelCandidato();
+    if (btnCad) btnCad.style.setProperty('display', 'none', 'important');
   } else if (tokenCandidato) {
     btnEntrar.textContent = '📝 Completar cadastro';
     btnEntrar.onclick = () => { abrirModal('cad'); irParaEtapa(2); };
+    if (btnCad) btnCad.style.setProperty('display', 'none', 'important');
   } else {
     btnEntrar.textContent = 'Entrar';
     btnEntrar.onclick = () => abrirModal('login');
+    if (btnCad) btnCad.style.setProperty('display', 'inline-block', 'important');
   }
 }
 
