@@ -1,13 +1,13 @@
 // ============================================
 // VAGAS.IO — Front-end do Candidato
 // Conecta com backend: https://recrutamento-api.onrender.com
-// Fluxo: /api/candidato/iniciar → /verificar (código email) → /cadastrar (com CPF)
+// Fluxo: Cadastro/Login com e-mail + senha (sem código de verificação)
 // ============================================
 
 const API = 'https://recrutamento-api.onrender.com';
 let categoriaAtiva = '';
 let vagaSelecionada = null;
-let emailVerificado = null;
+let emailLogado = null;
 let tokenCandidato = null;
 let cadastroCompleto = false;
 
@@ -28,8 +28,10 @@ window.addEventListener('DOMContentLoaded', () => {
 async function carregarVagas() {
   const grid = document.getElementById('vagas-grid');
   const contador = document.getElementById('contador');
+  if (!grid) return;
   grid.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
-  const busca = document.getElementById('busca').value;
+  const buscaEl = document.getElementById('busca');
+  const busca = buscaEl ? buscaEl.value : '';
   try {
     let url = API + '/api/vagas';
     const params = new URLSearchParams();
@@ -49,7 +51,7 @@ async function carregarVagas() {
           <h3>Nenhuma vaga disponível no momento</h3>
           <p>Volte mais tarde — atualizamos toda semana.</p>
         </div>`;
-      contador.textContent = '0 vagas encontradas';
+      if (contador) contador.textContent = '0 vagas encontradas';
       return;
     }
     grid.innerHTML = vagas.map(v => `
@@ -68,14 +70,14 @@ async function carregarVagas() {
         </div>
       </div>
     `).join('');
-    contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
+    if (contador) contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;">
       <div class="empty-icon">⚠️</div><h3>Não foi possível carregar as vagas</h3>
       <p>O servidor pode estar iniciando. Tente novamente.</p>
       <button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="carregarVagas()">Tentar novamente</button>
     </div>`;
-    contador.textContent = 'Não foi possível carregar';
+    if (contador) contador.textContent = 'Não foi possível carregar';
   }
 }
 
@@ -85,17 +87,34 @@ function abrirDetalhes(id) {
     .then(data => {
       const v = data.vaga || data;
       vagaSelecionada = v;
-      document.getElementById('det-empresa').textContent = v.empresa || 'Confidencial';
-      document.getElementById('det-titulo').textContent = v.titulo;
-      document.getElementById('det-local').textContent = v.cidade || '—';
-      document.getElementById('det-contrato').textContent = v.tipo_contrato || '—';
-      document.getElementById('det-nivel').textContent = v.nivel || '—';
-      document.getElementById('det-area').textContent = v.area || '—';
-      const sal = (v.salario_min && v.salario_max) ? `R$ ${v.salario_min} - R$ ${v.salario_max}` : 'A combinar';
-      document.getElementById('det-salario').textContent = sal;
-      document.getElementById('det-descricao').textContent = v.descricao || 'Sem descrição';
-      document.getElementById('det-requisitos').textContent = v.requisitos || '—';
-      document.getElementById('det-beneficios').textContent = v.beneficios || '—';
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setTxt('det-empresa', v.empresa || 'Confidencial');
+      setTxt('det-titulo', v.titulo);
+      setTxt('det-local', v.cidade || '—');
+      setTxt('det-contrato', v.tipo_contrato || '—');
+      setTxt('det-nivel', v.nivel || '—');
+      setTxt('det-area', v.area || '—');
+      const sal = (v.salario_min && v.salario_max) ? `R$ ${v.salario_min} - R$ ${v.salario_max}` : (v.salario || 'A combinar');
+      setTxt('det-salario', sal);
+      setTxt('det-descricao', v.descricao || 'Sem descrição');
+      setTxt('det-requisitos', v.requisitos || '—');
+      setTxt('det-beneficios', v.beneficios || '—');
+      // Processo seletivo (se o backend devolver)
+      const procEl = document.getElementById('det-processo');
+      if (procEl) {
+        if (v.processo_seletivo) {
+          procEl.innerHTML = v.processo_seletivo;
+        } else {
+          procEl.innerHTML = `
+            <ol class="processo-lista">
+              <li><span class="proc-numero">1</span><div><strong>Inscrição</strong><p>Envie sua candidatura pela plataforma</p></div></li>
+              <li><span class="proc-numero">2</span><div><strong>Triagem curricular</strong><p>Análise do perfil e documentos</p></div></li>
+              <li><span class="proc-numero">3</span><div><strong>Entrevista RH</strong><p>Conversa inicial com o time de recrutamento</p></div></li>
+              <li><span class="proc-numero">4</span><div><strong>Entrevista técnica</strong><p>Avaliação com o gestor da área</p></div></li>
+              <li><span class="proc-numero">5</span><div><strong>Contratação</strong><p>Proposta formal e início</p></div></li>
+            </ol>`;
+        }
+      }
       atualizarBotaoCandidatar(v.id);
       document.getElementById('modal-detalhes').classList.add('aberto');
     })
@@ -104,6 +123,7 @@ function abrirDetalhes(id) {
 
 function atualizarBotaoCandidatar(vagaId) {
   const btn = document.getElementById('btn-candidatar');
+  if (!btn) return;
   if (!tokenCandidato) {
     btn.textContent = '🔒 Faça login para se candidatar';
     btn.disabled = false;
@@ -112,12 +132,12 @@ function atualizarBotaoCandidatar(vagaId) {
     btn.textContent = '📝 Complete seu cadastro para candidatar-se';
     btn.disabled = false;
     btn.onclick = () => {
-      emailVerificado = localStorage.getItem('candidato_email') || emailVerificado;
-      const cadEmail2 = document.getElementById('cad-email-2');
-      if (cadEmail2) cadEmail2.value = emailVerificado || '';
+      emailLogado = localStorage.getItem('candidato_email') || emailLogado;
+      const cadEmail = document.getElementById('cad-email');
+      if (cadEmail) cadEmail.value = emailLogado || '';
       fecharModal('detalhes');
       abrirModal('cad');
-      irParaEtapa(3);
+      irParaEtapa(2);
     };
   } else {
     btn.textContent = '✅ Candidatar-se a esta vaga';
@@ -127,7 +147,6 @@ function atualizarBotaoCandidatar(vagaId) {
 }
 
 async function candidatar(vagaId) {
-  // Proteção: se não tiver token, manda pro login
   if (!tokenCandidato) {
     alert('Você precisa fazer login antes de se candidatar.');
     fecharModal('detalhes');
@@ -135,10 +154,10 @@ async function candidatar(vagaId) {
     return;
   }
   if (!cadastroCompleto) {
-    alert('Complete seu cadastro (CPF, cidade, etc.) antes de se candidatar.');
+    alert('Complete seu cadastro antes de se candidatar.');
     fecharModal('detalhes');
     abrirModal('cad');
-    irParaEtapa(3);
+    irParaEtapa(2);
     return;
   }
   const btn = document.getElementById('btn-candidatar');
@@ -155,7 +174,6 @@ async function candidatar(vagaId) {
       btn.style.background = '#2E7D32';
       btn.style.color = 'white';
     } else if (r.status === 401) {
-      // Token expirou ou é inválido
       logout();
       btn.textContent = '🔒 Faça login para se candidatar';
       btn.disabled = false;
@@ -171,73 +189,90 @@ async function candidatar(vagaId) {
   }
 }
 
-// ===== AUTH / CADASTRO =====
+// ===== MODAIS =====
 function abrirModal(id) {
   if (id === 'cad') {
-    document.getElementById('cad-etapa-1').style.setProperty('display', 'block', 'important');
-    document.getElementById('cad-etapa-2').style.setProperty('display', 'none', 'important');
-    document.getElementById('cad-etapa-3').style.setProperty('display', 'none', 'important');
-    if (emailVerificado) {
-      document.getElementById('cad-email').value = emailVerificado;
+    // Mostra etapa 2 (perfil). A etapa 1 (criar conta) só aparece se não estiver logado.
+    const cadEtapa1 = document.getElementById('cad-etapa-1');
+    if (cadEtapa1) cadEtapa1.style.setProperty('display', 'none', 'important');
+    document.getElementById('cad-etapa-2').style.setProperty('display', 'block', 'important');
+    const cadEtapa3 = document.getElementById('cad-etapa-3');
+    if (cadEtapa3) cadEtapa3.style.setProperty('display', 'none', 'important');
+    if (emailLogado) {
+      const el = document.getElementById('cad-email');
+      if (el) el.value = emailLogado;
     }
   }
   if (id === 'login') {
-    document.getElementById('login-etapa-1').style.setProperty('display', 'block', 'important');
-    document.getElementById('login-etapa-2').style.setProperty('display', 'none', 'important');
-    if (emailVerificado) {
-      document.getElementById('login-email').value = emailVerificado;
-    }
+    // Reset login para etapa 1
+    const etapa1 = document.getElementById('login-etapa-1');
+    const etapa2 = document.getElementById('login-etapa-2');
+    if (etapa1) etapa1.style.setProperty('display', 'block', 'important');
+    if (etapa2) etapa2.style.setProperty('display', 'none', 'important');
   }
-  document.getElementById('modal-' + id).classList.add('aberto');
+  if (id === 'cad-completo') {
+    // Modal só com perfil (usuário já logado, quer editar)
+    document.getElementById('cad-etapa-completo-1').style.setProperty('display', 'block', 'important');
+    carregarDadosPerfil();
+  }
+  const modal = document.getElementById('modal-' + id);
+  if (modal) modal.classList.add('aberto');
 }
 
 function fecharModal(id) {
-  document.getElementById('modal-' + id).classList.remove('aberto');
+  const modal = document.getElementById('modal-' + id);
+  if (modal) modal.classList.remove('aberto');
 }
 
+// Compat: o HTML antigo tem 3 etapas (1=código, 2=verificar, 3=perfil).
+// Agora simplificamos: etapa 1 = criar conta, etapa 2 = perfil. Etapa 3 (legado) some.
 function irParaEtapa(n) {
   const e1 = document.getElementById('cad-etapa-1');
   const e2 = document.getElementById('cad-etapa-2');
   const e3 = document.getElementById('cad-etapa-3');
-  if (n === 1) { e1.style.setProperty('display', 'block', 'important'); e2.style.setProperty('display', 'none', 'important'); e3.style.setProperty('display', 'none', 'important'); }
-  if (n === 2) { e1.style.setProperty('display', 'none', 'important'); e2.style.setProperty('display', 'block', 'important'); e3.style.setProperty('display', 'none', 'important'); }
-  if (n === 3) { e1.style.setProperty('display', 'none', 'important'); e2.style.setProperty('display', 'none', 'important'); e3.style.setProperty('display', 'block', 'important'); }
+  if (e1) e1.style.setProperty('display', 'none', 'important');
+  if (e2) e2.style.setProperty('display', 'none', 'important');
+  if (e3) e3.style.setProperty('display', 'none', 'important');
+  if (n === 1 && e1) e1.style.setProperty('display', 'block', 'important');
+  if (n === 2 && e2) e2.style.setProperty('display', 'block', 'important');
+  if (n === 3 && e3) e3.style.setProperty('display', 'block', 'important');
 }
 
-// ETAPA 1: enviar código para o email
-async function enviarCodigo(btn) {
-  const email = document.getElementById('cad-email').value.trim().toLowerCase();
-  if (!email || !email.includes('@') || !email.includes('.')) {
-    alert('Informe um e-mail válido');
-    return;
-  }
+// ===== CADASTRO (etapa 1: criar conta, etapa 2: completar perfil) =====
+async function cadastrarConta(btn) {
+  const nome = document.getElementById('cad-nome')?.value.trim();
+  const email = document.getElementById('cad-email')?.value.trim().toLowerCase();
+  const celular = document.getElementById('cad-celular')?.value.trim();
+  const senha = document.getElementById('cad-senha')?.value;
+  const senhaConf = document.getElementById('cad-senha-conf')?.value;
+
+  if (!nome) return alert('Informe seu nome');
+  if (!email || !email.includes('@')) return alert('Informe um e-mail válido');
+  if (!celular) return alert('Informe seu celular/WhatsApp');
+  if (!senha || senha.length < 6) return alert('A senha deve ter no mínimo 6 caracteres');
+  if (senha !== senhaConf) return alert('As senhas não coincidem');
+
   const oldText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Enviando...';
+  btn.textContent = 'Criando conta...';
   try {
-    const r = await fetch(API + '/api/candidato/iniciar', {
+    const r = await fetch(API + '/api/candidato/cadastro', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ nome, email, celular, senha })
     });
     const data = await r.json();
     if (r.ok) {
-      emailVerificado = email;
-      localStorage.setItem('candidato_email', email);
-      const cadEmail2 = document.getElementById('cad-email-2');
-      if (cadEmail2) cadEmail2.value = email;
-      const devBox = document.getElementById('codigo-dev');
-      if (data.codigo_debug && devBox) {
-        devBox.innerHTML = '🔧 <b>Modo DEV:</b> seu código é <b>' + data.codigo_debug + '</b>';
-        devBox.style.display = 'block';
-      } else if (devBox) {
-        devBox.style.display = 'none';
-      }
-      const msgEl = document.getElementById('codigo-enviado-msg');
-      if (msgEl) msgEl.textContent = 'Enviamos um código de 6 dígitos para ' + email;
+      tokenCandidato = data.token;
+      emailLogado = data.candidato.email;
+      localStorage.setItem('candidato_token', tokenCandidato);
+      localStorage.setItem('candidato_email', emailLogado);
+      cadastroCompleto = false; // ainda não tem CPF, etc.
+      // Avança para etapa 2 (perfil completo)
       irParaEtapa(2);
+      atualizarHeaderUsuario();
     } else {
-      alert('Erro: ' + (data.erro || 'Não foi possível enviar'));
+      alert('Erro: ' + (data.erro || 'Não foi possível criar a conta'));
     }
   } catch (e) {
     alert('Erro de conexão. Tente novamente.');
@@ -247,87 +282,23 @@ async function enviarCodigo(btn) {
   }
 }
 
-// ETAPA 2: verificar código
-async function verificarCodigo(btn) {
-  const codigo = document.getElementById('cad-codigo').value.trim();
-  if (!codigo || codigo.length !== 6) {
-    alert('Digite o código de 6 dígitos recebido por e-mail');
-    return;
-  }
-  const oldText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Verificando...';
-  try {
-    const r = await fetch(API + '/api/candidato/verificar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailVerificado, codigo })
-    });
-    const data = await r.json();
-    if (r.ok) {
-      tokenCandidato = data.token;
-      localStorage.setItem('candidato_token', tokenCandidato);
-      localStorage.setItem('candidato_email', emailVerificado);
-      await checarPerfil();
-      irParaEtapa(3);
-    } else {
-      alert('Erro: ' + (data.erro || 'Código inválido'));
-    }
-  } catch (e) {
-    alert('Erro de conexão');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = oldText;
-  }
-}
-
-async function checarPerfil() {
-  if (!tokenCandidato) return;
-  try {
-    const r = await fetch(API + '/api/candidato/perfil', {
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
-    if (r.status === 401) {
-      logout();
-      return;
-    }
-    const data = await r.json();
-    if (data.candidato) {
-      cadastroCompleto = true;
-      const c = data.candidato;
-      const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
-      setVal('perfil-nome', c.nome);
-      setVal('perfil-cpf', c.cpf);
-      setVal('perfil-celular', c.celular);
-      setVal('perfil-nascimento', c.data_nascimento);
-      setVal('perfil-sexo', c.sexo);
-      setVal('perfil-cidade', c.cidade);
-      setVal('perfil-estado', c.estado);
-      setVal('perfil-formacao', c.formacao);
-      atualizarHeaderUsuario();
-    }
-  } catch (e) {
-    console.warn('Falha ao checar perfil:', e);
-  }
-}
-
-// ETAPA 3: salvar perfil
 async function salvarPerfil(btn) {
-  const cpfRaw = document.getElementById('perfil-cpf').value.trim();
+  const cpfRaw = document.getElementById('perfil-cpf')?.value.trim() || '';
   const cpf = cpfRaw.replace(/\D/g, '');
   const perfil = {
-    nome: document.getElementById('perfil-nome').value.trim(),
+    nome: document.getElementById('perfil-nome')?.value.trim(),
     cpf: cpf,
-    email: emailVerificado,
-    celular: document.getElementById('perfil-celular').value.trim(),
-    data_nascimento: document.getElementById('perfil-nascimento').value || null,
-    sexo: document.getElementById('perfil-sexo').value || null,
-    cidade: document.getElementById('perfil-cidade').value.trim(),
-    estado: document.getElementById('perfil-estado').value.trim().toUpperCase(),
-    formacao: document.getElementById('perfil-formacao').value.trim()
+    email: emailLogado,
+    celular: document.getElementById('perfil-celular')?.value.trim(),
+    data_nascimento: document.getElementById('perfil-nascimento')?.value || null,
+    sexo: document.getElementById('perfil-sexo')?.value || null,
+    cidade: document.getElementById('perfil-cidade')?.value.trim(),
+    estado: document.getElementById('perfil-estado')?.value.trim().toUpperCase(),
+    formacao: document.getElementById('perfil-formacao')?.value.trim()
   };
   if (!perfil.nome) { alert('Nome é obrigatório'); return; }
   if (!perfil.cpf || perfil.cpf.length !== 11) { alert('CPF é obrigatório (11 dígitos)'); return; }
+  if (!tokenCandidato) { alert('Você precisa estar logado'); return; }
   const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Salvando...';
@@ -341,9 +312,11 @@ async function salvarPerfil(btn) {
     if (r.ok) {
       cadastroCompleto = true;
       fecharModal('cad');
+      fecharModal('cad-completo');
       atualizarHeaderUsuario();
-      alert('✅ Cadastro concluído! Agora você pode se candidatar às vagas.');
-      // Se o modal de detalhes estava aberto, atualizar o botão
+      if (!btn.dataset.silencioso) {
+        alert('✅ Cadastro concluído! Agora você pode se candidatar às vagas.');
+      }
       if (vagaSelecionada) {
         const btnCand = document.getElementById('btn-candidatar');
         if (btnCand) {
@@ -366,89 +339,37 @@ async function salvarPerfil(btn) {
   }
 }
 
-// LOGIN (reenviar código)
-async function loginEnviarCodigo(btn) {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  if (!email || !email.includes('@')) {
-    alert('Informe um e-mail válido');
-    return;
-  }
-  const oldText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Enviando...';
-  try {
-    const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 25000);
-    const r = await fetch(API + '/api/candidato/iniciar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-      signal: ctrl.signal
-    });
-    clearTimeout(timeoutId);
-    const data = await r.json();
-    if (r.ok) {
-      emailVerificado = email;
-      localStorage.setItem('candidato_email', email);
-      const loginEmail2 = document.getElementById('login-email-2');
-      if (loginEmail2) loginEmail2.value = email;
-      // Se o backend devolveu o código (modo DEV sem SMTP), mostra em destaque
-      const devBox = document.getElementById('codigo-dev-login');
-      if (data.codigo_debug && devBox) {
-        devBox.innerHTML = '🔧 <b>Modo DEV:</b> o envio de e-mail está desativado. Seu código é <b>' + data.codigo_debug + '</b>';
-        devBox.style.display = 'block';
-      } else if (devBox) {
-        devBox.style.display = 'none';
-      }
-      document.getElementById('login-etapa-1').style.setProperty('display', 'none', 'important');
-      document.getElementById('login-etapa-2').style.setProperty('display', 'block', 'important');
-    } else {
-      alert('Erro: ' + (data.erro || ''));
-    }
-  } catch (e) {
-    if (e.name === 'AbortError') {
-      alert('O servidor demorou demais. Tente novamente.');
-    } else {
-      alert('Erro de conexão');
-    }
-  } finally {
-    btn.disabled = false;
-    btn.textContent = oldText;
-  }
-}
+// ===== LOGIN (email + senha, etapa única) =====
+async function loginEntrar(btn) {
+  const email = document.getElementById('login-email')?.value.trim().toLowerCase();
+  const senha = document.getElementById('login-senha')?.value;
+  if (!email || !email.includes('@')) return alert('Informe um e-mail válido');
+  if (!senha) return alert('Informe sua senha');
 
-async function loginVerificarCodigo(btn) {
-  const codigo = document.getElementById('login-codigo').value.trim();
-  if (!codigo || codigo.length !== 6) {
-    alert('Código inválido');
-    return;
-  }
   const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Entrando...';
   try {
-    const r = await fetch(API + '/api/candidato/verificar', {
+    const r = await fetch(API + '/api/candidato/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailVerificado, codigo })
+      body: JSON.stringify({ email, senha })
     });
     const data = await r.json();
     if (r.ok) {
       tokenCandidato = data.token;
+      emailLogado = data.candidato.email;
       localStorage.setItem('candidato_token', tokenCandidato);
-      localStorage.setItem('candidato_email', emailVerificado);
+      localStorage.setItem('candidato_email', emailLogado);
       await checarPerfil();
       fecharModal('login');
       atualizarHeaderUsuario();
-      if (cadastroCompleto) {
-        alert('✅ Login efetuado!');
-      } else {
-        // Se não tem perfil, abre direto a etapa 3 do cadastro
+      if (!cadastroCompleto) {
         abrirModal('cad');
-        irParaEtapa(3);
+        irParaEtapa(2);
       }
     } else {
-      alert('Erro: ' + (data.erro || 'Código inválido'));
+      alert('Erro: ' + (data.erro || 'Não foi possível entrar'));
     }
   } catch (e) {
     alert('Erro de conexão');
@@ -458,12 +379,61 @@ async function loginVerificarCodigo(btn) {
   }
 }
 
+async function checarPerfil() {
+  if (!tokenCandidato) return;
+  try {
+    const r = await fetch(API + '/api/candidato/perfil', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (r.status === 401) { logout(); return; }
+    const data = await r.json();
+    if (data.candidato) {
+      const c = data.candidato;
+      // Considera perfil completo se tem nome + cpf
+      cadastroCompleto = !!(c.nome && c.cpf);
+      // guarda no localStorage pra usar no header
+      if (c.nome) localStorage.setItem('candidato_nome', c.nome);
+    } else {
+      cadastroCompleto = false;
+    }
+  } catch (e) {
+    console.warn('Falha ao checar perfil:', e);
+  }
+}
+
+async function carregarDadosPerfil() {
+  if (!tokenCandidato) return;
+  try {
+    const r = await fetch(API + '/api/candidato/perfil', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    if (!data.candidato) return;
+    const c = data.candidato;
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val !== null && val !== undefined) el.value = val; };
+    setVal('perfil-nome', c.nome);
+    setVal('perfil-cpf', c.cpf);
+    setVal('perfil-celular', c.celular);
+    // Para <input type="date">, o backend manda DATE; o input aceita yyyy-mm-dd
+    if (c.data_nascimento) {
+      const dn = c.data_nascimento.substring(0, 10);
+      setVal('perfil-nascimento', dn);
+    }
+    setVal('perfil-sexo', c.sexo);
+    setVal('perfil-cidade', c.cidade);
+    setVal('perfil-estado', c.estado);
+    setVal('perfil-formacao', c.formacao);
+    setVal('perfil-email-readonly', emailLogado);
+  } catch (e) { console.warn(e); }
+}
+
 function checarAuth() {
   const t = localStorage.getItem('candidato_token');
   const e = localStorage.getItem('candidato_email');
   if (t && e) {
     tokenCandidato = t;
-    emailVerificado = e;
+    emailLogado = e;
     checarPerfil().then(atualizarHeaderUsuario);
   }
 }
@@ -472,11 +442,12 @@ function atualizarHeaderUsuario() {
   const btnEntrar = document.querySelector('header .btn-outline');
   if (!btnEntrar) return;
   if (tokenCandidato && cadastroCompleto) {
-    btnEntrar.textContent = '👤 ' + (emailVerificado || 'Perfil');
+    const nome = localStorage.getItem('candidato_nome') || emailLogado;
+    btnEntrar.textContent = '👤 ' + nome;
     btnEntrar.onclick = () => abrirPainelCandidato();
   } else if (tokenCandidato) {
     btnEntrar.textContent = '📝 Completar cadastro';
-    btnEntrar.onclick = () => { abrirModal('cad'); irParaEtapa(3); };
+    btnEntrar.onclick = () => { abrirModal('cad'); irParaEtapa(2); };
   } else {
     btnEntrar.textContent = 'Entrar';
     btnEntrar.onclick = () => abrirModal('login');
@@ -486,33 +457,44 @@ function atualizarHeaderUsuario() {
 async function abrirPainelCandidato() {
   if (!cadastroCompleto) {
     abrirModal('cad');
-    irParaEtapa(3);
+    irParaEtapa(2);
     return;
   }
+  // Recarrega dados do perfil pra ter o nome atualizado
+  try {
+    const rPerfil = await fetch(API + '/api/candidato/perfil', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (rPerfil.ok) {
+      const dp = await rPerfil.json();
+      if (dp.candidato && dp.candidato.nome) {
+        localStorage.setItem('candidato_nome', dp.candidato.nome);
+      }
+    }
+  } catch (e) { /* silencioso */ }
+
   try {
     const r = await fetch(API + '/api/candidato/candidaturas', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
-    if (r.status === 401) {
-      logout();
-      alert('Sessão expirada');
-      return;
-    }
+    if (r.status === 401) { logout(); alert('Sessão expirada'); return; }
     const data = await r.json();
     const lista = data.candidaturas || [];
+    const nome = localStorage.getItem('candidato_nome') || emailLogado || '';
     const html = lista.length === 0
-      ? '<div class="empty"><div class="empty-icon">📭</div><p>Você ainda não se candidatou a nenhuma vaga.</p></div>'
+      ? '<div class="empty"><div class="empty-icon">📭</div><p>Você ainda não se candidatou a nenhuma vaga.</p><p style="font-size:13px;color:#888;margin-top:8px">Volte para a lista de vagas e candidate-se!</p></div>'
       : lista.map(c => `
         <div class="cand-item">
           <div>
             <strong>${c.titulo || 'Vaga'}</strong>
             <div class="muted">${c.empresa || ''} • ${c.cidade || ''}</div>
+            <div class="muted" style="font-size:12px;margin-top:4px">📅 ${formatarData(c.criada_em)}</div>
           </div>
           <span class="status status-${c.status}">${statusLabel(c.status)}</span>
         </div>
       `).join('');
     document.getElementById('minhas-cand-lista').innerHTML = html;
-    document.getElementById('minhas-cand-email').textContent = emailVerificado || '';
+    document.getElementById('minhas-cand-email').textContent = nome;
     document.getElementById('modal-minhas').classList.add('aberto');
   } catch (e) {
     alert('Erro ao buscar candidaturas');
@@ -532,11 +514,11 @@ function statusLabel(s) {
 function logout() {
   localStorage.removeItem('candidato_token');
   localStorage.removeItem('candidato_email');
+  localStorage.removeItem('candidato_nome');
   tokenCandidato = null;
   cadastroCompleto = false;
-  emailVerificado = null;
+  emailLogado = null;
   atualizarHeaderUsuario();
-  // Fechar todos os modais
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('aberto'));
 }
 
@@ -581,16 +563,17 @@ document.addEventListener('DOMContentLoaded', () => {
       e.target.value = v;
     });
   }
-  const codigoInput = document.getElementById('cad-codigo');
-  if (codigoInput) {
-    codigoInput.addEventListener('input', e => {
-      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
-    });
-  }
-  const codigoInput2 = document.getElementById('login-codigo');
-  if (codigoInput2) {
-    codigoInput2.addEventListener('input', e => {
-      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+  // celular do cadastro (semelhante)
+  const cadCel = document.getElementById('cad-celular');
+  if (cadCel) {
+    cadCel.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length <= 10) {
+        v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      } else {
+        v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      }
+      e.target.value = v;
     });
   }
 });
@@ -598,11 +581,15 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 // EXPOR NO WINDOW (para onclick inline funcionar)
 // ============================================
-window.enviarCodigo = enviarCodigo;
-window.verificarCodigo = verificarCodigo;
-window.loginEnviarCodigo = loginEnviarCodigo;
-window.loginVerificarCodigo = loginVerificarCodigo;
+window.cadastrarConta = cadastrarConta;
+window.salvarPerfil = salvarPerfil;
+window.loginEntrar = loginEntrar;
 window.abrirModal = abrirModal;
 window.fecharModal = fecharModal;
 window.irParaEtapa = irParaEtapa;
-window.cadastrarPerfil = salvarPerfil;
+window.logout = logout;
+window.carregarVagas = carregarVagas;
+window.abrirDetalhes = abrirDetalhes;
+window.candidatar = candidatar;
+window.abrirPainelCandidato = abrirPainelCandidato;
+window.atualizarHeaderUsuario = atualizarHeaderUsuario;
