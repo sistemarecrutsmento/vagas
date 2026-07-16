@@ -556,8 +556,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (celInput) {
     celInput.addEventListener('input', e => {
       let v = e.target.value.replace(/\D/g, '').slice(0, 11);
-      v = v.replace(/^(\d{2})(\d)/, '($1) $2');
-      v = v.replace(/(\d)(\d{4})$/, '$1-$2');
+      if (v.length <= 10) {
+        v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      } else {
+        v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      }
       e.target.value = v;
     });
   }
@@ -571,32 +574,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (codigoInput2) {
     codigoInput2.addEventListener('input', e => {
       e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
-    });
-  }
-
-  // Máscara de CPF
-  const cpfInput = document.getElementById('perfil-cpf');
-  if (cpfInput) {
-    cpfInput.addEventListener('input', e => {
-      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
-      v = v.replace(/(\d{3})(\d)/, '$1.$2');
-      v = v.replace(/(\d{3})(\d)/, '$1.$2');
-      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-      e.target.value = v;
-    });
-  }
-
-  // Máscara de celular
-  const celInput = document.getElementById('perfil-celular');
-  if (celInput) {
-    celInput.addEventListener('input', e => {
-      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
-      if (v.length <= 10) {
-        v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
-      } else {
-        v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
-      }
-      e.target.value = v;
     });
   }
 });
