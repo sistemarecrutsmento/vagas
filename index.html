@@ -121,11 +121,67 @@
     .step { display: none; }
     .step-num { display: inline-block; background: var(--vinho); color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 700; font-size: 14px; margin-right: 8px; }
 
+    /* ====== PROCESSO SELETIVO (bolinhas numeradas) ====== */
+    .procsel { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+    .procsel-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; background: var(--cinza); border-radius: 8px; border-left: 3px solid var(--vinho); }
+    .procsel-num { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    .procsel-texto strong { display: block; font-size: 15px; color: var(--preto); margin-bottom: 2px; }
+    .procsel-texto small { color: var(--cinza-medio); font-size: 13px; }
+
+    /* ====== HEADER USUARIO LOGADO ====== */
+    .header-user { display: flex; align-items: center; gap: 12px; }
+    .header-user-email { font-size: 13px; color: rgba(255,255,255,0.9); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .header-user-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+    .header-user-btn:hover { background: rgba(255,255,255,0.25); }
+    .header-user-btn.primary { background: white; color: var(--vinho); }
+    .header-user-btn.primary:hover { background: var(--cinza); }
+    .header-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.25); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+
+    /* ====== PAINEL CANDIDATO (modal minhas) ====== */
+    .painel-resumo { display: grid; grid-template-columns: 80px 1fr auto; gap: 16px; align-items: center; padding: 20px; background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro)); color: white; border-radius: 12px; margin-bottom: 20px; }
+    .painel-avatar { width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; }
+    .painel-info h3 { font-size: 20px; margin-bottom: 4px; }
+    .painel-info p { opacity: 0.9; font-size: 14px; }
+
+    .cand-card { background: var(--cinza); border-radius: 8px; padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--vinho); }
+    .cand-card-topo { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 12px; flex-wrap: wrap; }
+    .cand-card-topo h4 { font-size: 16px; color: var(--preto); }
+    .cand-card-empresa { font-size: 13px; color: var(--cinza-medio); margin-bottom: 4px; }
+    .cand-card-data { font-size: 12px; color: var(--cinza-medio); }
+
+    .cand-timeline { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--borda); display: flex; flex-direction: column; gap: 8px; }
+    .cand-tl { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+    .cand-tl-dot { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--cinza); color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; border: 2px solid var(--borda); }
+    .cand-tl.done .cand-tl-dot { background: #D4EDDA; color: #155724; border-color: #28A745; }
+    .cand-tl.current .cand-tl-dot { background: var(--vinho); color: white; border-color: var(--vinho-escuro); }
+    .cand-tl.rejected .cand-tl-dot { background: #F8D7DA; color: #721C24; border-color: #C62828; }
+    .cand-tl strong { display: block; color: var(--preto); font-size: 13px; }
+    .cand-tl small { color: var(--cinza-medio); }
+
+    .cand-vazia { text-align: center; padding: 40px 20px; color: var(--cinza-medio); }
+    .cand-vazia-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+    .perfil-progresso { background: var(--cinza); border-radius: 6px; height: 8px; margin-top: 8px; overflow: hidden; }
+    .perfil-progresso-bar { background: linear-gradient(90deg, var(--vinho), var(--vinho-claro)); height: 100%; transition: width 0.3s; }
+    .perfil-progresso-texto { font-size: 12px; color: rgba(255,255,255,0.9); margin-top: 6px; }
+
+    /* Form group (padroniza inputs do modal) */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--preto); }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 11px 13px; border: 1px solid var(--borda); border-radius: 6px;
+      font-size: 14px; font-family: inherit; background: white;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--vinho); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
     @media (max-width: 768px) {
       .hero h1 { font-size: 32px; }
       .vagas-grid { grid-template-columns: 1fr; }
       .det-grid, .form-row { grid-template-columns: 1fr; }
       .header-inner { flex-direction: column; gap: 12px; }
+      .painel-resumo { grid-template-columns: 60px 1fr; }
+      .painel-resumo .btn { grid-column: 1 / -1; }
     }
   </style>
 </head>
@@ -201,6 +257,10 @@
         <div class="det-item" style="grid-column:1/-1"><div class="det-label">Salário</div><div class="det-value" id="det-salario"></div></div>
       </div>
       <div class="det-section"><h3>Descrição</h3><p id="det-descricao"></p></div>
+      <div class="det-section">
+        <h3>Processo seletivo</h3>
+        <div id="det-processo"></div>
+      </div>
       <div class="det-section"><h3>Requisitos</h3><p id="det-requisitos"></p></div>
       <div class="det-section"><h3>Benefícios</h3><p id="det-beneficios"></p></div>
     </div>
@@ -210,7 +270,7 @@
   </div>
 </div>
 
-<!-- MODAL CADASTRO (3 ETAPAS) -->
+<!-- MODAL CADASTRO (2 ETAPAS: criar conta + completar perfil) -->
 <div class="modal-overlay" id="modal-cad">
   <div class="modal">
     <div class="modal-header">
@@ -219,34 +279,39 @@
     </div>
     <div class="modal-body">
 
-      <!-- ETAPA 1: email -->
-      <div class="step" id="cad-etapa-1" style="display:block">
+      <!-- ETAPA 1: criar conta (nome, email, celular, senha) -->
+      <div class="step" id="cad-etapa-1">
         <div class="info-box">
-          <strong>Como funciona:</strong> você informa seu e-mail, recebe um código de 6 dígitos e confirma. Sem senha pra lembrar.
+          <strong>Crie sua conta</strong> — é rápido e gratuito. Você poderá se candidatar às vagas imediatamente.
         </div>
         <div class="form-group">
-          <label>Seu e-mail</label>
-          <input type="email" id="cad-email" placeholder="seu@email.com">
+          <label>Nome completo *</label>
+          <input type="text" id="cad-nome" placeholder="Seu nome" autocomplete="name">
         </div>
-        <button class="btn btn-primary" onclick="enviarCodigo(this)">Enviar código</button>
-      </div>
-
-      <!-- ETAPA 2: código -->
-      <div class="step" id="cad-etapa-2">
-        <div class="info-box" id="codigo-enviado-msg">Código enviado!</div>
-        <div class="info-box" id="codigo-dev" style="display:none;background:#fff3cd;border-color:#f0c040;color:#664d03;margin-top:8px;"></div>
         <div class="form-group">
-          <label>Código de 6 dígitos</label>
-          <input type="text" id="cad-codigo" maxlength="6" placeholder="000000" style="text-align:center;font-size:24px;letter-spacing:8px;font-weight:700;">
+          <label>E-mail *</label>
+          <input type="email" id="cad-email" placeholder="seu@email.com" autocomplete="email">
         </div>
-        <button class="btn btn-primary" onclick="verificarCodigo(this)">Verificar código</button>
-        <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--cinza-medio);">
-          <a href="#" onclick="irParaEtapa(1);return false;" style="color:var(--vinho);">← Trocar e-mail</a>
+        <div class="form-group">
+          <label>Celular / WhatsApp *</label>
+          <input type="tel" id="cad-celular" placeholder="(00) 00000-0000" autocomplete="tel">
+        </div>
+        <div class="form-group">
+          <label>Senha * (mínimo 6 caracteres)</label>
+          <input type="password" id="cad-senha" placeholder="••••••" minlength="6" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>Confirme sua senha *</label>
+          <input type="password" id="cad-senha-conf" placeholder="••••••" minlength="6" autocomplete="new-password">
+        </div>
+        <button class="btn btn-primary" onclick="cadastrarConta(this)">Criar conta</button>
+        <p style="text-align:center;margin-top:16px;font-size:14px;">
+          Já tem conta? <a href="#" onclick="fecharModal('cad');abrirModal('login');return false;" style="color:var(--vinho);font-weight:600;">Entrar</a>
         </p>
       </div>
 
-      <!-- ETAPA 3: perfil -->
-      <div class="step" id="cad-etapa-3">
+      <!-- ETAPA 2: completar perfil (CPF, data, etc.) -->
+      <div class="step" id="cad-etapa-2">
         <div class="info-box">
           <strong>Quase lá!</strong> Complete seu perfil. Você pode editar depois.
         </div>
@@ -285,13 +350,20 @@
           </select>
         </div>
         <button class="btn btn-primary" onclick="salvarPerfil(this)">Salvar e continuar</button>
+        <p style="text-align:center;margin-top:12px;font-size:13px;color:var(--cinza-medio);">
+          Você pode pular e preencher depois.
+        </p>
+        <button class="btn btn-secondary" style="margin-top:8px" onclick="fecharModal('cad');atualizarHeaderUsuario()">Pular por agora</button>
       </div>
+
+      <!-- ETAPA 3 (legado, mantida oculta por compat) -->
+      <div class="step" id="cad-etapa-3" style="display:none !important"></div>
 
     </div>
   </div>
 </div>
 
-<!-- MODAL LOGIN -->
+<!-- MODAL LOGIN (email + senha, etapa única) -->
 <div class="modal-overlay" id="modal-login">
   <div class="modal">
     <div class="modal-header">
@@ -299,21 +371,13 @@
       <button class="modal-close" onclick="fecharModal('login')">×</button>
     </div>
     <div class="modal-body">
-      <div class="step" id="login-etapa-1" style="display:block">
-        <div class="info-box">Informe seu e-mail. Enviaremos um código de acesso.</div>
-        <div class="form-group"><label>Seu e-mail</label><input type="email" id="login-email"></div>
-        <button class="btn btn-primary" onclick="loginEnviarCodigo(this)">Enviar código</button>
+      <div class="step" id="login-etapa-1">
+        <div class="info-box">Acesse sua conta com e-mail e senha.</div>
+        <div class="form-group"><label>Seu e-mail</label><input type="email" id="login-email" autocomplete="email"></div>
+        <div class="form-group"><label>Senha</label><input type="password" id="login-senha" autocomplete="current-password"></div>
+        <button class="btn btn-primary" onclick="loginEntrar(this)">Entrar</button>
       </div>
-      <div class="step" id="login-etapa-2">
-        <div class="info-box">Digite o código enviado para seu e-mail.</div>
-        <div class="info-box" id="codigo-dev-login" style="display:none;background:#fff3cd;border-color:#f0c040;color:#664d03;margin-top:8px;"></div>
-        <div class="form-group">
-          <label>Código</label>
-          <input type="text" id="login-codigo" maxlength="6" placeholder="000000" style="text-align:center;font-size:24px;letter-spacing:8px;font-weight:700;">
-        </div>
-        <button class="btn btn-primary" onclick="loginVerificarCodigo(this)">Entrar</button>
-        <p style="text-align:center;margin-top:16px;font-size:14px;"><a href="#" onclick="document.getElementById('login-etapa-1').style.display='block';document.getElementById('login-etapa-2').style.display='none';return false;" style="color:var(--vinho);">← Trocar e-mail</a></p>
-      </div>
+      <div class="step" id="login-etapa-2" style="display:none !important"></div>
       <p style="text-align:center;margin-top:16px;font-size:14px;">
         Não tem conta? <a href="#" onclick="fecharModal('login');abrirModal('cad');return false;" style="color:var(--vinho);font-weight:600;">Cadastre-se</a>
       </p>
@@ -337,6 +401,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260716-2200"></script>
+<script src="app.js?v=20260716-2025"></script>
 </body>
 </html>
