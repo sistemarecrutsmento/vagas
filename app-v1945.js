@@ -617,3 +617,45 @@ window.abrirModal = abrirModal;
 window.fecharModal = fecharModal;
 window.irParaEtapa = irParaEtapa;
 window.cadastrarPerfil = salvarPerfil;
+
+// ============================================
+// ZAPIA DEBUG: instrumento
+// ============================================
+function __zapiaShow(txt) {
+  let el = document.getElementById('__zapia_div__');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = '__zapia_div__';
+    el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-height:200px;overflow:auto;background:#000;color:#0f0;font:10px monospace;padding:6px;z-index:99999;white-space:pre-wrap;border-top:2px solid #0f0';
+    document.body.appendChild(el);
+  }
+  el.textContent += new Date().toISOString().substr(11, 8) + ' ' + txt + '\n';
+  el.scrollTop = el.scrollHeight;
+}
+window.addEventListener('error', e => {
+  __zapiaShow('ERR: ' + e.message + ' @ ' + (e.filename || '?') + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', e => {
+  __zapiaShow('PROMISE: ' + (e.reason?.message || e.reason));
+});
+
+const _origIr = irParaEtapa;
+window.irParaEtapa = function(n) {
+  __zapiaShow('irParaEtapa(' + n + ')');
+  _origIr(n);
+};
+const _origAbrir = abrirModal;
+window.abrirModal = function(id) {
+  __zapiaShow('abrirModal(' + id + ')');
+  _origAbrir(id);
+};
+const _origEnviar = enviarCodigo;
+window.enviarCodigo = async function(btn) {
+  __zapiaShow('enviarCodigo btn=' + (btn && btn.textContent));
+  try {
+    await _origEnviar(btn);
+    __zapiaShow('enviarCodigo OK');
+  } catch (e) {
+    __zapiaShow('enviarCodigo ERRO: ' + e.message);
+  }
+};
