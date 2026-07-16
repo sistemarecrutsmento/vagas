@@ -478,49 +478,258 @@ function atualizarHeaderUsuario() {
 }
 
 async function abrirPainelCandidato() {
+  if (!tokenCandidato) { abrirModal('login'); return; }
   if (!cadastroCompleto) {
     abrirModal('cad');
     irParaEtapa(2);
     return;
   }
-  // Recarrega dados do perfil pra ter o nome atualizado
+
+  document.getElementById('modal-minhas').classList.add('aberto');
+  await carregarPainel();
+}
+
+async function carregarPainel() {
+  // 1) Perfil
+  let perfil = null;
   try {
-    const rPerfil = await fetch(API + '/api/candidato/perfil', {
+    const r = await fetch(API + '/api/candidato/perfil', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
-    if (rPerfil.ok) {
-      const dp = await rPerfil.json();
-      if (dp.candidato && dp.candidato.nome) {
-        localStorage.setItem('candidato_nome', dp.candidato.nome);
-      }
-    }
-  } catch (e) { /* silencioso */ }
+    if (r.status === 401) { logout(); return; }
+    const dp = await r.json();
+    perfil = dp.candidato;
+  } catch (e) {}
 
+  if (perfil) {
+    const nome = perfil.nome || emailLogado;
+    const iniciais = (perfil.nome || emailLogado || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+    document.getElementById('painel-foto').textContent = iniciais || '👤';
+    document.getElementById('painel-nome').textContent = nome;
+    document.getElementById('painel-email').textContent = perfil.email || emailLogado || '';
+    localStorage.setItem('candidato_nome', nome);
+  }
+
+  // 2) Progresso do perfil
+  const pFill = document.getElementById('painel-progresso-fill');
+  const pPct = document.getElementById('painel-progresso-pct');
+  const pDica = document.getElementById('painel-progresso-dica');
+  if (perfil) {
+    const campos = ['cpf', 'data_nascimento', 'sexo', 'celular', 'cep', 'cidade', 'estado', 'bairro', 'logradouro', 'formacao', 'instituicao'];
+    const preenchidos = campos.filter(c => perfil[c] && String(perfil[c]).trim() !== '').length;
+    const pct = Math.round((preenchidos / campos.length) * 100);
+    pFill.style.width = pct + '%';
+    pPct.textContent = pct + '%';
+    pDica.textContent = pct === 100
+      ? '🎉 Seu perfil está completo!'
+      : `Preencha mais ${campos.length - preenchidos} campos para melhorar seu currículo.`;
+  }
+
+  // 3) Preencher form de edição
+  carregarDadosPerfil(perfil);
+
+  // 4) Candidaturas
+  const listaEl = document.getElementById('painel-cands-lista');
+  listaEl.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
   try {
     const r = await fetch(API + '/api/candidato/candidaturas', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
-    if (r.status === 401) { logout(); alert('Sessão expirada'); return; }
+    if (r.status === 401) { logout(); return; }
     const data = await r.json();
     const lista = data.candidaturas || [];
-    const nome = localStorage.getItem('candidato_nome') || emailLogado || '';
-    const html = lista.length === 0
-      ? '<div class="empty"><div class="empty-icon">📭</div><p>Você ainda não se candidatou a nenhuma vaga.</p><p style="font-size:13px;color:#888;margin-top:8px">Volte para a lista de vagas e candidate-se!</p></div>'
-      : lista.map(c => `
-        <div class="cand-item">
-          <div>
-            <strong>${c.titulo || 'Vaga'}</strong>
-            <div class="muted">${c.empresa || ''} • ${c.cidade || ''}</div>
-            <div class="muted" style="font-size:12px;margin-top:4px">📅 ${formatarData(c.criada_em)}</div>
+
+    if (lista.length === 0) {
+      listaEl.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">📭</div>
+          <p>Você ainda não se candidatou a nenhuma vaga.</p>
+          <p style="font-size:13px;color:#888;margin-top:8px">Volte para a lista de vagas e candidate-se!</p>
+          <button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="fecharModal('minhas')">Ver vagas</button>
+        </div>`;
+      return;
+    }
+
+    // Buscar etapas de cada vaga pra montar a timeline
+    const cands = await Promise.all(lista.map(async (c) => {
+      try {
+        const rv = await fetch(API + '/api/vagas/' + c.vaga_id);
+        const dv = await rv.json();
+        const v = dv.vaga || dv;
+        let etapas = v.etapas;
+        if (typeof etapas === 'string') {
+          try { etapas = JSON.parse(etapas); } catch (e) { etapas = null; }
+        }
+        if (!Array.isArray(etapas) || !etapas.length) {
+          etapas = ['Inscrição', 'Triagem', 'Entrevista RH', 'Entrevista gestor', 'Contratação'];
+        }
+        return { ...c, etapas, vagaTitulo: v.titulo, vagaEmpresa: v.empresa, vagaCidade: v.cidade };
+      } catch (e) {
+        return { ...c, etapas: ['Inscrição', 'Triagem', 'Entrevista', 'Contratação'], vagaTitulo: c.titulo };
+      }
+    }));
+
+    listaEl.innerHTML = cands.map(c => {
+      const etapaAtual = Number(c.etapa_atual || 0);
+      const etapasHTML = c.etapas.map((e, i) => {
+        const nome = (typeof e === 'string') ? e : (e.nome || `Etapa ${i+1}`);
+        const cls = i < etapaAtual ? 'concluida' : (i === etapaAtual ? 'ativa' : '');
+        return `<div class="cand-etapa ${cls}">
+          <div class="cand-etapa-bola">${i < etapaAtual ? '✓' : i+1}</div>
+          <div class="cand-etapa-label">${nome}</div>
+        </div>`;
+      }).join('');
+      return `
+        <div class="cand-card">
+          <div class="cand-card-top">
+            <div>
+              <h4>${c.vagaTitulo || c.titulo || 'Vaga'}</h4>
+              <div class="cand-empresa">${c.vagaEmpresa || c.empresa || ''} ${c.vagaCidade || c.cidade ? '• ' + (c.vagaCidade || c.cidade) : ''}</div>
+            </div>
+            <span class="status status-${c.status}">${statusLabel(c.status)}</span>
           </div>
-          <span class="status status-${c.status}">${statusLabel(c.status)}</span>
+          <div class="cand-timeline">${etapasHTML}</div>
+          <div style="margin-top:8px;font-size:12px;color:#888">📅 Inscrito em ${formatarData(c.criada_em)}</div>
         </div>
-      `).join('');
-    document.getElementById('minhas-cand-lista').innerHTML = html;
-    document.getElementById('minhas-cand-email').textContent = nome;
-    document.getElementById('modal-minhas').classList.add('aberto');
+      `;
+    }).join('');
   } catch (e) {
-    alert('Erro ao buscar candidaturas');
+    listaEl.innerHTML = '<div class="empty">Erro ao carregar candidaturas.</div>';
+  }
+}
+
+function carregarDadosPerfil(perfil) {
+  if (!perfil) return;
+  const map = {
+    'pe-nome': perfil.nome,
+    'pe-cpf': perfil.cpf,
+    'pe-nascimento': perfil.data_nascimento ? String(perfil.data_nascimento).substring(0,10) : '',
+    'pe-sexo': perfil.sexo || '',
+    'pe-celular': perfil.celular,
+    'pe-email': perfil.email,
+    'pe-cep': perfil.cep,
+    'pe-cidade': perfil.cidade,
+    'pe-estado': perfil.estado,
+    'pe-bairro': perfil.bairro,
+    'pe-logradouro': perfil.logradouro,
+    'pe-numero': perfil.numero,
+    'pe-complemento': perfil.complemento,
+    'pe-formacao': perfil.formacao,
+    'pe-instituicao': perfil.instituicao,
+    'pe-curso': perfil.curso,
+    'pe-situacao': perfil.situacao,
+    'pe-primeiro-emprego': perfil.primeiro_emprego ? 'true' : 'false',
+    'pe-acessibilidade': perfil.acessibilidade,
+    'pe-comunicacoes': !!perfil.recebe_comunicacoes
+  };
+  for (const [id, val] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el) {
+      if (el.type === 'checkbox') el.checked = !!val;
+      else el.value = (val == null ? '' : val);
+    }
+  }
+}
+
+async function salvarPerfilCompleto(btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+  const payload = {
+    nome: document.getElementById('pe-nome').value.trim(),
+    cpf: document.getElementById('pe-cpf').value.replace(/\D/g, ''),
+    data_nascimento: document.getElementById('pe-nascimento').value || null,
+    sexo: document.getElementById('pe-sexo').value || null,
+    celular: document.getElementById('pe-celular').value.trim(),
+    cep: document.getElementById('pe-cep').value.replace(/\D/g, ''),
+    cidade: document.getElementById('pe-cidade').value.trim(),
+    estado: document.getElementById('pe-estado').value.trim().toUpperCase(),
+    bairro: document.getElementById('pe-bairro').value.trim(),
+    logradouro: document.getElementById('pe-logradouro').value.trim(),
+    numero: document.getElementById('pe-numero').value.trim(),
+    complemento: document.getElementById('pe-complemento').value.trim(),
+    formacao: document.getElementById('pe-formacao').value || null,
+    instituicao: document.getElementById('pe-instituicao').value.trim(),
+    curso: document.getElementById('pe-curso').value.trim(),
+    situacao: document.getElementById('pe-situacao').value || null,
+    primeiro_emprego: document.getElementById('pe-primeiro-emprego').value === 'true',
+    acessibilidade: document.getElementById('pe-acessibilidade').value || null,
+    recebe_comunicacoes: document.getElementById('pe-comunicacoes').checked
+  };
+  try {
+    const r = await fetch(API + '/api/candidato/cadastrar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json();
+    if (r.ok) {
+      cadastroCompleto = true;
+      localStorage.setItem('candidato_nome', payload.nome);
+      if (btn) { btn.textContent = '✓ Salvo!'; btn.style.background = 'var(--verde)'; }
+      setTimeout(() => { if (btn) { btn.textContent = 'Salvar perfil'; btn.style.background = ''; btn.disabled = false; } carregarPainel(); }, 800);
+    } else {
+      alert('Erro: ' + (data.erro || ''));
+      if (btn) { btn.disabled = false; btn.textContent = 'Salvar perfil'; }
+    }
+  } catch (e) {
+    alert('Erro de conexão');
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar perfil'; }
+  }
+}
+
+// ===== ABAS DO PAINEL =====
+function painelIrPara(tab) {
+  document.querySelectorAll('.painel-tab').forEach(t => t.classList.remove('ativo'));
+  document.querySelectorAll('.painel-secao').forEach(s => s.classList.remove('ativo'));
+  const tabEl = document.querySelector(`.painel-tab[data-tab="${tab}"]`);
+  const secEl = document.getElementById('painel-secao-' + tab);
+  if (tabEl) tabEl.classList.add('ativo');
+  if (secEl) secEl.classList.add('ativo');
+  if (tab === 'cands') carregarPainel();
+  if (tab === 'perfil') carregarPainel(); // recarrega p/ ter dados atualizados
+}
+window.painelIrPara = painelIrPara;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.painel-tab[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => painelIrPara(btn.dataset.tab));
+  });
+  document.querySelectorAll('.perfil-aba').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sub = btn.dataset.sub;
+      document.querySelectorAll('.perfil-aba').forEach(b => b.classList.remove('ativo'));
+      document.querySelectorAll('.perfil-bloco').forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      const bloco = document.querySelector(`.perfil-bloco[data-bloco="${sub}"]`);
+      if (bloco) bloco.classList.add('ativo');
+    });
+  });
+});
+
+async function trocarSenha(btn) {
+  const atual = document.getElementById('senha-atual').value;
+  const nova = document.getElementById('senha-nova').value;
+  const conf = document.getElementById('senha-nova-conf').value;
+  if (!atual || !nova || !conf) { alert('Preencha todos os campos'); return; }
+  if (nova.length < 6) { alert('A nova senha deve ter pelo menos 6 caracteres'); return; }
+  if (nova !== conf) { alert('A confirmação não confere com a nova senha'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Atualizando...'; }
+  try {
+    const r = await fetch(API + '/api/candidato/trocar-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+      body: JSON.stringify({ senhaAtual: atual, novaSenha: nova })
+    });
+    const data = await r.json();
+    if (r.ok) {
+      if (btn) { btn.textContent = '✓ Senha atualizada!'; btn.style.background = 'var(--verde)'; }
+      setTimeout(() => { if (btn) { btn.textContent = 'Atualizar senha'; btn.style.background = ''; btn.disabled = false; } document.getElementById('senha-atual').value = ''; document.getElementById('senha-nova').value = ''; document.getElementById('senha-nova-conf').value = ''; }, 800);
+    } else {
+      alert('Erro: ' + (data.erro || ''));
+      if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha'; }
+    }
+  } catch (e) {
+    alert('Erro de conexão');
+    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha'; }
   }
 }
 
@@ -606,6 +815,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 window.cadastrarConta = cadastrarConta;
 window.salvarPerfil = salvarPerfil;
+window.salvarPerfilCompleto = salvarPerfilCompleto;
+window.trocarSenha = trocarSenha;
 window.loginEntrar = loginEntrar;
 window.abrirModal = abrirModal;
 window.fecharModal = fecharModal;
