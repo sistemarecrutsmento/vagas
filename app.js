@@ -600,3 +600,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Expor handlers no window (garante que onclick inline consegue chamar)
+window.enviarCodigo = enviarCodigo;
+window.verificarCodigo = verificarCodigo;
+window.loginEnviarCodigo = loginEnviarCodigo;
+window.loginVerificarCodigo = loginVerificarCodigo;
+window.abrirModal = abrirModal;
+window.fecharModal = fecharModal;
+window.irParaEtapa = irParaEtapa;
+window.cadastrarPerfil = cadastrarPerfil;
