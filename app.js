@@ -221,6 +221,7 @@ async function enviarCodigo(btn) {
     });
     clearTimeout(timeoutId);
     const data = await r.json();
+    console.log('[ZAPIA] /iniciar resposta:', r.status, data);
     if (r.ok) {
       emailVerificado = email;
       localStorage.setItem('candidato_email', email);
@@ -235,6 +236,7 @@ async function enviarCodigo(btn) {
       }
       document.getElementById('codigo-enviado-msg').textContent = 'Enviamos um código de 6 dígitos para ' + email;
       irParaEtapa(2);
+      console.log('[ZAPIA] Avançou para etapa 2');
     } else {
       alert('Erro: ' + (data.erro || 'Não foi possível enviar'));
     }
