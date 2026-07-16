@@ -225,6 +225,14 @@ async function enviarCodigo(btn) {
       emailVerificado = email;
       localStorage.setItem('candidato_email', email);
       document.getElementById('cad-email-2').value = email;
+      // Se o backend devolveu o código (modo DEV sem SMTP), mostra em destaque
+      const devBox = document.getElementById('codigo-dev');
+      if (data.codigo_debug && devBox) {
+        devBox.innerHTML = '🔧 <b>Modo DEV:</b> o envio de e-mail está desativado. Seu código é <b>' + data.codigo_debug + '</b>';
+        devBox.style.display = 'block';
+      } else if (devBox) {
+        devBox.style.display = 'none';
+      }
       document.getElementById('codigo-enviado-msg').textContent = 'Enviamos um código de 6 dígitos para ' + email;
       irParaEtapa(2);
     } else {
@@ -381,14 +389,22 @@ async function loginEnviarCodigo(btn) {
       signal: ctrl.signal
     });
     clearTimeout(timeoutId);
+    const data = await r.json();
     if (r.ok) {
       emailVerificado = email;
       localStorage.setItem('candidato_email', email);
       document.getElementById('login-email-2').value = email;
+      // Se o backend devolveu o código (modo DEV sem SMTP), mostra em destaque
+      const devBox = document.getElementById('codigo-dev-login');
+      if (data.codigo_debug && devBox) {
+        devBox.innerHTML = '🔧 <b>Modo DEV:</b> o envio de e-mail está desativado. Seu código é <b>' + data.codigo_debug + '</b>';
+        devBox.style.display = 'block';
+      } else if (devBox) {
+        devBox.style.display = 'none';
+      }
       document.getElementById('login-etapa-1').style.display = 'none';
       document.getElementById('login-etapa-2').style.display = 'block';
     } else {
-      const data = await r.json();
       alert('Erro: ' + (data.erro || ''));
     }
   } catch (e) {
