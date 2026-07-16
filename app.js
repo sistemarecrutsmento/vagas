@@ -22,6 +22,12 @@ window.addEventListener('DOMContentLoaded', () => {
       carregarVagas();
     });
   });
+  // Liga o botão de Enviar Código do CADASTRO (backup do onclick inline)
+  const btnEnviarCad = document.querySelector('#modal-cad .step[id="cad-etapa-1"] button.btn-primary');
+  if (btnEnviarCad) btnEnviarCad.addEventListener('click', e => enviarCodigo(e.currentTarget));
+  // E o do LOGIN
+  const btnEnviarLogin = document.querySelector('#modal-login .step[id="login-etapa-1"] button.btn-primary');
+  if (btnEnviarLogin) btnEnviarLogin.addEventListener('click', e => loginEnviarCodigo(e.currentTarget));
 });
 
 // ===== API: VAGAS =====
@@ -203,17 +209,18 @@ function irParaEtapa(n) {
 // ETAPA 1: enviar código para o email
 async function enviarCodigo(btn) {
   const email = document.getElementById('cad-email').value.trim().toLowerCase();
+  console.log('[ZAPIA] enviarCodigo chamado com:', email);
   if (!email || !email.includes('@') || !email.includes('.')) {
     alert('Informe um e-mail válido');
     return;
   }
-  alert('[DEBUG] Iniciando envio de código para ' + email);
   const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), 35000);
+    console.log('[ZAPIA] Fetch /iniciar...');
     const r = await fetch(API + '/api/candidato/iniciar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -221,9 +228,9 @@ async function enviarCodigo(btn) {
       signal: ctrl.signal
     });
     clearTimeout(timeoutId);
-    alert('[DEBUG] Resposta recebida: status=' + r.status);
+    console.log('[ZAPIA] Resposta recebida:', r.status);
     const data = await r.json();
-    alert('[DEBUG] JSON: ' + JSON.stringify(data));
+    console.log('[ZAPIA] JSON:', data);
     if (r.ok) {
       emailVerificado = email;
       localStorage.setItem('candidato_email', email);
@@ -238,15 +245,16 @@ async function enviarCodigo(btn) {
       }
       document.getElementById('codigo-enviado-msg').textContent = 'Enviamos um código de 6 dígitos para ' + email;
       irParaEtapa(2);
-      alert('[DEBUG] Avançou para etapa 2');
+      console.log('[ZAPIA] Avançou para etapa 2');
     } else {
       alert('Erro: ' + (data.erro || 'Não foi possível enviar'));
     }
   } catch (e) {
+    console.error('[ZAPIA] Erro:', e);
     if (e.name === 'AbortError') {
       alert('O servidor demorou demais. Tente novamente em alguns segundos.');
     } else {
-      alert('Erro de conexão. Tente novamente.');
+      alert('Erro de conexão. Tente novamente. ' + e.message);
     }
   } finally {
     btn.disabled = false;
