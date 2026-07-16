@@ -228,7 +228,7 @@
           <label>Seu e-mail</label>
           <input type="email" id="cad-email" placeholder="seu@email.com">
         </div>
-        <button class="btn btn-primary" onclick="enviarCodigo()">Enviar código</button>
+        <button class="btn btn-primary" onclick="enviarCodigo(this)">Enviar código</button>
       </div>
 
       <!-- ETAPA 2: código -->
@@ -238,7 +238,7 @@
           <label>Código de 6 dígitos</label>
           <input type="text" id="cad-codigo" maxlength="6" placeholder="000000" style="text-align:center;font-size:24px;letter-spacing:8px;font-weight:700;">
         </div>
-        <button class="btn btn-primary" onclick="verificarCodigo()">Verificar código</button>
+        <button class="btn btn-primary" onclick="verificarCodigo(this)">Verificar código</button>
         <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--cinza-medio);">
           <a href="#" onclick="irParaEtapa(1);return false;" style="color:var(--vinho);">← Trocar e-mail</a>
         </p>
@@ -254,8 +254,19 @@
           <div class="form-group"><label>CPF *</label><input type="text" id="perfil-cpf" placeholder="000.000.000-00"></div>
         </div>
         <div class="form-row">
+          <div class="form-group"><label>CPF <span style="color:#C00;">*</span></label><input type="text" id="perfil-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric"></div>
           <div class="form-group"><label>Celular</label><input type="text" id="perfil-celular" placeholder="(00) 00000-0000"></div>
+        </div>
+        <div class="form-row">
           <div class="form-group"><label>Data de nascimento</label><input type="date" id="perfil-nascimento"></div>
+          <div class="form-group"><label>Sexo</label>
+            <select id="perfil-sexo">
+              <option value="">Prefiro não informar</option>
+              <option value="M">Masculino</option>
+              <option value="F">Feminino</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>Cidade</label><input type="text" id="perfil-cidade"></div>
@@ -273,7 +284,7 @@
             <option value="Mestrado">Mestrado</option>
           </select>
         </div>
-        <button class="btn btn-primary" onclick="salvarPerfil()">Salvar e continuar</button>
+        <button class="btn btn-primary" onclick="salvarPerfil(this)">Salvar e continuar</button>
       </div>
 
     </div>
@@ -291,7 +302,7 @@
       <div class="step" id="login-etapa-1" style="display:block">
         <div class="info-box">Informe seu e-mail. Enviaremos um código de acesso.</div>
         <div class="form-group"><label>Seu e-mail</label><input type="email" id="login-email"></div>
-        <button class="btn btn-primary" onclick="loginEnviarCodigo()">Enviar código</button>
+        <button class="btn btn-primary" onclick="loginEnviarCodigo(this)">Enviar código</button>
       </div>
       <div class="step" id="login-etapa-2">
         <div class="info-box">Digite o código enviado para seu e-mail.</div>
@@ -299,7 +310,7 @@
           <label>Código</label>
           <input type="text" id="login-codigo" maxlength="6" placeholder="000000" style="text-align:center;font-size:24px;letter-spacing:8px;font-weight:700;">
         </div>
-        <button class="btn btn-primary" onclick="loginVerificarCodigo()">Entrar</button>
+        <button class="btn btn-primary" onclick="loginVerificarCodigo(this)">Entrar</button>
         <p style="text-align:center;margin-top:16px;font-size:14px;"><a href="#" onclick="document.getElementById('login-etapa-1').style.display='block';document.getElementById('login-etapa-2').style.display='none';return false;" style="color:var(--vinho);">← Trocar e-mail</a></p>
       </div>
       <p style="text-align:center;margin-top:16px;font-size:14px;">
