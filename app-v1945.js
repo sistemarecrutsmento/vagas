@@ -196,73 +196,51 @@ function fecharModal(id) {
 }
 
 function irParaEtapa(n) {
-  console.log('[ZAPIA-IR] irParaEtapa(' + n + ')');
-  __zapiaShow('IR irParaEtapa(' + n + ')');
   const e1 = document.getElementById('cad-etapa-1');
   const e2 = document.getElementById('cad-etapa-2');
   const e3 = document.getElementById('cad-etapa-3');
-  e1.style.display = n === 1 ? 'block' : 'none';
-  e2.style.display = n === 2 ? 'block' : 'none';
-  e3.style.display = n === 3 ? 'block' : 'none';
-  __zapiaShow('IR DEPOIS: e1=' + e1.style.display + ' e2=' + e2.style.display + ' e3=' + e3.style.display);
+  if (n === 1) { e1.style.setProperty('display', 'block', 'important'); e2.style.setProperty('display', 'none', 'important'); e3.style.setProperty('display', 'none', 'important'); }
+  if (n === 2) { e1.style.setProperty('display', 'none', 'important'); e2.style.setProperty('display', 'block', 'important'); e3.style.setProperty('display', 'none', 'important'); }
+  if (n === 3) { e1.style.setProperty('display', 'none', 'important'); e2.style.setProperty('display', 'none', 'important'); e3.style.setProperty('display', 'block', 'important'); }
 }
 
 // ETAPA 1: enviar código para o email
 async function enviarCodigo(btn) {
-  console.log('[ZAPIA] enviarCodigo chamada');
   const email = document.getElementById('cad-email').value.trim().toLowerCase();
   if (!email || !email.includes('@') || !email.includes('.')) {
-    console.warn('[ZAPIA] email inválido');
+    alert('Informe um e-mail válido');
     return;
   }
-  console.log('[ZAPIA] email ok:', email);
   const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
-    const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 35000);
     const r = await fetch(API + '/api/candidato/iniciar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-      signal: ctrl.signal
+      body: JSON.stringify({ email })
     });
-    clearTimeout(timeoutId);
-    console.log('[ZAPIA] /iniciar resposta:', r.status);
     const data = await r.json();
-    console.log('[ZAPIA] /iniciar data:', data);
     if (r.ok) {
       emailVerificado = email;
       localStorage.setItem('candidato_email', email);
-      document.getElementById('cad-email-2').value = email;
-      // Se o backend devolveu o código (modo DEV sem SMTP), mostra em destaque
+      const cadEmail2 = document.getElementById('cad-email-2');
+      if (cadEmail2) cadEmail2.value = email;
       const devBox = document.getElementById('codigo-dev');
-      console.log('[ZAPIA] devBox=', devBox, 'data.codigo_debug=', data.codigo_debug);
       if (data.codigo_debug && devBox) {
-        devBox.innerHTML = '🔧 <b>Modo DEV:</b> o envio de e-mail está desativado. Seu código é <b>' + data.codigo_debug + '</b>';
+        devBox.innerHTML = '🔧 <b>Modo DEV:</b> seu código é <b>' + data.codigo_debug + '</b>';
         devBox.style.display = 'block';
       } else if (devBox) {
         devBox.style.display = 'none';
       }
-      document.getElementById('codigo-enviado-msg').textContent = 'Enviamos um código de 6 dígitos para ' + email;
-      __zapiaShow('chamando irParaEtapa(2)');
-      __zapiaShow('cad-etapa-1 ANTES: ' + document.getElementById('cad-etapa-1').style.display);
-      __zapiaShow('cad-etapa-2 ANTES: ' + document.getElementById('cad-etapa-2').style.display);
+      const msgEl = document.getElementById('codigo-enviado-msg');
+      if (msgEl) msgEl.textContent = 'Enviamos um código de 6 dígitos para ' + email;
       irParaEtapa(2);
-      __zapiaShow('cad-etapa-1 DEPOIS: ' + document.getElementById('cad-etapa-1').style.display);
-      __zapiaShow('cad-etapa-2 DEPOIS: ' + document.getElementById('cad-etapa-2').style.display);
-      console.log('[ZAPIA] DEPOIS de irParaEtapa(2)');
     } else {
-      console.error('[ZAPIA] erro:', data);
       alert('Erro: ' + (data.erro || 'Não foi possível enviar'));
     }
   } catch (e) {
-    if (e.name === 'AbortError') {
-      alert('O servidor demorou demais. Tente novamente em alguns segundos.');
-    } else {
-      alert('Erro de conexão. Tente novamente.');
-    }
+    alert('Erro de conexão. Tente novamente.');
   } finally {
     btn.disabled = false;
     btn.textContent = oldText;
@@ -627,45 +605,3 @@ window.abrirModal = abrirModal;
 window.fecharModal = fecharModal;
 window.irParaEtapa = irParaEtapa;
 window.cadastrarPerfil = salvarPerfil;
-
-// ============================================
-// ZAPIA DEBUG: instrumento
-// ============================================
-function __zapiaShow(txt) {
-  let el = document.getElementById('__zapia_div__');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = '__zapia_div__';
-    el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-height:200px;overflow:auto;background:#000;color:#0f0;font:10px monospace;padding:6px;z-index:99999;white-space:pre-wrap;border-top:2px solid #0f0';
-    document.body.appendChild(el);
-  }
-  el.textContent += new Date().toISOString().substr(11, 8) + ' ' + txt + '\n';
-  el.scrollTop = el.scrollHeight;
-}
-window.addEventListener('error', e => {
-  __zapiaShow('ERR: ' + e.message + ' @ ' + (e.filename || '?') + ':' + e.lineno);
-});
-window.addEventListener('unhandledrejection', e => {
-  __zapiaShow('PROMISE: ' + (e.reason?.message || e.reason));
-});
-
-const _origIr = irParaEtapa;
-window.irParaEtapa = function(n) {
-  __zapiaShow('irParaEtapa(' + n + ')');
-  _origIr(n);
-};
-const _origAbrir = abrirModal;
-window.abrirModal = function(id) {
-  __zapiaShow('abrirModal(' + id + ')');
-  _origAbrir(id);
-};
-const _origEnviar = enviarCodigo;
-window.enviarCodigo = async function(btn) {
-  __zapiaShow('enviarCodigo btn=' + (btn && btn.textContent));
-  try {
-    await _origEnviar(btn);
-    __zapiaShow('enviarCodigo OK');
-  } catch (e) {
-    __zapiaShow('enviarCodigo ERRO: ' + e.message);
-  }
-};
