@@ -5,6 +5,7 @@
 // ============================================
 
 const API = 'https://recrutamento-api.onrender.com';
+document.title = '[ZAPIA] ' + document.title + ' @ ' + Date.now();
 let categoriaAtiva = '';
 let vagaSelecionada = null;
 let emailVerificado = null;
