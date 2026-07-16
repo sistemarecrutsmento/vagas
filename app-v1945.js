@@ -240,8 +240,12 @@ async function enviarCodigo(btn) {
         devBox.style.display = 'none';
       }
       document.getElementById('codigo-enviado-msg').textContent = 'Enviamos um código de 6 dígitos para ' + email;
-      console.log('[ZAPIA] chamando irParaEtapa(2)');
+      __zapiaShow('chamando irParaEtapa(2)');
+      __zapiaShow('cad-etapa-1 ANTES: ' + document.getElementById('cad-etapa-1').style.display);
+      __zapiaShow('cad-etapa-2 ANTES: ' + document.getElementById('cad-etapa-2').style.display);
       irParaEtapa(2);
+      __zapiaShow('cad-etapa-1 DEPOIS: ' + document.getElementById('cad-etapa-1').style.display);
+      __zapiaShow('cad-etapa-2 DEPOIS: ' + document.getElementById('cad-etapa-2').style.display);
       console.log('[ZAPIA] DEPOIS de irParaEtapa(2)');
     } else {
       console.error('[ZAPIA] erro:', data);
