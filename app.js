@@ -114,6 +114,20 @@ function atualizarBotaoCandidatar(vagaId) {
 }
 
 async function candidatar(vagaId) {
+  // Proteção: se não tiver token, manda pro login
+  if (!tokenCandidato) {
+    alert('Você precisa fazer login antes de se candidatar.');
+    fecharModal('detalhes');
+    abrirModal('login');
+    return;
+  }
+  if (!cadastroCompleto) {
+    alert('Complete seu cadastro (CPF, cidade, etc.) antes de se candidatar.');
+    fecharModal('detalhes');
+    abrirModal('cad');
+    irParaEtapa(3);
+    return;
+  }
   const btn = document.getElementById('btn-candidatar');
   btn.disabled = true;
   btn.textContent = 'Enviando...';
@@ -126,11 +140,14 @@ async function candidatar(vagaId) {
     if (r.ok) {
       btn.textContent = '✓ Candidatura enviada!';
       btn.style.background = '#2E7D32';
+      btn.style.color = 'white';
     } else if (r.status === 401) {
       // Token expirou ou é inválido
       logout();
       btn.textContent = '🔒 Faça login para se candidatar';
+      btn.disabled = false;
       btn.onclick = () => { fecharModal('detalhes'); abrirModal('login'); };
+      alert('Sua sessão expirou. Faça login novamente.');
     } else {
       btn.textContent = '❌ ' + (data.erro || 'Erro');
       btn.disabled = false;
