@@ -600,4 +600,20 @@ document.addEventListener('DOMContentLoaded', () => {
       e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
     });
   }
+
+  // Fallback robusto: também registra o envio por evento, sem depender do onclick inline
+  const cadBtn = document.querySelector('#cad-etapa-1 button.btn-primary');
+  if (cadBtn) {
+    cadBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      enviarCodigo(this);
+    });
+  }
+  const loginBtn = document.querySelector('#login-etapa-1 button.btn-primary');
+  if (loginBtn) {
+    loginBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      loginEnviarCodigo(this);
+    });
+  }
 });
