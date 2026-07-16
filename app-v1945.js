@@ -196,9 +196,15 @@ function fecharModal(id) {
 }
 
 function irParaEtapa(n) {
-  document.getElementById('cad-etapa-1').style.display = n === 1 ? 'block' : 'none';
-  document.getElementById('cad-etapa-2').style.display = n === 2 ? 'block' : 'none';
-  document.getElementById('cad-etapa-3').style.display = n === 3 ? 'block' : 'none';
+  console.log('[ZAPIA-IR] irParaEtapa(' + n + ')');
+  __zapiaShow('IR irParaEtapa(' + n + ')');
+  const e1 = document.getElementById('cad-etapa-1');
+  const e2 = document.getElementById('cad-etapa-2');
+  const e3 = document.getElementById('cad-etapa-3');
+  e1.style.display = n === 1 ? 'block' : 'none';
+  e2.style.display = n === 2 ? 'block' : 'none';
+  e3.style.display = n === 3 ? 'block' : 'none';
+  __zapiaShow('IR DEPOIS: e1=' + e1.style.display + ' e2=' + e2.style.display + ' e3=' + e3.style.display);
 }
 
 // ETAPA 1: enviar código para o email
