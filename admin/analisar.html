@@ -111,32 +111,105 @@
         return '<div class="etapa ' + cls + '"><div class="num">' + idx + '/' + totalEtapas + '</div>' + nome + '</div>';
       }).join('');
 
-      // Experiências
+      // Helper: formata data
+      const fmtData = v => {
+        if (!v) return null;
+        const s = String(v);
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+          const [a, m, d] = s.substring(0, 10).split('-');
+          return d + '/' + m + '/' + a;
+        }
+        return s;
+      };
+      const fmtDataHora = v => {
+        if (!v) return '';
+        const d = new Date(v);
+        if (isNaN(d.getTime())) return String(v);
+        return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      };
+
+      // Endereço completo
+      const endCompleto = [
+        c.logradouro ? c.logradouro : null,
+        c.numero ? ', ' + c.numero : null,
+        c.complemento ? ' — ' + c.complemento : null,
+        c.bairro ? '<br>' + c.bairro : null,
+        (c.cd_cidade || c.cidade) ? '<br>' + (c.cd_cidade || c.cidade) : null,
+        (c.cd_estado || c.estado) ? ' / ' + (c.cd_estado || c.estado) : null,
+        c.cep ? '<br>CEP ' + c.cep : null
+      ].filter(Boolean).join('');
+
+      // Experiências (array + campo antigo "experiencia")
       const exps = Array.isArray(c.experiencias) ? c.experiencias : [];
-      const expsHtml = exps.length === 0 ? '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma experiência informada.</p>'
-        : exps.map(e => '<div style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#FAFAFA"><strong>' + (e.cargo || '—') + '</strong> em ' + (e.empresa || '—') + '<br><small style="color:var(--cinza-medio)">' + (e.inicio || '') + (e.fim ? ' — ' + e.fim : ' — Atual') + '</small>' + (e.descricao ? '<p style="font-size:13px;margin-top:4px">' + e.descricao + '</p>' : '') + '</div>').join('');
+      let expsHtml = '';
+      if (exps.length > 0) {
+        expsHtml = exps.map(e => {
+          const ini = fmtData(e.inicio) || '';
+          const fim = e.fim ? (fmtData(e.fim)) : (e.atual ? 'Atual' : '');
+          return '<div style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#FAFAFA">' +
+            '<strong>' + (e.cargo || '—') + '</strong> em ' + (e.empresa || '—') + '<br>' +
+            '<small style="color:var(--cinza-medio)">' + ini + (fim ? ' — ' + fim : '') + '</small>' +
+            (e.descricao ? '<p style="font-size:13px;margin-top:4px">' + e.descricao + '</p>' : '') +
+            '</div>';
+        }).join('');
+      } else if (c.experiencia) {
+        expsHtml = '<div style="padding:10px;border-left:3px solid var(--vinho);background:#FAFAFA;font-size:14px;white-space:pre-wrap">' + c.experiencia + '</div>';
+      } else {
+        expsHtml = '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma experiência informada.</p>';
+      }
 
-      // Formação
-      const formacao = c.formacao || {};
-      const formacaoHtml = formacao && (formacao.escolaridade || formacao.curso || formacao.instituicao)
-        ? '<div class="field-value">' + (formacao.escolaridade || '—') + (formacao.curso ? ' — ' + formacao.curso : '') + (formacao.instituicao ? '<br><small style="color:var(--cinza-medio)">' + formacao.instituicao + '</small>' : '') + '</div>'
-        : '<p style="color:var(--cinza-medio);font-size:14px">Não informada.</p>';
+      // Formação: formacao pode ser objeto OU null. Se null, usar campos soltos.
+      let formacaoHtml = '<p style="color:var(--cinza-medio);font-size:14px">Não informada.</p>';
+      const f = c.formacao && typeof c.formacao === 'object' ? c.formacao : null;
+      const esc = (f && f.escolaridade) || c.escolaridade;
+      const curso = (f && f.curso) || c.curso;
+      const inst = (f && f.instituicao) || c.instituicao;
+      const sit = (f && f.situacao) || c.situacao;
+      const concl = fmtData((f && f.data_conclusao) || c.data_conclusao);
+      if (esc || curso || inst) {
+        formacaoHtml =
+          '<div class="field-value">' + (esc || '—') + '</div>' +
+          (curso ? '<div class="field-value" style="margin-top:6px">' + curso + '</div>' : '') +
+          (inst ? '<div class="field-value" style="font-weight:400;color:var(--cinza-medio);margin-top:2px">' + inst + '</div>' : '') +
+          ((sit || concl) ? '<div class="field-value" style="font-weight:400;font-size:13px;color:var(--cinza-medio);margin-top:4px">' + (sit || '') + (concl ? ' • Conclusão: ' + concl : '') + '</div>' : '');
+      }
 
-      // Histórico
-      const hist = c.historico || [];
-      const histHtml = hist.length === 0
-        ? '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma movimentação ainda.</p>'
-        : hist.map(h => {
-            const d = h.data ? new Date(h.data).toLocaleString('pt-BR') : '';
-            return '<div class="hist-item"><strong>' + (h.etapa || h.status) + '</strong> [' + h.status + '] — ' + d + (h.por ? '<br><small>por ' + h.por + '</small>' : '');
-          }).join('');
+      // Sobre Você
+      const sobre = c.sobre_voce || c.sobre;
+      const sobreHtml = sobre
+        ? '<p style="font-size:14px;line-height:1.6;white-space:pre-wrap">' + sobre + '</p>'
+        : '<p style="color:var(--cinza-medio);font-size:14px">Não informado.</p>';
+
+      // Histórico: só mostrar até a etapa atual (não inventar movimentações futuras)
+      const hist = Array.isArray(c.historico) ? c.historico : [];
+      const histFiltrado = hist.filter(h => (h.etapa == null) || (h.etapa <= etapaAtual));
+      // Se o histórico está vazio mas já passou da etapa 1, mostra pelo menos a entrada de criação
+      let histHtml;
+      if (histFiltrado.length === 0) {
+        histHtml = '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma movimentação registrada ainda.</p>';
+      } else {
+        histHtml = histFiltrado.map(h => {
+          const dataFmt = fmtDataHora(h.data);
+          const acaoLabel = h.acao === 'avancar' ? 'Avançou para próxima etapa' :
+                            h.acao === 'reprovar' ? 'Reprovado' :
+                            h.acao === 'reabrir' ? 'Candidatura reaberta' :
+                            h.acao === 'aprovar' ? 'Aprovado' : (h.status || '');
+          return '<div class="hist-item">' +
+            '<strong>' + (acaoLabel || 'Movimentação') + '</strong>' +
+            (h.etapa != null ? ' <span class="badge-etapa">' + h.etapa + '/' + totalEtapas + '</span>' : '') +
+            (h.status ? ' <small>[' + h.status + ']</small>' : '') +
+            (dataFmt ? '<br><small>' + dataFmt + '</small>' : '') +
+            (h.por ? '<br><small>por ' + h.por + '</small>' : '') +
+            '</div>';
+        }).join('');
+      }
 
       // Botões de ação (só na triagem curricular)
       let acoesHtml = '';
       if (ehTriagem) {
-        if (status === 'em_andamento' || status === 'aprovado') {
+        if (status === 'em_andamento' || status === 'aprovado' || status === 'em_analise') {
           acoesHtml = '<div class="acoes"><button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button><button class="btn btn-aprovar" onclick="acao(' + c.id + ',\'aprovar-triagem\')">✓ Aprovar Triagem</button></div>';
-        } else if (status === 'reprovado') {
+        } else if (status === 'reprovado' || status === 'rejeitado') {
           acoesHtml = '<div class="acoes"><button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button></div>';
         }
       } else {
@@ -146,7 +219,7 @@
       content.innerHTML =
         '<div class="header">' +
           '<h1>' + (c.nome || 'Candidato') + '</h1>' +
-          '<div class="sub">' + (c.vaga_titulo || c.titulo || 'Vaga') + (c.cidade ? ' • ' + c.cidade : '') + '</div>' +
+          '<div class="sub">' + (c.titulo || 'Vaga') + (c.cidade ? ' • ' + c.cidade : '') + '</div>' +
           '<span class="status-pill status-' + status + '">' + status.replace('_', ' ') + '</span>' +
         '</div>' +
 
@@ -160,12 +233,15 @@
           '<h2>👤 Dados Pessoais</h2>' +
           '<div class="grid-2">' +
             '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (c.email || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + (c.celular || c.telefone || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + (c.celular || '—') + '</div></div>' +
             '<div class="field"><div class="field-label">CPF</div><div class="field-value">' + (c.cpf || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">Nascimento</div><div class="field-value">' + (c.nascimento || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">Cidade</div><div class="field-value">' + (c.cidade || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">Estado</div><div class="field-value">' + (c.estado || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Nascimento</div><div class="field-value">' + (fmtData(c.data_nascimento) || '—') + '</div></div>' +
+            '<div class="field" style="grid-column:1 / -1"><div class="field-label">Endereço</div><div class="field-value">' + (endCompleto || '—') + '</div></div>' +
           '</div>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<h2>💬 Sobre você</h2>' + sobreHtml +
         '</div>' +
 
         '<div class="card">' +
@@ -175,8 +251,6 @@
         '<div class="card">' +
           '<h2>💼 Experiências Profissionais</h2>' + expsHtml +
         '</div>' +
-
-        (c.sobre ? '<div class="card"><h2>💬 Sobre você</h2><p style="font-size:14px;line-height:1.5">' + c.sobre + '</p></div>' : '') +
 
         '<div class="card">' +
           '<h2>📜 Histórico do Processo</h2>' + histHtml +
