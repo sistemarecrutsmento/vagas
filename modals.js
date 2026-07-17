@@ -181,7 +181,7 @@
         <h3 class="wizard-titulo">Experiência profissional</h3>
         <p class="wizard-subtitulo">Adicione suas últimas experiências. Você pode pular se preferir.</p>
         <div class="form-group">
-          <label class="check-label"><input type="checkbox" id="w5-primeiro-emprego"> Este é meu primeiro emprego (sem experiência anterior)</label>
+          <label class="check-label"><input type="checkbox" id="w5-primeiro-emprego" onchange="aplicarPrimeiroEmprego()"> Este é meu primeiro emprego (sem experiência anterior)</label>
         </div>
         <div id="w5-lista"><p class="muted">Nenhuma experiência adicionada ainda.</p></div>
         <div class="exp-form" id="w5-exp-form">
