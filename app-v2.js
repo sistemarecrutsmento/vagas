@@ -651,7 +651,13 @@ function atualizarHeaderUsuario() {
 }
 
 function garantirBotaoMenu() {
-  if (document.getElementById('btn-menu-logo')) return;
+  const existe = document.getElementById('btn-menu-logo');
+  // Visitante (sem login OU cadastro incompleto) → NÃO mostra ☰
+  if (!tokenCandidato || !cadastroCompleto) {
+    if (existe) existe.remove();
+    return;
+  }
+  if (existe) return;
   const headerEl = document.querySelector('header');
   if (!headerEl) return;
   const btn = document.createElement('button');
