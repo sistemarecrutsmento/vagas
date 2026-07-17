@@ -185,7 +185,7 @@
     <a class="nav-item ativo" data-page="dashboard" onclick="irPara('dashboard')">📊 Dashboard</a>
     <a class="nav-item" data-page="vagas" onclick="irPara('vagas')">💼 Vagas</a>
     <a class="nav-item" data-page="candidatos" onclick="irPara('candidatos')">👥 Candidatos</a>
-    <a class="nav-item" href="candidaturas.html">📋 Candidaturas</a>
+    <a class="nav-item" data-page="candidaturas" onclick="irPara('candidaturas')">📋 Candidaturas</a>
     <a class="nav-item sair" onclick="sair()">🚪 Sair</a>
   </aside>
 
@@ -244,6 +244,36 @@
         <div><h2>Candidaturas</h2><p>Selecione uma vaga para ver os candidatos inscritos</p></div>
       </div>
       <div id="vagas-cands-grid" class="vagas-cands-grid">
+        <div class="empty"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- CANDIDATOS DA VAGA (página interna) -->
+    <div class="page" id="page-candidatos-vaga">
+      <div class="page-header">
+        <div>
+          <button class="btn btn-sec" id="cands-vaga-voltar" style="margin-bottom:8px">← Voltar para Candidaturas</button>
+          <h2 id="cands-vaga-titulo">Candidatos da vaga</h2>
+        </div>
+      </div>
+      <div id="cands-vaga-info" style="background:var(--cinza);padding:14px;border-radius:8px;margin-bottom:16px;font-size:13px"></div>
+      <div class="tabela-wrap">
+        <table id="vaga-cands-internal-table">
+          <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANÁLISE DO CANDIDATO (página interna) -->
+    <div class="page" id="page-analisar">
+      <div class="page-header">
+        <div>
+          <button class="btn btn-sec" id="analisar-voltar" style="margin-bottom:8px">← Voltar para Candidatos</button>
+          <h2 id="analisar-internal-titulo">Análise do candidato</h2>
+        </div>
+      </div>
+      <div id="analisar-internal-body">
         <div class="empty"><div class="spinner"></div></div>
       </div>
     </div>
@@ -356,6 +386,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-1320"></script>
+<script src="app.js?v=20260717-1340"></script>
 </body>
 </html>
