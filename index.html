@@ -804,12 +804,21 @@
   <div class="drawer-body">
     <div class="drawer-section">Navegação</div>
     <a href="index.html" class="drawer-link ativo"><span class="icon">🏠</span> Vagas</a>
-    <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
-    <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
-    <div class="drawer-section">Atalhos</div>
-    <a href="javascript:void(0)" onclick="abrirPainelCandidato();fecharDrawer()" class="drawer-link"><span class="icon">✏️</span> Editar perfil</a>
+    <div id="drawer-logado" style="display:none">
+      <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
+      <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
+    </div>
+    <div id="drawer-deslogado">
+      <div class="drawer-section">Sua conta</div>
+      <a href="javascript:void(0)" onclick="fecharDrawer();abrirModal('login')" class="drawer-link"><span class="icon">🔐</span> Entrar</a>
+      <a href="javascript:void(0)" onclick="fecharDrawer();abrirModal('cad')" class="drawer-link"><span class="icon">📝</span> Cadastre-se</a>
+    </div>
+    <div id="drawer-atalhos" style="display:none">
+      <div class="drawer-section">Atalhos</div>
+      <a href="javascript:void(0)" onclick="abrirPainelCandidato();fecharDrawer()" class="drawer-link"><span class="icon">✏️</span> Editar perfil</a>
+    </div>
   </div>
-  <div class="drawer-footer">
+  <div class="drawer-footer" id="drawer-footer-logado" style="display:none">
     <button class="drawer-logout" onclick="logout()">Sair</button>
   </div>
 </aside>
@@ -824,14 +833,17 @@ function abrirDrawer(e) {
   drawer.classList.add('aberto');
   overlay.classList.add('aberto');
   // Popula dados do usuário
-  const nome = localStorage.getItem('candidato_nome') || emailLogado || 'Visitante';
+  const logado = !!(window.tokenCandidato);
+  const cadastroOk = !!(window.cadastroCompleto);
+  const podeAcessar = logado && cadastroOk;
+  const nome = localStorage.getItem('candidato_nome') || window.emailLogado || (logado ? 'Candidato' : 'Visitante');
   const iniciais = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
   const fotoUrl = localStorage.getItem('candidato_foto') || '';
   const drawerFoto = document.getElementById('drawer-foto');
   const drawerNome = document.getElementById('drawer-nome');
   const drawerEmail = document.getElementById('drawer-email');
   if (drawerNome) drawerNome.textContent = nome;
-  if (drawerEmail) drawerEmail.textContent = emailLogado || '';
+  if (drawerEmail) drawerEmail.textContent = window.emailLogado || (logado ? 'Complete seu cadastro' : 'Entre ou cadastre-se');
   if (drawerFoto) {
     if (fotoUrl) {
       drawerFoto.style.backgroundImage = `url("${fotoUrl.replace(/"/g, '\\"')}")`;
@@ -842,6 +854,22 @@ function abrirDrawer(e) {
       drawerFoto.textContent = iniciais;
       drawerFoto.style.backgroundImage = '';
     }
+  }
+  // Mostra/oculta blocos baseado em login + cadastro completo
+  const elLogado = document.getElementById('drawer-logado');
+  const elDeslogado = document.getElementById('drawer-deslogado');
+  const elAtalhos = document.getElementById('drawer-atalhos');
+  const elFooter = document.getElementById('drawer-footer-logado');
+  if (podeAcessar) {
+    if (elLogado) elLogado.style.display = '';
+    if (elDeslogado) elDeslogado.style.display = 'none';
+    if (elAtalhos) elAtalhos.style.display = '';
+    if (elFooter) elFooter.style.display = '';
+  } else {
+    if (elLogado) elLogado.style.display = 'none';
+    if (elDeslogado) elDeslogado.style.display = '';
+    if (elAtalhos) elAtalhos.style.display = 'none';
+    if (elFooter) elFooter.style.display = 'none';
   }
 }
 function fecharDrawer() {
