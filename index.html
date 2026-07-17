@@ -271,6 +271,20 @@
     .check-label { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 14px; line-height: 1.4; }
     .check-label input { width: auto !important; margin-top: 2px; }
     .muted { color: var(--cinza-medio); font-size: 14px; }
+
+    /* Foto de perfil */
+    .perfil-foto-bloco { display: flex; align-items: center; gap: 24px; padding: 20px; background: #f8f9fa; border-radius: 10px; margin-bottom: 24px; border: 1px solid var(--borda); }
+    .perfil-foto-preview { width: 110px; height: 110px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 700; flex-shrink: 0; background-size: cover; background-position: center; overflow: hidden; }
+    .perfil-foto-inicial { line-height: 1; }
+    .perfil-foto-acoes { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+    .perfil-foto-acoes .btn { padding: 8px 16px; font-size: 14px; cursor: pointer; display: inline-block; }
+    .perfil-foto-info { margin: 0; font-size: 12px; color: var(--cinza-medio); }
+    .btn-vinho-outline { background: transparent; color: var(--vinho); border: 1px solid var(--vinho); }
+    .btn-vinho-outline:hover { background: var(--vinho); color: white; }
+
+    /* Avatar no header */
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background-size: cover; background-position: center; flex-shrink: 0; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
   </style>
 </head>
 <body>
@@ -279,7 +293,7 @@
   <div class="container">
     <div class="header-inner">
       <div class="logo">Vagas<span>.io</span></div>
-      <div class="header-actions">
+      <div class="header-actions" id="header-actions">
         <button class="btn-outline" onclick="abrirModal('login')">Entrar</button>
         <button id="btn-cadastrar" class="btn-outline" onclick="abrirModal('cad')">Cadastrar</button>
       </div>
@@ -592,6 +606,20 @@
         <!-- ABA: EDITAR PERFIL (com sub-abas) -->
         <div class="painel-secao" id="painel-secao-perfil">
           <h3 class="painel-titulo">Meu perfil</h3>
+
+          <!-- Foto de perfil -->
+          <div class="perfil-foto-bloco">
+            <div class="perfil-foto-preview" id="perfil-foto-preview">
+              <span class="perfil-foto-inicial" id="perfil-foto-inicial">?</span>
+            </div>
+            <div class="perfil-foto-acoes">
+              <label class="btn btn-secondary" for="perfil-foto-input">📷 Escolher foto</label>
+              <input type="file" id="perfil-foto-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+              <button type="button" class="btn btn-vinho-outline" id="perfil-foto-remover" style="display:none">🗑️ Remover</button>
+              <p class="perfil-foto-info">JPG, PNG ou WebP — até 5 MB</p>
+            </div>
+          </div>
+
           <div class="perfil-abas">
             <button class="perfil-aba ativo" data-sub="dados">Dados pessoais</button>
             <button class="perfil-aba" data-sub="endereco">Endereço</button>
@@ -720,6 +748,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260716-2230"></script>
+<script src="app.js?v=20260716-2300"></script>
 </body>
 </html>
