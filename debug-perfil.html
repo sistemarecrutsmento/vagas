@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html><head><title>Debug Perfil</title></head><body>
+<div id="dbg" style="white-space:pre-wrap;font-family:monospace;font-size:11px;padding:8px"></div>
+<script>
+const dbg = document.getElementById('dbg');
+function log(...args) {
+  dbg.textContent += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n';
+}
+window.addEventListener('error', e => log('ERROR:', e.message, 'at', e.filename + ':' + e.lineno));
+window.addEventListener('unhandledrejection', e => log('REJECTION:', e.reason?.message || e.reason));
+log('Página carregada', new Date().toISOString());
+// Hooka console
+const origLog = console.log;
+console.log = function(...args) { log('LOG:', ...args); origLog.apply(console, args); };
+const origErr = console.error;
+console.error = function(...args) { log('ERR:', ...args); origErr.apply(console, args); };
+
+// Monitora o submit
+setTimeout(() => {
+  const f = document.getElementById('perfil-form');
+  if (f) {
+    log('Form encontrado, adicionando listener de debug');
+    f.addEventListener('submit', async (e) => {
+      log('=== SUBMIT CAPTURADO ===');
+      const nome = document.getElementById('pe-nome')?.value;
+      log('pe-nome.value =', JSON.stringify(nome));
+      log('btn =', f.querySelector('button[type="submit"]')?.textContent);
+    }, true); // capture
+  } else {
+    log('Form NÃO encontrado!');
+  }
+}, 2000);
+</script>
+<script src="app.js?v=20260717-0400"></script>
+</body></html>
