@@ -92,6 +92,19 @@
   .perfil-bloco { display: none; }
   .perfil-bloco.ativo { display: block; }
 
+  /* Experiências (mesmo padrão do wizard de cadastro) */
+  .exp-form { background: #f8f9fa; border: 1px dashed var(--borda); padding: 16px; border-radius: 8px; margin-bottom: 12px; }
+  .exp-form h4 { margin: 0 0 12px; font-size: 14px; }
+  .exp-acoes { display: flex; gap: 8px; margin-top: 8px; }
+  .exp-acoes .btn { padding: 8px 16px; font-size: 13px; width: auto; }
+  .exp-item { background: #f8f9fa; border: 1px solid var(--borda); padding: 12px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .exp-item h4 { margin: 0 0 4px; font-size: 15px; }
+  .exp-item p { margin: 0; font-size: 13px; color: var(--cinza-medio); }
+  .exp-item .exp-text { flex: 1; min-width: 0; }
+  .exp-item .btn-x { background: none; border: none; color: var(--vermelho); cursor: pointer; font-size: 22px; padding: 0 8px; line-height: 1; }
+  .exp-item .btn-x:hover { background: #fee; border-radius: 4px; }
+  .exp-vazia { color: var(--cinza-medio); font-size: 14px; padding: 12px 0; }
+
   /* === Form === */
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   .form-group { margin-bottom: 16px; }
@@ -159,7 +172,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-0300"></script>
+<script src="app.js?v=20260717-0310"></script>
 <script>
 // ===== ROTEAMENTO =====
 function redirecionarSeNaoLogado() {
@@ -171,6 +184,7 @@ async function carregarPaginaPerfil() {
   if (!tokenCandidato) { location.href = 'index.html'; return; }
 
   let perfil = null;
+  let experiencias = [];
   try {
     const r = await fetch(API + '/api/candidato/perfil', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
@@ -178,6 +192,7 @@ async function carregarPaginaPerfil() {
     if (r.status === 401) { logout(); return; }
     const d = await r.json();
     perfil = d.candidato;
+    experiencias = Array.isArray(d.experiencias) ? d.experiencias : [];
   } catch (e) {}
 
   if (!perfil) {
@@ -318,11 +333,25 @@ async function carregarPaginaPerfil() {
 
         <!-- EXPERIÊNCIA -->
         <div class="perfil-bloco" data-bloco="experiencia">
-          <p style="color:var(--cinza);font-size:14px;margin-bottom:16px">Descreva sua trajetória profissional. Você pode listar empresas anteriores, cargos, período e atividades que realizou.</p>
-          <div class="form-group">
-            <label>Experiência profissional</label>
-            <textarea id="pe-experiencia" rows="10" placeholder="Ex:&#10;• Empresa X — Auxiliar administrativo (jan/2020 a dez/2022)&#10;Atividades: atendimento ao cliente, controle de estoque, emissão de notas fiscais.&#10;&#10;• Empresa Y — Operador de caixa (mar/2018 a dez/2019)">${escapeHtml(perfil.experiencia || '')}</textarea>
-            <small style="color:var(--cinza);font-size:12px;display:block;margin-top:4px">Dica: use • para listar, e linhas separadas para cada empresa.</small>
+          <p style="color:var(--cinza);font-size:14px;margin-bottom:16px">Adicione suas últimas experiências profissionais. Você pode adicionar quantas quiser.</p>
+          <div id="perfil-exp-lista"></div>
+          <div class="exp-form">
+            <h4>+ Nova experiência</h4>
+            <div class="form-row">
+              <div class="form-group"><label>Cargo *</label><input type="text" id="perfil-exp-cargo" placeholder="Ex: Auxiliar administrativo"></div>
+              <div class="form-group"><label>Empresa *</label><input type="text" id="perfil-exp-empresa" placeholder="Nome da empresa"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Início *</label><input type="date" id="perfil-exp-inicio"></div>
+              <div class="form-group"><label>Término</label><input type="date" id="perfil-exp-fim"></div>
+            </div>
+            <div class="form-group">
+              <label class="check-label"><input type="checkbox" id="perfil-exp-atual"> Emprego atual</label>
+            </div>
+            <div class="form-group"><label>Atividades exercidas</label><textarea id="perfil-exp-descricao" rows="2" placeholder="Descreva brevemente suas atividades"></textarea></div>
+            <div class="exp-acoes">
+              <button type="button" class="btn btn-secondary" onclick="perfilAddExp()">+ Adicionar</button>
+            </div>
           </div>
         </div>
 
@@ -377,7 +406,94 @@ async function carregarPaginaPerfil() {
       document.querySelector(`.perfil-bloco[data-bloco="${btn.dataset.sub}"]`).classList.add('ativo');
     });
   });
+
+  // Inicializa experiencias: expõe o array globalmente para o app.js incluir no payload
+  window.__perfilExps = experiencias;
+  perfilRenderExps();
+
+  // Toggle "Emprego atual" desabilita "Término"
+  const chkAtual = document.getElementById('perfil-exp-atual');
+  const inpFim = document.getElementById('perfil-exp-fim');
+  if (chkAtual && inpFim) {
+    chkAtual.addEventListener('change', () => {
+      if (chkAtual.checked) { inpFim.value = ''; inpFim.disabled = true; }
+      else { inpFim.disabled = false; }
+    });
+  }
 }
+
+// ===== EXPERIÊNCIAS =====
+function fmtData(s) {
+  if (!s) return '?';
+  try {
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return String(s).slice(0, 7);
+    return d.toISOString().slice(0, 7);
+  } catch (e) { return String(s).slice(0, 7); }
+}
+
+function perfilAddExp() {
+  const cargo = document.getElementById('perfil-exp-cargo')?.value.trim();
+  const empresa = document.getElementById('perfil-exp-empresa')?.value.trim();
+  const inicio = document.getElementById('perfil-exp-inicio')?.value || null;
+  const fim = document.getElementById('perfil-exp-fim')?.value || null;
+  const empregoAtual = document.getElementById('perfil-exp-atual')?.checked;
+  const descricao = document.getElementById('perfil-exp-descricao')?.value.trim() || null;
+
+  if (!cargo) return alert('Informe o cargo');
+  if (!empresa) return alert('Informe a empresa');
+  if (!inicio) return alert('Informe a data de início');
+
+  const exp = { cargo, empresa, inicio, descricao };
+  if (empregoAtual) { exp.emprego_atual = true; exp.fim = null; }
+  else { exp.emprego_atual = false; if (fim) exp.fim = fim; }
+
+  window.__perfilExps = window.__perfilExps || [];
+  window.__perfilExps.push(exp);
+
+  // limpa form
+  ['perfil-exp-cargo','perfil-exp-empresa','perfil-exp-inicio','perfil-exp-fim','perfil-exp-descricao'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const at = document.getElementById('perfil-exp-atual'); if (at) { at.checked = false; }
+  const inpFim = document.getElementById('perfil-exp-fim'); if (inpFim) inpFim.disabled = false;
+
+  perfilRenderExps();
+}
+
+function perfilRemoverExp(idx) {
+  if (!Array.isArray(window.__perfilExps)) return;
+  window.__perfilExps.splice(idx, 1);
+  perfilRenderExps();
+}
+
+function perfilRenderExps() {
+  const cont = document.getElementById('perfil-exp-lista');
+  if (!cont) return;
+  const exps = Array.isArray(window.__perfilExps) ? window.__perfilExps : [];
+  if (exps.length === 0) {
+    cont.innerHTML = '<p class="exp-vazia">Nenhuma experiência adicionada. Use o formulário abaixo para adicionar.</p>';
+    return;
+  }
+  cont.innerHTML = exps.map((e, i) => {
+    const desc = e.descricao ? `<p>${escapeHtml(e.descricao)}</p>` : '';
+    return `
+      <div class="exp-item">
+        <div class="exp-text">
+          <h4>${escapeHtml(e.cargo)} — ${escapeHtml(e.empresa)}</h4>
+          <p>${fmtData(e.inicio)} → ${e.emprego_atual ? 'Atual' : (e.fim ? fmtData(e.fim) : '?')}</p>
+          ${desc}
+        </div>
+        <button type="button" class="btn-x" onclick="perfilRemoverExp(${i})" title="Remover">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+window.perfilAddExp = perfilAddExp;
+window.perfilRemoverExp = perfilRemoverExp;
+window.perfilRenderExps = perfilRenderExps;
 
 // ===== Helpers =====
 function escapeHtml(s) {
