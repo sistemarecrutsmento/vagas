@@ -257,7 +257,7 @@ async function carregarCandidaturas() {
     grid.innerHTML = vagas.map(v => {
       const statusBadge = v.status === 'publicada' ? 'badge-ativa' : 'badge-fechada';
       return `
-        <div class="vaga-cand-card" onclick="abrirVagaCands(${v.id})">
+        <div class="vaga-cand-card" onclick="abrirVagaCands(${v.id})" style="cursor:pointer">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
             <h3 style="margin:0;font-size:16px;color:var(--vinho)">${v.titulo}</h3>
             <span class="badge ${statusBadge}">${v.status}</span>
@@ -281,9 +281,20 @@ async function carregarCandidaturas() {
   }
 }
 
+function irParaPagina(page) {
+  // Marca o item da sidebar como ativo
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('ativo', n.getAttribute('data-page') === page);
+  });
+  // Mostra a página certa
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('ativo'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('ativo');
+}
+
 async function abrirVagaCands(vagaId) {
-  abrirModal('vaga-cands');
-  const tb = document.querySelector('#vaga-cands-table tbody');
+  irParaPagina('candidatos-vaga');
+  const tb = document.querySelector('#vaga-cands-internal-table tbody');
   tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
   try {
     const r = await fetch(API + '/api/admin/vagas/' + vagaId + '/candidaturas', { headers: { 'Authorization': 'Bearer ' + token } });
@@ -296,8 +307,9 @@ async function abrirVagaCands(vagaId) {
     vagaAtualCands = data.vaga;
     candidaturasVagaCache = data.candidaturas || [];
 
-    document.getElementById('vaga-cands-titulo').textContent = data.vaga.titulo + ' — Candidatos';
-    const info = document.getElementById('vaga-cands-info');
+    document.getElementById('cands-vaga-titulo').textContent = '👥 ' + data.vaga.titulo + ' — Candidatos';
+    document.getElementById('cands-vaga-voltar').onclick = () => irParaPagina('candidaturas');
+    const info = document.getElementById('cands-vaga-info');
     info.innerHTML = `
       <div style="display:flex;gap:24px;flex-wrap:wrap">
         <div><strong>Empresa:</strong> ${data.vaga.empresa || '—'}</div>
@@ -312,11 +324,17 @@ async function abrirVagaCands(vagaId) {
     }
     tb.innerHTML = candidaturasVagaCache.map(c => {
       const badge = c.status === 'contratado' ? 'badge-ativa' : (c.status === 'rejeitado' || c.status === 'reprovado') ? 'badge-fechada' : (c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente');
+      // Resolve nome da etapa
+      let etapasArr = [];
+      try { etapasArr = typeof c.etapas === 'string' ? JSON.parse(c.etapas) : c.etapas; } catch(e) {}
+      if (!Array.isArray(etapasArr)) etapasArr = [];
+      const idx = c.etapa_atual || 0;
+      const etapaNome = (etapasArr[idx] && (typeof etapasArr[idx] === 'string' ? etapasArr[idx] : etapasArr[idx].nome)) || `Etapa ${idx+1}`;
       return `<tr>
         <td><strong>${c.nome || '—'}</strong></td>
         <td>${c.email || '—'}</td>
         <td>${c.cidade || '—'}</td>
-        <td>${c.etapa_atual || 0}</td>
+        <td>${idx+1}. ${etapaNome}</td>
         <td><span class="badge ${badge}">${c.status}</span></td>
         <td>${formatarData(c.criada_em)}</td>
         <td>
@@ -331,9 +349,13 @@ async function abrirVagaCands(vagaId) {
 
 async function analisarCandidatura(id) {
   candidaturaAtual = id;
-  abrirModal('analisar');
-  const body = document.getElementById('analisar-body');
+  irParaPagina('analisar');
+  const body = document.getElementById('analisar-internal-body');
   body.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+  document.getElementById('analisar-voltar').onclick = () => {
+    if (vagaAtualCands) abrirVagaCands(vagaAtualCands.id);
+    else irParaPagina('candidaturas');
+  };
   try {
     const r = await fetch(API + '/api/admin/candidatura/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
     if (!r.ok) {
@@ -343,7 +365,7 @@ async function analisarCandidatura(id) {
     }
     const data = await r.json();
     const c = data.candidatura;
-    document.getElementById('analisar-titulo').textContent = (c.nome || 'Candidato') + ' — ' + (c.titulo || 'Vaga');
+    document.getElementById('analisar-internal-titulo').textContent = (c.nome || 'Candidato') + ' — ' + (c.titulo || 'Vaga');
     renderAnalise(c, body);
   } catch (e) {
     body.innerHTML = '<div class="empty">Erro: ' + e.message + '</div>';
@@ -460,7 +482,7 @@ function renderAnalise(c, container) {
             '<button class="btn btn-vinho-outline" onclick="acaoCandidatura(' + c.id + ', \'reprovar\')">✖ Reprovar</button>'
           : '') +
         (reprovado || contratado ? '<button class="btn btn-vinho-outline" onclick="acaoCandidatura(' + c.id + ', \'reabrir\')">↻ Reabrir</button>' : '') +
-        '<button class="btn" style="background:#eee" onclick="fecharModal(\'analisar\')">Fechar</button>' +
+        '<button class="btn" style="background:#eee" onclick="analisarCandidatura(' + c.id + ')">↻ Atualizar</button>' +
       '</div>' +
     '</div>';
 }
