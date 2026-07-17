@@ -71,13 +71,17 @@
     .stat-card.verde .valor { color: var(--verde); }
     /* Tabela */
     .tabela-wrap { background: var(--branco); border-radius: 8px; border: 1px solid var(--borda); overflow-x: auto; }
-    #vaga-cands-internal-table { min-width: 0; border-collapse: separate; border-spacing: 0; }
-    #vaga-cands-internal-table th, #vaga-cands-internal-table td { white-space: nowrap; }
-    #vaga-cands-internal-table th:nth-child(1), #vaga-cands-internal-table td:nth-child(1) { min-width: 160px; }
-    #vaga-cands-internal-table th:nth-child(2), #vaga-cands-internal-table td:nth-child(2) { min-width: 200px; }
-    #vaga-cands-internal-table th:nth-child(4), #vaga-cands-internal-table td:nth-child(4) { min-width: 180px; }
-    #vaga-cands-internal-table th:nth-child(5), #vaga-cands-internal-table td:nth-child(5) { min-width: 130px; }
-    #vaga-cands-internal-table th:last-child, #vaga-cands-internal-table td:last-child { text-align: right; position: sticky; right: 0; background: var(--branco); box-shadow: -1px 0 0 var(--borda); }
+    #vaga-cands-internal-table { min-width: 0; border-collapse: separate; border-spacing: 0; table-layout: fixed; width: 100%; }
+    #vaga-cands-internal-table th, #vaga-cands-internal-table td { white-space: normal; word-break: break-word; }
+    #vaga-cands-internal-table th:nth-child(1), #vaga-cands-internal-table td:nth-child(1) { width: 17%; }
+    #vaga-cands-internal-table th:nth-child(2), #vaga-cands-internal-table td:nth-child(2) { width: 22%; }
+    #vaga-cands-internal-table th:nth-child(3), #vaga-cands-internal-table td:nth-child(3) { width: 12%; }
+    #vaga-cands-internal-table th:nth-child(4), #vaga-cands-internal-table td:nth-child(4) { width: 18%; }
+    #vaga-cands-internal-table th:nth-child(5), #vaga-cands-internal-table td:nth-child(5) { width: 12%; }
+    #vaga-cands-internal-table th:nth-child(6), #vaga-cands-internal-table td:nth-child(6) { width: 12%; }
+    #vaga-cands-internal-table th:nth-child(7), #vaga-cands-internal-table td:nth-child(7) { width: 7%; }
+    #vaga-cands-internal-table th:last-child, #vaga-cands-internal-table td:last-child { text-align: right; }
+    #vaga-cands-internal-table .btn-ver { white-space: nowrap; }
     #vaga-cands-internal-table thead th:last-child { background: #F8F8F8; }
     .tabela-scroll { overflow-x: auto; }
     .btn-ver { display: inline-block; padding: 6px 14px; background: var(--vinho); color: #fff; border-radius: 4px; font-size: 12px; text-decoration: none; white-space: nowrap; }
