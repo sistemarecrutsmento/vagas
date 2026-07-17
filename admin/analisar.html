@@ -3,287 +3,202 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Análise do Candidato — Admin</title>
+  <title>Analisar Candidato — Admin</title>
   <style>
-    :root {
-      --vinho: #7B1F1F;
-      --vinho-escuro: #5a1414;
-      --dourado: #D4AF37;
-      --borda: #e0e0e0;
-      --cinza: #f5f5f5;
-      --cinza-medio: #888;
-      --branco: #fff;
-      --preto: #222;
-      --verde: #28a745;
-      --vermelho: #dc3545;
-    }
+    :root { --vinho:#6B0F1A; --vinho-claro:#8B1A2B; --cinza:#F5F5F5; --cinza-medio:#999; --cinza-escuro:#2A2A2A; --branco:#fff; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: var(--cinza); color: var(--preto); }
-    .topo { background: var(--vinho); color: var(--branco); padding: 16px 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 10; }
-    .topo h1 { font-size: 18px; font-weight: 600; }
-    .topo a { color: var(--dourado); text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid var(--dourado); border-radius: 6px; }
-    .topo a:hover { background: var(--dourado); color: var(--vinho); }
-    .topo .spacer { flex: 1; }
-    .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
-    .voltar { color: var(--vinho); text-decoration: none; font-size: 13px; }
-    .voltar:hover { text-decoration: underline; }
-    .cabecalho { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
-    .cabecalho .nome { font-size: 24px; font-weight: 700; color: var(--vinho); margin-bottom: 4px; }
-    .cabecalho .vaga { font-size: 14px; color: var(--cinza-medio); margin-bottom: 16px; }
-    .cabecalho .dados-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
-    .dado { padding: 10px 14px; background: var(--cinza); border-radius: 6px; }
-    .dado .lbl { font-size: 11px; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 2px; }
-    .dado .val { font-size: 14px; color: var(--preto); }
-    .secao { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
-    .secao h3 { font-size: 16px; color: var(--vinho); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--cinza); }
-    .timeline { display: flex; gap: 4px; overflow-x: auto; padding: 12px 0; }
-    .etapa { flex: 1; min-width: 110px; text-align: center; }
-    .etapa .bola { width: 36px; height: 36px; border-radius: 50%; background: var(--cinza); color: var(--cinza-medio); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; border: 3px solid var(--borda); }
-    .etapa .nome { font-size: 11px; color: var(--cinza-medio); margin-top: 6px; line-height: 1.2; }
-    .etapa.atual .bola { background: var(--vinho); color: var(--branco); border-color: var(--vinho); }
-    .etapa.atual .nome { color: var(--vinho); font-weight: 600; }
-    .etapa.concluida .bola { background: var(--verde); color: var(--branco); border-color: var(--verde); }
-    .etapa.concluida .nome { color: var(--verde); }
-    .etapa.rejeitada .bola { background: var(--vermelho); color: var(--branco); border-color: var(--vermelho); }
-    .etapa.rejeitada .nome { color: var(--vermelho); }
-    .exp-card { border: 1px solid var(--borda); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
-    .exp-card .exp-titulo { font-weight: 600; color: var(--preto); margin-bottom: 4px; }
-    .exp-card .exp-empresa { color: var(--vinho); font-size: 13px; margin-bottom: 4px; }
-    .exp-card .exp-periodo { color: var(--cinza-medio); font-size: 12px; margin-bottom: 6px; }
-    .exp-card .exp-desc { font-size: 13px; color: var(--preto); line-height: 1.5; white-space: pre-wrap; }
-    .texto-bloco { background: var(--cinza); padding: 14px; border-radius: 6px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
-    .acoes { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 20px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; position: sticky; bottom: 0; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); }
-    .acoes .spacer { flex: 1; }
-    .acoes textarea { width: 100%; padding: 10px; border: 1px solid var(--borda); border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 50px; }
-    .acoes .msg { flex: 1 1 100%; }
-    .btn { background: var(--vinho); color: var(--branco); border: none; padding: 11px 20px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
-    .btn:hover { background: var(--vinho-escuro); }
-    .btn:disabled { background: var(--cinza-medio); cursor: not-allowed; }
-    .btn-aprovar { background: var(--verde); }
-    .btn-aprovar:hover { background: #1e7e34; }
-    .btn-reprovar { background: var(--vermelho); }
-    .btn-reprovar:hover { background: #a71d2a; }
-    .btn-reabrir { background: var(--dourado); color: var(--preto); }
-    .btn-reabrir:hover { background: #b8941e; color: var(--branco); }
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-    .badge-em-analise { background: #fff3cd; color: #856404; }
-    .badge-em-andamento { background: #cce5ff; color: #004085; }
-    .badge-contratado { background: #d4edda; color: #155724; }
-    .badge-rejeitado { background: #f8d7da; color: #721c24; }
-    .historico-item { padding: 10px 14px; border-left: 3px solid var(--vinho); margin-bottom: 8px; background: var(--cinza); border-radius: 0 6px 6px 0; }
-    .historico-item .h-status { font-weight: 600; }
-    .historico-item .h-data { color: var(--cinza-medio); font-size: 12px; }
-    .historico-item .h-msg { font-style: italic; color: var(--cinza-medio); margin-top: 4px; font-size: 13px; }
-    .empty { text-align: center; padding: 40px 20px; color: var(--cinza-medio); }
-    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--cinza); color: var(--cinza-escuro); padding: 24px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .header { background: var(--branco); padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; }
+    .header h1 { color: var(--vinho); font-size: 24px; margin-bottom: 4px; }
+    .header .sub { color: var(--cinza-medio); font-size: 14px; }
+    .status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+    .status-em_andamento { background: #FFF4E5; color: #B45309; }
+    .status-aprovado { background: #E5F8E5; color: #166534; }
+    .status-reprovado { background: #FEE2E2; color: #991B1B; }
+    .status-contratado { background: #DBEAFE; color: #1E40AF; }
+    .card { background: var(--branco); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; }
+    .card h2 { font-size: 16px; color: var(--vinho); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cinza); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { font-size: 14px; }
+    .field-label { color: var(--cinza-medio); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .field-value { color: var(--cinza-escuro); font-size: 15px; font-weight: 500; }
+    .timeline { display: flex; gap: 4px; overflow-x: auto; padding: 8px 0; }
+    .etapa { flex: 1; min-width: 110px; padding: 10px 12px; border-radius: 8px; background: #F0F0F0; color: #BBB; font-size: 12px; text-align: center; position: relative; }
+    .etapa.concluida { background: #DCFCE7; color: #166534; }
+    .etapa.atual { background: var(--vinho); color: var(--branco); font-weight: 600; }
+    .etapa .num { font-size: 11px; opacity: 0.8; margin-bottom: 2px; }
+    .acoes { display: flex; gap: 12px; padding: 20px; background: var(--branco); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: sticky; bottom: 16px; }
+    .btn { padding: 12px 24px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; flex: 1; }
+    .btn-aprovar { background: #16A34A; color: white; }
+    .btn-aprovar:hover { background: #15803D; }
+    .btn-reprovar { background: #DC2626; color: white; }
+    .btn-reprovar:hover { background: #B91C1C; }
+    .btn-reabrir { background: var(--cinza-escuro); color: white; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .empty { text-align: center; padding: 40px; color: var(--cinza-medio); }
+    .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--vinho); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
+    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+    .alert-erro { background: #FEE2E2; color: #991B1B; }
+    .alert-sucesso { background: #DCFCE7; color: #166534; }
+    .hist-item { padding: 10px; border-left: 3px solid var(--vinho); margin-bottom: 8px; background: #FAFAFA; font-size: 13px; }
+    .hist-item small { color: var(--cinza-medio); }
+    .badge-etapa { display: inline-block; background: var(--vinho); color: white; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    a { color: var(--vinho); }
   </style>
 </head>
 <body>
-  <div class="topo">
-    <a href="candidaturas.html">← Candidaturas</a>
-    <h1>📄 Análise do Candidato</h1>
-    <div class="spacer"></div>
-  </div>
-
   <div class="container">
-    <a class="voltar" id="voltar-link" href="candidaturas.html">← Voltar</a>
-
-    <div id="conteudo">
-      <div class="empty"><div class="spinner"></div> Carregando perfil do candidato...</div>
+    <div id="content">
+      <div class="card"><div class="empty"><div class="spinner"></div>Carregando...</div></div>
     </div>
   </div>
 
   <script>
     const API = 'https://recrutamento-api.onrender.com';
-    const token = localStorage.getItem('admin_token');
-    const params = new URLSearchParams(window.location.search);
-    const candId = params.get('id');
 
-    if (!token) { window.location.href = 'index.html'; }
-    if (!candId) { window.location.href = 'candidaturas.html'; }
+    (async () => {
+      const content = document.getElementById('content');
+      const token = localStorage.getItem('admin_token');
+      if (!token) {
+        content.innerHTML = '<div class="card"><div class="alert alert-erro">Você não está logado. <a href="index.html">Faça login</a> primeiro.</div></div>';
+        return;
+      }
 
-    const ETAPAS = ['Inscrição', 'Triagem curricular', 'Entrevista RH', 'Entrevista gestor', 'Proposta', 'Coleta de documentos', 'Contratação'];
+      const params = new URLSearchParams(location.search);
+      const id = params.get('id');
+      if (!id) {
+        content.innerHTML = '<div class="card"><div class="alert alert-erro">ID da candidatura não informado.</div></div>';
+        return;
+      }
 
-    function badgeStatus(s) {
-      const cls = { em_analise: 'badge-em-analise', em_andamento: 'badge-em-andamento', aprovado: 'badge-em-andamento', contratado: 'badge-contratado', rejeitado: 'badge-rejeitado', reprovado: 'badge-rejeitado' }[s] || 'badge-em-analise';
-      const lbl = { em_analise: 'Em análise', em_andamento: 'Em andamento', aprovado: 'Aprovado', contratado: 'Contratado', rejeitado: 'Reprovado', reprovado: 'Reprovado' }[s] || s;
-      return `<span class="badge ${cls}">${lbl}</span>`;
-    }
-
-    function formatarData(iso) {
-      if (!iso) return '—';
-      return new Date(iso).toLocaleString('pt-BR');
-    }
-
-    function formatarDataSimples(iso) {
-      if (!iso) return '—';
-      return new Date(iso).toLocaleDateString('pt-BR');
-    }
-
-    function montarTimeline(c) {
-      let etapasArr = ETAPAS;
+      let candidatura;
       try {
-        const arr = typeof c.etapas === 'string' ? JSON.parse(c.etapas) : c.etapas;
-        if (Array.isArray(arr) && arr.length) {
-          // Cada item pode ser string OU objeto {nome: '...'}
-          etapasArr = arr.map(e => typeof e === 'string' ? e : (e.nome || e.name || JSON.stringify(e)));
-        }
-      } catch (e) {}
-
-      const etapaAtual = c.etapa_atual || 0;
-      const status = c.status;
-      const reprovado = status === 'rejeitado' || status === 'reprovado';
-
-      return etapasArr.map((nome, i) => {
-        let classe = '';
-        if (reprovado) classe = i === etapaAtual ? 'rejeitada' : (i < etapaAtual ? 'concluida' : '');
-        else if (i < etapaAtual) classe = 'concluida';
-        else if (i === etapaAtual) classe = 'atual';
-        const num = i + 1;
-        return `<div class="etapa ${classe}">
-          <div class="bola">${classe === 'concluida' ? '✓' : num}</div>
-          <div class="nome">${nome}</div>
-        </div>`;
-      }).join('');
-    }
-
-    async function carregar() {
-      try {
-        const r = await fetch(API + '/api/admin/candidatura/' + candId, {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+        const r = await fetch(API + '/api/admin/candidatura/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
         if (r.status === 401 || r.status === 403) {
-          localStorage.removeItem('admin_token');
-          window.location.href = 'index.html';
+          content.innerHTML = '<div class="card"><div class="alert alert-erro">Sessão expirada. <a href="index.html" target="_top">Faça login</a> novamente.</div></div>';
           return;
         }
         const data = await r.json();
-        if (data.erro) {
-          document.getElementById('conteudo').innerHTML = '<div class="empty">' + data.erro + '</div>';
+        if (!r.ok) {
+          content.innerHTML = '<div class="card"><div class="alert alert-erro">' + (data.erro || 'Erro ao carregar') + '</div></div>';
           return;
         }
-        const c = data.candidatura;
-        const exps = c.experiencias || [];
-
-        // Link de voltar
-        if (c.vaga_id) {
-          document.getElementById('voltar-link').href = 'candidatos.html?vaga=' + c.vaga_id;
-          document.getElementById('voltar-link').textContent = '← Voltar para candidatos da vaga';
-        }
-
-        document.title = c.nome + ' — Análise';
-
-        const endCompleto = [c.logradouro, c.numero, c.complemento, c.bairro, c.cidade, c.cd_estado || c.estado, c.cep].filter(Boolean).join(', ') || '—';
-        const localCand = [c.cd_cidade || c.cidade, c.cd_estado || c.estado].filter(Boolean).join(' / ') || '—';
-        const localVaga = [c.cidade, c.estado].filter(Boolean).join(' / ') || '—';
-
-        let acoesBotoes = '';
-        const status = c.status;
-        if (status === 'rejeitado' || status === 'reprovado') {
-          acoesBotoes = `<button class="btn btn-reabrir" onclick="acaoCandidatura('reabrir')">↻ Reabrir candidatura</button>`;
-        } else {
-          acoesBotoes = `<button class="btn btn-aprovar" onclick="acaoCandidatura('avancar')">✓ Aprovar e avançar etapa</button>
-            <button class="btn btn-reprovar" onclick="acaoCandidatura('reprovar')">✖ Reprovar</button>`;
-        }
-
-        document.getElementById('conteudo').innerHTML = `
-          <div class="cabecalho">
-            <div class="nome">${c.nome || '—'}</div>
-            <div class="vaga">Candidatou-se para: <strong>${c.titulo || '—'}</strong> • ${c.empresa || '—'}</div>
-            <div class="dados-grid">
-              <div class="dado"><div class="lbl">E-mail</div><div class="val">${c.email || '—'}</div></div>
-              <div class="dado"><div class="lbl">Celular</div><div class="val">${c.celular || '—'}</div></div>
-              <div class="dado"><div class="lbl">CPF</div><div class="val">${c.cpf || '—'}</div></div>
-              <div class="dado"><div class="lbl">Data nasc.</div><div class="val">${formatarDataSimples(c.data_nascimento)}</div></div>
-              <div class="dado"><div class="lbl">Cidade/UF</div><div class="val">${localCand}</div></div>
-              <div class="dado"><div class="lbl">Acessibilidade</div><div class="val">${c.acessibilidade || '—'}</div></div>
-              <div class="dado"><div class="lbl">Candidatou em</div><div class="val">${formatarData(c.criada_em)}</div></div>
-              <div class="dado"><div class="lbl">Status atual</div><div class="val">${badgeStatus(c.status)}</div></div>
-            </div>
-          </div>
-
-          <div class="secao">
-            <h3>📋 Etapas do Processo</h3>
-            <div class="timeline">${montarTimeline(c)}</div>
-          </div>
-
-          <div class="secao">
-            <h3>📍 Endereço</h3>
-            <div class="texto-bloco">${endCompleto}</div>
-          </div>
-          <div class="secao">
-            <h3>🎓 Formação Acadêmica</h3>
-            <div class="dados-grid">
-              <div class="dado"><div class="lbl">Nível</div><div class="val">${c.formacao || '—'}</div></div>
-              <div class="dado"><div class="lbl">Instituição</div><div class="val">${c.instituicao || '—'}</div></div>
-              <div class="dado"><div class="lbl">Curso</div><div class="val">${c.curso || '—'}</div></div>
-              <div class="dado"><div class="lbl">Situação</div><div class="val">${c.situacao || '—'}</div></div>
-              <div class="dado"><div class="lbl">Conclusão</div><div class="val">${formatarDataSimples(c.data_conclusao)}</div></div>
-            </div>
-          </div>
-
-          <div class="secao">
-            <h3>💼 Experiências Profissionais</h3>
-            ${exps.length === 0 ? '<div class="empty">Sem experiências cadastradas.</div>' :
-              exps.map(e => `<div class="exp-card">
-                <div class="exp-titulo">${e.cargo || '—'}</div>
-                <div class="exp-empresa">${e.empresa || '—'}</div>
-                <div class="exp-periodo">${formatarDataSimples(e.inicio)} → ${e.emprego_atual ? 'Atual' : formatarDataSimples(e.fim)}</div>
-                <div class="exp-desc">${e.descricao || ''}</div>
-              </div>`).join('')}
-          </div>
-
-          <div class="secao">
-            <h3>💬 Sobre você</h3>
-            <div class="texto-bloco">${c.sobre_voce || 'Não informado.'}</div>
-          </div>
-
-          <div class="secao">
-            <h3>📌 Requisitos da Vaga</h3>
-            <div class="texto-bloco">${c.requisitos || '—'}</div>
-          </div>
-
-          <div class="secao">
-            <h3>📜 Histórico de Movimentações</h3>
-            ${(c.historico && c.historico.length > 0) ?
-              c.historico.map(h => `<div class="historico-item">
-                <div class="h-status">Etapa ${(h.etapa ?? 0) + 1} — ${h.status || '—'}</div>
-                <div class="h-data">${formatarData(h.data)}${h.por ? ' • por ' + h.por : ''}</div>
-                ${h.mensagem ? '<div class="h-msg">"' + h.mensagem + '"</div>' : ''}
-              </div>`).join('') :
-              '<div class="empty">Nenhuma movimentação ainda.</div>'}
-          </div>
-
-          <div class="acoes" id="acoes-bar">
-            <textarea class="msg" id="msg-admin" placeholder="Mensagem opcional para o candidato (vai no e-mail)"></textarea>
-            ${acoesBotoes}
-          </div>
-        `;
+        candidatura = data.candidatura;
       } catch (e) {
-        document.getElementById('conteudo').innerHTML = '<div class="empty">Erro: ' + e.message + '</div>';
+        content.innerHTML = '<div class="card"><div class="alert alert-erro">Erro: ' + e.message + '</div></div>';
+        return;
       }
+
+      render(candidatura);
+    })();
+
+    function render(c) {
+      const content = document.getElementById('content');
+      const etapas = (c.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
+      const etapaAtual = c.etapa_atual || 1;
+      const totalEtapas = etapas.length || 1;
+      const ehTriagem = etapaAtual === 2; // 2ª etapa = Triagem Curricular
+      const status = c.status || 'em_andamento';
+
+      // Timeline
+      const timeline = etapas.map((nome, i) => {
+        const idx = i + 1;
+        let cls = '';
+        if (idx < etapaAtual) cls = 'concluida';
+        else if (idx === etapaAtual) cls = 'atual';
+        return '<div class="etapa ' + cls + '"><div class="num">' + idx + '/' + totalEtapas + '</div>' + nome + '</div>';
+      }).join('');
+
+      // Experiências
+      const exps = Array.isArray(c.experiencias) ? c.experiencias : [];
+      const expsHtml = exps.length === 0 ? '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma experiência informada.</p>'
+        : exps.map(e => '<div style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#FAFAFA"><strong>' + (e.cargo || '—') + '</strong> em ' + (e.empresa || '—') + '<br><small style="color:var(--cinza-medio)">' + (e.inicio || '') + (e.fim ? ' — ' + e.fim : ' — Atual') + '</small>' + (e.descricao ? '<p style="font-size:13px;margin-top:4px">' + e.descricao + '</p>' : '') + '</div>').join('');
+
+      // Formação
+      const formacao = c.formacao || {};
+      const formacaoHtml = formacao && (formacao.escolaridade || formacao.curso || formacao.instituicao)
+        ? '<div class="field-value">' + (formacao.escolaridade || '—') + (formacao.curso ? ' — ' + formacao.curso : '') + (formacao.instituicao ? '<br><small style="color:var(--cinza-medio)">' + formacao.instituicao + '</small>' : '') + '</div>'
+        : '<p style="color:var(--cinza-medio);font-size:14px">Não informada.</p>';
+
+      // Histórico
+      const hist = c.historico || [];
+      const histHtml = hist.length === 0
+        ? '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma movimentação ainda.</p>'
+        : hist.map(h => {
+            const d = h.data ? new Date(h.data).toLocaleString('pt-BR') : '';
+            return '<div class="hist-item"><strong>' + (h.etapa || h.status) + '</strong> [' + h.status + '] — ' + d + (h.por ? '<br><small>por ' + h.por + '</small>' : '');
+          }).join('');
+
+      // Botões de ação (só na triagem curricular)
+      let acoesHtml = '';
+      if (ehTriagem) {
+        if (status === 'em_andamento' || status === 'aprovado') {
+          acoesHtml = '<div class="acoes"><button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button><button class="btn btn-aprovar" onclick="acao(' + c.id + ',\'aprovar-triagem\')">✓ Aprovar Triagem</button></div>';
+        } else if (status === 'reprovado') {
+          acoesHtml = '<div class="acoes"><button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button></div>';
+        }
+      } else {
+        acoesHtml = '<div class="acoes"><div style="flex:1;text-align:center;color:var(--cinza-medio);font-size:13px;padding:8px">Ações de aprovação disponíveis apenas na Etapa 2 (Triagem Curricular). Candidato está na etapa ' + etapaAtual + '.</div></div>';
+      }
+
+      content.innerHTML =
+        '<div class="header">' +
+          '<h1>' + (c.nome || 'Candidato') + '</h1>' +
+          '<div class="sub">' + (c.vaga_titulo || c.titulo || 'Vaga') + (c.cidade ? ' • ' + c.cidade : '') + '</div>' +
+          '<span class="status-pill status-' + status + '">' + status.replace('_', ' ') + '</span>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<h2>📋 Status do Processo</h2>' +
+          '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual + '/' + totalEtapas + ' — ' + (etapas[etapaAtual - 1] || '—') + '</span></div>' +
+          '<div class="timeline">' + timeline + '</div>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<h2>👤 Dados Pessoais</h2>' +
+          '<div class="grid-2">' +
+            '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (c.email || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + (c.celular || c.telefone || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">CPF</div><div class="field-value">' + (c.cpf || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Nascimento</div><div class="field-value">' + (c.nascimento || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Cidade</div><div class="field-value">' + (c.cidade || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Estado</div><div class="field-value">' + (c.estado || '—') + '</div></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<h2>🎓 Formação</h2>' + formacaoHtml +
+        '</div>' +
+
+        '<div class="card">' +
+          '<h2>💼 Experiências Profissionais</h2>' + expsHtml +
+        '</div>' +
+
+        (c.sobre ? '<div class="card"><h2>💬 Sobre você</h2><p style="font-size:14px;line-height:1.5">' + c.sobre + '</p></div>' : '') +
+
+        '<div class="card">' +
+          '<h2>📜 Histórico do Processo</h2>' + histHtml +
+        '</div>' +
+
+        acoesHtml;
     }
 
-    async function acaoCandidatura(acao) {
-      const confirma = {
-        avancar: 'Avançar para a próxima etapa?',
-        reprovar: 'Reprovar este candidato? Esta ação pode ser revertida.',
-        reabrir: 'Reabrir esta candidatura?'
-      }[acao];
-      if (!confirm(confirma)) return;
-
-      const mensagem = document.getElementById('msg-admin').value.trim();
+    async function acao(id, acao) {
+      const labels = { 'reprovar': 'reprovar este candidato?', 'aprovar-triagem': 'aprovar este candidato na triagem curricular?', 'reabrir': 'reabrir esta candidatura?' };
+      if (!confirm('Tem certeza que deseja ' + labels[acao])) return;
       try {
-        const r = await fetch(API + '/api/admin/candidatura/' + candId + '/status', {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/candidatura/' + id + '/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ acao, mensagem: mensagem || undefined })
+          body: JSON.stringify({ acao: acao === 'aprovar-triagem' ? 'avancar' : acao })
         });
         const data = await r.json();
         if (r.ok) {
-          alert('✅ Atualizado com sucesso!');
-          carregar();
+          // Recarrega os dados
+          location.reload();
         } else {
           alert('Erro: ' + (data.erro || 'Não foi possível atualizar'));
         }
@@ -291,8 +206,6 @@
         alert('Erro: ' + e.message);
       }
     }
-
-    carregar();
   </script>
 </body>
 </html>
