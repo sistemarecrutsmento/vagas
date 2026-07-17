@@ -372,9 +372,12 @@
 <script src="app.js?v=painelpagina"></script>
 <script>
 // ===== ROTEAMENTO =====
-if (!tokenCandidato) {
-  // não logado: redireciona pra home
-  location.href = 'index.html';
+// (checarAuth no app.js vai popular tokenCandidato no DOMContentLoaded;
+// aqui só esperamos isso acontecer antes de redirecionar)
+function redirecionarSeNaoLogado() {
+  if (!tokenCandidato) {
+    location.href = 'index.html';
+  }
 }
 
 // ===== CARREGAR DADOS DA PÁGINA =====
@@ -526,8 +529,12 @@ document.addEventListener('click', (e) => {
 
 // Quando modal abre, sincroniza abas
 window.addEventListener('DOMContentLoaded', () => {
-  carregarPaginaCandidato();
-  if (typeof window.atualizarHeaderUsuario === 'function') window.atualizarHeaderUsuario();
+  // Espera checarAuth rodar (também no DOMContentLoaded)
+  setTimeout(() => {
+    redirecionarSeNaoLogado();
+    if (tokenCandidato) carregarPaginaCandidato();
+    if (typeof window.atualizarHeaderUsuario === 'function') window.atualizarHeaderUsuario();
+  }, 50);
 });
 </script>
 
