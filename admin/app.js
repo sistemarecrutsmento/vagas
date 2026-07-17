@@ -297,6 +297,9 @@ function irParaPagina(page) {
   document.querySelectorAll('.nav-item').forEach(n => {
     n.classList.toggle('ativo', n.getAttribute('data-page') === page);
   });
+  // Fecha menu mobile
+  document.getElementById('aside')?.classList.remove('aberto');
+  document.getElementById('app')?.classList.remove('aside-aberto');
   // Mostra a página certa
   document.querySelectorAll('.page').forEach(p => p.classList.remove('ativo'));
   const el = document.getElementById('page-' + page);
