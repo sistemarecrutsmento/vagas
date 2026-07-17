@@ -599,6 +599,7 @@ function atualizarHeaderUsuario() {
         <div class="user-avatar" ${avatarStyle}>${fotoUrl ? '' : (iniciais || '👤')}</div>
         <span style="font-weight:600;color:var(--preto);">${nome || emailLogado}</span>
       </div>
+      <button class="btn-hamburguer-header" onclick="abrirDrawer(event)" title="Menu">☰</button>
     `;
   } else if (tokenCandidato) {
     headerActions.innerHTML = `<button class="btn-outline" onclick="abrirModal('cad')">📝 Completar cadastro</button>`;
