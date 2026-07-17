@@ -1229,3 +1229,8 @@ window.wizardVoltar = wizardVoltar;
 window.wizardAddExperiencia = wizardAddExperiencia;
 window.wizardRemoverExp = wizardRemoverExp;
 window.wizardFinalizar = wizardFinalizar;
+
+// Expõe estado pro drawer/UI
+Object.defineProperty(window, 'tokenCandidato', { get: () => tokenCandidato });
+Object.defineProperty(window, 'emailLogado', { get: () => emailLogado });
+Object.defineProperty(window, 'cadastroCompleto', { get: () => cadastroCompleto });
