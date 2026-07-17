@@ -599,7 +599,7 @@ function atualizarHeaderUsuario() {
       <button id="btn-cadastrar" class="btn-outline" onclick="abrirModal('cad')">Cadastrar</button>
     `;
   }
-  // Garante que o botão ☰ no logo existe
+  // SEMPRE garante que o botão ☰ no logo existe (logado ou deslogado)
   garantirBotaoMenu();
 }
 
