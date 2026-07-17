@@ -572,8 +572,8 @@ window.abrirDetalhesCandidato = function(vagaId) {
 
 // ===== MODAL DE EDIÇÃO =====
 window.abrirEdicaoPerfil = function() {
-  // Abre em nova aba (página dedicada)
-  window.open('perfil.html', '_blank');
+  // Navega para a página dedicada de perfil na MESMA aba
+  location.href = 'perfil.html';
 };
 window.fecharEdicao = function() {
   document.getElementById('modal-edicao').classList.remove('aberto');
