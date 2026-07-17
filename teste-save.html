@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html><head><title>Teste Save</title></head><body>
+<div id="dbg" style="white-space:pre-wrap;font-family:monospace;font-size:11px;padding:8px;background:#000;color:#0f0"></div>
+<script>
+const dbg = document.getElementById('dbg');
+function log(...args) {
+  const txt = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ');
+  dbg.textContent += txt + '\n';
+  document.title = 'LOG: ' + txt.substring(0, 50);
+}
+window.addEventListener('error', e => log('ERROR:', e.message, 'at', e.filename + ':' + e.lineno));
+window.addEventListener('unhandledrejection', e => log('REJECTION:', e.reason?.message || e.reason));
+// Hooka alert
+const origAlert = window.alert;
+window.alert = function(msg) { log('ALERT:', msg); };
+log('script tag init ok');
+
+// Setar token manualmente
+const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1ldXNzZWdkb3Jlc0BnbWFpbC5jb20iLCJ0aXBvIjoiY2FuZGlkYXRvIiwiaWF0IjoxNzg0MjU0ODQxLCJleHAiOjE3ODY4NDY4NDF9.WcGqpfz8E-bxKFa575LFmdF5PaiLRGUtZanv6ms5h34';
+localStorage.setItem('candidato_token', TOKEN);
+localStorage.setItem('candidato_email', 'meussegdores@gmail.com');
+</script>
+<script src="app.js?v=20260717-0500"></script>
+<script>
+// Polling
+setInterval(() => {
+  const f = document.getElementById('perfil-form');
+  if (f && !f.dataset.hooked) {
+    f.dataset.hooked = '1';
+    log('FORM ENCONTRADO, hookando submit');
+    f.addEventListener('submit', (e) => {
+      log('=== SUBMIT ===');
+      log('pe-nome =', document.getElementById('pe-nome')?.value);
+    });
+  }
+}, 200);
+</script>
+</body></html>
