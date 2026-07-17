@@ -71,6 +71,12 @@
     .stat-card.verde .valor { color: var(--verde); }
     /* Tabela */
     .tabela-wrap { background: var(--branco); border-radius: 8px; border: 1px solid var(--borda); overflow: hidden; }
+    #vaga-cands-internal-table { min-width: 720px; }
+    #vaga-cands-internal-table th, #vaga-cands-internal-table td { white-space: nowrap; }
+    #vaga-cands-internal-table th:last-child, #vaga-cands-internal-table td:last-child { text-align: right; }
+    .tabela-scroll { overflow-x: auto; }
+    .btn-ver { display: inline-block; padding: 6px 14px; background: var(--vinho); color: #fff; border-radius: 4px; font-size: 12px; text-decoration: none; white-space: nowrap; }
+    .btn-ver:hover { background: var(--vinho-claro); }
     table { width: 100%; border-collapse: collapse; }
     th { background: #F8F8F8; padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; font-weight: 700; border-bottom: 1px solid var(--borda); }
     td { padding: 14px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; }
@@ -257,7 +263,7 @@
         </div>
       </div>
       <div id="cands-vaga-info" style="background:var(--cinza);padding:14px;border-radius:8px;margin-bottom:16px;font-size:13px"></div>
-      <div class="tabela-wrap">
+      <div class="tabela-wrap tabela-scroll">
         <table id="vaga-cands-internal-table">
           <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead>
           <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
@@ -386,6 +392,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-1400"></script>
+<script src="app.js?v=20260717-1410"></script>
 </body>
 </html>
