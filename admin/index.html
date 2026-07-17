@@ -160,6 +160,34 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty { text-align: center; padding: 40px; color: #888; }
 
+    /* Áreas de interesse (Base de Talentos) */
+    .areas-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+    .badge-area { display: inline-block; padding: 3px 8px; background: #fdf2f4; color: var(--vinho); border: 1px solid #f3d4da; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .filtro-area { background: white; }
+    .filtro-area:focus { outline: none; border-color: var(--vinho); }
+
+    /* Modal de Currículo (Base de Talentos) */
+    .curriculo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .curriculo-card { background: #fafafa; border: 1px solid var(--borda); border-radius: 10px; padding: 14px; }
+    .curriculo-card h4 { font-size: 14px; color: var(--vinho); margin-bottom: 10px; }
+    .curriculo-card .kv { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; gap: 8px; }
+    .curriculo-card .kv span { color: var(--cinza); }
+    .curriculo-card .kv strong { text-align: right; word-break: break-word; }
+    .curriculo-full { grid-column: 1 / -1; }
+    @media (max-width: 700px) {
+      .curriculo-grid { grid-template-columns: 1fr; }
+      .curriculo-full { grid-column: 1; }
+    }
+
+    /* Base de Talentos — tabela em mobile (cards) */
+    @media (max-width: 700px) {
+      #candidatos-table, #candidatos-table tbody, #candidatos-table tr, #candidatos-table td { display: block; width: 100% !important; max-width: 100% !important; table-layout: auto !important; }
+      #candidatos-table thead { display: none; }
+      #candidatos-table tr { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+      #candidatos-table td { padding: 4px 0; border: 0; text-align: left; box-sizing: border-box; word-break: normal; }
+      #candidatos-table td::before { content: attr(data-label); display: block; font-size: 11px; color: var(--cinza-medio); text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
+    }
+
     /* Cards de vagas com candidatos */
     .vagas-cands-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
     .vaga-cand-card { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 18px; transition: transform .15s, box-shadow .15s; cursor: pointer; position: relative; }
@@ -282,11 +310,19 @@
     <div class="page" id="page-candidatos">
       <div class="page-header">
         <div><h2>Base de Talentos</h2><p>Todos os candidatos cadastrados na plataforma</p></div>
+        <div class="base-filtros" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select id="candidatos-filtro-area" class="filtro-area" style="padding:8px 12px;border:1px solid var(--borda);border-radius:6px;font-size:14px;min-width:200px">
+            <option value="">📂 Todas as áreas</option>
+          </select>
+          <input type="text" id="candidatos-filtro-busca" placeholder="🔍 Buscar nome/email..." style="padding:8px 12px;border:1px solid var(--borda);border-radius:6px;font-size:14px;min-width:200px">
+          <button class="btn btn-primary" style="width:auto" onclick="carregarCandidatos()">Aplicar</button>
+          <button class="btn btn-sec" style="width:auto" onclick="limparFiltrosCandidatos()">Limpar</button>
+        </div>
       </div>
       <div class="tabela-wrap">
         <table id="candidatos-table">
-          <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Cidade</th><th>Cadastro</th></tr></thead>
-          <tbody><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
+          <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Cidade</th><th>Áreas de interesse</th><th>Cadastro</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -439,6 +475,22 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-1420"></script>
+<!-- Modal: Currículo do Candidato (Base de Talentos) -->
+<div class="modal-overlay" id="modal-curriculo">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3 id="curriculo-titulo">📄 Currículo do Candidato</h3>
+      <button class="modal-close" onclick="fecharModal('curriculo')">&times;</button>
+    </div>
+    <div class="modal-body" id="curriculo-body">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('curriculo')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js?v=20260717-1549"></script>
 </body>
 </html>
