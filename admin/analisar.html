@@ -239,10 +239,11 @@
                             h.acao === 'reprovar' ? 'Reprovado' :
                             h.acao === 'reabrir' ? 'Candidatura reaberta' :
                             h.acao === 'aprovar' ? 'Aprovado' : (h.status || '');
+          const statusLabel = h.status === 'em_analise' ? 'em análise' : h.status === 'em_andamento' ? 'em andamento' : (h.status || '');
           return '<div class="hist-item">' +
             '<strong>' + (acaoLabel || 'Movimentação') + '</strong>' +
             (h.etapa != null ? ' <span class="badge-etapa">' + h.etapa + '/' + totalEtapas + '</span>' : '') +
-            (h.status ? ' <small>[' + h.status + ']</small>' : '') +
+            (statusLabel ? ' <small>[' + statusLabel + ']</small>' : '') +
             (dataFmt ? '<br><small>' + dataFmt + '</small>' : '') +
             (h.por ? '<br><small>por ' + h.por + '</small>' : '') +
             '</div>';
@@ -269,7 +270,7 @@
           '</button>' +
           '<h1>' + (c.nome || 'Candidato') + '</h1>' +
           '<div class="sub">' + (c.titulo || 'Vaga') + (c.cidade ? ' • ' + c.cidade : '') + '</div>' +
-          '<span class="status-pill status-' + status + '">' + status.replace('_', ' ') + '</span>' +
+          '<span class="status-pill status-' + status + '">' + (status === 'em_analise' ? 'Em análise' : status === 'em_andamento' ? 'Em andamento' : status === 'contratado' ? 'Contratado' : status === 'reprovado' ? 'Reprovado' : status === 'rejeitado' ? 'Rejeitado' : status === 'aprovado' ? 'Aprovado' : status) + '</span>' +
         '</div>' +
 
         '<div class="card">' +
