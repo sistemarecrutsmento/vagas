@@ -325,8 +325,10 @@ async function abrirVagaCands(vagaId) {
     tb.innerHTML = candidaturasVagaCache.map(c => {
       const badge = c.status === 'contratado' ? 'badge-ativa' : (c.status === 'rejeitado' || c.status === 'reprovado') ? 'badge-fechada' : (c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente');
       // Resolve nome da etapa (etapa_atual é 1-based: 1=Inscrição, 2=Triagem, ...)
+      // O campo 'etapas' vem na VAGA, não na candidatura.
       let etapasArr = [];
-      try { etapasArr = typeof c.etapas === 'string' ? JSON.parse(c.etapas) : c.etapas; } catch(e) {}
+      const fonteEtapas = data.vaga && data.vaga.etapas ? data.vaga.etapas : null;
+      try { etapasArr = typeof fonteEtapas === 'string' ? JSON.parse(fonteEtapas) : fonteEtapas; } catch(e) {}
       if (!Array.isArray(etapasArr)) etapasArr = [];
       const numEtapa = c.etapa_atual || 1;  // 1-based
       const idxZero = numEtapa - 1;
