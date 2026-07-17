@@ -367,7 +367,8 @@ function wizardEtapa2Validar() {
   // E-mail vem do cadastro (etapa 1) ou do candidato logado
   wizardEtapa1 = wizardEtapa1 || {};
   const emailFromLogin = (wizardEtapa1.email) || emailLogado || null;
-  wizardEtapa1.dados = { cpf, nome, data_nascimento: dataNasc, sexo, celular, email: emailFromLogin, acessibilidade, banco_talentos: banco, areas_interesse: areas };
+  const sobreVoce = document.getElementById('w2-sobre-voce')?.value.trim() || null;
+  wizardEtapa1.dados = { cpf, nome, data_nascimento: dataNasc, sexo, celular, email: emailFromLogin, acessibilidade, banco_talentos: banco, areas_interesse: areas, sobre_voce: sobreVoce };
   wizardIrPara(3);
 }
 
