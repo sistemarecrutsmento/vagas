@@ -607,10 +607,8 @@ function atualizarHeaderUsuario() {
 
 function garantirBotaoMenu() {
   if (document.getElementById('btn-menu-logo')) return;
-  const headerInner = document.querySelector('.header-inner');
+  const headerInner = document.querySelector('header');
   if (!headerInner) return;
-  const logo = headerInner.querySelector('.logo');
-  if (!logo) return;
   const btn = document.createElement('button');
   btn.id = 'btn-menu-logo';
   btn.className = 'btn-menu-logo';
@@ -618,8 +616,8 @@ function garantirBotaoMenu() {
   btn.setAttribute('aria-label', 'Abrir menu');
   btn.innerHTML = '☰';
   btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); window.abrirDrawer && window.abrirDrawer(e); });
-  // Insere ANTES do logo
-  logo.parentNode.insertBefore(btn, logo);
+  // Insere como PRIMEIRO filho do <header> (canto superior esquerdo absoluto)
+  headerInner.insertBefore(btn, headerInner.firstChild);
 }
 
 async function abrirPainelCandidato() {
