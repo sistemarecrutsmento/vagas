@@ -163,7 +163,7 @@
   </div>
 </main>
 
-<script src="app.js?v=20260717-0250"></script>
+<script src="app.js?v=20260717-0900"></script>
 <script>
 // ===== PEGAR ID DA VAGA =====
 const params = new URLSearchParams(window.location.search);
@@ -287,9 +287,12 @@ function renderizar(cand, v) {
   if (!Array.isArray(etapas) || !etapas.length) {
     etapas = [
       { nome: 'Inscrição' },
-      { nome: 'Triagem' },
-      { nome: 'Entrevista' },
-      { nome: 'Resultado final' }
+      { nome: 'Triagem curricular' },
+      { nome: 'Entrevista RH' },
+      { nome: 'Entrevista gestor' },
+      { nome: 'Proposta' },
+      { nome: 'Coleta de documentos' },
+      { nome: 'Contratação' }
     ];
   }
 
