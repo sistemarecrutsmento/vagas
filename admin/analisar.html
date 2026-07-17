@@ -34,7 +34,8 @@
     .etapa.concluida { background: #DCFCE7; color: #166534; }
     .etapa.atual { background: var(--vinho); color: var(--branco); font-weight: 600; }
     .etapa .num { font-size: 11px; opacity: 0.8; margin-bottom: 2px; }
-    .acoes { display: flex; gap: 12px; padding: 20px; background: var(--branco); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: sticky; bottom: 16px; }
+    .acoes { display: flex; gap: 12px; padding: 20px; background: var(--branco); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .aviso-etapa { flex: 1; text-align: center; color: var(--cinza-medio); font-size: 14px; padding: 12px; background: #F9F6F0; border-radius: 8px; border-left: 3px solid var(--vinho-claro); }
     .btn { padding: 12px 24px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; flex: 1; }
     .btn-aprovar { background: #16A34A; color: white; }
     .btn-aprovar:hover { background: #15803D; }
@@ -259,7 +260,7 @@
           acoesHtml = '<div class="acoes"><button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button></div>';
         }
       } else {
-        acoesHtml = '<div class="acoes"><div style="flex:1;text-align:center;color:var(--cinza-medio);font-size:13px;padding:8px">Ações de aprovação disponíveis apenas na Etapa 2 (Triagem Curricular). Candidato está na etapa ' + etapaAtual + '.</div></div>';
+        acoesHtml = '<div class="acoes"><div class="aviso-etapa">ℹ️ Ações de aprovação disponíveis apenas na Etapa 2 (Triagem Curricular). Candidato está na etapa ' + etapaAtual + '.</div></div>';
       }
 
       content.innerHTML =
