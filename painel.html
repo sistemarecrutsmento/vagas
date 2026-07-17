@@ -119,7 +119,8 @@
   .empty { padding: 40px 0; text-align: center; color: var(--cinza); }
 
   /* Timeline de candidatura (mesma usada na home) */
-  .cand-card { background: var(--cinza); border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+  .cand-card { background: var(--cinza); border-radius: 8px; padding: 16px; margin-bottom: 14px; transition: transform .15s, box-shadow .15s; }
+  .cand-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
   .cand-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
   .cand-card h4 { color: var(--vinho); font-size: 16px; margin-bottom: 2px; }
   .cand-card .cand-empresa { font-size: 13px; color: var(--cinza-medio); }
@@ -446,7 +447,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-1100"></script>
+<script src="app.js?v=20260717-1200"></script>
 <script>
 // ===== ROTEAMENTO =====
 // (checarAuth no app.js vai popular tokenCandidato no DOMContentLoaded;
