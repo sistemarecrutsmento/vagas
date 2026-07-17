@@ -91,6 +91,13 @@
     .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: var(--preto); }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--borda); border-radius: 6px; font-size: 15px; font-family: inherit; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--vinho); }
+
+    /* Áreas de interesse (chips) */
+    .areas-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px; border: 1px solid var(--borda); border-radius: 8px; background: #fafafa; min-height: 50px; }
+    .area-chip { display: inline-block; padding: 7px 14px; background: white; border: 1px solid var(--borda); border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .area-chip:hover { border-color: var(--vinho); color: var(--vinho); }
+    .area-chip.selecionada { background: var(--vinho); color: white; border-color: var(--vinho); font-weight: 600; }
+    .area-chip.selecionada:hover { background: var(--vinho-escuro); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
     .btn { padding: 12px 24px; border-radius: 6px; font-weight: 600; font-size: 15px; cursor: pointer; border: none; }
@@ -439,6 +446,11 @@
         </div>
         <div class="form-group">
           <label class="check-label"><input type="checkbox" id="w2-banco"> Autorizo manter meu perfil no Banco de Talentos por 24 meses para futuras oportunidades.</label>
+        </div>
+        <div class="form-group">
+          <label>Áreas de interesse <span style="font-weight:400;color:var(--cinza);font-size:12px;">(escolha até 5)</span></label>
+          <div id="w2-areas" class="areas-chips"></div>
+          <div id="w2-areas-contador" style="margin-top:6px;font-size:12px;color:var(--cinza);">0 de 5 selecionadas</div>
         </div>
         <div class="wizard-botoes">
           <button class="btn btn-secondary" onclick="wizardVoltar()">Voltar</button>
