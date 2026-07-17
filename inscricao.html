@@ -101,6 +101,10 @@
   .proc-etapa.aprovada .proc-etapa-status { background: var(--verde); color: white; }
   .proc-etapa.rejeitada .proc-etapa-status { background: var(--vermelho); color: white; }
   .proc-etapa.atual .proc-etapa-status { background: #f97316; color: white; }
+  .proc-etapa-desc { margin-top: 8px; font-size: 12.5px; color: var(--cinza); line-height: 1.4; }
+  .proc-etapa.aprovada .proc-etapa-desc { color: #166534; }
+  .proc-etapa.rejeitada .proc-etapa-desc { color: #991b1b; }
+  .proc-etapa.atual .proc-etapa-desc { color: #9a3412; }
 
   /* Loading & empty */
   .loading { padding: 80px 20px; text-align: center; color: var(--cinza); }
@@ -287,13 +291,12 @@ function renderizar(cand, v) {
   }
   if (!Array.isArray(etapas) || !etapas.length) {
     etapas = [
-      { nome: 'Inscrição' },
-      { nome: 'Triagem curricular' },
-      { nome: 'Entrevista RH' },
-      { nome: 'Entrevista gestor' },
-      { nome: 'Proposta' },
-      { nome: 'Coleta de documentos' },
-      { nome: 'Contratação' }
+      { nome: 'Inscrição',              descricao: 'Você se candidatou, agora nosso time vai analisar seu perfil.' },
+      { nome: 'Triagem curricular',     descricao: 'Nosso time vai analisar sua compatibilidade com a vaga.' },
+      { nome: 'Entrevista RH',          descricao: 'Vamos entrar em contato para agendar um bate papo com nosso time.' },
+      { nome: 'Entrevista gestor',      descricao: 'Segunda parte do processo, bate papo com o gestor/empresa.' },
+      { nome: 'Coleta de documentos',   descricao: 'Nessa etapa será solicitado o anexo dos documentos necessários para contratação.' },
+      { nome: 'Contratação',            descricao: 'Fim do processo.' }
     ];
   }
 
@@ -334,6 +337,7 @@ function renderizar(cand, v) {
       <div class="proc-grid">
         ${etapas.map((e, i) => {
           const nome = (typeof e === 'string') ? e : (e.nome || e.titulo || `Etapa ${i+1}`);
+          const descricao = (typeof e === 'object' && e.descricao) ? e.descricao : '';
           let etapaClass = '';
           let statusTxt = 'Aguardando';
           if (reprovadoGeral) {
@@ -353,6 +357,7 @@ function renderizar(cand, v) {
               <div class="proc-etapa-info">
                 <div class="proc-etapa-nome">${nome}</div>
                 <span class="proc-etapa-status">${statusTxt}</span>
+                ${descricao ? `<div class="proc-etapa-desc">${descricao}</div>` : ''}
               </div>
             </div>`;
         }).join('')}
