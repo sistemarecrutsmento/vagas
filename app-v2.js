@@ -305,6 +305,8 @@ function wizardIrPara(n) {
   // já rolar pro topo do modal
   const modal = document.getElementById('modal-cad');
   if (modal) modal.scrollTop = 0;
+  // Aplica regra do "primeiro emprego" na etapa 5
+  if (n === 5) aplicarPrimeiroEmprego();
 }
 
 function wizardProximo() {
@@ -531,6 +533,22 @@ async function wizardFinalizar() {
 // Compat: função usada pelo HTML antigo em alguns lugares
 function irParaEtapa(n) {
   if (n >= 1 && n <= 5) wizardIrPara(n);
+}
+
+// ===== PRIMEIRO EMPREGO (esconde área de experiência) =====
+function aplicarPrimeiroEmprego() {
+  const ck = document.getElementById('w5-primeiro-emprego');
+  if (!ck) return;
+  const lista = document.getElementById('w5-lista');
+  const expForm = document.querySelector('#wizard-etapa-5 .exp-form');
+  if (ck.checked) {
+    if (lista) lista.style.display = 'none';
+    if (expForm) expForm.style.display = 'none';
+    wizardExps = [];
+  } else {
+    if (lista) lista.style.display = '';
+    if (expForm) expForm.style.display = '';
+  }
 }
 
 // ===== LOGIN (email + senha, etapa única) =====
@@ -1235,6 +1253,7 @@ window.wizardVoltar = wizardVoltar;
 window.wizardAddExperiencia = wizardAddExperiencia;
 window.wizardRemoverExp = wizardRemoverExp;
 window.wizardFinalizar = wizardFinalizar;
+window.aplicarPrimeiroEmprego = aplicarPrimeiroEmprego;
 
 // Expõe estado pro drawer/UI
 Object.defineProperty(window, 'tokenCandidato', { get: () => tokenCandidato });
