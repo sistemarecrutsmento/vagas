@@ -59,11 +59,12 @@
       .btn.btn-sec { padding: 8px 14px; background: var(--cinza-escuro); color: var(--branco); border: 0; border-radius: 6px; cursor: pointer; font-size: 13px; }
       .page-header { flex-direction: column; align-items: flex-start; }
       .page-header h2 { font-size: 20px; }
+      .tabela-wrap { width: 100%; }
       /* Mobile: transforma tabela de candidatos em cards */
       #vaga-cands-internal-table thead { display: none; }
-      #vaga-cands-internal-table, #vaga-cands-internal-table tbody, #vaga-cands-internal-table tr, #vaga-cands-internal-table td { display: block; width: 100%; }
-      #vaga-cands-internal-table tr { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; }
-      #vaga-cands-internal-table td { padding: 4px 0; border: 0; text-align: left; }
+      #vaga-cands-internal-table, #vaga-cands-internal-table tbody, #vaga-cands-internal-table tr, #vaga-cands-internal-table td { display: block; width: 100% !important; max-width: 100% !important; table-layout: auto !important; }
+      #vaga-cands-internal-table tr { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+      #vaga-cands-internal-table td { padding: 4px 0; border: 0; text-align: left; box-sizing: border-box; word-break: normal; }
       #vaga-cands-internal-table td:nth-child(1) { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
       #vaga-cands-internal-table td:nth-child(1)::before { content: ''; }
       #vaga-cands-internal-table td:nth-child(2)::before { content: '📧 '; color: var(--cinza-medio); }
