@@ -767,8 +767,7 @@
   /* ☰ na lateral direita, alinhado com o logo "Vagas.io" */
   .btn-menu-logo { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 60; }
   .btn-menu-logo:hover { background: rgba(255,255,255,0.25); }
-  /* Empurra o header-actions pra esquerda do ☰ */
-  .header-inner { padding-right: 60px; }
+  /* (sem padding-right aqui — ☰ só aparece quando logado+cadastro completo) */
   .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: all 0.25s; z-index: 99; }
   .drawer-overlay.aberto { opacity: 1; visibility: visible; }
   /* Drawer abre pela DIREITA */
