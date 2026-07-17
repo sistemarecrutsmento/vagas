@@ -300,6 +300,18 @@ function renderizar(cand, v) {
     ];
   }
 
+  // Descrições padrão das etapas. As etapas podem vir do banco apenas com o nome;
+  // nesse caso, completamos automaticamente a descrição correspondente.
+  const DESCRICOES_ETAPAS = {
+    'inscrição': 'Você se candidatou, agora nosso time vai analisar seu perfil.',
+    'triagem curricular': 'Nosso time vai analisar sua compatibilidade com a vaga.',
+    'entrevista rh': 'Vamos entrar em contato para agendar um bate papo com nosso time.',
+    'entrevista gestor': 'Segunda parte do processo, bate papo com o gestor/empresa.',
+    'coleta de documentos': 'Nessa etapa será solicitado o anexo dos documentos necessários para contratação.',
+    'contratação': 'Fim do processo.'
+  };
+  const normalizarEtapa = nome => String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
   // Etapa atual (0 = nenhuma concluída; etapas.length = tudo concluído)
   const etapaAtual = Number(cand.etapa_atual || 0);
   const statusCand = cand.status || 'em_analise';
@@ -337,7 +349,8 @@ function renderizar(cand, v) {
       <div class="proc-grid">
         ${etapas.map((e, i) => {
           const nome = (typeof e === 'string') ? e : (e.nome || e.titulo || `Etapa ${i+1}`);
-          const descricao = (typeof e === 'object' && e.descricao) ? e.descricao : '';
+          const descricaoBanco = (typeof e === 'object' && e.descricao) ? e.descricao : '';
+          const descricao = descricaoBanco || DESCRICOES_ETAPAS[normalizarEtapa(nome)] || '';
           let etapaClass = '';
           let statusTxt = 'Aguardando';
           if (reprovadoGeral) {
