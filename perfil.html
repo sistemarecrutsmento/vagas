@@ -23,109 +23,96 @@
   a { color: inherit; text-decoration: none; }
   button { font-family: inherit; }
 
-  /* Top bar vinho */
+  /* === Header padrão (igual painel.html) === */
   header { background: var(--vinho); color: var(--branco); border-bottom: none; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
-  .header-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .header-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; padding-right: 80px; }
   .logo { font-weight: 800; font-size: 22px; color: var(--branco); text-decoration: none; }
   .logo span { color: var(--branco); opacity: 0.8; font-weight: 300; }
-  .header-actions { display: flex; align-items: center; gap: 10px; }
-  .btn-menu-logo { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: var(--branco); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-  .btn-menu-logo:hover { background: rgba(255,255,255,0.12); }
-  .btn-outline { background: transparent; color: var(--branco); border: 1px solid rgba(255,255,255,0.5); padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .btn-outline:hover { background: rgba(255,255,255,0.12); }
-  .header-user { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-  .header-user-foto { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2); color: var(--branco); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; background-size: cover; background-position: center; overflow: hidden; }
-  .header-user-info { display: flex; flex-direction: column; }
-  .header-user-nome { font-size: 14px; font-weight: 700; color: var(--branco); }
-  .header-user-email { font-size: 11px; color: rgba(255,255,255,0.8); }
+  .header-actions { display: flex; align-items: center; gap: 12px; }
+  .btn-outline { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.3); color: var(--branco); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .btn-outline:hover { background: rgba(255,255,255,0.22); border-color: white; }
+  .btn-menu-logo { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: var(--branco); width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 60; transition: all 0.15s; }
+  .btn-menu-logo:hover { background: rgba(255,255,255,0.25); border-color: white; color: white; }
 
-  /* Subheader vinho (padrão Havan) */
-  .subheader { background: var(--vinho); color: var(--branco); padding: 12px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  /* === Subheader vinho === */
+  .subheader { background: var(--vinho); color: var(--branco); padding: 0 0 28px; margin-top: -1px; }
   .subheader-inner { max-width: 1100px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
-  .subheader h1 { font-size: 18px; font-weight: 700; color: var(--branco); }
-  .subheader-voltar { color: var(--branco); cursor: pointer; font-size: 14px; font-weight: 600; opacity: 0.9; }
-  .subheader-voltar:hover { opacity: 1; text-decoration: underline; }
+  .subheader h1 { font-size: 22px; font-weight: 700; }
+  .subheader-voltar { color: var(--branco); opacity: 0.9; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .subheader-voltar:hover { opacity: 1; }
 
-  /* Drawer */
-  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
-  .drawer-overlay.aberto { opacity: 1; pointer-events: auto; }
-  .drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: white; transform: translateX(-100%); transition: transform 0.25s ease; z-index: 101; display: flex; flex-direction: column; box-shadow: 2px 0 12px rgba(0,0,0,0.2); }
-  .drawer.aberto { transform: translateX(0); }
-  .drawer-header { padding: 20px; border-bottom: 1px solid var(--borda); display: flex; align-items: center; gap: 12px; position: relative; }
-  .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; flex-shrink: 0; background-size: cover; background-position: center; overflow: hidden; }
-  .drawer-info h3 { font-size: 15px; color: var(--preto); margin-bottom: 2px; }
-  .drawer-info p { font-size: 12px; color: var(--cinza); }
-  .drawer-close { position: absolute; top: 12px; right: 12px; background: transparent; border: none; font-size: 22px; color: var(--cinza); cursor: pointer; }
-  .drawer-body { flex: 1; padding: 12px 0; overflow-y: auto; }
-  .drawer-section { font-size: 11px; text-transform: uppercase; color: var(--cinza-medio); font-weight: 700; padding: 12px 20px 4px; letter-spacing: 0.5px; }
-  .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--preto); font-size: 14px; cursor: pointer; }
-  .drawer-link:hover { background: #f5f5f7; }
-  .drawer-link.ativo { background: #fdf2f3; color: var(--vinho); font-weight: 600; }
-  .drawer-link .icon { font-size: 18px; }
-  .drawer-footer { padding: 12px 20px; border-top: 1px solid var(--borda); }
-  .drawer-logout { width: 100%; background: transparent; color: var(--vermelho); border: 1px solid var(--vermelho); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .drawer-logout:hover { background: var(--vermelho); color: white; }
+  /* === Container === */
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
 
-  /* Página */
-  .container { max-width: 1100px; margin: 24px auto; padding: 0 20px; }
-  .perfil-grid { display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+  /* === Drawer === */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+  .drawer-overlay.aberto { display: block; }
+  aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+  aside.drawer.aberto { transform: translateX(0); }
+  .drawer-head { background: var(--vinho); color: white; padding: 20px; display: flex; align-items: center; gap: 12px; }
+  .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; background-size: cover; background-position: center; overflow: hidden; }
+  .drawer-foto-info h3 { font-size: 16px; font-weight: 700; }
+  .drawer-foto-info p { font-size: 12px; opacity: 0.9; word-break: break-all; }
+  .drawer-close { margin-left: auto; background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; line-height: 1; }
+  .drawer-links { flex: 1; padding: 16px 0; overflow-y: auto; }
+  .drawer-link { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: var(--preto); font-size: 15px; font-weight: 500; }
+  .drawer-link:hover { background: var(--bg); }
+  .drawer-link.ativo { background: rgba(114,47,55,0.1); color: var(--vinho); font-weight: 700; }
+  .drawer-link .icon { width: 24px; text-align: center; font-size: 18px; }
+  .drawer-footer { padding: 16px 20px; border-top: 1px solid var(--borda); }
+  .drawer-logout { width: 100%; background: transparent; color: var(--vinho); border: 1px solid var(--vinho); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .drawer-logout:hover { background: var(--vinho); color: white; }
 
-  /* Lateral da foto */
-  .perfil-lateral { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); position: sticky; top: 100px; align-self: start; }
-  .perfil-lateral h3 { font-size: 14px; color: var(--cinza); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; font-weight: 700; }
-  .perfil-lateral-acoes { display: flex; flex-direction: column; gap: 10px; }
-  .perfil-lateral-acoes .btn { width: 100%; justify-content: center; }
-  .perfil-lateral-info { font-size: 12px; color: var(--cinza-medio); margin-top: 4px; text-align: center; }
-
-  /* Card topo (resumo do perfil) */
-  .perfil-topo { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
-  .perfil-foto-preview { width: 110px; height: 110px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 700; flex-shrink: 0; background-size: cover; background-position: center; overflow: hidden; }
-  .perfil-foto-inicial { display: block; }
-  .perfil-topo-info h2 { font-size: 22px; color: var(--preto); margin-bottom: 4px; }
-  .perfil-topo-info p { font-size: 14px; color: var(--cinza); }
-  .perfil-topo-info .perfil-progresso { margin-top: 12px; }
-  .progresso-titulo { display: flex; justify-content: space-between; font-size: 13px; color: var(--cinza); margin-bottom: 6px; }
-  .progresso-titulo strong { color: var(--preto); }
+  /* === Card do perfil (cabeçalho com foto) === */
+  .perfil-header-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px; margin-bottom: 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .perfil-foto-wrapper { position: relative; flex-shrink: 0; }
+  .perfil-foto-grande { width: 120px; height: 120px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 700; background-size: cover; background-position: center; overflow: hidden; }
+  .perfil-foto-icon { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; border: 3px solid white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.15s; }
+  .perfil-foto-icon:hover { transform: scale(1.08); }
+  .perfil-foto-remove { position: absolute; top: 0; right: 0; width: 28px; height: 28px; border-radius: 50%; background: white; color: var(--vermelho); border: 2px solid var(--borda); display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+  .perfil-foto-remove:hover { background: var(--vermelho); color: white; border-color: var(--vermelho); }
+  .perfil-foto-remove.visivel { display: flex; }
+  .perfil-foto-info-col { flex: 1; min-width: 240px; }
+  .perfil-foto-info-col h2 { font-size: 22px; color: var(--preto); margin-bottom: 4px; }
+  .perfil-foto-info-col p { color: var(--cinza); font-size: 14px; word-break: break-all; }
+  .perfil-foto-info-col .perfil-progresso { margin-top: 12px; }
+  .progresso-titulo { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--cinza); margin-bottom: 6px; }
+  .progresso-titulo strong { color: var(--preto); font-weight: 700; }
   .barra { width: 100%; height: 8px; background: #ebebed; border-radius: 4px; overflow: hidden; }
   .barra-fill { height: 100%; background: var(--verde); border-radius: 4px; transition: width 0.4s ease; }
+  .input-file-hidden { display: none; }
 
-  /* Card do form */
-  .perfil-form-card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-  .perfil-titulo { font-size: 18px; color: var(--preto); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--borda); }
-
-  .perfil-abas { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--borda); flex-wrap: wrap; }
-  .perfil-aba { background: transparent; border: none; padding: 12px 16px; font-size: 14px; color: var(--cinza); cursor: pointer; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  /* === Abas === */
+  .perfil-form-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px; margin-bottom: 24px; }
+  .perfil-titulo { font-size: 20px; color: var(--vinho); margin-bottom: 20px; font-weight: 700; }
+  .perfil-abas { display: flex; gap: 6px; border-bottom: 1px solid var(--borda); margin-bottom: 24px; flex-wrap: wrap; }
+  .perfil-aba { background: transparent; border: none; padding: 10px 16px; cursor: pointer; font-size: 14px; color: var(--cinza); font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.15s; }
   .perfil-aba:hover { color: var(--preto); }
   .perfil-aba.ativo { color: var(--vinho); border-bottom-color: var(--vinho); }
-
   .perfil-bloco { display: none; }
   .perfil-bloco.ativo { display: block; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  .form-group { display: flex; flex-direction: column; }
-  .form-group label { font-size: 13px; color: var(--preto); margin-bottom: 6px; font-weight: 500; }
-  .form-group input, .form-group select { padding: 10px 12px; border: 1px solid var(--borda); border-radius: 6px; font-size: 14px; font-family: inherit; background: white; }
-  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--vinho); }
-  .form-group input:disabled { background: #f5f5f7; color: var(--cinza); }
 
-  .btn { padding: 10px 18px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  /* === Form === */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--preto); margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 8px; font-size: 14px; font-family: inherit; background: white; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--vinho); box-shadow: 0 0 0 3px rgba(114,47,55,0.1); }
+  .form-group textarea { min-height: 100px; resize: vertical; }
+  .perfil-acoes { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .btn { padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px; }
   .btn-primary { background: var(--vinho); color: white; }
   .btn-primary:hover { background: var(--vinho-escuro); }
-  .btn-secondary { background: white; color: var(--preto); border: 1px solid var(--borda); }
-  .btn-secondary:hover { background: #f5f5f7; }
-  .btn-vinho-outline { background: transparent; color: var(--vinho); border: 1px solid var(--vinho); }
-  .btn-vinho-outline:hover { background: var(--vinho); color: white; }
-  .btn-vinho-outline:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary { background: var(--bg); color: var(--preto); border: 1px solid var(--borda); }
+  .btn-secondary:hover { background: var(--borda); }
+  .checkbox-group { display: flex; align-items: center; gap: 8px; }
+  .checkbox-group input { width: auto; }
 
-  .perfil-acoes { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--borda); display: flex; gap: 12px; }
-
-  .empty { text-align: center; padding: 60px 20px; color: var(--cinza); }
-  .loading { text-align: center; padding: 60px 20px; color: var(--cinza); }
-
-  @media (max-width: 800px) {
-    .perfil-grid { grid-template-columns: 1fr; }
-    .perfil-lateral { position: static; }
-    .perfil-topo { flex-direction: column; text-align: center; }
+  .loading, .empty { text-align: center; padding: 60px 20px; color: var(--cinza); }
+  @media (max-width: 700px) {
     .form-row { grid-template-columns: 1fr; }
+    .perfil-header-card { flex-direction: column; text-align: center; }
   }
 </style>
 </head>
@@ -141,24 +128,24 @@
 <section class="subheader">
   <div class="subheader-inner">
     <h1>Meu perfil</h1>
-    <span class="subheader-voltar" onclick="location.href='painel.html'">← Voltar para o painel</span>
+    <a href="painel.html" class="subheader-voltar">← Voltar</a>
   </div>
 </section>
 
+<!-- Drawer lateral -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
 <aside class="drawer" id="drawer">
-  <div class="drawer-header">
+  <div class="drawer-head">
     <div class="drawer-foto" id="drawer-foto">👤</div>
-    <div class="drawer-info">
+    <div class="drawer-foto-info">
       <h3 id="drawer-nome">Candidato</h3>
       <p id="drawer-email">—</p>
     </div>
-    <button class="drawer-close" onclick="fecharDrawer()" title="Fechar">×</button>
+    <button class="drawer-close" onclick="fecharDrawer()">×</button>
   </div>
-  <div class="drawer-body">
-    <div class="drawer-section">Navegação</div>
+  <div class="drawer-links">
     <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
-    <a href="painel.html" class="drawer-link ativo"><span class="icon">👤</span> Meu perfil</a>
+    <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
     <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
   </div>
   <div class="drawer-footer">
@@ -176,31 +163,12 @@
 <script>
 // ===== ROTEAMENTO =====
 function redirecionarSeNaoLogado() {
-  if (!tokenCandidato) {
-    location.href = 'index.html';
-  }
+  if (!tokenCandidato) location.href = 'index.html';
 }
 
 // ===== CARREGAR PÁGINA =====
 async function carregarPaginaPerfil() {
-  if (!tokenCandidato) {
-    location.href = 'index.html';
-    return;
-  }
-  // Garante botão de menu no header (se app.js não tiver inserido)
-  if (!document.getElementById('btn-menu-logo')) {
-    const h = document.querySelector('header');
-    if (h) {
-      const b = document.createElement('button');
-      b.id = 'btn-menu-logo';
-      b.className = 'btn-menu-logo';
-      b.innerHTML = '☰';
-      b.title = 'Menu';
-      b.setAttribute('aria-label', 'Abrir menu');
-      b.onclick = abrirDrawer;
-      h.appendChild(b);
-    }
-  }
+  if (!tokenCandidato) { location.href = 'index.html'; return; }
 
   let perfil = null;
   try {
@@ -217,204 +185,207 @@ async function carregarPaginaPerfil() {
     return;
   }
 
-  // Salva no localStorage para o header/drawer
   const nome = perfil.nome || emailLogado || 'Candidato';
   localStorage.setItem('candidato_nome', nome);
   if (perfil.foto_url) localStorage.setItem('candidato_foto', perfil.foto_url);
   if (typeof atualizarHeaderUsuario === 'function') atualizarHeaderUsuario();
 
-  // Foto inicial
   const inicial = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
-  const foto = perfil.foto_url || '';
-  const fotoStyle = foto ? `style="background-image:url(&quot;${foto.replace(/"/g,'\\"')}&quot;)"` : '';
+  const temFoto = !!perfil.foto_url;
+  const fotoBg = temFoto ? `style="background-image:url(&quot;${perfil.foto_url.replace(/"/g,'\\"')}&quot;)"` : '';
+  const displayFoto = temFoto ? '' : inicial;
 
   // Progresso
   const checks = [
     !!perfil.nome, !!perfil.cpf, !!perfil.data_nascimento, !!perfil.celular, !!perfil.sexo,
     !!perfil.cep, !!perfil.cidade, !!perfil.logradouro, !!perfil.numero,
-    !!perfil.formacao, !!perfil.instituicao, !!perfil.curso,
-    !!perfil.foto_url
+    !!perfil.formacao, !!perfil.curso, !!perfil.situacao,
+    !!perfil.experiencia, !!perfil.sobre_voce,
+    !!perfil.acessibilidade
   ];
-  const total = checks.length;
-  const done = checks.filter(Boolean).length;
-  const pct = Math.round((done / total) * 100);
+  const completos = checks.filter(Boolean).length;
+  const pct = Math.round((completos / checks.length) * 100);
 
-  // HTML principal
   document.getElementById('conteudo').innerHTML = `
-    <div class="perfil-grid">
-      <!-- LATERAL: ações de foto -->
-      <aside class="perfil-lateral">
-        <h3>📷 Foto de perfil</h3>
-        <div class="perfil-lateral-acoes">
-          <label class="btn btn-secondary" for="perfil-foto-input">📷 Trocar foto</label>
-          <input type="file" id="perfil-foto-input" accept="image/jpeg,image/png,image/webp" onchange="perfilFotoEscolher(this)" style="display:none">
-          <button type="button" class="btn btn-vinho-outline" id="perfil-foto-remover" onclick="perfilFotoRemover()">🗑️ Remover foto</button>
-        </div>
-        <p class="perfil-lateral-info">JPG, PNG ou WebP — até 5 MB</p>
-      </aside>
-
-      <!-- CONTEÚDO PRINCIPAL -->
-      <div>
-        <!-- Card topo: foto + nome + progresso -->
-        <div class="perfil-topo">
-          <div class="perfil-foto-preview" id="perfil-foto-preview" ${fotoStyle}>
-            <span class="perfil-foto-inicial" id="perfil-foto-inicial" style="${foto ? 'display:none' : ''}">${inicial || '?'}</span>
-          </div>
-          <div class="perfil-topo-info">
-            <h2>${nome}</h2>
-            <p>${(perfil.cidade ? perfil.cidade : '') + (perfil.estado ? ' / ' + perfil.estado : '') || 'Complete seu perfil'}</p>
-            <div class="perfil-progresso" style="max-width:320px">
-              <div class="progresso-titulo"><span>Perfil completo</span><strong>${pct}%</strong></div>
-              <div class="barra"><div class="barra-fill" style="width:${pct}%"></div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card do form -->
-        <div class="perfil-form-card">
-          <h3 class="perfil-titulo">Editar informações</h3>
-          <div class="perfil-abas">
-            <button class="perfil-aba ativo" data-sub="dados">Dados pessoais</button>
-            <button class="perfil-aba" data-sub="endereco">Endereço</button>
-            <button class="perfil-aba" data-sub="escolaridade">Escolaridade</button>
-            <button class="perfil-aba" data-sub="acessibilidade">Acessibilidade</button>
-          </div>
-
-          <form class="perfil-form" id="perfil-form" onsubmit="event.preventDefault();salvarPerfilCompleto(this)">
-            <div class="perfil-bloco ativo" data-bloco="dados">
-              <div class="form-row">
-                <div class="form-group"><label>Nome completo *</label><input type="text" id="pe-nome" required value="${(perfil.nome||'').replace(/"/g,'&quot;')}"></div>
-                <div class="form-group"><label>CPF *</label><input type="text" id="pe-cpf" placeholder="000.000.000-00" maxlength="14" value="${(perfil.cpf||'').replace(/"/g,'&quot;')}"></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>Data de nascimento</label><input type="date" id="pe-nascimento" value="${perfil.data_nascimento||''}"></div>
-                <div class="form-group"><label>Sexo</label>
-                  <select id="pe-sexo">
-                    <option value="">Prefiro não informar</option>
-                    <option value="M" ${perfil.sexo==='M'?'selected':''}>Masculino</option>
-                    <option value="F" ${perfil.sexo==='F'?'selected':''}>Feminino</option>
-                    <option value="Outro" ${perfil.sexo==='Outro'?'selected':''}>Outro</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>Celular</label><input type="tel" id="pe-celular" placeholder="(00) 00000-0000" value="${(perfil.celular||'').replace(/"/g,'&quot;')}"></div>
-                <div class="form-group"><label>E-mail</label><input type="email" id="pe-email" disabled value="${(perfil.email||'').replace(/"/g,'&quot;')}"></div>
-              </div>
-            </div>
-
-            <div class="perfil-bloco" data-bloco="endereco">
-              <div class="form-row">
-                <div class="form-group"><label>CEP</label><input type="text" id="pe-cep" placeholder="00000-000" maxlength="9" value="${(perfil.cep||'').replace(/"/g,'&quot;')}"></div>
-                <div class="form-group"><label>Cidade</label><input type="text" id="pe-cidade" value="${(perfil.cidade||'').replace(/"/g,'&quot;')}"></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>UF</label><input type="text" id="pe-estado" maxlength="2" placeholder="BA" value="${(perfil.estado||'').replace(/"/g,'&quot;')}"></div>
-                <div class="form-group"><label>Bairro</label><input type="text" id="pe-bairro" value="${(perfil.bairro||'').replace(/"/g,'&quot;')}"></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group" style="grid-column:1/-1"><label>Logradouro</label><input type="text" id="pe-logradouro" placeholder="Rua, avenida..." value="${(perfil.logradouro||'').replace(/"/g,'&quot;')}"></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>Número</label><input type="text" id="pe-numero" value="${(perfil.numero||'').replace(/"/g,'&quot;')}"></div>
-                <div class="form-group"><label>Complemento</label><input type="text" id="pe-complemento" value="${(perfil.complemento||'').replace(/"/g,'&quot;')}"></div>
-              </div>
-            </div>
-
-            <div class="perfil-bloco" data-bloco="escolaridade">
-              <div class="form-row">
-                <div class="form-group"><label>Formação</label>
-                  <select id="pe-formacao">
-                    <option value="">Selecione...</option>
-                    <option value="Ensino fundamental" ${perfil.formacao==='Ensino fundamental'?'selected':''}>Ensino fundamental</option>
-                    <option value="Ensino médio" ${perfil.formacao==='Ensino médio'?'selected':''}>Ensino médio</option>
-                    <option value="Ensino técnico" ${perfil.formacao==='Ensino técnico'?'selected':''}>Ensino técnico</option>
-                    <option value="Graduação" ${perfil.formacao==='Graduação'?'selected':''}>Graduação</option>
-                    <option value="Pós-graduação" ${perfil.formacao==='Pós-graduação'?'selected':''}>Pós-graduação</option>
-                    <option value="Mestrado" ${perfil.formacao==='Mestrado'?'selected':''}>Mestrado</option>
-                  </select>
-                </div>
-                <div class="form-group"><label>Instituição</label><input type="text" id="pe-instituicao" value="${(perfil.instituicao||'').replace(/"/g,'&quot;')}"></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>Curso</label><input type="text" id="pe-curso" value="${(perfil.curso||'').replace(/"/g,'&quot;')}"></div>
-                <div class="form-group"><label>Situação</label>
-                  <select id="pe-situacao">
-                    <option value="">Selecione...</option>
-                    <option value="concluido" ${perfil.situacao==='concluido'?'selected':''}>Concluído</option>
-                    <option value="cursando" ${perfil.situacao==='cursando'?'selected':''}>Cursando</option>
-                    <option value="trancado" ${perfil.situacao==='trancado'?'selected':''}>Trancado</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group"><label>Primeiro emprego?</label>
-                <select id="pe-primeiro-emprego">
-                  <option value="false" ${!perfil.primeiro_emprego?'selected':''}>Não</option>
-                  <option value="true" ${perfil.primeiro_emprego?'selected':''}>Sim</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="perfil-bloco" data-bloco="acessibilidade">
-              <div class="form-group"><label>Possui alguma necessidade de acessibilidade?</label>
-                <select id="pe-acessibilidade">
-                  <option value="">Nenhuma</option>
-                  <option value="cadeirante" ${perfil.acessibilidade==='cadeirante'?'selected':''}>Cadeirante</option>
-                  <option value="deficiencia_visual" ${perfil.acessibilidade==='deficiencia_visual'?'selected':''}>Deficiência visual</option>
-                  <option value="deficiencia_auditiva" ${perfil.acessibilidade==='deficiencia_auditiva'?'selected':''}>Deficiência auditiva</option>
-                  <option value="mobilidade_reduzida" ${perfil.acessibilidade==='mobilidade_reduzida'?'selected':''}>Mobilidade reduzida</option>
-                  <option value="outra" ${perfil.acessibilidade==='outra'?'selected':''}>Outra</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                  <input type="checkbox" id="pe-comunicacoes" style="width:auto;" ${perfil.aceita_comunicacoes?'checked':''}>
-                  Quero receber comunicações de novas vagas
-                </label>
-              </div>
-            </div>
-
-            <div class="perfil-acoes">
-              <button type="submit" class="btn btn-primary" id="btn-salvar-perfil">Salvar perfil</button>
-              <a href="painel.html" class="btn btn-secondary">Voltar ao painel</a>
-            </div>
-          </form>
-        </div>
-
-        <!-- Card de senha -->
-        <div class="perfil-form-card" style="margin-top:24px">
-          <h3 class="perfil-titulo">🔑 Trocar senha</h3>
-          <form class="perfil-form" onsubmit="event.preventDefault();trocarSenha(this)">
-            <div class="form-group"><label>Senha atual *</label><input type="password" id="senha-atual" required minlength="6"></div>
-            <div class="form-group"><label>Nova senha * (mínimo 6 caracteres)</label><input type="password" id="senha-nova" required minlength="6"></div>
-            <div class="form-group"><label>Confirme a nova senha *</label><input type="password" id="senha-nova-conf" required minlength="6"></div>
-            <div class="perfil-acoes">
-              <button type="submit" class="btn btn-primary" id="btn-trocar-senha">Atualizar senha</button>
-            </div>
-          </form>
+    <!-- Cabeçalho: foto + nome + progresso -->
+    <div class="perfil-header-card">
+      <div class="perfil-foto-wrapper">
+        <div class="perfil-foto-grande" id="perfil-foto-preview" ${fotoBg}>${displayFoto}</div>
+        <input type="file" id="perfil-foto-input" class="input-file-hidden" accept="image/jpeg,image/png,image/webp" onchange="perfilFotoEscolher(this)">
+        <label for="perfil-foto-input" class="perfil-foto-icon" title="Trocar foto">📷</label>
+        <button type="button" class="perfil-foto-remove ${temFoto ? 'visivel' : ''}" id="perfil-foto-remover" onclick="perfilFotoRemover()" title="Remover foto">✕</button>
+      </div>
+      <div class="perfil-foto-info-col">
+        <h2>${escapeHtml(nome)}</h2>
+        <p>${escapeHtml(perfil.email || emailLogado || '')}</p>
+        <div class="perfil-progresso">
+          <div class="progresso-titulo"><span>Perfil completo</span><strong>${pct}%</strong></div>
+          <div class="barra"><div class="barra-fill" style="width:${pct}%"></div></div>
         </div>
       </div>
     </div>
+
+    <!-- Card de edição -->
+    <div class="perfil-form-card">
+      <h3 class="perfil-titulo">✏️ Editar perfil</h3>
+      <div class="perfil-abas">
+        <button class="perfil-aba ativo" data-sub="dados">Dados pessoais</button>
+        <button class="perfil-aba" data-sub="endereco">Endereço</button>
+        <button class="perfil-aba" data-sub="escolaridade">Escolaridade</button>
+        <button class="perfil-aba" data-sub="experiencia">Experiência</button>
+        <button class="perfil-aba" data-sub="acessibilidade">Acessibilidade</button>
+      </div>
+
+      <form class="perfil-form" id="perfil-form" onsubmit="event.preventDefault();salvarPerfilCompleto(this)">
+
+        <!-- DADOS PESSOAIS + SOBRE VOCÊ -->
+        <div class="perfil-bloco ativo" data-bloco="dados">
+          <div class="form-row">
+            <div class="form-group"><label>Nome completo *</label><input type="text" id="pe-nome" required value="${escapeHtml(perfil.nome || '')}"></div>
+            <div class="form-group"><label>CPF *</label><input type="text" id="pe-cpf" placeholder="000.000.000-00" maxlength="14" value="${escapeHtml(perfil.cpf || '')}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Data de nascimento</label><input type="date" id="pe-nascimento" value="${escapeHtml(perfil.data_nascimento || '')}"></div>
+            <div class="form-group"><label>Sexo</label>
+              <select id="pe-sexo">
+                <option value="">Prefiro não informar</option>
+                <option value="M" ${perfil.sexo==='M'?'selected':''}>Masculino</option>
+                <option value="F" ${perfil.sexo==='F'?'selected':''}>Feminino</option>
+                <option value="O" ${perfil.sexo==='O'?'selected':''}>Outro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label>Celular (com DDD) *</label><input type="text" id="pe-celular" placeholder="(11) 99999-9999" value="${escapeHtml(perfil.celular || '')}"></div>
+
+          <div class="form-group" style="margin-top:24px">
+            <label>Sobre você</label>
+            <textarea id="pe-sobre-voce" maxlength="500" placeholder="Conte um pouco sobre você, seus objetivos profissionais, o que te motiva...">${escapeHtml(perfil.sobre_voce || '')}</textarea>
+            <small style="color:var(--cinza);font-size:12px;display:block;margin-top:4px">Máximo 500 caracteres. Será visível para recrutadores.</small>
+          </div>
+        </div>
+
+        <!-- ENDEREÇO -->
+        <div class="perfil-bloco" data-bloco="endereco">
+          <div class="form-row">
+            <div class="form-group"><label>CEP *</label><input type="text" id="pe-cep" placeholder="00000-000" maxlength="9" value="${escapeHtml(perfil.cep || '')}" onblur="buscarCep()"></div>
+            <div class="form-group"><label>Estado (UF) *</label><input type="text" id="pe-estado" placeholder="SP" maxlength="2" value="${escapeHtml(perfil.estado || '')}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Cidade *</label><input type="text" id="pe-cidade" value="${escapeHtml(perfil.cidade || '')}"></div>
+            <div class="form-group"><label>Bairro</label><input type="text" id="pe-bairro" value="${escapeHtml(perfil.bairro || '')}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Logradouro (rua, avenida...) *</label><input type="text" id="pe-logradouro" value="${escapeHtml(perfil.logradouro || '')}"></div>
+            <div class="form-group"><label>Número *</label><input type="text" id="pe-numero" value="${escapeHtml(perfil.numero || '')}"></div>
+          </div>
+          <div class="form-group"><label>Complemento</label><input type="text" id="pe-complemento" placeholder="Apto, bloco, etc." value="${escapeHtml(perfil.complemento || '')}"></div>
+        </div>
+
+        <!-- ESCOLARIDADE -->
+        <div class="perfil-bloco" data-bloco="escolaridade">
+          <div class="form-row">
+            <div class="form-group"><label>Formação *</label>
+              <select id="pe-formacao">
+                <option value="">Selecione...</option>
+                <option value="fundamental" ${perfil.formacao==='fundamental'?'selected':''}>Fundamental</option>
+                <option value="medio" ${perfil.formacao==='medio'?'selected':''}>Médio</option>
+                <option value="tecnico" ${perfil.formacao==='tecnico'?'selected':''}>Técnico</option>
+                <option value="superior" ${perfil.formacao==='superior'?'selected':''}>Superior</option>
+                <option value="pos" ${perfil.formacao==='pos'?'selected':''}>Pós-graduação</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Situação *</label>
+              <select id="pe-situacao">
+                <option value="">Selecione...</option>
+                <option value="concluido" ${perfil.situacao==='concluido'?'selected':''}>Concluído</option>
+                <option value="cursando" ${perfil.situacao==='cursando'?'selected':''}>Cursando</option>
+                <option value="interrompido" ${perfil.situacao==='interrompido'?'selected':''}>Interrompido</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Instituição</label><input type="text" id="pe-instituicao" value="${escapeHtml(perfil.instituicao || '')}"></div>
+            <div class="form-group"><label>Curso</label><input type="text" id="pe-curso" value="${escapeHtml(perfil.curso || '')}"></div>
+          </div>
+          <div class="form-group">
+            <label>É seu primeiro emprego?</label>
+            <select id="pe-primeiro-emprego">
+              <option value="false" ${!perfil.primeiro_emprego?'selected':''}>Não</option>
+              <option value="true" ${perfil.primeiro_emprego?'selected':''}>Sim</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- EXPERIÊNCIA -->
+        <div class="perfil-bloco" data-bloco="experiencia">
+          <p style="color:var(--cinza);font-size:14px;margin-bottom:16px">Descreva sua trajetória profissional. Você pode listar empresas anteriores, cargos, período e atividades que realizou.</p>
+          <div class="form-group">
+            <label>Experiência profissional</label>
+            <textarea id="pe-experiencia" rows="10" placeholder="Ex:&#10;• Empresa X — Auxiliar administrativo (jan/2020 a dez/2022)&#10;Atividades: atendimento ao cliente, controle de estoque, emissão de notas fiscais.&#10;&#10;• Empresa Y — Operador de caixa (mar/2018 a dez/2019)">${escapeHtml(perfil.experiencia || '')}</textarea>
+            <small style="color:var(--cinza);font-size:12px;display:block;margin-top:4px">Dica: use • para listar, e linhas separadas para cada empresa.</small>
+          </div>
+        </div>
+
+        <!-- ACESSIBILIDADE -->
+        <div class="perfil-bloco" data-bloco="acessibilidade">
+          <p style="color:var(--cinza);font-size:14px;margin-bottom:16px">Caso tenha alguma necessidade, podemos adaptar o processo seletivo.</p>
+          <div class="form-group">
+            <label>Possui alguma deficiência ou necessidade de acessibilidade?</label>
+            <select id="pe-acessibilidade">
+              <option value="">Nenhuma</option>
+              <option value="visual" ${perfil.acessibilidade==='visual'?'selected':''}>Visual</option>
+              <option value="auditiva" ${perfil.acessibilidade==='auditiva'?'selected':''}>Auditiva</option>
+              <option value="fisica" ${perfil.acessibilidade==='fisica'?'selected':''}>Física/Motora</option>
+              <option value="intelectual" ${perfil.acessibilidade==='intelectual'?'selected':''}>Intelectual</option>
+              <option value="multipla" ${perfil.acessibilidade==='multipla'?'selected':''}>Múltipla</option>
+              <option value="outra" ${perfil.acessibilidade==='outra'?'selected':''}>Outra</option>
+            </select>
+          </div>
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="pe-comunicacoes" ${perfil.recebe_comunicacoes?'checked':''}>
+            <label for="pe-comunicacoes" style="margin:0">Desejo receber comunicações sobre novas vagas e atualizações</label>
+          </div>
+        </div>
+
+        <div class="perfil-acoes">
+          <button type="submit" class="btn btn-primary" id="btn-salvar-perfil">Salvar perfil</button>
+          <a href="painel.html" class="btn btn-secondary">Voltar ao painel</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Card de senha -->
+    <div class="perfil-form-card">
+      <h3 class="perfil-titulo">🔑 Trocar senha</h3>
+      <form class="perfil-form" onsubmit="event.preventDefault();trocarSenha(this)">
+        <div class="form-group"><label>Senha atual *</label><input type="password" id="senha-atual" required minlength="6"></div>
+        <div class="form-group"><label>Nova senha * (mínimo 6 caracteres)</label><input type="password" id="senha-nova" required minlength="6"></div>
+        <div class="form-group"><label>Confirme a nova senha *</label><input type="password" id="senha-nova-conf" required minlength="6"></div>
+        <div class="perfil-acoes">
+          <button type="submit" class="btn btn-primary" id="btn-trocar-senha">Atualizar senha</button>
+        </div>
+      </form>
+    </div>
   `;
 
-  // Esconde o botão "Remover" se não houver foto
-  const btnRemover = document.getElementById('perfil-foto-remover');
-  if (btnRemover && !foto) btnRemover.style.display = 'none';
-
-  // Liga as abas
-  document.querySelectorAll('.perfil-aba').forEach(aba => {
-    aba.onclick = () => {
-      document.querySelectorAll('.perfil-aba').forEach(a => a.classList.remove('ativo'));
+  // Abas internas
+  document.querySelectorAll('.perfil-aba').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.perfil-aba').forEach(b => b.classList.remove('ativo'));
       document.querySelectorAll('.perfil-bloco').forEach(b => b.classList.remove('ativo'));
-      aba.classList.add('ativo');
-      const sub = aba.getAttribute('data-sub');
-      const bloco = document.querySelector('.perfil-bloco[data-bloco="' + sub + '"]');
-      if (bloco) bloco.classList.add('ativo');
-    };
+      btn.classList.add('ativo');
+      document.querySelector(`.perfil-bloco[data-bloco="${btn.dataset.sub}"]`).classList.add('ativo');
+    });
   });
 }
 
-// ===== DRAWER =====
+// ===== Helpers =====
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ===== Drawer =====
 function abrirDrawer() {
   document.getElementById('drawer').classList.add('aberto');
   document.getElementById('drawer-overlay').classList.add('aberto');
@@ -435,7 +406,6 @@ window.fecharDrawer = fecharDrawer;
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
-  // Espera o app.js rodar checarAuth
   setTimeout(() => {
     if (!tokenCandidato) tokenCandidato = localStorage.getItem('candidato_token');
     if (!emailLogado) emailLogado = localStorage.getItem('candidato_email');
