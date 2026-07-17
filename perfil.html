@@ -172,7 +172,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-0330"></script>
+<script src="app.js?v=20260717-0800"></script>
 <script>
 // ===== ROTEAMENTO =====
 function redirecionarSeNaoLogado() {
@@ -251,7 +251,7 @@ async function carregarPaginaPerfil() {
         <button class="perfil-aba" data-sub="acessibilidade">Acessibilidade</button>
       </div>
 
-      <form class="perfil-form" id="perfil-form" onsubmit="event.preventDefault();salvarPerfilCompleto(this)">
+      <form class="perfil-form" id="perfil-form" onsubmit="event.preventDefault();salvarPerfilCompleto(event.currentTarget)">
 
         <!-- DADOS PESSOAIS + SOBRE VOCÊ -->
         <div class="perfil-bloco ativo" data-bloco="dados">
