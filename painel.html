@@ -551,7 +551,7 @@ async function carregarCandsPagina() {
       const statusClass = status === 'contratado' ? 'status-contratado' : status === 'rejeitado' ? 'status-rejeitado' : '';
       const etapaAtual = Number(c.etapa_atual || 0);
       return `
-        <div class="cand-item" onclick="abrirDetalhesCandidato(${c.vaga_id})">
+        <div class="cand-item" onclick="location.href='inscricao.html?vaga=${c.vaga_id}'">
           <span class="cand-titulo">${c.vagaTitulo}</span>
           <span class="cand-status ${statusClass}">${statusLabel}</span>
           <span class="cand-seta">→</span>
