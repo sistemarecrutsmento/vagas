@@ -614,8 +614,8 @@
             </div>
             <div class="perfil-foto-acoes">
               <label class="btn btn-secondary" for="perfil-foto-input">📷 Escolher foto</label>
-              <input type="file" id="perfil-foto-input" accept="image/jpeg,image/png,image/webp" style="display:none">
-              <button type="button" class="btn btn-vinho-outline" id="perfil-foto-remover" style="display:none">🗑️ Remover</button>
+              <input type="file" id="perfil-foto-input" accept="image/jpeg,image/png,image/webp" onchange="perfilFotoEscolher(this)" style="display:none">
+              <button type="button" class="btn btn-vinho-outline" id="perfil-foto-remover" style="display:none" onclick="perfilFotoRemover()">🗑️ Remover</button>
               <p class="perfil-foto-info">JPG, PNG ou WebP — até 5 MB</p>
             </div>
           </div>
@@ -748,6 +748,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260716-2300"></script>
+<script src="app.js?v=20260716-2350"></script>
 </body>
 </html>
