@@ -531,10 +531,6 @@ document.addEventListener('click', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
   // Espera checarAuth rodar (também no DOMContentLoaded)
   setTimeout(() => {
-    console.log('[painel.html] tokenCandidato =', tokenCandidato ? 'presente' : 'AUSENTE');
-    if (typeof window.localStorage !== 'undefined') {
-      console.log('[painel.html] localStorage token =', localStorage.getItem('candidato_token') ? 'presente' : 'AUSENTE');
-    }
     if (!tokenCandidato && localStorage.getItem('candidato_token')) {
       // checarAuth ainda não rodou — popula direto
       tokenCandidato = localStorage.getItem('candidato_token');
