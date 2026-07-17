@@ -352,7 +352,7 @@ async function abrirVagaCands(vagaId) {
         <td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : c.status}</span></td>
         <td>${formatarData(c.criada_em)}</td>
         <td>
-          <a class="btn-ver" href="analisar.html?id=${c.id}">👁 Ver</a>
+          <a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a>
         </td>
       </tr>`;
     }).join('');
