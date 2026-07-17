@@ -161,17 +161,17 @@
         expsHtml = '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma experiência informada.</p>';
       }
 
-      // Formação: formacao pode ser objeto OU null. Se null, usar campos soltos.
+      // Formação: formacao pode ser string simples ('Superior completo', 'Graduação'...) OU null. Se null, usar campos soltos.
       let formacaoHtml = '<p style="color:var(--cinza-medio);font-size:14px">Não informada.</p>';
       const f = c.formacao && typeof c.formacao === 'object' ? c.formacao : null;
-      const esc = (f && f.escolaridade) || c.escolaridade;
+      const esc = (f && f.escolaridade) || (typeof c.formacao === 'string' ? c.formacao : null) || c.escolaridade;
       const curso = (f && f.curso) || c.curso;
       const inst = (f && f.instituicao) || c.instituicao;
       const sit = (f && f.situacao) || c.situacao;
       const concl = fmtData((f && f.data_conclusao) || c.data_conclusao);
       if (esc || curso || inst) {
         formacaoHtml =
-          '<div class="field-value">' + (esc || '—') + '</div>' +
+          '<div class="field-value" style="font-weight:600">' + (esc || '—') + '</div>' +
           (curso ? '<div class="field-value" style="margin-top:6px">' + curso + '</div>' : '') +
           (inst ? '<div class="field-value" style="font-weight:400;color:var(--cinza-medio);margin-top:2px">' + inst + '</div>' : '') +
           ((sit || concl) ? '<div class="field-value" style="font-weight:400;font-size:13px;color:var(--cinza-medio);margin-top:4px">' + (sit || '') + (concl ? ' • Conclusão: ' + concl : '') + '</div>' : '');
