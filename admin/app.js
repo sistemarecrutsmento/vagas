@@ -42,6 +42,10 @@ function sair() {
   location.reload();
 }
 
+function toggleMenu() {
+  document.getElementById('aside')?.classList.toggle('aberto');
+}
+
 function mostrarApp() {
   document.getElementById('login-page').style.display = 'none';
   document.getElementById('app').classList.add('logado');
@@ -54,6 +58,8 @@ function irPara(page) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
   document.getElementById('page-' + page).classList.add('ativo');
   document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('ativo');
+  // Fecha menu mobile ao navegar
+  document.getElementById('aside')?.classList.remove('aberto');
   if (page === 'dashboard') carregarDashboard();
   if (page === 'vagas') carregarVagasAdmin();
   if (page === 'candidatos') carregarCandidatos();
