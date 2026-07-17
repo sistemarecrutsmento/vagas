@@ -176,7 +176,51 @@ if (!vagaId) {
       <a href="painel.html" class="btn-voltar-painel">Voltar ao painel</a>
     </div>`;
 } else {
-  carregarInscricao();
+  // O app.js inicializa a sessão no DOMContentLoaded; aguarda antes da consulta protegida.
+  function init() {
+    tokenCandidato = tokenCandidato || localStorage.getItem('candidato_token');
+    emailLogado = emailLogado || localStorage.getItem('candidato_email');
+    // Garante botão de menu no header
+    if (!document.getElementById('btn-menu-logo')) {
+      const h = document.querySelector('header');
+      if (h) {
+        const b = document.createElement('button');
+        b.id = 'btn-menu-logo';
+        b.className = 'btn-menu-logo';
+        b.innerHTML = '☰';
+        b.title = 'Menu';
+        b.setAttribute('aria-label', 'Abrir menu');
+        b.onclick = abrirDrawer;
+        h.appendChild(b);
+      }
+    }
+    if (typeof atualizarHeaderUsuario === 'function') atualizarHeaderUsuario();
+    if (!tokenCandidato) {
+      document.getElementById('conteudo').innerHTML = `<div class="empty"><p>Faça login para visualizar esta inscrição.</p><a href="index.html" class="btn-voltar-painel">Entrar</a></div>`;
+      return;
+    }
+    carregarInscricao();
+  }
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', () => setTimeout(init, 250));
+  } else {
+    setTimeout(init, 250);
+  }
+}
+
+function abrirDrawer() {
+  document.getElementById('drawer').classList.add('aberto');
+  document.getElementById('drawer-overlay').classList.add('aberto');
+  const nome = localStorage.getItem('candidato_nome') || emailLogado || 'Candidato';
+  const foto = localStorage.getItem('candidato_foto') || '';
+  document.getElementById('drawer-nome').textContent = nome;
+  document.getElementById('drawer-email').textContent = emailLogado || '';
+  const el = document.getElementById('drawer-foto');
+  if (foto) { el.style.backgroundImage = `url("${foto.replace(/"/g, '\\\"')}")`; el.textContent = ''; }
+}
+function fecharDrawer() {
+  document.getElementById('drawer').classList.remove('aberto');
+  document.getElementById('drawer-overlay').classList.remove('aberto');
 }
 
 function statusLabel(s) {
