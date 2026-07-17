@@ -64,6 +64,7 @@ function irPara(page) {
   document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('ativo');
   // Fecha menu mobile ao navegar
   document.getElementById('aside')?.classList.remove('aberto');
+  document.getElementById('app')?.classList.remove('aside-aberto');
   if (page === 'dashboard') carregarDashboard();
   if (page === 'vagas') carregarVagasAdmin();
   if (page === 'candidatos') carregarCandidatos();
