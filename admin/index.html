@@ -57,10 +57,12 @@
       .aside-logo { padding: 12px 24px 24px; }
       main { width: 100%; padding: 20px 16px; padding-top: 64px; }
       .btn.btn-sec { padding: 8px 14px; background: var(--cinza-escuro); color: var(--branco); border: 0; border-radius: 6px; cursor: pointer; font-size: 13px; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .page-header h2 { font-size: 20px; }
       /* Mobile: transforma tabela de candidatos em cards */
       #vaga-cands-internal-table thead { display: none; }
       #vaga-cands-internal-table, #vaga-cands-internal-table tbody, #vaga-cands-internal-table tr, #vaga-cands-internal-table td { display: block; width: 100%; }
-      #vaga-cands-internal-table tr { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+      #vaga-cands-internal-table tr { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; }
       #vaga-cands-internal-table td { padding: 4px 0; border: 0; text-align: left; }
       #vaga-cands-internal-table td:nth-child(1) { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
       #vaga-cands-internal-table td:nth-child(1)::before { content: ''; }
