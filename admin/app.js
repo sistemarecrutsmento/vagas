@@ -43,7 +43,11 @@ function sair() {
 }
 
 function toggleMenu() {
-  document.getElementById('aside')?.classList.toggle('aberto');
+  const aside = document.getElementById('aside');
+  const app = document.getElementById('app');
+  const aberto = aside?.classList.toggle('aberto');
+  if (aberto) app?.classList.add('aside-aberto');
+  else app?.classList.remove('aside-aberto');
 }
 
 function mostrarApp() {
