@@ -446,7 +446,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-0900"></script>
+<script src="app.js?v=20260717-1000"></script>
 <script>
 // ===== ROTEAMENTO =====
 // (checarAuth no app.js vai popular tokenCandidato no DOMContentLoaded;
@@ -514,53 +514,7 @@ async function carregarPaginaCandidato() {
   }
 
   // Candidaturas
-  carregarCandsPagina();
-}
-
-async function carregarCandsPagina() {
-  const listaEl = document.getElementById('painel-cands-lista');
-  if (!listaEl) return;
-  try {
-    const r = await fetch(API + '/api/candidato/candidaturas', {
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
-    if (r.status === 401) { logout(); return; }
-    const d = await r.json();
-    const lista = d.candidaturas || [];
-    if (lista.length === 0) {
-      listaEl.innerHTML = '<div class="empty">Você ainda não se candidatou a nenhuma vaga. <a href="index.html" style="color:var(--vinho);font-weight:600;">Ver vagas abertas</a></div>';
-      return;
-    }
-    // Enriquece com dados da vaga
-    const cands = await Promise.all(lista.map(async (c) => {
-      try {
-        const rv = await fetch(API + '/api/vagas/' + c.vaga_id);
-        const dv = await rv.json();
-        const v = dv.vaga || dv;
-        return { ...c, vagaTitulo: v.titulo };
-      } catch (e) {
-        return { ...c, vagaTitulo: 'Vaga' };
-      }
-    }));
-    listaEl.innerHTML = cands.map(c => {
-      const status = c.status || 'em_analise';
-      const statusLabel = ({
-        'em_analise': 'Em análise', 'em_andamento': 'Em andamento', 'andamento': 'Em andamento',
-        'contratado': 'Contratado', 'rejeitado': 'Não selecionado', 'finalizado': 'Finalizado'
-      })[status] || status;
-      const statusClass = status === 'contratado' ? 'status-contratado' : status === 'rejeitado' ? 'status-rejeitado' : '';
-      const etapaAtual = Number(c.etapa_atual || 0);
-      return `
-        <div class="cand-item" onclick="location.href='inscricao.html?vaga=${c.vaga_id}'">
-          <span class="cand-titulo">${c.vagaTitulo}</span>
-          <span class="cand-status ${statusClass}">${statusLabel}</span>
-          <span class="cand-seta">→</span>
-        </div>
-      `;
-    }).join('');
-  } catch (e) {
-    listaEl.innerHTML = '<div class="empty">Erro ao carregar candidaturas.</div>';
-  }
+  carregarCands();
 }
 
 window.abrirDetalhesCandidato = function(vagaId) {
