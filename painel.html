@@ -130,6 +130,9 @@
   .cand-progresso-top strong { color: var(--preto); font-weight: 600; }
   .cand-progresso-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
   .cand-progresso-fill { height: 100%; background: linear-gradient(90deg, var(--vinho) 0%, var(--vinho-claro) 100%); border-radius: 3px; transition: width .4s ease; }
+  .cand-progresso-desc { margin-top: 10px; font-size: 13px; color: var(--cinza); line-height: 1.45; padding: 10px 12px; background: #fafafa; border-left: 3px solid var(--vinho); border-radius: 4px; }
+  .cand-card.contratado .cand-progresso-desc { background: #f0fdf4; border-left-color: var(--verde); color: #166534; }
+  .cand-card.reprovado .cand-progresso-desc { background: #fef2f2; border-left-color: var(--vermelho); color: #991b1b; }
   .cand-card.contratado { border-color: var(--verde); }
   .cand-card.contratado .cand-progresso-fill { background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%); }
   .cand-card.reprovado { border-color: var(--vermelho); opacity: 0.85; }
@@ -465,7 +468,7 @@
   </div>
 </div>
 
-<script src="app-v2.js?v=6"></script>
+<script src="app-v2.js?v=7"></script>
 <script src="modals.js?v=1"></script>
 <script>
 // ===== ROTEAMENTO =====
