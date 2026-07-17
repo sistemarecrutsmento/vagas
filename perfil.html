@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu perfil — Vagas.io</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--preto); line-height: 1.5; }
+  :root {
+    --branco: #ffffff;
+    --vinho: #722F37;
+    --vinho-escuro: #5C252C;
+    --vinho-claro: #8a3d47;
+    --borda: #e0e0e0;
+    --bg: #f5f5f7;
+    --preto: #222;
+    --cinza: #666;
+    --cinza-medio: #999;
+    --verde: #16a34a;
+    --vermelho: #dc2626;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* Top bar vinho */
+  header { background: var(--vinho); color: var(--branco); border-bottom: none; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+  .header-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-weight: 800; font-size: 22px; color: var(--branco); text-decoration: none; }
+  .logo span { color: var(--branco); opacity: 0.8; font-weight: 300; }
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-menu-logo { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: var(--branco); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  .btn-menu-logo:hover { background: rgba(255,255,255,0.12); }
+  .btn-outline { background: transparent; color: var(--branco); border: 1px solid rgba(255,255,255,0.5); padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-outline:hover { background: rgba(255,255,255,0.12); }
+  .header-user { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .header-user-foto { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2); color: var(--branco); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; background-size: cover; background-position: center; overflow: hidden; }
+  .header-user-info { display: flex; flex-direction: column; }
+  .header-user-nome { font-size: 14px; font-weight: 700; color: var(--branco); }
+  .header-user-email { font-size: 11px; color: rgba(255,255,255,0.8); }
+
+  /* Subheader vinho (padrão Havan) */
+  .subheader { background: var(--vinho); color: var(--branco); padding: 12px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .subheader-inner { max-width: 1100px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+  .subheader h1 { font-size: 18px; font-weight: 700; color: var(--branco); }
+  .subheader-voltar { color: var(--branco); cursor: pointer; font-size: 14px; font-weight: 600; opacity: 0.9; }
+  .subheader-voltar:hover { opacity: 1; text-decoration: underline; }
+
+  /* Drawer */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+  .drawer-overlay.aberto { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: white; transform: translateX(-100%); transition: transform 0.25s ease; z-index: 101; display: flex; flex-direction: column; box-shadow: 2px 0 12px rgba(0,0,0,0.2); }
+  .drawer.aberto { transform: translateX(0); }
+  .drawer-header { padding: 20px; border-bottom: 1px solid var(--borda); display: flex; align-items: center; gap: 12px; position: relative; }
+  .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; flex-shrink: 0; background-size: cover; background-position: center; overflow: hidden; }
+  .drawer-info h3 { font-size: 15px; color: var(--preto); margin-bottom: 2px; }
+  .drawer-info p { font-size: 12px; color: var(--cinza); }
+  .drawer-close { position: absolute; top: 12px; right: 12px; background: transparent; border: none; font-size: 22px; color: var(--cinza); cursor: pointer; }
+  .drawer-body { flex: 1; padding: 12px 0; overflow-y: auto; }
+  .drawer-section { font-size: 11px; text-transform: uppercase; color: var(--cinza-medio); font-weight: 700; padding: 12px 20px 4px; letter-spacing: 0.5px; }
+  .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--preto); font-size: 14px; cursor: pointer; }
+  .drawer-link:hover { background: #f5f5f7; }
+  .drawer-link.ativo { background: #fdf2f3; color: var(--vinho); font-weight: 600; }
+  .drawer-link .icon { font-size: 18px; }
+  .drawer-footer { padding: 12px 20px; border-top: 1px solid var(--borda); }
+  .drawer-logout { width: 100%; background: transparent; color: var(--vermelho); border: 1px solid var(--vermelho); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .drawer-logout:hover { background: var(--vermelho); color: white; }
+
+  /* Página */
+  .container { max-width: 1100px; margin: 24px auto; padding: 0 20px; }
+  .perfil-grid { display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+
+  /* Lateral da foto */
+  .perfil-lateral { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); position: sticky; top: 100px; align-self: start; }
+  .perfil-lateral h3 { font-size: 14px; color: var(--cinza); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; font-weight: 700; }
+  .perfil-lateral-acoes { display: flex; flex-direction: column; gap: 10px; }
+  .perfil-lateral-acoes .btn { width: 100%; justify-content: center; }
+  .perfil-lateral-info { font-size: 12px; color: var(--cinza-medio); margin-top: 4px; text-align: center; }
+
+  /* Card topo (resumo do perfil) */
+  .perfil-topo { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+  .perfil-foto-preview { width: 110px; height: 110px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 700; flex-shrink: 0; background-size: cover; background-position: center; overflow: hidden; }
+  .perfil-foto-inicial { display: block; }
+  .perfil-topo-info h2 { font-size: 22px; color: var(--preto); margin-bottom: 4px; }
+  .perfil-topo-info p { font-size: 14px; color: var(--cinza); }
+  .perfil-topo-info .perfil-progresso { margin-top: 12px; }
+  .progresso-titulo { display: flex; justify-content: space-between; font-size: 13px; color: var(--cinza); margin-bottom: 6px; }
+  .progresso-titulo strong { color: var(--preto); }
+  .barra { width: 100%; height: 8px; background: #ebebed; border-radius: 4px; overflow: hidden; }
+  .barra-fill { height: 100%; background: var(--verde); border-radius: 4px; transition: width 0.4s ease; }
+
+  /* Card do form */
+  .perfil-form-card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .perfil-titulo { font-size: 18px; color: var(--preto); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--borda); }
+
+  .perfil-abas { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--borda); flex-wrap: wrap; }
+  .perfil-aba { background: transparent; border: none; padding: 12px 16px; font-size: 14px; color: var(--cinza); cursor: pointer; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .perfil-aba:hover { color: var(--preto); }
+  .perfil-aba.ativo { color: var(--vinho); border-bottom-color: var(--vinho); }
+
+  .perfil-bloco { display: none; }
+  .perfil-bloco.ativo { display: block; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group label { font-size: 13px; color: var(--preto); margin-bottom: 6px; font-weight: 500; }
+  .form-group input, .form-group select { padding: 10px 12px; border: 1px solid var(--borda); border-radius: 6px; font-size: 14px; font-family: inherit; background: white; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--vinho); }
+  .form-group input:disabled { background: #f5f5f7; color: var(--cinza); }
+
+  .btn { padding: 10px 18px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--vinho); color: white; }
+  .btn-primary:hover { background: var(--vinho-escuro); }
+  .btn-secondary { background: white; color: var(--preto); border: 1px solid var(--borda); }
+  .btn-secondary:hover { background: #f5f5f7; }
+  .btn-vinho-outline { background: transparent; color: var(--vinho); border: 1px solid var(--vinho); }
+  .btn-vinho-outline:hover { background: var(--vinho); color: white; }
+  .btn-vinho-outline:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .perfil-acoes { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--borda); display: flex; gap: 12px; }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--cinza); }
+  .loading { text-align: center; padding: 60px 20px; color: var(--cinza); }
+
+  @media (max-width: 800px) {
+    .perfil-grid { grid-template-columns: 1fr; }
+    .perfil-lateral { position: static; }
+    .perfil-topo { flex-direction: column; text-align: center; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">Vagas<span>.io</span></a>
+    <div class="header-actions" id="header-actions"></div>
+  </div>
+</header>
+
+<section class="subheader">
+  <div class="subheader-inner">
+    <h1>Meu perfil</h1>
+    <span class="subheader-voltar" onclick="location.href='painel.html'">← Voltar para o painel</span>
+  </div>
+</section>
+
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-foto" id="drawer-foto">👤</div>
+    <div class="drawer-info">
+      <h3 id="drawer-nome">Candidato</h3>
+      <p id="drawer-email">—</p>
+    </div>
+    <button class="drawer-close" onclick="fecharDrawer()" title="Fechar">×</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">Navegação</div>
+    <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
+    <a href="painel.html" class="drawer-link ativo"><span class="icon">👤</span> Meu perfil</a>
+    <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
+  </div>
+  <div class="drawer-footer">
+    <button class="drawer-logout" onclick="logout()">Sair</button>
+  </div>
+</aside>
+
+<div class="container">
+  <div id="conteudo">
+    <div class="loading">Carregando perfil...</div>
+  </div>
+</div>
+
+<script src="app.js?v=20260717-0300"></script>
+<script>
+// ===== ROTEAMENTO =====
+function redirecionarSeNaoLogado() {
+  if (!tokenCandidato) {
+    location.href = 'index.html';
+  }
+}
+
+// ===== CARREGAR PÁGINA =====
+async function carregarPaginaPerfil() {
+  if (!tokenCandidato) {
+    location.href = 'index.html';
+    return;
+  }
+  // Garante botão de menu no header (se app.js não tiver inserido)
+  if (!document.getElementById('btn-menu-logo')) {
+    const h = document.querySelector('header');
+    if (h) {
+      const b = document.createElement('button');
+      b.id = 'btn-menu-logo';
+      b.className = 'btn-menu-logo';
+      b.innerHTML = '☰';
+      b.title = 'Menu';
+      b.setAttribute('aria-label', 'Abrir menu');
+      b.onclick = abrirDrawer;
+      h.appendChild(b);
+    }
+  }
+
+  let perfil = null;
+  try {
+    const r = await fetch(API + '/api/candidato/perfil', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (r.status === 401) { logout(); return; }
+    const d = await r.json();
+    perfil = d.candidato;
+  } catch (e) {}
+
+  if (!perfil) {
+    document.getElementById('conteudo').innerHTML = '<div class="empty">Erro ao carregar perfil.</div>';
+    return;
+  }
+
+  // Salva no localStorage para o header/drawer
+  const nome = perfil.nome || emailLogado || 'Candidato';
+  localStorage.setItem('candidato_nome', nome);
+  if (perfil.foto_url) localStorage.setItem('candidato_foto', perfil.foto_url);
+  if (typeof atualizarHeaderUsuario === 'function') atualizarHeaderUsuario();
+
+  // Foto inicial
+  const inicial = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+  const foto = perfil.foto_url || '';
+  const fotoStyle = foto ? `style="background-image:url(&quot;${foto.replace(/"/g,'\\"')}&quot;)"` : '';
+
+  // Progresso
+  const checks = [
+    !!perfil.nome, !!perfil.cpf, !!perfil.data_nascimento, !!perfil.celular, !!perfil.sexo,
+    !!perfil.cep, !!perfil.cidade, !!perfil.logradouro, !!perfil.numero,
+    !!perfil.formacao, !!perfil.instituicao, !!perfil.curso,
+    !!perfil.foto_url
+  ];
+  const total = checks.length;
+  const done = checks.filter(Boolean).length;
+  const pct = Math.round((done / total) * 100);
+
+  // HTML principal
+  document.getElementById('conteudo').innerHTML = `
+    <div class="perfil-grid">
+      <!-- LATERAL: ações de foto -->
+      <aside class="perfil-lateral">
+        <h3>📷 Foto de perfil</h3>
+        <div class="perfil-lateral-acoes">
+          <label class="btn btn-secondary" for="perfil-foto-input">📷 Trocar foto</label>
+          <input type="file" id="perfil-foto-input" accept="image/jpeg,image/png,image/webp" onchange="perfilFotoEscolher(this)" style="display:none">
+          <button type="button" class="btn btn-vinho-outline" id="perfil-foto-remover" onclick="perfilFotoRemover()">🗑️ Remover foto</button>
+        </div>
+        <p class="perfil-lateral-info">JPG, PNG ou WebP — até 5 MB</p>
+      </aside>
+
+      <!-- CONTEÚDO PRINCIPAL -->
+      <div>
+        <!-- Card topo: foto + nome + progresso -->
+        <div class="perfil-topo">
+          <div class="perfil-foto-preview" id="perfil-foto-preview" ${fotoStyle}>
+            <span class="perfil-foto-inicial" id="perfil-foto-inicial" style="${foto ? 'display:none' : ''}">${inicial || '?'}</span>
+          </div>
+          <div class="perfil-topo-info">
+            <h2>${nome}</h2>
+            <p>${(perfil.cidade ? perfil.cidade : '') + (perfil.estado ? ' / ' + perfil.estado : '') || 'Complete seu perfil'}</p>
+            <div class="perfil-progresso" style="max-width:320px">
+              <div class="progresso-titulo"><span>Perfil completo</span><strong>${pct}%</strong></div>
+              <div class="barra"><div class="barra-fill" style="width:${pct}%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card do form -->
+        <div class="perfil-form-card">
+          <h3 class="perfil-titulo">Editar informações</h3>
+          <div class="perfil-abas">
+            <button class="perfil-aba ativo" data-sub="dados">Dados pessoais</button>
+            <button class="perfil-aba" data-sub="endereco">Endereço</button>
+            <button class="perfil-aba" data-sub="escolaridade">Escolaridade</button>
+            <button class="perfil-aba" data-sub="acessibilidade">Acessibilidade</button>
+          </div>
+
+          <form class="perfil-form" id="perfil-form" onsubmit="event.preventDefault();salvarPerfilCompleto(this)">
+            <div class="perfil-bloco ativo" data-bloco="dados">
+              <div class="form-row">
+                <div class="form-group"><label>Nome completo *</label><input type="text" id="pe-nome" required value="${(perfil.nome||'').replace(/"/g,'&quot;')}"></div>
+                <div class="form-group"><label>CPF *</label><input type="text" id="pe-cpf" placeholder="000.000.000-00" maxlength="14" value="${(perfil.cpf||'').replace(/"/g,'&quot;')}"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Data de nascimento</label><input type="date" id="pe-nascimento" value="${perfil.data_nascimento||''}"></div>
+                <div class="form-group"><label>Sexo</label>
+                  <select id="pe-sexo">
+                    <option value="">Prefiro não informar</option>
+                    <option value="M" ${perfil.sexo==='M'?'selected':''}>Masculino</option>
+                    <option value="F" ${perfil.sexo==='F'?'selected':''}>Feminino</option>
+                    <option value="Outro" ${perfil.sexo==='Outro'?'selected':''}>Outro</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Celular</label><input type="tel" id="pe-celular" placeholder="(00) 00000-0000" value="${(perfil.celular||'').replace(/"/g,'&quot;')}"></div>
+                <div class="form-group"><label>E-mail</label><input type="email" id="pe-email" disabled value="${(perfil.email||'').replace(/"/g,'&quot;')}"></div>
+              </div>
+            </div>
+
+            <div class="perfil-bloco" data-bloco="endereco">
+              <div class="form-row">
+                <div class="form-group"><label>CEP</label><input type="text" id="pe-cep" placeholder="00000-000" maxlength="9" value="${(perfil.cep||'').replace(/"/g,'&quot;')}"></div>
+                <div class="form-group"><label>Cidade</label><input type="text" id="pe-cidade" value="${(perfil.cidade||'').replace(/"/g,'&quot;')}"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>UF</label><input type="text" id="pe-estado" maxlength="2" placeholder="BA" value="${(perfil.estado||'').replace(/"/g,'&quot;')}"></div>
+                <div class="form-group"><label>Bairro</label><input type="text" id="pe-bairro" value="${(perfil.bairro||'').replace(/"/g,'&quot;')}"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group" style="grid-column:1/-1"><label>Logradouro</label><input type="text" id="pe-logradouro" placeholder="Rua, avenida..." value="${(perfil.logradouro||'').replace(/"/g,'&quot;')}"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Número</label><input type="text" id="pe-numero" value="${(perfil.numero||'').replace(/"/g,'&quot;')}"></div>
+                <div class="form-group"><label>Complemento</label><input type="text" id="pe-complemento" value="${(perfil.complemento||'').replace(/"/g,'&quot;')}"></div>
+              </div>
+            </div>
+
+            <div class="perfil-bloco" data-bloco="escolaridade">
+              <div class="form-row">
+                <div class="form-group"><label>Formação</label>
+                  <select id="pe-formacao">
+                    <option value="">Selecione...</option>
+                    <option value="Ensino fundamental" ${perfil.formacao==='Ensino fundamental'?'selected':''}>Ensino fundamental</option>
+                    <option value="Ensino médio" ${perfil.formacao==='Ensino médio'?'selected':''}>Ensino médio</option>
+                    <option value="Ensino técnico" ${perfil.formacao==='Ensino técnico'?'selected':''}>Ensino técnico</option>
+                    <option value="Graduação" ${perfil.formacao==='Graduação'?'selected':''}>Graduação</option>
+                    <option value="Pós-graduação" ${perfil.formacao==='Pós-graduação'?'selected':''}>Pós-graduação</option>
+                    <option value="Mestrado" ${perfil.formacao==='Mestrado'?'selected':''}>Mestrado</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>Instituição</label><input type="text" id="pe-instituicao" value="${(perfil.instituicao||'').replace(/"/g,'&quot;')}"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Curso</label><input type="text" id="pe-curso" value="${(perfil.curso||'').replace(/"/g,'&quot;')}"></div>
+                <div class="form-group"><label>Situação</label>
+                  <select id="pe-situacao">
+                    <option value="">Selecione...</option>
+                    <option value="concluido" ${perfil.situacao==='concluido'?'selected':''}>Concluído</option>
+                    <option value="cursando" ${perfil.situacao==='cursando'?'selected':''}>Cursando</option>
+                    <option value="trancado" ${perfil.situacao==='trancado'?'selected':''}>Trancado</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group"><label>Primeiro emprego?</label>
+                <select id="pe-primeiro-emprego">
+                  <option value="false" ${!perfil.primeiro_emprego?'selected':''}>Não</option>
+                  <option value="true" ${perfil.primeiro_emprego?'selected':''}>Sim</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="perfil-bloco" data-bloco="acessibilidade">
+              <div class="form-group"><label>Possui alguma necessidade de acessibilidade?</label>
+                <select id="pe-acessibilidade">
+                  <option value="">Nenhuma</option>
+                  <option value="cadeirante" ${perfil.acessibilidade==='cadeirante'?'selected':''}>Cadeirante</option>
+                  <option value="deficiencia_visual" ${perfil.acessibilidade==='deficiencia_visual'?'selected':''}>Deficiência visual</option>
+                  <option value="deficiencia_auditiva" ${perfil.acessibilidade==='deficiencia_auditiva'?'selected':''}>Deficiência auditiva</option>
+                  <option value="mobilidade_reduzida" ${perfil.acessibilidade==='mobilidade_reduzida'?'selected':''}>Mobilidade reduzida</option>
+                  <option value="outra" ${perfil.acessibilidade==='outra'?'selected':''}>Outra</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" id="pe-comunicacoes" style="width:auto;" ${perfil.aceita_comunicacoes?'checked':''}>
+                  Quero receber comunicações de novas vagas
+                </label>
+              </div>
+            </div>
+
+            <div class="perfil-acoes">
+              <button type="submit" class="btn btn-primary" id="btn-salvar-perfil">Salvar perfil</button>
+              <a href="painel.html" class="btn btn-secondary">Voltar ao painel</a>
+            </div>
+          </form>
+        </div>
+
+        <!-- Card de senha -->
+        <div class="perfil-form-card" style="margin-top:24px">
+          <h3 class="perfil-titulo">🔑 Trocar senha</h3>
+          <form class="perfil-form" onsubmit="event.preventDefault();trocarSenha(this)">
+            <div class="form-group"><label>Senha atual *</label><input type="password" id="senha-atual" required minlength="6"></div>
+            <div class="form-group"><label>Nova senha * (mínimo 6 caracteres)</label><input type="password" id="senha-nova" required minlength="6"></div>
+            <div class="form-group"><label>Confirme a nova senha *</label><input type="password" id="senha-nova-conf" required minlength="6"></div>
+            <div class="perfil-acoes">
+              <button type="submit" class="btn btn-primary" id="btn-trocar-senha">Atualizar senha</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Esconde o botão "Remover" se não houver foto
+  const btnRemover = document.getElementById('perfil-foto-remover');
+  if (btnRemover && !foto) btnRemover.style.display = 'none';
+
+  // Liga as abas
+  document.querySelectorAll('.perfil-aba').forEach(aba => {
+    aba.onclick = () => {
+      document.querySelectorAll('.perfil-aba').forEach(a => a.classList.remove('ativo'));
+      document.querySelectorAll('.perfil-bloco').forEach(b => b.classList.remove('ativo'));
+      aba.classList.add('ativo');
+      const sub = aba.getAttribute('data-sub');
+      const bloco = document.querySelector('.perfil-bloco[data-bloco="' + sub + '"]');
+      if (bloco) bloco.classList.add('ativo');
+    };
+  });
+}
+
+// ===== DRAWER =====
+function abrirDrawer() {
+  document.getElementById('drawer').classList.add('aberto');
+  document.getElementById('drawer-overlay').classList.add('aberto');
+  const nome = localStorage.getItem('candidato_nome') || emailLogado || 'Candidato';
+  const foto = localStorage.getItem('candidato_foto') || '';
+  document.getElementById('drawer-nome').textContent = nome;
+  document.getElementById('drawer-email').textContent = emailLogado || '';
+  const el = document.getElementById('drawer-foto');
+  if (foto) { el.style.backgroundImage = `url("${foto.replace(/"/g,'\\"')}")`; el.textContent = ''; }
+}
+function fecharDrawer() {
+  document.getElementById('drawer').classList.remove('aberto');
+  document.getElementById('drawer-overlay').classList.remove('aberto');
+}
+
+window.abrirDrawer = abrirDrawer;
+window.fecharDrawer = fecharDrawer;
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Espera o app.js rodar checarAuth
+  setTimeout(() => {
+    if (!tokenCandidato) tokenCandidato = localStorage.getItem('candidato_token');
+    if (!emailLogado) emailLogado = localStorage.getItem('candidato_email');
+    if (!tokenCandidato) { location.href = 'index.html'; return; }
+    carregarPaginaPerfil();
+    if (typeof window.atualizarHeaderUsuario === 'function') window.atualizarHeaderUsuario();
+  }, 200);
+});
+</script>
+</body>
+</html>
