@@ -83,6 +83,8 @@
   .container { max-width: 1100px; margin: 24px auto; padding: 0 20px; }
 
   /* Card de detalhes */
+  .det-voltar { display: inline-block; margin: 0 0 12px 4px; color: var(--vinho); font-weight: 600; text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: 6px; transition: background .15s; }
+  .det-voltar:hover { background: var(--cinza-claro); }
   .det-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--borda); overflow: hidden; }
   .det-cabecalho { padding: 28px 32px; border-bottom: 1px solid var(--borda); }
   .det-empresa { font-size: 13px; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; }
@@ -247,6 +249,7 @@ function renderVaga(v) {
   }
 
   const html = `
+    <a href="javascript:history.back()" class="det-voltar">← Voltar</a>
     <div class="det-card">
       <div class="det-cabecalho">
         <div class="det-empresa">${v.empresa || 'Confidencial'}</div>
