@@ -686,7 +686,12 @@ async function carregarPainel() {
   carregarDadosPerfil(perfil);
 
   // 4) Candidaturas
+  carregarCands();
+}
+
+async function carregarCands() {
   const listaEl = document.getElementById('painel-cands-lista');
+  if (!listaEl) return;
   listaEl.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
   try {
     const r = await fetch(API + '/api/candidato/candidaturas', {
