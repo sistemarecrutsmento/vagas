@@ -587,20 +587,10 @@ function checarAuth() {
 function atualizarHeaderUsuario() {
   const headerActions = document.getElementById('header-actions');
   if (!headerActions) return;
-  // Cache da foto (carregada após login)
-  const fotoUrl = localStorage.getItem('candidato_foto') || '';
-  const nome = localStorage.getItem('candidato_nome') || emailLogado || '';
-  const iniciais = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
-  const avatarStyle = fotoUrl ? `style="background-image:url('${fotoUrl.replace(/'/g, "\\'")}');background-size:cover;background-position:center;"` : '';
 
   if (tokenCandidato && cadastroCompleto) {
-    headerActions.innerHTML = `
-      <div class="user-info" onclick="abrirPainelCandidato()" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
-        <div class="user-avatar" ${avatarStyle}>${fotoUrl ? '' : (iniciais || '👤')}</div>
-        <span style="font-weight:600;color:var(--preto);">${nome || emailLogado}</span>
-      </div>
-      <button class="btn-hamburguer-header" onclick="abrirDrawer(event)" title="Menu">☰</button>
-    `;
+    // Logado: header-actions vazio (☰ fica no lado do logo)
+    headerActions.innerHTML = '';
   } else if (tokenCandidato) {
     headerActions.innerHTML = `<button class="btn-outline" onclick="abrirModal('cad')">📝 Completar cadastro</button>`;
   } else {
@@ -609,6 +599,25 @@ function atualizarHeaderUsuario() {
       <button id="btn-cadastrar" class="btn-outline" onclick="abrirModal('cad')">Cadastrar</button>
     `;
   }
+  // Garante que o botão ☰ no logo existe
+  garantirBotaoMenu();
+}
+
+function garantirBotaoMenu() {
+  if (document.getElementById('btn-menu-logo')) return;
+  const headerInner = document.querySelector('.header-inner');
+  if (!headerInner) return;
+  const logo = headerInner.querySelector('.logo');
+  if (!logo) return;
+  const btn = document.createElement('button');
+  btn.id = 'btn-menu-logo';
+  btn.className = 'btn-menu-logo';
+  btn.title = 'Menu';
+  btn.setAttribute('aria-label', 'Abrir menu');
+  btn.innerHTML = '☰';
+  btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); window.abrirDrawer && window.abrirDrawer(e); });
+  // Insere ANTES do logo
+  logo.parentNode.insertBefore(btn, logo);
 }
 
 async function abrirPainelCandidato() {
