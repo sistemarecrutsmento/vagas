@@ -790,13 +790,12 @@ async function carregarCands() {
 
     // Buscar etapas de cada vaga pra montar a timeline
     const ETAPAS_PADRAO = [
-      { nome: 'Inscrição' },
-      { nome: 'Triagem curricular' },
-      { nome: 'Entrevista RH' },
-      { nome: 'Entrevista gestor' },
-      { nome: 'Proposta' },
-      { nome: 'Coleta de documentos' },
-      { nome: 'Contratação' }
+      { nome: 'Inscrição',              descricao: 'Você se candidatou, agora nosso time vai analisar seu perfil.' },
+      { nome: 'Triagem curricular',     descricao: 'Nosso time vai analisar sua compatibilidade com a vaga.' },
+      { nome: 'Entrevista RH',          descricao: 'Vamos entrar em contato para agendar um bate papo com nosso time.' },
+      { nome: 'Entrevista gestor',      descricao: 'Segunda parte do processo, bate papo com o gestor/empresa.' },
+      { nome: 'Coleta de documentos',   descricao: 'Nessa etapa será solicitado o anexo dos documentos necessários para contratação.' },
+      { nome: 'Contratação',            descricao: 'Fim do processo.' }
     ];
     const cands = await Promise.all(lista.map(async (c) => {
       // Se a vaga tem etapas salvas, usa; senão, usa o padrão
@@ -825,21 +824,26 @@ async function carregarCands() {
       const totalEtapas = c.etapas.length;
       const isReprovado = (c.status === 'reprovado' || c.status === 'rejeitado');
       const isContratado = (c.status === 'contratado' || c.status === 'contratada');
+      // Helper: extrai nome + descrição de uma etapa (aceita string ou objeto)
+      const etapaObj = (e) => ({
+        nome: (typeof e === 'string') ? e : (e?.nome || `Etapa`),
+        descricao: (typeof e === 'object' && e?.descricao) ? e.descricao : ''
+      });
       // --- Bolinhas de etapa (timeline visual) ---
       const etapasHTML = c.etapas.map((e, i) => {
-        const nome = (typeof e === 'string') ? e : (e.nome || `Etapa ${i+1}`);
+        const { nome, descricao } = etapaObj(e);
         let cls = '';
         let bola = (i + 1).toString();
         if (i < etapaAtual) {
           cls = 'concluida';
           bola = '✓';
         } else if (i === etapaAtual) {
-          // Etapa em andamento
           if (isReprovado) { cls = 'reprovada'; bola = '✕'; }
           else if (isContratado) { cls = 'concluida'; bola = '✓'; }
           else { cls = 'andamento'; bola = '⏳'; }
         }
-        return `<div class="cand-etapa ${cls}" title="${nome}">
+        const tooltip = descricao ? `${nome} — ${descricao}` : nome;
+        return `<div class="cand-etapa ${cls}" title="${tooltip.replace(/"/g, '&quot;')}">
           <div class="cand-etapa-bola">${bola}</div>
           <div class="cand-etapa-label">${nome}</div>
         </div>`;
@@ -847,14 +851,20 @@ async function carregarCands() {
       // --- Barra de progresso (% concluído) ---
       const etapasConcluidas = Math.min(etapaAtual, totalEtapas);
       const pct = totalEtapas > 0 ? Math.round((etapasConcluidas / totalEtapas) * 100) : 0;
+      // --- Descrição da etapa atual (destaque) ---
+      const etapaAtualObj = c.etapas[etapaAtual];
+      const etapaAtualFmt = etapaObj(etapaAtualObj);
       const etapaNome = (() => {
         if (isContratado) return '🎉 Contratação concluída';
         if (isReprovado) return 'Processo encerrado';
-        const idx = etapaAtual;
-        const e = c.etapas[idx];
-        if (!e) return 'Inscrição recebida';
-        const nome = (typeof e === 'string') ? e : (e.nome || `Etapa ${idx + 1}`);
-        return `Etapa ${idx + 1} de ${totalEtapas} — ${nome}`;
+        if (!etapaAtualObj) return 'Inscrição recebida';
+        return `Etapa ${etapaAtual + 1} de ${totalEtapas} — ${etapaAtualFmt.nome}`;
+      })();
+      const etapaDescricao = (() => {
+        if (isContratado) return 'Parabéns! Você foi aprovado em todas as etapas.';
+        if (isReprovado) return 'Infelizmente o processo não seguiu dessa vez. Continue tentando!';
+        if (!etapaAtualObj) return 'Aguarde a primeira movimentação do recrutador.';
+        return etapaAtualFmt.descricao || '';
       })();
       const statusClass = c.status || 'em_analise';
       const cardExtras = isContratado ? ' contratado' : (isReprovado ? ' reprovado' : '');
@@ -882,6 +892,7 @@ async function carregarCands() {
               <strong>${pct}%</strong>
             </div>
             <div class="cand-progresso-bar"><div class="cand-progresso-fill" style="width:${pct}%;background:${fillBg}"></div></div>
+            ${etapaDescricao ? `<div class="cand-progresso-desc">${etapaDescricao}</div>` : ''}
           </div>
           <div class="cand-timeline">${etapasHTML}</div>
           <div class="cand-card-footer">
