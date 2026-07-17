@@ -101,7 +101,7 @@ async function carregarVagas() {
       const sMax = Number(v.salario_max) || null;
       const salTexto = (sMin && sMax) ? `R$ ${sMin.toLocaleString('pt-BR')} - R$ ${sMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
       return `
-      <a class="vaga-card" href="vaga.html?id=${v.id}" style="text-decoration:none;color:inherit;display:block;">
+      <a class="vaga-card" href="javascript:void(0)" onclick="abrirDetalhes(${v.id})" style="text-decoration:none;color:inherit;display:block;">
         <div class="empresa">${v.empresa || 'Empresa'}</div>
         <h3>${v.titulo}</h3>
         <div class="vaga-tags">
