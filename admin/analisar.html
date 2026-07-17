@@ -65,11 +65,14 @@
     const API = 'https://recrutamento-api.onrender.com';
 
     function voltar() {
-      // Se há histórico, volta; senão vai direto pra lista de candidaturas
-      if (document.referrer && document.referrer.includes('candidaturas.html')) {
+      // Volta pra lista de candidatos da vaga (SPA)
+      const params = new URLSearchParams(location.search);
+      const candId = params.get('id');
+      // Se tiver histórico, volta; senão vai pra SPA
+      if (document.referrer && document.referrer.includes(location.host)) {
         history.back();
       } else {
-        location.href = 'candidaturas.html';
+        location.href = 'index.html';
       }
     }
 
