@@ -789,35 +789,51 @@ function carregarDadosPerfil(perfil) {
 }
 
 async function salvarPerfilCompleto(target) {
+  // Se target for o form (pelo onsubmit), o botão está dentro dele
+  const form = target?.tagName === 'FORM' ? target : (target?.form || document.getElementById('perfil-form'));
   const btn = target?.tagName === 'FORM' ? target.querySelector('button[type="submit"]') : target;
-  if (btn) { btn.disabled = true; btn._oldText = btn.textContent; btn.textContent = 'Salvando...'; }
-  const payload = {
-    nome: document.getElementById('pe-nome')?.value.trim(),
-    cpf: document.getElementById('pe-cpf')?.value.replace(/\D/g, ''),
-    data_nascimento: document.getElementById('pe-nascimento')?.value || null,
-    sexo: document.getElementById('pe-sexo')?.value || null,
-    celular: document.getElementById('pe-celular')?.value.trim(),
-    cep: document.getElementById('pe-cep')?.value.replace(/\D/g, ''),
-    cidade: document.getElementById('pe-cidade')?.value.trim(),
-    estado: document.getElementById('pe-estado')?.value.trim().toUpperCase(),
-    bairro: document.getElementById('pe-bairro')?.value.trim(),
-    logradouro: document.getElementById('pe-logradouro')?.value.trim(),
-    numero: document.getElementById('pe-numero')?.value.trim(),
-    complemento: document.getElementById('pe-complemento')?.value.trim(),
-    formacao: document.getElementById('pe-formacao')?.value || null,
-    instituicao: document.getElementById('pe-instituicao')?.value.trim(),
-    curso: document.getElementById('pe-curso')?.value.trim(),
-    situacao: document.getElementById('pe-situacao')?.value || null,
-    primeiro_emprego: document.getElementById('pe-primeiro-emprego')?.value === 'true',
-    experiencia: document.getElementById('pe-experiencia')?.value.trim() || null,
-    sobre_voce: document.getElementById('pe-sobre-voce')?.value.trim() || null,
-    acessibilidade: document.getElementById('pe-acessibilidade')?.value || null,
-    recebe_comunicacoes: document.getElementById('pe-comunicacoes')?.checked || false
+  
+  if (btn) { 
+    btn.disabled = true; 
+    btn._oldText = btn.textContent; 
+    btn.textContent = 'Salvando...'; 
+  }
+
+  // Helper para buscar valor preferencialmente dentro do form para evitar colisões
+  const getV = (id) => {
+    const el = form ? form.querySelector('#' + id) : document.getElementById(id);
+    return el ? el.value.trim() : '';
   };
+
+  const payload = {
+    nome: getV('pe-nome'),
+    cpf: getV('pe-cpf').replace(/\D/g, ''),
+    data_nascimento: getV('pe-nascimento') || null,
+    sexo: getV('pe-sexo') || null,
+    celular: getV('pe-celular').trim(),
+    cep: getV('pe-cep').replace(/\D/g, ''),
+    cidade: getV('pe-cidade'),
+    estado: getV('pe-estado').toUpperCase(),
+    bairro: getV('pe-bairro'),
+    logradouro: getV('pe-logradouro'),
+    numero: getV('pe-numero'),
+    complemento: getV('pe-complemento'),
+    formacao: getV('pe-formacao') || null,
+    instituicao: getV('pe-instituicao'),
+    curso: getV('pe-curso'),
+    situacao: getV('pe-situacao') || null,
+    primeiro_emprego: getV('pe-primeiro-emprego') === 'true',
+    experiencia: getV('pe-experiencia') || null,
+    sobre_voce: getV('pe-sobre-voce') || null,
+    acessibilidade: getV('pe-acessibilidade') || null,
+    recebe_comunicacoes: form ? (form.querySelector('#pe-comunicacoes')?.checked || false) : (document.getElementById('pe-comunicacoes')?.checked || false)
+  };
+
   // Se a página injetou um array de experiencias (ex: perfil.html), inclui no payload
   if (Array.isArray(window.__perfilExps)) {
     payload.experiencias = window.__perfilExps;
   }
+
   try {
     const r = await fetch(API + '/api/candidato/cadastrar', {
       method: 'POST',
@@ -1089,6 +1105,33 @@ document.addEventListener('DOMContentLoaded', () => {
       e.target.value = v;
     });
   }
+
+  // Máscaras adicionais para o perfil dedicado (pe- IDs)
+  ['pe-cpf'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4').replace(/-$/, '').replace(/\.$/, '');
+      e.target.value = v;
+    });
+  });
+  ['pe-cep'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+      v = v.replace(/(\d{5})(\d{0,3})/, '$1-$2').replace(/-$/, '');
+      e.target.value = v;
+    });
+  });
+  ['pe-celular'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length <= 10) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      else v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+      e.target.value = v;
+    });
+  });
 });
 
 // ============================================
@@ -1105,6 +1148,7 @@ window.abrirDetalhes = abrirDetalhes;
 window.candidatar = candidatar;
 window.abrirPainelCandidato = abrirPainelCandidato;
 window.atualizarHeaderUsuario = atualizarHeaderUsuario;
+window.salvarPerfilCompleto = salvarPerfilCompleto;
 // Wizard
 window.wizardIrPara = wizardIrPara;
 window.wizardProximo = wizardProximo;
