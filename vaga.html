@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detalhes da vaga — Vagas.io</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--preto); line-height: 1.5; }
+  :root {
+    --vinho: #722F37;
+    --vinho-escuro: #5C252C;
+    --vinho-claro: #8a3d47;
+    --borda: #e0e0e0;
+    --bg: #f5f5f7;
+    --preto: #222;
+    --cinza: #666;
+    --cinza-medio: #999;
+    --cinza-claro: #f0f0f0;
+    --verde: #16a34a;
+    --amarelo: #f59e0b;
+    --vermelho: #dc2626;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* Top bar (igual à home) */
+  header { background: white; border-bottom: 1px solid var(--borda); position: sticky; top: 0; z-index: 50; }
+  .header-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-weight: 800; font-size: 22px; color: var(--vinho); }
+  .logo span { color: var(--preto); }
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-outline { background: transparent; color: var(--vinho); border: 1.5px solid var(--vinho); padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+  .btn-outline:hover { background: var(--vinho); color: white; }
+  .user-info { display: flex; align-items: center; gap: 10px; }
+  .user-info span { font-weight: 600; color: var(--preto); font-size: 14px; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+
+  /* Sub-header bordô com menu */
+  .subheader { background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro)); color: white; }
+  .subheader-inner { max-width: 1100px; margin: 0 auto; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .subheader h1 { font-size: 22px; font-weight: 700; }
+  .subheader-back { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .subheader-back:hover { background: rgba(255,255,255,0.25); }
+  .subheader-menu { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .subheader-link { color: rgba(255,255,255,0.85); padding: 7px 14px; border-radius: 6px; font-size: 14px; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
+  .subheader-link:hover { background: rgba(255,255,255,0.15); color: white; }
+  .subheader-link.ativo { background: rgba(255,255,255,0.25); color: white; font-weight: 700; }
+
+  /* Container principal */
+  .container { max-width: 1100px; margin: 24px auto; padding: 0 20px; }
+
+  /* Card de detalhes */
+  .det-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--borda); overflow: hidden; }
+  .det-cabecalho { padding: 28px 32px; border-bottom: 1px solid var(--borda); }
+  .det-empresa { font-size: 13px; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; }
+  .det-titulo { font-size: 28px; font-weight: 700; color: var(--preto); margin-bottom: 14px; }
+  .det-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .det-tag { background: var(--cinza-claro); padding: 5px 12px; border-radius: 20px; font-size: 13px; color: var(--cinza); }
+  .det-tag.salario { background: rgba(114,47,55,0.08); color: var(--vinho); font-weight: 700; }
+
+  .det-corpo { padding: 28px 32px; }
+  .det-section { margin-bottom: 28px; }
+  .det-section:last-child { margin-bottom: 0; }
+  .det-section h3 { font-size: 16px; font-weight: 700; color: var(--preto); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--vinho); display: inline-block; }
+  .det-section p { color: #444; line-height: 1.7; white-space: pre-wrap; font-size: 15px; }
+
+  .det-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding: 24px 32px; background: var(--cinza-claro); }
+  .det-item { background: white; padding: 14px 18px; border-radius: 8px; border-left: 3px solid var(--vinho); }
+  .det-label { font-size: 11px; color: var(--cinza-medio); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; letter-spacing: 0.5px; }
+  .det-value { font-size: 15px; color: var(--preto); font-weight: 600; }
+
+  /* Processo seletivo */
+  .processo-lista { list-style: none; padding: 0; }
+  .processo-lista li { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--borda); }
+  .processo-lista li:last-child { border-bottom: none; }
+  .proc-numero { width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .processo-lista strong { display: block; color: var(--preto); margin-bottom: 2px; }
+  .processo-lista p { color: var(--cinza); font-size: 14px; margin-top: 4px; }
+
+  /* Footer da vaga */
+  .det-footer { padding: 20px 32px; background: var(--cinza-claro); border-top: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .det-footer .info { font-size: 13px; color: var(--cinza); }
+  .btn { background: var(--vinho); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn:hover { background: var(--vinho-escuro); }
+  .btn:disabled { background: var(--cinza-medio); cursor: not-allowed; }
+  .btn-success { background: var(--verde); }
+
+  /* Loading state */
+  .loading { padding: 80px 20px; text-align: center; }
+  .spinner { display: inline-block; width: 36px; height: 36px; border: 3px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 720px) {
+    .subheader-inner { flex-wrap: wrap; }
+    .subheader h1 { font-size: 18px; flex: 1; }
+    .subheader-menu { width: 100%; }
+    .det-cabecalho, .det-corpo, .det-grid, .det-footer { padding-left: 20px; padding-right: 20px; }
+    .det-titulo { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">Vagas<span>.io</span></a>
+    <div class="header-actions" id="header-actions"></div>
+  </div>
+</header>
+
+<section class="subheader">
+  <div class="subheader-inner">
+    <button class="subheader-back" onclick="location.href='index.html'" title="Voltar para vagas">←</button>
+    <h1>Detalhes da vaga</h1>
+    <nav class="subheader-menu">
+      <a href="index.html" class="subheader-link">🏠 Vagas</a>
+      <a href="painel.html" class="subheader-link">👤 Perfil</a>
+      <a href="javascript:void(0)" onclick="alert('Sem notificações no momento')" class="subheader-link">🔔</a>
+    </nav>
+  </div>
+</section>
+
+<div class="container">
+  <div id="vaga-conteudo">
+    <div class="det-card">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js?v=20260717-0100"></script>
+<script>
+// ===== PEGAR ID DA VAGA =====
+const params = new URLSearchParams(window.location.search);
+const vagaId = params.get('id');
+
+if (!vagaId) {
+  document.getElementById('vaga-conteudo').innerHTML = `
+    <div class="det-card" style="padding:60px 20px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+      <h3 style="margin-bottom:8px">Vaga não informada</h3>
+      <p style="color:var(--cinza);margin-bottom:20px">Volte para a lista de vagas e tente novamente.</p>
+      <a href="index.html" class="btn" style="display:inline-block;text-decoration:none;">Ver vagas</a>
+    </div>`;
+} else {
+  carregarVaga();
+}
+
+async function carregarVaga() {
+  try {
+    const r = await fetch(API + '/api/vagas/' + vagaId);
+    if (!r.ok) throw new Error('Vaga não encontrada');
+    const data = await r.json();
+    const v = data.vaga || data;
+    renderVaga(v);
+  } catch (e) {
+    document.getElementById('vaga-conteudo').innerHTML = `
+      <div class="det-card" style="padding:60px 20px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:16px">😕</div>
+        <h3 style="margin-bottom:8px">Vaga não encontrada</h3>
+        <p style="color:var(--cinza);margin-bottom:20px">Esta vaga pode ter sido removida ou o link está incorreto.</p>
+        <a href="index.html" class="btn" style="display:inline-block;text-decoration:none;">Ver vagas</a>
+      </div>`;
+  }
+}
+
+function renderVaga(v) {
+  // Atualizar título da página
+  document.title = (v.titulo || 'Vaga') + ' — Vagas.io';
+
+  // Calcular salário
+  const salMin = Number(v.salario_min) || null;
+  const salMax = Number(v.salario_max) || null;
+  const salTexto = (salMin && salMax) ? `R$ ${salMin.toLocaleString('pt-BR')} – R$ ${salMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
+
+  // Processo seletivo
+  let etapas = v.etapas;
+  if (typeof etapas === 'string') {
+    try { etapas = JSON.parse(etapas); } catch (e) { etapas = null; }
+  }
+  let processoHTML = '';
+  if (Array.isArray(etapas) && etapas.length) {
+    processoHTML = `<ol class="processo-lista">` + etapas.map((e, i) => {
+      const nome = (typeof e === 'string') ? e : (e.nome || e.titulo || `Etapa ${i+1}`);
+      const desc = (typeof e === 'string') ? '' : (e.descricao || '');
+      return `<li><span class="proc-numero">${i+1}</span><div><strong>${nome}</strong>${desc ? `<p>${desc}</p>` : ''}</div></li>`;
+    }).join('') + `</ol>`;
+  } else {
+    processoHTML = `<ol class="processo-lista">
+      <li><span class="proc-numero">1</span><div><strong>Inscrição</strong><p>Envie sua candidatura pela plataforma</p></div></li>
+      <li><span class="proc-numero">2</span><div><strong>Triagem curricular</strong><p>Análise do perfil e documentos</p></div></li>
+      <li><span class="proc-numero">3</span><div><strong>Entrevista RH</strong><p>Conversa inicial com o time de recrutamento</p></div></li>
+      <li><span class="proc-numero">4</span><div><strong>Entrevista técnica</strong><p>Avaliação com o gestor da área</p></div></li>
+      <li><span class="proc-numero">5</span><div><strong>Contratação</strong><p>Proposta formal e início</p></div></li>
+    </ol>`;
+  }
+
+  const html = `
+    <div class="det-card">
+      <div class="det-cabecalho">
+        <div class="det-empresa">${v.empresa || 'Confidencial'}</div>
+        <h1 class="det-titulo">${v.titulo || 'Vaga'}</h1>
+        <div class="det-tags">
+          ${v.area ? `<span class="det-tag">${v.area}</span>` : ''}
+          ${v.modalidade ? `<span class="det-tag">${v.modalidade}</span>` : ''}
+          ${v.cidade ? `<span class="det-tag">📍 ${v.cidade}${v.estado ? '/' + v.estado : ''}</span>` : ''}
+          <span class="det-tag salario">💰 ${salTexto}</span>
+        </div>
+      </div>
+
+      <div class="det-grid">
+        <div class="det-item"><div class="det-label">Localização</div><div class="det-value">${v.cidade || '—'}</div></div>
+        <div class="det-item"><div class="det-label">Contrato</div><div class="det-value">${v.tipo_contrato || '—'}</div></div>
+        <div class="det-item"><div class="det-label">Nível</div><div class="det-value">${v.nivel || '—'}</div></div>
+        <div class="det-item"><div class="det-label">Área</div><div class="det-value">${v.area || '—'}</div></div>
+      </div>
+
+      <div class="det-corpo">
+        <div class="det-section">
+          <h3>Descrição</h3>
+          <p>${v.descricao || 'Sem descrição'}</p>
+        </div>
+        <div class="det-section">
+          <h3>Requisitos</h3>
+          <p>${v.requisitos || '—'}</p>
+        </div>
+        <div class="det-section">
+          <h3>Benefícios</h3>
+          <p>${v.beneficios || '—'}</p>
+        </div>
+        <div class="det-section">
+          <h3>Processo seletivo</h3>
+          ${processoHTML}
+        </div>
+      </div>
+
+      <div class="det-footer">
+        <div class="info">📅 Publicada em ${formatarData(v.criada_em)}</div>
+        <button class="btn" id="btn-candidatar">Candidatar-se</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('vaga-conteudo').innerHTML = html;
+  atualizarBotaoCandidatar(v.id);
+}
+
+function atualizarBotaoCandidatar(vagaId) {
+  const btn = document.getElementById('btn-candidatar');
+  if (!btn) return;
+  if (!tokenCandidato) {
+    btn.textContent = '🔒 Faça login para se candidatar';
+    btn.disabled = false;
+    btn.onclick = () => { location.href = 'index.html'; abrirModal('login'); };
+  } else if (!cadastroCompleto) {
+    btn.textContent = '📝 Complete seu cadastro para candidatar-se';
+    btn.disabled = false;
+    btn.onclick = () => {
+      // Volta pra home e abre o cadastro
+      location.href = 'index.html';
+    };
+  } else {
+    btn.textContent = '✅ Candidatar-se a esta vaga';
+    btn.disabled = false;
+    btn.onclick = () => candidatarPagina(vagaId);
+  }
+}
+
+async function candidatarPagina(vagaId) {
+  const btn = document.getElementById('btn-candidatar');
+  if (!btn) return;
+  if (!tokenCandidato) { alert('Você precisa fazer login antes de se candidatar.'); return; }
+  if (!cadastroCompleto) { alert('Complete seu cadastro antes de se candidatar.'); return; }
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try {
+    const r = await fetch(API + '/api/candidato/candidatar/' + vagaId, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    const data = await r.json();
+    if (r.ok) {
+      btn.textContent = '✓ Candidatura enviada!';
+      btn.classList.add('btn-success');
+    } else if (r.status === 401) {
+      logout();
+      btn.textContent = '🔒 Faça login para se candidatar';
+      btn.disabled = false;
+      btn.onclick = () => { location.href = 'index.html'; };
+      alert('Sua sessão expirou. Faça login novamente.');
+    } else {
+      btn.textContent = '❌ ' + (data.erro || 'Erro');
+      btn.disabled = false;
+    }
+  } catch (e) {
+    btn.textContent = '❌ Erro de conexão';
+    btn.disabled = false;
+  }
+}
+
+function formatarData(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return '';
+  return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', () => {
+  if (typeof window.atualizarHeaderUsuario === 'function') window.atualizarHeaderUsuario();
+});
+</script>
+
+</body>
+</html>
