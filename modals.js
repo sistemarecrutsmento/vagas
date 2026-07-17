@@ -169,18 +169,22 @@
       <div class="wizard-etapa" id="wizard-etapa-4" style="display:none !important">
         <h3 class="wizard-titulo">Escolaridade</h3>
         <p class="wizard-subtitulo">Conte sobre sua formação.</p>
+        <div class="form-group">
+          <label>Formação *</label>
+          <select id="w4-formacao">
+            <option value="">Selecione...</option>
+            <option value="fundamental">Ensino Fundamental</option>
+            <option value="medio">Ensino Médio</option>
+            <option value="tecnico">Ensino Técnico</option>
+            <option value="superior">Ensino Superior</option>
+            <option value="pos">Pós-graduação</option>
+            <option value="mestrado">Mestrado</option>
+            <option value="doutorado">Doutorado</option>
+          </select>
+        </div>
         <div class="form-row">
-          <div class="form-group"><label>Nível</label>
-            <select id="w4-nivel">
-              <option value="">Selecione...</option>
-              <option value="fundamental">Fundamental</option>
-              <option value="medio">Médio</option>
-              <option value="tecnico">Técnico</option>
-              <option value="superior">Superior</option>
-              <option value="pos">Pós-graduação</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Curso</label><input type="text" id="w4-curso"></div>
+          <div class="form-group"><label>Instituição</label><input type="text" id="w4-instituicao" placeholder="Nome da escola/faculdade"></div>
+          <div class="form-group"><label>Curso</label><input type="text" id="w4-curso" placeholder="Ex: Administração"></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>Situação</label>
