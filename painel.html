@@ -115,6 +115,21 @@
   .cand-seta { color: var(--cinza-medio); font-size: 18px; }
   .empty { padding: 40px 0; text-align: center; color: var(--cinza); }
 
+  /* Timeline de candidatura (mesma usada na home) */
+  .cand-card { background: var(--cinza); border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+  .cand-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .cand-card h4 { color: var(--vinho); font-size: 16px; margin-bottom: 2px; }
+  .cand-card .cand-empresa { font-size: 13px; color: var(--cinza-medio); }
+  .cand-timeline { display: flex; align-items: center; gap: 6px; padding-top: 12px; border-top: 1px solid var(--borda); overflow-x: auto; }
+  .cand-etapa { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; text-align: center; position: relative; }
+  .cand-etapa::after { content: ''; position: absolute; top: 14px; left: 50%; right: -50%; height: 2px; background: var(--borda); z-index: 0; }
+  .cand-etapa:last-child::after { display: none; }
+  .cand-etapa-bola { width: 28px; height: 28px; border-radius: 50%; background: var(--borda); color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; z-index: 1; position: relative; }
+  .cand-etapa.ativa .cand-etapa-bola { background: var(--vinho); color: white; }
+  .cand-etapa.concluida .cand-etapa-bola { background: var(--verde); color: white; }
+  .cand-etapa-label { font-size: 11px; color: var(--cinza-medio); }
+  .cand-etapa.ativa .cand-etapa-label, .cand-etapa.concluida .cand-etapa-label { color: var(--preto); font-weight: 600; }
+
   /* Modal overlay (reutilizado) */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
   .modal-overlay.aberto { display: flex; }
