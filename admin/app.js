@@ -324,17 +324,18 @@ async function abrirVagaCands(vagaId) {
     }
     tb.innerHTML = candidaturasVagaCache.map(c => {
       const badge = c.status === 'contratado' ? 'badge-ativa' : (c.status === 'rejeitado' || c.status === 'reprovado') ? 'badge-fechada' : (c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente');
-      // Resolve nome da etapa
+      // Resolve nome da etapa (etapa_atual é 1-based: 1=Inscrição, 2=Triagem, ...)
       let etapasArr = [];
       try { etapasArr = typeof c.etapas === 'string' ? JSON.parse(c.etapas) : c.etapas; } catch(e) {}
       if (!Array.isArray(etapasArr)) etapasArr = [];
-      const idx = c.etapa_atual || 0;
-      const etapaNome = (etapasArr[idx] && (typeof etapasArr[idx] === 'string' ? etapasArr[idx] : etapasArr[idx].nome)) || `Etapa ${idx+1}`;
+      const numEtapa = c.etapa_atual || 1;  // 1-based
+      const idxZero = numEtapa - 1;
+      const etapaNome = (etapasArr[idxZero] && (typeof etapasArr[idxZero] === 'string' ? etapasArr[idxZero] : etapasArr[idxZero].nome)) || `Etapa ${numEtapa}`;
       return `<tr>
         <td><strong>${c.nome || '—'}</strong></td>
         <td>${c.email || '—'}</td>
         <td>${c.cidade || '—'}</td>
-        <td>${idx+1}. ${etapaNome}</td>
+        <td>${numEtapa}. ${etapaNome}</td>
         <td><span class="badge ${badge}">${c.status}</span></td>
         <td>${formatarData(c.criada_em)}</td>
         <td>
