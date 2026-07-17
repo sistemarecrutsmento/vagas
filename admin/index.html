@@ -71,9 +71,10 @@
     .stat-card.verde .valor { color: var(--verde); }
     /* Tabela */
     .tabela-wrap { background: var(--branco); border-radius: 8px; border: 1px solid var(--borda); overflow: hidden; }
-    #vaga-cands-internal-table { min-width: 720px; }
+    #vaga-cands-internal-table { min-width: 720px; border-collapse: separate; border-spacing: 0; }
     #vaga-cands-internal-table th, #vaga-cands-internal-table td { white-space: nowrap; }
-    #vaga-cands-internal-table th:last-child, #vaga-cands-internal-table td:last-child { text-align: right; }
+    #vaga-cands-internal-table th:last-child, #vaga-cands-internal-table td:last-child { text-align: right; position: sticky; right: 0; background: var(--branco); box-shadow: -1px 0 0 var(--borda); }
+    #vaga-cands-internal-table thead th:last-child { background: #F8F8F8; }
     .tabela-scroll { overflow-x: auto; }
     .btn-ver { display: inline-block; padding: 6px 14px; background: var(--vinho); color: #fff; border-radius: 4px; font-size: 12px; text-decoration: none; white-space: nowrap; }
     .btn-ver:hover { background: var(--vinho-claro); }
@@ -392,6 +393,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-1410"></script>
+<script src="app.js?v=20260717-1420"></script>
 </body>
 </html>
