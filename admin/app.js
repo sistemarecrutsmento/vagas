@@ -265,26 +265,21 @@ async function carregarCandidatos() {
       );
     }
     if (lista.length === 0) {
-      tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum candidato encontrado' + (area ? ' com a área "' + area + '"' : '') + '</td></tr>';
+      tb.innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato encontrado' + (area ? ' com a área "' + area + '"' : '') + '</td></tr>';
       return;
     }
     tb.innerHTML = lista.map(c => {
-      const areas = Array.isArray(c.areas_interesse) ? c.areas_interesse : [];
-      const areasHtml = areas.length
-        ? areas.map(a => `<span class="badge-area">${a}</span>`).join(' ')
-        : '<span style="color:var(--cinza-medio)">—</span>';
       return `<tr>
         <td data-label="Nome"><strong>${c.nome}</strong></td>
         <td data-label="Email">${c.email || '—'}</td>
         <td data-label="Telefone">${c.celular || '—'}</td>
         <td data-label="Cidade">${c.cidade ? c.cidade + (c.estado ? '/' + c.estado : '') : '—'}</td>
-        <td data-label="Áreas"><div class="areas-badges">${areasHtml}</div></td>
         <td data-label="Cadastro">${formatarData(c.criado_em)}</td>
         <td data-label="Ações"><a class="btn-ver" href="javascript:void(0)" onclick="abrirCurriculo(${c.id})">👁 Ver currículo</a></td>
       </tr>`;
     }).join('');
   } catch {
-    tb.innerHTML = '<tr><td colspan="7" class="alert-erro">Erro ao carregar</td></tr>';
+    tb.innerHTML = '<tr><td colspan="6" class="alert-erro">Erro ao carregar</td></tr>';
   }
 }
 
