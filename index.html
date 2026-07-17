@@ -34,9 +34,9 @@
     .btn-outline:hover { background: rgba(255,255,255,0.1); }
 
     /* Hero */
-    .hero { background: linear-gradient(135deg, var(--vinho) 0%, var(--vinho-escuro) 100%); color: var(--branco); padding: 80px 0 60px; text-align: center; }
-    .hero h1 { font-size: 48px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 16px; }
-    .hero p { font-size: 19px; opacity: 0.9; max-width: 600px; margin: 0 auto 32px; }
+    .hero { background: linear-gradient(135deg, var(--vinho) 0%, var(--vinho-escuro) 100%); color: var(--branco); padding: 60px 0 70px; text-align: center; }
+    .hero h1 { display: none; }
+    .hero p { display: none; }
     .search-box { max-width: 600px; margin: 0 auto; display: flex; gap: 8px; background: var(--branco); padding: 8px; border-radius: 8px; }
     .search-box input { flex: 1; border: none; padding: 14px 16px; font-size: 16px; outline: none; color: var(--preto); }
     .search-box button { background: var(--preto); color: var(--branco); border: none; padding: 0 24px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; }
@@ -243,6 +243,34 @@
       .painel-resumo { grid-template-columns: 60px 1fr; }
       .painel-resumo .btn { grid-column: 1 / -1; }
     }
+
+    /* ===== WIZARD DE CADASTRO (4 ETAPAS) ===== */
+    .wizard-progresso { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+    .wizard-passo { padding: 6px 12px; border-radius: 20px; background: rgba(255,255,255,0.15); font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.7); }
+    .wizard-passo span { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; background: rgba(255,255,255,0.2); border-radius: 50%; font-size: 11px; font-weight: 700; }
+    .wizard-passo.ativo { background: white; color: var(--vinho); }
+    .wizard-passo.ativo span { background: var(--vinho); color: white; }
+    .wizard-passo.concluido { background: #2E7D32; color: white; }
+    .wizard-passo.concluido span { background: white; color: #2E7D32; }
+    .wizard-titulo { font-size: 22px; font-weight: 700; color: var(--vinho); margin-bottom: 4px; margin-top: 8px; }
+    .wizard-subtitulo { color: var(--cinza-medio); font-size: 14px; margin-bottom: 20px; }
+    .wizard-botoes { display: flex; justify-content: space-between; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--borda); gap: 12px; }
+    .wizard-botoes .btn-primary { width: auto; }
+    .wizard-botoes .btn-secondary { width: auto; }
+    .modal-large { max-width: 680px; width: 95%; }
+
+    .exp-form { background: #f8f9fa; border: 1px dashed var(--borda); padding: 16px; border-radius: 8px; margin-bottom: 12px; }
+    .exp-form h4 { margin: 0 0 12px; font-size: 14px; }
+    .exp-acoes { display: flex; gap: 8px; margin-top: 8px; }
+    .exp-acoes .btn { padding: 8px 16px; font-size: 13px; width: auto; }
+    .exp-item { background: #f8f9fa; border: 1px solid var(--borda); padding: 12px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .exp-item h4 { margin: 0 0 4px; font-size: 15px; }
+    .exp-item p { margin: 0; font-size: 13px; color: var(--cinza-medio); }
+    .exp-item .btn-x { background: none; border: none; color: var(--vermelho); cursor: pointer; font-size: 22px; padding: 0 8px; line-height: 1; }
+    .exp-item .btn-x:hover { background: #fee; border-radius: 4px; }
+    .check-label { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 14px; line-height: 1.4; }
+    .check-label input { width: auto !important; margin-top: 2px; }
+    .muted { color: var(--cinza-medio); font-size: 14px; }
   </style>
 </head>
 <body>
@@ -261,9 +289,7 @@
 
 <section class="hero">
   <div class="container">
-    <h1>Encontre sua próxima oportunidade</h1>
-    <p>Vagas de empresas que valorizam seu talento. Cadastre-se e candidate-se com poucos cliques.</p>
-    <div class="search-box">
+    <div class="search-box search-box-central">
       <input type="text" id="busca" placeholder="Buscar por cargo ou empresa...">
       <button onclick="carregarVagas()">Buscar</button>
     </div>
@@ -317,10 +343,6 @@
         <div class="det-item" style="grid-column:1/-1"><div class="det-label">Salário</div><div class="det-value" id="det-salario"></div></div>
       </div>
       <div class="det-section"><h3>Descrição</h3><p id="det-descricao"></p></div>
-      <div class="det-section">
-        <h3>Processo seletivo</h3>
-        <div id="det-processo"></div>
-      </div>
       <div class="det-section"><h3>Requisitos</h3><p id="det-requisitos"></p></div>
       <div class="det-section"><h3>Benefícios</h3><p id="det-beneficios"></p></div>
     </div>
@@ -330,76 +352,105 @@
   </div>
 </div>
 
-<!-- MODAL CADASTRO (2 ETAPAS: criar conta + completar perfil) -->
+<!-- MODAL CADASTRO (WIZARD 4 ETAPAS) -->
 <div class="modal-overlay" id="modal-cad">
-  <div class="modal">
+  <div class="modal modal-large">
     <div class="modal-header">
-      <h2 id="cad-titulo">Criar conta</h2>
+      <div style="flex:1">
+        <h2 id="cad-titulo">Cadastre-se</h2>
+        <div class="wizard-progresso" id="wizard-progresso">
+          <div class="wizard-passo ativo" data-p="1"><span>1</span> Conta</div>
+          <div class="wizard-passo" data-p="2"><span>2</span> Dados pessoais</div>
+          <div class="wizard-passo" data-p="3"><span>3</span> Endereço</div>
+          <div class="wizard-passo" data-p="4"><span>4</span> Experiência</div>
+        </div>
+      </div>
       <button class="modal-close" onclick="fecharModal('cad')">×</button>
     </div>
     <div class="modal-body">
 
-      <!-- ETAPA 1: criar conta (nome, email, celular, senha) -->
-      <div class="step" id="cad-etapa-1">
-        <div class="info-box">
-          <strong>Crie sua conta</strong> — é rápido e gratuito. Você poderá se candidatar às vagas imediatamente.
+      <!-- ETAPA 1: CONTA (email+senha) — pula se já logado -->
+      <div class="wizard-etapa" id="wizard-etapa-1">
+        <h3 class="wizard-titulo">Crie sua conta</h3>
+        <p class="wizard-subtitulo">É rápido e gratuito. Você poderá se candidatar às vagas imediatamente.</p>
+        <div class="form-group"><label>E-mail *</label><input type="email" id="w1-email" placeholder="seu@email.com" autocomplete="email"></div>
+        <div class="form-group"><label>Senha * (mínimo 6 caracteres)</label><input type="password" id="w1-senha" placeholder="••••••" minlength="6" autocomplete="new-password"></div>
+        <div class="form-group"><label>Confirme sua senha *</label><input type="password" id="w1-senha-conf" placeholder="••••••" minlength="6" autocomplete="new-password"></div>
+        <div class="wizard-botoes">
+          <span></span>
+          <button class="btn btn-primary" onclick="wizardProximo()">Continuar</button>
         </div>
-        <div class="form-group">
-          <label>Nome completo *</label>
-          <input type="text" id="cad-nome" placeholder="Seu nome" autocomplete="name">
-        </div>
-        <div class="form-group">
-          <label>E-mail *</label>
-          <input type="email" id="cad-email" placeholder="seu@email.com" autocomplete="email">
-        </div>
-        <div class="form-group">
-          <label>Celular / WhatsApp *</label>
-          <input type="tel" id="cad-celular" placeholder="(00) 00000-0000" autocomplete="tel">
-        </div>
-        <div class="form-group">
-          <label>Senha * (mínimo 6 caracteres)</label>
-          <input type="password" id="cad-senha" placeholder="••••••" minlength="6" autocomplete="new-password">
-        </div>
-        <div class="form-group">
-          <label>Confirme sua senha *</label>
-          <input type="password" id="cad-senha-conf" placeholder="••••••" minlength="6" autocomplete="new-password">
-        </div>
-        <button class="btn btn-primary" onclick="cadastrarConta(this)">Criar conta</button>
-        <p style="text-align:center;margin-top:16px;font-size:14px;">
+        <p style="text-align:center;margin-top:20px;font-size:14px;">
           Já tem conta? <a href="#" onclick="fecharModal('cad');abrirModal('login');return false;" style="color:var(--vinho);font-weight:600;">Entrar</a>
         </p>
       </div>
 
-      <!-- ETAPA 2: completar perfil (CPF, data, etc.) -->
-      <div class="step" id="cad-etapa-2">
-        <div class="info-box">
-          <strong>Quase lá!</strong> Complete seu perfil. Você pode editar depois.
+      <!-- ETAPA 2: DADOS PESSOAIS -->
+      <div class="wizard-etapa" id="wizard-etapa-2" style="display:none !important">
+        <h3 class="wizard-titulo">Seus dados pessoais</h3>
+        <p class="wizard-subtitulo">Essas informações ajudam a empresa a te conhecer melhor.</p>
+        <div class="form-row">
+          <div class="form-group"><label>CPF *</label><input type="text" id="w2-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric"></div>
+          <div class="form-group"><label>Nome completo *</label><input type="text" id="w2-nome" placeholder="Seu nome"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Nome completo *</label><input type="text" id="perfil-nome"></div>
-          <div class="form-group"><label>Celular</label><input type="text" id="perfil-celular" placeholder="(00) 00000-0000"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>CPF <span style="color:#C00;">*</span></label><input type="text" id="perfil-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric"></div>
-          <div class="form-group"><label>Data de nascimento</label><input type="date" id="perfil-nascimento"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Sexo</label>
-            <select id="perfil-sexo">
-              <option value="">Prefiro não informar</option>
+          <div class="form-group"><label>Data de nascimento *</label><input type="date" id="w2-nascimento"></div>
+          <div class="form-group"><label>Sexo *</label>
+            <select id="w2-sexo">
+              <option value="">Selecione...</option>
               <option value="M">Masculino</option>
               <option value="F">Feminino</option>
               <option value="Outro">Outro</option>
             </select>
           </div>
-          <div class="form-group"><label>Cidade</label><input type="text" id="perfil-cidade"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>UF</label><input type="text" id="perfil-estado" maxlength="2"></div>
+          <div class="form-group"><label>Número do celular *</label><input type="tel" id="w2-celular" placeholder="(00) 00000-0000"></div>
+          <div class="form-group"><label>E-mail *</label><input type="email" id="w2-email" placeholder="seu@email.com"></div>
         </div>
         <div class="form-group">
-          <label>Formação</label>
-          <select id="perfil-formacao">
+          <label>Precisa de acessibilidade?</label>
+          <select id="w2-acessibilidade">
+            <option value="">Não</option>
+            <option value="cadeirante">Cadeirante</option>
+            <option value="deficiencia_visual">Deficiência visual</option>
+            <option value="deficiencia_auditiva">Deficiência auditiva</option>
+            <option value="mobilidade_reduzida">Mobilidade reduzida</option>
+            <option value="outra">Outra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="check-label"><input type="checkbox" id="w2-politica" required> Li e aceito a <a href="#" onclick="alert('Política de privacidade');return false;" style="color:var(--vinho);font-weight:600;">Política de privacidade</a></label>
+        </div>
+        <div class="form-group">
+          <label class="check-label"><input type="checkbox" id="w2-banco"> Autorizo manter meu perfil no Banco de Talentos por 24 meses para futuras oportunidades.</label>
+        </div>
+        <div class="wizard-botoes">
+          <button class="btn btn-secondary" onclick="wizardVoltar()">Voltar</button>
+          <button class="btn btn-primary" onclick="wizardProximo()">Continuar</button>
+        </div>
+      </div>
+
+      <!-- ETAPA 3: ENDEREÇO -->
+      <div class="wizard-etapa" id="wizard-etapa-3" style="display:none !important">
+        <h3 class="wizard-titulo">Endereço</h3>
+        <p class="wizard-subtitulo">Para o envio de correspondências e processos presenciais.</p>
+        <div class="form-row">
+          <div class="form-group"><label>CEP *</label><input type="text" id="w3-cep" placeholder="00000-000" maxlength="9"></div>
+          <div class="form-group"><label>UF *</label><input type="text" id="w3-estado" maxlength="2" placeholder="BA"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Cidade *</label><input type="text" id="w3-cidade"></div>
+          <div class="form-group"><label>Bairro *</label><input type="text" id="w3-bairro"></div>
+        </div>
+        <div class="form-group"><label>Logradouro *</label><input type="text" id="w3-logradouro" placeholder="Rua, avenida..."></div>
+        <div class="form-row">
+          <div class="form-group"><label>Número *</label><input type="text" id="w3-numero"></div>
+          <div class="form-group"><label>Complemento</label><input type="text" id="w3-complemento"></div>
+        </div>
+        <h3 class="wizard-titulo" style="margin-top:30px">Escolaridade</h3>
+        <div class="form-group"><label>Formação *</label>
+          <select id="w3-formacao">
             <option value="">Selecione...</option>
             <option value="Ensino fundamental">Ensino fundamental</option>
             <option value="Ensino médio">Ensino médio</option>
@@ -409,15 +460,58 @@
             <option value="Mestrado">Mestrado</option>
           </select>
         </div>
-        <button class="btn btn-primary" onclick="salvarPerfil(this)">Salvar e continuar</button>
-        <p style="text-align:center;margin-top:12px;font-size:13px;color:var(--cinza-medio);">
-          Você pode pular e preencher depois.
-        </p>
-        <button class="btn btn-secondary" style="margin-top:8px" onclick="fecharModal('cad');atualizarHeaderUsuario()">Pular por agora</button>
+        <div class="form-row">
+          <div class="form-group"><label>Instituição</label><input type="text" id="w3-instituicao"></div>
+          <div class="form-group"><label>Curso</label><input type="text" id="w3-curso"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Situação</label>
+            <select id="w3-situacao">
+              <option value="">Selecione...</option>
+              <option value="concluido">Concluído</option>
+              <option value="cursando">Cursando</option>
+              <option value="trancado">Trancado</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Data de conclusão</label><input type="date" id="w3-conclusao"></div>
+        </div>
+        <div class="wizard-botoes">
+          <button class="btn btn-secondary" onclick="wizardVoltar()">Voltar</button>
+          <button class="btn btn-primary" onclick="wizardProximo()">Continuar</button>
+        </div>
       </div>
 
-      <!-- ETAPA 3 (legado, mantida oculta por compat) -->
-      <div class="step" id="cad-etapa-3" style="display:none !important"></div>
+      <!-- ETAPA 4: EXPERIÊNCIA -->
+      <div class="wizard-etapa" id="wizard-etapa-4" style="display:none !important">
+        <h3 class="wizard-titulo">Experiência profissional</h3>
+        <p class="wizard-subtitulo">Adicione suas últimas experiências. Você pode pular se preferir.</p>
+        <div id="w4-lista"><p class="muted">Nenhuma experiência adicionada ainda.</p></div>
+        <div class="exp-form">
+          <h4>+ Nova experiência</h4>
+          <div class="form-row">
+            <div class="form-group"><label>Cargo *</label><input type="text" id="w4-cargo" placeholder="Ex: Auxiliar administrativo"></div>
+            <div class="form-group"><label>Empresa *</label><input type="text" id="w4-empresa" placeholder="Nome da empresa"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Início</label><input type="date" id="w4-inicio"></div>
+            <div class="form-group"><label>Término</label><input type="date" id="w4-fim"></div>
+          </div>
+          <div class="form-group">
+            <label class="check-label"><input type="checkbox" id="w4-atual"> Emprego atual</label>
+          </div>
+          <div class="form-group"><label>Atividades exercidas</label><textarea id="w4-descricao" rows="2" placeholder="Descreva brevemente suas atividades"></textarea></div>
+          <div class="exp-acoes">
+            <button class="btn btn-secondary" type="button" onclick="wizardAddExperiencia()">+ Adicionar</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="check-label"><input type="checkbox" id="w3-primeiro-emprego"> Este é meu primeiro emprego</label>
+        </div>
+        <div class="wizard-botoes">
+          <button class="btn btn-secondary" onclick="wizardVoltar()">Voltar</button>
+          <button class="btn btn-primary" onclick="wizardFinalizar()">Finalizar cadastro</button>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -616,6 +710,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260716-2110"></script>
+<script src="app.js?v=20260716-2120"></script>
 </body>
 </html>
