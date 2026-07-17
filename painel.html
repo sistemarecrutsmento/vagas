@@ -531,10 +531,22 @@ document.addEventListener('click', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
   // Espera checarAuth rodar (também no DOMContentLoaded)
   setTimeout(() => {
-    redirecionarSeNaoLogado();
-    if (tokenCandidato) carregarPaginaCandidato();
+    console.log('[painel.html] tokenCandidato =', tokenCandidato ? 'presente' : 'AUSENTE');
+    if (typeof window.localStorage !== 'undefined') {
+      console.log('[painel.html] localStorage token =', localStorage.getItem('candidato_token') ? 'presente' : 'AUSENTE');
+    }
+    if (!tokenCandidato && localStorage.getItem('candidato_token')) {
+      // checarAuth ainda não rodou — popula direto
+      tokenCandidato = localStorage.getItem('candidato_token');
+      emailLogado = localStorage.getItem('candidato_email');
+    }
+    if (!tokenCandidato) {
+      location.href = 'index.html';
+      return;
+    }
+    carregarPaginaCandidato();
     if (typeof window.atualizarHeaderUsuario === 'function') window.atualizarHeaderUsuario();
-  }, 50);
+  }, 200);
 });
 </script>
 
