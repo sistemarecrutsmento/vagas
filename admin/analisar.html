@@ -122,18 +122,20 @@
     }
 
     function montarTimeline(c) {
-      let etapas = ETAPAS;
+      let etapasArr = ETAPAS;
       try {
         const arr = typeof c.etapas === 'string' ? JSON.parse(c.etapas) : c.etapas;
-        if (Array.isArray(arr) && arr.length) etapas = arr;
+        if (Array.isArray(arr) && arr.length) {
+          // Cada item pode ser string OU objeto {nome: '...'}
+          etapasArr = arr.map(e => typeof e === 'string' ? e : (e.nome || e.name || JSON.stringify(e)));
+        }
       } catch (e) {}
 
       const etapaAtual = c.etapa_atual || 0;
       const status = c.status;
-      const total = etapas.length;
       const reprovado = status === 'rejeitado' || status === 'reprovado';
 
-      return etapas.map((nome, i) => {
+      return etapasArr.map((nome, i) => {
         let classe = '';
         if (reprovado) classe = i === etapaAtual ? 'rejeitada' : (i < etapaAtual ? 'concluida' : '');
         else if (i < etapaAtual) classe = 'concluida';
@@ -210,7 +212,6 @@
             <h3>📍 Endereço</h3>
             <div class="texto-bloco">${endCompleto}</div>
           </div>
-
           <div class="secao">
             <h3>🎓 Formação Acadêmica</h3>
             <div class="dados-grid">
