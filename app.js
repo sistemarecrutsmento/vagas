@@ -651,6 +651,7 @@ async function carregarPainel() {
     document.getElementById('painel-nome').textContent = nome;
     document.getElementById('painel-email').textContent = perfil.email || emailLogado || '';
     localStorage.setItem('candidato_nome', nome);
+    if (perfil.foto_url) localStorage.setItem('candidato_foto', perfil.foto_url);
   }
 
   // Foto de perfil no editor
