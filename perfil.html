@@ -172,7 +172,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-0800"></script>
+<script src="app.js?v=20260717-0900"></script>
 <script>
 // ===== ROTEAMENTO =====
 function redirecionarSeNaoLogado() {
@@ -260,7 +260,7 @@ async function carregarPaginaPerfil() {
             <div class="form-group"><label>CPF *</label><input type="text" id="pe-cpf" placeholder="000.000.000-00" maxlength="14" value="${escapeHtml(perfil.cpf || '')}"></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label>Data de nascimento</label><input type="date" id="pe-nascimento" value="${escapeHtml(perfil.data_nascimento || '')}"></div>
+            <div class="form-group"><label>Data de nascimento</label><input type="date" id="pe-nascimento" value="${escapeHtml((perfil.data_nascimento||'').toString().substring(0,10))}"></div>
             <div class="form-group"><label>Sexo</label>
               <select id="pe-sexo">
                 <option value="">Prefiro não informar</option>
