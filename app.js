@@ -788,8 +788,9 @@ function carregarDadosPerfil(perfil) {
   }
 }
 
-async function salvarPerfilCompleto(btn) {
-  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+async function salvarPerfilCompleto(target) {
+  const btn = target?.tagName === 'FORM' ? target.querySelector('button[type="submit"]') : target;
+  if (btn) { btn.disabled = true; btn._oldText = btn.textContent; btn.textContent = 'Salvando...'; }
   const payload = {
     nome: document.getElementById('pe-nome')?.value.trim(),
     cpf: document.getElementById('pe-cpf')?.value.replace(/\D/g, ''),
@@ -830,7 +831,7 @@ async function salvarPerfilCompleto(btn) {
       if (btn) { btn.textContent = '✓ Salvo!'; btn.style.background = 'var(--verde)'; }
       setTimeout(() => { 
         if (btn) { 
-          btn.textContent = 'Salvar perfil'; 
+          btn.textContent = btn._oldText || 'Salvar perfil'; 
           btn.style.background = ''; 
           btn.disabled = false; 
         } 
@@ -839,11 +840,11 @@ async function salvarPerfilCompleto(btn) {
       }, 800);
     } else {
       alert('Erro: ' + (data.erro || ''));
-      if (btn) { btn.disabled = false; btn.textContent = 'Salvar perfil'; }
+      if (btn) { btn.disabled = false; btn.textContent = btn._oldText || 'Salvar perfil'; }
     }
   } catch (e) {
     alert('Erro de conexão');
-    if (btn) { btn.disabled = false; btn.textContent = 'Salvar perfil'; }
+    if (btn) { btn.disabled = false; btn.textContent = btn._oldText || 'Salvar perfil'; }
   }
 }
 
