@@ -59,7 +59,7 @@ async function carregarVagas() {
       const sMax = Number(v.salario_max) || null;
       const salTexto = (sMin && sMax) ? `R$ ${sMin.toLocaleString('pt-BR')} - R$ ${sMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
       return `
-      <div class="vaga-card" onclick="abrirDetalhes(${v.id})">
+      <a class="vaga-card" href="vaga.html?id=${v.id}" style="text-decoration:none;color:inherit;display:block;">
         <div class="empresa">${v.empresa || 'Empresa'}</div>
         <h3>${v.titulo}</h3>
         <div class="vaga-tags">
@@ -72,7 +72,7 @@ async function carregarVagas() {
           <span class="data">${formatarData(v.criada_em)}</span>
           <span class="cta">Ver detalhes →</span>
         </div>
-      </div>
+      </a>
     `;
     }).join('');
     if (contador) contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
