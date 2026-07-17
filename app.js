@@ -791,25 +791,27 @@ function carregarDadosPerfil(perfil) {
 async function salvarPerfilCompleto(btn) {
   if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
   const payload = {
-    nome: document.getElementById('pe-nome').value.trim(),
-    cpf: document.getElementById('pe-cpf').value.replace(/\D/g, ''),
-    data_nascimento: document.getElementById('pe-nascimento').value || null,
-    sexo: document.getElementById('pe-sexo').value || null,
-    celular: document.getElementById('pe-celular').value.trim(),
-    cep: document.getElementById('pe-cep').value.replace(/\D/g, ''),
-    cidade: document.getElementById('pe-cidade').value.trim(),
-    estado: document.getElementById('pe-estado').value.trim().toUpperCase(),
-    bairro: document.getElementById('pe-bairro').value.trim(),
-    logradouro: document.getElementById('pe-logradouro').value.trim(),
-    numero: document.getElementById('pe-numero').value.trim(),
-    complemento: document.getElementById('pe-complemento').value.trim(),
-    formacao: document.getElementById('pe-formacao').value || null,
-    instituicao: document.getElementById('pe-instituicao').value.trim(),
-    curso: document.getElementById('pe-curso').value.trim(),
-    situacao: document.getElementById('pe-situacao').value || null,
-    primeiro_emprego: document.getElementById('pe-primeiro-emprego').value === 'true',
-    acessibilidade: document.getElementById('pe-acessibilidade').value || null,
-    recebe_comunicacoes: document.getElementById('pe-comunicacoes').checked
+    nome: document.getElementById('pe-nome')?.value.trim(),
+    cpf: document.getElementById('pe-cpf')?.value.replace(/\D/g, ''),
+    data_nascimento: document.getElementById('pe-nascimento')?.value || null,
+    sexo: document.getElementById('pe-sexo')?.value || null,
+    celular: document.getElementById('pe-celular')?.value.trim(),
+    cep: document.getElementById('pe-cep')?.value.replace(/\D/g, ''),
+    cidade: document.getElementById('pe-cidade')?.value.trim(),
+    estado: document.getElementById('pe-estado')?.value.trim().toUpperCase(),
+    bairro: document.getElementById('pe-bairro')?.value.trim(),
+    logradouro: document.getElementById('pe-logradouro')?.value.trim(),
+    numero: document.getElementById('pe-numero')?.value.trim(),
+    complemento: document.getElementById('pe-complemento')?.value.trim(),
+    formacao: document.getElementById('pe-formacao')?.value || null,
+    instituicao: document.getElementById('pe-instituicao')?.value.trim(),
+    curso: document.getElementById('pe-curso')?.value.trim(),
+    situacao: document.getElementById('pe-situacao')?.value || null,
+    primeiro_emprego: document.getElementById('pe-primeiro-emprego')?.value === 'true',
+    experiencia: document.getElementById('pe-experiencia')?.value.trim() || null,
+    sobre_voce: document.getElementById('pe-sobre-voce')?.value.trim() || null,
+    acessibilidade: document.getElementById('pe-acessibilidade')?.value || null,
+    recebe_comunicacoes: document.getElementById('pe-comunicacoes')?.checked || false
   };
   try {
     const r = await fetch(API + '/api/candidato/cadastrar', {
