@@ -617,8 +617,8 @@ async function abrirPainelCandidato() {
     return;
   }
 
-  document.getElementById('modal-minhas').classList.add('aberto');
-  await carregarPainel();
+  // Vai pra página dedicada do candidato (não mais modal)
+  location.href = 'painel.html';
 }
 
 async function carregarPainel() {
