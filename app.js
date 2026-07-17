@@ -1129,7 +1129,10 @@ function formatarData(iso) {
   if (!iso) return 'Recente';
   const d = new Date(iso);
   const hoje = new Date();
-  const diff = Math.floor((hoje - d) / 86400000);
+  // Compara só a parte de DATA (sem hora) pra evitar "Hoje" aparecer quando já virou "Ontem"
+  const dDia = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const hDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const diff = Math.round((hDia - dDia) / 86400000);
   if (diff === 0) return 'Hoje';
   if (diff === 1) return 'Ontem';
   if (diff < 7) return `${diff} dias atrás`;
