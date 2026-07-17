@@ -363,7 +363,8 @@
           <div class="wizard-passo ativo" data-p="1"><span>1</span> Conta</div>
           <div class="wizard-passo" data-p="2"><span>2</span> Dados pessoais</div>
           <div class="wizard-passo" data-p="3"><span>3</span> Endereço</div>
-          <div class="wizard-passo" data-p="4"><span>4</span> Experiência</div>
+          <div class="wizard-passo" data-p="4"><span>4</span> Escolaridade</div>
+          <div class="wizard-passo" data-p="5"><span>5</span> Experiência</div>
         </div>
       </div>
       <button class="modal-close" onclick="fecharModal('cad')">×</button>
@@ -449,9 +450,18 @@
           <div class="form-group"><label>Número *</label><input type="text" id="w3-numero"></div>
           <div class="form-group"><label>Complemento</label><input type="text" id="w3-complemento"></div>
         </div>
-        <h3 class="wizard-titulo" style="margin-top:30px">Escolaridade</h3>
+        <div class="wizard-botoes">
+          <button class="btn btn-secondary" onclick="wizardVoltar()">Voltar</button>
+          <button class="btn btn-primary" onclick="wizardProximo()">Continuar</button>
+        </div>
+      </div>
+
+      <!-- ETAPA 4: ESCOLARIDADE -->
+      <div class="wizard-etapa" id="wizard-etapa-4" style="display:none !important">
+        <h3 class="wizard-titulo">Escolaridade</h3>
+        <p class="wizard-subtitulo">Conte sobre sua formação. Pode ser ensino médio, técnico, graduação ou pós.</p>
         <div class="form-group"><label>Formação *</label>
-          <select id="w3-formacao">
+          <select id="w4-formacao">
             <option value="">Selecione...</option>
             <option value="Ensino fundamental">Ensino fundamental</option>
             <option value="Ensino médio">Ensino médio</option>
@@ -462,19 +472,22 @@
           </select>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Instituição</label><input type="text" id="w3-instituicao"></div>
-          <div class="form-group"><label>Curso</label><input type="text" id="w3-curso"></div>
+          <div class="form-group"><label>Instituição</label><input type="text" id="w4-instituicao"></div>
+          <div class="form-group"><label>Curso</label><input type="text" id="w4-curso"></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>Situação</label>
-            <select id="w3-situacao">
+            <select id="w4-situacao">
               <option value="">Selecione...</option>
               <option value="concluido">Concluído</option>
               <option value="cursando">Cursando</option>
               <option value="trancado">Trancado</option>
             </select>
           </div>
-          <div class="form-group"><label>Data de conclusão</label><input type="date" id="w3-conclusao"></div>
+          <div class="form-group"><label>Data de conclusão</label><input type="date" id="w4-conclusao"></div>
+        </div>
+        <div class="form-group">
+          <label class="check-label"><input type="checkbox" id="w4-primeiro-emprego"> Este é meu primeiro emprego</label>
         </div>
         <div class="wizard-botoes">
           <button class="btn btn-secondary" onclick="wizardVoltar()">Voltar</button>
@@ -482,31 +495,28 @@
         </div>
       </div>
 
-      <!-- ETAPA 4: EXPERIÊNCIA -->
-      <div class="wizard-etapa" id="wizard-etapa-4" style="display:none !important">
+      <!-- ETAPA 5: EXPERIÊNCIA -->
+      <div class="wizard-etapa" id="wizard-etapa-5" style="display:none !important">
         <h3 class="wizard-titulo">Experiência profissional</h3>
         <p class="wizard-subtitulo">Adicione suas últimas experiências. Você pode pular se preferir.</p>
-        <div id="w4-lista"><p class="muted">Nenhuma experiência adicionada ainda.</p></div>
+        <div id="w5-lista"><p class="muted">Nenhuma experiência adicionada ainda.</p></div>
         <div class="exp-form">
           <h4>+ Nova experiência</h4>
           <div class="form-row">
-            <div class="form-group"><label>Cargo *</label><input type="text" id="w4-cargo" placeholder="Ex: Auxiliar administrativo"></div>
-            <div class="form-group"><label>Empresa *</label><input type="text" id="w4-empresa" placeholder="Nome da empresa"></div>
+            <div class="form-group"><label>Cargo *</label><input type="text" id="w5-cargo" placeholder="Ex: Auxiliar administrativo"></div>
+            <div class="form-group"><label>Empresa *</label><input type="text" id="w5-empresa" placeholder="Nome da empresa"></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label>Início</label><input type="date" id="w4-inicio"></div>
-            <div class="form-group"><label>Término</label><input type="date" id="w4-fim"></div>
+            <div class="form-group"><label>Início</label><input type="date" id="w5-inicio"></div>
+            <div class="form-group"><label>Término</label><input type="date" id="w5-fim"></div>
           </div>
           <div class="form-group">
-            <label class="check-label"><input type="checkbox" id="w4-atual"> Emprego atual</label>
+            <label class="check-label"><input type="checkbox" id="w5-atual"> Emprego atual</label>
           </div>
-          <div class="form-group"><label>Atividades exercidas</label><textarea id="w4-descricao" rows="2" placeholder="Descreva brevemente suas atividades"></textarea></div>
+          <div class="form-group"><label>Atividades exercidas</label><textarea id="w5-descricao" rows="2" placeholder="Descreva brevemente suas atividades"></textarea></div>
           <div class="exp-acoes">
             <button class="btn btn-secondary" type="button" onclick="wizardAddExperiencia()">+ Adicionar</button>
           </div>
-        </div>
-        <div class="form-group">
-          <label class="check-label"><input type="checkbox" id="w3-primeiro-emprego"> Este é meu primeiro emprego</label>
         </div>
         <div class="wizard-botoes">
           <button class="btn btn-secondary" onclick="wizardVoltar()">Voltar</button>
@@ -711,6 +721,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260716-2150"></script>
+<script src="app.js?v=20260716-2200"></script>
 </body>
 </html>
