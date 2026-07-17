@@ -80,7 +80,8 @@
     .modal-overlay.aberto { display: flex; }
     .modal { background: var(--branco); border-radius: 12px; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; }
     .modal-large { max-width: 720px; }
-    .modal-header { padding: 24px 28px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: start; }
+    .modal-header { padding: 24px 28px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .modal-header > div { flex: 1; }
     .modal-header h2 { font-size: 22px; font-weight: 700; }
     .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--cinza-medio); }
     .modal-body { padding: 28px; }
@@ -710,6 +711,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260716-2140"></script>
+<script src="app.js?v=20260716-2150"></script>
 </body>
 </html>
