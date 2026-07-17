@@ -14,6 +14,8 @@ let cadastroCompleto = false;
 window.addEventListener('DOMContentLoaded', () => {
   carregarVagas();
   checarAuth();
+  // Garante o ☰ no logo (mesmo deslogado)
+  setTimeout(garantirBotaoMenu, 50);
   document.querySelectorAll('.filtro-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.filtro-chip').forEach(c => c.classList.remove('ativo'));
