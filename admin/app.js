@@ -336,7 +336,7 @@ async function abrirVagaCands(vagaId) {
       return `<tr>
         <td><strong>${c.nome || '—'}</strong></td>
         <td>${c.email || '—'}</td>
-        <td>${c.cidade || '—'}</td>
+        <td>${c.cidade ? (c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td>
         <td>${numEtapa}. ${etapaNome}</td>
         <td><span class="badge ${badge}">${c.status}</span></td>
         <td>${formatarData(c.criada_em)}</td>
