@@ -813,6 +813,10 @@ async function salvarPerfilCompleto(btn) {
     acessibilidade: document.getElementById('pe-acessibilidade')?.value || null,
     recebe_comunicacoes: document.getElementById('pe-comunicacoes')?.checked || false
   };
+  // Se a página injetou um array de experiencias (ex: perfil.html), inclui no payload
+  if (Array.isArray(window.__perfilExps)) {
+    payload.experiencias = window.__perfilExps;
+  }
   try {
     const r = await fetch(API + '/api/candidato/cadastrar', {
       method: 'POST',
