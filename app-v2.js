@@ -779,8 +779,14 @@ async function carregarCands() {
           <p style="font-size:13px;color:#888;margin-top:8px">Volte para a lista de vagas e candidate-se!</p>
           <button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="fecharModal('minhas')">Ver vagas</button>
         </div>`;
+      const cnt = document.getElementById('painel-cands-count');
+      if (cnt) cnt.textContent = '';
       return;
     }
+
+    // Contador no título
+    const cnt = document.getElementById('painel-cands-count');
+    if (cnt) cnt.textContent = `(${lista.length} ${lista.length === 1 ? 'vaga' : 'vagas'})`;
 
     // Buscar etapas de cada vaga pra montar a timeline
     const ETAPAS_PADRAO = [
@@ -816,27 +822,41 @@ async function carregarCands() {
 
     listaEl.innerHTML = cands.map(c => {
       const etapaAtual = Number(c.etapa_atual || 0);
-      const etapasHTML = c.etapas.map((e, i) => {
-        const nome = (typeof e === 'string') ? e : (e.nome || `Etapa ${i+1}`);
-        const cls = i < etapaAtual ? 'concluida' : (i === etapaAtual ? 'ativa' : '');
-        return `<div class="cand-etapa ${cls}">
-          <div class="cand-etapa-bola">${i < etapaAtual ? '✓' : i+1}</div>
-          <div class="cand-etapa-label">${nome}</div>
-        </div>`;
-      }).join('');
+      const totalEtapas = c.etapas.length;
+      const pct = totalEtapas > 0 ? Math.min(100, Math.round((etapaAtual / totalEtapas) * 100)) : 0;
+      const etapaNome = (() => {
+        if (c.status === 'contratado') return '🎉 Contratação concluída';
+        if (c.status === 'reprovado') return 'Processo encerrado';
+        const e = c.etapas[etapaAtual];
+        if (!e) return 'Inscrição recebida';
+        const nome = (typeof e === 'string') ? e : (e.nome || `Etapa ${etapaAtual + 1}`);
+        return `Etapa ${etapaAtual + 1} de ${totalEtapas} — ${nome}`;
+      })();
+      const statusClass = c.status || 'em_analise';
+      const cardExtras = (c.status === 'contratado') ? ' contratado' : (c.status === 'reprovado' ? ' reprovado' : '');
+      const localTxt = c.cidade ? `${c.cidade}${c.estado ? ' / ' + c.estado : ''}` : '';
       return `
-        <div class="cand-card" style="cursor:pointer" onclick="location.href='inscricao.html?vaga=${c.vaga_id}'" title="Acompanhar processo seletivo">
+        <div class="cand-card${cardExtras}" onclick="location.href='inscricao.html?vaga=${c.vaga_id}'" title="Acompanhar processo seletivo">
           <div class="cand-card-top">
-            <div>
+            <div class="cand-card-info">
               <h4>${c.titulo || 'Vaga'}</h4>
-              <div class="cand-empresa">${c.empresa || ''} ${c.cidade ? '• ' + c.cidade : ''}</div>
+              <div class="cand-card-meta">
+                <span>🏢 ${c.empresa || 'Empresa'}</span>
+                ${localTxt ? `<span class="sep">•</span><span>📍 ${localTxt}</span>` : ''}
+              </div>
             </div>
-            <span class="status status-${c.status}">${statusLabel(c.status)}</span>
+            <span class="cand-status status-${statusClass}"><span class="dot"></span>${statusLabel(c.status)}</span>
           </div>
-          <div class="cand-timeline">${etapasHTML}</div>
-          <div style="margin-top:8px;font-size:12px;color:#888;display:flex;justify-content:space-between;align-items:center">
+          <div class="cand-progresso">
+            <div class="cand-progresso-top">
+              <span>${etapaNome}</span>
+              <strong>${pct}%</strong>
+            </div>
+            <div class="cand-progresso-bar"><div class="cand-progresso-fill" style="width:${pct}%"></div></div>
+          </div>
+          <div class="cand-card-footer">
             <span>📅 Inscrito em ${formatarData(c.criada_em)}</span>
-            <span style="color:var(--vinho);font-weight:600">Acompanhar processo →</span>
+            <span class="ver-mais">Acompanhar processo →</span>
           </div>
         </div>
       `;
