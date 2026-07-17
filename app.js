@@ -755,7 +755,7 @@ async function carregarCands() {
         </div>`;
       }).join('');
       return `
-        <div class="cand-card">
+        <div class="cand-card" style="cursor:pointer" onclick="location.href='inscricao.html?vaga=${c.vaga_id}'" title="Acompanhar processo seletivo">
           <div class="cand-card-top">
             <div>
               <h4>${c.titulo || 'Vaga'}</h4>
@@ -764,7 +764,10 @@ async function carregarCands() {
             <span class="status status-${c.status}">${statusLabel(c.status)}</span>
           </div>
           <div class="cand-timeline">${etapasHTML}</div>
-          <div style="margin-top:8px;font-size:12px;color:#888">📅 Inscrito em ${formatarData(c.criada_em)}</div>
+          <div style="margin-top:8px;font-size:12px;color:#888;display:flex;justify-content:space-between;align-items:center">
+            <span>📅 Inscrito em ${formatarData(c.criada_em)}</span>
+            <span style="color:var(--vinho);font-weight:600">Acompanhar processo →</span>
+          </div>
         </div>
       `;
     }).join('');
