@@ -338,7 +338,7 @@ async function abrirVagaCands(vagaId) {
         <td><span class="badge ${badge}">${c.status}</span></td>
         <td>${formatarData(c.criada_em)}</td>
         <td>
-          <a class="btn btn-primary" style="padding:6px 12px;font-size:12px" href="analisar.html?id=${c.id}" target="_blank">👁 Ver</a>
+          <a class="btn-ver" href="analisar.html?id=${c.id}" target="_blank" rel="noopener">👁 Ver</a>
         </td>
       </tr>`;
     }).join('');
