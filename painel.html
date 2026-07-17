@@ -106,33 +106,37 @@
 
   /* Card de candidaturas */
   .cands-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px; }
-  .cands-card h3 { font-size: 20px; color: var(--preto); margin-bottom: 20px; }
-  .cands-tabela-head { display: grid; grid-template-columns: 1fr auto; gap: 16px; padding: 0 0 12px; border-bottom: 1px solid var(--borda); font-size: 12px; font-weight: 600; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; }
-  .cand-item { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 16px; padding: 18px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.15s; }
-  .cand-item:hover { background: #fafafa; }
-  .cand-item:last-child { border-bottom: none; }
-  .cand-titulo { color: var(--preto); font-weight: 500; }
-  .cand-status { background: var(--vinho); color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
-  .cand-status.status-contratado { background: var(--verde); }
-  .cand-status.status-rejeitado { background: var(--vermelho); }
-  .cand-seta { color: var(--cinza-medio); font-size: 18px; }
+  .cands-card h3 { font-size: 20px; color: var(--preto); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  .cands-card h3 small { font-size: 13px; color: var(--cinza-medio); font-weight: 400; }
+  .cands-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .cands-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .cand-card { background: white; border: 1px solid var(--borda); border-radius: 12px; padding: 20px; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; position: relative; overflow: hidden; }
+  .cand-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(114,47,55,0.10); border-color: var(--vinho-claro); }
+  .cand-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .cand-card-info { flex: 1; min-width: 0; }
+  .cand-card h4 { color: var(--preto); font-size: 17px; margin-bottom: 4px; line-height: 1.3; }
+  .cand-card-meta { font-size: 13px; color: var(--cinza-medio); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .cand-card-meta span { display: inline-flex; align-items: center; gap: 4px; }
+  .cand-card-meta .sep { color: var(--borda); }
+  .cand-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; background: #fef3c7; color: #92400e; }
+  .cand-status .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .cand-status.status-em_analise { background: #fef3c7; color: #92400e; }
+  .cand-status.status-aprovado { background: #d1fae5; color: #065f46; }
+  .cand-status.status-reprovado { background: #fee2e2; color: #991b1b; }
+  .cand-status.status-contratado { background: #d1fae5; color: #065f46; }
+  .cand-status.status-entrevista { background: #dbeafe; color: #1e40af; }
+  .cand-progresso { margin-top: 16px; }
+  .cand-progresso-top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--cinza-medio); margin-bottom: 6px; }
+  .cand-progresso-top strong { color: var(--preto); font-weight: 600; }
+  .cand-progresso-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+  .cand-progresso-fill { height: 100%; background: linear-gradient(90deg, var(--vinho) 0%, var(--vinho-claro) 100%); border-radius: 3px; transition: width .4s ease; }
+  .cand-card.contratado { border-color: var(--verde); }
+  .cand-card.contratado .cand-progresso-fill { background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%); }
+  .cand-card.reprovado { border-color: var(--vermelho); opacity: 0.85; }
+  .cand-card.reprovado .cand-progresso-fill { background: var(--vermelho); }
+  .cand-card-footer { margin-top: 14px; padding-top: 14px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--cinza-medio); }
+  .cand-card-footer .ver-mais { color: var(--vinho); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
   .empty { padding: 40px 0; text-align: center; color: var(--cinza); }
-
-  /* Timeline de candidatura (mesma usada na home) */
-  .cand-card { background: var(--cinza); border-radius: 8px; padding: 16px; margin-bottom: 14px; transition: transform .15s, box-shadow .15s; }
-  .cand-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
-  .cand-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-  .cand-card h4 { color: var(--vinho); font-size: 16px; margin-bottom: 2px; }
-  .cand-card .cand-empresa { font-size: 13px; color: var(--cinza-medio); }
-  .cand-timeline { display: flex; align-items: center; gap: 6px; padding-top: 12px; border-top: 1px solid var(--borda); overflow-x: auto; }
-  .cand-etapa { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; text-align: center; position: relative; }
-  .cand-etapa::after { content: ''; position: absolute; top: 14px; left: 50%; right: -50%; height: 2px; background: var(--borda); z-index: 0; }
-  .cand-etapa:last-child::after { display: none; }
-  .cand-etapa-bola { width: 28px; height: 28px; border-radius: 50%; background: var(--borda); color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; z-index: 1; position: relative; }
-  .cand-etapa.ativa .cand-etapa-bola { background: var(--vinho); color: white; }
-  .cand-etapa.concluida .cand-etapa-bola { background: var(--verde); color: white; }
-  .cand-etapa-label { font-size: 11px; color: var(--cinza-medio); }
-  .cand-etapa.ativa .cand-etapa-label, .cand-etapa.concluida .cand-etapa-label { color: var(--preto); font-weight: 600; }
 
   /* Modal overlay (reutilizado) */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
@@ -271,13 +275,8 @@
 
   <!-- Card de candidaturas -->
   <div class="cands-card">
-    <h3>Minhas inscrições</h3>
-    <div class="cands-tabela-head">
-      <span>Título</span>
-      <span>Status</span>
-      <span></span>
-    </div>
-    <div id="painel-cands-lista">
+    <h3>Minhas inscrições <small id="painel-cands-count"></small></h3>
+    <div class="cands-grid" id="painel-cands-lista">
       <div class="empty"><div class="spinner"></div></div>
     </div>
   </div>
@@ -447,7 +446,7 @@
   </div>
 </div>
 
-<script src="app-v2.js?v=1"></script>
+<script src="app-v2.js?v=5"></script>
 <script src="modals.js?v=1"></script>
 <script>
 // ===== ROTEAMENTO =====
