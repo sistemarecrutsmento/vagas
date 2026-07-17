@@ -11,6 +11,46 @@ let emailLogado = null;
 let tokenCandidato = null;
 let cadastroCompleto = false;
 
+// Áreas de interesse (Banco de Talentos)
+const AREAS_INTERESSE = [
+  'Atendimento ao Cliente','Caixa','Vendas','Comercial','Administrativo','Recepção','Estoque','Logística','Expedição','Compras',
+  'Financeiro','Recursos Humanos (RH)','Marketing','Telemarketing','Suporte Técnico','Tecnologia da Informação (TI)','Desenvolvimento de Software',
+  'Design Gráfico','E-commerce','Supervisão','Gerência','Liderança Comercial','Operações','Produção','Qualidade','Segurança Patrimonial','Portaria',
+  'Limpeza e Conservação','Serviços Gerais','Manutenção','Transporte','Motorista','Entregas','Alimentação e Restaurantes','Hotelaria e Turismo','Saúde',
+  'Educação','Farmácia','Construção Civil','Indústria','Estágio','Jovem Aprendiz','Primeiro Emprego'
+];
+const AREAS_MAX = 5;
+let areasSelecionadas = [];
+
+function renderAreasChips() {
+  const container = document.getElementById('w2-areas');
+  if (!container) return;
+  container.innerHTML = AREAS_INTERESSE.map(a => {
+    const sel = areasSelecionadas.includes(a);
+    return `<span class="area-chip${sel ? ' selecionada' : ''}" data-area="${a.replace(/"/g, '&quot;')}">${a}</span>`;
+  }).join('');
+  container.querySelectorAll('.area-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const area = chip.getAttribute('data-area');
+      const idx = areasSelecionadas.indexOf(area);
+      if (idx >= 0) {
+        areasSelecionadas.splice(idx, 1);
+      } else {
+        if (areasSelecionadas.length >= AREAS_MAX) return alert('Você pode escolher no máximo ' + AREAS_MAX + ' áreas.');
+        areasSelecionadas.push(area);
+      }
+      renderAreasChips();
+      atualizarContadorAreas();
+    });
+  });
+  atualizarContadorAreas();
+}
+
+function atualizarContadorAreas() {
+  const el = document.getElementById('w2-areas-contador');
+  if (el) el.textContent = areasSelecionadas.length + ' de ' + AREAS_MAX + ' selecionadas';
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   carregarVagas();
   checarAuth();
@@ -213,7 +253,9 @@ function abrirModal(id) {
     // Reset wizard
     wizardExps = [];
     wizardEtapa1 = null;
+    areasSelecionadas = [];
     if (typeof wizardRenderExps === 'function') wizardRenderExps();
+    if (typeof renderAreasChips === 'function') renderAreasChips();
     // Se já tem token, pula etapa 1 (conta)
     if (tokenCandidato) {
       wizardEtapa1 = { email: emailLogado, jaLogado: true };
@@ -307,6 +349,7 @@ function wizardEtapa2Validar() {
   const acessibilidade = document.getElementById('w2-acessibilidade')?.value || null;
   const politica = document.getElementById('w2-politica')?.checked;
   const banco = document.getElementById('w2-banco')?.checked;
+  const areas = areasSelecionadas.slice();
 
   if (!cpf || cpf.length !== 11) return alert('CPF é obrigatório (11 dígitos)');
   if (!nome) return alert('Informe seu nome completo');
@@ -319,7 +362,7 @@ function wizardEtapa2Validar() {
   // Pra etapa 4: se for a primeira conta (não logado), cria com email+senha
   // Se já logado, só atualiza perfil
   wizardEtapa1 = wizardEtapa1 || {};
-  wizardEtapa1.dados = { cpf, nome, data_nascimento: dataNasc, sexo, celular, email: emailConfirm, acessibilidade, banco_talentos: banco };
+  wizardEtapa1.dados = { cpf, nome, data_nascimento: dataNasc, sexo, celular, email: emailConfirm, acessibilidade, banco_talentos: banco, areas_interesse: areas };
   wizardIrPara(3);
 }
 
