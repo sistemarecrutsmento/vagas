@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidatos da Vaga — Admin</title>
+  <style>
+    :root {
+      --vinho: #7B1F1F;
+      --vinho-escuro: #5a1414;
+      --dourado: #D4AF37;
+      --borda: #e0e0e0;
+      --cinza: #f5f5f5;
+      --cinza-medio: #888;
+      --branco: #fff;
+      --preto: #222;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: var(--cinza); color: var(--preto); }
+    .topo { background: var(--vinho); color: var(--branco); padding: 16px 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 16px; }
+    .topo h1 { font-size: 18px; font-weight: 600; }
+    .topo a { color: var(--dourado); text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid var(--dourado); border-radius: 6px; }
+    .topo a:hover { background: var(--dourado); color: var(--vinho); }
+    .topo .spacer { flex: 1; }
+    .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .page-header { margin-bottom: 20px; }
+    .voltar { color: var(--vinho); text-decoration: none; font-size: 13px; }
+    .voltar:hover { text-decoration: underline; }
+    .page-header h2 { font-size: 22px; color: var(--vinho); margin: 8px 0 4px; }
+    .page-header .vaga-sub { color: var(--cinza-medio); font-size: 14px; }
+    .vaga-info { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; }
+    .vaga-info .linha { display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px; }
+    .vaga-info .item { display: flex; gap: 6px; }
+    .vaga-info .item .lbl { color: var(--cinza-medio); font-weight: 500; }
+    .tabela-wrap { background: var(--branco); border-radius: 10px; border: 1px solid var(--borda); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--vinho); color: var(--branco); }
+    th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--borda); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #fafafa; }
+    .cand-nome { font-weight: 600; color: var(--preto); }
+    .cand-email { color: var(--cinza-medio); font-size: 12px; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-em-analise { background: #fff3cd; color: #856404; }
+    .badge-em-andamento { background: #cce5ff; color: #004085; }
+    .badge-contratado { background: #d4edda; color: #155724; }
+    .badge-rejeitado { background: #f8d7da; color: #721c24; }
+    .etapa-tag { background: var(--cinza); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .btn { background: var(--vinho); color: var(--branco); border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; text-decoration: none; display: inline-block; }
+    .btn:hover { background: var(--vinho-escuro); }
+    .empty { text-align: center; padding: 40px 20px; color: var(--cinza-medio); }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="topo">
+    <a href="candidaturas.html">← Vagas</a>
+    <h1>👥 Candidatos da Vaga</h1>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <a class="voltar" href="candidaturas.html">← Voltar para vagas</a>
+      <h2 id="vaga-titulo">Carregando...</h2>
+      <div class="vaga-sub" id="vaga-sub"></div>
+    </div>
+    <div class="vaga-info" id="vaga-info"></div>
+    <div class="tabela-wrap">
+      <table>
+        <thead>
+          <tr><th>Candidato</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr>
+        </thead>
+        <tbody id="cands-tbody">
+          <tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://recrutamento-api.onrender.com';
+    const token = localStorage.getItem('admin_token');
+    const params = new URLSearchParams(window.location.search);
+    const vagaId = params.get('vaga');
+
+    if (!token) { window.location.href = 'index.html'; }
+    if (!vagaId) { window.location.href = 'candidaturas.html'; }
+
+    const ETAPAS = ['Inscrição', 'Triagem curricular', 'Entrevista RH', 'Entrevista gestor', 'Proposta', 'Coleta de documentos', 'Contratação'];
+
+    function badgeStatus(s) {
+      const cls = { em_analise: 'badge-em-analise', em_andamento: 'badge-em-andamento', aprovado: 'badge-em-andamento', contratado: 'badge-contratado', rejeitado: 'badge-rejeitado', reprovado: 'badge-rejeitado' }[s] || 'badge-em-analise';
+      const lbl = { em_analise: 'Em análise', em_andamento: 'Em andamento', aprovado: 'Aprovado', contratado: 'Contratado', rejeitado: 'Reprovado', reprovado: 'Reprovado' }[s] || s;
+      return `<span class="badge ${cls}">${lbl}</span>`;
+    }
+
+    async function carregar() {
+      try {
+        const r = await fetch(API + '/api/admin/vagas/' + vagaId + '/candidaturas', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (r.status === 401 || r.status === 403) {
+          localStorage.removeItem('admin_token');
+          window.location.href = 'index.html';
+          return;
+        }
+        const data = await r.json();
+        if (data.erro) {
+          document.getElementById('vaga-titulo').textContent = 'Erro';
+          document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="6" class="empty">' + data.erro + '</td></tr>';
+          return;
+        }
+        const v = data.vaga;
+        const cands = data.candidaturas || [];
+
+        document.getElementById('vaga-titulo').textContent = v.titulo;
+        document.title = v.titulo + ' — Candidatos';
+        document.getElementById('vaga-sub').textContent = v.empresa + ' • ' + ([v.cidade, v.estado].filter(Boolean).join(' / ') || '—');
+
+        const local = [v.cidade, v.estado].filter(Boolean).join(' / ') || '—';
+        document.getElementById('vaga-info').innerHTML = `
+          <div class="linha">
+            <div class="item"><span class="lbl">Empresa:</span><span>${v.empresa || '—'}</span></div>
+            <div class="item"><span class="lbl">Local:</span><span>${local}</span></div>
+            <div class="item"><span class="lbl">Candidatos:</span><span><strong>${cands.length}</strong></span></div>
+          </div>
+        `;
+
+        if (cands.length === 0) {
+          document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato ainda.</td></tr>';
+          return;
+        }
+
+        document.getElementById('cands-tbody').innerHTML = cands.map(c => {
+          const etapa = c.etapa_atual || 0;
+          const etapaNome = ETAPAS[etapa] || ('Etapa ' + etapa);
+          return `<tr>
+            <td>
+              <div class="cand-nome">${c.nome || '—'}</div>
+              <div class="cand-email">${c.email || ''}</div>
+            </td>
+            <td>${[c.cidade, c.estado].filter(Boolean).join(' / ') || '—'}</td>
+            <td><span class="etapa-tag">${etapa+1}. ${etapaNome}</span></td>
+            <td>${badgeStatus(c.status)}</td>
+            <td>${formatarData(c.criada_em)}</td>
+            <td><a class="btn" href="analisar.html?id=${c.id}">👁 Analisar</a></td>
+          </tr>`;
+        }).join('');
+      } catch (e) {
+        document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="6" class="empty">Erro: ' + e.message + '</td></tr>';
+      }
+    }
+
+    function formatarData(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    carregar();
+  </script>
+</body>
+</html>
