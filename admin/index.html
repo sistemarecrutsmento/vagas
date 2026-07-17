@@ -56,15 +56,26 @@
       aside.aberto .menu-close { display: block; }
       .aside-logo { padding: 12px 24px 24px; }
       main { width: 100%; padding: 20px 16px; padding-top: 64px; }
-      /* Tabela: esconde colunas não-críticas em mobile para evitar quebra por caractere */
-      #vaga-cands-internal-table th:nth-child(3), #vaga-cands-internal-table td:nth-child(3),
-      #vaga-cands-internal-table th:nth-child(6), #vaga-cands-internal-table td:nth-child(6) { display: none; }
-      #vaga-cands-internal-table th:nth-child(1), #vaga-cands-internal-table td:nth-child(1) { width: 28%; }
-      #vaga-cands-internal-table th:nth-child(2), #vaga-cands-internal-table td:nth-child(2) { width: 30%; word-break: break-all; font-size: 12px; }
-      #vaga-cands-internal-table th:nth-child(4), #vaga-cands-internal-table td:nth-child(4) { width: 16%; font-size: 12px; }
-      #vaga-cands-internal-table th:nth-child(5), #vaga-cands-internal-table td:nth-child(5) { width: 18%; font-size: 12px; white-space: nowrap; }
-      #vaga-cands-internal-table th:nth-child(7), #vaga-cands-internal-table td:nth-child(7) { width: 8%; }
       .btn.btn-sec { padding: 8px 14px; background: var(--cinza-escuro); color: var(--branco); border: 0; border-radius: 6px; cursor: pointer; font-size: 13px; }
+      /* Mobile: transforma tabela de candidatos em cards */
+      #vaga-cands-internal-table thead { display: none; }
+      #vaga-cands-internal-table, #vaga-cands-internal-table tbody, #vaga-cands-internal-table tr, #vaga-cands-internal-table td { display: block; width: 100%; }
+      #vaga-cands-internal-table tr { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+      #vaga-cands-internal-table td { padding: 4px 0; border: 0; text-align: left; }
+      #vaga-cands-internal-table td:nth-child(1) { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+      #vaga-cands-internal-table td:nth-child(1)::before { content: ''; }
+      #vaga-cands-internal-table td:nth-child(2)::before { content: '📧 '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(2) { font-size: 13px; color: var(--cinza-medio); word-break: break-all; }
+      #vaga-cands-internal-table td:nth-child(3)::before { content: '📍 '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(3) { font-size: 12px; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(4)::before { content: '📊 Etapa: '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(4) { font-size: 13px; }
+      #vaga-cands-internal-table td:nth-child(5)::before { content: '🏷 Status: '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(5) { font-size: 13px; }
+      #vaga-cands-internal-table td:nth-child(6)::before { content: '📅 Data: '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(6) { font-size: 12px; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(7) { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--borda); text-align: right; }
+      #vaga-cands-internal-table td:nth-child(7) .btn-ver { padding: 8px 16px; }
     }
     /* Sidebar */
     aside { width: 240px; background: var(--preto); color: var(--branco); padding: 24px 0; flex-shrink: 0; }
