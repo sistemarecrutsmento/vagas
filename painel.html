@@ -134,6 +134,25 @@
   .cand-card.contratado .cand-progresso-fill { background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%); }
   .cand-card.reprovado { border-color: var(--vermelho); opacity: 0.85; }
   .cand-card.reprovado .cand-progresso-fill { background: var(--vermelho); }
+  .cand-timeline { display: flex; align-items: flex-start; gap: 4px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #f0f0f0; overflow-x: auto; }
+  .cand-etapa { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 78px; text-align: center; position: relative; flex: 1; }
+  .cand-etapa::after { content: ''; position: absolute; top: 13px; left: 50%; right: -50%; height: 2px; background: #e8e8e8; z-index: 0; }
+  .cand-etapa:last-child::after { display: none; }
+  .cand-etapa-bola { width: 28px; height: 28px; border-radius: 50%; background: #e8e8e8; color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; z-index: 1; position: relative; border: 2px solid white; box-shadow: 0 0 0 1px #e8e8e8; }
+  .cand-etapa.concluida .cand-etapa-bola { background: var(--verde); color: white; box-shadow: 0 0 0 1px var(--verde); }
+  .cand-etapa.concluida::after { background: var(--verde); }
+  .cand-etapa.andamento .cand-etapa-bola { background: #dbeafe; color: #1e40af; box-shadow: 0 0 0 2px #1e40af; animation: pulse-etapa 1.8s ease-in-out infinite; }
+  .cand-etapa.andamento::after { background: linear-gradient(90deg, #e8e8e8 0%, #e8e8e8 50%, #1e40af 50%, #1e40af 100%); }
+  .cand-etapa.reprovada .cand-etapa-bola { background: var(--vermelho); color: white; box-shadow: 0 0 0 1px var(--vermelho); }
+  .cand-etapa.reprovada::after { background: var(--vermelho); }
+  .cand-etapa-label { font-size: 10.5px; color: var(--cinza-medio); line-height: 1.2; max-width: 90px; }
+  .cand-etapa.concluida .cand-etapa-label { color: var(--preto); font-weight: 600; }
+  .cand-etapa.andamento .cand-etapa-label { color: #1e40af; font-weight: 700; }
+  .cand-etapa.reprovada .cand-etapa-label { color: var(--vermelho); font-weight: 600; }
+  @keyframes pulse-etapa {
+    0%, 100% { box-shadow: 0 0 0 2px #1e40af, 0 0 0 4px rgba(30,64,175,0); }
+    50% { box-shadow: 0 0 0 2px #1e40af, 0 0 0 8px rgba(30,64,175,0.15); }
+  }
   .cand-card-footer { margin-top: 14px; padding-top: 14px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--cinza-medio); }
   .cand-card-footer .ver-mais { color: var(--vinho); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
   .empty { padding: 40px 0; text-align: center; color: var(--cinza); }
@@ -446,7 +465,7 @@
   </div>
 </div>
 
-<script src="app-v2.js?v=5"></script>
+<script src="app-v2.js?v=6"></script>
 <script src="modals.js?v=1"></script>
 <script>
 // ===== ROTEAMENTO =====
