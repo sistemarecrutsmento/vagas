@@ -312,7 +312,12 @@ function wizardProximo() {
   if (wizardStep === 2) return wizardEtapa2Validar();
   if (wizardStep === 3) return wizardEtapa3Validar();
   if (wizardStep === 4) return wizardEtapa4Validar();
-  if (wizardStep === 5) return wizardFinalizar();
+  if (wizardStep === 5) {
+    // Salva flag "primeiro emprego" antes de finalizar
+    wizardEtapa1.dados = wizardEtapa1.dados || {};
+    wizardEtapa1.dados.primeiro_emprego = document.getElementById('w5-primeiro-emprego')?.checked || false;
+    return wizardFinalizar();
+  }
 }
 
 function wizardVoltar() {
@@ -345,7 +350,6 @@ function wizardEtapa2Validar() {
   const dataNasc = document.getElementById('w2-nascimento')?.value;
   const sexo = document.getElementById('w2-sexo')?.value;
   const celular = document.getElementById('w2-celular')?.value.trim();
-  const emailConfirm = document.getElementById('w2-email')?.value.trim().toLowerCase();
   const acessibilidade = document.getElementById('w2-acessibilidade')?.value || null;
   const politica = document.getElementById('w2-politica')?.checked;
   const banco = document.getElementById('w2-banco')?.checked;
@@ -356,13 +360,12 @@ function wizardEtapa2Validar() {
   if (!dataNasc) return alert('Informe sua data de nascimento');
   if (!sexo) return alert('Selecione o sexo');
   if (!celular || celular.replace(/\D/g, '').length < 10) return alert('Informe um celular válido');
-  if (!emailConfirm || !emailConfirm.includes('@')) return alert('Informe um e-mail válido');
   if (!politica) return alert('Você precisa aceitar a Política de Privacidade');
 
-  // Pra etapa 4: se for a primeira conta (não logado), cria com email+senha
-  // Se já logado, só atualiza perfil
+  // E-mail vem do cadastro (etapa 1) ou do candidato logado
   wizardEtapa1 = wizardEtapa1 || {};
-  wizardEtapa1.dados = { cpf, nome, data_nascimento: dataNasc, sexo, celular, email: emailConfirm, acessibilidade, banco_talentos: banco, areas_interesse: areas };
+  const emailFromLogin = (wizardEtapa1.email) || emailLogado || null;
+  wizardEtapa1.dados = { cpf, nome, data_nascimento: dataNasc, sexo, celular, email: emailFromLogin, acessibilidade, banco_talentos: banco, areas_interesse: areas };
   wizardIrPara(3);
 }
 
@@ -393,12 +396,11 @@ function wizardEtapa4Validar() {
   const curso = document.getElementById('w4-curso')?.value.trim() || null;
   const situacao = document.getElementById('w4-situacao')?.value || null;
   const dataConclusao = document.getElementById('w4-conclusao')?.value || null;
-  const primeiroEmprego = document.getElementById('w4-primeiro-emprego')?.checked || false;
 
   if (!formacao) return alert('Selecione a formação');
 
   wizardEtapa1.dados = wizardEtapa1.dados || {};
-  Object.assign(wizardEtapa1.dados, { formacao, instituicao, curso, situacao, data_conclusao: dataConclusao, primeiro_emprego: primeiroEmprego });
+  Object.assign(wizardEtapa1.dados, { formacao, instituicao, curso, situacao, data_conclusao: dataConclusao });
   wizardIrPara(5);
 }
 
