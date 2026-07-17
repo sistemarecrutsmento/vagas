@@ -208,22 +208,16 @@ async function candidatar(vagaId) {
 // ===== MODAIS =====
 function abrirModal(id) {
   if (id === 'cad') {
-    const cadEtapa1 = document.getElementById('cad-etapa-1');
-    const cadEtapa2 = document.getElementById('cad-etapa-2');
-    const cadEtapa3 = document.getElementById('cad-etapa-3');
-    // Se já tem token (criou conta mas falta perfil) → vai direto pra etapa 2
-    // Senão → etapa 1 (criar conta com email+senha)
+    // Reset wizard
+    wizardExps = [];
+    wizardEtapa1 = null;
+    if (typeof wizardRenderExps === 'function') wizardRenderExps();
+    // Se já tem token, pula etapa 1 (conta)
     if (tokenCandidato) {
-      if (cadEtapa1) cadEtapa1.style.setProperty('display', 'none', 'important');
-      if (cadEtapa2) cadEtapa2.style.setProperty('display', 'block', 'important');
+      wizardEtapa1 = { email: emailLogado, jaLogado: true };
+      wizardIrPara(2);
     } else {
-      if (cadEtapa1) cadEtapa1.style.setProperty('display', 'block', 'important');
-      if (cadEtapa2) cadEtapa2.style.setProperty('display', 'none', 'important');
-    }
-    if (cadEtapa3) cadEtapa3.style.setProperty('display', 'none', 'important');
-    if (emailLogado) {
-      const el = document.getElementById('cad-email');
-      if (el) el.value = emailLogado;
+      wizardIrPara(1);
     }
   }
   if (id === 'login') {
@@ -247,119 +241,242 @@ function fecharModal(id) {
   if (modal) modal.classList.remove('aberto');
 }
 
-// Compat: o HTML antigo tem 3 etapas (1=código, 2=verificar, 3=perfil).
-// Agora simplificamos: etapa 1 = criar conta, etapa 2 = perfil. Etapa 3 (legado) some.
-function irParaEtapa(n) {
-  const e1 = document.getElementById('cad-etapa-1');
-  const e2 = document.getElementById('cad-etapa-2');
-  const e3 = document.getElementById('cad-etapa-3');
-  if (e1) e1.style.setProperty('display', 'none', 'important');
-  if (e2) e2.style.setProperty('display', 'none', 'important');
-  if (e3) e3.style.setProperty('display', 'none', 'important');
-  if (n === 1 && e1) e1.style.setProperty('display', 'block', 'important');
-  if (n === 2 && e2) e2.style.setProperty('display', 'block', 'important');
-  if (n === 3 && e3) e3.style.setProperty('display', 'block', 'important');
+// ===== WIZARD DE CADASTRO (4 ETAPAS) =====
+let wizardStep = 1;
+let wizardExps = []; // experiências adicionadas no passo 4
+let wizardEtapa1 = null; // email+senha do passo 1 (criar conta) — null se já logado
+
+function wizardIrPara(n) {
+  wizardStep = n;
+  document.querySelectorAll('.wizard-etapa').forEach(el => el.style.setProperty('display', 'none', 'important'));
+  document.querySelectorAll('.wizard-passo').forEach(el => el.classList.remove('ativo', 'concluido'));
+  const etapa = document.getElementById('wizard-etapa-' + n);
+  if (etapa) etapa.style.setProperty('display', 'block', 'important');
+  for (let i = 1; i <= 4; i++) {
+    const p = document.querySelector(`.wizard-passo[data-p="${i}"]`);
+    if (!p) continue;
+    if (i < n) p.classList.add('concluido');
+    if (i === n) p.classList.add('ativo');
+  }
+  // já rolar pro topo do modal
+  const modal = document.getElementById('modal-cad');
+  if (modal) modal.scrollTop = 0;
 }
 
-// ===== CADASTRO (etapa 1: criar conta, etapa 2: completar perfil) =====
-async function cadastrarConta(btn) {
-  const nome = document.getElementById('cad-nome')?.value.trim();
-  const email = document.getElementById('cad-email')?.value.trim().toLowerCase();
-  const celular = document.getElementById('cad-celular')?.value.trim();
-  const senha = document.getElementById('cad-senha')?.value;
-  const senhaConf = document.getElementById('cad-senha-conf')?.value;
+function wizardProximo() {
+  if (wizardStep === 1) return wizardEtapa1Validar();
+  if (wizardStep === 2) return wizardEtapa2Validar();
+  if (wizardStep === 3) return wizardEtapa3Validar();
+  if (wizardStep === 4) return wizardFinalizar();
+}
 
-  if (!nome) return alert('Informe seu nome');
+function wizardVoltar() {
+  if (wizardStep > 1) wizardIrPara(wizardStep - 1);
+}
+
+function wizardEtapa1Validar() {
+  // Se já tem token (caso "completar cadastro"), pula etapa 1
+  if (tokenCandidato) {
+    wizardEtapa1 = { email: emailLogado, jaLogado: true };
+    wizardIrPara(2);
+    return;
+  }
+
+  const email = document.getElementById('w1-email')?.value.trim().toLowerCase();
+  const senha = document.getElementById('w1-senha')?.value;
+  const senhaConf = document.getElementById('w1-senha-conf')?.value;
   if (!email || !email.includes('@')) return alert('Informe um e-mail válido');
-  if (!celular) return alert('Informe seu celular/WhatsApp');
   if (!senha || senha.length < 6) return alert('A senha deve ter no mínimo 6 caracteres');
   if (senha !== senhaConf) return alert('As senhas não coincidem');
 
-  const oldText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Criando conta...';
+  wizardEtapa1 = { email, senha, jaLogado: false };
+  wizardIrPara(2);
+}
+
+function wizardEtapa2Validar() {
+  const cpfRaw = document.getElementById('w2-cpf')?.value.trim() || '';
+  const cpf = cpfRaw.replace(/\D/g, '');
+  const nome = document.getElementById('w2-nome')?.value.trim();
+  const dataNasc = document.getElementById('w2-nascimento')?.value;
+  const sexo = document.getElementById('w2-sexo')?.value;
+  const celular = document.getElementById('w2-celular')?.value.trim();
+  const emailConfirm = document.getElementById('w2-email')?.value.trim().toLowerCase();
+  const acessibilidade = document.getElementById('w2-acessibilidade')?.value || null;
+  const politica = document.getElementById('w2-politica')?.checked;
+  const banco = document.getElementById('w2-banco')?.checked;
+
+  if (!cpf || cpf.length !== 11) return alert('CPF é obrigatório (11 dígitos)');
+  if (!nome) return alert('Informe seu nome completo');
+  if (!dataNasc) return alert('Informe sua data de nascimento');
+  if (!sexo) return alert('Selecione o sexo');
+  if (!celular || celular.replace(/\D/g, '').length < 10) return alert('Informe um celular válido');
+  if (!emailConfirm || !emailConfirm.includes('@')) return alert('Informe um e-mail válido');
+  if (!politica) return alert('Você precisa aceitar a Política de Privacidade');
+
+  // Pra etapa 4: se for a primeira conta (não logado), cria com email+senha
+  // Se já logado, só atualiza perfil
+  wizardEtapa1 = wizardEtapa1 || {};
+  wizardEtapa1.dados = { cpf, nome, data_nascimento: dataNasc, sexo, celular, email: emailConfirm, acessibilidade, banco_talentos: banco };
+  wizardIrPara(3);
+}
+
+function wizardEtapa3Validar() {
+  const cep = document.getElementById('w3-cep')?.value.replace(/\D/g, '') || '';
+  const estado = document.getElementById('w3-estado')?.value.trim().toUpperCase();
+  const cidade = document.getElementById('w3-cidade')?.value.trim();
+  const bairro = document.getElementById('w3-bairro')?.value.trim();
+  const logradouro = document.getElementById('w3-logradouro')?.value.trim();
+  const numero = document.getElementById('w3-numero')?.value.trim();
+  const complemento = document.getElementById('w3-complemento')?.value.trim() || null;
+
+  if (cep.length !== 8) return alert('CEP é obrigatório (8 dígitos)');
+  if (!estado || estado.length !== 2) return alert('UF é obrigatório (ex: SP)');
+  if (!cidade) return alert('Cidade é obrigatória');
+  if (!bairro) return alert('Bairro é obrigatório');
+  if (!logradouro) return alert('Logradouro é obrigatório');
+  if (!numero) return alert('Número é obrigatório');
+
+  wizardEtapa1.dados = wizardEtapa1.dados || {};
+  Object.assign(wizardEtapa1.dados, { cep, estado, cidade, bairro, logradouro, numero, complemento });
+  wizardIrPara(4);
+}
+
+function wizardAddExperiencia() {
+  const cargo = document.getElementById('w4-cargo')?.value.trim();
+  const empresa = document.getElementById('w4-empresa')?.value.trim();
+  const inicio = document.getElementById('w4-inicio')?.value || null;
+  const fim = document.getElementById('w4-fim')?.value || null;
+  const empregoAtual = document.getElementById('w4-atual')?.checked;
+  const descricao = document.getElementById('w4-descricao')?.value.trim() || null;
+
+  if (!cargo) return alert('Informe o cargo');
+  if (!empresa) return alert('Informe a empresa');
+
+  if (empregoAtual) {
+    wizardExps.push({ cargo, empresa, inicio, fim: null, emprego_atual: true, descricao });
+  } else {
+    if (!inicio) return alert('Informe a data de início');
+    if (!fim) return alert('Informe a data de término (ou marque "Emprego atual")');
+    wizardExps.push({ cargo, empresa, inicio, fim, emprego_atual: false, descricao });
+  }
+
+  // limpa form
+  ['w4-cargo','w4-empresa','w4-inicio','w4-fim','w4-descricao'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const at = document.getElementById('w4-atual'); if (at) at.checked = false;
+  wizardRenderExps();
+}
+
+function wizardRemoverExp(idx) {
+  wizardExps.splice(idx, 1);
+  wizardRenderExps();
+}
+
+function wizardRenderExps() {
+  const cont = document.getElementById('w4-lista');
+  if (!cont) return;
+  if (wizardExps.length === 0) {
+    cont.innerHTML = '<p class="muted">Nenhuma experiência adicionada ainda. Você pode adicionar ou pular essa etapa.</p>';
+    return;
+  }
+  cont.innerHTML = wizardExps.map((e, i) => `
+    <div class="exp-item">
+      <div>
+        <strong>${e.cargo}</strong> — ${e.empresa}
+        <div class="muted" style="font-size:12px">${e.inicio || '?'} → ${e.emprego_atual ? 'Atual' : (e.fim || '?')}</div>
+      </div>
+      <button type="button" class="btn-x" onclick="wizardRemoverExp(${i})" title="Remover">×</button>
+    </div>
+  `).join('');
+}
+
+async function wizardFinalizar() {
+  const formacao = document.getElementById('w3-formacao')?.value || null;
+  const instituicao = document.getElementById('w3-instituicao')?.value.trim() || null;
+  const curso = document.getElementById('w3-curso')?.value.trim() || null;
+  const situacao = document.getElementById('w3-situacao')?.value || null;
+  const dataConclusao = document.getElementById('w3-conclusao')?.value || null;
+  const primeiroEmprego = document.getElementById('w3-primeiro-emprego')?.checked || false;
+
+  const dados = {
+    ...(wizardEtapa1.dados || {}),
+    formacao, instituicao, curso, situacao, data_conclusao: dataConclusao,
+    primeiro_emprego: primeiroEmprego,
+    experiencias: wizardExps
+  };
+
+  const btn = document.querySelector('#wizard-etapa-4 .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Finalizando...'; }
+
   try {
-    const r = await fetch(API + '/api/candidato/cadastro', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, email, celular, senha })
-    });
-    const data = await r.json();
-    if (r.ok) {
-      tokenCandidato = data.token;
-      emailLogado = data.candidato.email;
+    // 1) Se não logado, cria a conta
+    if (!wizardEtapa1.jaLogado) {
+      const rc = await fetch(API + '/api/candidato/cadastro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: dados.nome,
+          email: wizardEtapa1.email,
+          senha: wizardEtapa1.senha,
+          cpf: dados.cpf,
+          celular: dados.celular,
+          data_nascimento: dados.data_nascimento,
+          sexo: dados.sexo
+        })
+      });
+      const dc = await rc.json();
+      if (!rc.ok) {
+        alert('Erro: ' + (dc.erro || 'não foi possível criar a conta'));
+        if (btn) { btn.disabled = false; btn.textContent = 'Finalizar cadastro'; }
+        return;
+      }
+      tokenCandidato = dc.token;
+      emailLogado = dc.candidato.email;
       localStorage.setItem('candidato_token', tokenCandidato);
       localStorage.setItem('candidato_email', emailLogado);
-      cadastroCompleto = false; // ainda não tem CPF, etc.
-      // Avança para etapa 2 (perfil completo)
-      irParaEtapa(2);
+      localStorage.setItem('candidato_nome', dados.nome);
+    }
+
+    // 2) Salva o resto do perfil (endereço, escolaridade, experiências)
+    const rp = await fetch(API + '/api/candidato/cadastrar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+      body: JSON.stringify(dados)
+    });
+    const dp = await rp.json();
+    if (!rp.ok) {
+      alert('Erro: ' + (dp.erro || 'não foi possível salvar o perfil'));
+      if (btn) { btn.disabled = false; btn.textContent = 'Finalizar cadastro'; }
+      return;
+    }
+
+    cadastroCompleto = true;
+    localStorage.setItem('candidato_nome', dados.nome);
+    if (vagaSelecionada) {
+      // se veio de "candidatar", já abre o detalhe da vaga
+      fecharModal('cad');
       atualizarHeaderUsuario();
+      const btnCand = document.getElementById('btn-candidatar');
+      if (btnCand) {
+        btnCand.textContent = '✅ Candidatar-se a esta vaga';
+        btnCand.disabled = false;
+        btnCand.onclick = () => candidatar(vagaSelecionada.id);
+      }
     } else {
-      alert('Erro: ' + (data.erro || 'Não foi possível criar a conta'));
+      fecharModal('cad');
+      atualizarHeaderUsuario();
     }
   } catch (e) {
     alert('Erro de conexão. Tente novamente.');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = oldText;
+    if (btn) { btn.disabled = false; btn.textContent = 'Finalizar cadastro'; }
   }
 }
 
-async function salvarPerfil(btn) {
-  const cpfRaw = document.getElementById('perfil-cpf')?.value.trim() || '';
-  const cpf = cpfRaw.replace(/\D/g, '');
-  const perfil = {
-    nome: document.getElementById('perfil-nome')?.value.trim(),
-    cpf: cpf,
-    email: emailLogado,
-    celular: document.getElementById('perfil-celular')?.value.trim(),
-    data_nascimento: document.getElementById('perfil-nascimento')?.value || null,
-    sexo: document.getElementById('perfil-sexo')?.value || null,
-    cidade: document.getElementById('perfil-cidade')?.value.trim(),
-    estado: document.getElementById('perfil-estado')?.value.trim().toUpperCase(),
-    formacao: document.getElementById('perfil-formacao')?.value.trim()
-  };
-  if (!perfil.nome) { alert('Nome é obrigatório'); return; }
-  if (!perfil.cpf || perfil.cpf.length !== 11) { alert('CPF é obrigatório (11 dígitos)'); return; }
-  if (!tokenCandidato) { alert('Você precisa estar logado'); return; }
-  const oldText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Salvando...';
-  try {
-    const r = await fetch(API + '/api/candidato/cadastrar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
-      body: JSON.stringify(perfil)
-    });
-    const data = await r.json();
-    if (r.ok) {
-      cadastroCompleto = true;
-      fecharModal('cad');
-      fecharModal('cad-completo');
-      atualizarHeaderUsuario();
-      if (!btn.dataset.silencioso) {
-        alert('✅ Cadastro concluído! Agora você pode se candidatar às vagas.');
-      }
-      if (vagaSelecionada) {
-        const btnCand = document.getElementById('btn-candidatar');
-        if (btnCand) {
-          btnCand.textContent = '✅ Candidatar-se a esta vaga';
-          btnCand.disabled = false;
-          btnCand.onclick = () => candidatar(vagaSelecionada.id);
-        }
-      }
-    } else if (r.status === 401) {
-      logout();
-      alert('Sessão expirada. Faça login novamente.');
-    } else {
-      alert('Erro: ' + (data.erro || 'Não foi possível salvar'));
-    }
-  } catch (e) {
-    alert('Erro de conexão');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = oldText;
-  }
+// Compat: função usada pelo HTML antigo em alguns lugares
+function irParaEtapa(n) {
+  if (n >= 1 && n <= 4) wizardIrPara(n);
 }
 
 // ===== LOGIN (email + senha, etapa única) =====
@@ -389,7 +506,6 @@ async function loginEntrar(btn) {
       atualizarHeaderUsuario();
       if (!cadastroCompleto) {
         abrirModal('cad');
-        irParaEtapa(2);
       }
     } else {
       alert('Erro: ' + (data.erro || 'Não foi possível entrar'));
@@ -472,7 +588,7 @@ function atualizarHeaderUsuario() {
     if (btnCad) btnCad.style.setProperty('display', 'none', 'important');
   } else if (tokenCandidato) {
     btnEntrar.textContent = '📝 Completar cadastro';
-    btnEntrar.onclick = () => { abrirModal('cad'); irParaEtapa(2); };
+    btnEntrar.onclick = () => abrirModal('cad');
     if (btnCad) btnCad.style.setProperty('display', 'none', 'important');
   } else {
     btnEntrar.textContent = 'Entrar';
@@ -485,7 +601,6 @@ async function abrirPainelCandidato() {
   if (!tokenCandidato) { abrirModal('login'); return; }
   if (!cadastroCompleto) {
     abrirModal('cad');
-    irParaEtapa(2);
     return;
   }
 
@@ -831,3 +946,10 @@ window.abrirDetalhes = abrirDetalhes;
 window.candidatar = candidatar;
 window.abrirPainelCandidato = abrirPainelCandidato;
 window.atualizarHeaderUsuario = atualizarHeaderUsuario;
+// Wizard
+window.wizardIrPara = wizardIrPara;
+window.wizardProximo = wizardProximo;
+window.wizardVoltar = wizardVoltar;
+window.wizardAddExperiencia = wizardAddExperiencia;
+window.wizardRemoverExp = wizardRemoverExp;
+window.wizardFinalizar = wizardFinalizar;
