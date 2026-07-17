@@ -47,6 +47,32 @@
   .subheader-link:hover { background: rgba(255,255,255,0.15); color: white; }
   .subheader-link.ativo { background: rgba(255,255,255,0.25); color: white; font-weight: 700; }
 
+  /* Botão hambúrguer */
+  .btn-hamburguer { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); width: 40px; height: 40px; border-radius: 8px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .btn-hamburguer:hover { background: rgba(255,255,255,0.25); }
+
+  /* Drawer (menu lateral) */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: all 0.25s; z-index: 99; }
+  .drawer-overlay.aberto { opacity: 1; visibility: visible; }
+  .drawer { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; background: white; box-shadow: 4px 0 16px rgba(0,0,0,0.2); transform: translateX(-100%); transition: transform 0.25s ease; z-index: 100; display: flex; flex-direction: column; }
+  .drawer.aberto { transform: translateX(0); }
+  .drawer-header { padding: 20px; background: var(--vinho); color: white; display: flex; align-items: center; gap: 12px; }
+  .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; background-size: cover; background-position: center; flex-shrink: 0; }
+  .drawer-info { flex: 1; min-width: 0; }
+  .drawer-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-info p { font-size: 12px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-close { background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .drawer-close:hover { background: rgba(255,255,255,0.25); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 12px 0; }
+  .drawer-section { padding: 8px 20px 4px; font-size: 11px; font-weight: 700; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 12px; }
+  .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--preto); font-size: 15px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; text-decoration: none; }
+  .drawer-link:hover { background: #f5f5f7; }
+  .drawer-link.ativo { background: #fdf2f3; border-left-color: var(--vinho); color: var(--vinho); font-weight: 700; }
+  .drawer-link .icon { font-size: 20px; width: 24px; text-align: center; }
+  .drawer-footer { padding: 16px 20px; border-top: 1px solid var(--borda); }
+  .drawer-logout { width: 100%; padding: 10px; background: transparent; color: var(--vinho); border: 1px solid var(--vinho); border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .drawer-logout:hover { background: var(--vinho); color: white; }
+
   /* Container principal */
   .container { max-width: 1100px; margin: 24px auto; padding: 0 20px; }
 
@@ -113,13 +139,33 @@
   <div class="subheader-inner">
     <button class="subheader-back" onclick="location.href='index.html'" title="Voltar para vagas">←</button>
     <h1>Detalhes da vaga</h1>
-    <nav class="subheader-menu">
-      <a href="index.html" class="subheader-link">🏠 Vagas</a>
-      <a href="painel.html" class="subheader-link">👤 Perfil</a>
-      <a href="javascript:void(0)" onclick="alert('Sem notificações no momento')" class="subheader-link">🔔</a>
-    </nav>
+    <button class="btn-hamburguer" onclick="abrirDrawer()" title="Menu">☰</button>
   </div>
 </section>
+
+<!-- Drawer lateral -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-foto" id="drawer-foto">👤</div>
+    <div class="drawer-info">
+      <h3 id="drawer-nome">Candidato</h3>
+      <p id="drawer-email">—</p>
+    </div>
+    <button class="drawer-close" onclick="fecharDrawer()" title="Fechar">×</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">Navegação</div>
+    <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
+    <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
+    <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
+    <div class="drawer-section">Atalhos</div>
+    <a href="index.html" onclick="fecharDrawer()" class="drawer-link"><span class="icon">🔍</span> Ver mais vagas</a>
+  </div>
+  <div class="drawer-footer">
+    <button class="drawer-logout" onclick="logout()">Sair</button>
+  </div>
+</aside>
 
 <div class="container">
   <div id="vaga-conteudo">
@@ -129,7 +175,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-0100"></script>
+<script src="app.js?v=20260717-0115"></script>
 <script>
 // ===== PEGAR ID DA VAGA =====
 const params = new URLSearchParams(window.location.search);
@@ -310,6 +356,41 @@ function formatarData(d) {
 window.addEventListener('DOMContentLoaded', () => {
   if (typeof window.atualizarHeaderUsuario === 'function') window.atualizarHeaderUsuario();
 });
+
+// ===== DRAWER (menu lateral) =====
+function abrirDrawer() {
+  document.getElementById('drawer').classList.add('aberto');
+  document.getElementById('drawer-overlay').classList.add('aberto');
+  // Popula dados do usuário no drawer
+  const nome = localStorage.getItem('candidato_nome') || emailLogado || 'Visitante';
+  const iniciais = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+  const fotoUrl = localStorage.getItem('candidato_foto') || '';
+  const drawerFoto = document.getElementById('drawer-foto');
+  const drawerNome = document.getElementById('drawer-nome');
+  const drawerEmail = document.getElementById('drawer-email');
+  if (drawerNome) drawerNome.textContent = nome;
+  if (drawerEmail) drawerEmail.textContent = emailLogado || '';
+  if (drawerFoto) {
+    if (fotoUrl) {
+      drawerFoto.style.backgroundImage = `url("${fotoUrl.replace(/"/g, '\\"')}")`;
+      drawerFoto.style.backgroundSize = 'cover';
+      drawerFoto.style.backgroundPosition = 'center';
+      drawerFoto.textContent = '';
+    } else {
+      drawerFoto.textContent = iniciais;
+      drawerFoto.style.backgroundImage = '';
+    }
+  }
+}
+function fecharDrawer() {
+  document.getElementById('drawer').classList.remove('aberto');
+  document.getElementById('drawer-overlay').classList.remove('aberto');
+}
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') fecharDrawer();
+});
+window.abrirDrawer = abrirDrawer;
+window.fecharDrawer = fecharDrawer;
 </script>
 
 </body>
