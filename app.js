@@ -708,22 +708,35 @@ async function carregarPainel() {
     }
 
     // Buscar etapas de cada vaga pra montar a timeline
+    const ETAPAS_PADRAO = [
+      { nome: 'Inscrição' },
+      { nome: 'Triagem curricular' },
+      { nome: 'Entrevista RH' },
+      { nome: 'Entrevista gestor' },
+      { nome: 'Proposta' },
+      { nome: 'Coleta de documentos' },
+      { nome: 'Contratação' }
+    ];
     const cands = await Promise.all(lista.map(async (c) => {
-      try {
-        const rv = await fetch(API + '/api/vagas/' + c.vaga_id);
-        const dv = await rv.json();
-        const v = dv.vaga || dv;
-        let etapas = v.etapas;
-        if (typeof etapas === 'string') {
-          try { etapas = JSON.parse(etapas); } catch (e) { etapas = null; }
-        }
-        if (!Array.isArray(etapas) || !etapas.length) {
-          etapas = ['Inscrição', 'Triagem', 'Entrevista RH', 'Entrevista gestor', 'Contratação'];
-        }
-        return { ...c, etapas, vagaTitulo: v.titulo, vagaEmpresa: v.empresa, vagaCidade: v.cidade };
-      } catch (e) {
-        return { ...c, etapas: ['Inscrição', 'Triagem', 'Entrevista', 'Contratação'], vagaTitulo: c.titulo };
+      // Se a vaga tem etapas salvas, usa; senão, usa o padrão
+      let etapas = c.etapas;
+      if (typeof etapas === 'string') {
+        try { etapas = JSON.parse(etapas); } catch (e) { etapas = null; }
       }
+      if (!Array.isArray(etapas) || !etapas.length) {
+        // Tenta buscar a vaga pra ver se tem etapas customizadas
+        try {
+          const rv = await fetch(API + '/api/vagas/' + c.vaga_id);
+          const dv = await rv.json();
+          const v = dv.vaga || dv;
+          etapas = v.etapas;
+          if (typeof etapas === 'string') {
+            try { etapas = JSON.parse(etapas); } catch (e) { etapas = null; }
+          }
+        } catch (e) {}
+      }
+      if (!Array.isArray(etapas) || !etapas.length) etapas = ETAPAS_PADRAO;
+      return { ...c, etapas };
     }));
 
     listaEl.innerHTML = cands.map(c => {
@@ -740,8 +753,8 @@ async function carregarPainel() {
         <div class="cand-card">
           <div class="cand-card-top">
             <div>
-              <h4>${c.vagaTitulo || c.titulo || 'Vaga'}</h4>
-              <div class="cand-empresa">${c.vagaEmpresa || c.empresa || ''} ${c.vagaCidade || c.cidade ? '• ' + (c.vagaCidade || c.cidade) : ''}</div>
+              <h4>${c.titulo || 'Vaga'}</h4>
+              <div class="cand-empresa">${c.empresa || ''} ${c.cidade ? '• ' + c.cidade : ''}</div>
             </div>
             <span class="status status-${c.status}">${statusLabel(c.status)}</span>
           </div>
