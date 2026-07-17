@@ -38,10 +38,9 @@
 
   /* Sub-header bordô com menu */
   .subheader { background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro)); color: white; }
-  .subheader-inner { max-width: 1100px; margin: 0 auto; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .subheader-inner { max-width: 1100px; margin: 0 auto; padding: 18px 20px; display: flex; align-items: center; justify-content: center; gap: 16px; }
   .subheader h1 { font-size: 22px; font-weight: 700; }
-  .subheader-back { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .subheader-back:hover { background: rgba(255,255,255,0.25); }
+  .subheader-back { display: none; }
   .subheader-menu { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .subheader-link { color: rgba(255,255,255,0.85); padding: 7px 14px; border-radius: 6px; font-size: 14px; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
   .subheader-link:hover { background: rgba(255,255,255,0.15); color: white; }
@@ -143,9 +142,7 @@
 
 <section class="subheader">
   <div class="subheader-inner">
-    <button class="subheader-back" onclick="location.href='index.html'" title="Voltar para vagas">←</button>
     <h1>Detalhes da vaga</h1>
-    <span style="width:40px"></span>
   </div>
 </section>
 
@@ -181,7 +178,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-0240"></script>
+<script src="app.js?v=20260717-0250"></script>
 <script>
 // ===== PEGAR ID DA VAGA =====
 const params = new URLSearchParams(window.location.search);
