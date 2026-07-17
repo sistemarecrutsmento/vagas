@@ -103,7 +103,7 @@ async function carregarVagasAdmin() {
         <td><strong>${v.titulo}</strong></td>
         <td>${v.empresa || '—'}</td>
         <td>${v.area || v.categoria || '—'}</td>
-        <td><span class="badge ${badge}">${v.status}</span></td>
+        <td><span class="badge ${badge}">${v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status}</span></td>
         <td><div class="acoes">
           <button onclick="editarVaga(${v.id})">Editar</button>
           <button class="perigo" onclick="deletarVaga(${v.id})">Excluir</button>
@@ -260,7 +260,7 @@ async function carregarCandidaturas() {
         <div class="vaga-cand-card" onclick="abrirVagaCands(${v.id})" style="cursor:pointer">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
             <h3 style="margin:0;font-size:16px;color:var(--vinho)">${v.titulo}</h3>
-            <span class="badge ${statusBadge}">${v.status}</span>
+            <span class="badge ${statusBadge}">${v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status}</span>
           </div>
           <div style="font-size:13px;color:var(--cinza-medio);margin-bottom:12px">${v.empresa || '—'} • ${v.cidade || ''}${v.estado ? '/' + v.estado : ''}</div>
           <div class="vaga-cand-stats">
@@ -583,7 +583,7 @@ async function verCandidatura(id) {
         <div class="det-item"><div class="det-label">CPF</div><div class="det-value">${c.cpf || '—'}</div></div>
         <div class="det-item"><div class="det-label">Vaga</div><div class="det-value">${c.titulo || '—'}</div></div>
         <div class="det-item"><div class="det-label">Empresa</div><div class="det-value">${c.empresa || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Status</div><div class="det-value"><span class="badge ${c.status === 'contratado' ? 'badge-ativa' : c.status === 'reprovado' ? 'badge-fechada' : 'badge-pendente'}">${c.status}</span></div></div>
+        <div class="det-item"><div class="det-label">Status</div><div class="det-value"><span class="badge ${c.status === 'contratado' ? 'badge-ativa' : (c.status === 'reprovado' || c.status === 'rejeitado') ? 'badge-fechada' : c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente'}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : c.status}</span></div></div>
         <div class="det-item"><div class="det-label">Criada em</div><div class="det-value">${formatarData(c.criada_em)}</div></div>
       </div>
       <div class="det-section">
