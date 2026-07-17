@@ -138,6 +138,10 @@
         <div class="form-group">
           <label class="check-label"><input type="checkbox" id="w2-banco"> Autorizo manter meu perfil no Banco de Talentos por 24 meses para futuras oportunidades.</label>
         </div>
+        <div class="form-group">
+          <label>Sobre você <span style="font-weight:400;color:var(--cinza);font-size:12px;">(opcional, mas ajuda muito — fale um pouco sobre você, seus objetivos e o que te motiva)</span></label>
+          <textarea id="w2-sobre-voce" rows="4" placeholder="Ex: Sou uma pessoa comunicativa, busco minha primeira oportunidade na área administrativa..." style="resize:vertical;"></textarea>
+        </div>
         <div class="wizard-botoes">
           <button class="btn btn-secondary" onclick="wizardVoltar()">Voltar</button>
           <button class="btn btn-primary" onclick="wizardProximo()">Continuar</button>
