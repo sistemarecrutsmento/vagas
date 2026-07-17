@@ -338,7 +338,7 @@ async function abrirVagaCands(vagaId) {
         <td>${c.email || '—'}</td>
         <td>${c.cidade ? (c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td>
         <td>${numEtapa}. ${etapaNome}</td>
-        <td><span class="badge ${badge}">${c.status}</span></td>
+        <td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : c.status}</span></td>
         <td>${formatarData(c.criada_em)}</td>
         <td>
           <a class="btn-ver" href="analisar.html?id=${c.id}">👁 Ver</a>
