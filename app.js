@@ -822,7 +822,15 @@ async function salvarPerfilCompleto(btn) {
       cadastroCompleto = true;
       localStorage.setItem('candidato_nome', payload.nome);
       if (btn) { btn.textContent = '✓ Salvo!'; btn.style.background = 'var(--verde)'; }
-      setTimeout(() => { if (btn) { btn.textContent = 'Salvar perfil'; btn.style.background = ''; btn.disabled = false; } carregarPainel(); }, 800);
+      setTimeout(() => { 
+        if (btn) { 
+          btn.textContent = 'Salvar perfil'; 
+          btn.style.background = ''; 
+          btn.disabled = false; 
+        } 
+        if (typeof carregarPainel === 'function') carregarPainel();
+        if (location.pathname.includes('perfil.html')) location.reload();
+      }, 800);
     } else {
       alert('Erro: ' + (data.erro || ''));
       if (btn) { btn.disabled = false; btn.textContent = 'Salvar perfil'; }
