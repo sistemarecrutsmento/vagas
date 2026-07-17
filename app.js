@@ -252,7 +252,7 @@ function wizardIrPara(n) {
   document.querySelectorAll('.wizard-passo').forEach(el => el.classList.remove('ativo', 'concluido'));
   const etapa = document.getElementById('wizard-etapa-' + n);
   if (etapa) etapa.style.setProperty('display', 'block', 'important');
-  for (let i = 1; i <= 4; i++) {
+  for (let i = 1; i <= 5; i++) {
     const p = document.querySelector(`.wizard-passo[data-p="${i}"]`);
     if (!p) continue;
     if (i < n) p.classList.add('concluido');
@@ -267,7 +267,8 @@ function wizardProximo() {
   if (wizardStep === 1) return wizardEtapa1Validar();
   if (wizardStep === 2) return wizardEtapa2Validar();
   if (wizardStep === 3) return wizardEtapa3Validar();
-  if (wizardStep === 4) return wizardFinalizar();
+  if (wizardStep === 4) return wizardEtapa4Validar();
+  if (wizardStep === 5) return wizardFinalizar();
 }
 
 function wizardVoltar() {
@@ -341,13 +342,28 @@ function wizardEtapa3Validar() {
   wizardIrPara(4);
 }
 
+function wizardEtapa4Validar() {
+  const formacao = document.getElementById('w4-formacao')?.value;
+  const instituicao = document.getElementById('w4-instituicao')?.value.trim() || null;
+  const curso = document.getElementById('w4-curso')?.value.trim() || null;
+  const situacao = document.getElementById('w4-situacao')?.value || null;
+  const dataConclusao = document.getElementById('w4-conclusao')?.value || null;
+  const primeiroEmprego = document.getElementById('w4-primeiro-emprego')?.checked || false;
+
+  if (!formacao) return alert('Selecione a formação');
+
+  wizardEtapa1.dados = wizardEtapa1.dados || {};
+  Object.assign(wizardEtapa1.dados, { formacao, instituicao, curso, situacao, data_conclusao: dataConclusao, primeiro_emprego: primeiroEmprego });
+  wizardIrPara(5);
+}
+
 function wizardAddExperiencia() {
-  const cargo = document.getElementById('w4-cargo')?.value.trim();
-  const empresa = document.getElementById('w4-empresa')?.value.trim();
-  const inicio = document.getElementById('w4-inicio')?.value || null;
-  const fim = document.getElementById('w4-fim')?.value || null;
-  const empregoAtual = document.getElementById('w4-atual')?.checked;
-  const descricao = document.getElementById('w4-descricao')?.value.trim() || null;
+  const cargo = document.getElementById('w5-cargo')?.value.trim();
+  const empresa = document.getElementById('w5-empresa')?.value.trim();
+  const inicio = document.getElementById('w5-inicio')?.value || null;
+  const fim = document.getElementById('w5-fim')?.value || null;
+  const empregoAtual = document.getElementById('w5-atual')?.checked;
+  const descricao = document.getElementById('w5-descricao')?.value.trim() || null;
 
   if (!cargo) return alert('Informe o cargo');
   if (!empresa) return alert('Informe a empresa');
@@ -361,11 +377,11 @@ function wizardAddExperiencia() {
   }
 
   // limpa form
-  ['w4-cargo','w4-empresa','w4-inicio','w4-fim','w4-descricao'].forEach(id => {
+  ['w5-cargo','w5-empresa','w5-inicio','w5-fim','w5-descricao'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  const at = document.getElementById('w4-atual'); if (at) at.checked = false;
+  const at = document.getElementById('w5-atual'); if (at) at.checked = false;
   wizardRenderExps();
 }
 
@@ -375,7 +391,7 @@ function wizardRemoverExp(idx) {
 }
 
 function wizardRenderExps() {
-  const cont = document.getElementById('w4-lista');
+  const cont = document.getElementById('w5-lista');
   if (!cont) return;
   if (wizardExps.length === 0) {
     cont.innerHTML = '<p class="muted">Nenhuma experiência adicionada ainda. Você pode adicionar ou pular essa etapa.</p>';
@@ -393,21 +409,12 @@ function wizardRenderExps() {
 }
 
 async function wizardFinalizar() {
-  const formacao = document.getElementById('w3-formacao')?.value || null;
-  const instituicao = document.getElementById('w3-instituicao')?.value.trim() || null;
-  const curso = document.getElementById('w3-curso')?.value.trim() || null;
-  const situacao = document.getElementById('w3-situacao')?.value || null;
-  const dataConclusao = document.getElementById('w3-conclusao')?.value || null;
-  const primeiroEmprego = document.getElementById('w3-primeiro-emprego')?.checked || false;
-
   const dados = {
     ...(wizardEtapa1.dados || {}),
-    formacao, instituicao, curso, situacao, data_conclusao: dataConclusao,
-    primeiro_emprego: primeiroEmprego,
     experiencias: wizardExps
   };
 
-  const btn = document.querySelector('#wizard-etapa-4 .btn-primary');
+  const btn = document.querySelector('#wizard-etapa-5 .btn-primary');
   if (btn) { btn.disabled = true; btn.textContent = 'Finalizando...'; }
 
   try {
@@ -476,7 +483,7 @@ async function wizardFinalizar() {
 
 // Compat: função usada pelo HTML antigo em alguns lugares
 function irParaEtapa(n) {
-  if (n >= 1 && n <= 4) wizardIrPara(n);
+  if (n >= 1 && n <= 5) wizardIrPara(n);
 }
 
 // ===== LOGIN (email + senha, etapa única) =====
