@@ -829,6 +829,10 @@ async function salvarPerfilCompleto(target) {
     recebe_comunicacoes: form ? (form.querySelector('#pe-comunicacoes')?.checked || false) : (document.getElementById('pe-comunicacoes')?.checked || false)
   };
 
+  // DEBUG: log do payload para entender o que está sendo enviado
+  console.log('[salvarPerfilCompleto] payload:', JSON.stringify(payload));
+  console.log('[salvarPerfilCompleto] form?', !!form, 'target.tagName:', target?.tagName, 'form.id:', form?.id);
+
   // Se a página injetou um array de experiencias (ex: perfil.html), inclui no payload
   if (Array.isArray(window.__perfilExps)) {
     payload.experiencias = window.__perfilExps;
