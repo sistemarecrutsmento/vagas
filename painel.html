@@ -572,11 +572,8 @@ window.abrirDetalhesCandidato = function(vagaId) {
 
 // ===== MODAL DE EDIÇÃO =====
 window.abrirEdicaoPerfil = function() {
-  document.getElementById('modal-edicao').classList.add('aberto');
-  // Reaproveita carregarPainel do app.js (ele popula #painel-foto, #painel-nome, etc)
-  if (typeof window.carregarPainel === 'function') {
-    window.carregarPainel();
-  }
+  // Abre em nova aba (página dedicada)
+  window.open('perfil.html', '_blank');
 };
 window.fecharEdicao = function() {
   document.getElementById('modal-edicao').classList.remove('aberto');
