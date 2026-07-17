@@ -585,22 +585,28 @@ function checarAuth() {
 }
 
 function atualizarHeaderUsuario() {
-  const btnEntrar = document.querySelector('header .btn-outline');
-  const btnCad = document.getElementById('btn-cadastrar');
-  if (!btnEntrar) return;
+  const headerActions = document.getElementById('header-actions');
+  if (!headerActions) return;
+  // Cache da foto (carregada após login)
+  const fotoUrl = localStorage.getItem('candidato_foto') || '';
+  const nome = localStorage.getItem('candidato_nome') || emailLogado || '';
+  const iniciais = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+  const avatarStyle = fotoUrl ? `style="background-image:url('${fotoUrl.replace(/'/g, "\\'")}');background-size:cover;background-position:center;"` : '';
+
   if (tokenCandidato && cadastroCompleto) {
-    const nome = localStorage.getItem('candidato_nome') || emailLogado;
-    btnEntrar.textContent = '👤 ' + nome;
-    btnEntrar.onclick = () => abrirPainelCandidato();
-    if (btnCad) btnCad.style.setProperty('display', 'none', 'important');
+    headerActions.innerHTML = `
+      <div class="user-info" onclick="abrirPainelCandidato()" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <div class="user-avatar" ${avatarStyle}>${fotoUrl ? '' : (iniciais || '👤')}</div>
+        <span style="font-weight:600;color:var(--preto);">${nome || emailLogado}</span>
+      </div>
+    `;
   } else if (tokenCandidato) {
-    btnEntrar.textContent = '📝 Completar cadastro';
-    btnEntrar.onclick = () => abrirModal('cad');
-    if (btnCad) btnCad.style.setProperty('display', 'none', 'important');
+    headerActions.innerHTML = `<button class="btn-outline" onclick="abrirModal('cad')">📝 Completar cadastro</button>`;
   } else {
-    btnEntrar.textContent = 'Entrar';
-    btnEntrar.onclick = () => abrirModal('login');
-    if (btnCad) btnCad.style.setProperty('display', 'inline-block', 'important');
+    headerActions.innerHTML = `
+      <button class="btn-outline" onclick="abrirModal('login')">Entrar</button>
+      <button id="btn-cadastrar" class="btn-outline" onclick="abrirModal('cad')">Cadastrar</button>
+    `;
   }
 }
 
@@ -630,11 +636,25 @@ async function carregarPainel() {
   if (perfil) {
     const nome = perfil.nome || emailLogado;
     const iniciais = (perfil.nome || emailLogado || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
-    document.getElementById('painel-foto').textContent = iniciais || '👤';
+    const painelFoto = document.getElementById('painel-foto');
+    if (painelFoto) {
+      if (perfil.foto_url) {
+        painelFoto.style.backgroundImage = `url("${perfil.foto_url}")`;
+        painelFoto.style.backgroundSize = 'cover';
+        painelFoto.style.backgroundPosition = 'center';
+        painelFoto.textContent = '';
+      } else {
+        painelFoto.style.backgroundImage = '';
+        painelFoto.textContent = iniciais || '👤';
+      }
+    }
     document.getElementById('painel-nome').textContent = nome;
     document.getElementById('painel-email').textContent = perfil.email || emailLogado || '';
     localStorage.setItem('candidato_nome', nome);
   }
+
+  // Foto de perfil no editor
+  if (typeof window.perfilFotoInit === 'function') window.perfilFotoInit(perfil);
 
   // 2) Progresso do perfil
   const pFill = document.getElementById('painel-progresso-fill');
@@ -801,6 +821,115 @@ async function salvarPerfilCompleto(btn) {
     if (btn) { btn.disabled = false; btn.textContent = 'Salvar perfil'; }
   }
 }
+
+// ===== FOTO DE PERFIL =====
+function perfilFotoInit(perfil) {
+  const preview = document.getElementById('perfil-foto-preview');
+  const inicial = document.getElementById('perfil-foto-inicial');
+  const btnRemover = document.getElementById('perfil-foto-remover');
+  if (!preview) return;
+  const fotoUrl = (perfil && perfil.foto_url) ? perfil.foto_url : '';
+  const nome = (perfil && perfil.nome) ? perfil.nome : (localStorage.getItem('candidato_nome') || emailLogado || '?');
+  const ini = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+  if (fotoUrl) {
+    preview.style.backgroundImage = 'url("' + fotoUrl.replace(/"/g, '\\"') + '")';
+    preview.style.backgroundSize = 'cover';
+    preview.style.backgroundPosition = 'center';
+    if (inicial) inicial.style.display = 'none';
+    if (btnRemover) btnRemover.style.display = 'inline-block';
+    localStorage.setItem('candidato_foto', fotoUrl);
+  } else {
+    preview.style.backgroundImage = '';
+    if (inicial) { inicial.style.display = ''; inicial.textContent = ini || '👤'; }
+    if (btnRemover) btnRemover.style.display = 'none';
+  }
+}
+
+function perfilFotoEscolher(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (!/^image\/(jpeg|jpg|png|webp)$/i.test(file.type)) {
+    alert('Formato inválido. Use JPG, PNG ou WebP.');
+    input.value = '';
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Imagem muito grande. Máximo 5 MB.');
+    input.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUrl = e.target.result;
+    const preview = document.getElementById('perfil-foto-preview');
+    const inicial = document.getElementById('perfil-foto-inicial');
+    if (preview) {
+      preview.style.backgroundImage = 'url(' + dataUrl + ')';
+      preview.style.backgroundSize = 'cover';
+      preview.style.backgroundPosition = 'center';
+    }
+    if (inicial) inicial.style.display = 'none';
+    const btnRemover = document.getElementById('perfil-foto-remover');
+    if (btnRemover) btnRemover.style.display = 'inline-block';
+    try {
+      const r = await fetch(API + '/api/candidato/foto', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+        body: JSON.stringify({ foto_url: dataUrl })
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.erro || 'Erro ao enviar');
+      localStorage.setItem('candidato_foto', dataUrl);
+      const painelFoto = document.getElementById('painel-foto');
+      if (painelFoto) {
+        painelFoto.style.backgroundImage = 'url("' + dataUrl.replace(/"/g, '\\"') + '")';
+        painelFoto.style.backgroundSize = 'cover';
+        painelFoto.style.backgroundPosition = 'center';
+        painelFoto.textContent = '';
+      }
+      atualizarHeaderUsuario();
+    } catch (err) {
+      alert('Erro ao enviar foto: ' + err.message);
+    }
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+async function perfilFotoRemover() {
+  if (!confirm('Remover sua foto de perfil?')) return;
+  try {
+    const r = await fetch(API + '/api/candidato/foto', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (!r.ok) {
+      const data = await r.json();
+      throw new Error(data.erro || 'Erro ao remover');
+    }
+    localStorage.removeItem('candidato_foto');
+    const preview = document.getElementById('perfil-foto-preview');
+    const inicial = document.getElementById('perfil-foto-inicial');
+    const btnRemover = document.getElementById('perfil-foto-remover');
+    if (preview) preview.style.backgroundImage = '';
+    const nome = localStorage.getItem('candidato_nome') || emailLogado || '?';
+    const ini = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+    if (inicial) { inicial.style.display = ''; inicial.textContent = ini; }
+    if (btnRemover) btnRemover.style.display = 'none';
+    const painelFoto = document.getElementById('painel-foto');
+    if (painelFoto) {
+      painelFoto.style.backgroundImage = '';
+      painelFoto.textContent = ini;
+    }
+    atualizarHeaderUsuario();
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
+
+window.perfilFotoInit = perfilFotoInit;
+window.perfilFotoEscolher = perfilFotoEscolher;
+window.perfilFotoRemover = perfilFotoRemover;
 
 // ===== ABAS DO PAINEL =====
 function painelIrPara(tab) {
