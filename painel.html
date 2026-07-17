@@ -161,8 +161,13 @@
 
 <section class="subheader">
   <div class="subheader-inner">
+    <button class="subheader-back" onclick="location.href='index.html'" title="Voltar para vagas">←</button>
     <h1>Página do candidato</h1>
-    <span class="subheader-icon">👤</span>
+    <nav class="subheader-menu">
+      <a href="index.html" class="subheader-link">🏠 Vagas</a>
+      <a href="painel.html" class="subheader-link ativo">👤 Perfil</a>
+      <a href="javascript:void(0)" onclick="alert('Sem notificações no momento')" class="subheader-link">🔔</a>
+    </nav>
   </div>
 </section>
 
@@ -369,7 +374,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260717-0045"></script>
+<script src="app.js?v=20260717-0100"></script>
 <script>
 // ===== ROTEAMENTO =====
 // (checarAuth no app.js vai popular tokenCandidato no DOMContentLoaded;
