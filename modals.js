@@ -106,15 +106,37 @@
           <div class="form-group"><label>Data de nascimento *</label><input type="date" id="w2-nascimento"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Sexo</label>
+          <div class="form-group"><label>Sexo *</label>
             <select id="w2-sexo">
-              <option value="">Prefiro não informar</option>
+              <option value="">Selecione...</option>
               <option value="M">Masculino</option>
               <option value="F">Feminino</option>
-              <option value="O">Outro</option>
+              <option value="Outro">Outro</option>
             </select>
           </div>
-          <div class="form-group"><label>Celular *</label><input type="tel" id="w2-celular" placeholder="(00) 00000-0000"></div>
+          <div class="form-group"><label>Número do celular *</label><input type="tel" id="w2-celular" placeholder="(00) 00000-0000"></div>
+        </div>
+        <div class="form-group">
+          <label>Precisa de acessibilidade?</label>
+          <select id="w2-acessibilidade">
+            <option value="">Não</option>
+            <option value="cadeirante">Cadeirante</option>
+            <option value="deficiencia_visual">Deficiência visual</option>
+            <option value="deficiencia_auditiva">Deficiência auditiva</option>
+            <option value="mobilidade_reduzida">Mobilidade reduzida</option>
+            <option value="outra">Outra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Áreas de interesse <span style="font-weight:400;color:var(--cinza);font-size:12px;">(escolha até 5)</span></label>
+          <div id="w2-areas" class="areas-chips"></div>
+          <div id="w2-areas-contador" style="margin-top:6px;font-size:12px;color:var(--cinza);">0 de 5 selecionadas</div>
+        </div>
+        <div class="form-group">
+          <label class="check-label"><input type="checkbox" id="w2-politica" required> Li e aceito a <a href="#" onclick="alert('Política de privacidade');return false;" style="color:var(--vinho);font-weight:600;">Política de privacidade</a></label>
+        </div>
+        <div class="form-group">
+          <label class="check-label"><input type="checkbox" id="w2-banco"> Autorizo manter meu perfil no Banco de Talentos por 24 meses para futuras oportunidades.</label>
         </div>
         <div class="wizard-botoes">
           <button class="btn btn-secondary" onclick="wizardVoltar()">Voltar</button>
