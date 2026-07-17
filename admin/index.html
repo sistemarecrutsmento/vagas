@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Painel de Recrutamento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-escuro: #4A1F25;
+      --vinho-claro: #8B3A45;
+      --branco: #FFFFFF;
+      --preto: #1A1A1A;
+      --preto-suave: #2A2A2A;
+      --cinza-escuro: #3A3A3A;
+      --borda: #E5E5E5;
+      --borda-escura: #444;
+      --verde: #2E7D32;
+      --amarelo: #F57C00;
+      --vermelho: #C62828;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #FAFAFA; color: var(--preto); }
+    /* Login */
+    .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--preto) 0%, var(--cinza-escuro) 100%); padding: 20px; }
+    .login-card { background: var(--branco); padding: 48px 40px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border-top: 4px solid var(--vinho); }
+    .login-card h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .login-card .sub { color: #888; margin-bottom: 32px; font-size: 14px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--preto); }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--borda);
+      border-radius: 6px; font-size: 15px; font-family: inherit; background: var(--branco);
+    }
+    .form-group input:focus { outline: none; border-color: var(--vinho); }
+    .btn { padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 15px; transition: all 0.2s; }
+    .btn-primary { background: var(--vinho); color: var(--branco); width: 100%; }
+    .btn-primary:hover { background: var(--vinho-escuro); }
+    .btn-primary:disabled { opacity: 0.5; }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    .btn-sec { background: var(--preto); color: var(--branco); }
+    .btn-perigo { background: var(--vermelho); color: var(--branco); }
+    .alert { padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+    .alert-erro { background: #FEE; color: var(--vermelho); border: 1px solid #FCC; }
+    /* Layout logado */
+    .app { display: none; }
+    .app.logado { display: flex; min-height: 100vh; }
+    /* Sidebar */
+    aside { width: 240px; background: var(--preto); color: var(--branco); padding: 24px 0; flex-shrink: 0; }
+    .aside-logo { padding: 0 24px 24px; border-bottom: 1px solid var(--borda-escura); margin-bottom: 16px; }
+    .aside-logo h1 { font-size: 20px; font-weight: 800; }
+    .aside-logo small { color: #888; font-size: 12px; }
+    .nav-item { display: block; padding: 12px 24px; color: #CCC; text-decoration: none; font-size: 14px; font-weight: 500; border-left: 3px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: var(--cinza-escuro); color: var(--branco); }
+    .nav-item.ativo { background: var(--cinza-escuro); color: var(--branco); border-left-color: var(--vinho); }
+    .nav-item.sair { margin-top: auto; color: #888; }
+    /* Main */
+    main { flex: 1; padding: 32px; overflow-y: auto; }
+    .page { display: none; }
+    .page.ativo { display: block; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .page-header h2 { font-size: 24px; font-weight: 700; }
+    .page-header p { color: #888; font-size: 14px; margin-top: 2px; }
+    /* Cards de stats */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--branco); padding: 20px; border-radius: 8px; border: 1px solid var(--borda); }
+    .stat-card .label { font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .stat-card .valor { font-size: 32px; font-weight: 800; margin-top: 8px; color: var(--preto); }
+    .stat-card.vinho .valor { color: var(--vinho); }
+    .stat-card.verde .valor { color: var(--verde); }
+    /* Tabela */
+    .tabela-wrap { background: var(--branco); border-radius: 8px; border: 1px solid var(--borda); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #F8F8F8; padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; font-weight: 700; border-bottom: 1px solid var(--borda); }
+    td { padding: 14px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #FAFAFA; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .badge-ativa { background: #E8F5E9; color: var(--verde); }
+    .badge-pendente { background: #FFF3E0; color: var(--amarelo); }
+    .badge-fechada { background: #F5F5F5; color: #888; }
+    .acoes { display: flex; gap: 6px; }
+    .acoes button { background: none; border: 1px solid var(--borda); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .acoes button:hover { border-color: var(--vinho); color: var(--vinho); }
+    .acoes .perigo:hover { border-color: var(--vermelho); color: var(--vermelho); }
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-overlay.aberto { display: flex; }
+    .modal { background: var(--branco); border-radius: 8px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-lg { max-width: 800px; }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 20px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #888; }
+    .modal-body { padding: 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--borda); display: flex; gap: 8px; justify-content: flex-end; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .det-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .det-item { background: #fafafa; padding: 10px 14px; border-radius: 6px; border: 1px solid var(--borda); }
+    .det-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--cinza-medio); margin-bottom: 4px; letter-spacing: 0.5px; }
+    .det-value { font-size: 14px; font-weight: 500; color: var(--preto); }
+    .det-section { margin-top: 16px; }
+    .det-section h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--borda); }
+    .alert-erro { color: var(--vermelho); padding: 8px; }
+    .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 12px; }
+    .alert-erro { background: #ffebee; color: var(--vermelho); }
+    .alert-sucesso { background: #e8f5e9; color: var(--verde); }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty { text-align: center; padding: 40px; color: #888; }
+
+    /* Cards de vagas com candidatos */
+    .vagas-cands-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .vaga-cand-card { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 18px; transition: transform .15s, box-shadow .15s; cursor: pointer; position: relative; }
+    .vaga-cand-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); border-color: var(--vinho); }
+    .vaga-cand-card h3 { font-size: 16px; color: var(--preto); margin-bottom: 4px; }
+    .vaga-cand-card .empresa { font-size: 13px; color: var(--cinza-medio); margin-bottom: 12px; }
+    .vaga-cand-stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; padding: 10px; background: var(--cinza); border-radius: 6px; }
+    .vaga-cand-stat { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 60px; }
+    .vaga-cand-stat .num { font-size: 20px; font-weight: 700; color: var(--vinho); }
+    .vaga-cand-stat .lbl { font-size: 11px; color: var(--cinza-medio); text-transform: uppercase; }
+    .vaga-cand-ver { display: inline-block; background: var(--vinho); color: white; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+    .vaga-cand-ver:hover { background: #5a1a1a; }
+
+    /* Modal xl */
+    .modal.modal-xl { max-width: 900px; }
+
+    /* Análise do candidato */
+    .analisar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 700px) { .analisar-grid { grid-template-columns: 1fr; } }
+    .analisar-bloco { background: var(--cinza); padding: 14px; border-radius: 8px; }
+    .analisar-bloco h4 { font-size: 13px; text-transform: uppercase; color: var(--cinza-medio); margin-bottom: 8px; letter-spacing: 0.5px; }
+    .analisar-bloco .valor { font-size: 14px; color: var(--preto); }
+    .analisar-bloco .valor small { color: var(--cinza-medio); display: block; font-size: 12px; margin-top: 2px; }
+    .analisar-foto { width: 80px; height: 80px; border-radius: 50%; background: var(--borda); display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--cinza-medio); overflow: hidden; flex-shrink: 0; }
+    .analisar-foto img { width: 100%; height: 100%; object-fit: cover; }
+    .analisar-topo { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--borda); }
+    .analisar-topo h2 { font-size: 20px; margin-bottom: 2px; }
+    .analisar-topo .sub { color: var(--cinza-medio); font-size: 13px; }
+    .analisar-acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 2px solid var(--borda); }
+    .analisar-acoes button { padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
+    .btn-avancar { background: #28a745; color: white; }
+    .btn-avancar:hover { background: #218838; }
+    .btn-reprovar { background: #dc3545; color: white; }
+    .btn-reprovar:hover { background: #c82333; }
+    .btn-reabrir { background: #ffc107; color: #333; }
+    .btn-reabrir:hover { background: #e0a800; }
+    .btn-msg { background: var(--cinza); color: var(--preto); }
+    .analisar-timeline { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 14px; background: var(--cinza); border-radius: 8px; margin: 16px 0; }
+    .analisar-etapa { display: flex; flex-direction: column; align-items: center; min-width: 90px; font-size: 11px; }
+    .analisar-etapa-bola { width: 28px; height: 28px; border-radius: 50%; background: var(--borda); color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 4px; }
+    .analisar-etapa.aprovada .analisar-etapa-bola { background: #28a745; color: white; }
+    .analisar-etapa.atual .analisar-etapa-bola { background: var(--vinho); color: white; animation: pulse 1.5s infinite; }
+    .analisar-etapa.rejeitada .analisar-etapa-bola { background: #dc3545; color: white; }
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(123, 31, 31, 0.5); } 50% { box-shadow: 0 0 0 8px rgba(123, 31, 31, 0); } }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-page" id="login-page">
+  <div class="login-card">
+    <h1>🔐 Painel Admin</h1>
+    <p class="sub">Acesso restrito para recrutadores</p>
+    <div id="alert-login"></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="admin@empresa.com" value="fabio08dejesusjunior@gmail.com">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••">
+    </div>
+    <button class="btn btn-primary" onclick="fazerLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- APP LOGADA -->
+<div class="app" id="app">
+  <aside>
+    <div class="aside-logo">
+      <h1>Admin</h1>
+      <small>Recrutamento</small>
+    </div>
+    <a class="nav-item ativo" data-page="dashboard" onclick="irPara('dashboard')">📊 Dashboard</a>
+    <a class="nav-item" data-page="vagas" onclick="irPara('vagas')">💼 Vagas</a>
+    <a class="nav-item" data-page="candidatos" onclick="irPara('candidatos')">👥 Candidatos</a>
+    <a class="nav-item" data-page="candidaturas" onclick="irPara('candidaturas')">📋 Candidaturas</a>
+    <a class="nav-item sair" onclick="sair()">🚪 Sair</a>
+  </aside>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div class="page ativo" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <h2>Dashboard</h2>
+          <p>Visão geral do recrutamento</p>
+        </div>
+      </div>
+      <div class="stats" id="stats-grid"><div class="empty"><div class="spinner"></div></div></div>
+      <h3 style="margin:24px 0 12px;font-size:18px;">🏆 Vagas com mais candidatos</h3>
+      <div class="tabela-wrap">
+        <table id="ranking-table">
+          <thead><tr><th>Vaga</th><th>Empresa</th><th style="text-align:right;">Candidatos</th></tr></thead>
+          <tbody><tr><td colspan="3" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VAGAS -->
+    <div class="page" id="page-vagas">
+      <div class="page-header">
+        <div>
+          <h2>Vagas</h2>
+          <p>Gerencie as vagas publicadas</p>
+        </div>
+        <button class="btn btn-primary" style="width:auto;" onclick="abrirModalVaga()">+ Nova vaga</button>
+      </div>
+      <div class="tabela-wrap">
+        <table id="vagas-table">
+          <thead><tr><th>Título</th><th>Empresa</th><th>Categoria</th><th>Status</th><th></th></tr></thead>
+          <tbody><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CANDIDATOS -->
+    <div class="page" id="page-candidatos">
+      <div class="page-header">
+        <div><h2>Candidatos</h2><p>Base de talentos cadastrados</p></div>
+      </div>
+      <div class="tabela-wrap">
+        <table id="candidatos-table">
+          <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Cidade</th><th>Cadastro</th></tr></thead>
+          <tbody><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CANDIDATURAS -->
+    <div class="page" id="page-candidaturas">
+      <div class="page-header">
+        <div><h2>Candidaturas</h2><p>Selecione uma vaga para ver os candidatos inscritos</p></div>
+      </div>
+      <div id="vagas-cands-grid" class="vagas-cands-grid">
+        <div class="empty"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL CANDIDATOS DA VAGA -->
+<div class="modal-overlay" id="modal-vaga-cands">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3 id="vaga-cands-titulo">Candidatos da vaga</h3>
+      <button class="modal-close" onclick="fecharModal('vaga-cands')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="vaga-cands-info" style="background:var(--cinza);padding:14px;border-radius:8px;margin-bottom:16px;font-size:13px"></div>
+      <div class="tabela-wrap">
+        <table id="vaga-cands-table">
+          <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ANÁLISE DO CANDIDATO -->
+<div class="modal-overlay" id="modal-analisar">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3 id="analisar-titulo">Análise do candidato</h3>
+      <button class="modal-close" onclick="fecharModal('analisar')">&times;</button>
+    </div>
+    <div class="modal-body" id="analisar-body">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VAGA -->
+<div class="modal-overlay" id="modal-vaga">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="vaga-modal-titulo">Nova vaga</h3>
+      <button class="modal-close" onclick="fecharModal('vaga')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="alert-vaga"></div>
+      <input type="hidden" id="vaga-id">
+      <div class="form-row">
+        <div class="form-group"><label>Título *</label><input id="v-titulo" placeholder="Ex: Desenvolvedor Full Stack"></div>
+        <div class="form-group"><label>Empresa</label><input id="v-empresa" placeholder="Nome da empresa"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Área</label>
+          <select id="v-categoria">
+            <option value="">Selecione...</option>
+            <option>Tecnologia</option><option>Vendas</option><option>Administrativo</option>
+            <option>Operacional</option><option>Marketing</option><option>Financeiro</option>
+            <option>Comercial</option><option>Saúde</option><option>Educação</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Nível</label>
+          <select id="v-nivel">
+            <option value="">Selecione...</option>
+            <option>Júnior</option><option>Pleno</option><option>Sênior</option>
+            <option>Especialista</option><option>Coordenação</option><option>Gerência</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Cidade</label><input id="v-cidade" placeholder="Cidade"></div>
+        <div class="form-group"><label>UF</label><input id="v-estado" maxlength="2" placeholder="BA"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Salário mín.</label><input id="v-salario-min" type="number" placeholder="0"></div>
+        <div class="form-group"><label>Salário máx.</label><input id="v-salario-max" type="number" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tipo de contrato</label>
+          <select id="v-tipo"><option>CLT</option><option>PJ</option><option>Estágio</option><option>Temporário</option></select>
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select id="v-status"><option value="publicada">Publicada</option><option value="pausada">Pausada</option><option value="fechada">Fechada</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Descrição</label><textarea id="v-descricao" rows="4"></textarea></div>
+      <div class="form-group"><label>Requisitos</label><textarea id="v-requisitos" rows="3"></textarea></div>
+      <div class="form-group"><label>Benefícios</label><textarea id="v-beneficios" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('vaga')">Cancelar</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="salvarVaga()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Detalhes da Candidatura -->
+<div class="modal-overlay" id="modal-candidatura">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h3>📋 Detalhes da Candidatura</h3>
+      <button class="modal-close" onclick="fecharModal('candidatura')">&times;</button>
+    </div>
+    <div class="modal-body" id="candidatura-detalhes">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('candidatura')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js?v=20260717-1300"></script>
+</body>
+</html>
