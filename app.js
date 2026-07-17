@@ -932,9 +932,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 // EXPOR NO WINDOW (para onclick inline funcionar)
 // ============================================
-window.cadastrarConta = cadastrarConta;
-window.salvarPerfil = salvarPerfil;
-window.salvarPerfilCompleto = salvarPerfilCompleto;
 window.trocarSenha = trocarSenha;
 window.loginEntrar = loginEntrar;
 window.abrirModal = abrirModal;
