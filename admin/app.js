@@ -220,26 +220,144 @@ async function deletarVaga(id) {
 }
 
 // ===== CANDIDATOS =====
+const AREAS_INTERESSE_ADMIN = [
+  'Atendimento ao Cliente','Caixa','Vendas','Comercial','Administrativo','Recepção','Estoque','Logística','Expedição','Compras',
+  'Financeiro','Recursos Humanos (RH)','Marketing','Telemarketing','Suporte Técnico','Tecnologia da Informação (TI)','Desenvolvimento de Software',
+  'Design Gráfico','E-commerce','Supervisão','Gerência','Liderança Comercial','Operações','Produção','Qualidade','Segurança Patrimonial','Portaria',
+  'Limpeza e Conservação','Serviços Gerais','Manutenção','Transporte','Motorista','Entregas','Alimentação e Restaurantes','Hotelaria e Turismo','Saúde',
+  'Educação','Farmácia','Construção Civil','Indústria','Estágio','Jovem Aprendiz','Primeiro Emprego'
+];
+
+function popularSelectAreas() {
+  const sel = document.getElementById('candidatos-filtro-area');
+  if (!sel || sel.options.length > 1) return;
+  AREAS_INTERESSE_ADMIN.forEach(a => {
+    const o = document.createElement('option');
+    o.value = a;
+    o.textContent = a;
+    sel.appendChild(o);
+  });
+}
+
+function limparFiltrosCandidatos() {
+  const sel = document.getElementById('candidatos-filtro-area');
+  const inp = document.getElementById('candidatos-filtro-busca');
+  if (sel) sel.value = '';
+  if (inp) inp.value = '';
+  carregarCandidatos();
+}
+
 async function carregarCandidatos() {
+  popularSelectAreas();
   const tb = document.querySelector('#candidatos-table tbody');
-  tb.innerHTML = '<tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr>';
+  tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
   try {
-    const r = await fetch(API + '/api/admin/candidatos', { headers: { 'Authorization': 'Bearer ' + token } });
+    const area = document.getElementById('candidatos-filtro-area')?.value || '';
+    const busca = (document.getElementById('candidatos-filtro-busca')?.value || '').toLowerCase().trim();
+    const url = API + '/api/admin/candidatos' + (area ? '?area=' + encodeURIComponent(area) : '');
+    const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
     const data = await r.json();
-    const lista = data.candidatos || [];
+    let lista = data.candidatos || [];
+    if (busca) {
+      lista = lista.filter(c =>
+        (c.nome || '').toLowerCase().includes(busca) ||
+        (c.email || '').toLowerCase().includes(busca)
+      );
+    }
     if (lista.length === 0) {
-      tb.innerHTML = '<tr><td colspan="5" class="empty">Nenhum candidato cadastrado</td></tr>';
+      tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum candidato encontrado' + (area ? ' com a área "' + area + '"' : '') + '</td></tr>';
       return;
     }
-    tb.innerHTML = lista.map(c => `<tr>
-      <td><strong>${c.nome}</strong></td>
-      <td>${c.email || '—'}</td>
-      <td>${c.cpf || '—'}</td>
-      <td>${c.cidade || '—'}</td>
-      <td>${formatarData(c.criado_em)}</td>
-    </tr>`).join('');
+    tb.innerHTML = lista.map(c => {
+      const areas = Array.isArray(c.areas_interesse) ? c.areas_interesse : [];
+      const areasHtml = areas.length
+        ? areas.map(a => `<span class="badge-area">${a}</span>`).join(' ')
+        : '<span style="color:var(--cinza-medio)">—</span>';
+      return `<tr>
+        <td data-label="Nome"><strong>${c.nome}</strong></td>
+        <td data-label="Email">${c.email || '—'}</td>
+        <td data-label="Telefone">${c.celular || '—'}</td>
+        <td data-label="Cidade">${c.cidade ? c.cidade + (c.estado ? '/' + c.estado : '') : '—'}</td>
+        <td data-label="Áreas"><div class="areas-badges">${areasHtml}</div></td>
+        <td data-label="Cadastro">${formatarData(c.criado_em)}</td>
+        <td data-label="Ações"><a class="btn-ver" href="javascript:void(0)" onclick="abrirCurriculo(${c.id})">👁 Ver currículo</a></td>
+      </tr>`;
+    }).join('');
   } catch {
-    tb.innerHTML = '<tr><td colspan="5" class="alert-erro">Erro ao carregar</td></tr>';
+    tb.innerHTML = '<tr><td colspan="7" class="alert-erro">Erro ao carregar</td></tr>';
+  }
+}
+
+async function abrirCurriculo(id) {
+  abrirModal('curriculo');
+  const body = document.getElementById('curriculo-body');
+  const titulo = document.getElementById('curriculo-titulo');
+  body.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+  titulo.textContent = '📄 Currículo do Candidato';
+  try {
+    const r = await fetch(API + '/api/admin/candidato/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      body.innerHTML = '<div class="alert alert-erro">Erro: ' + (err.erro || r.status) + '</div>';
+      return;
+    }
+    const c = await r.json();
+    const cand = c.candidato || c;
+    titulo.textContent = '📄 ' + (cand.nome || 'Candidato');
+
+    const areas = Array.isArray(cand.areas_interesse) ? cand.areas_interesse : [];
+    const areasHtml = areas.length
+      ? areas.map(a => `<span class="badge-area">${a}</span>`).join(' ')
+      : '<span style="color:var(--cinza-medio)">Nenhuma área selecionada</span>';
+
+    body.innerHTML = `
+      <div class="curriculo-grid">
+        <div class="curriculo-card">
+          <h4>👤 Dados pessoais</h4>
+          <div class="kv"><span>Nome</span><strong>${cand.nome || '—'}</strong></div>
+          <div class="kv"><span>CPF</span><strong>${cand.cpf || '—'}</strong></div>
+          <div class="kv"><span>Nascimento</span><strong>${formatarData(cand.data_nascimento)}</strong></div>
+          <div class="kv"><span>Sexo</span><strong>${cand.sexo || '—'}</strong></div>
+          <div class="kv"><span>Email</span><strong>${cand.email || '—'}</strong></div>
+          <div class="kv"><span>Celular</span><strong>${cand.celular || '—'}</strong></div>
+          <div class="kv"><span>Acessibilidade</span><strong>${cand.acessibilidade || 'Nenhuma'}</strong></div>
+        </div>
+        <div class="curriculo-card">
+          <h4>📍 Endereço</h4>
+          <div class="kv"><span>CEP</span><strong>${cand.cep || '—'}</strong></div>
+          <div class="kv"><span>Logradouro</span><strong>${(cand.logradouro || '—') + (cand.numero ? ', ' + cand.numero : '')}${cand.complemento ? ' — ' + cand.complemento : ''}</strong></div>
+          <div class="kv"><span>Bairro</span><strong>${cand.bairro || '—'}</strong></div>
+          <div class="kv"><span>Cidade/UF</span><strong>${(cand.cidade || '—') + (cand.estado ? '/' + cand.estado : '')}</strong></div>
+        </div>
+        <div class="curriculo-card">
+          <h4>🎓 Escolaridade</h4>
+          <div class="kv"><span>Formação</span><strong>${cand.formacao || '—'}</strong></div>
+          <div class="kv"><span>Instituição</span><strong>${cand.instituicao || '—'}</strong></div>
+          <div class="kv"><span>Curso</span><strong>${cand.curso || '—'}</strong></div>
+          <div class="kv"><span>Situação</span><strong>${cand.situacao || '—'}</strong></div>
+          <div class="kv"><span>Conclusão</span><strong>${formatarData(cand.data_conclusao)}</strong></div>
+          <div class="kv"><span>Primeiro emprego?</span><strong>${cand.primeiro_emprego ? 'Sim' : 'Não'}</strong></div>
+        </div>
+        <div class="curriculo-card">
+          <h4>🎯 Áreas de interesse</h4>
+          <div class="areas-badges" style="margin-top:8px">${areasHtml}</div>
+        </div>
+        <div class="curriculo-card curriculo-full">
+          <h4>💼 Experiências</h4>
+          <pre style="white-space:pre-wrap;font-family:inherit;background:#fafafa;padding:10px;border-radius:6px;margin-top:6px">${cand.experiencia || 'Não informado'}</pre>
+        </div>
+        <div class="curriculo-card curriculo-full">
+          <h4>📝 Sobre você</h4>
+          <pre style="white-space:pre-wrap;font-family:inherit;background:#fafafa;padding:10px;border-radius:6px;margin-top:6px">${cand.sobre_voce || 'Não informado'}</pre>
+        </div>
+        <div class="curriculo-card curriculo-full">
+          <h4>📊 Status no Banco de Talentos</h4>
+          <div class="kv"><span>Cadastro criado em</span><strong>${formatarData(cand.criado_em)}</strong></div>
+          <div class="kv"><span>Autoriza banco de talentos</span><strong>${cand.banco_talentos ? '✅ Sim' : '❌ Não'}</strong></div>
+        </div>
+      </div>`;
+  } catch (e) {
+    body.innerHTML = '<div class="alert alert-erro">Erro: ' + e.message + '</div>';
   }
 }
 
