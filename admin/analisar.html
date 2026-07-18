@@ -43,6 +43,7 @@
     .btn-reprovar:hover { background: #B91C1C; }
     .btn-reabrir { background: var(--cinza-escuro); color: white; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .aviso-bloq { width: 100%; margin-top: 10px; padding: 10px 12px; background: var(--amarelo-bg); color: var(--amarelo); border-radius: 6px; font-size: 13px; border: 1px solid var(--amarelo); }
     .empty { text-align: center; padding: 40px; color: var(--cinza-medio); }
     .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--vinho); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; margin: 0 auto 12px; }
     @keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
@@ -293,16 +294,17 @@
         }).join('');
       }
 
-      // Botões de ação (só na triagem curricular)
+      // Botões de ação (disponíveis em qualquer etapa em_andamento)
       let acoesHtml = '';
-      if (ehTriagem) {
-        if (status === 'em_andamento' || status === 'aprovado' || status === 'em_analise') {
-          acoesHtml = '<div class="acoes"><button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button><button class="btn btn-aprovar" onclick="acao(' + c.id + ',\'aprovar-triagem\')">✓ Aprovar Triagem</button></div>';
-        } else if (status === 'reprovado' || status === 'rejeitado') {
-          acoesHtml = '<div class="acoes"><button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button></div>';
-        }
-      } else {
-        acoesHtml = '<div class="acoes"><div class="aviso-etapa">ℹ️ Ações de aprovação disponíveis apenas na Etapa 2 (Triagem Curricular). Candidato está na etapa ' + etapaAtual + '.</div></div>';
+      const _stats = window._docsStatsCache || { total: 0, aprovados: 0, reprovados: 0, pendentes: 0 };
+      const _tudoAprovado = _stats.total === 0 || (_stats.aprovados === _stats.total && _stats.reprovados === 0 && _stats.pendentes === 0);
+      const _bloqueiaAvancar = etapaAtual === 5 && !_tudoAprovado;
+      if (status === 'em_andamento' || status === 'aprovado' || status === 'em_analise') {
+        const _avancarDisabled = _bloqueiaAvancar ? ' disabled title="Aprove todos os documentos antes de avançar"' : '';
+        const _avancarHint = _bloqueiaAvancar ? '<div class="aviso-bloq">⏳ ' + (_stats.reprovados > 0 ? 'Há ' + _stats.reprovados + ' documento(s) reprovado(s)' : 'Há ' + _stats.pendentes + ' documento(s) pendente(s)') + ' — corrija antes de avançar.</div>' : '';
+        acoesHtml = '<div class="acoes"><button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button><button class="btn btn-aprovar"' + _avancarDisabled + ' onclick="acao(' + c.id + ',\'aprovar-triagem\')">✓ Aprovar e Avançar</button>' + _avancarHint + '</div>';
+      } else if (status === 'reprovado' || status === 'rejeitado') {
+        acoesHtml = '<div class="acoes"><button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button></div>';
       }
 
       content.innerHTML =
@@ -479,11 +481,13 @@
       const enviados = _docsCache.length;
       const aprovados = _docsCache.filter(d => d.status === 'aprovado').length;
       const reprovados = _docsCache.filter(d => d.status === 'reprovado').length;
+      const pendentes = Math.max(0, total - aprovados - reprovados);
+      window._docsStatsCache = { total, enviados, aprovados, reprovados, pendentes };
       const resumo = '<div style="margin-top:14px;padding:10px 14px;background:#F9F6F0;border-radius:8px;font-size:13px;color:var(--cinza-escuro)">' +
         '<strong>Resumo:</strong> ' + enviados + '/' + total + ' enviados • ' +
         '<span style="color:#16A34A">' + aprovados + ' aprovados</span> • ' +
         '<span style="color:#DC2626">' + reprovados + ' reprovados</span> • ' +
-        (total - enviados) + ' pendentes' +
+        pendentes + ' pendentes' +
         '</div>';
 
       return html + resumo;
