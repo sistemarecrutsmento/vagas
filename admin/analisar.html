@@ -166,6 +166,10 @@
       const etapaAtual = Number(c.etapa_atual || 1);
       const totalEtapas = etapas.length || 1;
       const ehTriagem = etapaAtual === 2; // 2ª etapa = Triagem Curricular
+      // 5ª etapa = Proposta (índice 4)
+      const ehProposta = etapaAtual === 5;
+      // 4ª etapa = Entrevista gestor (índice 3) — onde o admin pode preparar a proposta
+      const ehEntrevistaGestor = etapaAtual === 4;
       const status = c.status || 'em_andamento';
 
 
@@ -358,6 +362,8 @@
           '<button class="btn btn-primary" ' + _botaoAvancarDisabled + ' ' + _botaoAvancarOnclick + ' ' + _avancarTitle + '>' + labelAvancar + '</button>' +
           '<button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button>' +
           (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank" rel="noopener">📄 Ver documentos anexados</a>' : '') +
+          (ehEntrevistaGestor || ehProposta ? '<button class="btn" style="background:#7C3AED;color:white" onclick="abrirModalProposta(' + c.id + ')">📨 ' + (c.proposta_enviada_em ? 'Reenviar / Editar Proposta' : 'Enviar Proposta') + '</button>' : '') +
+          (ehProposta && c.proposta_enviada_em ? '<div class="aviso-bloq" style="background:#EDE9FE;color:#5B21B6;border-left:4px solid #7C3AED;margin-top:8px;text-align:left">📨 <strong>Proposta enviada</strong>' + (c.proposta_aceita_em ? ' — ✅ aceita pelo candidato' : c.proposta_recusada_em ? ' — ❌ recusada' : ' — aguardando aceite do candidato') + '</div>' : '') +
           _hintColeta +
         '</div>';
       } else if (status === 'reprovado' || status === 'rejeitado') {
@@ -830,6 +836,94 @@
     function escapeHtml(s) {
       return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
+
+    // ====== Modal de Proposta (etapa 5) ======
+    let _propostaCandId = null;
+    function abrirModalProposta(candidaturaId) {
+      _propostaCandId = candidaturaId;
+      document.getElementById('modal-proposta').classList.add('aberto');
+      // Limpa
+      document.getElementById('proposta-texto').value = '';
+      document.getElementById('proposta-pdf').value = '';
+      const status = document.getElementById('proposta-status');
+      if (status) status.textContent = '';
+    }
+    function fecharModalProposta() {
+      document.getElementById('modal-proposta').classList.remove('aberto');
+    }
+    async function enviarProposta() {
+      if (!_propostaCandId) return;
+      const texto = document.getElementById('proposta-texto').value.trim();
+      const fileInput = document.getElementById('proposta-pdf');
+      const file = fileInput.files[0];
+      if (!texto && !file) {
+        alert('Digite o texto da proposta OU anexe um PDF.');
+        return;
+      }
+      const btn = document.querySelector('#modal-proposta .btn-enviar-proposta');
+      if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+      const status = document.getElementById('proposta-status');
+      if (status) status.textContent = 'Enviando proposta...';
+      try {
+        let pdfUrl = null;
+        if (file) {
+          if (file.type !== 'application/pdf') {
+            alert('Apenas arquivos PDF são aceitos.');
+            if (btn) { btn.disabled = false; btn.textContent = '📨 Enviar Proposta'; }
+            return;
+          }
+          // Converte para base64 (data URL)
+          pdfUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        }
+        const r = await fetch(API + '/api/admin/candidatura/' + _propostaCandId + '/enviar-proposta', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ texto, pdf_url: pdfUrl })
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.erro || 'Erro ao enviar');
+        if (status) status.innerHTML = '✅ Proposta enviada! Recarregando...';
+        setTimeout(() => { location.reload(); }, 1200);
+      } catch (e) {
+        if (status) status.textContent = '❌ ' + e.message;
+        if (btn) { btn.disabled = false; btn.textContent = '📨 Enviar Proposta'; }
+      }
+    }
   </script>
+
+  <!-- Modal de Proposta -->
+  <div id="modal-proposta" class="modal-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px">
+    <div class="modal-content" style="background:white;border-radius:12px;max-width:560px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 8px 32px rgba(0,0,0,0.3)">
+      <div style="padding:20px;border-bottom:1px solid #EEE;display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0;color:var(--vinho);font-size:20px">📨 Enviar Proposta</h2>
+        <button onclick="fecharModalProposta()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#999">×</button>
+      </div>
+      <div style="padding:24px">
+        <p style="color:#666;margin-bottom:16px;font-size:14px">A proposta será enviada ao candidato. Quando ele aceitar, a candidatura avança automaticamente para a etapa <strong>Coleta de Documentos</strong>. Se recusar, a candidatura é finalizada como reprovada.</p>
+
+        <label style="display:block;font-weight:600;margin-bottom:6px;color:#333">Texto da proposta *</label>
+        <textarea id="proposta-texto" rows="6" placeholder="Ex: Estamos oferecendo R$ 5.000 + benefícios (VR, VT, plano de saúde). Data de início: 01/09/2026..." style="width:100%;padding:12px;border:1px solid #DDD;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical"></textarea>
+
+        <label style="display:block;font-weight:600;margin:16px 0 6px;color:#333">📄 PDF da proposta (opcional)</label>
+        <input type="file" id="proposta-pdf" accept="application/pdf" style="width:100%;padding:8px;border:1px solid #DDD;border-radius:8px;font-size:13px">
+        <small style="color:#888;display:block;margin-top:4px">Se anexar, o candidato também poderá baixar o PDF.</small>
+
+        <div id="proposta-status" style="margin-top:12px;font-size:14px;color:#666"></div>
+
+        <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+          <button onclick="fecharModalProposta()" style="padding:10px 18px;background:#EEE;border:none;border-radius:6px;cursor:pointer;font-weight:500">Cancelar</button>
+          <button class="btn-enviar-proposta" onclick="enviarProposta()" style="padding:10px 18px;background:#7C3AED;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600">📨 Enviar Proposta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>
+    #modal-proposta.aberto { display: flex !important; }
+  </style>
 </body>
 </html>
