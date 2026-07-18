@@ -53,6 +53,31 @@
     .hist-item small { color: var(--cinza-medio); }
     .badge-etapa { display: inline-block; background: var(--vinho); color: white; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
     a { color: var(--vinho); }
+
+    /* ===== Documentos ===== */
+    .doc-lista { display: grid; gap: 10px; }
+    .doc-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--cinza); border-radius: 10px; background: #FAFAFA; }
+    .doc-row.status-aprovado { border-color: #16A34A; background: #F0FDF4; }
+    .doc-row.status-reprovado { border-color: #DC2626; background: #FEF2F2; }
+    .doc-info { flex: 1; min-width: 0; }
+    .doc-tipo { font-size: 14px; font-weight: 600; color: var(--cinza-escuro); }
+    .doc-valor { font-size: 13px; color: var(--cinza-medio); margin-top: 2px; word-break: break-all; }
+    .doc-valor a { color: var(--vinho); text-decoration: underline; }
+    .doc-pendente { font-size: 12px; color: var(--cinza-medio); font-style: italic; }
+    .doc-justificativa { font-size: 12px; color: #991B1B; margin-top: 4px; font-style: italic; }
+    .doc-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .doc-badge-pendente { background: #FEF3C7; color: #92400E; }
+    .doc-badge-aprovado { background: #DCFCE7; color: #166534; }
+    .doc-badge-reprovado { background: #FEE2E2; color: #991B1B; }
+    .doc-badge-vazio { background: var(--cinza); color: var(--cinza-medio); }
+    .doc-acoes { display: flex; gap: 6px; flex-shrink: 0; }
+    .doc-btn { padding: 6px 12px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .doc-btn-aprovar { background: #16A34A; color: white; }
+    .doc-btn-aprovar:hover { background: #15803D; }
+    .doc-btn-reprovar { background: #DC2626; color: white; }
+    .doc-btn-reprovar:hover { background: #B91C1C; }
+    .doc-btn-reverter { background: var(--cinza-medio); color: white; }
+    .doc-btn-reverter:hover { background: var(--cinza-escuro); }
   </style>
 </head>
 <body>
@@ -110,10 +135,27 @@
         return;
       }
 
-      render(candidatura);
+      // Carrega documentos se estiver na fase de coleta (etapa 4 = index 3 OU etapa_atual >= 5)
+      const etapaNum = Number(candidatura.etapa_atual || 0);
+      let docsCard = '';
+      if (etapaNum >= 4) {
+        try {
+          await carregarDocumentos(id);
+          if (_obrigatoriosDocs.length) {
+            docsCard = '<div class="card" id="card-documentos">' +
+              '<h2>📄 Documentos de Contratação</h2>' +
+              '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Aprovar ou reprovar cada documento enviado pelo candidato. Em caso de reprovação, a justificativa é obrigatória.</p>' +
+              '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
+            '</div>';
+          }
+        } catch (e) {
+          console.error('Erro ao carregar documentos:', e);
+        }
+      }
+      render(candidatura, docsCard);
     })();
 
-    function render(c) {
+    function render(c, docsCard) {
       const content = document.getElementById('content');
       const etapas = (c.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
       const etapaAtual = c.etapa_atual || 1;
@@ -305,6 +347,8 @@
           '<h2>💼 Experiências Profissionais</h2>' + expsHtml +
         '</div>' +
 
+        (docsCard || '') +
+
         '<div class="card">' +
           '<h2>📜 Histórico do Processo</h2>' + histHtml +
         '</div>' +
@@ -332,6 +376,161 @@
       } catch (e) {
         alert('Erro: ' + e.message);
       }
+    }
+
+    // ============ DOCUMENTOS ============
+    // Carrega + renderiza a lista de documentos da etapa de coleta (etapa 5)
+    let _obrigatoriosDocs = []; // cache do schema vindo da API
+    let _docsCache = [];        // cache dos docs do candidato
+
+    async function carregarDocumentos(candidaturaId) {
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/candidatura/' + candidaturaId + '/documentos', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!r.ok) {
+          _obrigatoriosDocs = []; _docsCache = [];
+          return '';
+        }
+        const data = await r.json();
+        _obrigatoriosDocs = data.obrigatorios || [];
+        _docsCache = data.documentos || [];
+      } catch (e) {
+        console.error('docs:', e);
+        _obrigatoriosDocs = []; _docsCache = [];
+        return '';
+      }
+      // Não envia nada se candidato não tem nenhum doc e nem tá na etapa 5
+      // (a função é chamada só quando etapa >= 5 mesmo assim; deixamos a UI decidir)
+      return renderizarDocumentos();
+    }
+
+    function renderizarDocumentos() {
+      if (!_obrigatoriosDocs.length) return '';
+      // Indexa docs existentes por tipo
+      const porTipo = {};
+      for (const d of _docsCache) porTipo[d.tipo] = d;
+
+      const fmt = (n) => n ? (n / 1024).toFixed(1) + ' KB' : '';
+      const fmtData = (s) => s ? new Date(s).toLocaleString('pt-BR') : '';
+
+      let html = '<div class="doc-lista">';
+      for (const o of _obrigatoriosDocs) {
+        const d = porTipo[o.tipo];
+        const status = d ? d.status : null;
+        const isArquivo = o.categoria === 'arquivo';
+        let valorHtml = '';
+        if (isArquivo) {
+          if (d && d.arquivo_url) {
+            // Link pra URL do Cloudinary (target _blank)
+            valorHtml = '<div class="doc-valor"><a href="' + d.arquivo_url + '" target="_blank" rel="noopener">📎 ' + (d.arquivo_nome || 'ver arquivo') + '</a> <span style="color:var(--cinza-medio)">(' + fmt(d.arquivo_tamanho) + ')</span></div>';
+          } else {
+            valorHtml = '<div class="doc-pendente">⏳ Candidato ainda não enviou</div>';
+          }
+        } else {
+          // Campo de texto
+          if (d && d.valor_texto) {
+            valorHtml = '<div class="doc-valor">' + escapeHtml(d.valor_texto) + '</div>';
+          } else {
+            valorHtml = '<div class="doc-pendente">⏳ Candidato ainda não preencheu</div>';
+          }
+        }
+        // Justificativa (se reprovado)
+        if (d && d.status === 'reprovado' && d.justificativa_admin) {
+          valorHtml += '<div class="doc-justificativa">Motivo: ' + escapeHtml(d.justificativa_admin) + '</div>';
+        }
+        // Status badge
+        let badge = '';
+        if (!d) badge = '<span class="doc-badge doc-badge-vazio">vazio</span>';
+        else if (d.status === 'aprovado') badge = '<span class="doc-badge doc-badge-aprovado">✓ aprovado</span>';
+        else if (d.status === 'reprovado') badge = '<span class="doc-badge doc-badge-reprovado">✗ reprovado</span>';
+        else badge = '<span class="doc-badge doc-badge-pendente">⏳ pendente</span>';
+
+        // Botões de ação (só mostra se candidato JÁ enviou)
+        let acoesHtml = '';
+        if (d) {
+          acoesHtml = '<div class="doc-acoes">';
+          if (d.status !== 'aprovado') {
+            acoesHtml += '<button class="doc-btn doc-btn-aprovar" onclick="revisarDocumento(' + d.id + ',\'aprovar\')">✓ Aprovar</button>';
+          }
+          if (d.status !== 'reprovado') {
+            acoesHtml += '<button class="doc-btn doc-btn-reprovar" onclick="revisarDocumento(' + d.id + ',\'reprovar\')">✗ Reprovar</button>';
+          }
+          if (d.status !== 'pendente') {
+            acoesHtml += '<button class="doc-btn doc-btn-reverter" onclick="revisarDocumento(' + d.id + ',\'reverter\')">↻ Reverter</button>';
+          }
+          acoesHtml += '</div>';
+        }
+
+        html += '<div class="doc-row ' + (d ? 'status-' + d.status : '') + '">';
+        html += '  <div class="doc-info">';
+        html += '    <div class="doc-tipo">' + escapeHtml(o.label) + ' ' + badge + '</div>';
+        html += '    ' + valorHtml;
+        if (d && d.enviado_em) html += '<div class="doc-valor" style="font-size:11px">Enviado em ' + fmtData(d.enviado_em) + (d.revisado_em ? ' • Revisado em ' + fmtData(d.revisado_em) : '') + '</div>';
+        html += '  </div>';
+        html += '  ' + acoesHtml;
+        html += '</div>';
+      }
+      html += '</div>';
+
+      // Resumo
+      const total = _obrigatoriosDocs.length;
+      const enviados = _docsCache.length;
+      const aprovados = _docsCache.filter(d => d.status === 'aprovado').length;
+      const reprovados = _docsCache.filter(d => d.status === 'reprovado').length;
+      const resumo = '<div style="margin-top:14px;padding:10px 14px;background:#F9F6F0;border-radius:8px;font-size:13px;color:var(--cinza-escuro)">' +
+        '<strong>Resumo:</strong> ' + enviados + '/' + total + ' enviados • ' +
+        '<span style="color:#16A34A">' + aprovados + ' aprovados</span> • ' +
+        '<span style="color:#DC2626">' + reprovados + ' reprovados</span> • ' +
+        (total - enviados) + ' pendentes' +
+        '</div>';
+
+      return html + resumo;
+    }
+
+    async function revisarDocumento(docId, acao) {
+      // Monta prompt de justificativa
+      let justificativa = '';
+      if (acao === 'reprovar') {
+        justificativa = prompt('Por que você está REPROVANDO este documento?\n\nA justificativa é obrigatória e será enviada ao candidato.', '');
+        if (justificativa === null) return; // cancelou
+        if (!justificativa.trim()) {
+          alert('Justificativa obrigatória para reprovar.');
+          return;
+        }
+      } else if (acao === 'reverter') {
+        if (!confirm('Reverter este documento para status pendente?')) return;
+      } else if (acao === 'aprovar') {
+        if (!confirm('Confirmar aprovação deste documento?')) return;
+      }
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/documento/' + docId + '/revisar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ acao, justificativa })
+        });
+        const data = await r.json();
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao revisar')); return; }
+        // Atualiza cache local e re-renderiza
+        const idx = _docsCache.findIndex(d => d.id === docId);
+        if (idx >= 0) {
+          _docsCache[idx] = { ..._docsCache[idx], status: data.documento.status, justificativa_admin: data.documento.justificativa_admin, revisado_em: data.documento.revisado_em };
+        }
+        // Re-renderiza a seção
+        const card = document.getElementById('card-documentos');
+        if (card) {
+          const novaHtml = renderizarDocumentos();
+          card.querySelector('.doc-lista-wrapper').innerHTML = novaHtml;
+        }
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
   </script>
 </body>
