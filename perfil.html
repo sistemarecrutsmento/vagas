@@ -358,16 +358,15 @@ async function carregarPaginaPerfil() {
 
         <!-- ACESSIBILIDADE -->
         <div class="perfil-bloco" data-bloco="acessibilidade">
-          <p style="color:var(--cinza);font-size:14px;margin-bottom:16px">Caso tenha alguma necessidade, podemos adaptar o processo seletivo.</p>
+          <p style="color:var(--cinza);font-size:14px;margin-bottom:16px">Você respondeu isso no momento do cadastro. Se precisar atualizar, é só editar abaixo.</p>
           <div class="form-group">
             <label>Possui alguma deficiência ou necessidade de acessibilidade?</label>
             <select id="pe-acessibilidade">
               <option value="">Nenhuma</option>
-              <option value="visual" ${perfil.acessibilidade==='visual'?'selected':''}>Visual</option>
-              <option value="auditiva" ${perfil.acessibilidade==='auditiva'?'selected':''}>Auditiva</option>
-              <option value="fisica" ${perfil.acessibilidade==='fisica'?'selected':''}>Física/Motora</option>
-              <option value="intelectual" ${perfil.acessibilidade==='intelectual'?'selected':''}>Intelectual</option>
-              <option value="multipla" ${perfil.acessibilidade==='multipla'?'selected':''}>Múltipla</option>
+              <option value="cadeirante" ${perfil.acessibilidade==='cadeirante'?'selected':''}>Cadeirante</option>
+              <option value="deficiencia_visual" ${perfil.acessibilidade==='deficiencia_visual'?'selected':''}>Deficiência visual</option>
+              <option value="deficiencia_auditiva" ${perfil.acessibilidade==='deficiencia_auditiva'?'selected':''}>Deficiência auditiva</option>
+              <option value="mobilidade_reduzida" ${perfil.acessibilidade==='mobilidade_reduzida'?'selected':''}>Mobilidade reduzida</option>
               <option value="outra" ${perfil.acessibilidade==='outra'?'selected':''}>Outra</option>
             </select>
           </div>
