@@ -168,13 +168,29 @@
       const ehTriagem = etapaAtual === 2; // 2ª etapa = Triagem Curricular
       const status = c.status || 'em_andamento';
 
-      // Timeline
+      // Observações por etapa (comentários internos do admin)
+      const observacoes = (c.observacoes_etapas && typeof c.observacoes_etapas === 'object') ? c.observacoes_etapas : {};
+
+      // Detecta etapas de entrevista por NOME (case-insensitive)
+      // "Entrevista RH" e "Entrevista com Gestor" / "Entrevista Gestor" / "Entrevista com o Gestor"
+      const idxEtapaRH = etapas.findIndex(n => /entrevista.*rh|rh.*entrevista/i.test(n));
+      const idxEtapaGestor = etapas.findIndex(n => /entrevista.*gestor|gestor.*entrevista/i.test(n));
+      // Etapas já atingidas (para mostrar os comentários como histórico)
+      const etapaRHAtingida = idxEtapaRH >= 0 && (idxEtapaRH + 1) <= etapaAtual;
+      const etapaGestorAtingida = idxEtapaGestor >= 0 && (idxEtapaGestor + 1) <= etapaAtual;
+      // Etapa de coleta de documentos (por nome)
+      const idxEtapaColeta = etapas.findIndex(n => /coleta.*documento|documento.*coleta/i.test(n));
+      const ehEtapaColeta = idxEtapaColeta >= 0 && (idxEtapaColeta + 1) === etapaAtual;
+
+      // Timeline interativa: cada bolinha é clicável e rola até a seção correspondente
       const timeline = etapas.map((nome, i) => {
         const idx = i + 1;
         let cls = '';
         if (idx < etapaAtual) cls = 'concluida';
         else if (idx === etapaAtual) cls = 'atual';
-        return '<div class="etapa ' + cls + '"><div class="num">' + idx + '/' + totalEtapas + '</div>' + nome + '</div>';
+        // onclick="scrollSecao('etapa-X')" — rola até a seção dessa etapa
+        return '<div class="etapa ' + cls + '" onclick="scrollSecao(\'etapa-' + idx + '\')" style="cursor:pointer" title="Ir para detalhes da etapa ' + idx + '">' +
+          '<div class="num">' + idx + '/' + totalEtapas + '</div>' + nome + '</div>';
       }).join('');
 
       // Helper: formata data
@@ -283,44 +299,106 @@
       } else {
         histHtml = histFiltrado.map(h => {
           const dataFmt = fmtDataHora(h.data);
-          const acaoLabel = h.acao === 'avancar' ? 'Avançou para próxima etapa' :
-                            h.acao === 'reprovar' ? 'Reprovado' :
-                            h.acao === 'reabrir' ? 'Candidatura reaberta' :
-                            h.acao === 'aprovar' ? 'Aprovado' : (h.status || '');
-          const statusLabel = h.status === 'em_analise' ? 'em análise' : h.status === 'em_andamento' ? 'em andamento' : (h.status || '');
-          return '<div class="hist-item">' +
-            '<strong>' + (acaoLabel || 'Movimentação') + '</strong>' +
-            (h.etapa != null ? ' <span class="badge-etapa">' + h.etapa + '/' + totalEtapas + '</span>' : '') +
-            (statusLabel ? ' <small>[' + statusLabel + ']</small>' : '') +
-            (dataFmt ? '<br><small>' + dataFmt + '</small>' : '') +
-            (h.por ? '<br><small>por ' + h.por + '</small>' : '') +
-            '</div>';
+          const acaoLabel = h.acao === 'avancar' ? '▶ Avançou para próxima etapa' :
+                            h.acao === 'reprovar' ? '✖ Reprovado' :
+                            h.acao === 'reabrir' ? '↻ Candidatura reaberta' :
+                            h.acao === 'aprovar' ? '✅ Aprovado' :
+                            h.acao === 'inscricao' ? '📝 Inscrição realizada' :
+                            (h.status || 'Movimentação');
+          const statusLabel = h.status === 'em_analise' ? 'em análise' :
+                              h.status === 'em_andamento' ? 'em andamento' :
+                              h.status === 'rejeitado' ? 'reprovado' :
+                              h.status === 'reprovado' ? 'reprovado' :
+                              h.status === 'contratado' ? 'contratado' :
+                              (h.status || '');
+          // Nome da etapa (se existir)
+          const etapaNome = (h.etapa != null && etapas[h.etapa - 1]) ? etapas[h.etapa - 1] : null;
+          return '<div class="hist-item" id="etapa-' + (h.etapa != null ? h.etapa : '0') + '">' +
+            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+              '<strong>' + acaoLabel + '</strong>' +
+              (h.etapa != null ? ' <span class="badge-etapa">Etapa ' + h.etapa + (etapaNome ? ' — ' + etapaNome : '') + '</span>' : '') +
+              (statusLabel ? ' <span style="font-size:11px;padding:2px 8px;background:#EEE;border-radius:999px;color:#555">[' + statusLabel + ']</span>' : '') +
+            '</div>' +
+            (h.mensagem ? '<div style="margin-top:4px;font-size:13px;color:#444">"' + escapeHtml(h.mensagem) + '"</div>' : '') +
+            '<div style="margin-top:4px;font-size:11px;color:var(--cinza-medio)">' +
+              (dataFmt ? dataFmt : '') +
+              (h.por ? ' • por ' + h.por : '') +
+            '</div>' +
+          '</div>';
         }).join('');
       }
 
-      // Botões de ação (disponíveis em qualquer etapa em_andamento)
+      // Botões de ação gerais: ▶ Avançar e ✖ Reprovar
+      // - Disponíveis em qualquer etapa em_andamento / em_analise
+      // - Exceção: na etapa de Coleta de Documentos, "▶ Avançar" fica bloqueado até todos os docs serem aprovados
+      //   (o admin usa o botão verde "Aprovar tudo e avançar etapa" dentro do card de Documentos)
       let acoesHtml = '';
       const _stats = window._docsStatsCache || { total: 0, aprovados: 0, reprovados: 0, pendentes: 0 };
       const _tudoAprovado = _stats.total === 0 || (_stats.aprovados === _stats.total && _stats.reprovados === 0 && _stats.pendentes === 0);
-      const _bloqueiaAvancar = etapaAtual === 5 && !_tudoAprovado;
-      const _temDocs = etapaAtual >= 4;
+      const _bloqueiaAvancar = ehEtapaColeta && !_tudoAprovado;
+      const _temDocs = idxEtapaColeta >= 0 && etapaAtual >= (idxEtapaColeta + 1);
+
+      // Mensagem pra step final (contratação)
+      const ehUltimaEtapa = etapaAtual >= totalEtapas;
+      const labelAvancar = ehUltimaEtapa ? '✅ Contratar' : '▶ Avançar para próxima etapa';
+
       if (status === 'em_andamento' || status === 'aprovado' || status === 'em_analise') {
-        // Novo fluxo: não há mais "Aprovar e Avançar" nem "Reprovar" manuais da candidatura.
-        // O avanço de etapa é feito exclusivamente pelo botão verde "Aprovar tudo e avançar etapa"
-        // que fica dentro do card de Documentos de Contratação.
-        const _hintDocs = _temDocs
-          ? '<div class="aviso-bloq" style="background:#FEF3C7;color:#92400E;border-left:4px solid #F59E0B">📄 Para avançar a etapa, abra a seção <strong>"Documentos de Contratação"</strong> abaixo e use <strong>"Aprovar tudo e avançar etapa"</strong> quando todos os docs estiverem ok.</div>'
-          : '<div class="aviso-bloq">📋 Aguardando candidato chegar à fase de coleta de documentos.</div>';
+        const _botaoAvancarDisabled = _bloqueiaAvancar ? 'disabled style="opacity:0.5;cursor:not-allowed"' : '';
+        const _botaoAvancarOnclick = _bloqueiaAvancar
+          ? ''
+          : 'onclick="acao(' + c.id + ',\'avancar\')"';
+        const _avancarTitle = _bloqueiaAvancar ? 'title="Aprove todos os documentos antes de avançar (use o botão no card de Documentos)"' : '';
+
+        const _hintColeta = ehEtapaColeta && !_tudoAprovado
+          ? '<div class="aviso-bloq" style="background:#FEF3C7;color:#92400E;border-left:4px solid #F59E0B;margin-top:8px">📄 <strong>Coleta de Documentos em andamento.</strong> Aprove todos os documentos abaixo (botão verde "Aprovar tudo e avançar etapa") para liberar o avanço.</div>'
+          : '';
+
         acoesHtml = '<div class="acoes">' +
-          (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank">📄 Validar documentação</a>' : '') +
-          _hintDocs +
+          '<button class="btn btn-primary" ' + _botaoAvancarDisabled + ' ' + _botaoAvancarOnclick + ' ' + _avancarTitle + '>' + labelAvancar + '</button>' +
+          '<button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button>' +
+          (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank" rel="noopener">📄 Ver documentos anexados</a>' : '') +
+          _hintColeta +
         '</div>';
       } else if (status === 'reprovado' || status === 'rejeitado') {
         acoesHtml = '<div class="acoes">' +
-          (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank">📄 Validar documentação</a>' : '') +
+          (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank" rel="noopener">📄 Ver documentos anexados</a>' : '') +
+          '<button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button>' +
+        '</div>';
+      } else if (status === 'contratado') {
+        acoesHtml = '<div class="acoes">' +
+          '<div class="aviso-bloq" style="background:#DCFCE7;color:#166534;border-left:4px solid #16A34A">🎉 Candidato contratado!</div>' +
           '<button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button>' +
         '</div>';
       }
+
+      // Constrói o card de comentário por etapa (só aparece se a vaga tem essa etapa E foi atingida)
+      const comentarioRHCard = (idxEtapaRH >= 0 && etapaRHAtingida) ? (
+        '<div class="card" id="card-comentario-rh">' +
+          '<h2>🗣️ Comentários da Entrevista RH</h2>' +
+          '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:10px">Anotações internas sobre a etapa "' + (etapas[idxEtapaRH] || '') + '". <strong>Não é exibido ao candidato.</strong></p>' +
+          '<textarea id="txt-comentario-rh" rows="4" placeholder="Pontos fortes, pontos de atenção, impressões, parecer…" style="width:100%;padding:10px;border:1px solid #DDD;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' + (observacoes[String(idxEtapaRH + 1)] ? escapeHtml(observacoes[String(idxEtapaRH + 1)]) : '') + '</textarea>' +
+          '<div style="margin-top:8px;display:flex;justify-content:flex-end">' +
+            '<button class="btn" style="background:var(--dourado);color:var(--cinza-escuro)" onclick="salvarComentarioEtapa(' + c.id + ',' + (idxEtapaRH + 1) + ')">💾 Salvar comentário</button>' +
+          '</div>' +
+        '</div>'
+      ) : '';
+
+      const comentarioGestorCard = (idxEtapaGestor >= 0 && etapaGestorAtingida) ? (
+        '<div class="card" id="card-comentario-gestor">' +
+          '<h2>👔 Comentários da Entrevista com o Gestor</h2>' +
+          '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:10px">Anotações internas sobre a etapa "' + (etapas[idxEtapaGestor] || '') + '". <strong>Não é exibido ao candidato.</strong></p>' +
+          '<textarea id="txt-comentario-gestor" rows="4" placeholder="Impressões do gestor, fit com a vaga, próximos passos…" style="width:100%;padding:10px;border:1px solid #DDD;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' + (observacoes[String(idxEtapaGestor + 1)] ? escapeHtml(observacoes[String(idxEtapaGestor + 1)]) : '') + '</textarea>' +
+          '<div style="margin-top:8px;display:flex;justify-content:flex-end">' +
+            '<button class="btn" style="background:var(--dourado);color:var(--cinza-escuro)" onclick="salvarComentarioEtapa(' + c.id + ',' + (idxEtapaGestor + 1) + ')">💾 Salvar comentário</button>' +
+          '</div>' +
+        '</div>'
+      ) : '';
+
+      // Card de Histórico do Processo (com data + etapa + ação + status)
+      const historicoCard =
+        '<div class="card" id="card-historico">' +
+          '<h2>📜 Histórico do Processo</h2>' + histHtml +
+        '</div>';
 
       content.innerHTML =
         '<div class="header">' +
@@ -333,13 +411,19 @@
           '<span class="status-pill status-' + status + '">' + (status === 'em_analise' ? 'Em análise' : status === 'em_andamento' ? 'Em andamento' : status === 'contratado' ? 'Contratado' : status === 'reprovado' ? 'Reprovado' : status === 'rejeitado' ? 'Reprovado' : status === 'aprovado' ? 'Aprovado' : status) + '</span>' +
         '</div>' +
 
-        '<div class="card">' +
+        // 1) Status do Processo (timeline interativa)
+        '<div class="card" id="card-timeline">' +
           '<h2>📋 Status do Processo</h2>' +
           '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual + '/' + totalEtapas + ' — ' + (etapas[etapaAtual - 1] || '—') + '</span></div>' +
+          '<div style="font-size:12px;color:var(--cinza-medio);margin-bottom:6px">💡 Clique em uma etapa para ver detalhes.</div>' +
           '<div class="timeline">' + timeline + '</div>' +
         '</div>' +
 
-        '<div class="card">' +
+        // 2) Histórico do Processo (logo abaixo da timeline, conforme combinado)
+        historicoCard +
+
+        // 3) Dados Pessoais + Endereço (SEM "sobre você")
+        '<div class="card" id="card-dados-pessoais">' +
           '<h2>👤 Dados Pessoais</h2>' +
           '<div class="grid-2">' +
             '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (c.email || '—') + '</div></div>' +
@@ -352,25 +436,79 @@
           '</div>' +
         '</div>' +
 
-        '<div class="card">' +
+        // 4) Sobre você
+        '<div class="card" id="card-sobre-voce">' +
           '<h2>💬 Sobre você</h2>' + sobreHtml +
         '</div>' +
 
-        '<div class="card">' +
-          '<h2>🎓 Formação</h2>' + formacaoHtml +
+        // 5) Escolaridade / Formação
+        '<div class="card" id="card-formacao">' +
+          '<h2>🎓 Escolaridade</h2>' + formacaoHtml +
         '</div>' +
 
-        '<div class="card">' +
+        // 6) Experiências Profissionais
+        '<div class="card" id="card-experiencias">' +
           '<h2>💼 Experiências Profissionais</h2>' + expsHtml +
         '</div>' +
 
+        // 7) Comentários RH (se houver etapa de entrevista RH atingida)
+        comentarioRHCard +
+
+        // 8) Comentários Gestor (se houver etapa de entrevista com gestor atingida)
+        comentarioGestorCard +
+
+        // 9) Card de Documentos (se aplicável)
         (docsCard || '') +
 
-        '<div class="card">' +
-          '<h2>📜 Histórico do Processo</h2>' + histHtml +
-        '</div>' +
-
         acoesHtml;
+    }
+
+    // Rola suavemente até a seção do id informado
+    function scrollSecao(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Salva a observação interna de uma etapa (sem mudar status/etapa da candidatura)
+    async function salvarComentarioEtapa(candidaturaId, etapaNum) {
+      // Pega o textarea certo: o botão que chamou a função está dentro de um card com data-etapa
+      let comentario = '';
+      const btns = document.querySelectorAll('button[onclick*="salvarComentarioEtapa"]');
+      let btnClicou = null;
+      for (const b of btns) {
+        if (b.onclick && b.onclick.toString().includes(`salvarComentarioEtapa(${candidaturaId},${etapaNum})`)) {
+          btnClicou = b;
+          break;
+        }
+      }
+      if (btnClicou) {
+        const card = btnClicou.closest('.card');
+        const ta = card ? card.querySelector('textarea') : null;
+        if (ta) comentario = ta.value || '';
+      }
+      comentario = (comentario || '').trim();
+      if (!comentario) {
+        alert('Digite um comentário antes de salvar.');
+        return;
+      }
+      try {
+        const token = localStorage.getItem('admin_token');
+        // Usa a mesma rota /status passando APENAS a etapa + comentario (sem acao)
+        // → status/etapa NÃO mudam, só a observação é gravada
+        const r = await fetch(API + '/api/admin/candidatura/' + candidaturaId + '/comentario', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ etapa: etapaNum, comentario: comentario })
+        });
+        const data = await r.json();
+        if (r.ok) {
+          alert('✅ Comentário salvo.');
+        } else {
+          alert('Erro: ' + (data.erro || 'Não foi possível salvar'));
+        }
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
     }
 
     async function acao(id, acao) {
