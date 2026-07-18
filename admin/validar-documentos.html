@@ -46,7 +46,9 @@
     .doc-badge-pendente { background: var(--amarelo-bg); color: var(--amarelo); }
     .doc-badge-aprovado { background: #DCFCE7; color: #166534; }
     .doc-badge-reprovado { background: #FEE2E2; color: #991B1B; }
+    .doc-badge-retornado { background: #FEF3C7; color: #92400E; }
     .doc-badge-vazio { background: var(--cinza); color: var(--cinza-medio); }
+    .resumo-stat.retornados { border-left: 4px solid #92400E; }
 
     .doc-corpo { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .doc-valor { flex: 1; min-width: 200px; font-size: 14px; color: var(--cinza-escuro); }
@@ -88,6 +90,7 @@
         <div class="sub" id="sub-titulo">Carregando...</div>
         <div class="acoes-topo">
           <button class="btn-topo btn-download-tudo" id="btn-download-tudo" onclick="baixarTudo()" disabled>📥 Baixar tudo (PDF único)</button>
+          <button class="btn-topo btn-aprovar-tudo-topo" id="btn-aprovar-tudo-topo" onclick="aprovarTodosAvancar()" disabled style="background:#16A34A;color:white">✅ Aprovar tudo e avançar</button>
           <a class="btn-topo btn-voltar-topo" id="btn-voltar-cand" href="index.html">← Voltar</a>
         </div>
       </div>
@@ -165,20 +168,41 @@
       const total = _obrigatorios.length;
       const enviados = _documentos.length;
       const aprovados = _documentos.filter(d => d.status === 'aprovado').length;
+      const retornados = _documentos.filter(d => d.status === 'retornado').length;
       const reprovados = _documentos.filter(d => d.status === 'reprovado').length;
-      const pendentes = Math.max(0, total - aprovados - reprovados);
+      const pendentes = Math.max(0, total - aprovados - retornados - reprovados);
       const arquivosEnviados = _documentos.filter(d => d.categoria === 'arquivo' && d.arquivo_url).length;
+      window._docsStats = { total, enviados, aprovados, retornados, reprovados, pendentes };
 
       document.getElementById('resumo-bar-container').innerHTML =
         '<div class="resumo-bar">' +
           '<div class="resumo-stat"><div class="resumo-num">' + arquivosEnviados + '/' + total + '</div><div class="resumo-label">Arquivos enviados</div></div>' +
           '<div class="resumo-stat aprovados"><div class="resumo-num">' + aprovados + '</div><div class="resumo-label">Aprovados</div></div>' +
+          '<div class="resumo-stat retornados"><div class="resumo-num">' + retornados + '</div><div class="resumo-label">A reenviar</div></div>' +
           '<div class="resumo-stat reprovados"><div class="resumo-num">' + reprovados + '</div><div class="resumo-label">Reprovados</div></div>' +
           '<div class="resumo-stat pendentes"><div class="resumo-num">' + pendentes + '</div><div class="resumo-label">Pendentes</div></div>' +
         '</div>';
 
       // Habilita botão de download só se tiver pelo menos 1 arquivo
       document.getElementById('btn-download-tudo').disabled = arquivosEnviados === 0;
+
+      // Habilita "Aprovar tudo" só quando TODOS os obrigatórios estiverem enviados e aprovados
+      const btnAprovar = document.getElementById('btn-aprovar-tudo-topo');
+      const tudoAprovado = total > 0 && enviados === total && aprovados === total && retornados === 0 && reprovados === 0 && pendentes === 0;
+      if (btnAprovar) {
+        btnAprovar.disabled = !tudoAprovado;
+        btnAprovar.style.opacity = tudoAprovado ? '1' : '0.5';
+        btnAprovar.style.cursor = tudoAprovado ? 'pointer' : 'not-allowed';
+        if (!tudoAprovado) {
+          const falta = (pendentes + retornados + reprovados);
+          const msg = enviados < total
+            ? `🔒 Faltam ${total - enviados} documento(s) a enviar`
+            : `🔒 ${falta} pendente(s) de aprovação`;
+          btnAprovar.textContent = msg;
+        } else {
+          btnAprovar.textContent = '✅ Aprovar tudo e avançar';
+        }
+      }
 
       // Lista
       const porTipo = {};
@@ -193,6 +217,7 @@
         let badge = '';
         if (!d) badge = '<span class="doc-badge doc-badge-vazio">vazio</span>';
         else if (d.status === 'aprovado') badge = '<span class="doc-badge doc-badge-aprovado">✓ aprovado</span>';
+        else if (d.status === 'retornado') badge = '<span class="doc-badge doc-badge-retornado">📨 a reenviar</span>';
         else if (d.status === 'reprovado') badge = '<span class="doc-badge doc-badge-reprovado">✗ reprovado</span>';
         else badge = '<span class="doc-badge doc-badge-pendente">⏳ pendente</span>';
 
@@ -215,25 +240,18 @@
           }
         }
 
-        if (d && d.status === 'reprovado' && d.justificativa_admin) {
-          corpo += '<div class="doc-justificativa">Motivo: ' + escapeHtml(d.justificativa_admin) + '</div>';
+        if (d && (d.status === 'reprovado' || d.status === 'retornado') && d.justificativa_admin) {
+          const titulo = d.status === 'retornado' ? 'Mensagem ao candidato' : 'Motivo';
+          corpo += '<div class="doc-justificativa">' + titulo + ': ' + escapeHtml(d.justificativa_admin) + '</div>';
         }
 
-        // Botões
+        // Botões (apenas "Retornar" — sem aprovar/reprovar individual)
         let acoes = '<div class="doc-acoes">';
         if (isArquivo && d && d.arquivo_url) {
           acoes += '<button class="doc-btn doc-btn-baixar" onclick="baixarUm(' + d.id + ')">📥 Baixar</button>';
         }
-        if (d) {
-          if (d.status !== 'aprovado') {
-            acoes += '<button class="doc-btn doc-btn-aprovar" onclick="revisar(' + d.id + ',\'aprovar\')">✓ Aprovar</button>';
-          }
-          if (d.status !== 'reprovado') {
-            acoes += '<button class="doc-btn doc-btn-reprovar" onclick="revisar(' + d.id + ',\'reprovar\')">✗ Reprovar</button>';
-          }
-          if (d.status !== 'pendente') {
-            acoes += '<button class="doc-btn doc-btn-reverter" onclick="revisar(' + d.id + ',\'reverter\')">↻ Reverter</button>';
-          }
+        if (d && d.status !== 'aprovado') {
+          acoes += '<button class="doc-btn doc-btn-retornar" onclick="retornarDoc(' + d.id + ')">📨 Retornar</button>';
         }
         acoes += '</div>';
 
@@ -254,28 +272,54 @@
     }
 
     async function revisar(docId, acao) {
-      let justificativa = '';
-      if (acao === 'reprovar') {
-        justificativa = prompt('Por que você está REPROVANDO este documento?\n\nA justificativa é obrigatória e será enviada ao candidato.', '');
-        if (justificativa === null) return;
-        if (!justificativa.trim()) { alert('Justificativa obrigatória para reprovar.'); return; }
-      } else if (acao === 'reverter') {
+      // Apenas reverter (voltar pra pendente) — aprovar/reprovar foram removidos do fluxo
+      if (acao === 'reverter') {
         if (!confirm('Reverter este documento para status pendente?')) return;
-      } else if (acao === 'aprovar') {
-        if (!confirm('Confirmar aprovação deste documento?')) return;
+      } else {
+        return;
       }
       try {
         const token = localStorage.getItem('admin_token');
         const r = await fetch(API + '/api/admin/documento/' + docId + '/revisar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ acao, justificativa })
+          body: JSON.stringify({ acao })
         });
         const data = await r.json();
-        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao revisar')); return; }
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao reverter')); return; }
         const idx = _documentos.findIndex(d => d.id === docId);
         if (idx >= 0) {
-          _documentos[idx] = { ..._documentos[idx], status: data.documento.status, justificativa_admin: data.documento.justificativa_admin, revisado_em: data.documento.revisado_em };
+          _documentos[idx] = { ..._documentos[idx], status: data.documento.status || 'pendente', justificativa_admin: null, revisado_em: new Date().toISOString() };
+        }
+        render();
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
+    }
+
+    async function retornarDoc(docId) {
+      const d = _documentos.find(x => x.id === docId);
+      const label = d ? (d.tipo || 'este documento') : 'este documento';
+      const msg = prompt(
+        'Retornar "' + label + '" para o candidato?\n\n' +
+        'Escreva uma mensagem personalizada explicando o que precisa ser corrigido. ' +
+        'O candidato será notificado e poderá reenviar o documento.',
+        ''
+      );
+      if (msg === null) return;
+      if (!msg.trim()) { alert('A mensagem é obrigatória.'); return; }
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/documento/' + docId + '/revisar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ acao: 'retornar', justificativa: msg })
+        });
+        const data = await r.json();
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao retornar')); return; }
+        const idx = _documentos.findIndex(d => d.id === docId);
+        if (idx >= 0) {
+          _documentos[idx] = { ..._documentos[idx], status: 'retornado', justificativa_admin: msg, revisado_em: new Date().toISOString() };
         }
         render();
       } catch (e) {
@@ -302,6 +346,42 @@
       } catch (e) {
         // Fallback: abre em nova aba
         window.open(d.arquivo_url, '_blank');
+      }
+    }
+
+    // === AÇÃO GLOBAL: Aprovar TUDO e avançar etapa ===
+    async function aprovarTodosAvancar() {
+      const stats = window._docsStats || {};
+      if (stats.retornados > 0) {
+        return alert('Há ' + stats.retornados + ' documento(s) marcado(s) como "a reenviar". Aguarde o candidato reenviar antes de aprovar.');
+      }
+      if (stats.reprovados > 0) {
+        return alert('Há ' + stats.reprovados + ' documento(s) reprovado(s). Reverter para pendente antes de aprovar.');
+      }
+      if (stats.aprovados < stats.total) {
+        return alert('Apenas ' + stats.aprovados + '/' + stats.total + ' documentos aprovados.');
+      }
+      if (!confirm('Confirmar a aprovação de TODOS os ' + stats.total + ' documentos e avançar a etapa do candidato?')) return;
+
+      const btn = document.getElementById('btn-aprovar-tudo-topo');
+      const id = new URLSearchParams(location.search).get('id');
+      if (btn) { btn.disabled = true; btn.textContent = 'Aprovando...'; }
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/candidatura/' + id + '/aprovar-documentos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+        });
+        const data = await r.json();
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao aprovar')); if (btn) { btn.disabled = false; btn.textContent = '✅ Aprovar tudo e avançar'; } return; }
+        const msg = data.contratados
+          ? '🎉 Documentos aprovados! Candidato CONTRATADO com sucesso.'
+          : '✅ Documentos aprovados! Candidato avançou para a etapa ' + data.novaEtapa + '/' + data.totalEtapas + '.';
+        alert(msg);
+        location.reload();
+      } catch (e) {
+        alert('Erro: ' + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = '✅ Aprovar tudo e avançar'; }
       }
     }
 
