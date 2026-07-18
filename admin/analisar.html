@@ -299,12 +299,21 @@
       const _stats = window._docsStatsCache || { total: 0, aprovados: 0, reprovados: 0, pendentes: 0 };
       const _tudoAprovado = _stats.total === 0 || (_stats.aprovados === _stats.total && _stats.reprovados === 0 && _stats.pendentes === 0);
       const _bloqueiaAvancar = etapaAtual === 5 && !_tudoAprovado;
+      const _temDocs = etapaNum >= 4;
       if (status === 'em_andamento' || status === 'aprovado' || status === 'em_analise') {
         const _avancarDisabled = _bloqueiaAvancar ? ' disabled title="Aprove todos os documentos antes de avançar"' : '';
         const _avancarHint = _bloqueiaAvancar ? '<div class="aviso-bloq">⏳ ' + (_stats.reprovados > 0 ? 'Há ' + _stats.reprovados + ' documento(s) reprovado(s)' : 'Há ' + _stats.pendentes + ' documento(s) pendente(s)') + ' — corrija antes de avançar.</div>' : '';
-        acoesHtml = '<div class="acoes"><button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button><button class="btn btn-aprovar"' + _avancarDisabled + ' onclick="acao(' + c.id + ',\'aprovar-triagem\')">✓ Aprovar e Avançar</button>' + _avancarHint + '</div>';
+        acoesHtml = '<div class="acoes">' +
+          (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank">📄 Validar documentação</a>' : '') +
+          '<button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button>' +
+          '<button class="btn btn-aprovar"' + _avancarDisabled + ' onclick="acao(' + c.id + ',\'aprovar-triagem\')">✓ Aprovar e Avançar</button>' +
+          _avancarHint +
+        '</div>';
       } else if (status === 'reprovado' || status === 'rejeitado') {
-        acoesHtml = '<div class="acoes"><button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button></div>';
+        acoesHtml = '<div class="acoes">' +
+          (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank">📄 Validar documentação</a>' : '') +
+          '<button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button>' +
+        '</div>';
       }
 
       content.innerHTML =
