@@ -7,7 +7,6 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Validar Documentação — Admin</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root { --vinho:#6B0F1A; --vinho-claro:#8B1A2B; --dourado:#D4AF37; --cinza:#F5F5F5; --cinza-medio:#999; --cinza-escuro:#2A2A2A; --branco:#fff; --verde:#16A34A; --vermelho:#DC2626; --amarelo:#92400E; --amarelo-bg:#FEF3C7; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -81,7 +80,7 @@
   <div class="container">
     <div id="content">
       <div class="header">
-        <a class="btn-voltar" href="javascript:history.back()">
+        <a class="btn-voltar" id="btn-voltar" href="index.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           Voltar
         </a>
@@ -89,7 +88,7 @@
         <div class="sub" id="sub-titulo">Carregando...</div>
         <div class="acoes-topo">
           <button class="btn-topo btn-download-tudo" id="btn-download-tudo" onclick="baixarTudo()" disabled>📥 Baixar tudo (PDF único)</button>
-          <a class="btn-topo btn-voltar-topo" href="javascript:history.back()">← Voltar para o candidato</a>
+          <a class="btn-topo btn-voltar-topo" id="btn-voltar-cand" href="index.html">← Voltar</a>
         </div>
       </div>
       <div id="progresso" class="progresso">
@@ -135,6 +134,12 @@
 
       document.getElementById('sub-titulo').textContent = (_candidatura.nome || 'Candidato') + ' — ' + (_candidatura.titulo || 'Vaga');
       document.title = 'Validar Doc — ' + (_candidatura.nome || '');
+      // Ajusta links de voltar pra apontar pro analisar.html
+      const candId = _candidatura.id;
+      const voltarCandidato = document.getElementById('btn-voltar-cand');
+      if (voltarCandidato) voltarCandidato.href = 'analisar.html?id=' + candId;
+      const voltarTopo = document.getElementById('btn-voltar');
+      if (voltarTopo) voltarTopo.href = 'analisar.html?id=' + candId;
 
       // Carrega documentos
       try {
@@ -217,7 +222,7 @@
         // Botões
         let acoes = '<div class="doc-acoes">';
         if (isArquivo && d && d.arquivo_url) {
-          acoes += '<button class="doc-btn doc-btn-baixar" onclick="baixarUm(\'' + d.id + '\')">📥 Baixar</button>';
+          acoes += '<button class="doc-btn doc-btn-baixar" onclick="baixarUm(' + d.id + ')">📥 Baixar</button>';
         }
         if (d) {
           if (d.status !== 'aprovado') {
@@ -300,7 +305,7 @@
       }
     }
 
-    // === Baixar TUDO num único PDF ===
+    // === Baixar TUDO num único PDF (100% via pdf-lib) ===
     async function baixarTudo() {
       const arquivos = _documentos.filter(d => d.categoria === 'arquivo' && d.arquivo_url);
       if (!arquivos.length) { alert('Nenhum arquivo pra baixar.'); return; }
@@ -313,147 +318,187 @@
       progTxt.textContent = 'Preparando PDF...';
 
       try {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-        const pageW = pdf.internal.pageSize.getWidth();
-        const pageH = pdf.internal.pageSize.getHeight();
-        const margin = 15;
+        // Carrega pdf-lib sob demanda
+        if (!window._PDFLib) {
+          await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+          });
+          window._PDFLib = window.PDFLib;
+        }
+        const { PDFDocument, StandardFonts, rgb } = window._PDFLib;
 
-        // CAPA
-        pdf.setFillColor(107, 15, 26);
-        pdf.rect(0, 0, pageW, 50, 'F');
-        pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(22);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('Documentação de Contratação', margin, 25);
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(_candidatura.nome || 'Candidato', margin, 35);
-        pdf.setFontSize(10);
-        pdf.text('Vaga: ' + (_candidatura.titulo || '').trim(), margin, 42);
+        // Doc principal
+        const out = await PDFDocument.create();
+        const fontBold = await out.embedFont(StandardFonts.HelveticaBold);
+        const fontNorm = await out.embedFont(StandardFonts.Helvetica);
+        const fontItalic = await out.embedFont(StandardFonts.HelveticaOblique);
+        const A4 = { w: 595.28, h: 841.89 }; // pontos
+        const margin = 40;
 
-        pdf.setTextColor(40, 40, 40);
-        pdf.setFontSize(10);
-        let y = 65;
-        const camposCapa = [
-          ['Email', _candidatura.email],
-          ['CPF', _candidatura.cpf],
+        const Vinho = rgb(0.42, 0.06, 0.10);
+        const Texto = rgb(0.10, 0.10, 0.10);
+        const Cinza = rgb(0.45, 0.45, 0.45);
+        const CinzaClaro = rgb(0.92, 0.92, 0.92);
+        const Verde = rgb(0.09, 0.64, 0.29);
+        const Vermelho = rgb(0.86, 0.16, 0.16);
+
+        const txt = (str, maxW, font, size) => {
+          // Quebra em linhas
+          const words = String(str || '').split(/\s+/);
+          const linhas = [];
+          let linha = '';
+          for (const w of words) {
+            const test = linha ? linha + ' ' + w : w;
+            const width = font.widthOfTextAtSize(test, size);
+            if (width > maxW && linha) { linhas.push(linha); linha = w; }
+            else linha = test;
+          }
+          if (linha) linhas.push(linha);
+          return linhas;
+        };
+
+        // === CAPA ===
+        const capa = out.addPage([A4.w, A4.h]);
+        // Faixa vinho no topo
+        capa.drawRectangle({ x: 0, y: A4.h - 180, width: A4.w, height: 180, color: Vinho });
+        capa.drawText('Documentação de Contratação', { x: margin, y: A4.h - 70, size: 22, font: fontBold, color: rgb(1,1,1) });
+        capa.drawText(_candidatura.nome || 'Candidato', { x: margin, y: A4.h - 110, size: 16, font: fontNorm, color: rgb(1,1,1) });
+        capa.drawText('Vaga: ' + ((_candidatura.titulo || '').trim() || '—'), { x: margin, y: A4.h - 140, size: 11, font: fontItalic, color: rgb(0.9,0.9,0.9) });
+
+        // Campos
+        let y = A4.h - 230;
+        const campos = [
+          ['E-mail', _candidatura.email],
+          ['CPF', _candidatura.cpf ? _candidatura.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : null],
           ['Celular', _candidatura.celular],
-          ['Cidade', (_candidatura.cidade || '') + ' / ' + (_candidatura.estado || '')],
+          ['Cidade/UF', [_candidatura.cidade, _candidatura.estado].filter(Boolean).join(' / ') || null],
           ['Data do processo', new Date().toLocaleString('pt-BR')]
         ];
-        for (const [k, v] of camposCapa) {
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(k + ':', margin, y);
-          pdf.setFont('helvetica', 'normal');
-          pdf.text(String(v || '—'), margin + 30, y);
-          y += 7;
+        for (const [k, v] of campos) {
+          capa.drawText(k + ':', { x: margin, y, size: 10, font: fontBold, color: Texto });
+          capa.drawText(String(v || '—'), { x: margin + 90, y, size: 10, font: fontNorm, color: Texto });
+          y -= 16;
         }
 
         // Lista de documentos
-        y += 10;
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(13);
-        pdf.text('Documentos (' + arquivos.length + '):', margin, y);
-        y += 8;
-        pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(10);
+        y -= 20;
+        capa.drawText('Documentos (' + arquivos.length + '):', { x: margin, y, size: 13, font: fontBold, color: Vinho });
+        y -= 18;
         arquivos.forEach((a, i) => {
           const label = (_obrigatorios.find(o => o.tipo === a.tipo) || {}).label || a.tipo;
-          pdf.text((i + 1) + '. ' + label + ' [' + a.status + ']', margin, y);
-          y += 6;
+          const statusTxt = a.status === 'aprovado' ? '✓ aprovado' : a.status === 'reprovado' ? '✗ reprovado' : '⏳ pendente';
+          const statusCor = a.status === 'aprovado' ? Verde : a.status === 'reprovado' ? Vermelho : Cinza;
+          capa.drawText((i + 1) + '. ' + label, { x: margin, y, size: 10, font: fontNorm, color: Texto });
+          capa.drawText(statusTxt, { x: margin + 200, y, size: 10, font: fontBold, color: statusCor });
+          y -= 14;
         });
 
-        // Adiciona cada PDF/imagem
+        // === Documentos (merge de PDF / embed de imagem) ===
         let i = 0;
         for (const doc of arquivos) {
           i++;
-          progTxt.textContent = 'Baixando ' + i + '/' + arquivos.length + '...';
+          progTxt.textContent = 'Incorporando ' + i + '/' + arquivos.length + '...';
           try {
             const r = await fetch(doc.arquivo_url);
-            const blob = await r.blob();
-            const isPdf = (doc.arquivo_nome || '').toLowerCase().endsWith('.pdf') || blob.type === 'application/pdf';
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const buffer = await r.arrayBuffer();
+            const isPdf = (doc.arquivo_nome || '').toLowerCase().endsWith('.pdf')
+                       || (doc.arquivo_tipo || '').includes('pdf');
 
             if (isPdf) {
-              // Tenta mesclar PDF usando pdf-lib (carregado sob demanda)
-              const buffer = await blob.arrayBuffer();
-              try {
-                if (!window._PDFLib) {
-                  await new Promise((res, rej) => {
-                    const s = document.createElement('script');
-                    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
-                    s.onload = res; s.onerror = rej;
-                    document.head.appendChild(s);
-                  });
-                  window._PDFLib = window.PDFLib;
-                }
-                const { PDFDocument } = window._PDFLib;
-                const externo = await PDFDocument.load(buffer);
-                const novo = await PDFDocument.create();
-                const paginas = await novo.copyPages(externo, externo.getPageIndices());
-                paginas.forEach(p => novo.addPage(p));
-                const bytes = await novo.save();
-                // Adiciona como anexo
-                pdf.addPage();
-                const label = (_obrigatorios.find(o => o.tipo === doc.tipo) || {}).label || doc.tipo;
-                pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(14);
-                pdf.setTextColor(107, 15, 26);
-                pdf.text('📎 ' + label, margin, 20);
-                pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(10);
-                pdf.setTextColor(80, 80, 80);
-                pdf.text(doc.arquivo_nome || '', margin, 27);
-                // Em cada página adicionada, coloca um rodapé
-                // (PDFs embedded não são renderizados pelo jsPDF — então criamos uma página índice)
-                pdf.setFontSize(9);
-                pdf.setTextColor(150, 150, 150);
-                pdf.text('PDF anexo: ' + (doc.arquivo_nome || doc.tipo) + ' (' + bytes.length + ' bytes)', margin, pageH - 10);
-              } catch (e) {
-                console.error('PDF merge falhou', e);
-                pdf.addPage();
-                pdf.setFontSize(12);
-                pdf.text('PDF: ' + (doc.arquivo_nome || doc.tipo), margin, 20);
-                pdf.setFontSize(10);
-                pdf.text('(conteúdo em: ' + doc.arquivo_url + ')', margin, 27);
+              // MERGE de verdade: copia as páginas do PDF externo pro doc principal
+              const externo = await PDFDocument.load(buffer, { ignoreEncryption: true });
+              const paginas = await out.copyPages(externo, externo.getPageIndices());
+              // Cada página do PDF externo: adiciona cabeçalho de identificação
+              const label = (_obrigatorios.find(o => o.tipo === doc.tipo) || {}).label || doc.tipo;
+              for (const p of paginas) {
+                out.addPage(p);
+                // (cabeçalho fica numa camada sutil — pdf-lib não tem camada direta em página já importada,
+                //  então só mantemos a página original)
               }
             } else {
-              // Imagem
-              const dataUrl = await new Promise((res, rej) => {
-                const reader = new FileReader();
-                reader.onload = () => res(reader.result);
-                reader.onerror = rej;
-                reader.readAsDataURL(blob);
-              });
-              const img = new Image();
-              await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
+              // Imagem: cria página A4 e embed a imagem
+              const bytes = new Uint8Array(buffer);
+              let img;
+              const tipo = (doc.arquivo_tipo || '').toLowerCase();
+              const nomeLower = (doc.arquivo_nome || '').toLowerCase();
+              try {
+                if (tipo.includes('png') || nomeLower.endsWith('.png')) {
+                  img = await out.embedPng(bytes);
+                } else {
+                  // jpg / jpeg / qualquer outro formato -> tenta jpg (mais comum)
+                  img = await out.embedJpg(bytes);
+                }
+              } catch (imgErr) {
+                throw new Error('Formato de imagem não suportado (' + (tipo || 'desconhecido') + ')');
+              }
+              const pagina = out.addPage([A4.w, A4.h]);
+              // Cabeçalho vinho
+              pagina.drawRectangle({ x: 0, y: A4.h - 50, width: A4.w, height: 50, color: Vinho });
               const label = (_obrigatorios.find(o => o.tipo === doc.tipo) || {}).label || doc.tipo;
-              // Cabeçalho
-              pdf.addPage();
-              pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(14);
-              pdf.setTextColor(107, 15, 26);
-              pdf.text('📎 ' + label, margin, 20);
-              // Calcula tamanho mantendo proporção
-              const maxW = pageW - margin * 2;
-              const maxH = pageH - margin * 2 - 15;
+              pagina.drawText('📎 ' + label, { x: margin, y: A4.h - 30, size: 13, font: fontBold, color: rgb(1,1,1) });
+              pagina.drawText((doc.arquivo_nome || '').slice(0, 60), { x: margin, y: A4.h - 45, size: 8, font: fontItalic, color: rgb(0.9,0.9,0.9) });
+
+              // Imagem dimensionada
+              const maxW = A4.w - margin * 2;
+              const maxH = A4.h - 80 - margin;
               let w = maxW, h = maxW * img.height / img.width;
               if (h > maxH) { h = maxH; w = maxH * img.width / img.height; }
-              const x = (pageW - w) / 2;
-              pdf.addImage(dataUrl, 'JPEG', x, 30, w, h);
+              const x = (A4.w - w) / 2;
+              const yImg = (A4.h - 50 - h) / 2;
+              pagina.drawImage(img, { x, y: yImg, width: w, height: h });
             }
           } catch (e) {
             console.error('Erro ao processar doc', doc.tipo, e);
+            // Página de erro pra esse doc
+            const errPage = out.addPage([A4.w, A4.h]);
+            const label = (_obrigatorios.find(o => o.tipo === doc.tipo) || {}).label || doc.tipo;
+            errPage.drawText('⚠ Não foi possível incorporar:', { x: margin, y: A4.h - 60, size: 12, font: fontBold, color: Vermelho });
+            errPage.drawText(label + ' (' + (doc.arquivo_nome || doc.tipo) + ')', { x: margin, y: A4.h - 80, size: 10, font: fontNorm, color: Texto });
+            errPage.drawText('Link original:', { x: margin, y: A4.h - 110, size: 9, font: fontBold, color: Cinza });
+            const linhas = txt(doc.arquivo_url, A4.w - margin * 2, fontNorm, 8);
+            linhas.forEach((linha, idx) => {
+              errPage.drawText(linha, { x: margin, y: A4.h - 125 - idx * 10, size: 8, font: fontNorm, color: Cinza });
+            });
           }
         }
 
-        // Gera nome do arquivo
+        // === Sumário no final ===
+        const sumario = out.addPage([A4.w, A4.h]);
+        sumario.drawRectangle({ x: 0, y: A4.h - 50, width: A4.w, height: 50, color: Vinho });
+        sumario.drawText('Sumário', { x: margin, y: A4.h - 30, size: 14, font: fontBold, color: rgb(1,1,1) });
+        let yy = A4.h - 90;
+        arquivos.forEach((a, i) => {
+          const label = (_obrigatorios.find(o => o.tipo === a.tipo) || {}).label || a.tipo;
+          const statusTxt = a.status === 'aprovado' ? '✓ aprovado' : a.status === 'reprovado' ? '✗ reprovado' : '⏳ pendente';
+          const statusCor = a.status === 'aprovado' ? Verde : a.status === 'reprovado' ? Vermelho : Cinza;
+          sumario.drawText((i + 1) + '.', { x: margin, y: yy, size: 10, font: fontNorm, color: Texto });
+          sumario.drawText(label, { x: margin + 30, y: yy, size: 10, font: fontNorm, color: Texto });
+          sumario.drawText(statusTxt, { x: margin + 350, y: yy, size: 10, font: fontBold, color: statusCor });
+          yy -= 14;
+        });
+
+        // Download
+        const bytes = await out.save();
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
         const nomeLimpo = (_candidatura.nome || 'candidato').replace(/[^a-zA-Z0-9]/g, '_');
         const dataStr = new Date().toISOString().substring(0, 10);
-        pdf.save('documentos_' + nomeLimpo + '_' + dataStr + '.pdf');
-        progTxt.textContent = '✓ PDF gerado!';
+        a.download = 'documentos_' + nomeLimpo + '_' + dataStr + '.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+        progTxt.textContent = '✓ PDF gerado! (' + arquivos.length + ' documentos)';
         setTimeout(() => prog.classList.remove('visivel'), 2000);
       } catch (e) {
+        console.error(e);
         alert('Erro ao gerar PDF: ' + e.message);
         prog.classList.remove('visivel');
       } finally {
