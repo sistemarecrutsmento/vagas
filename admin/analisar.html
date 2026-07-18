@@ -305,13 +305,15 @@
       const _bloqueiaAvancar = etapaAtual === 5 && !_tudoAprovado;
       const _temDocs = etapaAtual >= 4;
       if (status === 'em_andamento' || status === 'aprovado' || status === 'em_analise') {
-        const _avancarDisabled = _bloqueiaAvancar ? ' disabled title="Aprove todos os documentos antes de avançar"' : '';
-        const _avancarHint = _bloqueiaAvancar ? '<div class="aviso-bloq">⏳ ' + (_stats.reprovados > 0 ? 'Há ' + _stats.reprovados + ' documento(s) reprovado(s)' : 'Há ' + _stats.pendentes + ' documento(s) pendente(s)') + ' — corrija antes de avançar.</div>' : '';
+        // Novo fluxo: não há mais "Aprovar e Avançar" nem "Reprovar" manuais da candidatura.
+        // O avanço de etapa é feito exclusivamente pelo botão verde "Aprovar tudo e avançar etapa"
+        // que fica dentro do card de Documentos de Contratação.
+        const _hintDocs = _temDocs
+          ? '<div class="aviso-bloq" style="background:#FEF3C7;color:#92400E;border-left:4px solid #F59E0B">📄 Para avançar a etapa, abra a seção <strong>"Documentos de Contratação"</strong> abaixo e use <strong>"Aprovar tudo e avançar etapa"</strong> quando todos os docs estiverem ok.</div>'
+          : '<div class="aviso-bloq">📋 Aguardando candidato chegar à fase de coleta de documentos.</div>';
         acoesHtml = '<div class="acoes">' +
           (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank">📄 Validar documentação</a>' : '') +
-          '<button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button>' +
-          '<button class="btn btn-aprovar"' + _avancarDisabled + ' onclick="acao(' + c.id + ',\'aprovar-triagem\')">✓ Aprovar e Avançar</button>' +
-          _avancarHint +
+          _hintDocs +
         '</div>';
       } else if (status === 'reprovado' || status === 'rejeitado') {
         acoesHtml = '<div class="acoes">' +
