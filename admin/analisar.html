@@ -168,9 +168,6 @@
       const ehTriagem = etapaAtual === 2; // 2ª etapa = Triagem Curricular
       const status = c.status || 'em_andamento';
 
-      console.log('DEBUG_VERSION: 18/07 15:00');
-      console.log('DEBUG_ETAPAS:', etapas);
-      console.log('DEBUG_ETAPA_ATUAL:', etapaAtual);
 
       // Observações por etapa (comentários internos do admin)
       const observacoes = (c.observacoes_etapas && typeof c.observacoes_etapas === 'object') ? c.observacoes_etapas : {};
