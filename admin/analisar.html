@@ -159,7 +159,7 @@
     function render(c, docsCard) {
       const content = document.getElementById('content');
       const etapas = (c.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
-      const etapaAtual = c.etapa_atual || 1;
+      const etapaAtual = Number(c.etapa_atual || 1);
       const totalEtapas = etapas.length || 1;
       const ehTriagem = etapaAtual === 2; // 2ª etapa = Triagem Curricular
       const status = c.status || 'em_andamento';
@@ -299,7 +299,7 @@
       const _stats = window._docsStatsCache || { total: 0, aprovados: 0, reprovados: 0, pendentes: 0 };
       const _tudoAprovado = _stats.total === 0 || (_stats.aprovados === _stats.total && _stats.reprovados === 0 && _stats.pendentes === 0);
       const _bloqueiaAvancar = etapaAtual === 5 && !_tudoAprovado;
-      const _temDocs = etapaNum >= 4;
+      const _temDocs = etapaAtual >= 4;
       if (status === 'em_andamento' || status === 'aprovado' || status === 'em_analise') {
         const _avancarDisabled = _bloqueiaAvancar ? ' disabled title="Aprove todos os documentos antes de avançar"' : '';
         const _avancarHint = _bloqueiaAvancar ? '<div class="aviso-bloq">⏳ ' + (_stats.reprovados > 0 ? 'Há ' + _stats.reprovados + ' documento(s) reprovado(s)' : 'Há ' + _stats.pendentes + ' documento(s) pendente(s)') + ' — corrija antes de avançar.</div>' : '';
