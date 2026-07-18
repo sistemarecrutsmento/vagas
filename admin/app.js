@@ -477,146 +477,6 @@ async function abrirVagaCands(vagaId) {
   }
 }
 
-async function analisarCandidatura(id) {
-  candidaturaAtual = id;
-  irParaPagina('analisar');
-  const body = document.getElementById('analisar-internal-body');
-  body.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
-  document.getElementById('analisar-voltar').onclick = () => {
-    if (vagaAtualCands) abrirVagaCands(vagaAtualCands.id);
-    else irParaPagina('candidaturas');
-  };
-  try {
-    const r = await fetch(API + '/api/admin/candidatura/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
-    if (!r.ok) {
-      const err = await r.json().catch(() => ({}));
-      body.innerHTML = '<div class="empty">Erro: ' + (err.erro || r.status) + '</div>';
-      return;
-    }
-    const data = await r.json();
-    const c = data.candidatura;
-    document.getElementById('analisar-internal-titulo').textContent = (c.nome || 'Candidato') + ' — ' + (c.titulo || 'Vaga');
-    renderAnalise(c, body);
-  } catch (e) {
-    body.innerHTML = '<div class="empty">Erro: ' + e.message + '</div>';
-  }
-}
-
-function renderAnalise(c, container) {
-  // Etapas da vaga
-  let etapas = c.etapas;
-  if (typeof etapas === 'string') {
-    try { etapas = JSON.parse(etapas); } catch (e) { etapas = null; }
-  }
-  if (!Array.isArray(etapas) || !etapas.length) {
-    etapas = ['Inscrição','Triagem curricular','Entrevista RH','Entrevista gestor','Proposta','Coleta de documentos','Contratação'];
-  }
-  const etapaAtual = Number(c.etapa_atual || 0);
-  const reprovado = c.status === 'rejeitado' || c.status === 'reprovado';
-  const contratado = c.status === 'contratado';
-
-  const etapasHTML = etapas.map((e, i) => {
-    const nome = (typeof e === 'string') ? e : (e.nome || `Etapa ${i+1}`);
-    let cls = '';
-    if (reprovado) {
-      cls = i < etapaAtual ? 'concluida' : (i === etapaAtual ? 'rejeitada' : '');
-    } else if (contratado) {
-      cls = 'concluida';
-    } else if (i < etapaAtual) {
-      cls = 'concluida';
-    } else if (i === etapaAtual) {
-      cls = 'atual';
-    }
-    return '<div class="analisar-etapa ' + cls + '">' +
-      '<div class="analisar-etapa-bola">' + (cls === 'concluida' ? '✓' : (i+1)) + '</div>' +
-      '<div class="analisar-etapa-label">' + nome + '</div>' +
-    '</div>';
-  }).join('');
-
-  const expsHTML = (c.experiencias && c.experiencias.length)
-    ? c.experiencias.map(x => {
-        return '<div style="border-left:3px solid var(--vinho);padding:8px 12px;margin-bottom:8px;background:#f9f9f9;border-radius:0 6px 6px 0">' +
-          '<strong>' + (x.cargo || '—') + '</strong>' + (x.empresa ? ' • ' + x.empresa : '') +
-          '<div style="font-size:12px;color:var(--cinza-medio);margin-top:2px">' +
-            (x.inicio ? new Date(x.inicio).toLocaleDateString('pt-BR') : '—') + ' → ' + (x.emprego_atual ? 'Atual' : (x.fim ? new Date(x.fim).toLocaleDateString('pt-BR') : '—')) +
-          '</div>' +
-          (x.descricao ? '<div style="margin-top:6px;font-size:13px">' + escapeHTML(x.descricao) + '</div>' : '') +
-        '</div>';
-      }).join('')
-    : '<p style="color:var(--cinza-medio);font-size:13px">Nenhuma experiência cadastrada.</p>';
-
-  const statusLabel = contratado ? 'Contratado ✅' : reprovado ? 'Não selecionado ❌' : (c.status === 'aprovado' ? 'Aprovado ✅' : (c.status === 'em_andamento' ? 'Em andamento' : 'Em análise'));
-
-  container.innerHTML =
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">' +
-      '<div>' +
-        '<h3 style="margin:0 0 8px 0;font-size:18px">' + (c.nome || '—') + '</h3>' +
-        '<div style="color:var(--cinza-medio);font-size:14px;line-height:1.7">' +
-          '📧 ' + (c.email || '—') + '<br>' +
-          '📱 ' + (c.celular || '—') + '<br>' +
-          '🆔 CPF: ' + (c.cpf || '—') + '<br>' +
-          '🎂 Nasc.: ' + (c.data_nascimento ? new Date(c.data_nascimento).toLocaleDateString('pt-BR') : '—') + '<br>' +
-          '📍 ' + (c.cd_cidade || '—') + (c.cd_estado ? '/' + c.cd_estado : '') + '<br>' +
-          '🏠 ' + (c.logradouro ? c.logradouro + ', ' + (c.numero || 's/n') : '—') +
-        '</div>' +
-      '</div>' +
-      '<div>' +
-        '<h3 style="margin:0 0 8px 0;font-size:16px">Vaga: ' + (c.titulo || '—') + '</h3>' +
-        '<div style="color:var(--cinza-medio);font-size:14px;line-height:1.7">' +
-          '🏢 ' + (c.empresa || '—') + '<br>' +
-          '📍 ' + (c.cidade || '—') + (c.estado ? '/' + c.estado : '') + '<br>' +
-          '📅 Inscrição: ' + formatarData(c.criada_em) + '<br>' +
-          '<strong style="color:var(--vinho)">Status atual: ' + statusLabel + '</strong><br>' +
-          '<strong>Etapa atual: ' + (etapaAtual + 1) + ' de ' + etapas.length + '</strong>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="analisar-timeline">' + etapasHTML + '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">' +
-      '<div class="analisar-bloco">' +
-        '<h4>🎓 Formação</h4>' +
-        '<p><strong>' + (c.formacao || 'Não informada') + '</strong></p>' +
-        (c.curso ? '<p>Curso: ' + c.curso + '</p>' : '') +
-        (c.instituicao ? '<p>Instituição: ' + c.instituicao + '</p>' : '') +
-        (c.situacao ? '<p>Situação: ' + c.situacao + '</p>' : '') +
-        (c.data_conclusao ? '<p>Conclusão: ' + new Date(c.data_conclusao).toLocaleDateString('pt-BR') + '</p>' : '') +
-      '</div>' +
-      '<div class="analisar-bloco">' +
-        '<h4>💼 Experiências</h4>' +
-        expsHTML +
-      '</div>' +
-    '</div>' +
-    '<div class="analisar-bloco" style="margin-top:16px">' +
-      '<h4>📝 Sobre você</h4>' +
-      '<p style="white-space:pre-wrap">' + (c.sobre_voce ? escapeHTML(c.sobre_voce) : '<em style="color:var(--cinza-medio)">Não informado</em>') + '</p>' +
-    '</div>' +
-    '<div class="analisar-bloco" style="margin-top:16px">' +
-      '<h4>📋 Requisitos da vaga</h4>' +
-      '<p style="white-space:pre-wrap;font-size:13px;color:var(--cinza-medio)">' + (c.requisitos ? escapeHTML(c.requisitos) : '—') + '</p>' +
-    '</div>' +
-    '<div class="analisar-bloco" style="margin-top:16px">' +
-      '<h4>📜 Histórico do processo</h4>' +
-      ((c.historico && c.historico.length)
-        ? '<ul style="list-style:none;padding:0;margin:0">' + c.historico.map(h => {
-            const d = h.data ? new Date(h.data).toLocaleString('pt-BR') : '';
-            const acaoTxt = h.acao ? '[' + h.acao + '] ' : '';
-            return '<li style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#f9f9f9"><strong>Etapa ' + ((h.etapa || 0) + 1) + '</strong> ' + acaoTxt + '[' + h.status + '] — ' + d + (h.por ? ' <small style="color:var(--cinza-medio)">por ' + h.por + '</small>' : '') + (h.mensagem ? '<br><em>' + escapeHTML(h.mensagem) + '</em>' : '') + '</li>';
-          }).join('') + '</ul>'
-        : '<p style="color:var(--cinza-medio);font-size:13px">Nenhuma movimentação ainda.</p>') +
-    '</div>' +
-    '<div class="analisar-acoes" id="analisar-acoes">' +
-      '<h4>⚙️ Ações do processo</h4>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-        (!contratado && !reprovado
-          ? '<button class="btn btn-success" onclick="acaoCandidatura(' + c.id + ', \'avancar\')">' + (etapaAtual + 1 >= etapas.length ? '✅ Contratar' : '▶ Avançar para próxima etapa') + '</button>' +
-            '<button class="btn btn-vinho-outline" onclick="acaoCandidatura(' + c.id + ', \'reprovar\')">✖ Reprovar</button>'
-          : '') +
-        (reprovado || contratado ? '<button class="btn btn-vinho-outline" onclick="acaoCandidatura(' + c.id + ', \'reabrir\')">↻ Reabrir</button>' : '') +
-        '<button class="btn" style="background:#eee" onclick="analisarCandidatura(' + c.id + ')">↻ Atualizar</button>' +
-      '</div>' +
-    '</div>';
-}
-
 async function acaoCandidatura(id, acao) {
   const mensagens = {
     'avancar': 'Avançar o candidato para a próxima etapa do processo seletivo?',
@@ -632,7 +492,6 @@ async function acaoCandidatura(id, acao) {
     });
     const data = await r.json();
     if (!r.ok) { alert('Erro: ' + (data.erro || 'Não foi possível atualizar')); return; }
-    analisarCandidatura(id);
     if (vagaAtualCands) {
       const r2 = await fetch(API + '/api/admin/vagas/' + vagaAtualCands.id + '/candidaturas', { headers: { 'Authorization': 'Bearer ' + token } });
       if (r2.ok) {
@@ -650,7 +509,7 @@ function escapeHTML(s) {
   return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
 
-async function mudarStatus(id, status) {
+
   if (!confirm('Alterar status para "' + status + '"?')) return;
   try {
     const r = await fetch(API + '/api/admin/candidatura/' + id + '/status', {
@@ -668,9 +527,8 @@ async function mudarStatus(id, status) {
   }
 }
 
-async function verCandidatura(id) {
-  analisarCandidatura(id);
-}
+// verCandidatura stub removido (analisarCandidatura apagada)
+
 
 async function mudarStatus(id, status) {
   if (!confirm('Alterar status para "' + status + '"?')) return;
