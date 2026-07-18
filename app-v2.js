@@ -356,6 +356,7 @@ function wizardEtapa2Validar() {
   const celular = document.getElementById('w2-celular')?.value.trim();
   const acessibilidade = document.getElementById('w2-acessibilidade')?.value || null;
   const politica = document.getElementById('w2-politica')?.checked;
+  const comunicacoes = document.getElementById('w2-comunicacoes')?.checked || false;
   const banco = document.getElementById('w2-banco')?.checked;
   const areas = areasSelecionadas.slice();
 
@@ -370,7 +371,7 @@ function wizardEtapa2Validar() {
   wizardEtapa1 = wizardEtapa1 || {};
   const emailFromLogin = (wizardEtapa1.email) || emailLogado || null;
   const sobreVoce = document.getElementById('w2-sobre-voce')?.value.trim() || null;
-  wizardEtapa1.dados = { cpf, nome, data_nascimento: dataNasc, sexo, celular, email: emailFromLogin, acessibilidade, banco_talentos: banco, areas_interesse: areas, sobre_voce: sobreVoce };
+  wizardEtapa1.dados = { cpf, nome, data_nascimento: dataNasc, sexo, celular, email: emailFromLogin, acessibilidade, banco_talentos: banco, areas_interesse: areas, sobre_voce: sobreVoce, recebe_comunicacoes: comunicacoes };
   wizardIrPara(3);
 }
 
