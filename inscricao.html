@@ -318,12 +318,12 @@ function renderizar(cand, v) {
   const etapaAtual = Number(cand.etapa_atual || 0);
   const statusCand = cand.status || '';
 
-  // Botão "Enviar documentos" só aparece se a etapa atual for a "Coleta de Documentos" (índice 5)
+  // Bloco de Coleta de Documentos só aparece se a etapa atual for a "Coleta de Documentos" (etapa 6, 1-indexed)
   const etapaAtualObj = etapas[etapaAtual];
   const etapaAtualNome = (typeof etapaAtualObj === 'string' ? etapaAtualObj : (etapaAtualObj?.nome || '')).toLowerCase();
-  const emColetaDocumentos = etapaAtual === 5 || etapaAtualNome.includes('documento') || etapaAtualNome.includes('document');
-  // Bloco de Proposta só aparece na etapa 5 (índice 4)
-  const emProposta = etapaAtual === 4 || etapaAtualNome.includes('proposta');
+  const emColetaDocumentos = etapaAtual === 6 || etapaAtualNome.includes('documento') || etapaAtualNome.includes('document');
+  // Bloco de Proposta só aparece na etapa 5 (Proposta)
+  const emProposta = etapaAtual === 5 || etapaAtualNome.includes('proposta');
   const reprovadoGeral = (statusCand === 'rejeitado' || statusCand === 'reprovado');
 
   // Tags
