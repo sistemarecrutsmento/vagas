@@ -95,6 +95,7 @@
   .doc-status.s-pendente { background: var(--amarelo-bg); color: var(--amarelo); }
   .doc-status.s-aprovado { background: var(--verde-bg); color: var(--verde); }
   .doc-status.s-reprovado { background: var(--vermelho-bg); color: var(--vermelho); }
+  .doc-status.s-retornado { background: #FEF3C7; color: #92400E; }
   .doc-status.s-vazio { background: #f0f0f0; color: var(--cinza-medio); }
 
   /* Inputs */
@@ -263,9 +264,12 @@ function render() {
   document.getElementById('progresso-fill').style.width = ((aprovados / total) * 100) + '%';
 
   // Cabeçalho de alerta
-  const reprovados = Object.values(docsExistentes).filter(d => d.status === 'reprovado');
+  const reprovados = Object.values(docsExistentes).filter(d => d.status === 'reprovado' || d.status === 'retornado');
+  const retornados = Object.values(docsExistentes).filter(d => d.status === 'retornado');
   let alerta = '';
-  if (reprovados.length > 0) {
+  if (retornados.length > 0) {
+    alerta = `<div class="alerta aviso">📨 <div><strong>${retornados.length} documento(s) precisa(m) ser reenviado(s).</strong> O recrutador pediu ajustes — veja a mensagem abaixo em cada item e reenvie.</div></div>`;
+  } else if (reprovados.length > 0) {
     alerta = `<div class="alerta aviso">⚠️ <div><strong>${reprovados.length} documento(s) precisa(m) ser reenviado(s).</strong> Veja a justificativa do recrutador abaixo em cada item.</div></div>`;
   } else if (aprovados === total) {
     alerta = `<div class="alerta sucesso">✅ <div><strong>Tudo certo!</strong> Todos os documentos foram aprovados. Aguarde o próximo passo do recrutador.</div></div>`;
@@ -301,8 +305,8 @@ function renderDoc(doc) {
   const ex = docsExistentes[doc.tipo];
   const status = ex ? ex.status : null;
   const statusClass = status ? `status-${status}` : '';
-  const statusLabel = !ex ? 'Vazio' : status === 'aprovado' ? 'Aprovado' : status === 'reprovado' ? 'Reprovado' : 'Pendente';
-  const statusBadge = !ex ? 's-vazio' : status === 'aprovado' ? 's-aprovado' : status === 'reprovado' ? 's-reprovado' : 's-pendente';
+  const statusLabel = !ex ? 'Vazio' : status === 'aprovado' ? 'Aprovado' : status === 'reprovado' ? 'Reprovado' : status === 'retornado' ? 'A reenviar' : 'Pendente';
+  const statusBadge = !ex ? 's-vazio' : status === 'aprovado' ? 's-aprovado' : status === 'reprovado' ? 's-reprovado' : status === 'retornado' ? 's-retornado' : 's-pendente';
 
   let html = `<div class="doc-item ${statusClass}" id="doc-${doc.tipo}">`;
   html += `<div class="doc-icon">${doc.categoria === 'texto' ? '📝' : '📎'}</div>`;
@@ -327,9 +331,10 @@ function renderDoc(doc) {
     }
   }
 
-  // Justificativa se reprovado
-  if (status === 'reprovado' && ex.justificativa_admin) {
-    html += `<div class="doc-extra justificativa">💬 <em>${escapeHtml(ex.justificativa_admin)}</em></div>`;
+  // Justificativa se reprovado ou retornado
+  if ((status === 'reprovado' || status === 'retornado') && ex.justificativa_admin) {
+    const label = status === 'retornado' ? '📨 Mensagem do recrutador' : '💬 Justificativa';
+    html += `<div class="doc-extra justificativa">${label}: <em>${escapeHtml(ex.justificativa_admin)}</em></div>`;
   }
 
   html += `</div>`;
