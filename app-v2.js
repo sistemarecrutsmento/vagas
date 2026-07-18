@@ -25,9 +25,11 @@ let areasSelecionadas = [];
 function renderAreasChips() {
   const container = document.getElementById('w2-areas');
   if (!container) return;
+  container.style.cssText = 'display:flex;flex-wrap:wrap;align-items:flex-start;align-content:flex-start;gap:6px;padding:8px;border:1px solid #ddd;border-radius:8px;background:#fafafa;min-height:50px;';
   container.innerHTML = AREAS_INTERESSE.map(a => {
     const sel = areasSelecionadas.includes(a);
-    return `<span class="area-chip${sel ? ' selecionada' : ''}" data-area="${a.replace(/"/g, '&quot;')}">${a}</span>`;
+    const safe = a.replace(/"/g, '&quot;');
+    return `<span class="area-chip${sel ? ' selecionada' : ''}" data-area="${safe}" style="display:inline-flex;flex:0 0 auto;width:auto;align-items:center;justify-content:center;box-sizing:border-box;padding:4px 10px;background:${sel ? '#7b1830' : '#fff'};color:${sel ? '#fff' : '#222'};border:1px solid ${sel ? '#7b1830' : '#ccc'};border-radius:20px;font-size:12px;line-height:1.3;cursor:pointer;user-select:none;white-space:nowrap;">${a}</span>`;
   }).join('');
   container.querySelectorAll('.area-chip').forEach(chip => {
     chip.addEventListener('click', () => {
