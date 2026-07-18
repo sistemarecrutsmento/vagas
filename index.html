@@ -93,8 +93,8 @@
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--vinho); }
 
     /* Áreas de interesse (chips) */
-    .areas-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--borda); border-radius: 8px; background: #fafafa; min-height: 50px; align-content: flex-start; }
-    .area-chip { display: inline-flex; align-items: center; padding: 4px 10px; background: white; border: 1px solid var(--borda); border-radius: 20px; font-size: 12px; line-height: 1.3; cursor: pointer; transition: all 0.15s; user-select: none; white-space: nowrap; max-width: 100%; }
+    .areas-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--borda); border-radius: 8px; background: #fafafa; min-height: 50px; align-items: flex-start; align-content: flex-start; }
+    .area-chip { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: auto; padding: 4px 10px; background: white; border: 1px solid var(--borda); border-radius: 20px; font-size: 12px; line-height: 1.3; cursor: pointer; transition: all 0.15s; user-select: none; white-space: nowrap; }
     .area-chip:hover { border-color: var(--vinho); color: var(--vinho); }
     .area-chip.selecionada { background: var(--vinho); color: white; border-color: var(--vinho); font-weight: 600; }
     .area-chip.selecionada:hover { background: var(--vinho-escuro); }
@@ -622,8 +622,8 @@
   </div>
 </aside>
 
-<script src="app-v2.js?v=10"></script>
-<script src="modals.js?v=10"></script>
+<script src="app-v2.js?v=11"></script>
+<script src="modals.js?v=11"></script>
 <script>
 function abrirDrawer(e) {
   if (e) e.stopPropagation();
