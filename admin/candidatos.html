@@ -119,7 +119,7 @@
         });
         if (r.status === 401 || r.status === 403) { location.href = 'index.html'; return; }
         const data = await r.json();
-        const cands = data.candidatos || [];
+        const cands = data.candidaturas || [];
         if (!cands.length) {
           document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato ainda.</td></tr>';
           return;
