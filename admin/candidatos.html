@@ -26,223 +26,127 @@
     .page-header { margin-bottom: 20px; }
     .voltar { color: var(--vinho); text-decoration: none; font-size: 13px; }
     .voltar:hover { text-decoration: underline; }
-    .page-header h2 { font-size: 22px; color: var(--vinho); margin: 8px 0 4px; }
-    .page-header .vaga-sub { color: var(--cinza-medio); font-size: 14px; }
-    .vaga-info { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; }
-    .vaga-info .linha { display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px; }
-    .vaga-info .item { display: flex; gap: 6px; }
-    .vaga-info .item .lbl { color: var(--cinza-medio); font-weight: 500; }
-    .tabela-wrap { background: var(--branco); border-radius: 10px; border: 1px solid var(--borda); overflow: hidden; }
+    .page-header h2 { font-size: 22px; color: var(--preto); margin: 6px 0; }
+    .page-header .vaga-info { color: var(--cinza-medio); font-size: 14px; }
+    .card { background: var(--branco); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
-    thead { background: var(--vinho); color: var(--branco); }
-    th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--borda); }
+    thead { background: #fafafa; }
+    th { text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; color: var(--cinza-medio); font-weight: 600; border-bottom: 1px solid var(--borda); }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--borda); font-size: 14px; vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover { background: #fafafa; }
     .cand-nome { font-weight: 600; color: var(--preto); }
-    .cand-email { color: var(--cinza-medio); font-size: 12px; }
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-    .badge-em-analise { background: #fff3cd; color: #856404; }
-    .badge-em-andamento { background: #cce5ff; color: #004085; }
-    .badge-contratado { background: #d4edda; color: #155724; }
-    .badge-rejeitado { background: #f8d7da; color: #721c24; }
-    .etapa-tag { background: var(--cinza); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-    .docs-mini { font-size: 11px; margin-top: 4px; }
-    .docs-mini .pend { color: #856404; font-weight: 600; }
-    .docs-mini .ok { color: #155724; }
-    .docs-mini .rep { color: #721c24; font-weight: 600; }
-    .btn { background: var(--vinho); color: var(--branco); border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; text-decoration: none; display: inline-block; }
+    .cand-email { font-size: 12px; color: var(--cinza-medio); margin-top: 2px; }
+    .etapa-tag { display: inline-block; padding: 4px 10px; background: var(--vinho); color: var(--branco); border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .etapa-tag.coleta-docs { background: var(--dourado); color: var(--preto); }
+    .status { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .status-em_andamento { background: #FFF4E5; color: #B45309; }
+    .status-aprovado { background: #E5F8E5; color: #166534; }
+    .status-reprovado { background: #FEE2E2; color: #991B1B; }
+    .status-contratado { background: #DBEAFE; color: #1E40AF; }
+    .btn { display: inline-block; padding: 8px 16px; background: var(--vinho); color: var(--branco); text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600; }
     .btn:hover { background: var(--vinho-escuro); }
-    .btn-sec { background: var(--branco); color: var(--vinho); border: 1px solid var(--vinho); }
-    .btn-sec:hover { background: var(--cinza); }
-    .empty { text-align: center; padding: 40px 20px; color: var(--cinza-medio); }
-    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ===== Modal de análise (drawer por cima da lista) ===== */
-    .modal-fundo { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
-    .modal-fundo.aberto { display: flex; }
-    .modal { background: var(--branco); border-radius: 12px; max-width: 920px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
-    .modal-topo { padding: 16px 20px; border-bottom: 1px solid var(--borda); display: flex; align-items: center; gap: 12px; background: var(--vinho); color: var(--branco); }
-    .modal-topo h2 { font-size: 18px; font-weight: 600; flex: 1; }
-    .modal-topo .fechar { background: transparent; border: 1px solid var(--dourado); color: var(--dourado); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 18px; line-height: 1; }
-    .modal-topo .fechar:hover { background: var(--dourado); color: var(--vinho); }
-    .modal-corpo { padding: 20px; overflow-y: auto; flex: 1; }
-    .modal-rodape { padding: 12px 20px; border-top: 1px solid var(--borda); display: flex; gap: 10px; justify-content: flex-end; background: var(--cinza); }
-    .timeline { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
-    .timeline .etapa { padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: var(--cinza); color: var(--cinza-medio); }
-    .timeline .etapa.atual { background: var(--dourado); color: var(--vinho); }
-    .timeline .etapa.feita { background: #d4edda; color: #155724; }
-    .card { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
-    .card h3 { font-size: 14px; color: var(--vinho); margin-bottom: 10px; }
-    .campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-    .campo .lbl { font-size: 11px; color: var(--cinza-medio); font-weight: 600; text-transform: uppercase; }
-    .campo .val { font-size: 13px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .aviso-bloq { background: #fff3cd; color: #856404; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-top: 10px; }
-    .doc-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 6px; margin-bottom: 8px; }
-    .doc-item .doc-info { flex: 1; }
-    .doc-item .doc-tipo { font-weight: 600; font-size: 13px; }
-    .doc-item .doc-valor { font-size: 12px; color: var(--cinza-medio); margin-top: 2px; }
-    .doc-item .doc-arquivo a { font-size: 12px; color: var(--vinho); }
-    .doc-item .doc-status { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-    .doc-status-pendente { background: #fff3cd; color: #856404; }
-    .doc-status-aprovado { background: #d4edda; color: #155724; }
-    .doc-status-reprovado { background: #f8d7da; color: #721c24; }
-    .doc-item .doc-acoes { display: flex; gap: 6px; }
-    .doc-item .doc-acoes button { padding: 6px 10px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; font-weight: 600; }
-    .btn-aprovar { background: #28a745; color: var(--branco); }
-    .btn-reprovar { background: #dc3545; color: var(--branco); }
-    .btn-reverter { background: #6c757d; color: var(--branco); }
-    .doc-item .doc-just { font-size: 11px; color: #721c24; margin-top: 4px; font-style: italic; }
+    .btn-dourado { background: var(--dourado); color: var(--preto); }
+    .btn-dourado:hover { background: #B8941F; color: var(--branco); }
+    .empty { text-align: center; padding: 40px; color: var(--cinza-medio); }
+    .acoes-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+    .doc-pill { display: inline-block; margin-left: 6px; padding: 2px 8px; background: var(--dourado); color: var(--preto); border-radius: 999px; font-size: 10px; font-weight: 700; vertical-align: middle; }
   </style>
 </head>
 <body>
   <div class="topo">
     <a href="candidaturas.html">← Vagas</a>
-    <h1>👥 Candidatos da Vaga</h1>
+    <h1>Admin</h1>
     <div class="spacer"></div>
+    <a href="index.html">Sair</a>
   </div>
 
   <div class="container">
     <div class="page-header">
-      <a class="voltar" href="candidaturas.html">← Voltar para vagas</a>
-      <h2 id="vaga-titulo">Carregando...</h2>
-      <div class="vaga-sub" id="vaga-sub"></div>
+      <a class="voltar" href="candidaturas.html">← Voltar para Vagas</a>
+      <h2 id="titulo-vaga">Carregando...</h2>
+      <div class="vaga-info" id="info-vaga"></div>
     </div>
-    <div class="vaga-info" id="vaga-info"></div>
-    <div class="tabela-wrap">
+
+    <div class="card">
       <table>
         <thead>
-          <tr><th>Candidato</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr>
+          <tr>
+            <th>Candidato</th>
+            <th>Local</th>
+            <th>Etapa</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
         </thead>
         <tbody id="cands-tbody">
-          <tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>
+          <tr><td colspan="6" class="empty">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Modal de análise (drawer sobreposto) -->
-  <div class="modal-fundo" id="modal-fundo" onclick="if(event.target===this) fecharModal()">
-    <div class="modal">
-      <div class="modal-topo">
-        <h2 id="modal-titulo">👁 Analisando candidato...</h2>
-        <button class="fechar" onclick="fecharModal()" title="Fechar">×</button>
-      </div>
-      <div class="modal-corpo" id="modal-corpo">
-        <div class="empty"><div class="spinner"></div></div>
-      </div>
-      <div class="modal-rodape" id="modal-rodape"></div>
-    </div>
-  </div>
-
   <script>
     const API = 'https://recrutamento-api.onrender.com';
-    const token = localStorage.getItem('admin_token');
-    const params = new URLSearchParams(window.location.search);
-    const vagaId = params.get('vaga');
-
-    if (!token) { window.location.href = 'index.html'; }
-    if (!vagaId) { window.location.href = 'candidaturas.html'; }
-
-    const ETAPAS = ['Inscrição', 'Triagem curricular', 'Entrevista RH', 'Entrevista gestor', 'Proposta', 'Coleta de documentos', 'Contratação'];
-
-    // Cache local das candidaturas + docs resumidos
-    let _candsCache = [];
-
-    function badgeStatus(s) {
-      const cls = { em_analise: 'badge-em-analise', em_andamento: 'badge-em-andamento', aprovado: 'badge-em-andamento', contratado: 'badge-contratado', rejeitado: 'badge-rejeitado', reprovado: 'badge-rejeitado' }[s] || 'badge-em-analise';
-      const lbl = { em_analise: 'Em análise', em_andamento: 'Em andamento', aprovado: 'Aprovado', contratado: 'Contratado', rejeitado: 'Reprovado', reprovado: 'Reprovado' }[s] || s;
-      return `<span class="badge ${cls}">${lbl}</span>`;
-    }
-
-    function docsResumo(cand) {
-      if (!cand._docsStats) return '';
-      const { pendentes, aprovados, reprovados } = cand._docsStats;
-      if (pendentes === 0 && aprovados === 0 && reprovados === 0) return '';
-      return `<div class="docs-mini">
-        ${pendentes > 0 ? `<span class="pend">⏳ ${pendentes} pendente(s)</span>` : ''}
-        ${aprovados > 0 ? `<span class="ok"> ✓${aprovados}</span>` : ''}
-        ${reprovados > 0 ? `<span class="rep"> ✗${reprovados}</span>` : ''}
-      </div>`;
-    }
+    const ETAPAS = ['Inscrição', 'Triagem curricular', 'Entrevista RH', 'Entrevista gestor', 'Coleta de documentos', 'Contratação'];
 
     async function carregar() {
+      const token = localStorage.getItem('admin_token');
+      if (!token) { location.href = 'index.html'; return; }
+
+      const params = new URLSearchParams(location.search);
+      const vagaId = params.get('vaga');
+      if (!vagaId) {
+        document.getElementById('titulo-vaga').textContent = 'Vaga não informada';
+        return;
+      }
+
+      // Carrega info da vaga
       try {
-        const r = await fetch(API + '/api/admin/vagas/' + vagaId + '/candidaturas', {
+        const r = await fetch(API + '/api/vagas/' + vagaId);
+        const data = await r.json();
+        if (r.ok && data.vaga) {
+          document.getElementById('titulo-vaga').textContent = data.vaga.titulo || 'Vaga';
+          document.getElementById('info-vaga').textContent = (data.vaga.cidade ? data.vaga.cidade + ' / ' : '') + (data.vaga.estado || '');
+        }
+      } catch (e) {}
+
+      // Carrega candidatos
+      try {
+        const r = await fetch(API + '/api/vaga/' + vagaId + '/candidatos', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
-        if (r.status === 401 || r.status === 403) {
-          localStorage.removeItem('admin_token');
-          window.location.href = 'index.html';
-          return;
-        }
+        if (r.status === 401 || r.status === 403) { location.href = 'index.html'; return; }
         const data = await r.json();
-        if (data.erro) {
-          document.getElementById('vaga-titulo').textContent = 'Erro';
-          document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="6" class="empty">' + data.erro + '</td></tr>';
-          return;
-        }
-        const v = data.vaga;
-        const cands = data.candidaturas || [];
-        _candsCache = cands;
-
-        // Carregar resumo de docs pra cada candidato (em paralelo)
-        const etapaColeta = (v.etapas || []).findIndex(e => (typeof e === 'string' ? e : e.nome) === 'Coleta de documentos');
-        if (etapaColeta >= 0) {
-          await Promise.all(cands.map(async (c) => {
-            if ((c.etapa_atual || 0) >= etapaColeta) {
-              try {
-                const dr = await fetch(API + '/api/admin/candidatura/' + c.id + '/documentos', {
-                  headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (dr.ok) {
-                  const dd = await dr.json();
-                  const docs = dd.documentos || [];
-                  c._docsStats = {
-                    pendentes: docs.filter(d => d.status === 'pendente').length,
-                    aprovados: docs.filter(d => d.status === 'aprovado').length,
-                    reprovados: docs.filter(d => d.status === 'reprovado').length
-                  };
-                }
-              } catch (e) { /* silent */ }
-            }
-          }));
-        }
-
-        document.getElementById('vaga-titulo').textContent = v.titulo;
-        document.title = v.titulo + ' — Candidatos';
-        document.getElementById('vaga-sub').textContent = v.empresa + ' • ' + ([v.cidade, v.estado].filter(Boolean).join(' / ') || '—');
-
-        const local = [v.cidade, v.estado].filter(Boolean).join(' / ') || '—';
-        document.getElementById('vaga-info').innerHTML = `
-          <div class="linha">
-            <div class="item"><span class="lbl">Empresa:</span><span>${v.empresa || '—'}</span></div>
-            <div class="item"><span class="lbl">Local:</span><span>${local}</span></div>
-            <div class="item"><span class="lbl">Candidatos:</span><span><strong>${cands.length}</strong></span></div>
-          </div>
-        `;
-
-        if (cands.length === 0) {
+        const cands = data.candidatos || [];
+        if (!cands.length) {
           document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato ainda.</td></tr>';
           return;
         }
 
         document.getElementById('cands-tbody').innerHTML = cands.map(c => {
           const etapa = c.etapa_atual || 0;
-          const etapaNome = ETAPAS[etapa] || ('Etapa ' + etapa);
+          const etapaNome = ETAPAS[etapa - 1] || ('Etapa ' + etapa);
+          const isColeta = etapa >= 4;
           return `<tr>
             <td>
               <div class="cand-nome">${c.nome || '—'}</div>
               <div class="cand-email">${c.email || ''}</div>
-              ${docsResumo(c)}
             </td>
             <td>${[c.cidade, c.estado].filter(Boolean).join(' / ') || '—'}</td>
-            <td><span class="etapa-tag">${etapa+1}. ${etapaNome}</span></td>
+            <td>
+              <span class="etapa-tag ${isColeta ? 'coleta-docs' : ''}">${etapa}. ${etapaNome}</span>
+              ${isColeta ? '<span class="doc-pill">📄 validar docs</span>' : ''}
+            </td>
             <td>${badgeStatus(c.status)}</td>
             <td>${formatarData(c.criada_em)}</td>
-            <td><button class="btn" onclick="abrirAnalise(${c.id})">👁 Analisar</button></td>
+            <td>
+              <div class="acoes-cell">
+                <a class="btn" href="analisar.html?id=${c.id}" target="_blank">👁 Analisar</a>
+                ${isColeta ? '<a class="btn btn-dourado" href="validar-documentos.html?id=' + c.id + '" target="_blank">📄 Validar docs</a>' : ''}
+              </div>
+            </td>
           </tr>`;
         }).join('');
       } catch (e) {
@@ -250,267 +154,21 @@
       }
     }
 
+    function badgeStatus(s) {
+      const map = {
+        'em_andamento': '<span class="status status-em_andamento">Em andamento</span>',
+        'aprovado': '<span class="status status-aprovado">Aprovado</span>',
+        'reprovado': '<span class="status status-reprovado">Reprovado</span>',
+        'contratado': '<span class="status status-contratado">Contratado</span>'
+      };
+      return map[s] || s;
+    }
+
     function formatarData(iso) {
       if (!iso) return '—';
       const d = new Date(iso);
       return d.toLocaleDateString('pt-BR');
     }
-
-    // ===== Modal de análise =====
-    let _candAtual = null;
-    let _docsCache = [];
-    let _obrigatoriosDocs = [];
-
-    function abrirAnalise(candidaturaId) {
-      const c = _candsCache.find(x => x.id === candidaturaId);
-      if (!c) return;
-      _candAtual = c;
-      document.getElementById('modal-titulo').textContent = '👁 ' + (c.nome || 'Candidato');
-      document.getElementById('modal-corpo').innerHTML = '<div class="empty"><div class="spinner"></div></div>';
-      document.getElementById('modal-rodape').innerHTML = '';
-      document.getElementById('modal-fundo').classList.add('aberto');
-      carregarAnalise(candidaturaId);
-    }
-
-    function fecharModal() {
-      document.getElementById('modal-fundo').classList.remove('aberto');
-    }
-
-    async function carregarAnalise(candidaturaId) {
-      try {
-        const r = await fetch(API + '/api/admin/candidatura/' + candidaturaId, {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (r.status === 401 || r.status === 403) {
-          localStorage.removeItem('admin_token');
-          window.location.href = 'index.html';
-          return;
-        }
-        const data = await r.json();
-        if (data.erro) {
-          document.getElementById('modal-corpo').innerHTML = '<div class="empty">' + (data.erro || 'Erro') + '</div>';
-          return;
-        }
-        const c = data.candidatura;
-        _candAtual = { ..._candAtual, ...c };
-        renderModal(_candAtual, '');
-      } catch (e) {
-        document.getElementById('modal-corpo').innerHTML = '<div class="empty">Erro: ' + e.message + '</div>';
-      }
-    }
-
-    async function carregarDocumentos(candidaturaId) {
-      const r = await fetch(API + '/api/admin/candidatura/' + candidaturaId + '/documentos', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const data = await r.json();
-      _docsCache = data.documentos || [];
-      _obrigatoriosDocs = data.obrigatorios || [];
-    }
-
-    function renderizarDocumentos() {
-      if (!_docsCache.length) {
-        return '<div class="empty" style="padding:20px">Nenhum documento enviado ainda.</div>';
-      }
-      return _docsCache.map((doc, idx) => {
-        const statusClass = 'doc-status-' + (doc.status || 'pendente');
-        const statusLabel = { pendente: 'Pendente', aprovado: 'Aprovado', reprovado: 'Reprovado' }[doc.status] || doc.status;
-        const obrigatorio = _obrigatoriosDocs.find(o => o.tipo === doc.tipo);
-        const label = (obrigatorio && obrigatorio.label) || doc.tipo;
-        const cat = (obrigatorio && obrigatorio.categoria) || doc.categoria;
-        const isArquivo = cat === 'arquivo' || doc.arquivo_url;
-        const valor = doc.valor ? `<div class="doc-valor">📝 ${escape(doc.valor)}</div>` : '';
-        const arquivo = doc.arquivo_url ? `<div class="doc-arquivo"><a href="${doc.arquivo_url}" target="_blank" rel="noopener">📎 Ver arquivo</a></div>` : '';
-        const just = doc.justificativa_admin ? `<div class="doc-just">Motivo: ${escape(doc.justificativa_admin)}</div>` : '';
-        const acoes = doc.status === 'pendente' ? `
-          <button class="btn-aprovar" onclick="revisarDoc(${idx}, 'aprovar')">✓ Aprovar</button>
-          <button class="btn-reprovar" onclick="revisarDoc(${idx}, 'reprovar')">✗ Reprovar</button>
-        ` : `
-          <button class="btn-reverter" onclick="revisarDoc(${idx}, 'reverter')">↩ Reverter</button>
-        `;
-        return `<div class="doc-item">
-          <div class="doc-info">
-            <div class="doc-tipo">${escape(label)} ${isArquivo ? '📎' : '📝'}</div>
-            ${valor}${arquivo}${just}
-          </div>
-          <div class="doc-status ${statusClass}">${statusLabel}</div>
-          <div class="doc-acoes">${acoes}</div>
-        </div>`;
-      }).join('');
-    }
-
-    function escape(s) { return String(s || '').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c])); }
-
-    function statsDocs() {
-      const pendentes = _docsCache.filter(d => d.status === 'pendente').length;
-      const reprovados = _docsCache.filter(d => d.status === 'reprovado').length;
-      const aprovados = _docsCache.filter(d => d.status === 'aprovado').length;
-      return { pendentes, reprovados, aprovados, total: _docsCache.length };
-    }
-
-    function render(c, docsCard) {
-      const etapas = (c.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
-      const etapaAtual = c.etapa_atual || 1;
-      const totalEtapas = etapas.length || 1;
-      const ehColeta = (etapas[etapaAtual-1] || '').toLowerCase().includes('coleta');
-      const stats = statsDocs();
-      const bloqueiaAvancar = ehColeta && (stats.pendentes > 0 || stats.reprovados > 0);
-
-      // Timeline
-      const timeline = etapas.map((nome, i) => {
-        const idx = i + 1;
-        const cls = idx < etapaAtual ? 'etapa feita' : (idx === etapaAtual ? 'etapa atual' : '');
-        return `<div class="etapa ${cls}">${idx}. ${escape(nome)}</div>`;
-      }).join('');
-
-      const _avancarDisabled = bloqueiaAvancar ? ' disabled title="Aprove todos os documentos antes de avançar"' : '';
-      const _avancarHint = bloqueiaAvancar ? '<div class="aviso-bloq">⏳ ' + (stats.reprovados > 0 ? 'Há ' + stats.reprovados + ' documento(s) reprovado(s)' : 'Há ' + stats.pendentes + ' documento(s) pendente(s)') + ' — corrija antes de avançar.</div>' : '';
-
-      document.getElementById('modal-corpo').innerHTML = `
-        <div class="timeline">${timeline}</div>
-
-        <div class="card">
-          <h3>👤 Dados pessoais</h3>
-          <div class="grid-2">
-            <div class="campo"><span class="lbl">Nome</span><span class="val">${escape(c.nome || '—')}</span></div>
-            <div class="campo"><span class="lbl">Email</span><span class="val">${escape(c.email || '—')}</span></div>
-            <div class="campo"><span class="lbl">Telefone</span><span class="val">${escape(c.telefone || '—')}</span></div>
-            <div class="campo"><span class="lbl">CPF</span><span class="val">${escape(c.cpf || '—')}</span></div>
-            <div class="campo"><span class="lbl">Cidade</span><span class="val">${escape([c.cidade, c.estado].filter(Boolean).join(' / ') || '—')}</span></div>
-            <div class="campo"><span class="lbl">Status</span><span class="val">${badgeStatus(c.status || 'em_andamento')}</span></div>
-          </div>
-        </div>
-
-        ${c.currículo_url ? `<div class="card"><h3>📄 Currículo</h3><a class="btn btn-sec" href="${c.currículo_url}" target="_blank" rel="noopener">📎 Abrir currículo</a></div>` : ''}
-
-        ${docsCard}
-      `;
-
-      const _bloqueadoContratado = c.status === 'contratado' || c.status === 'rejeitado' || c.status === 'reprovado';
-      document.getElementById('modal-rodape').innerHTML = `
-        <button class="btn btn-sec" onclick="reabrirCandidatura()" ${(_bloqueadoContratado ? '' : 'disabled')}>↩ Reabrir</button>
-        <button class="btn btn-sec" onclick="reprovarCandidatura()">✗ Reprovar</button>
-        <button class="btn" onclick="avancarCandidatura()" ${_avancarDisabled}>${(etapaAtual >= totalEtapas) ? '✓ Contratar' : '→ Aprovar e avançar'}</button>
-      `;
-      if (_avancarHint) document.getElementById('modal-corpo').insertAdjacentHTML('beforeend', _avancarHint);
-    }
-
-    async function revisarDoc(idx, acao) {
-      const doc = _docsCache[idx];
-      if (!doc) return;
-      let justificativa = null;
-      if (acao === 'reprovar') {
-        justificativa = prompt('Por que você está REPROVANDO este documento?\n\nA justificativa é obrigatória e será enviada ao candidato.', '');
-        if (justificativa === null) return;
-        if (!justificativa.trim()) { alert('Justificativa obrigatória.'); return; }
-      } else if (acao === 'reverter') {
-        if (!confirm('Reverter este documento para status pendente?')) return;
-      } else if (acao === 'aprovar') {
-        if (!confirm('Confirmar aprovação deste documento?')) return;
-      }
-      try {
-        const r = await fetch(API + '/api/admin/documento/' + doc.id + '/revisar', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ acao, justificativa })
-        });
-        const data = await r.json();
-        if (!r.ok || data.erro) { alert(data.erro || 'Erro ao revisar'); return; }
-        _docsCache[idx] = { ..._docsCache[idx], status: data.documento.status, justificativa_admin: data.documento.justificativa_admin, revisado_em: data.documento.revisado_em };
-        const card = document.getElementById('card-documentos');
-        if (card) card.querySelector('.doc-lista-wrapper').innerHTML = renderizarDocumentos();
-        // Re-renderiza rodapé pra atualizar estado do botão
-        if (_candAtual) {
-          const docsCardAtual = document.getElementById('card-documentos') ? document.getElementById('card-documentos').outerHTML : '';
-          render(_candAtual, docsCardAtual);
-        }
-      } catch (e) {
-        alert('Erro: ' + e.message);
-      }
-    }
-
-    async function avancarCandidatura() {
-      if (!_candAtual) return;
-      if (!confirm('Avançar este candidato para a próxima etapa?')) return;
-      try {
-        const r = await fetch(API + '/api/admin/candidatura/' + _candAtual.id + '/status', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ acao: 'avancar' })
-        });
-        const data = await r.json();
-        if (!r.ok || data.erro) { alert(data.erro || 'Erro'); return; }
-        alert(data.candidatura.status === 'contratado' ? 'Candidato contratado! 🎉' : 'Candidato avançado para a próxima etapa.');
-        fecharModal();
-        carregar();
-      } catch (e) {
-        alert('Erro: ' + e.message);
-      }
-    }
-
-    async function reprovarCandidatura() {
-      if (!_candAtual) return;
-      const motivo = prompt('Motivo da reprovação (opcional):', '');
-      if (motivo === null) return;
-      if (!confirm('Reprovar este candidato?')) return;
-      try {
-        const r = await fetch(API + '/api/admin/candidatura/' + _candAtual.id + '/status', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ acao: 'reprovar', motivo })
-        });
-        const data = await r.json();
-        if (!r.ok || data.erro) { alert(data.erro || 'Erro'); return; }
-        alert('Candidato reprovado.');
-        fecharModal();
-        carregar();
-      } catch (e) {
-        alert('Erro: ' + e.message);
-      }
-    }
-
-    async function reabrirCandidatura() {
-      if (!_candAtual) return;
-      if (!confirm('Reabrir esta candidatura?')) return;
-      try {
-        const r = await fetch(API + '/api/admin/candidatura/' + _candAtual.id + '/status', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ acao: 'reabrir' })
-        });
-        const data = await r.json();
-        if (!r.ok || data.erro) { alert(data.erro || 'Erro'); return; }
-        alert('Candidatura reaberta.');
-        fecharModal();
-        carregar();
-      } catch (e) {
-        alert('Erro: ' + e.message);
-      }
-    }
-
-    // Render inicial do modal (carrega docs + render)
-    const _renderOriginal = renderModal;
-    async function renderModal(c, _) {
-      const etapaNum = Number(c.etapa_atual || 0);
-      let docsCard = '';
-      if (etapaNum >= 4) {
-        try {
-          await carregarDocumentos(c.id);
-          if (_obrigatoriosDocs.length) {
-            docsCard = '<div class="card" id="card-documentos">' +
-              '<h3>📄 Documentos de Contratação</h3>' +
-              '<p style="font-size:12px;color:var(--cinza-medio);margin-bottom:14px">Aprovar ou reprovar cada documento enviado pelo candidato. Em caso de reprovação, a justificativa é obrigatória.</p>' +
-              '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
-            '</div>';
-          }
-        } catch (e) { console.error('Erro ao carregar documentos:', e); }
-      }
-      render(c, docsCard);
-    }
-
-    // Fechar com ESC
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
 
     carregar();
   </script>
