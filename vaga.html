@@ -300,7 +300,7 @@ function atualizarBotaoCandidatar(vagaId) {
   if (!tokenCandidato) {
     btn.textContent = '🔒 Faça login para se candidatar';
     btn.disabled = false;
-    btn.onclick = () => { location.href = 'index.html'; abrirModal('login'); };
+    btn.onclick = () => { location.href = 'index.html?login=1'; };
   } else {
     btn.textContent = '🚀 Candidatar-se a esta vaga';
     btn.disabled = false;
