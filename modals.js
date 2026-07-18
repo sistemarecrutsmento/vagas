@@ -128,9 +128,9 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Áreas de interesse <span style="font-weight:400;color:var(--cinza);font-size:12px;">(escolha até 5)</span></label>
+          <label>Áreas de interesse <span style="font-weight:400;color:#888;font-size:12px;margin-left:6px;">(escolha até 5)</span></label>
           <div id="w2-areas" class="areas-chips"></div>
-          <div id="w2-areas-contador" style="margin-top:6px;font-size:12px;color:var(--cinza);">0 de 5 selecionadas</div>
+          <div id="w2-areas-contador" style="margin-top:6px;font-size:12px;color:#666;">0 de 5 selecionadas</div>
         </div>
         <div class="form-group">
           <label class="check-label"><input type="checkbox" id="w2-politica" required> Li e aceito a <a href="#" onclick="alert('Política de privacidade');return false;" style="color:var(--vinho);font-weight:600;">Política de privacidade</a></label>
