@@ -362,7 +362,7 @@
           '<button class="btn btn-primary" ' + _botaoAvancarDisabled + ' ' + _botaoAvancarOnclick + ' ' + _avancarTitle + '>' + labelAvancar + '</button>' +
           '<button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button>' +
           (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank" rel="noopener">📄 Ver documentos anexados</a>' : '') +
-          (ehEntrevistaGestor || ehProposta ? '<button class="btn" style="background:#7C3AED;color:white" onclick="abrirModalProposta(' + c.id + ')">📨 ' + (c.proposta_enviada_em ? 'Reenviar / Editar Proposta' : 'Enviar Proposta') + '</button>' : '') +
+          (ehProposta ? '<button class="btn" style="background:#7C3AED;color:white" onclick="abrirModalProposta(' + c.id + ')">📨 ' + (c.proposta_enviada_em ? 'Reenviar / Editar Proposta' : 'Enviar Proposta') + '</button>' : '') +
           (ehProposta && c.proposta_enviada_em ? '<div class="aviso-bloq" style="background:#EDE9FE;color:#5B21B6;border-left:4px solid #7C3AED;margin-top:8px;text-align:left">📨 <strong>Proposta enviada</strong>' + (c.proposta_aceita_em ? ' — ✅ aceita pelo candidato' : c.proposta_recusada_em ? ' — ❌ recusada' : ' — aguardando aceite do candidato') + '</div>' : '') +
           _hintColeta +
         '</div>';
