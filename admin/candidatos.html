@@ -114,7 +114,7 @@
 
       // Carrega candidatos
       try {
-        const r = await fetch(API + '/api/vaga/' + vagaId + '/candidatos', {
+        const r = await fetch(API + '/api/admin/vagas/' + vagaId + '/candidaturas', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
         if (r.status === 401 || r.status === 403) { location.href = 'index.html'; return; }
