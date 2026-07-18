@@ -509,45 +509,6 @@ function escapeHTML(s) {
   return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
 
-
-  if (!confirm('Alterar status para "' + status + '"?')) return;
-  try {
-    const r = await fetch(API + '/api/admin/candidatura/' + id + '/status', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ status })
-    });
-    const data = await r.json();
-    if (r.ok) {
-      carregarCandidaturas();
-    } else {
-      alert('Erro: ' + (data.erro || 'Não foi possível atualizar'));
-    }
-  } catch (e) {
-    alert('Erro de conexão: ' + e.message);
-  }
-}
-
-// verCandidatura stub removido (analisarCandidatura apagada)
-
-
-async function mudarStatus(id, status) {
-  if (!confirm('Alterar status para "' + status + '"?')) return;
-  try {
-    const r = await fetch(API + '/api/admin/candidatura/' + id + '/status', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ status })
-    });
-    const data = await r.json();
-    if (r.ok) {
-      carregarCandidaturas();
-    } else {
-      alert('Erro: ' + (data.erro || 'Não foi possível atualizar'));
-    }
-  } catch (e) {
-    alert('Erro de conexão: ' + e.message);
-  }
-}
-
 async function verCandidatura(id) {
   const container = document.getElementById('candidatura-detalhes');
   container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
