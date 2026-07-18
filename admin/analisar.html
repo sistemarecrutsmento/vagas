@@ -882,7 +882,7 @@
         }
         const r = await fetch(API + '/api/admin/candidatura/' + _propostaCandId + '/enviar-proposta', {
           method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          headers: { 'Authorization': 'Bearer ' + localStorage.getItem('admin_token'), 'Content-Type': 'application/json' },
           body: JSON.stringify({ texto, pdf_url: pdfUrl })
         });
         const data = await r.json();
