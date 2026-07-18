@@ -477,6 +477,11 @@ async function abrirVagaCands(vagaId) {
   }
 }
 
+// Abre a página de análise completa da candidatura
+function analisarCandidatura(id) {
+  window.location.href = 'analisar.html?id=' + id;
+}
+
 async function acaoCandidatura(id, acao) {
   const mensagens = {
     'avancar': 'Avançar o candidato para a próxima etapa do processo seletivo?',
