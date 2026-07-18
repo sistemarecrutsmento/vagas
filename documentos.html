@@ -81,6 +81,10 @@
   .doc-item.status-aprovado { background: var(--verde-bg); border-color: var(--verde); }
   .doc-item.status-reprovado { background: var(--vermelho-bg); border-color: var(--vermelho); }
   .doc-item.status-pendente { background: #fff; border-color: var(--amarelo); }
+  .doc-item.com-arquivo { border-color: var(--verde); background: #f0fdf4; }
+  .doc-item.com-arquivo .arq-nome { color: var(--verde); font-weight: 600; }
+  .doc-thumb { margin-top: 8px; max-width: 120px; max-height: 120px; border-radius: 6px; border: 1px solid var(--borda); display: block; }
+  .doc-thumb-msg { font-size: 12px; color: var(--verde); margin-top: 4px; font-weight: 600; }
   .doc-icon { font-size: 24px; width: 36px; text-align: center; flex-shrink: 0; }
   .doc-conteudo { flex: 1; min-width: 0; }
   .doc-label { font-weight: 600; font-size: 14px; color: var(--preto); margin-bottom: 2px; }
@@ -354,7 +358,21 @@ function arquivoEscolhido(tipo, input) {
     const dataUrl = e.target.result;
     const base64 = dataUrl.split(',')[1];
     arquivosBase64[tipo] = { base64, nome: f.name, tipo: f.type, tamanho: f.size };
-    document.getElementById(`arq-nome-${tipo}`).textContent = f.name;
+    document.getElementById(`arq-nome-${tipo}`).textContent = '✓ ' + f.name + ' (' + Math.round(f.size / 1024) + ' KB)';
+    // Marca o card como "com arquivo selecionado" — borda verde
+    const card = document.getElementById(`doc-${tipo}`);
+    if (card) card.classList.add('com-arquivo');
+    // Preview de imagem (se for foto)
+    let oldThumb = document.getElementById(`thumb-${tipo}`);
+    if (oldThumb) oldThumb.remove();
+    if (f.type.startsWith('image/')) {
+      const img = document.createElement('img');
+      img.id = `thumb-${tipo}`;
+      img.className = 'doc-thumb';
+      img.src = URL.createObjectURL(f);
+      const arqDiv = document.getElementById(`doc-${tipo}`).querySelector('.doc-conteudo');
+      if (arqDiv) arqDiv.appendChild(img);
+    }
   };
   reader.readAsDataURL(f);
 }
@@ -365,6 +383,10 @@ function arquivoLimpar(tipo) {
   arquivosBase64[tipo] = { base64: null, nome: null, tipo: null, tamanho: null, _remover: true };
   document.getElementById(`arq-nome-${tipo}`).textContent = 'Nenhum arquivo';
   document.getElementById(`file-${tipo}`).value = '';
+  const card = document.getElementById(`doc-${tipo}`);
+  if (card) card.classList.remove('com-arquivo');
+  const thumb = document.getElementById(`thumb-${tipo}`);
+  if (thumb) thumb.remove();
 }
 
 // ============== ENVIAR ==============
@@ -406,6 +428,8 @@ async function enviar() {
     docsExistentes = {};
     await carregarDocumentos();
     // sucesso
+    const topo = document.getElementById('alerta-topo');
+    topo.innerHTML = '<div class="alerta sucesso">✅ <div><strong>Documentos enviados com sucesso!</strong> O recrutador vai analisar e aprovar. Você será notificado quando houver retorno.</div></div>';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (e) {
     alert('Erro: ' + e.message);
