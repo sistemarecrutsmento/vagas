@@ -167,8 +167,8 @@
   </div>
 </main>
 
-<script src="app-v2.js?v=12"></script>
-<script src="modals.js?v=12"></script>
+<script src="app-v2.js?v=14"></script>
+<script src="modals.js?v=14"></script>
 <script>
 // ===== PEGAR ID DA VAGA =====
 const params = new URLSearchParams(window.location.search);
@@ -314,6 +314,11 @@ function renderizar(cand, v) {
 
   // Etapa atual (0 = nenhuma concluída; etapas.length = tudo concluído)
   const etapaAtual = Number(cand.etapa_atual || 0);
+
+  // Botão "Enviar documentos" só aparece se a etapa atual for a "Coleta de Documentos"
+  const etapaAtualObj = etapas[etapaAtual];
+  const etapaAtualNome = (typeof etapaAtualObj === 'string' ? etapaAtualObj : (etapaAtualObj?.nome || '')).toLowerCase();
+  const emColetaDocumentos = etapaAtualNome.includes('documento') || etapaAtualNome.includes('document');
   const statusCand = cand.status || 'em_analise';
   const reprovadoGeral = (statusCand === 'rejeitado' || statusCand === 'reprovado');
 
@@ -359,7 +364,7 @@ function renderizar(cand, v) {
             else { etapaClass = ''; statusTxt = '—'; }
           } else if (statusCand === 'contratado' || statusCand === 'aprovado' || (i < etapaAtual)) {
             etapaClass = 'aprovada';
-            statusTxt = 'Aprovado';
+            statusTxt = (i === 0) ? 'Candidatura realizada' : 'Aprovado';
           } else if (i === etapaAtual) {
             etapaClass = 'atual';
             statusTxt = 'Em andamento';
@@ -379,7 +384,7 @@ function renderizar(cand, v) {
 
     <div style="text-align:center;margin-top:24px">
       <a href="painel.html" class="btn-voltar-painel" style="display:inline-block;text-decoration:none;">← Voltar para Minhas Inscrições</a>
-      ${etapaAtual === 4 && cand.id ? `<a href="documentos.html?candidatura=${cand.id}" class="btn-voltar-painel" style="display:inline-block;text-decoration:none;margin-left:12px;background:var(--vinho);color:white;border-color:var(--vinho);">📎 Enviar documentos para contratação</a>` : ''}
+      ${emColetaDocumentos && cand.id ? `<a href="documentos.html?candidatura=${cand.id}" class="btn-voltar-painel" style="display:inline-block;text-decoration:none;margin-left:12px;background:var(--vinho);color:white;border-color:var(--vinho);">📎 Enviar documentos para contratação</a>` : ''}
     </div>
   `;
 
