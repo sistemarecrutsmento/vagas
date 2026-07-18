@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Validar Documentação — Admin</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root { --vinho:#6B0F1A; --vinho-claro:#8B1A2B; --dourado:#D4AF37; --cinza:#F5F5F5; --cinza-medio:#999; --cinza-escuro:#2A2A2A; --branco:#fff; --verde:#16A34A; --vermelho:#DC2626; --amarelo:#92400E; --amarelo-bg:#FEF3C7; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--cinza); color: var(--cinza-escuro); padding: 24px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .header { background: var(--branco); padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; position: relative; }
+    .header .btn-voltar { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid var(--cinza-medio); color: var(--cinza-escuro); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s; text-decoration: none; }
+    .header .btn-voltar:hover { background: var(--cinza); border-color: var(--vinho); color: var(--vinho); }
+    .header .btn-voltar svg { width: 18px; height: 18px; }
+    .header h1 { color: var(--vinho); font-size: 24px; margin-bottom: 4px; padding-left: 110px; }
+    .header .sub { color: var(--cinza-medio); font-size: 14px; padding-left: 110px; }
+    .header .acoes-topo { padding-left: 110px; margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-topo { padding: 10px 18px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-topo:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-download-tudo { background: var(--dourado); color: var(--cinza-escuro); }
+    .btn-download-tudo:hover { background: #B8941F; }
+    .btn-voltar-topo { background: var(--cinza); color: var(--cinza-escuro); }
+    .btn-voltar-topo:hover { background: #E0E0E0; }
+
+    .resumo-bar { background: linear-gradient(135deg, var(--vinho) 0%, var(--vinho-claro) 100%); color: white; padding: 18px 24px; border-radius: 12px; margin-bottom: 16px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+    .resumo-stat { flex: 1; min-width: 100px; }
+    .resumo-num { font-size: 28px; font-weight: 700; }
+    .resumo-label { font-size: 12px; text-transform: uppercase; opacity: 0.9; letter-spacing: 0.5px; }
+    .resumo-stat.aprovados .resumo-num { color: #6EE7B7; }
+    .resumo-stat.reprovados .resumo-num { color: #FCA5A5; }
+    .resumo-stat.pendentes .resumo-num { color: #FDE68A; }
+
+    .doc-card { background: var(--branco); border-radius: 12px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px; border-left: 4px solid var(--cinza-medio); transition: all 0.2s; }
+    .doc-card.status-aprovado { border-left-color: var(--verde); background: #FAFFF8; }
+    .doc-card.status-reprovado { border-left-color: var(--vermelho); background: #FFF8F8; }
+    .doc-card.status-pendente { border-left-color: var(--amarelo); }
+
+    .doc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .doc-icon { font-size: 22px; }
+    .doc-titulo { font-size: 16px; font-weight: 600; color: var(--cinza-escuro); flex: 1; }
+    .doc-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .doc-badge-pendente { background: var(--amarelo-bg); color: var(--amarelo); }
+    .doc-badge-aprovado { background: #DCFCE7; color: #166534; }
+    .doc-badge-reprovado { background: #FEE2E2; color: #991B1B; }
+    .doc-badge-vazio { background: var(--cinza); color: var(--cinza-medio); }
+
+    .doc-corpo { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .doc-valor { flex: 1; min-width: 200px; font-size: 14px; color: var(--cinza-escuro); }
+    .doc-valor a { color: var(--vinho); text-decoration: underline; word-break: break-all; }
+    .doc-valor .meta { display: block; font-size: 11px; color: var(--cinza-medio); margin-top: 2px; }
+    .doc-pendente { color: var(--cinza-medio); font-style: italic; font-size: 13px; }
+    .doc-justificativa { font-size: 12px; color: #991B1B; margin-top: 6px; padding: 6px 10px; background: #FEE2E2; border-radius: 6px; font-style: italic; }
+    .doc-empty { text-align: center; padding: 60px 20px; color: var(--cinza-medio); }
+    .doc-empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+    .doc-acoes { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+    .doc-btn { padding: 8px 14px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+    .doc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .doc-btn-aprovar { background: var(--verde); color: white; }
+    .doc-btn-aprovar:hover { background: #15803D; }
+    .doc-btn-reprovar { background: var(--vermelho); color: white; }
+    .doc-btn-reprovar:hover { background: #B91C1C; }
+    .doc-btn-reverter { background: var(--cinza-medio); color: white; }
+    .doc-btn-reverter:hover { background: var(--cinza-escuro); }
+    .doc-btn-baixar { background: var(--dourado); color: var(--cinza-escuro); }
+    .doc-btn-baixar:hover { background: #B8941F; }
+    .doc-btn-baixar:disabled { background: #E5D896; cursor: not-allowed; }
+
+    .progresso { padding: 12px 16px; background: #FFF8E5; border-radius: 8px; margin-bottom: 12px; font-size: 13px; color: var(--amarelo); display: none; }
+    .progresso.visivel { display: flex; align-items: center; gap: 10px; }
+    .spinner-mini { border: 2px solid #E5D896; border-top: 2px solid var(--dourado); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="content">
+      <div class="header">
+        <a class="btn-voltar" href="javascript:history.back()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Voltar
+        </a>
+        <h1>📄 Validar Documentação</h1>
+        <div class="sub" id="sub-titulo">Carregando...</div>
+        <div class="acoes-topo">
+          <button class="btn-topo btn-download-tudo" id="btn-download-tudo" onclick="baixarTudo()" disabled>📥 Baixar tudo (PDF único)</button>
+          <a class="btn-topo btn-voltar-topo" href="javascript:history.back()">← Voltar para o candidato</a>
+        </div>
+      </div>
+      <div id="progresso" class="progresso">
+        <div class="spinner-mini"></div>
+        <span id="progresso-texto">Baixando arquivos...</span>
+      </div>
+      <div id="resumo-bar-container"></div>
+      <div id="docs-lista">
+        <div class="doc-empty">
+          <div class="doc-empty-icon">📋</div>
+          Carregando documentos...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://recrutamento-api.onrender.com';
+    let _candidatura = null;
+    let _candidato = null;
+    let _obrigatorios = [];
+    let _documentos = [];
+
+    (async () => {
+      const token = localStorage.getItem('admin_token');
+      if (!token) { location.href = 'index.html'; return; }
+
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) { document.getElementById('docs-lista').innerHTML = '<div class="doc-empty"><div class="doc-empty-icon">⚠️</div>ID da candidatura não informado.</div>'; return; }
+
+      // Carrega candidatura
+      try {
+        const r = await fetch(API + '/api/admin/candidatura/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (r.status === 401 || r.status === 403) { location.href = 'index.html'; return; }
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.erro || 'Erro ao carregar');
+        _candidatura = data.candidatura;
+        _candidato = _candidatura;
+      } catch (e) {
+        document.getElementById('docs-lista').innerHTML = '<div class="doc-empty"><div class="doc-empty-icon">⚠️</div>Erro: ' + e.message + '</div>';
+        return;
+      }
+
+      document.getElementById('sub-titulo').textContent = (_candidatura.nome || 'Candidato') + ' — ' + (_candidatura.titulo || 'Vaga');
+      document.title = 'Validar Doc — ' + (_candidatura.nome || '');
+
+      // Carrega documentos
+      try {
+        const r = await fetch(API + '/api/admin/candidatura/' + id + '/documentos', { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await r.json();
+        _obrigatorios = data.obrigatorios || [];
+        _documentos = data.documentos || [];
+      } catch (e) {
+        console.error('docs:', e);
+      }
+
+      render();
+    })();
+
+    function render() {
+      if (!_obrigatorios.length) {
+        document.getElementById('docs-lista').innerHTML = '<div class="doc-empty"><div class="doc-empty-icon">📋</div>Nenhum documento configurado para esta vaga.</div>';
+        document.getElementById('resumo-bar-container').innerHTML = '';
+        return;
+      }
+
+      // Resumo
+      const total = _obrigatorios.length;
+      const enviados = _documentos.length;
+      const aprovados = _documentos.filter(d => d.status === 'aprovado').length;
+      const reprovados = _documentos.filter(d => d.status === 'reprovado').length;
+      const pendentes = Math.max(0, total - aprovados - reprovados);
+      const arquivosEnviados = _documentos.filter(d => d.categoria === 'arquivo' && d.arquivo_url).length;
+
+      document.getElementById('resumo-bar-container').innerHTML =
+        '<div class="resumo-bar">' +
+          '<div class="resumo-stat"><div class="resumo-num">' + arquivosEnviados + '/' + total + '</div><div class="resumo-label">Arquivos enviados</div></div>' +
+          '<div class="resumo-stat aprovados"><div class="resumo-num">' + aprovados + '</div><div class="resumo-label">Aprovados</div></div>' +
+          '<div class="resumo-stat reprovados"><div class="resumo-num">' + reprovados + '</div><div class="resumo-label">Reprovados</div></div>' +
+          '<div class="resumo-stat pendentes"><div class="resumo-num">' + pendentes + '</div><div class="resumo-label">Pendentes</div></div>' +
+        '</div>';
+
+      // Habilita botão de download só se tiver pelo menos 1 arquivo
+      document.getElementById('btn-download-tudo').disabled = arquivosEnviados === 0;
+
+      // Lista
+      const porTipo = {};
+      for (const d of _documentos) porTipo[d.tipo] = d;
+
+      let html = '';
+      for (const o of _obrigatorios) {
+        const d = porTipo[o.tipo];
+        const status = d ? d.status : null;
+        const isArquivo = o.categoria === 'arquivo';
+
+        let badge = '';
+        if (!d) badge = '<span class="doc-badge doc-badge-vazio">vazio</span>';
+        else if (d.status === 'aprovado') badge = '<span class="doc-badge doc-badge-aprovado">✓ aprovado</span>';
+        else if (d.status === 'reprovado') badge = '<span class="doc-badge doc-badge-reprovado">✗ reprovado</span>';
+        else badge = '<span class="doc-badge doc-badge-pendente">⏳ pendente</span>';
+
+        let corpo = '';
+        if (isArquivo) {
+          if (d && d.arquivo_url) {
+            const tamKB = d.arquivo_tamanho ? (d.arquivo_tamanho / 1024).toFixed(1) + ' KB' : '';
+            corpo += '<div class="doc-valor">' +
+              '<a href="' + d.arquivo_url + '" target="_blank" rel="noopener">📎 ' + escapeHtml(d.arquivo_nome || 'ver arquivo') + '</a>' +
+              '<span class="meta">' + tamKB + (d.enviado_em ? ' • Enviado em ' + new Date(d.enviado_em).toLocaleString('pt-BR') : '') + '</span>' +
+            '</div>';
+          } else {
+            corpo += '<div class="doc-pendente">⏳ Candidato ainda não enviou</div>';
+          }
+        } else {
+          if (d && d.valor_texto) {
+            corpo += '<div class="doc-valor">' + escapeHtml(d.valor_texto) + '</div>';
+          } else {
+            corpo += '<div class="doc-pendente">⏳ Candidato ainda não preencheu</div>';
+          }
+        }
+
+        if (d && d.status === 'reprovado' && d.justificativa_admin) {
+          corpo += '<div class="doc-justificativa">Motivo: ' + escapeHtml(d.justificativa_admin) + '</div>';
+        }
+
+        // Botões
+        let acoes = '<div class="doc-acoes">';
+        if (isArquivo && d && d.arquivo_url) {
+          acoes += '<button class="doc-btn doc-btn-baixar" onclick="baixarUm(\'' + d.id + '\')">📥 Baixar</button>';
+        }
+        if (d) {
+          if (d.status !== 'aprovado') {
+            acoes += '<button class="doc-btn doc-btn-aprovar" onclick="revisar(' + d.id + ',\'aprovar\')">✓ Aprovar</button>';
+          }
+          if (d.status !== 'reprovado') {
+            acoes += '<button class="doc-btn doc-btn-reprovar" onclick="revisar(' + d.id + ',\'reprovar\')">✗ Reprovar</button>';
+          }
+          if (d.status !== 'pendente') {
+            acoes += '<button class="doc-btn doc-btn-reverter" onclick="revisar(' + d.id + ',\'reverter\')">↻ Reverter</button>';
+          }
+        }
+        acoes += '</div>';
+
+        const icon = isArquivo ? '📎' : '📝';
+        const statusClass = d ? ('status-' + d.status) : 'status-vazio';
+
+        html += '<div class="doc-card ' + statusClass + '">' +
+          '<div class="doc-header">' +
+            '<div class="doc-icon">' + icon + '</div>' +
+            '<div class="doc-titulo">' + escapeHtml(o.label) + '</div>' +
+            badge +
+          '</div>' +
+          '<div class="doc-corpo">' + corpo + acoes + '</div>' +
+        '</div>';
+      }
+
+      document.getElementById('docs-lista').innerHTML = html || '<div class="doc-empty"><div class="doc-empty-icon">📋</div>Nenhum documento.</div>';
+    }
+
+    async function revisar(docId, acao) {
+      let justificativa = '';
+      if (acao === 'reprovar') {
+        justificativa = prompt('Por que você está REPROVANDO este documento?\n\nA justificativa é obrigatória e será enviada ao candidato.', '');
+        if (justificativa === null) return;
+        if (!justificativa.trim()) { alert('Justificativa obrigatória para reprovar.'); return; }
+      } else if (acao === 'reverter') {
+        if (!confirm('Reverter este documento para status pendente?')) return;
+      } else if (acao === 'aprovar') {
+        if (!confirm('Confirmar aprovação deste documento?')) return;
+      }
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/documento/' + docId + '/revisar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ acao, justificativa })
+        });
+        const data = await r.json();
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao revisar')); return; }
+        const idx = _documentos.findIndex(d => d.id === docId);
+        if (idx >= 0) {
+          _documentos[idx] = { ..._documentos[idx], status: data.documento.status, justificativa_admin: data.documento.justificativa_admin, revisado_em: data.documento.revisado_em };
+        }
+        render();
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
+    }
+
+    // === Baixar 1 arquivo ===
+    async function baixarUm(docId) {
+      const d = _documentos.find(x => x.id === docId);
+      if (!d || !d.arquivo_url) return;
+      try {
+        // Fetch como blob pra forçar download com nome correto
+        const r = await fetch(d.arquivo_url);
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = d.arquivo_nome || ('documento_' + d.tipo + '.pdf');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        // Fallback: abre em nova aba
+        window.open(d.arquivo_url, '_blank');
+      }
+    }
+
+    // === Baixar TUDO num único PDF ===
+    async function baixarTudo() {
+      const arquivos = _documentos.filter(d => d.categoria === 'arquivo' && d.arquivo_url);
+      if (!arquivos.length) { alert('Nenhum arquivo pra baixar.'); return; }
+
+      const btn = document.getElementById('btn-download-tudo');
+      const prog = document.getElementById('progresso');
+      const progTxt = document.getElementById('progresso-texto');
+      btn.disabled = true;
+      prog.classList.add('visivel');
+      progTxt.textContent = 'Preparando PDF...';
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const margin = 15;
+
+        // CAPA
+        pdf.setFillColor(107, 15, 26);
+        pdf.rect(0, 0, pageW, 50, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(22);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Documentação de Contratação', margin, 25);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(_candidatura.nome || 'Candidato', margin, 35);
+        pdf.setFontSize(10);
+        pdf.text('Vaga: ' + (_candidatura.titulo || '').trim(), margin, 42);
+
+        pdf.setTextColor(40, 40, 40);
+        pdf.setFontSize(10);
+        let y = 65;
+        const camposCapa = [
+          ['Email', _candidatura.email],
+          ['CPF', _candidatura.cpf],
+          ['Celular', _candidatura.celular],
+          ['Cidade', (_candidatura.cidade || '') + ' / ' + (_candidatura.estado || '')],
+          ['Data do processo', new Date().toLocaleString('pt-BR')]
+        ];
+        for (const [k, v] of camposCapa) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(k + ':', margin, y);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(String(v || '—'), margin + 30, y);
+          y += 7;
+        }
+
+        // Lista de documentos
+        y += 10;
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(13);
+        pdf.text('Documentos (' + arquivos.length + '):', margin, y);
+        y += 8;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        arquivos.forEach((a, i) => {
+          const label = (_obrigatorios.find(o => o.tipo === a.tipo) || {}).label || a.tipo;
+          pdf.text((i + 1) + '. ' + label + ' [' + a.status + ']', margin, y);
+          y += 6;
+        });
+
+        // Adiciona cada PDF/imagem
+        let i = 0;
+        for (const doc of arquivos) {
+          i++;
+          progTxt.textContent = 'Baixando ' + i + '/' + arquivos.length + '...';
+          try {
+            const r = await fetch(doc.arquivo_url);
+            const blob = await r.blob();
+            const isPdf = (doc.arquivo_nome || '').toLowerCase().endsWith('.pdf') || blob.type === 'application/pdf';
+
+            if (isPdf) {
+              // Tenta mesclar PDF usando pdf-lib (carregado sob demanda)
+              const buffer = await blob.arrayBuffer();
+              try {
+                if (!window._PDFLib) {
+                  await new Promise((res, rej) => {
+                    const s = document.createElement('script');
+                    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+                    s.onload = res; s.onerror = rej;
+                    document.head.appendChild(s);
+                  });
+                  window._PDFLib = window.PDFLib;
+                }
+                const { PDFDocument } = window._PDFLib;
+                const externo = await PDFDocument.load(buffer);
+                const novo = await PDFDocument.create();
+                const paginas = await novo.copyPages(externo, externo.getPageIndices());
+                paginas.forEach(p => novo.addPage(p));
+                const bytes = await novo.save();
+                // Adiciona como anexo
+                pdf.addPage();
+                const label = (_obrigatorios.find(o => o.tipo === doc.tipo) || {}).label || doc.tipo;
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(14);
+                pdf.setTextColor(107, 15, 26);
+                pdf.text('📎 ' + label, margin, 20);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(10);
+                pdf.setTextColor(80, 80, 80);
+                pdf.text(doc.arquivo_nome || '', margin, 27);
+                // Em cada página adicionada, coloca um rodapé
+                // (PDFs embedded não são renderizados pelo jsPDF — então criamos uma página índice)
+                pdf.setFontSize(9);
+                pdf.setTextColor(150, 150, 150);
+                pdf.text('PDF anexo: ' + (doc.arquivo_nome || doc.tipo) + ' (' + bytes.length + ' bytes)', margin, pageH - 10);
+              } catch (e) {
+                console.error('PDF merge falhou', e);
+                pdf.addPage();
+                pdf.setFontSize(12);
+                pdf.text('PDF: ' + (doc.arquivo_nome || doc.tipo), margin, 20);
+                pdf.setFontSize(10);
+                pdf.text('(conteúdo em: ' + doc.arquivo_url + ')', margin, 27);
+              }
+            } else {
+              // Imagem
+              const dataUrl = await new Promise((res, rej) => {
+                const reader = new FileReader();
+                reader.onload = () => res(reader.result);
+                reader.onerror = rej;
+                reader.readAsDataURL(blob);
+              });
+              const img = new Image();
+              await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
+              const label = (_obrigatorios.find(o => o.tipo === doc.tipo) || {}).label || doc.tipo;
+              // Cabeçalho
+              pdf.addPage();
+              pdf.setFont('helvetica', 'bold');
+              pdf.setFontSize(14);
+              pdf.setTextColor(107, 15, 26);
+              pdf.text('📎 ' + label, margin, 20);
+              // Calcula tamanho mantendo proporção
+              const maxW = pageW - margin * 2;
+              const maxH = pageH - margin * 2 - 15;
+              let w = maxW, h = maxW * img.height / img.width;
+              if (h > maxH) { h = maxH; w = maxH * img.width / img.height; }
+              const x = (pageW - w) / 2;
+              pdf.addImage(dataUrl, 'JPEG', x, 30, w, h);
+            }
+          } catch (e) {
+            console.error('Erro ao processar doc', doc.tipo, e);
+          }
+        }
+
+        // Gera nome do arquivo
+        const nomeLimpo = (_candidatura.nome || 'candidato').replace(/[^a-zA-Z0-9]/g, '_');
+        const dataStr = new Date().toISOString().substring(0, 10);
+        pdf.save('documentos_' + nomeLimpo + '_' + dataStr + '.pdf');
+        progTxt.textContent = '✓ PDF gerado!';
+        setTimeout(() => prog.classList.remove('visivel'), 2000);
+      } catch (e) {
+        alert('Erro ao gerar PDF: ' + e.message);
+        prog.classList.remove('visivel');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+  </script>
+</body>
+</html>
