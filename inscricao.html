@@ -379,6 +379,7 @@ function renderizar(cand, v) {
 
     <div style="text-align:center;margin-top:24px">
       <a href="painel.html" class="btn-voltar-painel" style="display:inline-block;text-decoration:none;">← Voltar para Minhas Inscrições</a>
+      ${etapaAtual === 4 && cand.id ? `<a href="documentos.html?candidatura=${cand.id}" class="btn-voltar-painel" style="display:inline-block;text-decoration:none;margin-left:12px;background:var(--vinho);color:white;border-color:var(--vinho);">📎 Enviar documentos para contratação</a>` : ''}
     </div>
   `;
 
