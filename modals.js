@@ -136,6 +136,9 @@
           <label class="check-label"><input type="checkbox" id="w2-politica" required> Li e aceito a <a href="#" onclick="alert('Política de privacidade');return false;" style="color:var(--vinho);font-weight:600;">Política de privacidade</a></label>
         </div>
         <div class="form-group">
+          <label class="check-label"><input type="checkbox" id="w2-comunicacoes"> Desejo receber comunicações sobre novas vagas e atualizações.</label>
+        </div>
+        <div class="form-group">
           <label class="check-label"><input type="checkbox" id="w2-banco"> Autorizo manter meu perfil no Banco de Talentos por 24 meses para futuras oportunidades.</label>
         </div>
         <div class="form-group">
