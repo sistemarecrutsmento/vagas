@@ -145,8 +145,12 @@
           if (_obrigatoriosDocs.length) {
             docsCard = '<div class="card" id="card-documentos">' +
               '<h2>📄 Documentos de Contratação</h2>' +
-              '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Aprovar ou reprovar cada documento enviado pelo candidato. Em caso de reprovação, a justificativa é obrigatória.</p>' +
+              '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Use <strong>"Retornar para candidato"</strong> em cada item para pedir reenvio com uma mensagem personalizada. Quando <strong>todos</strong> estiverem aprovados, clique no botão abaixo para aprovar tudo e avançar a etapa de uma vez.</p>' +
               '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
+              '<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--cinza)">' +
+                '<button id="btn-aprovar-tudo" class="btn" style="background:#16A34A;color:white;font-size:15px;padding:14px 20px;width:100%" onclick="aprovarTodosEAvancar()">✅ Aprovar tudo e avançar etapa</button>' +
+                '<p style="font-size:12px;color:var(--cinza-medio);margin-top:8px;text-align:center">Só fica disponível quando todos os documentos estiverem aprovados.</p>' +
+              '</div>' +
             '</div>';
           }
         } catch (e) {
@@ -447,29 +451,25 @@
             valorHtml = '<div class="doc-pendente">⏳ Candidato ainda não preencheu</div>';
           }
         }
-        // Justificativa (se reprovado)
-        if (d && d.status === 'reprovado' && d.justificativa_admin) {
-          valorHtml += '<div class="doc-justificativa">Motivo: ' + escapeHtml(d.justificativa_admin) + '</div>';
+        // Justificativa (se reprovado ou retornado)
+        if (d && (d.status === 'reprovado' || d.status === 'retornado') && d.justificativa_admin) {
+          valorHtml += '<div class="doc-justificativa">Mensagem ao candidato: ' + escapeHtml(d.justificativa_admin) + '</div>';
         }
         // Status badge
         let badge = '';
         if (!d) badge = '<span class="doc-badge doc-badge-vazio">vazio</span>';
         else if (d.status === 'aprovado') badge = '<span class="doc-badge doc-badge-aprovado">✓ aprovado</span>';
+        else if (d.status === 'retornado') badge = '<span class="doc-badge doc-badge-retornado">📨 a reenviar</span>';
         else if (d.status === 'reprovado') badge = '<span class="doc-badge doc-badge-reprovado">✗ reprovado</span>';
         else badge = '<span class="doc-badge doc-badge-pendente">⏳ pendente</span>';
 
-        // Botões de ação (só mostra se candidato JÁ enviou)
+        // Botões de ação individuais — apenas "Retornar ao candidato" (sem aprovar/reprovar individual)
         let acoesHtml = '';
-        if (d) {
+        if (d && d.status !== 'aprovado') {
           acoesHtml = '<div class="doc-acoes">';
-          if (d.status !== 'aprovado') {
-            acoesHtml += '<button class="doc-btn doc-btn-aprovar" onclick="revisarDocumento(' + d.id + ',\'aprovar\')">✓ Aprovar</button>';
-          }
-          if (d.status !== 'reprovado') {
-            acoesHtml += '<button class="doc-btn doc-btn-reprovar" onclick="revisarDocumento(' + d.id + ',\'reprovar\')">✗ Reprovar</button>';
-          }
+          acoesHtml += '<button class="doc-btn doc-btn-retornar" onclick="retornarDocumento(' + d.id + ')">📨 Retornar para candidato</button>';
           if (d.status !== 'pendente') {
-            acoesHtml += '<button class="doc-btn doc-btn-reverter" onclick="revisarDocumento(' + d.id + ',\'reverter\')">↻ Reverter</button>';
+            acoesHtml += '<button class="doc-btn doc-btn-reverter" onclick="revisarDocumento(' + d.id + ',\'reverter\')">↻ Reverter para pendente</button>';
           }
           acoesHtml += '</div>';
         }
@@ -489,47 +489,78 @@
       const total = _obrigatoriosDocs.length;
       const enviados = _docsCache.length;
       const aprovados = _docsCache.filter(d => d.status === 'aprovado').length;
+      const retornados = _docsCache.filter(d => d.status === 'retornado').length;
       const reprovados = _docsCache.filter(d => d.status === 'reprovado').length;
-      const pendentes = Math.max(0, total - aprovados - reprovados);
-      window._docsStatsCache = { total, enviados, aprovados, reprovados, pendentes };
-      const resumo = '<div style="margin-top:14px;padding:10px 14px;background:#F9F6F0;border-radius:8px;font-size:13px;color:var(--cinza-escuro)">' +
-        '<strong>Resumo:</strong> ' + enviados + '/' + total + ' enviados • ' +
-        '<span style="color:#16A34A">' + aprovados + ' aprovados</span> • ' +
-        '<span style="color:#DC2626">' + reprovados + ' reprovados</span> • ' +
-        pendentes + ' pendentes' +
+      const pendentes = Math.max(0, total - aprovados - retornados - reprovados);
+      window._docsStatsCache = { total, enviados, aprovados, retornados, reprovados, pendentes };
+      const resumo = '<div class="doc-resumo">' +
+        '<div><strong>Resumo:</strong> ' + enviados + '/' + total + ' enviados</div>' +
+        '<div><span style="color:#16A34A">●</span> ' + aprovados + ' aprovados</div>' +
+        '<div><span style="color:#92400E">●</span> ' + retornados + ' a reenviar</div>' +
+        '<div><span style="color:#DC2626">●</span> ' + reprovados + ' reprovados</div>' +
+        '<div><span style="color:#999">●</span> ' + pendentes + ' pendentes</div>' +
         '</div>';
+
+      // Atualiza estado do botão global (será chamado depois do DOM estar montado)
+      setTimeout(() => atualizarBotaoAprovarTudo(), 0);
 
       return html + resumo;
     }
 
-    async function revisarDocumento(docId, acao) {
-      // Monta prompt de justificativa
-      let justificativa = '';
-      if (acao === 'reprovar') {
-        justificativa = prompt('Por que você está REPROVANDO este documento?\n\nA justificativa é obrigatória e será enviada ao candidato.', '');
-        if (justificativa === null) return; // cancelou
-        if (!justificativa.trim()) {
-          alert('Justificativa obrigatória para reprovar.');
-          return;
-        }
-      } else if (acao === 'reverter') {
-        if (!confirm('Reverter este documento para status pendente?')) return;
-      } else if (acao === 'aprovar') {
-        if (!confirm('Confirmar aprovação deste documento?')) return;
+    function atualizarBotaoAprovarTudo() {
+      const btn = document.getElementById('btn-aprovar-tudo');
+      if (!btn) return;
+      const stats = window._docsStatsCache || {};
+      const tudoAprovado = stats.total > 0
+        && stats.enviados === stats.total
+        && stats.aprovados === stats.total
+        && stats.retornados === 0
+        && stats.reprovados === 0
+        && stats.pendentes === 0;
+      if (tudoAprovado) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.textContent = '✅ Aprovar tudo e avançar etapa';
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        const falta = (stats.pendentes || 0) + (stats.retornados || 0) + (stats.reprovados || 0);
+        const faltaTexto = stats.enviados < stats.total
+          ? `Faltam ${stats.total - stats.enviados} documento(s) a enviar`
+          : `${falta} pendente(s) de aprovação`;
+        btn.textContent = '🔒 ' + faltaTexto;
+      }
+    }
+
+    async function retornarDocumento(docId) {
+      const doc = _docsCache.find(d => d.id === docId);
+      const label = doc ? (doc.tipo || '') : 'este documento';
+      const msg = prompt(
+        'Retornar "' + label + '" para o candidato?\n\n' +
+        'Escreva uma mensagem personalizada explicando o que precisa ser corrigido. ' +
+        'O candidato será notificado e poderá reenviar o documento.',
+        ''
+      );
+      if (msg === null) return; // cancelou
+      if (!msg.trim()) {
+        alert('A mensagem é obrigatória para retornar o documento.');
+        return;
       }
       try {
         const token = localStorage.getItem('admin_token');
         const r = await fetch(API + '/api/admin/documento/' + docId + '/revisar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ acao, justificativa })
+          body: JSON.stringify({ acao: 'retornar', justificativa: msg.trim() })
         });
         const data = await r.json();
-        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao revisar')); return; }
-        // Atualiza cache local e re-renderiza
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao retornar')); return; }
+        // Atualiza cache local
         const idx = _docsCache.findIndex(d => d.id === docId);
         if (idx >= 0) {
-          _docsCache[idx] = { ..._docsCache[idx], status: data.documento.status, justificativa_admin: data.documento.justificativa_admin, revisado_em: data.documento.revisado_em };
+          _docsCache[idx] = { ..._docsCache[idx], status: data.documento?.status || 'retornado', justificativa_admin: msg.trim(), revisado_em: new Date().toISOString() };
         }
         // Re-renderiza a seção
         const card = document.getElementById('card-documentos');
@@ -537,8 +568,121 @@
           const novaHtml = renderizarDocumentos();
           card.querySelector('.doc-lista-wrapper').innerHTML = novaHtml;
         }
+        alert('Documento retornado. O candidato será notificado e poderá reenviar.');
       } catch (e) {
         alert('Erro: ' + e.message);
+      }
+    }
+
+    async function revisarDocumento(docId, acao) {
+      // Apenas "reverter" (voltar pra pendente) — aprovar/reprovar agora são via ação global
+      if (acao === 'reverter') {
+        if (!confirm('Reverter este documento para status pendente?')) return;
+      } else {
+        return;
+      }
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/documento/' + docId + '/revisar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ acao })
+        });
+        const data = await r.json();
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao revisar')); return; }
+        const idx = _docsCache.findIndex(d => d.id === docId);
+        if (idx >= 0) {
+          _docsCache[idx] = { ..._docsCache[idx], status: 'pendente', justificativa_admin: null, revisado_em: new Date().toISOString() };
+        }
+        const card = document.getElementById('card-documentos');
+        if (card) {
+          card.querySelector('.doc-lista-wrapper').innerHTML = renderizarDocumentos();
+        }
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
+    }
+
+    // === AÇÃO GLOBAL: aprovar tudo e avançar etapa ===
+    async function aprovarTodosEAvancar() {
+      const stats = window._docsStatsCache || {};
+      if (!stats.total) return alert('Nenhum documento configurado para esta vaga.');
+      if (stats.enviados < stats.total) {
+        return alert('O candidato ainda não enviou todos os documentos. Faltam ' + (stats.total - stats.enviados) + '.');
+      }
+      if (stats.retornados > 0) {
+        return alert('Há ' + stats.retornados + ' documento(s) marcado(s) como "a reenviar". Aguarde o candidato reenviar antes de aprovar.');
+      }
+      if (stats.pendentes > 0) {
+        return alert('Ainda há ' + stats.pendentes + ' documento(s) pendente(s) de revisão.');
+      }
+      if (stats.reprovados > 0) {
+        return alert('Há ' + stats.reprovados + ' documento(s) reprovado(s) que o candidato precisa reenviar antes da aprovação final.');
+      }
+      if (stats.aprovados < stats.total) {
+        return alert('Apenas ' + stats.aprovados + '/' + stats.total + ' documentos aprovados.');
+      }
+      if (!confirm('Aprovar TODOS os documentos e avançar para a próxima etapa?\n\n' +
+                   'Esta ação não pode ser desfeita. O candidato será notificado de que avançou no processo.')) {
+        return;
+      }
+      const token = localStorage.getItem('admin_token');
+      const id = new URLSearchParams(location.search).get('id');
+      const btn = document.getElementById('btn-aprovar-tudo');
+      if (btn) { btn.disabled = true; btn.textContent = 'Aprovando...'; }
+      try {
+        const r = await fetch(API + '/api/admin/candidatura/' + id + '/aprovar-documentos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({})
+        });
+        const data = await r.json();
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao aprovar')); if (btn) { btn.disabled = false; btn.textContent = '✅ Aprovar tudo e avançar etapa'; } return; }
+        const msg = data.contratados
+          ? '🎉 Documentos aprovados! Candidato CONTRATADO com sucesso.'
+          : '✅ Documentos aprovados! Candidato avançou para a etapa ' + data.novaEtapa + '/' + data.totalEtapas + '.';
+        alert(msg);
+        // Recarrega a página pra mostrar a timeline atualizada
+        location.reload();
+      } catch (e) {
+        alert('Erro: ' + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = '✅ Aprovar tudo e avançar etapa'; }
+      }
+    }
+
+    // === AÇÃO GLOBAL: Aprovar TUDO e avançar etapa ===
+    async function aprovarTodosEAvancar() {
+      const stats = window._docsStatsCache || {};
+      if (stats.retornados > 0) {
+        return alert('Há ' + stats.retornados + ' documento(s) marcado(s) como "a reenviar". Aguarde o candidato reenviar antes de aprovar.');
+      }
+      if (stats.reprovados > 0) {
+        return alert('Há ' + stats.reprovados + ' documento(s) reprovado(s). Reverter para pendente antes de aprovar.');
+      }
+      if (stats.aprovados < stats.total) {
+        return alert('Apenas ' + stats.aprovados + '/' + stats.total + ' documentos aprovados.');
+      }
+      if (!confirm('Confirmar a aprovação de TODOS os ' + stats.total + ' documentos e avançar a etapa do candidato?')) return;
+
+      const btn = document.getElementById('btn-aprovar-tudo');
+      const id = new URLSearchParams(location.search).get('id');
+      if (btn) { btn.disabled = true; btn.textContent = 'Aprovando...'; }
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/candidatura/' + id + '/aprovar-documentos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+        });
+        const data = await r.json();
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao aprovar')); if (btn) { btn.disabled = false; btn.textContent = '✅ Aprovar tudo e avançar etapa'; } return; }
+        const msg = data.contratados
+          ? '🎉 Documentos aprovados! Candidato CONTRATADO com sucesso.'
+          : '✅ Documentos aprovados! Candidato avançou para a etapa ' + data.novaEtapa + '/' + data.totalEtapas + '.';
+        alert(msg);
+        location.reload();
+      } catch (e) {
+        alert('Erro: ' + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = '✅ Aprovar tudo e avançar etapa'; }
       }
     }
 
