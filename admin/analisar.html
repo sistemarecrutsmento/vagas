@@ -335,11 +335,14 @@
                               h.status === 'contratado' ? 'contratado' :
                               (h.status || '');
           // Nome da etapa (se existir)
-          const etapaNome = (h.etapa != null && etapas[h.etapa - 1]) ? etapas[h.etapa - 1] : null;
-          return '<div class="hist-item" id="etapa-' + (h.etapa != null ? h.etapa : '0') + '">' +
+          // No banco, h.etapa é 0-indexed (etapa 0 = Inscrição, etapa 1 = Triagem, etc).
+          // Exibimos 1-indexed pra ficar igual à timeline.
+          const etapaNum = (h.etapa != null) ? h.etapa + 1 : null;
+          const etapaNome = (etapaNum != null && etapas[etapaNum - 1]) ? etapas[etapaNum - 1] : null;
+          return '<div class="hist-item" id="etapa-' + (etapaNum != null ? etapaNum : '0') + '">' +
             '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
               '<strong>' + acaoLabel + '</strong>' +
-              (h.etapa != null ? ' <span class="badge-etapa">Etapa ' + h.etapa + (etapaNome ? ' — ' + etapaNome : '') + '</span>' : '') +
+              (etapaNum != null ? ' <span class="badge-etapa">Etapa ' + etapaNum + (etapaNome ? ' — ' + etapaNome : '') + '</span>' : '') +
               (statusLabel ? ' <span style="font-size:11px;padding:2px 8px;background:#EEE;border-radius:999px;color:#555">[' + statusLabel + ']</span>' : '') +
             '</div>' +
             (h.mensagem ? '<div style="margin-top:4px;font-size:13px;color:#444">"' + escapeHtml(h.mensagem) + '"</div>' : '') +
