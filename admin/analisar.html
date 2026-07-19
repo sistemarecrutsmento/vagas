@@ -562,7 +562,38 @@
     // Salva a observação interna de uma etapa (sem mudar status/etapa da candidatura)
     async function salvarComentarioEtapa(candidaturaId, etapaNum) {
       // Pega o textarea certo: o botão que chamou a função está dentro de um card com data-etapa
-...
+      let comentario = '';
+      const btns = document.querySelectorAll('button[onclick*="salvarComentarioEtapa"]');
+      let btnClicou = null;
+      for (const b of btns) {
+        if (b.onclick && b.onclick.toString().includes(`salvarComentarioEtapa(${candidaturaId},${etapaNum})`)) {
+          btnClicou = b;
+          break;
+        }
+      }
+      if (btnClicou) {
+        const card = btnClicou.closest('.card');
+        const ta = card ? card.querySelector('textarea') : null;
+        if (ta) comentario = ta.value || '';
+      }
+      comentario = (comentario || '').trim();
+      if (!comentario) {
+        alert('Digite um comentário antes de salvar.');
+        return;
+      }
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/candidatura/' + candidaturaId + '/comentario', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ etapa: etapaNum, comentario: comentario })
+        });
+        const data = await r.json();
+        if (r.ok) {
+          alert('✅ Comentário salvo.');
+        } else {
+          alert('Erro: ' + (data.erro || 'Não foi possível salvar'));
+        }
       } catch (e) {
         alert('Erro: ' + e.message);
       }
