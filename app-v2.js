@@ -697,12 +697,8 @@ function garantirBotaoMenu() {
     return;
   }
   if (existe) return;
-  // Insere no final do header-actions (em vez de absolute no header) pra
-  // não ficar atrás dos botões "Completar cadastro" / "Entrar" / etc.
-  const actionsEl = document.getElementById('header-actions')
-    || document.querySelector('.header-actions')
-    || document.querySelector('header');
-  if (!actionsEl) return;
+  const headerEl = document.querySelector('header');
+  if (!headerEl) return;
   const btn = document.createElement('button');
   btn.id = 'btn-menu-logo';
   btn.className = 'btn-menu-logo';
@@ -710,7 +706,8 @@ function garantirBotaoMenu() {
   btn.setAttribute('aria-label', 'Abrir menu');
   btn.innerHTML = '☰';
   btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); window.abrirDrawer && window.abrirDrawer(e); });
-  actionsEl.appendChild(btn);
+  // Volta pro <header> como primeiro filho (absolute na direita)
+  headerEl.insertBefore(btn, headerEl.firstChild);
 }
 
 async function abrirPainelCandidato() {
