@@ -440,6 +440,22 @@
           return linhas;
         };
 
+        // Sanitiza texto removendo emojis e chars fora do WinAnsi (que pdf-lib/Helvetica não aceita)
+        const safe = (s) => {
+          if (s == null) return '';
+          let t = String(s);
+          // Substitui emojis comuns por texto
+          t = t.replace(/[\u{1F300}-\u{1FAFF}]/gu, '');     // símbolos/emoji principais
+          t = t.replace(/[\u{2600}-\u{27BF}]/gu, '');       // símbolos diversos, dingbats
+          t = t.replace(/[\u{2300}-\u{23FF}]/gu, '');       // misc técnico (incl. ⏳ U+23F3)
+          t = t.replace(/[\u{1F000}-\u{1F2FF}]/gu, '');     // mahjong/domino
+          // troca ✓/✗ por palavras
+          t = t.replace(/✓/g, 'OK').replace(/✗/g, 'X');
+          // colapsa espaços duplos
+          t = t.replace(/\s+/g, ' ').trim();
+          return t;
+        };
+
         // === CAPA ===
         const capa = out.addPage([A4.w, A4.h]);
         // Faixa vinho no topo
@@ -458,21 +474,21 @@
           ['Data do processo', new Date().toLocaleString('pt-BR')]
         ];
         for (const [k, v] of campos) {
-          capa.drawText(k + ':', { x: margin, y, size: 10, font: fontBold, color: Texto });
-          capa.drawText(String(v || '—'), { x: margin + 90, y, size: 10, font: fontNorm, color: Texto });
+          capa.drawText(safe(k) + ':', { x: margin, y, size: 10, font: fontBold, color: Texto });
+          capa.drawText(safe(String(v || '—')), { x: margin + 90, y, size: 10, font: fontNorm, color: Texto });
           y -= 16;
         }
 
         // Lista de documentos
         y -= 20;
-        capa.drawText('Documentos (' + arquivos.length + '):', { x: margin, y, size: 13, font: fontBold, color: Vinho });
+        capa.drawText(safe('Documentos (' + arquivos.length + '):'), { x: margin, y, size: 13, font: fontBold, color: Vinho });
         y -= 18;
         arquivos.forEach((a, i) => {
           const label = (_obrigatorios.find(o => o.tipo === a.tipo) || {}).label || a.tipo;
-          const statusTxt = a.status === 'aprovado' ? '✓ aprovado' : a.status === 'reprovado' ? '✗ reprovado' : '⏳ pendente';
+          const statusTxt = a.status === 'aprovado' ? 'OK aprovado' : a.status === 'reprovado' ? 'X reprovado' : 'pendente';
           const statusCor = a.status === 'aprovado' ? Verde : a.status === 'reprovado' ? Vermelho : Cinza;
-          capa.drawText((i + 1) + '. ' + label, { x: margin, y, size: 10, font: fontNorm, color: Texto });
-          capa.drawText(statusTxt, { x: margin + 200, y, size: 10, font: fontBold, color: statusCor });
+          capa.drawText(safe((i + 1) + '. ' + label), { x: margin, y, size: 10, font: fontNorm, color: Texto });
+          capa.drawText(safe(statusTxt), { x: margin + 200, y, size: 10, font: fontBold, color: statusCor });
           y -= 14;
         });
 
@@ -519,8 +535,8 @@
               // Cabeçalho vinho
               pagina.drawRectangle({ x: 0, y: A4.h - 50, width: A4.w, height: 50, color: Vinho });
               const label = (_obrigatorios.find(o => o.tipo === doc.tipo) || {}).label || doc.tipo;
-              pagina.drawText('📎 ' + label, { x: margin, y: A4.h - 30, size: 13, font: fontBold, color: rgb(1,1,1) });
-              pagina.drawText((doc.arquivo_nome || '').slice(0, 60), { x: margin, y: A4.h - 45, size: 8, font: fontItalic, color: rgb(0.9,0.9,0.9) });
+              pagina.drawText(safe('Anexo: ' + label), { x: margin, y: A4.h - 30, size: 13, font: fontBold, color: rgb(1,1,1) });
+              pagina.drawText(safe((doc.arquivo_nome || '').slice(0, 60)), { x: margin, y: A4.h - 45, size: 8, font: fontItalic, color: rgb(0.9,0.9,0.9) });
 
               // Imagem dimensionada
               const maxW = A4.w - margin * 2;
@@ -536,10 +552,10 @@
             // Página de erro pra esse doc
             const errPage = out.addPage([A4.w, A4.h]);
             const label = (_obrigatorios.find(o => o.tipo === doc.tipo) || {}).label || doc.tipo;
-            errPage.drawText('⚠ Não foi possível incorporar:', { x: margin, y: A4.h - 60, size: 12, font: fontBold, color: Vermelho });
-            errPage.drawText(label + ' (' + (doc.arquivo_nome || doc.tipo) + ')', { x: margin, y: A4.h - 80, size: 10, font: fontNorm, color: Texto });
+            errPage.drawText(safe('Atenção: Não foi possível incorporar:'), { x: margin, y: A4.h - 60, size: 12, font: fontBold, color: Vermelho });
+            errPage.drawText(safe(label + ' (' + (doc.arquivo_nome || doc.tipo) + ')'), { x: margin, y: A4.h - 80, size: 10, font: fontNorm, color: Texto });
             errPage.drawText('Link original:', { x: margin, y: A4.h - 110, size: 9, font: fontBold, color: Cinza });
-            const linhas = txt(doc.arquivo_url, A4.w - margin * 2, fontNorm, 8);
+            const linhas = txt(safe(doc.arquivo_url), A4.w - margin * 2, fontNorm, 8);
             linhas.forEach((linha, idx) => {
               errPage.drawText(linha, { x: margin, y: A4.h - 125 - idx * 10, size: 8, font: fontNorm, color: Cinza });
             });
@@ -553,11 +569,11 @@
         let yy = A4.h - 90;
         arquivos.forEach((a, i) => {
           const label = (_obrigatorios.find(o => o.tipo === a.tipo) || {}).label || a.tipo;
-          const statusTxt = a.status === 'aprovado' ? '✓ aprovado' : a.status === 'reprovado' ? '✗ reprovado' : '⏳ pendente';
+          const statusTxt = a.status === 'aprovado' ? 'OK aprovado' : a.status === 'reprovado' ? 'X reprovado' : 'pendente';
           const statusCor = a.status === 'aprovado' ? Verde : a.status === 'reprovado' ? Vermelho : Cinza;
           sumario.drawText((i + 1) + '.', { x: margin, y: yy, size: 10, font: fontNorm, color: Texto });
-          sumario.drawText(label, { x: margin + 30, y: yy, size: 10, font: fontNorm, color: Texto });
-          sumario.drawText(statusTxt, { x: margin + 350, y: yy, size: 10, font: fontBold, color: statusCor });
+          sumario.drawText(safe(label), { x: margin + 30, y: yy, size: 10, font: fontNorm, color: Texto });
+          sumario.drawText(safe(statusTxt), { x: margin + 350, y: yy, size: 10, font: fontBold, color: statusCor });
           yy -= 14;
         });
 
