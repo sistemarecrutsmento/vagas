@@ -340,12 +340,29 @@
                             h.acao === 'aprovar' ? '✅ Aprovado' :
                             h.acao === 'inscricao' ? '📝 Inscrição realizada' :
                             (h.status || 'Movimentação');
-          const statusLabel = h.status === 'em_analise' ? 'em análise' :
-                              h.status === 'em_andamento' ? 'em andamento' :
-                              h.status === 'rejeitado' ? 'reprovado' :
-                              h.status === 'reprovado' ? 'reprovado' :
-                              h.status === 'contratado' ? 'contratado' :
-                              (h.status || '');
+          // Status visual do item: derivado da POSIÇÃO da etapa na esteira, não de h.status
+          // (porque h.status é o status DA CANDIDATURA no momento, igual em todos os itens)
+          let statusLabel = '';
+          if (etapaNum != null) {
+            if (h.acao === 'reprovar' || h.status === 'rejeitado' || h.status === 'reprovado') {
+              statusLabel = 'reprovado';
+            } else if (h.acao === 'reabrir') {
+              statusLabel = 'reaberto';
+            } else if (etapaNum < etapaAtual) {
+              statusLabel = 'concluída';
+            } else if (etapaNum === etapaAtual) {
+              statusLabel = 'em andamento';
+            } else {
+              statusLabel = '—';
+            }
+          } else if (h.status) {
+            statusLabel = h.status === 'em_andamento' ? 'em andamento' :
+                          h.status === 'em_analise' ? 'em análise' :
+                          h.status === 'contratado' ? 'contratado' :
+                          h.status === 'rejeitado' ? 'reprovado' :
+                          h.status === 'reprovado' ? 'reprovado' :
+                          h.status;
+          }
           // Nome da etapa (se existir)
           // No banco, h.etapa é 0-indexed (etapa 0 = Inscrição, etapa 1 = Triagem, etc).
           // Exibimos 1-indexed pra ficar igual à timeline.
