@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vagas.io — Demo: Painel Administrativo</title>
+<style>
+  :root { --vinho:#722F37; --vinho-escuro:#4A1F25; --dourado:#D4AF37; --cinza:#F5F5F5; --texto:#1A1A1A; --cinza-medio:#666; --verde:#16A34A; --vermelho:#DC2626; --laranja:#F59E0B; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: #FAFAFA; color: var(--texto); line-height: 1.5; }
+
+  .demo-banner {
+    background: linear-gradient(90deg, #FEF3C7, #FDE68A);
+    color: #92400E;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 2px solid #F59E0B;
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  /* Layout com sidebar */
+  .app { display: flex; min-height: 100vh; }
+  aside.sidebar { width: 240px; background: white; border-right: 1px solid #EEE; padding: 20px 0; position: sticky; top: 38px; height: calc(100vh - 38px); }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 800; color: var(--vinho); padding: 0 20px 20px; border-bottom: 1px solid #EEE; margin-bottom: 16px; }
+  .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro)); color: var(--dourado); display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 16px; }
+  .nav-link { display: flex; align-items: center; gap: 12px; padding: 10px 20px; color: var(--texto); text-decoration: none; font-size: 14px; cursor: pointer; transition: all .15s; }
+  .nav-link:hover { background: var(--cinza); }
+  .nav-link.active { background: linear-gradient(90deg, #FCE7E7, transparent); color: var(--vinho); font-weight: 600; border-right: 3px solid var(--vinho); }
+
+  main { flex: 1; padding: 24px 32px; max-width: 1400px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .topbar h1 { font-size: 24px; }
+  .topbar .user { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro)); color: var(--dourado); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+  /* KPIs */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,.04); border-left: 4px solid; position: relative; overflow: hidden; }
+  .kpi-card.vinho { border-color: var(--vinho); }
+  .kpi-card.verde { border-color: var(--verde); }
+  .kpi-card.laranja { border-color: var(--laranja); }
+  .kpi-card.dourado { border-color: var(--dourado); }
+  .kpi-icon { position: absolute; right: 16px; top: 16px; font-size: 24px; opacity: .3; }
+  .kpi-label { font-size: 12px; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+  .kpi-valor { font-size: 32px; font-weight: 800; margin: 4px 0; }
+  .kpi-delta { font-size: 12px; color: var(--verde); font-weight: 600; }
+  .kpi-delta.neutro { color: var(--cinza-medio); }
+
+  /* Layout 2 colunas */
+  .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+  .card h2 { font-size: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+  /* Funil */
+  .funil { display: flex; flex-direction: column; gap: 8px; }
+  .funil-etapa { display: flex; align-items: center; gap: 12px; }
+  .funil-label { width: 120px; font-size: 13px; font-weight: 500; }
+  .funil-barra { flex: 1; height: 28px; background: #F5F5F5; border-radius: 6px; overflow: hidden; position: relative; }
+  .funil-preenchimento { height: 100%; background: linear-gradient(90deg, var(--vinho), var(--vinho-escuro)); border-radius: 6px; display: flex; align-items: center; padding: 0 10px; color: white; font-size: 12px; font-weight: 600; }
+
+  /* Próximas entrevistas */
+  .entrevista-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F0F0F0; }
+  .entrevista-item:last-child { border-bottom: none; }
+  .entrevista-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro)); color: var(--dourado); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .entrevista-info { flex: 1; }
+  .entrevista-nome { font-size: 14px; font-weight: 600; }
+  .entrevista-meta { font-size: 12px; color: var(--cinza-medio); margin-top: 2px; }
+  .badge { padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge-rh { background: #DBEAFE; color: #1E40AF; }
+  .badge-gestor { background: #FEF3C7; color: #92400E; }
+
+  /* Atividades */
+  .atividade { display: flex; gap: 10px; padding: 8px 0; font-size: 13px; }
+  .atividade-icone { width: 24px; height: 24px; border-radius: 50%; background: var(--cinza); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .atividade-texto { flex: 1; color: #444; }
+  .atividade-quando { color: var(--cinza-medio); font-size: 11px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid #EEE; margin-bottom: 20px; }
+  .tab { padding: 10px 16px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--cinza-medio); border-bottom: 2px solid transparent; }
+  .tab.active { color: var(--vinho); border-color: var(--vinho); font-weight: 600; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Tabela */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px; font-size: 12px; color: var(--cinza-medio); text-transform: uppercase; border-bottom: 1px solid #EEE; }
+  td { padding: 12px 10px; font-size: 14px; border-bottom: 1px solid #F0F0F0; }
+  .status { padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .status.andamento { background: #DBEAFE; color: #1E40AF; }
+  .status.aprovado { background: #D1FAE5; color: #065F46; }
+  .status.rejeitado { background: #FEE2E2; color: #991B1B; }
+
+  .btn { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+  .btn-vinho { background: var(--vinho); color: white; }
+  .btn-vinho:hover { background: var(--vinho-escuro); }
+  .btn-ghost { background: transparent; color: var(--vinho); border: 1px solid var(--vinho); }
+
+  /* Candidato destaque */
+  .destaque { background: linear-gradient(135deg, #FEF3C7, #FDE68A); padding: 16px; border-radius: 8px; border-left: 4px solid var(--dourado); margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<div class="demo-banner">
+  🧪 <strong>DEMO INTERATIVA — Visão do Gestor</strong> — Dados fictícios. Veja também <code>demo-candidato.html</code>.
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">V</div>
+      <span>Vagas.io</span>
+    </div>
+    <a class="nav-link active">📊 Dashboard</a>
+    <a class="nav-link">💼 Vagas</a>
+    <a class="nav-link">👥 Candidatos</a>
+    <a class="nav-link">📅 Agenda</a>
+    <a class="nav-link">📄 Documentos</a>
+    <a class="nav-link">📈 Relatórios</a>
+    <a class="nav-link">⚙️ Configurações</a>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <h1>Dashboard</h1>
+        <p style="font-size: 13px; color: var(--cinza-medio);">Visão geral dos seus processos seletivos</p>
+      </div>
+      <div class="user">
+        <div style="text-align: right;">
+          <div style="font-size: 13px; font-weight: 600;">Fabio Junior</div>
+          <div style="font-size: 11px; color: var(--cinza-medio);">Administrador</div>
+        </div>
+        <div class="avatar">F</div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card vinho">
+        <div class="kpi-icon">💼</div>
+        <div class="kpi-label">Vagas Abertas</div>
+        <div class="kpi-valor">6</div>
+        <div class="kpi-delta">↑ 2 novas esta semana</div>
+      </div>
+      <div class="kpi-card verde">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-label">Candidatos Totais</div>
+        <div class="kpi-valor">128</div>
+        <div class="kpi-delta">↑ 18% vs. mês passado</div>
+      </div>
+      <div class="kpi-card laranja">
+        <div class="kpi-icon">📅</div>
+        <div class="kpi-label">Entrevistas Agendadas</div>
+        <div class="kpi-valor">4</div>
+        <div class="kpi-delta">Próximos 7 dias</div>
+      </div>
+      <div class="kpi-card dourado">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-label">Contratações (mês)</div>
+        <div class="kpi-valor">3</div>
+        <div class="kpi-delta neutro">Meta: 5</div>
+      </div>
+    </div>
+
+    <!-- Funil + Entrevistas -->
+    <div class="grid-2">
+      <div class="card">
+        <h2>📊 Funil de Conversão</h2>
+        <div class="funil">
+          <div class="funil-etapa">
+            <div class="funil-label">Inscrições</div>
+            <div class="funil-barra"><div class="funil-preenchimento" style="width: 100%;">128</div></div>
+          </div>
+          <div class="funil-etapa">
+            <div class="funil-label">Triagem</div>
+            <div class="funil-barra"><div class="funil-preenchimento" style="width: 65%;">83</div></div>
+          </div>
+          <div class="funil-etapa">
+            <div class="funil-label">Entrevista RH</div>
+            <div class="funil-barra"><div class="funil-preenchimento" style="width: 40%;">52</div></div>
+          </div>
+          <div class="funil-etapa">
+            <div class="funil-label">Entrevista Gestor</div>
+            <div class="funil-barra"><div class="funil-preenchimento" style="width: 25%;">31</div></div>
+          </div>
+          <div class="funil-etapa">
+            <div class="funil-label">Proposta</div>
+            <div class="funil-barra"><div class="funil-preenchimento" style="width: 12%;">14</div></div>
+          </div>
+          <div class="funil-etapa">
+            <div class="funil-label">Contratação</div>
+            <div class="funil-barra"><div class="funil-preenchimento" style="width: 6%;">7</div></div>
+          </div>
+        </div>
+        <p style="font-size: 12px; color: var(--cinza-medio); margin-top: 16px; text-align: center;">
+          Taxa de conversão global: <strong>5,5%</strong>
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>📅 Próximas Entrevistas</h2>
+        <div class="entrevista-item">
+          <div class="entrevista-avatar">M</div>
+          <div class="entrevista-info">
+            <div class="entrevista-nome">Maria Silva Santos</div>
+            <div class="entrevista-meta">Gerente Administrativo</div>
+            <div class="entrevista-meta">📅 Amanhã, 14h • Google Meet</div>
+          </div>
+          <span class="badge badge-rh">RH</span>
+        </div>
+        <div class="entrevista-item">
+          <div class="entrevista-avatar">J</div>
+          <div class="entrevista-info">
+            <div class="entrevista-nome">João Pedro Oliveira</div>
+            <div class="entrevista-meta">Desenvolvedor Full Stack</div>
+            <div class="entrevista-meta">📅 23/07, 10h • Presencial</div>
+          </div>
+          <span class="badge badge-gestor">Gestor</span>
+        </div>
+        <div class="entrevista-item">
+          <div class="entrevista-avatar">C</div>
+          <div class="entrevista-info">
+            <div class="entrevista-nome">Camila Souza Lima</div>
+            <div class="entrevista-meta">Atendente de Padaria</div>
+            <div class="entrevista-meta">📅 24/07, 09h • Presencial</div>
+          </div>
+          <span class="badge badge-rh">RH</span>
+        </div>
+        <div class="entrevista-item">
+          <div class="entrevista-avatar">R</div>
+          <div class="entrevista-info">
+            <div class="entrevista-nome">Rafael Costa Mendes</div>
+            <div class="entrevista-meta">Professor(a) Matemática</div>
+            <div class="entrevista-meta">📅 25/07, 15h • Google Meet</div>
+          </div>
+          <span class="badge badge-gestor">Gestor</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="trocarTab(this, 'candidatos')">👥 Candidatos em Análise</div>
+      <div class="tab" onclick="trocarTab(this, 'agenda')">📅 Agenda</div>
+      <div class="tab" onclick="trocarTab(this, 'atividades')">🔔 Atividades</div>
+    </div>
+
+    <div class="tab-content active" id="tab-candidatos">
+      <div class="card">
+        <div class="destaque">
+          <strong>✨ Candidato destaque:</strong> Maria Silva Santos — 95% de compatibilidade com a vaga de Gerente Administrativo. Recomenda-se avançar para etapa final.
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Candidato</th>
+              <th>Vaga</th>
+              <th>Etapa</th>
+              <th>Match</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Maria Silva Santos</strong><br><span style="color: var(--cinza-medio); font-size: 12px;">maria.santos@email.com</span></td>
+              <td>Gerente Administrativo</td>
+              <td>4/5 — Gestor</td>
+              <td><span style="color: var(--verde); font-weight: 700;">95%</span></td>
+              <td><span class="status andamento">Em andamento</span></td>
+              <td><button class="btn btn-vinho" onclick="abrirCandidato('Maria')">Analisar</button></td>
+            </tr>
+            <tr>
+              <td><strong>João Pedro Oliveira</strong><br><span style="color: var(--cinza-medio); font-size: 12px;">joao.p@email.com</span></td>
+              <td>Desenvolvedor Full Stack</td>
+              <td>3/5 — RH</td>
+              <td><span style="color: var(--verde); font-weight: 700;">88%</span></td>
+              <td><span class="status andamento">Em andamento</span></td>
+              <td><button class="btn btn-vinho" onclick="abrirCandidato('João')">Analisar</button></td>
+            </tr>
+            <tr>
+              <td><strong>Camila Souza Lima</strong><br><span style="color: var(--cinza-medio); font-size: 12px;">camila.l@email.com</span></td>
+              <td>Atendente de Padaria</td>
+              <td>2/5 — Triagem</td>
+              <td><span style="color: var(--laranja); font-weight: 700;">72%</span></td>
+              <td><span class="status andamento">Em andamento</span></td>
+              <td><button class="btn btn-vinho" onclick="abrirCandidato('Camila')">Analisar</button></td>
+            </tr>
+            <tr>
+              <td><strong>Rafael Costa Mendes</strong><br><span style="color: var(--cinza-medio); font-size: 12px;">rafael.mendes@email.com</span></td>
+              <td>Professor(a) Matemática</td>
+              <td>4/5 — Gestor</td>
+              <td><span style="color: var(--verde); font-weight: 700;">91%</span></td>
+              <td><span class="status aprovado">Aprovado</span></td>
+              <td><button class="btn btn-vinho" onclick="abrirCandidato('Rafael')">Analisar</button></td>
+            </tr>
+            <tr>
+              <td><strong>Beatriz Almeida</strong><br><span style="color: var(--cinza-medio); font-size: 12px;">beatriz.a@email.com</span></td>
+              <td>Motorista Entregador</td>
+              <td>1/5 — Inscrição</td>
+              <td><span style="color: var(--cinza-medio); font-weight: 700;">60%</span></td>
+              <td><span class="status andamento">Em andamento</span></td>
+              <td><button class="btn btn-vinho" onclick="abrirCandidato('Beatriz')">Analisar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-agenda">
+      <div class="card">
+        <h2>📅 Agenda de Entrevistas — Próximos 7 dias</h2>
+        <table>
+          <thead>
+            <tr><th>Data/Hora</th><th>Candidato</th><th>Vaga</th><th>Tipo</th><th>Local</th><th>Ações</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>20/07 às 14h</td><td>Maria Silva Santos</td><td>Gerente Administrativo</td><td><span class="badge badge-rh">RH</span></td><td>Google Meet</td><td><button class="btn btn-ghost">Reagendar</button></td></tr>
+            <tr><td>23/07 às 10h</td><td>João Pedro Oliveira</td><td>Desenvolvedor Full Stack</td><td><span class="badge badge-gestor">Gestor</span></td><td>Presencial</td><td><button class="btn btn-ghost">Reagendar</button></td></tr>
+            <tr><td>24/07 às 09h</td><td>Camila Souza Lima</td><td>Atendente de Padaria</td><td><span class="badge badge-rh">RH</span></td><td>Presencial</td><td><button class="btn btn-ghost">Reagendar</button></td></tr>
+            <tr><td>25/07 às 15h</td><td>Rafael Costa Mendes</td><td>Professor(a) Matemática</td><td><span class="badge badge-gestor">Gestor</span></td><td>Google Meet</td><td><button class="btn btn-ghost">Reagendar</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-atividades">
+      <div class="card">
+        <h2>🔔 Atividades Recentes</h2>
+        <div class="atividade">
+          <div class="atividade-icone">📅</div>
+          <div>
+            <div class="atividade-texto"><strong>Entrevista agendada</strong> — Maria Silva Santos para Gerente Administrativo</div>
+            <div class="atividade-quando">há 5 minutos</div>
+          </div>
+        </div>
+        <div class="atividade">
+          <div class="atividade-icone" style="background: #D1FAE5; color: #065F46;">✓</div>
+          <div>
+            <div class="atividade-texto"><strong>João Pedro Oliveira</strong> avançou para etapa 3 (Entrevista RH)</div>
+            <div class="atividade-quando">há 1 hora</div>
+          </div>
+        </div>
+        <div class="atividade">
+          <div class="atividade-icone" style="background: #FEE2E2; color: #991B1B;">✕</div>
+          <div>
+            <div class="atividade-texto"><strong>Lucas Pereira</strong> foi reprovado na triagem de Desenvolvedor Full Stack</div>
+            <div class="atividade-quando">há 2 horas</div>
+          </div>
+        </div>
+        <div class="atividade">
+          <div class="atividade-icone">📄</div>
+          <div>
+            <div class="atividade-texto"><strong>Rafael Costa Mendes</strong> enviou RG e CPF (documentos de contratação)</div>
+            <div class="atividade-quando">há 3 horas</div>
+          </div>
+        </div>
+        <div class="atividade">
+          <div class="atividade-icone" style="background: #DBEAFE; color: #1E40AF;">👤</div>
+          <div>
+            <div class="atividade-texto"><strong>Beatriz Almeida</strong> se inscreveu para Motorista Entregador</div>
+            <div class="atividade-quando">há 5 horas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function trocarTab(el, id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+
+  function abrirCandidato(nome) {
+    alert('🔍 Abrindo análise completa de ' + nome + '...\n\n(Numa versão real, abriria a tela de perfil com currículo, histórico de etapas, documentos e comentários.)');
+  }
+</script>
+</body>
+</html>
