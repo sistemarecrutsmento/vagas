@@ -186,14 +186,15 @@
       // Habilita botão de download só se tiver pelo menos 1 arquivo
       document.getElementById('btn-download-tudo').disabled = arquivosEnviados === 0;
 
-      // Habilita "Aprovar tudo" só quando TODOS os obrigatórios estiverem enviados e aprovados
+      // Habilita "Aprovar tudo" só quando TODOS os obrigatórios estiverem enviados e nenhum retornado/reprovado
+      // (pendentes serão aprovados direto pela ação global, sem precisar revisar 1 a 1)
       const btnAprovar = document.getElementById('btn-aprovar-tudo-topo');
-      const tudoAprovado = total > 0 && enviados === total && aprovados === total && retornados === 0 && reprovados === 0 && pendentes === 0;
+      const podeAprovar = total > 0 && enviados === total && retornados === 0 && reprovados === 0;
       if (btnAprovar) {
-        btnAprovar.disabled = !tudoAprovado;
-        btnAprovar.style.opacity = tudoAprovado ? '1' : '0.5';
-        btnAprovar.style.cursor = tudoAprovado ? 'pointer' : 'not-allowed';
-        if (!tudoAprovado) {
+        btnAprovar.disabled = !podeAprovar;
+        btnAprovar.style.opacity = podeAprovar ? '1' : '0.5';
+        btnAprovar.style.cursor = podeAprovar ? 'pointer' : 'not-allowed';
+        if (!podeAprovar) {
           const falta = (pendentes + retornados + reprovados);
           const msg = enviados < total
             ? `🔒 Faltam ${total - enviados} documento(s) a enviar`
