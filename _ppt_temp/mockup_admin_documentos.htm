@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+  body { background: #FAFAFA; color: #1a1a1a; }
+  .header { background: white; padding: 16px 24px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+  .page-title { font-size: 18px; font-weight: 700; }
+  .page-sub { font-size: 13px; color: #666; margin-top: 2px; }
+  .btn-validate { background: #722F37; color: white; padding: 8px 14px; border-radius: 6px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .container { padding: 20px 24px; }
+  .cand-info { background: white; border-radius: 8px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .avatar { width: 48px; height: 48px; background: #722F37; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+  .cand-name { font-size: 16px; font-weight: 700; }
+  .cand-vaga { color: #666; font-size: 13px; }
+  .progress-info { margin-left: auto; text-align: right; }
+  .progress-pct { font-size: 20px; font-weight: 800; color: #722F37; }
+  .progress-sub { font-size: 11px; color: #666; }
+  .docs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .doc-card { background: white; border-radius: 8px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid #4CAF50; }
+  .doc-card.pending { border-left-color: #FF9800; }
+  .doc-card.rejected { border-left-color: #F44336; }
+  .doc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .doc-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .doc-status { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+  .doc-ok { background: #E8F5E9; color: #2E7D32; }
+  .doc-wait { background: #FFF3E0; color: #E65100; }
+  .doc-no { background: #FFEBEE; color: #C62828; }
+  .doc-file { font-size: 11px; color: #666; display: flex; align-items: center; gap: 4px; }
+  .doc-actions { display: flex; gap: 4px; margin-top: 8px; }
+  .doc-btn { flex: 1; padding: 5px 8px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; font-weight: 600; }
+  .btn-view { background: #f0f0f0; color: #1a1a1a; }
+  .btn-approve { background: #4CAF50; color: white; }
+  .btn-reject { background: #F44336; color: white; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="page-title">Validar Documentos</div>
+      <div class="page-sub">Marina Silva Santos · Estagiário(a) de Administração</div>
+    </div>
+    <button class="btn-validate">✓ Aprovar tudo</button>
+  </div>
+  <div class="container">
+    <div class="cand-info">
+      <div class="avatar">MS</div>
+      <div>
+        <div class="cand-name">Marina Silva Santos</div>
+        <div class="cand-vaga">Etapa 6: Coleta de Documentos • 12/16 enviados</div>
+      </div>
+      <div class="progress-info">
+        <div class="progress-pct">75%</div>
+        <div class="progress-sub">completo</div>
+      </div>
+    </div>
+    <div class="docs-grid">
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">RG (frente e verso)</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 rg_marina.pdf</div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">CPF</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 cpf_marina.pdf</div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">Comprovante de Residência</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 comprovante.pdf</div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">Carteira de Trabalho</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 ctps.pdf</div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">Título de Eleitor</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 titulo.pdf</div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">Certificado de Reservista</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 reservista.pdf</div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">Histórico Escolar</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 historico_ifs.pdf</div>
+      </div>
+      <div class="doc-card pending">
+        <div class="doc-header">
+          <div class="doc-name">Declaração de Matrícula</div>
+          <div class="doc-status doc-wait">⏳ Pendente</div>
+        </div>
+        <div class="doc-file">Aguardando envio</div>
+        <div class="doc-actions"><button class="doc-btn btn-view">👁 Ver</button></div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">Comprovante Bancário</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 banco.pdf</div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">Foto 3x4</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 foto.jpg</div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-header">
+          <div class="doc-name">Antecedentes Criminais</div>
+          <div class="doc-status doc-ok">✓ Aprovado</div>
+        </div>
+        <div class="doc-file">📄 antecedentes.pdf</div>
+      </div>
+      <div class="doc-card rejected">
+        <div class="doc-header">
+          <div class="doc-name">Atestado de Saúde</div>
+          <div class="doc-status doc-no">✕ Reprovado</div>
+        </div>
+        <div class="doc-file">📄 atestado.jpg</div>
+        <div class="doc-actions"><button class="doc-btn btn-view">👁 Ver</button><button class="doc-btn btn-approve">✓</button><button class="doc-btn btn-reject">✕</button></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
