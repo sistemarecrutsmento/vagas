@@ -690,8 +690,9 @@ function atualizarHeaderUsuario() {
 
 function garantirBotaoMenu() {
   const existe = document.getElementById('btn-menu-logo');
-  // Visitante (sem login OU cadastro incompleto) → NÃO mostra ☰
-  if (!tokenCandidato || !cadastroCompleto) {
+  // Qualquer usuário logado deve ter acesso ao menu (inclusive antes de
+  // completar o cadastro), para conseguir sair da conta em qualquer página.
+  if (!tokenCandidato) {
     if (existe) existe.remove();
     return;
   }
