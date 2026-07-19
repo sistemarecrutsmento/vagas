@@ -47,19 +47,19 @@
   /* === Drawer === */
   .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
   .drawer-overlay.aberto { display: block; }
-  aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+  aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
   aside.drawer.aberto { transform: translateX(0); }
-  .drawer-head { background: var(--vinho); color: white; padding: 20px; display: flex; align-items: center; gap: 12px; }
+  .drawer-head { background: var(--vinho); color: white; padding: 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
   .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; background-size: cover; background-position: center; overflow: hidden; }
   .drawer-foto-info h3 { font-size: 16px; font-weight: 700; }
   .drawer-foto-info p { font-size: 12px; opacity: 0.9; word-break: break-all; }
   .drawer-close { margin-left: auto; background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; line-height: 1; }
-  .drawer-links { flex: 1; padding: 16px 0; overflow-y: auto; }
+  .drawer-links { flex: 1 1 auto; min-height: 0; padding: 16px 0; overflow-y: auto; }
   .drawer-link { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: var(--preto); font-size: 15px; font-weight: 500; }
   .drawer-link:hover { background: var(--bg); }
   .drawer-link.ativo { background: rgba(114,47,55,0.1); color: var(--vinho); font-weight: 700; }
   .drawer-link .icon { width: 24px; text-align: center; font-size: 18px; }
-  .drawer-footer { padding: 16px 20px; border-top: 1px solid var(--borda); }
+  .drawer-footer { padding: 16px 20px; border-top: 1px solid var(--borda); background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); flex-shrink: 0; }
   .drawer-logout { width: 100%; background: transparent; color: var(--vinho); border: 1px solid var(--vinho); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
   .drawer-logout:hover { background: var(--vinho); color: white; }
 
@@ -172,8 +172,8 @@
   </div>
 </div>
 
-<script src="app-v2.js?v=FIX_FINAL"></script>
-<script src="modals.js?v=FIX_FINAL"></script>
+<script src="app-v2.js?v=1784405164_2"></script>
+<script src="modals.js?v=1784405164_2"></script>
 <script>
 // ===== ROTEAMENTO =====
 function redirecionarSeNaoLogado() {
