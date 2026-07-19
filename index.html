@@ -671,21 +671,25 @@ function abrirDrawer(e) {
       drawerFoto.style.backgroundImage = '';
     }
   }
-  // Mostra/oculta blocos baseado em login + cadastro completo
+  // O botão Sair deve aparecer para qualquer usuário logado,
+  // mesmo antes de o cadastro estar completo.
   const elLogado = document.getElementById('drawer-logado');
   const elDeslogado = document.getElementById('drawer-deslogado');
   const elAtalhos = document.getElementById('drawer-atalhos');
   const elFooter = document.getElementById('drawer-footer-logado');
+  if (logado) {
+    if (elFooter) elFooter.style.display = '';
+  } else {
+    if (elFooter) elFooter.style.display = 'none';
+  }
   if (podeAcessar) {
     if (elLogado) elLogado.style.display = '';
     if (elDeslogado) elDeslogado.style.display = 'none';
     if (elAtalhos) elAtalhos.style.display = '';
-    if (elFooter) elFooter.style.display = '';
   } else {
     if (elLogado) elLogado.style.display = 'none';
     if (elDeslogado) elDeslogado.style.display = '';
     if (elAtalhos) elAtalhos.style.display = 'none';
-    if (elFooter) elFooter.style.display = 'none';
   }
 }
 function fecharDrawer() {
