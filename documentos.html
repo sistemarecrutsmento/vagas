@@ -350,36 +350,73 @@ function escapeHtml(s) {
 
 // ============== ARQUIVO ==============
 let arquivosBase64 = {}; // tipo -> {base64, nome, tipo}
-function arquivoEscolhido(tipo, input) {
+async function comprimirImagem(file, maxDim = 1600, qualidade = 0.85) {
+  // Só comprime imagens; PDF vai direto
+  if (!file.type.startsWith('image/')) return file;
+  const img = new Image();
+  const dataUrl = await new Promise((res, rej) => {
+    img.onload = () => res(URL.createObjectURL(file));
+    img.onerror = rej;
+    const fr = new FileReader();
+    fr.onload = e => { img.src = e.target.result; };
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
+  }).catch(() => null);
+  if (!img || !img.complete) return file;
+  let { width, height } = img;
+  if (width > maxDim || height > maxDim) {
+    if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+    else { width = Math.round(width * maxDim / height); height = maxDim; }
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = width; canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, width, height);
+  URL.revokeObjectURL(dataUrl);
+  return new Promise((resolve) => {
+    canvas.toBlob(blob => {
+      if (!blob || blob.size >= file.size) resolve(file); // compressão não ajudou
+      else resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+    }, 'image/jpeg', qualidade);
+  });
+}
+async function arquivoEscolhido(tipo, input) {
   const f = input.files[0];
   if (!f) return;
-  if (f.size > 5 * 1024 * 1024) {
-    alert('Arquivo passa de 5MB.');
+  if (f.size > 10 * 1024 * 1024) {
+    alert('Arquivo passa de 10MB. Tire uma foto mais leve ou converta pra JPG.');
     input.value = '';
     return;
   }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const dataUrl = e.target.result;
-    const base64 = dataUrl.split(',')[1];
-    arquivosBase64[tipo] = { base64, nome: f.name, tipo: f.type, tamanho: f.size };
-    document.getElementById(`arq-nome-${tipo}`).textContent = '✓ ' + f.name + ' (' + Math.round(f.size / 1024) + ' KB)';
-    // Marca o card como "com arquivo selecionado" — borda verde
-    const card = document.getElementById(`doc-${tipo}`);
-    if (card) card.classList.add('com-arquivo');
-    // Preview de imagem (se for foto)
-    let oldThumb = document.getElementById(`thumb-${tipo}`);
-    if (oldThumb) oldThumb.remove();
-    if (f.type.startsWith('image/')) {
-      const img = document.createElement('img');
-      img.id = `thumb-${tipo}`;
-      img.className = 'doc-thumb';
-      img.src = URL.createObjectURL(f);
-      const arqDiv = document.getElementById(`doc-${tipo}`).querySelector('.doc-conteudo');
-      if (arqDiv) arqDiv.appendChild(img);
-    }
-  };
-  reader.readAsDataURL(f);
+  // Mostra "comprimindo..." enquanto processa
+  const nomeEl = document.getElementById(`arq-nome-${tipo}`);
+  if (nomeEl) nomeEl.textContent = '⏳ Processando...';
+  try {
+    const fileFinal = await comprimirImagem(f);
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target.result;
+      const base64 = dataUrl.split(',')[1];
+      arquivosBase64[tipo] = { base64, nome: fileFinal.name, tipo: fileFinal.type, tamanho: fileFinal.size };
+      if (nomeEl) nomeEl.textContent = '✓ ' + fileFinal.name + ' (' + Math.round(fileFinal.size / 1024) + ' KB)';
+      const card = document.getElementById(`doc-${tipo}`);
+      if (card) card.classList.add('com-arquivo');
+      let oldThumb = document.getElementById(`thumb-${tipo}`);
+      if (oldThumb) oldThumb.remove();
+      if (fileFinal.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.id = `thumb-${tipo}`;
+        img.className = 'doc-thumb';
+        img.src = URL.createObjectURL(fileFinal);
+        const arqDiv = document.getElementById(`doc-${tipo}`).querySelector('.doc-conteudo');
+        if (arqDiv) arqDiv.appendChild(img);
+      }
+    };
+    reader.readAsDataURL(fileFinal);
+  } catch (err) {
+    alert('Erro ao processar arquivo: ' + err.message);
+    input.value = '';
+  }
 }
 
 function arquivoLimpar(tipo) {
