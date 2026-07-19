@@ -694,17 +694,19 @@
       const btn = document.getElementById('btn-aprovar-tudo');
       if (!btn) return;
       const stats = window._docsStatsCache || {};
-      const tudoAprovado = stats.total > 0
+      // Libera quando: todos enviados E nenhum retornado/reprovado pendente
+      // (pendentes são aprovados direto pela ação global, sem precisar revisar 1 a 1)
+      const podeAprovar = stats.total > 0
         && stats.enviados === stats.total
-        && stats.aprovados === stats.total
         && stats.retornados === 0
-        && stats.reprovados === 0
-        && stats.pendentes === 0;
-      if (tudoAprovado) {
+        && stats.reprovados === 0;
+      if (podeAprovar) {
         btn.disabled = false;
         btn.style.opacity = '1';
         btn.style.cursor = 'pointer';
-        btn.textContent = '✅ Aprovar tudo e avançar etapa';
+        btn.textContent = stats.aprovados === stats.total
+          ? '✅ Aprovar tudo e avançar etapa'
+          : `✅ Aprovar ${stats.total} doc(s) e avançar etapa`;
       } else {
         btn.disabled = true;
         btn.style.opacity = '0.5';
@@ -796,14 +798,8 @@
       if (stats.retornados > 0) {
         return alert('Há ' + stats.retornados + ' documento(s) marcado(s) como "a reenviar". Aguarde o candidato reenviar antes de aprovar.');
       }
-      if (stats.pendentes > 0) {
-        return alert('Ainda há ' + stats.pendentes + ' documento(s) pendente(s) de revisão.');
-      }
       if (stats.reprovados > 0) {
         return alert('Há ' + stats.reprovados + ' documento(s) reprovado(s) que o candidato precisa reenviar antes da aprovação final.');
-      }
-      if (stats.aprovados < stats.total) {
-        return alert('Apenas ' + stats.aprovados + '/' + stats.total + ' documentos aprovados.');
       }
       if (!confirm('Aprovar TODOS os documentos e avançar para a próxima etapa?\n\n' +
                    'Esta ação não pode ser desfeita. O candidato será notificado de que avançou no processo.')) {
