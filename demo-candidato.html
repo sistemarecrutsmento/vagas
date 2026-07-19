@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vagas.io — Demo: Visão do Candidato</title>
+<style>
+  :root { --vinho:#722F37; --vinho-escuro:#4A1F25; --dourado:#D4AF37; --cinza:#F5F5F5; --texto:#1A1A1A; --cinza-medio:#666; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--cinza); color: var(--texto); line-height: 1.5; }
+
+  /* Banner de demo */
+  .demo-banner {
+    background: linear-gradient(90deg, #FEF3C7, #FDE68A);
+    color: #92400E;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 2px solid #F59E0B;
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  /* Header */
+  header { background: #fff; padding: 16px 24px; box-shadow: 0 2px 6px rgba(0,0,0,.06); display: flex; align-items: center; justify-content: space-between; }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; color: var(--vinho); }
+  .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro)); color: var(--dourado); display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 18px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all .15s; }
+  .btn-primary { background: var(--vinho); color: white; }
+  .btn-primary:hover { background: var(--vinho-escuro); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--vinho); }
+
+  /* Layout */
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* Hero */
+  .hero { background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro)); color: white; padding: 48px 32px; border-radius: 16px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; right: -50px; top: -50px; width: 200px; height: 200px; background: var(--dourado); opacity: .1; border-radius: 50%; }
+  .hero h1 { font-size: 36px; margin-bottom: 12px; }
+  .hero p { font-size: 17px; opacity: .9; max-width: 600px; }
+  .hero .search-bar { background: white; padding: 8px; border-radius: 12px; display: flex; gap: 8px; margin-top: 24px; max-width: 600px; }
+  .hero .search-bar input { flex: 1; padding: 12px 16px; border: none; border-radius: 8px; font-size: 14px; outline: none; }
+  .hero .search-bar select { padding: 12px; border: 1px solid #EEE; border-radius: 8px; background: white; font-size: 14px; }
+
+  /* Vagas */
+  .section-title { font-size: 22px; margin-bottom: 20px; color: var(--texto); display: flex; align-items: center; gap: 10px; }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filtro-chip { padding: 6px 14px; background: white; border: 1px solid #DDD; border-radius: 999px; font-size: 13px; cursor: pointer; }
+  .filtro-chip.active { background: var(--vinho); color: white; border-color: var(--vinho); }
+
+  .grid-vagas { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+  .vaga-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.04); transition: all .2s; cursor: pointer; border: 1px solid #EEE; }
+  .vaga-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(114,47,55,.15); border-color: var(--vinho); }
+  .vaga-empresa { font-size: 12px; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .vaga-titulo { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--texto); }
+  .vaga-meta { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; font-size: 13px; color: var(--cinza-medio); }
+  .vaga-meta span { display: flex; align-items: center; gap: 4px; }
+  .vaga-tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+  .tag { background: #FEF3C7; color: #92400E; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .tag.tipo { background: #DBEAFE; color: #1E40AF; }
+  .tag.modelo { background: #D1FAE5; color: #065F46; }
+  .vaga-salario { color: var(--vinho); font-weight: 700; font-size: 15px; margin-top: 10px; }
+
+  /* Modal de detalhes da vaga */
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .modal.open { display: flex; }
+  .modal-content { background: white; border-radius: 16px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal-header { padding: 24px; border-bottom: 1px solid #EEE; display: flex; justify-content: space-between; align-items: start; }
+  .modal-body { padding: 24px; }
+  .modal-body h3 { margin: 16px 0 8px; color: var(--vinho); }
+  .modal-body p { margin-bottom: 10px; color: #444; }
+  .modal-body ul { margin-left: 20px; margin-bottom: 12px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid #EEE; display: flex; gap: 10px; justify-content: flex-end; }
+  .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--cinza-medio); }
+
+  /* Painel do candidato logado */
+  .painel { display: none; }
+  .painel.active { display: block; }
+  .etapa-progresso { display: flex; gap: 8px; margin: 20px 0; }
+  .etapa-dot { flex: 1; height: 6px; background: #E5E7EB; border-radius: 3px; }
+  .etapa-dot.ativa { background: var(--vinho); }
+  .etapa-dot.concluida { background: var(--dourado); }
+
+  .timeline { margin-top: 20px; }
+  .timeline-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F0F0F0; }
+  .timeline-icon { width: 36px; height: 36px; border-radius: 50%; background: #F0FDF4; color: #16A34A; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .timeline-content h4 { font-size: 14px; margin-bottom: 4px; }
+  .timeline-content p { font-size: 12px; color: var(--cinza-medio); }
+</style>
+</head>
+<body>
+
+<div class="demo-banner">
+  🧪 <strong>DEMO INTERATIVA</strong> — Dados fictícios. Abra também o arquivo <code>demo-admin.html</code> para ver a visão do gestor.
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">V</div>
+    <span>Vagas.io</span>
+  </div>
+  <div class="header-actions" id="header-logged-out">
+    <button class="btn btn-ghost" onclick="abrirLogin()">Entrar</button>
+    <button class="btn btn-primary" onclick="abrirCadastro()">Completar cadastro</button>
+  </div>
+  <div class="header-actions painel" id="header-logged-in">
+    <span style="color: var(--cinza-medio); font-size: 13px;">Olá, <strong id="nome-user">Maria</strong></span>
+    <button class="btn btn-ghost" onclick="alternarVisao()">🔄 Ver como Admin</button>
+    <button class="btn btn-primary" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<!-- VISÃO PÚBLICA (não logado) -->
+<div class="container" id="visao-publica">
+  <div class="hero">
+    <h1>Encontre sua próxima oportunidade</h1>
+    <p>Conectamos candidatos a vagas de empresas que valorizam talento. Candidate-se em segundos, acompanhe tudo pelo app.</p>
+    <div class="search-bar">
+      <input type="text" placeholder="🔍 Busque por cargo, empresa ou área...">
+      <select><option>Todas as cidades</option><option>São Paulo</option><option>Rio de Janeiro</option><option>Remoto</option></select>
+      <button class="btn btn-primary">Buscar</button>
+    </div>
+  </div>
+
+  <h2 class="section-title">🔥 Vagas em destaque</h2>
+  <div class="filtros">
+    <div class="filtro-chip active">Todas</div>
+    <div class="filtro-chip">CLT</div>
+    <div class="filtro-chip">Estágio</div>
+    <div class="filtro-chip">Remoto</div>
+    <div class="filtro-chip">Presencial</div>
+  </div>
+
+  <div class="grid-vagas" id="grid-vagas"></div>
+</div>
+
+<!-- VISÃO LOGADA: PAINEL DO CANDIDATO -->
+<div class="container painel" id="visao-logada">
+  <h2 class="section-title">📋 Minhas Candidaturas</h2>
+
+  <div class="vaga-card" style="cursor: default;">
+    <div class="vaga-empresa">Grupo Vértice Empreendimentos</div>
+    <div class="vaga-titulo">Gerente Administrativo</div>
+    <div class="etapa-progresso">
+      <div class="etapa-dot concluida"></div>
+      <div class="etapa-dot concluida"></div>
+      <div class="etapa-dot ativa"></div>
+      <div class="etapa-dot"></div>
+      <div class="etapa-dot"></div>
+    </div>
+    <p style="font-size: 14px; color: #444; margin: 10px 0;">
+      <strong>Etapa atual: 3 de 5 — Entrevista RH</strong>
+    </p>
+    <p style="font-size: 13px; color: var(--cinza-medio);">
+      Status: <span style="color: #16A34A; font-weight: 600;">em andamento</span> • Inscrição feita em 12/07/2026
+    </p>
+
+    <h4 style="margin-top: 20px; color: var(--vinho);">📅 Próxima etapa</h4>
+    <div style="background: #F0F9FF; border-left: 4px solid #0EA5E9; padding: 12px; border-radius: 6px; margin-top: 8px;">
+      <strong>Entrevista com RH</strong> — marcada para <strong>22/07/2026 às 14h</strong><br>
+      📍 Google Meet (link enviado por e-mail)
+    </div>
+
+    <h4 style="margin-top: 20px; color: var(--vinho);">🕒 Linha do tempo</h4>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-icon">✓</div>
+        <div class="timeline-content">
+          <h4>Inscrição confirmada</h4>
+          <p>12/07/2026 às 09:32</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-icon">✓</div>
+        <div class="timeline-content">
+          <h4>Triagem curricular aprovada</h4>
+          <p>14/07/2026 — Analista RH deu retorno positivo</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-icon" style="background: #FEF3C7; color: #92400E;">⏱</div>
+        <div class="timeline-content">
+          <h4>Entrevista RH agendada</h4>
+          <p>16/07/2026 — Aguardando entrevista em 22/07</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin-top: 32px;">📄 Vagas recomendadas para você</h2>
+  <div class="grid-vagas" id="grid-recomendadas"></div>
+</div>
+
+<!-- MODAL DE DETALHES DA VAGA -->
+<div class="modal" id="modal-vaga">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <div style="font-size: 12px; color: var(--cinza-medio); text-transform: uppercase;" id="modal-empresa">—</div>
+        <h2 id="modal-titulo" style="margin-top: 4px;">—</h2>
+        <div style="margin-top: 8px; display: flex; gap: 8px;" id="modal-tags"></div>
+      </div>
+      <button class="close-btn" onclick="fecharModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <p>Carregando...</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fecharModal()">Fechar</button>
+      <button class="btn btn-primary" onclick="candidatar()">📨 Candidatar-me</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============== DADOS FICTÍCIOS ==============
+  const VAGAS = [
+    { id: 1, empresa: 'Grupo Vértice Empreendimentos', titulo: 'Gerente Administrativo', cidade: 'Salvador', estado: 'BA', modelo: 'Presencial', tipo: 'CLT', salario: 'R$ 6.500', tags: ['Liderança', 'Gestão de equipe', 'Excel avançado'], publicada: 'há 2 dias', descricao: 'Vaga para profissional com experiência em gestão administrativa e liderança de equipes. Reportará diretamente à diretoria.', requisitos: ['Ensino superior completo em Administração ou afins', 'Mínimo 3 anos de experiência em gestão', 'Excel avançado', 'Experiência com ERP'], beneficios: ['Vale-refeição R$ 35/dia', 'Plano de saúde Unimed', 'Vale-transporte', 'Bônus anual por performance'] },
+    { id: 2, empresa: 'Padaria Pão Quente', titulo: 'Atendente de Padaria', cidade: 'Pé de Serra', estado: 'BA', modelo: 'Presencial', tipo: 'CLT', salario: 'R$ 1.650', tags: ['Atendimento', 'Caixa', 'Organização'], publicada: 'há 1 dia', descricao: 'Atendimento ao cliente, operação de caixa e organização da loja. Ambiente familiar e acolhedor.', requisitos: ['Ensino médio completo', 'Boa comunicação', 'Disponibilidade para manhã'], beneficios: ['Vale-alimentação', 'Vale-transporte', 'Folga aos domingos'] },
+    { id: 3, empresa: 'Tech Soluções LTDA', titulo: 'Desenvolvedor Full Stack', cidade: 'Remoto', estado: '—', modelo: 'Remoto', tipo: 'CLT', salario: 'R$ 8.000 a R$ 12.000', tags: ['React', 'Node.js', 'PostgreSQL'], publicada: 'há 5 horas', descricao: 'Desenvolvimento de aplicações web modernas. Time ágil, projetos desafiadores.', requisitos: ['3+ anos com React e Node.js', 'Conhecimento em bancos SQL', 'Inglês intermediário'], beneficios: ['100% remoto', 'Horário flexível', 'Auxílio home office R$ 200'] },
+    { id: 4, empresa: 'Escola Aprender Mais', titulo: 'Professor(a) de Matemática', cidade: 'Feira de Santana', estado: 'BA', modelo: 'Presencial', tipo: 'CLT', salario: 'R$ 3.200', tags: ['Educação', 'Matemática', 'Ensino fundamental II'], publicada: 'há 3 dias', descricao: 'Ministrar aulas para o ensino fundamental II, participar de reuniões pedagógicas e atividades extracurriculares.', requisitos: ['Licenciatura em Matemática', 'Experiência em sala de aula', 'Afinidade com adolescentes'], beneficios: ['Plano de saúde', 'Vale-alimentação', 'Férias remuneradas'] },
+    { id: 5, empresa: 'LogiTrans Norte', titulo: 'Motorista Entregador', cidade: 'Aracaju', estado: 'SE', modelo: 'Presencial', tipo: 'CLT', salario: 'R$ 2.400 + vale', tags: ['CNH D', 'Entregas', 'Rotas urbanas'], publicada: 'há 1 semana', descricao: 'Realizar entregas urbanas, zelar pelo veículo e manter a documentação em dia.', requisitos: ['CNH categoria D', 'Experiência com entregas', 'Conhecimento da região'], beneficios: ['Vale-alimentação R$ 25/dia', 'Plano odontológico', 'Adicional de periculosidade'] },
+    { id: 6, empresa: 'Sorveteria Gelato Bom', titulo: 'Atendente de Sorveteria', cidade: 'Pé de Serra', estado: 'BA', modelo: 'Presencial', tipo: 'CLT', salario: 'R$ 1.580', tags: ['Atendimento', 'Caixa', 'Sazonal'], publicada: 'há 4 dias', descricao: 'Atendimento ao público em sorveteria com fluxo intenso nos fins de semana. Período de alta temporada.', requisitos: ['Ensino médio em andamento', 'Boa apresentação', 'Disponibilidade aos fins de semana'], beneficios: ['Vale-transporte', 'Comissão sobre vendas', 'Lanche no local'] },
+  ];
+
+  // ============== RENDER ==============
+  function renderVagas(lista, targetId) {
+    document.getElementById(targetId).innerHTML = lista.map(v => `
+      <div class="vaga-card" onclick="abrirVaga(${v.id})">
+        <div class="vaga-empresa">${v.empresa}</div>
+        <div class="vaga-titulo">${v.titulo}</div>
+        <div class="vaga-meta">
+          <span>📍 ${v.cidade}${v.estado !== '—' ? ' / ' + v.estado : ''}</span>
+          <span>🕒 ${v.publicada}</span>
+        </div>
+        <div class="vaga-tags">
+          <span class="tag tipo">${v.tipo}</span>
+          <span class="tag modelo">${v.modelo}</span>
+          ${v.tags.slice(0, 2).map(t => '<span class="tag">' + t + '</span>').join('')}
+        </div>
+        <div class="vaga-salario">💰 ${v.salario}</div>
+      </div>
+    `).join('');
+  }
+
+  function abrirVaga(id) {
+    const v = VAGAS.find(x => x.id === id);
+    if (!v) return;
+    document.getElementById('modal-empresa').textContent = v.empresa;
+    document.getElementById('modal-titulo').textContent = v.titulo;
+    document.getElementById('modal-tags').innerHTML = `
+      <span class="tag tipo">${v.tipo}</span>
+      <span class="tag modelo">${v.modelo}</span>
+      <span style="font-size: 13px; color: var(--cinza-medio);">📍 ${v.cidade}</span>
+    `;
+    document.getElementById('modal-body').innerHTML = `
+      <h3>📝 Descrição</h3>
+      <p>${v.descricao}</p>
+      <h3>✅ Requisitos</h3>
+      <ul>${v.requisitos.map(r => '<li>' + r + '</li>').join('')}</ul>
+      <h3>🎁 Benefícios</h3>
+      <ul>${v.beneficios.map(b => '<li>' + b + '</li>').join('')}</ul>
+      <h3>💰 Salário</h3>
+      <p><strong>${v.salario}</strong></p>
+    `;
+    document.getElementById('modal-vaga').classList.add('open');
+  }
+
+  function fecharModal() {
+    document.getElementById('modal-vaga').classList.remove('open');
+  }
+  function candidatar() {
+    alert('✅ Candidatura enviada com sucesso! (simulação)');
+    fecharModal();
+  }
+  function abrirLogin() {
+    document.getElementById('header-logged-out').classList.add('painel');
+    document.getElementById('header-logged-out').classList.remove('active');
+    document.getElementById('header-logged-in').classList.add('active');
+    document.getElementById('visao-publica').classList.add('painel');
+    document.getElementById('visao-publica').classList.remove('active');
+    document.getElementById('visao-logada').classList.add('active');
+  }
+  function abrirCadastro() { abrirLogin(); }
+  function sair() {
+    document.getElementById('header-logged-in').classList.remove('active');
+    document.getElementById('visao-logada').classList.remove('active');
+    document.getElementById('header-logged-out').classList.remove('painel');
+    document.getElementById('visao-publica').classList.remove('painel');
+  }
+  function alternarVisao() {
+    // No demo, só abre o admin numa nova aba
+    window.open('demo-admin.html', '_blank');
+  }
+
+  // Inicializa
+  renderVagas(VAGAS, 'grid-vagas');
+  renderVagas(VAGAS.slice(0, 3), 'grid-recomendadas');
+
+  // Filtro chips
+  document.querySelectorAll('.filtro-chip').forEach(chip => {
+    chip.onclick = () => {
+      document.querySelectorAll('.filtro-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const filtro = chip.textContent.toLowerCase();
+      const filtradas = filtro === 'todas' ? VAGAS : VAGAS.filter(v =>
+        v.tipo.toLowerCase() === filtro ||
+        v.modelo.toLowerCase() === filtro
+      );
+      renderVagas(filtradas, 'grid-vagas');
+    };
+  });
+</script>
+</body>
+</html>
