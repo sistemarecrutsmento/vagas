@@ -232,6 +232,94 @@
     .analisar-etapa.atual .analisar-etapa-bola { background: var(--vinho); color: white; animation: pulse 1.5s infinite; }
     .analisar-etapa.rejeitada .analisar-etapa-bola { background: #dc3545; color: white; }
     @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(123, 31, 31, 0.5); } 50% { box-shadow: 0 0 0 8px rgba(123, 31, 31, 0); } }
+
+    /* ==== DASHBOARD v2 (jul/2026) ==== */
+    .kpis-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 1100px) { .kpis-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 700px)  { .kpis-grid { grid-template-columns: repeat(2, 1fr); } }
+    .kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .kpi-icon { font-size: 24px; margin-bottom: 8px; display: inline-block; }
+    .kpi-label { font-size: 13px; color: #666; font-weight: 500; }
+    .kpi-valor { font-size: 32px; font-weight: 700; color: #1A1A1A; line-height: 1.1; margin-top: 4px; }
+    .kpi-delta { font-size: 12px; color: #2E7D32; font-weight: 600; margin-top: 6px; }
+    .kpi-delta.down { color: #C62828; }
+    .kpi-delta.neutro { color: #888; }
+    /* Acento colorido lateral */
+    .kpi-rosa     { border-left: 4px solid #EC4899; }
+    .kpi-rosa .kpi-icon { color: #EC4899; }
+    .kpi-azul     { border-left: 4px solid #3B82F6; }
+    .kpi-azul .kpi-icon { color: #3B82F6; }
+    .kpi-roxo     { border-left: 4px solid #8B5CF6; }
+    .kpi-roxo .kpi-icon { color: #8B5CF6; }
+    .kpi-verde    { border-left: 4px solid #10B981; }
+    .kpi-verde .kpi-icon { color: #10B981; }
+    .kpi-laranja  { border-left: 4px solid #F59E0B; }
+    .kpi-laranja .kpi-icon { color: #F59E0B; }
+
+    .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 900px) { .dash-row { grid-template-columns: 1fr; } }
+    .dash-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); }
+    .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .dash-card-header h3 { font-size: 15px; font-weight: 600; color: #1A1A1A; }
+    .dash-card-tag { font-size: 11px; padding: 3px 10px; background: #F3F4F6; color: #666; border-radius: 12px; font-weight: 500; }
+    .dash-link { color: var(--vinho); text-decoration: none; font-size: 13px; font-weight: 600; }
+    .dash-link:hover { text-decoration: underline; }
+
+    /* Gráfico de etapas - barras horizontais */
+    .grafico-etapas { display: flex; flex-direction: column; gap: 10px; }
+    .etapa-barra-row { display: grid; grid-template-columns: 110px 1fr 50px; align-items: center; gap: 10px; }
+    .etapa-barra-nome { font-size: 13px; color: #444; font-weight: 500; }
+    .etapa-barra-fundo { background: #F3F4F6; height: 28px; border-radius: 6px; overflow: hidden; position: relative; }
+    .etapa-barra-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; display: flex; align-items: center; padding-left: 10px; color: #fff; font-size: 11px; font-weight: 600; min-width: 24px; }
+    .etapa-barra-fill.e1 { background: linear-gradient(90deg, #EC4899, #F472B6); }
+    .etapa-barra-fill.e2 { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+    .etapa-barra-fill.e3 { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+    .etapa-barra-fill.e4 { background: linear-gradient(90deg, #06B6D4, #22D3EE); }
+    .etapa-barra-fill.e5 { background: linear-gradient(90deg, #10B981, #34D399); }
+    .etapa-barra-fill.e6 { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+    .etapa-barra-fill.e7 { background: linear-gradient(90deg, #722F37, #8B3A45); }
+    .etapa-barra-count { font-size: 14px; font-weight: 700; color: #1A1A1A; text-align: right; }
+
+    /* Taxa de Conversão - área SVG */
+    .conversao-area { position: relative; }
+    .conversao-valor { font-size: 36px; font-weight: 700; color: #1A1A1A; }
+    .conversao-svg { width: 100%; height: 100px; display: block; margin-top: 4px; }
+    .conversao-info { display: flex; gap: 18px; margin-top: 6px; font-size: 13px; color: #666; }
+    .conversao-info strong { color: #1A1A1A; }
+
+    /* Lista de Entrevistas */
+    .lista-entrevistas { display: flex; flex-direction: column; gap: 10px; }
+    .entrevista-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #FAFAFA; border-radius: 8px; border-left: 3px solid #722F37; }
+    .entrevista-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #722F37, #4A1F25); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .entrevista-info { flex: 1; min-width: 0; }
+    .entrevista-nome { font-size: 14px; font-weight: 600; color: #1A1A1A; }
+    .entrevista-vaga { font-size: 12px; color: #666; margin-top: 2px; }
+    .entrevista-data { font-size: 12px; color: #444; white-space: nowrap; font-weight: 500; }
+    .entrevista-link { font-size: 12px; color: var(--vinho); text-decoration: none; font-weight: 600; }
+    .entrevista-link:hover { text-decoration: underline; }
+
+    /* Feed de Atividades */
+    .atividades-feed { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
+    .atividade-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F3F4F6; }
+    .atividade-item:last-child { border-bottom: 0; }
+    .atividade-icone { width: 28px; height: 28px; border-radius: 50%; background: #F3F4F6; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .atividade-texto { flex: 1; font-size: 13px; color: #444; line-height: 1.4; }
+    .atividade-texto strong { color: #1A1A1A; }
+    .atividade-quando { font-size: 11px; color: #999; margin-top: 2px; }
+
+    /* Documentação - rosca */
+    .doc-chart { display: flex; align-items: center; gap: 20px; }
+    .doc-rosca { width: 120px; height: 120px; flex-shrink: 0; }
+    .doc-info { flex: 1; }
+    .doc-info-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; color: #444; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    /* KPIs secundários */
+    .kpis-secundarios { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .kpi-sec { padding: 12px; background: #FAFAFA; border-radius: 8px; }
+    .kpi-sec-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+    .kpi-sec-valor { font-size: 20px; font-weight: 700; color: #1A1A1A; }
   </style>
 </head>
 <body>
@@ -267,26 +355,139 @@
     <a class="nav-item" data-page="vagas" onclick="irPara('vagas')">💼 Vagas</a>
     <a class="nav-item" data-page="candidatos" onclick="irPara('candidatos')">👥 Base de Talentos</a>
     <a class="nav-item" data-page="candidaturas" onclick="irPara('candidaturas')">📋 Vagas com Candidatos</a>
+    <a class="nav-item" data-page="agenda" onclick="irPara('agenda')">📅 Agenda</a>
     <a class="nav-item" onclick="importarVagasDemo()" style="background: rgba(114,47,55,0.15); color: #FFB3B8; border-left-color: #FFB3B8;" title="Cria 6 vagas de demonstração (não duplica se já existirem)">🌱 Vagas Demo</a>
     <a class="nav-item sair" onclick="sair()">🚪 Sair</a>
   </aside>
 
   <main>
-    <!-- DASHBOARD -->
+    <!-- DASHBOARD (v2 - profissional jul/2026) -->
     <div class="page ativo" id="page-dashboard">
-      <div class="page-header">
+      <div class="page-header" style="margin-bottom: 24px;">
         <div>
-          <h2>Dashboard</h2>
-          <p>Visão geral do recrutamento</p>
+          <h2 style="font-size:24px;margin-bottom:4px;" id="dash-greeting">Bom dia, Recrutador! 👋</h2>
+          <p style="color:#666;font-size:14px;" id="dash-subtitle">Aqui está o resumo geral do seu recrutamento</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="dash-periodo" onchange="carregarDashboardV2()" style="padding:8px 14px;border:1px solid var(--borda);border-radius:8px;font-size:13px;background:#fff;cursor:pointer;">
+            <option value="7">Últimos 7 dias</option>
+            <option value="30" selected>Últimos 30 dias</option>
+            <option value="90">Últimos 90 dias</option>
+          </select>
         </div>
       </div>
-      <div class="stats" id="stats-grid"><div class="empty"><div class="spinner"></div></div></div>
-      <h3 style="margin:24px 0 12px;font-size:18px;">🏆 Vagas com mais candidatos</h3>
-      <div class="tabela-wrap">
-        <table id="ranking-table">
-          <thead><tr><th>Vaga</th><th>Empresa</th><th style="text-align:right;">Candidatos</th></tr></thead>
-          <tbody><tr><td colspan="3" class="empty">Carregando...</td></tr></tbody>
-        </table>
+
+      <!-- 5 KPIs coloridos -->
+      <div class="kpis-grid" id="kpis-grid">
+        <div class="kpi-card kpi-rosa"><div class="kpi-icon">💼</div><div class="kpi-label">Vagas Ativas</div><div class="kpi-valor" id="kpi-vagas">—</div><div class="kpi-delta" id="delta-vagas"></div></div>
+        <div class="kpi-card kpi-azul"><div class="kpi-icon">👥</div><div class="kpi-label">Total de Candidatos</div><div class="kpi-valor" id="kpi-candidatos">—</div><div class="kpi-delta" id="delta-candidatos"></div></div>
+        <div class="kpi-card kpi-roxo"><div class="kpi-icon">📋</div><div class="kpi-label">Processos Ativos</div><div class="kpi-valor" id="kpi-processos">—</div><div class="kpi-delta" id="delta-processos"></div></div>
+        <div class="kpi-card kpi-verde"><div class="kpi-icon">✨</div><div class="kpi-label">Novos (7d)</div><div class="kpi-valor" id="kpi-novos">—</div><div class="kpi-delta" id="delta-novos"></div></div>
+        <div class="kpi-card kpi-laranja"><div class="kpi-icon">📅</div><div class="kpi-label">Entrevistas Agendadas</div><div class="kpi-valor" id="kpi-entrevistas">—</div><div class="kpi-delta" id="delta-entrevistas"></div></div>
+      </div>
+
+      <!-- 2 colunas: gráfico de etapas + taxa de conversão -->
+      <div class="dash-row">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📊 Candidatos por etapa do processo</h3>
+            <span class="dash-card-tag">Funil completo</span>
+          </div>
+          <div id="grafico-etapas" class="grafico-etapas"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📈 Taxa de Conversão</h3>
+            <span class="dash-card-tag" id="conversao-tag">% contratação</span>
+          </div>
+          <div class="conversao-area">
+            <div class="conversao-valor" id="conversao-valor">—</div>
+            <svg id="conversao-grafico" class="conversao-svg" viewBox="0 0 400 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="conversao-grad" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path id="conversao-path" d="" fill="url(#conversao-grad)"/>
+              <path id="conversao-line" d="" fill="none" stroke="#3B82F6" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div class="conversao-info">
+            <span><strong id="conversao-contratados">—</strong> contratados</span>
+            <span>de <strong id="conversao-total">—</strong> processos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Próximas Entrevistas + Atividades Recentes -->
+      <div class="dash-row">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📅 Próximas Entrevistas</h3>
+            <a href="#" class="dash-link" onclick="irPara('vagas')">Ver todas →</a>
+          </div>
+          <div id="proximas-entrevistas" class="lista-entrevistas">
+            <div class="empty">Carregando...</div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>🔔 Atividades Recentes</h3>
+            <span class="dash-card-tag" id="atividades-count">0</span>
+          </div>
+          <div id="atividades-recentes" class="atividades-feed">
+            <div class="empty">Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela Vagas com mais volume -->
+      <div class="dash-card" style="margin-top:24px;">
+        <div class="dash-card-header">
+          <h3>🏆 Vagas com maior volume</h3>
+          <a href="#" class="dash-link" onclick="irPara('candidatos')">Ver detalhes →</a>
+        </div>
+        <div class="tabela-wrap" style="margin-top:12px;">
+          <table id="ranking-table">
+            <thead><tr><th>Vaga</th><th>Empresa</th><th>Status</th><th style="text-align:right;">Candidatos</th><th style="text-align:right;">Contratados</th></tr></thead>
+            <tbody><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Documentação + KPIs secundários -->
+      <div class="dash-row" style="margin-top:24px;">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📄 Documentação Recebida</h3>
+            <span class="dash-card-tag" id="doc-percent">—%</span>
+          </div>
+          <div class="doc-chart">
+            <svg viewBox="0 0 120 120" class="doc-rosca">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#F3F4F6" stroke-width="14"/>
+              <circle id="doc-rosca-fill" cx="60" cy="60" r="50" fill="none" stroke="#722F37" stroke-width="14"
+                stroke-dasharray="0 314" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+              <text x="60" y="68" text-anchor="middle" font-size="22" font-weight="700" fill="#1A1A1A" id="doc-rosca-texto">—</text>
+            </svg>
+            <div class="doc-info">
+              <div class="doc-info-item"><span class="dot" style="background:#722F37"></span><span>Recebidos</span></div>
+              <div class="doc-info-item"><span class="dot" style="background:#F3F4F6"></span><span>Pendentes</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📊 Indicadores Estratégicos</h3>
+          </div>
+          <div class="kpis-secundarios" id="kpis-secundarios">
+            <div class="kpi-sec"><div class="kpi-sec-label">Tempo médio contratação</div><div class="kpi-sec-valor" id="ks-tempo">—</div></div>
+            <div class="kpi-sec"><div class="kpi-sec-label">Taxa de aprovação</div><div class="kpi-sec-valor" id="ks-aprovacao">—</div></div>
+            <div class="kpi-sec"><div class="kpi-sec-label">Taxa de desligamento</div><div class="kpi-sec-valor" id="ks-desligamento">—</div></div>
+            <div class="kpi-sec"><div class="kpi-sec-label">Vagas encerradas</div><div class="kpi-sec-valor" id="ks-encerradas">—</div></div>
+            <div class="kpi-sec"><div class="kpi-sec-label">Empresas ativas</div><div class="kpi-sec-valor" id="ks-empresas">—</div></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -481,6 +682,6 @@
   </div>
 </div>
 
-<script src="app.js?v=1784433000_3"></script>
+<script src="app.js?v=1784405164_2"></script>
 </body>
 </html>
