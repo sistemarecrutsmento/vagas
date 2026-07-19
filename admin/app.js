@@ -566,3 +566,28 @@ function formatarData(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('pt-BR');
 }
+
+// ===== SEED DEMO: Importa 6 vagas de exemplo =====
+async function importarVagasDemo() {
+  if (!confirm('🌱 Importar 6 vagas de demonstração?\n\nSe alguma vaga com mesmo título+empresa já existir, ela será IGNORADA (não duplica).')) return;
+  const token = localStorage.getItem('admin_token');
+  if (!token) { alert('Faça login primeiro.'); return; }
+  try {
+    const r = await fetch(API + '/api/admin/seed-vagas-demo', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.erro || 'Erro ao importar');
+    const lista = (j.detalhes.criadas || []).map(v => '✅ ' + v.titulo + ' (' + v.empresa + ')').join('\n');
+    const exist = (j.detalhes.jaExistiam || []).map(v => '⚠️ ' + v.titulo + ' (' + v.empresa + ')').join('\n');
+    let msg = `🎉 Concluído!\n\n${j.criadas} vagas criadas.\n${j.jaExistiam} já existiam (ignoradas).`;
+    if (lista) msg += '\n\n--- Criadas ---\n' + lista;
+    if (exist) msg += '\n\n--- Já existiam ---\n' + exist;
+    alert(msg);
+    // Atualiza a lista de vagas se estiver na página
+    if (typeof carregarVagas === 'function') carregarVagas();
+  } catch (e) {
+    alert('❌ Erro: ' + e.message);
+  }
+}
