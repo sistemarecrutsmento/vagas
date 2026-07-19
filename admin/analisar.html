@@ -25,6 +25,10 @@
     .status-contratado { background: #DBEAFE; color: #1E40AF; }
     .card { background: var(--branco); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; }
     .card h2 { font-size: 16px; color: var(--vinho); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cinza); }
+    .dados-pessoais-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cinza); }
+    .dados-pessoais-header h2 { margin: 0; padding: 0; border: none; }
+    .dados-foto { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: var(--cinza-claro); }
+    .dados-foto-vazia { display: inline-flex; align-items: center; justify-content: center; font-size: 22px; color: var(--cinza-medio); border: 1px solid var(--cinza); }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .field { font-size: 14px; }
     .field-label { color: var(--cinza-medio); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
@@ -445,7 +449,10 @@
 
         // 3) Dados Pessoais + Endereço (SEM "sobre você")
         '<div class="card" id="card-dados-pessoais">' +
-          '<h2>👤 Dados Pessoais</h2>' +
+          '<div class="dados-pessoais-header">' +
+            (c.foto_url ? '<img class="dados-foto" src="' + c.foto_url + '" alt="Foto de ' + (c.nome || 'Candidato') + '" onerror="this.style.display=\'none\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
+            '<h2 style="margin:0">👤 Dados Pessoais</h2>' +
+          '</div>' +
           '<div class="grid-2">' +
             '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (c.email || '—') + '</div></div>' +
             '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + (c.celular || '—') + '</div></div>' +
