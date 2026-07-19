@@ -350,6 +350,24 @@ function escapeHtml(s) {
 
 // ============== ARQUIVO ==============
 let arquivosBase64 = {}; // tipo -> {base64, nome, tipo}
+
+// Atualiza o badge de status do card localmente (sem precisar esperar o backend)
+function atualizarStatusLocal(tipo, novoStatus) {
+  const card = document.getElementById('doc-' + tipo);
+  if (!card) return;
+  const badge = card.querySelector('.doc-status');
+  if (!badge) return;
+  const map = {
+    'vazio': { label: 'Vazio', cls: 's-vazio' },
+    'pendente': { label: 'Pendente', cls: 's-pendente' },
+    'aprovado': { label: 'Aprovado', cls: 's-aprovado' },
+    'reprovado': { label: 'Reprovado', cls: 's-reprovado' },
+    'retornado': { label: 'A reenviar', cls: 's-retornado' }
+  };
+  const info = map[novoStatus] || map.pendente;
+  badge.className = 'doc-status ' + info.cls;
+  badge.textContent = info.label;
+}
 async function comprimirImagem(file, maxDim = 1600, qualidade = 0.85) {
   // Só comprime imagens; PDF vai direto
   if (!file.type.startsWith('image/')) return file;
@@ -401,6 +419,21 @@ async function arquivoEscolhido(tipo, input) {
       if (nomeEl) nomeEl.textContent = '✓ ' + fileFinal.name + ' (' + Math.round(fileFinal.size / 1024) + ' KB)';
       const card = document.getElementById(`doc-${tipo}`);
       if (card) card.classList.add('com-arquivo');
+      // Atualiza badge: "Vazio" -> "Pendente" (ainda não enviado)
+      atualizarStatusLocal(tipo, 'pendente');
+      // Mostra botão de remover
+      let btnLimpar = document.getElementById('arq-limpar-' + tipo);
+      if (!btnLimpar) {
+        btnLimpar = document.createElement('button');
+        btnLimpar.type = 'button';
+        btnLimpar.id = 'arq-limpar-' + tipo;
+        btnLimpar.className = 'arq-limpar';
+        btnLimpar.title = 'Remover';
+        btnLimpar.textContent = '×';
+        btnLimpar.onclick = () => arquivoLimpar(tipo);
+        const arqDiv = document.getElementById('doc-' + tipo).querySelector('.doc-arquivo');
+        if (arqDiv) arqDiv.appendChild(btnLimpar);
+      }
       let oldThumb = document.getElementById(`thumb-${tipo}`);
       if (oldThumb) oldThumb.remove();
       if (fileFinal.type.startsWith('image/')) {
@@ -417,6 +450,21 @@ async function arquivoEscolhido(tipo, input) {
     alert('Erro ao processar arquivo: ' + err.message);
     input.value = '';
   }
+}
+
+function arquivoLimpar(tipo) {
+  delete arquivosBase64[tipo];
+  const input = document.getElementById('file-' + tipo);
+  if (input) input.value = '';
+  const nomeEl = document.getElementById('arq-nome-' + tipo);
+  const ex = docsExistentes[tipo];
+  if (nomeEl) nomeEl.textContent = ex ? (ex.arquivo_nome || 'Arquivo enviado') : 'Nenhum arquivo';
+  const btnLimpar = document.getElementById('arq-limpar-' + tipo);
+  if (btnLimpar) btnLimpar.remove();
+  const thumb = document.getElementById('thumb-' + tipo);
+  if (thumb) thumb.remove();
+  // Volta badge para o estado original (vazio se nunca enviado, ou pendente se já enviado)
+  atualizarStatusLocal(tipo, ex ? (ex.status || 'pendente') : 'vazio');
 }
 
 function arquivoLimpar(tipo) {
