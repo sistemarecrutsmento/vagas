@@ -72,28 +72,204 @@ function irPara(page) {
 }
 
 // ===== DASHBOARD =====
-async function carregarDashboard() {
-  const grid = document.getElementById('stats-grid');
-  grid.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+// ==== DASHBOARD V2 (jul/2026 - profissional) ====
+async function carregarDashboardV2() {
   try {
     const r = await fetch(API + '/api/admin/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
     const data = await r.json();
-    const s = data.stats || {};
-    grid.innerHTML = `
-      <div class="stat-card vinho"><div class="label">Vagas Ativas</div><div class="valor">${s.vagas_ativas || 0}</div></div>
-      <div class="stat-card"><div class="label">Total de Candidatos</div><div class="valor">${s.total_candidatos || 0}</div></div>
-      <div class="stat-card verde"><div class="label">Processos Ativos</div><div class="valor">${s.processos_ativos || 0}</div></div>
-      <div class="stat-card"><div class="label">Novos (7 dias)</div><div class="valor">${s.novos_7d || 0}</div></div>
-    `;
-    const tb = document.querySelector('#ranking-table tbody');
-    if (data.ranking && data.ranking.length) {
-      tb.innerHTML = data.ranking.map(v => `<tr><td>${v.titulo}</td><td>${v.empresa||'—'}</td><td style="text-align:right;font-weight:700;color:var(--vinho);">${v.total}</td></tr>`).join('');
-    } else {
-      tb.innerHTML = '<tr><td colspan="3" class="empty">Nenhuma vaga com candidatos ainda</td></tr>';
+    if (!r.ok) {
+      console.error('[DASHBOARD]', data);
+      document.getElementById('stats-grid').innerHTML = `<div class="alert alert-erro">Erro: ${data.erro || 'desconhecido'}</div>`;
+      return;
     }
-  } catch {
-    grid.innerHTML = '<div class="alert alert-erro">Erro ao carregar dashboard</div>';
+    // === Saudação dinâmica (bom dia / boa tarde / boa noite) ===
+    const hora = new Date().getHours();
+    const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+    const primeiroNome = (data.admin?.nome || 'Recrutador').split(' ')[0];
+    document.getElementById('dash-greeting').textContent = `${saudacao}, ${primeiroNome}! 👋`;
+    
+    // === KPIs principais (5) ===
+    const k = data.kpis || {};
+    const kpis = [
+      { label: 'Vagas ativas', valor: k.vagas_ativas || 0, delta: k.deltas?.vagas, icon: '💼', cor: 'rosa' },
+      { label: 'Candidatos', valor: k.total_candidatos || 0, delta: k.deltas?.candidatos, icon: '👥', cor: 'azul' },
+      { label: 'Processos ativos', valor: k.processos_ativos || 0, delta: k.deltas?.processos, icon: '📋', cor: 'roxo' },
+      { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: k.deltas?.entrevistas, icon: '📅', cor: 'verde' },
+      { label: 'Novos (7 dias)', valor: k.candidatos_novos_7d || 0, delta: k.deltas?.candidatos, icon: '✨', cor: 'laranja' }
+    ];
+    document.getElementById('stats-grid').innerHTML = kpis.map(k => {
+      const delta = k.delta == null ? '' : (k.delta > 0 ? `<span class="kpi-delta up">+${k.delta}% este mês</span>` : k.delta < 0 ? `<span class="kpi-delta down">${k.delta}% este mês</span>` : `<span class="kpi-delta flat">0% este mês</span>`);
+      return `<div class="kpi-card kpi-${k.cor}">
+        <div class="kpi-top">
+          <div class="kpi-icon">${k.icon}</div>
+        </div>
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-valor">${k.valor}</div>
+        ${delta}
+      </div>`;
+    }).join('');
+    
+    // === Gráfico: Candidatos por etapa ===
+    const etapasObj = data.etapas || {};
+    const labels = data.etapas_labels || ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'];
+    const cores = ['#FF8FA3', '#5B9BD5', '#A78BFA', '#34D399', '#FBBF24', '#F472B6', '#722F37'];
+    const maxEtapa = Math.max(1, ...Object.values(etapasObj).map(v => parseInt(v) || 0));
+    document.getElementById('chart-etapas').innerHTML = labels.map((label, i) => {
+      const etapaNum = i + 1;
+      const val = parseInt(etapasObj[etapaNum] || 0);
+      const pct = (val / maxEtapa) * 100;
+      return `<div class="etapa-row">
+        <div class="etapa-label">${label}</div>
+        <div class="etapa-bar-bg">
+          <div class="etapa-bar" style="width:${pct}%;background:${cores[i]}">
+            <span class="etapa-val">${val}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    
+    // === Taxa de conversão ===
+    const c = data.conversao || {};
+    const hist = c.historico || [];
+    const maxConv = Math.max(1, ...hist);
+    const w = 200, h = 60;
+    let pathD = '';
+    if (hist.length > 1) {
+      const stepX = w / (hist.length - 1);
+      const points = hist.map((v, i) => `${i * stepX},${h - (v / maxConv) * h}`);
+      pathD = `M ${points[0]} L ` + points.slice(1).join(' L ');
+      const fillD = pathD + ` L ${(hist.length - 1) * stepX},${h} L 0,${h} Z`;
+      document.getElementById('chart-conversao').innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:${h}px;">
+          <defs><linearGradient id="conv-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#5B9BD5" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#5B9BD5" stop-opacity="0"/>
+          </linearGradient></defs>
+          <path d="${fillD}" fill="url(#conv-grad)"/>
+          <path d="${pathD}" fill="none" stroke="#5B9BD5" stroke-width="2"/>
+        </svg>
+        <div class="conv-valores">${hist.map((v, i) => `<span>${i + 1}º mês: ${v}%</span>`).join('')}</div>
+      `;
+    } else {
+      document.getElementById('chart-conversao').innerHTML = '<div style="color:#999;font-size:12px;">Sem dados históricos</div>';
+    }
+    document.getElementById('conv-atual').textContent = (c.atual || 0) + '%';
+    document.getElementById('conv-detalhes').textContent = `${c.contratados || 0} de ${c.total || 0} candidatos`;
+    
+    // === Próximas Entrevistas ===
+    const entrevistas = data.proximas_entrevistas || [];
+    if (entrevistas.length > 0) {
+      document.getElementById('proximas-entrevistas').innerHTML = entrevistas.map(e => {
+        const data = new Date(e.data_iso);
+        const dataStr = data.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+        const horaStr = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const badgeClass = e.etapa === 3 ? 'rh' : 'gestor';
+        return `<div class="entrevista-item">
+          <div class="entrevista-avatar">${(e.nome || '?').charAt(0).toUpperCase()}</div>
+          <div class="entrevista-info">
+            <div class="entrevista-nome">${e.nome || '—'}</div>
+            <div class="entrevista-vaga">${e.vaga || '—'}</div>
+            <div class="entrevista-data">📅 ${dataStr} às ${horaStr}</div>
+          </div>
+          <div class="entrevista-badge entrevista-${badgeClass}">${e.etapa_nome || (e.etapa === 3 ? 'RH' : 'Gestor')}</div>
+        </div>`;
+      }).join('');
+    } else {
+      document.getElementById('proximas-entrevistas').innerHTML = '<div class="empty-msg">Nenhuma entrevista agendada</div>';
+    }
+    
+    // === Documentação (taxa de aprovação) ===
+    const taxaDoc = data.kpis_secundarios?.taxa_documentacao || 0;
+    const totalDocs = 16;
+    const aprovados = Math.round(totalDocs * taxaDoc / 100);
+    const circ = 2 * Math.PI * 32;
+    const offset = circ - (taxaDoc / 100) * circ;
+    document.getElementById('doc-rosca').innerHTML = `
+      <svg viewBox="0 0 80 80" style="width:80px;height:80px;transform:rotate(-90deg);">
+        <circle cx="40" cy="40" r="32" fill="none" stroke="#E5E5E5" stroke-width="8"/>
+        <circle cx="40" cy="40" r="32" fill="none" stroke="#722F37" stroke-width="8"
+          stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
+      </svg>
+      <div class="doc-rosca-texto">${taxaDoc}%</div>
+    `;
+    document.getElementById('doc-progresso-barra').style.width = taxaDoc + '%';
+    document.getElementById('doc-progresso-barra').textContent = taxaDoc > 10 ? `${aprovados}/${totalDocs} aprovados` : '';
+    
+    // === Vagas com mais candidatos ===
+    const vRanking = data.vagas_mais_candidatos || [];
+    if (vRanking.length > 0) {
+      document.getElementById('ranking-table-body').innerHTML = vRanking.map(v => `
+        <tr>
+          <td><strong>${v.titulo || '—'}</strong><br><span style="color:#888;font-size:12px;">${v.empresa || '—'}</span></td>
+          <td><span class="badge ${v.status === 'publicada' ? 'badge-ativa' : 'badge-fechada'}">${v.status === 'publicada' ? 'Ativa' : 'Encerrada'}</span></td>
+          <td style="text-align:right;">
+            <span style="color:#722F37;font-weight:700;">${v.total_candidatos || 0}</span>
+            <span style="color:#888;font-size:12px;"> / ${v.contratados || 0} contrat.</span>
+          </td>
+        </tr>
+      `).join('');
+    } else {
+      document.getElementById('ranking-table-body').innerHTML = '<tr><td colspan="3" class="empty">Nenhuma vaga com candidatos</td></tr>';
+    }
+    
+    // === Atividades recentes ===
+    const ats = data.atividades_recentes || [];
+    if (ats.length > 0) {
+      document.getElementById('atividades-recentes').innerHTML = ats.slice(0, 6).map(a => {
+        const quando = tempoRelativo(a.quando);
+        const acaoLabel = {
+          'inscricao': '✨ Nova inscrição',
+          'avancar': '▶️ Avançou etapa',
+          'reprovar': '✖ Reprovado',
+          'reabrir': '↩ Reaberto',
+          'recusar_proposta': '✖ Proposta recusada',
+          'aceitar_proposta': '✓ Proposta aceita',
+          'enviar_proposta': '📨 Proposta enviada'
+        }[a.texto] || a.texto;
+        return `<div class="atv-item">
+          <div class="atv-bullet"></div>
+          <div class="atv-content">
+            <div class="atv-titulo">${acaoLabel} — <strong>${a.candidato || '—'}</strong></div>
+            <div class="atv-sub">${a.vaga || '—'}</div>
+            <div class="atv-quando">${quando}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      document.getElementById('atividades-recentes').innerHTML = '<div class="empty-msg">Nenhuma atividade recente</div>';
+    }
+    
+    // === KPIs secundários ===
+    const ks = data.kpis_secundarios || {};
+    document.getElementById('ks-tempo-medio').textContent = (ks.tempo_medio_contratacao || 0) + 'd';
+    document.getElementById('ks-aprovacao').textContent = (ks.taxa_aprovacao || 0) + '%';
+    document.getElementById('ks-desligamento').textContent = (ks.taxa_desligamento || 0) + '%';
+    document.getElementById('ks-encerradas').textContent = ks.vagas_encerradas || 0;
+    document.getElementById('ks-empresas').textContent = ks.empresas_ativas || 0;
+  } catch (e) {
+    console.error('[DASHBOARD V2]', e);
+    document.getElementById('stats-grid').innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
   }
+}
+
+function tempoRelativo(dataIso) {
+  if (!dataIso) return '—';
+  const agora = new Date();
+  const data = new Date(dataIso);
+  const diffMs = agora - data;
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return 'agora mesmo';
+  if (diffMin < 60) return `há ${diffMin} min`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `há ${diffH} hora${diffH > 1 ? 's' : ''}`;
+  const diffD = Math.floor(diffH / 24);
+  if (diffD < 7) return `há ${diffD} dia${diffD > 1 ? 's' : ''}`;
+  return data.toLocaleDateString('pt-BR');
+}
+
+// Mantém a função antiga pra compatibilidade
+async function carregarDashboard() {
+  return carregarDashboardV2();
 }
 
 // ===== VAGAS =====
