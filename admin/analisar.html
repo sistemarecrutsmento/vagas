@@ -163,7 +163,11 @@
     function render(c, docsCard) {
       const content = document.getElementById('content');
       const etapas = (c.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
-      const etapaAtual = Number(c.etapa_atual || 1);
+      // etapa_atual do banco = 1-indexed da PRÓXIMA etapa a fazer (etapa 1 = Inscrição concluída,
+      // candidato está em andamento na etapa 2 = Triagem). Aqui exibimos o número da etapa em
+      // andamento, que é etapa_atual + 1.
+      const etapaAtualBanco = Number(c.etapa_atual || 1);
+      const etapaAtual = etapaAtualBanco + 1;
       const totalEtapas = etapas.length || 1;
       const ehTriagem = etapaAtual === 2; // 2ª etapa = Triagem Curricular
       // 5ª etapa = Proposta (índice 4)
