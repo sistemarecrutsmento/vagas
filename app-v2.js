@@ -58,14 +58,30 @@ window.addEventListener('DOMContentLoaded', () => {
   checarAuth();
   // Garante o ☰ no logo (mesmo deslogado)
   setTimeout(garantirBotaoMenu, 50);
-  document.querySelectorAll('.filtro-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.filtro-chip').forEach(c => c.classList.remove('ativo'));
-      chip.classList.add('ativo');
-      categoriaAtiva = chip.dataset.cat;
+  document.querySelectorAll('#filtro-dropdown button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat;
+      const label = btn.textContent.trim();
+      document.querySelectorAll('#filtro-dropdown button').forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      document.getElementById('filtro-label').textContent = '📂 ' + label;
+      categoriaAtiva = cat;
+      document.getElementById('filtro-dropdown').classList.remove('aberto');
       carregarVagas();
     });
   });
+});
+
+function toggleFiltroDropdown() {
+  document.getElementById('filtro-dropdown').classList.toggle('aberto');
+}
+
+// Fecha dropdown ao clicar fora
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('filtro-dropdown');
+  if (dd && !e.target.closest('.filtros-row')) {
+    dd.classList.remove('aberto');
+  }
 });
 
 // ===== API: VAGAS =====
@@ -1199,14 +1215,22 @@ function statusLabel(s) {
 }
 
 function logout() {
+  if (!confirm('Tem certeza que deseja sair da sua conta?')) return;
   localStorage.removeItem('candidato_token');
   localStorage.removeItem('candidato_email');
   localStorage.removeItem('candidato_nome');
   tokenCandidato = null;
   cadastroCompleto = false;
   emailLogado = null;
+  fecharDrawer();
   atualizarHeaderUsuario();
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('aberto'));
+  // Redireciona pra home se não estiver lá
+  if (!location.pathname.endsWith('index.html') && !location.pathname.endsWith('/')) {
+    location.href = 'index.html';
+  } else {
+    location.reload();
+  }
 }
 
 // fechar modal ao clicar fora
