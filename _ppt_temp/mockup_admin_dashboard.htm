@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+  body { background: #FAFAFA; color: #1a1a1a; display: flex; }
+  .sidebar { width: 240px; background: #1a1a1a; color: white; min-height: 100vh; padding: 20px 0; }
+  .logo { padding: 0 20px 24px; font-size: 20px; font-weight: 800; border-bottom: 1px solid #333; }
+  .logo span { color: #722F37; }
+  .nav { padding: 16px 0; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #ccc; font-size: 14px; cursor: pointer; }
+  .nav-item:hover, .nav-item.active { background: #722F37; color: white; }
+  .nav-item.active { border-left: 3px solid white; }
+  .main { flex: 1; padding: 24px 32px; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .page-title { font-size: 22px; font-weight: 700; }
+  .user-chip { display: flex; align-items: center; gap: 10px; padding: 6px 14px; background: white; border-radius: 20px; font-size: 14px; }
+  .avatar { width: 28px; height: 28px; background: #722F37; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .stat-label { color: #888; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 800; color: #1a1a1a; }
+  .stat-delta { color: #4CAF50; font-size: 12px; margin-top: 4px; }
+  .stat-icon { float: right; width: 36px; height: 36px; background: rgba(114,47,55,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .section-title { font-size: 16px; font-weight: 700; margin: 24px 0 12px; }
+  .vagas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .vaga-card { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid #722F37; }
+  .vaga-title { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .vaga-meta { color: #888; font-size: 12px; margin-bottom: 8px; }
+  .vaga-stats { display: flex; justify-content: space-between; align-items: center; }
+  .vaga-candidatos { background: #722F37; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .vaga-status { font-size: 11px; color: #4CAF50; font-weight: 600; }
+  .new-btn { background: #722F37; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">Vagas<span>.io</span></div>
+    <div class="nav">
+      <div class="nav-item active">📊 Dashboard</div>
+      <div class="nav-item">💼 Vagas</div>
+      <div class="nav-item">👥 Candidatos</div>
+      <div class="nav-item">📋 Candidaturas</div>
+      <div class="nav-item">📄 Documentos</div>
+      <div class="nav-item">📈 Relatórios</div>
+      <div class="nav-item">⚙️ Configurações</div>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="top-bar">
+      <div class="page-title">Dashboard</div>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <button class="new-btn">+ Nova Vaga</button>
+        <div class="user-chip">
+          <div class="avatar">FJ</div>
+          <div>Fabio Júnior</div>
+        </div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-icon">💼</div>
+        <div class="stat-label">Vagas Ativas</div>
+        <div class="stat-value">12</div>
+        <div class="stat-delta">↑ 3 esta semana</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">Candidatos</div>
+        <div class="stat-value">847</div>
+        <div class="stat-delta">↑ 47 esta semana</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-label">Processos Ativos</div>
+        <div class="stat-value">34</div>
+        <div class="stat-delta">8 precisam atenção</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-label">Novos (7 dias)</div>
+        <div class="stat-value">23</div>
+        <div class="stat-delta">↑ 18% vs semana anterior</div>
+      </div>
+    </div>
+    <div class="section-title">Vagas com mais movimento</div>
+    <div class="vagas-grid">
+      <div class="vaga-card">
+        <div class="vaga-title">Estagiário(a) de Administração</div>
+        <div class="vaga-meta">Grupo Vértice · Aracaju/SE</div>
+        <div class="vaga-stats">
+          <span class="vaga-status">● Publicada</span>
+          <span class="vaga-candidatos">14 candidatos</span>
+        </div>
+      </div>
+      <div class="vaga-card">
+        <div class="vaga-title">Farmacêutico(a)</div>
+        <div class="vaga-meta">Drogaria Bem Estar · Aracaju/SE</div>
+        <div class="vaga-stats">
+          <span class="vaga-status">● Em processo</span>
+          <span class="vaga-candidatos">9 candidatos</span>
+        </div>
+      </div>
+      <div class="vaga-card">
+        <div class="vaga-title">Gerente Administrativo</div>
+        <div class="vaga-meta">Distribuidora Prime · Aracaju/SE</div>
+        <div class="vaga-stats">
+          <span class="vaga-status">● Em processo</span>
+          <span class="vaga-candidatos">6 candidatos</span>
+        </div>
+      </div>
+      <div class="vaga-card">
+        <div class="vaga-title">Garçom / Garçonete</div>
+        <div class="vaga-meta">Restaurante Sabor & Arte · Aracaju/SE</div>
+        <div class="vaga-stats">
+          <span class="vaga-status">● Publicada</span>
+          <span class="vaga-candidatos">11 candidatos</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
