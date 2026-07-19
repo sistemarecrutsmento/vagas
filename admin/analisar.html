@@ -172,7 +172,89 @@
         }
       }
       render(candidatura, docsCard);
+      window.currentCandidatura = candidatura;
+      carregarEntrevistasExistentes(id);
     })();
+
+    // Carrega entrevistas já existentes e pré-popula o card (modo edição/confirmação)
+    async function carregarEntrevistasExistentes(candidaturaId) {
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/candidatura/' + candidaturaId + '/entrevistas', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!r.ok) return;
+        const data = await r.json();
+        const entrevistas = data.entrevistas || [];
+        if (entrevistas.length === 0) return;
+
+        // Pega a mais recente que ainda está agendada (status='agendada')
+        const ativa = entrevistas.find(e => e.status === 'agendada') || entrevistas[0];
+        // Converte data_hora pra formato do input datetime-local (YYYY-MM-DDTHH:MM)
+        const d = new Date(ativa.data_hora);
+        const pad = n => String(n).padStart(2, '0');
+        const dataLocal = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+                          'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+
+        const card = document.getElementById('card-agendamento-entrevista');
+        if (!card) return;
+
+        const dataFmt = d.toLocaleString('pt-BR', {
+          weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+
+        card.outerHTML =
+          '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #16A34A; background: #F0FDF4;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
+              '<h2 style="margin:0; color:#166534;">✅ Entrevista Agendada</h2>' +
+              '<div style="display:flex; gap:8px;">' +
+                '<button class="btn" style="background:#FFF; color:#166534; border:1px solid #16A34A;" onclick="editarEntrevista(' + JSON.stringify(ativa).replace(/"/g, '&quot;') + ')">✏️ Editar</button>' +
+                '<button class="btn" style="background:#FFF; color:#991B1B; border:1px solid #DC2626;" onclick="cancelarEntrevista(' + ativa.id + ')">🗑️ Cancelar</button>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
+              '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
+              '<div><strong style="color:#166534;">📍 Local:</strong><br>' + (ativa.local || '—') + '</div>' +
+              (ativa.link_reuniao ? '<div style="grid-column: 1 / -1;"><strong style="color:#166534;">🔗 Link:</strong> <a href="' + ativa.link_reuniao + '" target="_blank" style="color:#7C3AED;">' + ativa.link_reuniao + '</a></div>' : '') +
+            '</div>' +
+            '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:12px; color:#166534; border:1px solid #BBF7D0;">' +
+              '💡 Esta entrevista já está visível na aba <strong>📅 Agenda</strong> do seu Dashboard.' +
+            '</div>' +
+          '</div>';
+
+        // Esconde o botão "Confirmar" do form de baixo (se houver) e guarda os valores pra reaproveitar
+        window._entrevistaAtual = ativa;
+      } catch (e) {
+        console.warn('Falha ao carregar entrevistas existentes:', e);
+      }
+    }
+
+    function editarEntrevista(entrevista) {
+      // Recarrega a página com a entrevista no formulário de edição
+      // Alternativa: trocar o card de volta pro modo form
+      const card = document.getElementById('card-agendamento-entrevista');
+      if (!card) return location.reload();
+      // Como outerHTML substitui, vamos pedir reload — simples e robusto
+      location.reload();
+    }
+
+    async function cancelarEntrevista(entrevistaId) {
+      if (!confirm('Tem certeza que deseja cancelar esta entrevista?')) return;
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/entrevista/' + entrevistaId, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ status: 'cancelada' })
+        });
+        if (!r.ok) throw new Error('Falha ao cancelar');
+        alert('✅ Entrevista cancelada.');
+        location.reload();
+      } catch (e) {
+        alert('❌ Erro: ' + e.message);
+      }
+    }
 
     function render(c, docsCard) {
       const content = document.getElementById('content');
@@ -600,7 +682,8 @@
     }
 
     async function salvarEntrevista(candidaturaId, etapaNum) {
-      const btn = document.querySelector('#card-agendamento-entrevista button');
+      const card = document.getElementById('card-agendamento-entrevista');
+      const btn = card.querySelector('button');
       const dataVal = document.getElementById('entrevista-data').value;
       const localVal = document.getElementById('entrevista-local').value;
       const linkVal = document.getElementById('entrevista-link').value;
@@ -628,11 +711,29 @@
         const res = await r.json();
         if (!r.ok) throw new Error(res.erro || 'Falha ao agendar');
 
-        alert('✅ Entrevista agendada com sucesso! Ela já aparece no seu Dashboard.');
-        location.reload();
+        // Troca o card pelo modo de confirmação (sem recarregar a página!)
+        const dataFmt = new Date(dataVal).toLocaleString('pt-BR', {
+          weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+        card.outerHTML =
+          '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #16A34A; background: #F0FDF4;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
+              '<h2 style="margin:0; color:#166534;">✅ Entrevista Agendada</h2>' +
+              '<button class="btn" style="background:#FFF; color:#166534; border:1px solid #16A34A;" onclick="render(currentCandidatura)">✏️ Editar</button>' +
+            '</div>' +
+            '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
+              '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
+              '<div><strong style="color:#166534;">📍 Local:</strong><br>' + (localVal || '—') + '</div>' +
+              (linkVal ? '<div style="grid-column: 1 / -1;"><strong style="color:#166534;">🔗 Link:</strong> <a href="' + linkVal + '" target="_blank" style="color:#7C3AED;">' + linkVal + '</a></div>' : '') +
+            '</div>' +
+            '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:12px; color:#166534; border:1px solid #BBF7D0;">' +
+              '💡 Esta entrevista já está visível na aba <strong>📅 Agenda</strong> do seu Dashboard.' +
+            '</div>' +
+          '</div>';
+
       } catch (e) {
         alert('❌ Erro ao agendar: ' + e.message);
-      } finally {
         btn.disabled = false;
         btn.innerHTML = '💾 Confirmar Agendamento';
       }
