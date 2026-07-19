@@ -840,7 +840,11 @@ async function carregarCands() {
     }));
 
     listaEl.innerHTML = cands.map(c => {
-      const etapaAtual = Number(c.etapa_atual || 0);
+      // etapa_atual do banco = 0-indexed da PRÓXIMA etapa a fazer.
+      // etapaAtualBanco: índice 0-based para acessar c.etapas
+      // etapaAtual: 1-based para exibir no texto "Etapa X de N"
+      const etapaAtualBanco = Number(c.etapa_atual || 0);
+      const etapaAtual = etapaAtualBanco + 1;
       const totalEtapas = c.etapas.length;
       const isReprovado = (c.status === 'reprovado' || c.status === 'rejeitado');
       const isContratado = (c.status === 'contratado' || c.status === 'contratada');
@@ -854,10 +858,10 @@ async function carregarCands() {
         const { nome, descricao } = etapaObj(e);
         let cls = '';
         let bola = (i + 1).toString();
-        if (i < etapaAtual) {
+        if (i < etapaAtualBanco) {
           cls = 'concluida';
           bola = '✓';
-        } else if (i === etapaAtual) {
+        } else if (i === etapaAtualBanco) {
           if (isReprovado) { cls = 'reprovada'; bola = '✕'; }
           else if (isContratado) { cls = 'concluida'; bola = '✓'; }
           else { cls = 'andamento'; bola = '⏳'; }
@@ -869,16 +873,17 @@ async function carregarCands() {
         </div>`;
       }).join('');
       // --- Barra de progresso (% concluído) ---
-      const etapasConcluidas = Math.min(etapaAtual, totalEtapas);
+      // etapaAtualBanco = quantas etapas já passaram (0 = nenhuma, total = tudo concluído)
+      const etapasConcluidas = Math.min(etapaAtualBanco, totalEtapas);
       const pct = totalEtapas > 0 ? Math.round((etapasConcluidas / totalEtapas) * 100) : 0;
       // --- Descrição da etapa atual (destaque) ---
-      const etapaAtualObj = c.etapas[etapaAtual];
+      const etapaAtualObj = c.etapas[etapaAtualBanco];
       const etapaAtualFmt = etapaObj(etapaAtualObj);
       const etapaNome = (() => {
         if (isContratado) return '🎉 Contratação concluída';
         if (isReprovado) return 'Processo encerrado';
         if (!etapaAtualObj) return 'Inscrição recebida';
-        return `Etapa ${etapaAtual + 1} de ${totalEtapas} — ${etapaAtualFmt.nome}`;
+        return `Etapa ${etapaAtual} de ${totalEtapas} — ${etapaAtualFmt.nome}`;
       })();
       const etapaDescricao = (() => {
         if (isContratado) return 'Parabéns! Você foi aprovado em todas as etapas.';
