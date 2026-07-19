@@ -581,8 +581,10 @@
   .btn-hamburguer-header:hover { background: #f5f5f7; }
 
   /* ☰ na lateral direita, alinhado com o logo "Vagas.io" */
-  .btn-menu-logo { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 60; }
+  .btn-menu-logo { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; }
   .btn-menu-logo:hover { background: rgba(255,255,255,0.25); }
+  /* Empurra o header-actions pra não cobrir o ☰ */
+  /* nada */
   /* (sem padding-right aqui — ☰ só aparece quando logado+cadastro completo) */
   .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: all 0.25s; z-index: 99; }
   .drawer-overlay.aberto { opacity: 1; visibility: visible; }
@@ -638,8 +640,8 @@
   </div>
 </aside>
 
-<script src="app-v2.js?v=1784500000_FINAL"></script>
-<script src="modals.js?v=1784500000_FINAL"></script>
+<script src="app-v2.js?v=1784600000_HEADER"></script>
+<script src="modals.js?v=1784600000_HEADER"></script>
 <script>
 function abrirDrawer(e) {
   if (e) e.stopPropagation();
@@ -649,7 +651,9 @@ function abrirDrawer(e) {
   drawer.classList.add('aberto');
   overlay.classList.add('aberto');
   // Popula dados do usuário
-  const logado = !!(window.tokenCandidato);
+  // tokenCandidato é uma variável do app-v2.js; window.tokenCandidato
+  // pode ficar vazio mesmo quando o usuário está logado.
+  const logado = !!(typeof tokenCandidato !== 'undefined' && tokenCandidato);
   const cadastroOk = !!(window.cadastroCompleto);
   const podeAcessar = logado && cadastroOk;
   const nome = localStorage.getItem('candidato_nome') || window.emailLogado || (logado ? 'Candidato' : 'Visitante');
