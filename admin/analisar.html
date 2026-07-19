@@ -136,10 +136,13 @@
         return;
       }
 
-      // Carrega documentos se estiver na fase de coleta (etapa 4 = index 3 OU etapa_atual >= 5)
+      // Carrega documentos se estiver na fase de coleta (índice 6 = Coleta Documentos)
+      // ou após (índice 7 = Contratação). Para vagas menores, ajusta abaixo.
       const etapaNum = Number(candidatura.etapa_atual || 0);
       let docsCard = '';
-      if (etapaNum >= 4) {
+      // Coleta = índice (total - 2) para a maioria das vagas (Penúltima etapa)
+      const idxColetaEsperado = (candidatura.etapas || []).length - 2;
+      if (etapaNum >= idxColetaEsperado) {
         try {
           await carregarDocumentos(id);
           if (_obrigatoriosDocs.length) {
@@ -163,17 +166,22 @@
     function render(c, docsCard) {
       const content = document.getElementById('content');
       const etapas = (c.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
-      // etapa_atual do banco = 1-indexed da PRÓXIMA etapa a fazer (etapa 1 = Inscrição concluída,
-      // candidato está em andamento na etapa 2 = Triagem). Aqui exibimos o número da etapa em
-      // andamento, que é etapa_atual + 1.
-      const etapaAtualBanco = Number(c.etapa_atual || 1);
+      // etapa_atual do banco = 0-indexed da PRÓXIMA etapa a fazer (etapa_atual=0 = Inscrição,
+      // etapa_atual=1 = Triagem após Inscrição concluída, etc).
+      // etapaAtual = 1-indexed da etapa em andamento (etapa_atual + 1), usado no display.
+      // As comparações abaixo (ehProposta, ehTriagem, etc) usam etapa_atual direto (0-indexed)
+      // porque o backend grava os valores com esse significado (linha 1528 do server.js).
+      const etapaAtualBanco = Number(c.etapa_atual || 0);
       const etapaAtual = etapaAtualBanco + 1;
       const totalEtapas = etapas.length || 1;
-      const ehTriagem = etapaAtual === 2; // 2ª etapa = Triagem Curricular
-      // 5ª etapa = Proposta (índice 4)
-      const ehProposta = etapaAtual === 5;
-      // 4ª etapa = Entrevista gestor (índice 3) — onde o admin pode preparar a proposta
-      const ehEntrevistaGestor = etapaAtual === 4;
+      // Compara com etapa_atual do banco (0-indexed): Proposta=5, Entrevista Gestor=4, Triagem=1
+      // (Triagem=índice 1 do array; o backend grava etapa_atual=1 quando a inscrição é concluída)
+      const ehTriagem = etapaAtualBanco === 1;
+      // Proposta está no índice 5 nas vagas com 8 etapas (Inscrição=0, Triagem=1, RH=2, Gestor=3,
+      // Validação=4, Proposta=5)
+      const ehProposta = etapaAtualBanco === 5;
+      // Entrevista gestor = índice 3 (4ª etapa)
+      const ehEntrevistaGestor = etapaAtualBanco === 3;
       const status = c.status || 'em_andamento';
 
 
@@ -185,11 +193,13 @@
       const idxEtapaRH = etapas.findIndex(n => /entrevista.*rh|rh.*entrevista/i.test(n));
       const idxEtapaGestor = etapas.findIndex(n => /entrevista.*gestor|gestor.*entrevista/i.test(n));
       // Etapas já atingidas (para mostrar os comentários como histórico)
+      // etapa_atual (0-indexed) indica quantas etapas foram concluídas. idx+1 é 1-indexed.
+      // Se idx+1 <= etapa_atual+1 (=etapaAtual), a etapa já passou.
       const etapaRHAtingida = idxEtapaRH >= 0 && (idxEtapaRH + 1) <= etapaAtual;
       const etapaGestorAtingida = idxEtapaGestor >= 0 && (idxEtapaGestor + 1) <= etapaAtual;
       // Etapa de coleta de documentos (por nome)
       const idxEtapaColeta = etapas.findIndex(n => /coleta.*documento|documento.*coleta/i.test(n));
-      const ehEtapaColeta = idxEtapaColeta >= 0 && (idxEtapaColeta + 1) === etapaAtual;
+      const ehEtapaColeta = idxEtapaColeta >= 0 && idxEtapaColeta === etapaAtualBanco;
 
       // Timeline interativa: cada bolinha é clicável e rola até a seção correspondente
       const timeline = etapas.map((nome, i) => {
