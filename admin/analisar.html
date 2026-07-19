@@ -428,6 +428,34 @@
         '</div>';
       }
 
+      // Card de agendamento de entrevista (jul/2026)
+      const entrevistaCard = (idxEtapaRH >= 0 && (idxEtapaRH + 1) === etapaAtual) || (idxEtapaGestor >= 0 && (idxEtapaGestor + 1) === etapaAtual) ? (
+        '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #7C3AED;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
+            '<h2 style="margin:0;">📅 Agendar Entrevista</h2>' +
+            '<span style="font-size:11px; background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:999px; font-weight:700;">DASHBOARD PROFISSIONAL</span>' +
+          '</div>' +
+          '<p style="font-size:13px; color:#666; margin-bottom:16px;">Configure a data, hora e local da entrevista para aparecer na sua Agenda Administrativa.</p>' +
+          '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">' +
+            '<div>' +
+              '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Data e Hora</label>' +
+              '<input type="datetime-local" id="entrevista-data" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
+            '</div>' +
+            '<div>' +
+              '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Local / Plataforma</label>' +
+              '<input type="text" id="entrevista-local" placeholder="Ex: Google Meet, Presencial..." style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
+            '</div>' +
+          '</div>' +
+          '<div style="margin-bottom:16px;">' +
+            '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Link da Reunião (opcional)</label>' +
+            '<input type="url" id="entrevista-link" placeholder="https://meet.google.com/..." style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
+          '</div>' +
+          '<div style="display:flex; justify-content:flex-end; gap:8px;">' +
+            '<button class="btn" style="background:#7C3AED; color:white;" onclick="salvarEntrevista(' + c.id + ', ' + etapaAtual + ')">💾 Confirmar Agendamento</button>' +
+          '</div>' +
+        '</div>'
+      ) : '';
+
       // Constrói o card de comentário por etapa (só aparece se a vaga tem essa etapa E foi atingida)
       const comentarioRHCard = (idxEtapaRH >= 0 && etapaRHAtingida) ? (
         '<div class="card" id="card-comentario-rh">' +
@@ -475,6 +503,8 @@
           '<div style="font-size:12px;color:var(--cinza-medio);margin-bottom:6px">💡 Clique em uma etapa para ver detalhes.</div>' +
           '<div class="timeline">' + timeline + '</div>' +
         '</div>' +
+
+        entrevistaCard +
 
         // 2) Histórico do Processo (logo abaixo da timeline, conforme combinado)
         historicoCard +
@@ -532,42 +562,48 @@
     // Salva a observação interna de uma etapa (sem mudar status/etapa da candidatura)
     async function salvarComentarioEtapa(candidaturaId, etapaNum) {
       // Pega o textarea certo: o botão que chamou a função está dentro de um card com data-etapa
-      let comentario = '';
-      const btns = document.querySelectorAll('button[onclick*="salvarComentarioEtapa"]');
-      let btnClicou = null;
-      for (const b of btns) {
-        if (b.onclick && b.onclick.toString().includes(`salvarComentarioEtapa(${candidaturaId},${etapaNum})`)) {
-          btnClicou = b;
-          break;
-        }
-      }
-      if (btnClicou) {
-        const card = btnClicou.closest('.card');
-        const ta = card ? card.querySelector('textarea') : null;
-        if (ta) comentario = ta.value || '';
-      }
-      comentario = (comentario || '').trim();
-      if (!comentario) {
-        alert('Digite um comentário antes de salvar.');
-        return;
-      }
-      try {
-        const token = localStorage.getItem('admin_token');
-        // Usa a mesma rota /status passando APENAS a etapa + comentario (sem acao)
-        // → status/etapa NÃO mudam, só a observação é gravada
-        const r = await fetch(API + '/api/admin/candidatura/' + candidaturaId + '/comentario', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ etapa: etapaNum, comentario: comentario })
-        });
-        const data = await r.json();
-        if (r.ok) {
-          alert('✅ Comentário salvo.');
-        } else {
-          alert('Erro: ' + (data.erro || 'Não foi possível salvar'));
-        }
+...
       } catch (e) {
         alert('Erro: ' + e.message);
+      }
+    }
+
+    async function salvarEntrevista(candidaturaId, etapaNum) {
+      const btn = document.querySelector('#card-agendamento-entrevista button');
+      const dataVal = document.getElementById('entrevista-data').value;
+      const localVal = document.getElementById('entrevista-local').value;
+      const linkVal = document.getElementById('entrevista-link').value;
+      const token = localStorage.getItem('admin_token');
+
+      if (!dataVal) return alert('Por favor, selecione a data e hora da entrevista.');
+
+      try {
+        btn.disabled = true;
+        btn.innerHTML = 'Salvando...';
+
+        const r = await fetch(API + '/api/admin/entrevista', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({
+            candidatura_id: candidaturaId,
+            etapa: etapaNum,
+            data_hora: dataVal,
+            local: localVal,
+            link_reuniao: linkVal,
+            observacoes: `Entrevista agendada via painel de análise.`
+          })
+        });
+
+        const res = await r.json();
+        if (!r.ok) throw new Error(res.erro || 'Falha ao agendar');
+
+        alert('✅ Entrevista agendada com sucesso! Ela já aparece no seu Dashboard.');
+        location.reload();
+      } catch (e) {
+        alert('❌ Erro ao agendar: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '💾 Confirmar Agendamento';
       }
     }
 
