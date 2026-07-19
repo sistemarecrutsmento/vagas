@@ -1012,8 +1012,8 @@ async function salvarPerfilCompleto(target) {
   }
 
   try {
-    const r = await fetch(API + '/api/candidato/cadastrar', {
-      method: 'POST',
+    const r = await fetch(API + '/api/candidato/perfil', {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
       body: JSON.stringify(payload)
     });
