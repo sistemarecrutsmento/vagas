@@ -359,10 +359,12 @@
       if (stats.reprovados > 0) {
         return alert('Há ' + stats.reprovados + ' documento(s) reprovado(s). Reverter para pendente antes de aprovar.');
       }
-      if (stats.aprovados < stats.total) {
-        return alert('Apenas ' + stats.aprovados + '/' + stats.total + ' documentos aprovados.');
+      // Sem trava de "todos aprovados" — esta ação global APROVA TUDO (pendentes inclusos).
+      // O backend cuida de marcar todos os obrigatórios como 'aprovado' e avançar a etapa.
+      if (stats.enviados < stats.total) {
+        return alert('Faltam documentos a enviar. O candidato precisa enviar todos antes da aprovação.');
       }
-      if (!confirm('Confirmar a aprovação de TODOS os ' + stats.total + ' documentos e avançar a etapa do candidato?')) return;
+      if (!confirm('Confirmar a aprovação de TODOS os ' + stats.total + ' documentos (' + (stats.pendentes || 0) + ' serão aprovados agora) e avançar a etapa do candidato?')) return;
 
       const btn = document.getElementById('btn-aprovar-tudo-topo');
       const id = new URLSearchParams(location.search).get('id');
