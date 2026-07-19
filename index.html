@@ -46,11 +46,14 @@
     }
 
     /* Filtros */
-    .filtros { padding: 24px 0; background: var(--cinza); border-bottom: 1px solid var(--borda); }
-    .filtros-row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .filtro-chip { background: var(--branco); border: 1px solid var(--borda); padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
-    .filtro-chip:hover { border-color: var(--vinho); }
-    .filtro-chip.ativo { background: var(--vinho); color: var(--branco); border-color: var(--vinho); }
+    .filtros { padding: 12px 0; background: var(--cinza); border-bottom: 1px solid var(--borda); }
+    .filtros-row { display: flex; gap: 10px; align-items: center; position: relative; }
+    .filtro-toggle { background: var(--vinho); color: var(--branco); border: none; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .filtro-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 200px; z-index: 100; overflow: hidden; display: none; }
+    .filtro-dropdown.aberto { display: block; }
+    .filtro-dropdown button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--preto); }
+    .filtro-dropdown button:hover { background: var(--cinza); }
+    .filtro-dropdown button.ativo { background: var(--vinho); color: var(--branco); font-weight: 600; }
 
     /* Vagas */
     .vagas-section { padding: 60px 0; min-height: 400px; }
@@ -324,13 +327,22 @@
 <div class="filtros">
   <div class="container">
     <div class="filtros-row">
-      <button class="filtro-chip ativo" data-cat="">Todas</button>
-      <button class="filtro-chip" data-cat="Tecnologia">Tecnologia</button>
-      <button class="filtro-chip" data-cat="Administrativo">Administrativo</button>
-      <button class="filtro-chip" data-cat="Comercial">Comercial</button>
-      <button class="filtro-chip" data-cat="Operacional">Operacional</button>
-      <button class="filtro-chip" data-cat="Saúde">Saúde</button>
-      <button class="filtro-chip" data-cat="Educação">Educação</button>
+      <button class="filtro-toggle" id="filtro-label">📂 Todas</button>
+      <button class="filtro-toggle" style="background: var(--branco); color: var(--preto); border: 1px solid var(--borda);" onclick="toggleFiltroDropdown()">Filtrar ▾</button>
+      <div class="filtro-dropdown" id="filtro-dropdown">
+        <button data-cat="" class="ativo">Todas</button>
+        <button data-cat="Tecnologia">Tecnologia</button>
+        <button data-cat="Administrativo">Administrativo</button>
+        <button data-cat="Comercial">Comercial</button>
+        <button data-cat="Operacional">Operacional</button>
+        <button data-cat="Saúde">Saúde</button>
+        <button data-cat="Educação">Educação</button>
+        <button data-cat="Atendimento / Vendas">Atendimento / Vendas</button>
+        <button data-cat="Administração / Gestão">Administração / Gestão</button>
+        <button data-cat="Farmacêutico">Saúde / Farmácia</button>
+        <button data-cat="Gastronomia">Gastronomia</button>
+        <button data-cat="Estágio">Estágio</button>
+      </div>
     </div>
   </div>
 </div>
@@ -626,7 +638,7 @@
   </div>
 </aside>
 
-<script src="app-v2.js?v=1784433000_4"></script>
+<script src="app-v2.js?v=1784433000_6"></script>
 <script src="modals.js?v=1784405164_2"></script>
 <script>
 function abrirDrawer(e) {
