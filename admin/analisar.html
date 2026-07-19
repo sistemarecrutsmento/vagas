@@ -29,6 +29,13 @@
     .dados-pessoais-header h2 { margin: 0; padding: 0; border: none; }
     .dados-foto { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: var(--cinza-claro); }
     .dados-foto-vazia { display: inline-flex; align-items: center; justify-content: center; font-size: 22px; color: var(--cinza-medio); border: 1px solid var(--cinza); }
+    .exp-lista { display: flex; flex-direction: column; gap: 10px; }
+    .exp-item-admin { display: flex; gap: 12px; padding: 12px 14px; border-left: 3px solid var(--vinho); background: #FAFAFA; border-radius: 4px; }
+    .exp-item-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--vinho); color: white; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+    .exp-item-corpo { flex: 1; min-width: 0; }
+    .exp-item-titulo { font-size: 14px; color: var(--preto); margin-bottom: 2px; }
+    .exp-item-periodo { font-size: 12px; color: var(--cinza-medio); margin-bottom: 4px; }
+    .exp-item-desc { font-size: 13px; color: #444; margin-top: 4px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .field { font-size: 14px; }
     .field-label { color: var(--cinza-medio); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
@@ -248,15 +255,20 @@
       const exps = Array.isArray(c.experiencias) ? c.experiencias : [];
       let expsHtml = '';
       if (exps.length > 0) {
-        expsHtml = exps.map(e => {
+        expsHtml = '<div class="exp-lista">' + exps.map((e, i) => {
           const ini = fmtData(e.inicio) || '';
-          const fim = e.fim ? (fmtData(e.fim)) : (e.atual ? 'Atual' : '');
-          return '<div style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#FAFAFA">' +
-            '<strong>' + (e.cargo || '—') + '</strong> em ' + (e.empresa || '—') + '<br>' +
-            '<small style="color:var(--cinza-medio)">' + ini + (fim ? ' — ' + fim : '') + '</small>' +
-            (e.descricao ? '<p style="font-size:13px;margin-top:4px">' + e.descricao + '</p>' : '') +
+          // Backend retorna 'emprego_atual' (não 'atual')
+          const isAtual = e.emprego_atual || e.atual;
+          const fim = e.fim ? (fmtData(e.fim)) : (isAtual ? 'Atual' : '');
+          return '<div class="exp-item-admin">' +
+            '<div class="exp-item-num">' + (i + 1) + '</div>' +
+            '<div class="exp-item-corpo">' +
+              '<div class="exp-item-titulo"><strong>' + (e.cargo || '—') + '</strong> em ' + (e.empresa || '—') + '</div>' +
+              '<div class="exp-item-periodo">' + ini + (fim ? ' — ' + fim : '') + '</div>' +
+              (e.descricao ? '<div class="exp-item-desc">' + e.descricao + '</div>' : '') +
+            '</div>' +
             '</div>';
-        }).join('');
+        }).join('') + '</div>';
       } else if (c.experiencia) {
         expsHtml = '<div style="padding:10px;border-left:3px solid var(--vinho);background:#FAFAFA;font-size:14px;white-space:pre-wrap">' + c.experiencia + '</div>';
       } else {
