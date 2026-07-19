@@ -246,13 +246,17 @@
           corpo += '<div class="doc-justificativa">' + titulo + ': ' + escapeHtml(d.justificativa_admin) + '</div>';
         }
 
-        // Botões (apenas "Retornar" — sem aprovar/reprovar individual)
+        // Botões (Aprovar individual + Retornar/Reverter)
         let acoes = '<div class="doc-acoes">';
         if (isArquivo && d && d.arquivo_url) {
           acoes += '<button class="doc-btn doc-btn-baixar" onclick="baixarUm(' + d.id + ')">📥 Baixar</button>';
         }
         if (d && d.status !== 'aprovado') {
+          acoes += '<button class="doc-btn doc-btn-aprovar" onclick="revisar(' + d.id + ', ' + "'aprovar'" + ')">✅ Aprovar</button>';
           acoes += '<button class="doc-btn doc-btn-retornar" onclick="retornarDoc(' + d.id + ')">📨 Retornar</button>';
+        }
+        if (d && d.status === 'aprovado') {
+          acoes += '<button class="doc-btn doc-btn-retornar" onclick="revisar(' + d.id + ', ' + "'reverter'" + ')">↩️ Reverter</button>';
         }
         acoes += '</div>';
 
@@ -273,8 +277,10 @@
     }
 
     async function revisar(docId, acao) {
-      // Apenas reverter (voltar pra pendente) — aprovar/reprovar foram removidos do fluxo
-      if (acao === 'reverter') {
+      // Aprovar: marca o doc como 'aprovado' direto (sem precisar aprovar tudo em massa)
+      if (acao === 'aprovar') {
+        if (!confirm('Aprovar este documento?')) return;
+      } else if (acao === 'reverter') {
         if (!confirm('Reverter este documento para status pendente?')) return;
       } else {
         return;
@@ -287,10 +293,10 @@
           body: JSON.stringify({ acao })
         });
         const data = await r.json();
-        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao reverter')); return; }
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao revisar')); return; }
         const idx = _documentos.findIndex(d => d.id === docId);
         if (idx >= 0) {
-          _documentos[idx] = { ..._documentos[idx], status: data.documento.status || 'pendente', justificativa_admin: null, revisado_em: new Date().toISOString() };
+          _documentos[idx] = { ..._documentos[idx], status: data.documento.status || (acao === 'aprovar' ? 'aprovado' : 'pendente'), justificativa_admin: null, revisado_em: new Date().toISOString() };
         }
         render();
       } catch (e) {
