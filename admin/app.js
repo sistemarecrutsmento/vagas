@@ -546,8 +546,38 @@ function abrirModalVaga(vaga) {
   document.getElementById('v-descricao').value = vaga?.descricao || '';
   document.getElementById('v-requisitos').value = vaga?.requisitos || '';
   document.getElementById('v-beneficios').value = vaga?.beneficios || '';
+  // Carregar etapas (se for array de objetos, pegar só os nomes)
+  let etapasArr = vaga?.etapas;
+  if (typeof etapasArr === 'string') { try { etapasArr = JSON.parse(etapasArr); } catch (e) { etapasArr = []; } }
+  if (Array.isArray(etapasArr) && etapasArr.length > 0) {
+    const nomes = etapasArr.map(e => typeof e === 'string' ? e : (e.nome || '')).filter(Boolean);
+    document.getElementById('v-etapas').value = nomes.join('\n');
+  } else {
+    document.getElementById('v-etapas').value = '';
+  }
+  document.getElementById('v-template').value = ''; // reset template selector
   document.getElementById('alert-vaga').innerHTML = '';
   abrirModal('vaga');
+}
+
+const TEMPLATES_ETAPAS = {
+  operacional: ['Inscrição', 'Triagem curricular', 'Teste prático', 'Entrevista gestor', 'Contratação'],
+  administrativo: ['Inscrição', 'Triagem curricular', 'Entrevista RH', 'Entrevista gestor', 'Contratação'],
+  ti: ['Inscrição', 'Triagem curricular', 'Teste técnico', 'Entrevista RH', 'Entrevista gestor', 'Contratação'],
+  comercial: ['Inscrição', 'Triagem curricular', 'Dinâmica de vendas', 'Entrevista gestor', 'Contratação'],
+  estagio: ['Inscrição', 'Triagem curricular', 'Entrevista RH', 'Teste prático', 'Contratação'],
+  personalizado: []
+};
+
+function aplicarTemplateEtapas() {
+  const tpl = document.getElementById('v-template').value;
+  if (!tpl) return;
+  const etapas = TEMPLATES_ETAPAS[tpl];
+  if (etapas && etapas.length > 0) {
+    document.getElementById('v-etapas').value = etapas.join('\n');
+  } else if (tpl === 'personalizado') {
+    document.getElementById('v-etapas').focus();
+  }
 }
 
 async function editarVaga(id) {
@@ -580,6 +610,10 @@ async function salvarVaga() {
   const salMax = document.getElementById('v-salario-max').value;
   if (salMin) body.salario_min = parseFloat(salMin);
   if (salMax) body.salario_max = parseFloat(salMax);
+  // Etapas (textarea linha-a-linha → array de objetos)
+  const etapasTexto = document.getElementById('v-etapas').value;
+  const etapasArr = etapasTexto.split('\n').map(s => s.trim()).filter(Boolean).map(nome => ({ nome }));
+  if (etapasArr.length > 0) body.etapas = etapasArr;
   if (!body.titulo) {
     document.getElementById('alert-vaga').innerHTML = '<div class="alert alert-erro">Título é obrigatório</div>';
     return;
