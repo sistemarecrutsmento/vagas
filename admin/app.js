@@ -83,13 +83,11 @@ async function carregarDashboardV2() {
       if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro: ${data.erro || 'desconhecido'}</div>`;
       return;
     }
-    console.log('[DEBUG] Dados chegaram, nome:', data.admin?.nome);
     // === Saudação dinâmica (bom dia / boa tarde / boa noite) ===
     const hora = new Date().getHours();
     const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
     const primeiroNome = (data.admin?.nome || 'Recrutador').split(' ')[0];
     document.getElementById('dash-greeting').textContent = `${saudacao}, ${primeiroNome}! 👋`;
-    console.log('[DEBUG] Saudação OK');
     
     // === KPIs principais (5) ===
     const k = data.kpis || {};
@@ -246,15 +244,13 @@ async function carregarDashboardV2() {
     
     // === KPIs secundários ===
     const ks = data.kpis_secundarios || {};
-    document.getElementById('ks-tempo-medio').textContent = (ks.tempo_medio_contratacao || 0) + 'd';
+    document.getElementById('ks-tempo').textContent = (ks.tempo_medio_contratacao || 0) + 'd';
     document.getElementById('ks-aprovacao').textContent = (ks.taxa_aprovacao || 0) + '%';
     document.getElementById('ks-desligamento').textContent = (ks.taxa_desligamento || 0) + '%';
     document.getElementById('ks-encerradas').textContent = ks.vagas_encerradas || 0;
     document.getElementById('ks-empresas').textContent = ks.empresas_ativas || 0;
   } catch (e) {
-    console.error('[DASHBOARD V2] ERRO COMPLETO:', e);
-    console.error('[DASHBOARD V2] STACK:', e.stack);
-    console.error('[DASHBOARD V2] LINHA:', e.stack?.split('\n')[1]);
+    console.error('[DASHBOARD V2] ERRO:', e.message, e.stack);
     const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
     if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
   }
