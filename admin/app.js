@@ -69,7 +69,10 @@ function irPara(page) {
   if (page === 'vagas') carregarVagasAdmin();
   if (page === 'candidatos') carregarCandidatos();
   if (page === 'candidaturas') carregarCandidaturas();
-  if (page === 'equipe') window.location.href = 'equipe.html';
+  if (page === 'equipe') {
+    window.location.href = 'equipe.html';
+    return;
+  }
 }
 
 // ===== DASHBOARD =====
