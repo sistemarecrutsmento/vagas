@@ -751,9 +751,13 @@
       </div>
 
       <div class="form-group">
-        <label>Etapas do processo (uma por linha)</label>
-        <textarea id="v-etapas" rows="6" placeholder="Cada linha = 1 etapa. Ex:&#10;Inscrição&#10;Triagem curricular&#10;Entrevista RH&#10;Contratação"></textarea>
-        <small style="color:var(--txt-sec); display:block; margin-top:6px;">📋 O candidato vai ver essa timeline. A ordem importa.</small>
+        <label>Etapas do processo</label>
+        <small style="color:var(--txt-sec); display:block; margin-bottom:10px;">
+          <span style="color:var(--vinho);">🔒</span> <b>Inscrição</b> e <b>Triagem</b> são obrigatórias. As demais você pode adicionar, remover e reordenar.
+        </small>
+        <div id="v-etapas-lista" style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;"></div>
+        <button type="button" class="btn btn-sec" style="width:auto; padding:6px 12px; font-size:13px;" onclick="adicionarEtapaVaga()">+ Adicionar etapa</button>
+        <input type="hidden" id="v-etapas">
       </div>
     </div>
     <div class="modal-footer">
@@ -795,6 +799,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260721172200_templates_etapas"></script>
+<script src="app.js?v=20260721172600_editor_etapas_visual"></script>
 </body>
 </html>
