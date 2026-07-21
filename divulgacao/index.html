@@ -9,20 +9,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    /* ============== PALETA ============== */
+    /* ============== PALETA OFICIAL VAGAS.IO ============== */
     :root {
-      --bg: #0a0a0a;
-      --bg-2: #131313;
-      --bg-3: #1c1c1c;
-      --dourado: #d4af37;
-      --dourado-2: #f0c040;
-      --dourado-3: #b8941f;
-      --txt: #f5f5f5;
-      --txt-sec: #a0a0a0;
-      --borda: #2a2a2a;
-      --verde: #22c55e;
-      --azul: #3b82f6;
-      --vermelho: #ef4444;
+      --bg: #FFFFFF;
+      --bg-2: #FAF7F8;
+      --bg-3: #F5EFF1;
+      --vinho: #722F37;
+      --vinho-escuro: #4A1F25;
+      --vinho-claro: #8B3A45;
+      --txt: #1A1A1A;
+      --txt-sec: #6B6B6B;
+      --borda: #E5E5E5;
+      --branco: #FFFFFF;
+      --preto: #1A1A1A;
+      --cinza: #F5F5F5;
+      --verde: #28A745;
+      --azul: #0C5460;
+      --vermelho: #C62828;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -33,14 +36,14 @@
       line-height: 1.6;
       overflow-x: hidden;
     }
-    a { color: var(--dourado); text-decoration: none; }
-    a:hover { color: var(--dourado-2); }
+    a { color: var(--vinho); text-decoration: none; }
+    a:hover { color: var(--vinho-escuro); }
 
     /* ============== HEADER ============== */
     header {
       position: fixed; top: 0; left: 0; right: 0;
       z-index: 100;
-      background: rgba(10,10,10,0.85);
+      background: rgba(255,255,255,0.92);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--borda);
@@ -57,30 +60,30 @@
     }
     .logo-icon {
       width: 36px; height: 36px;
-      background: linear-gradient(135deg, var(--dourado), var(--dourado-3));
+      background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro));
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      color: #000; font-weight: 900; font-size: 18px;
-      box-shadow: 0 4px 12px rgba(212,175,55,0.3);
+      color: #FFF; font-weight: 900; font-size: 18px;
+      box-shadow: 0 4px 12px rgba(114,47,55,0.3);
     }
-    .logo span { color: var(--dourado); }
+    .logo span { color: var(--vinho); }
     nav { display: flex; gap: 28px; align-items: center; }
     nav a {
       color: var(--txt-sec); font-size: 14px; font-weight: 500;
       transition: color 0.2s;
     }
-    nav a:hover { color: var(--dourado); }
+    nav a:hover { color: var(--vinho); }
     .btn-cta-header {
       padding: 8px 18px;
-      background: var(--dourado);
-      color: #000;
+      background: var(--vinho);
+      color: #FFF;
       border-radius: 6px;
       font-weight: 700; font-size: 13px;
       transition: transform 0.2s, background 0.2s;
     }
     .btn-cta-header:hover {
-      background: var(--dourado-2);
-      color: #000;
+      background: var(--vinho-claro);
+      color: #FFF;
       transform: translateY(-1px);
     }
     @media (max-width: 768px) {
@@ -94,8 +97,8 @@
       padding: 120px 24px 80px;
       position: relative;
       background:
-        radial-gradient(circle at 20% 30%, rgba(212,175,55,0.15), transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(212,175,55,0.08), transparent 50%),
+        radial-gradient(circle at 20% 30%, rgba(114,47,55,0.12), transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(114,47,55,0.06), transparent 50%),
         var(--bg);
       text-align: center;
     }
@@ -103,9 +106,9 @@
     .hero-badge {
       display: inline-block;
       padding: 6px 16px;
-      background: rgba(212,175,55,0.1);
-      border: 1px solid rgba(212,175,55,0.3);
-      color: var(--dourado);
+      background: rgba(114,47,55,0.08);
+      border: 1px solid rgba(114,47,55,0.25);
+      color: var(--vinho);
       border-radius: 50px;
       font-size: 13px; font-weight: 600;
       margin-bottom: 24px;
@@ -116,9 +119,10 @@
       line-height: 1.1;
       margin-bottom: 24px;
       letter-spacing: -1.5px;
+      color: var(--txt);
     }
     .hero h1 .destaque {
-      background: linear-gradient(135deg, var(--dourado), var(--dourado-2));
+      background: linear-gradient(135deg, var(--vinho), var(--vinho-claro));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -141,15 +145,15 @@
       cursor: pointer; border: none;
     }
     .btn-primary {
-      background: var(--dourado);
-      color: #000;
-      box-shadow: 0 8px 24px rgba(212,175,55,0.3);
+      background: var(--vinho);
+      color: #FFF;
+      box-shadow: 0 8px 24px rgba(114,47,55,0.3);
     }
     .btn-primary:hover {
-      background: var(--dourado-2);
-      color: #000;
+      background: var(--vinho-claro);
+      color: #FFF;
       transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(212,175,55,0.4);
+      box-shadow: 0 12px 32px rgba(114,47,55,0.4);
     }
     .btn-secondary {
       background: transparent;
@@ -157,8 +161,8 @@
       border: 1px solid var(--borda);
     }
     .btn-secondary:hover {
-      border-color: var(--dourado);
-      color: var(--dourado);
+      border-color: var(--vinho);
+      color: var(--vinho);
     }
     .hero-stats {
       display: flex; gap: 48px; justify-content: center;
@@ -167,7 +171,7 @@
     .stat { text-align: center; }
     .stat-num {
       font-size: 36px; font-weight: 900;
-      color: var(--dourado);
+      color: var(--vinho);
       line-height: 1;
     }
     .stat-label {
@@ -189,7 +193,7 @@
       margin-bottom: 16px;
       letter-spacing: -0.5px;
     }
-    .section-title h2 .destaque { color: var(--dourado); }
+    .section-title h2 .destaque { color: var(--vinho); }
     .section-title p {
       font-size: 18px; color: var(--txt-sec);
       max-width: 600px; margin: 0 auto;
@@ -202,7 +206,7 @@
       gap: 24px;
     }
     .atalho-card {
-      background: linear-gradient(180deg, var(--bg-2), var(--bg-3));
+      background: var(--bg-2);
       border: 1px solid var(--borda);
       border-radius: 16px;
       padding: 32px 28px;
@@ -214,18 +218,18 @@
       color: inherit;
     }
     .atalho-card:hover {
-      border-color: var(--dourado);
+      border-color: var(--vinho);
       transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(212,175,55,0.15);
+      box-shadow: 0 20px 40px rgba(114,47,55,0.15);
     }
     .atalho-icon {
       width: 64px; height: 64px;
-      background: linear-gradient(135deg, var(--dourado), var(--dourado-3));
+      background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro));
       border-radius: 14px;
       margin: 0 auto 20px;
       display: flex; align-items: center; justify-content: center;
       font-size: 32px;
-      box-shadow: 0 8px 20px rgba(212,175,55,0.3);
+      box-shadow: 0 8px 20px rgba(114,47,55,0.3);
     }
     .atalho-card h3 {
       font-size: 22px; font-weight: 700;
@@ -237,7 +241,7 @@
     }
     .atalho-link {
       display: inline-flex; align-items: center; gap: 6px;
-      color: var(--dourado); font-weight: 600; font-size: 14px;
+      color: var(--vinho); font-weight: 600; font-size: 14px;
     }
     .atalho-card:hover .atalho-link { gap: 10px; }
 
@@ -255,8 +259,8 @@
       transition: all 0.3s;
     }
     .recurso:hover {
-      border-color: var(--dourado);
-      background: linear-gradient(180deg, var(--bg-2), rgba(212,175,55,0.05));
+      border-color: var(--vinho);
+      background: linear-gradient(180deg, var(--bg-2), rgba(114,47,55,0.05));
     }
     .recurso-emoji {
       font-size: 36px;
@@ -285,7 +289,7 @@
       transition: all 0.3s;
     }
     .screenshot:hover {
-      border-color: var(--dourado);
+      border-color: var(--vinho);
       transform: translateY(-4px);
     }
     .screenshot-img {
@@ -311,8 +315,8 @@
     .screenshot-tag {
       display: inline-block;
       padding: 4px 10px;
-      background: rgba(212,175,55,0.15);
-      color: var(--dourado);
+      background: rgba(114,47,55,0.15);
+      color: var(--vinho);
       border-radius: 4px;
       font-size: 11px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.5px;
@@ -335,13 +339,13 @@
     }
     .passo-num {
       width: 56px; height: 56px;
-      background: linear-gradient(135deg, var(--dourado), var(--dourado-3));
-      color: #000;
+      background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro));
+      color: #FFF;
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 24px; font-weight: 900;
       margin: 0 auto 20px;
-      box-shadow: 0 8px 20px rgba(212,175,55,0.3);
+      box-shadow: 0 8px 20px rgba(114,47,55,0.3);
     }
     .passo h3 {
       font-size: 17px; font-weight: 700; margin-bottom: 8px;
@@ -369,13 +373,13 @@
     .comparacao-row.header {
       background: var(--bg-3);
       font-weight: 700; font-size: 14px;
-      color: var(--dourado);
+      color: var(--vinho);
     }
     .comparacao-row .col { font-size: 14px; }
     .comparacao-row .col:first-child { font-weight: 600; }
     .check { color: var(--verde); font-weight: 700; }
     .x { color: var(--vermelho); font-weight: 700; }
-    .meio { color: var(--dourado); }
+    .meio { color: var(--vinho); }
     @media (max-width: 600px) {
       .comparacao-row { grid-template-columns: 1fr 1fr; padding: 12px; font-size: 13px; }
       .comparacao-row .col:first-child { grid-column: span 2; margin-bottom: 6px; }
@@ -401,7 +405,7 @@
       transition: all 0.3s;
     }
     .contato-card:hover {
-      border-color: var(--dourado);
+      border-color: var(--vinho);
     }
     .contato-emoji {
       font-size: 32px;
@@ -418,7 +422,7 @@
       font-size: 15px; font-weight: 600;
       color: var(--txt);
     }
-    .contato-card a:hover { color: var(--dourado); }
+    .contato-card a:hover { color: var(--vinho); }
 
     /* ============== FOOTER ============== */
     footer {
@@ -428,7 +432,7 @@
       color: var(--txt-sec);
       font-size: 14px;
     }
-    footer a { color: var(--dourado); font-weight: 600; }
+    footer a { color: var(--vinho); font-weight: 600; }
 
     /* ============== ANIMAÇÕES ============== */
     @keyframes fadeUp {
