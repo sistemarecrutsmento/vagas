@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vaga · Portal Empresa · Vagas.io</title>
+  <link rel="stylesheet" href="https://sistemarecrutsmento.github.io/vagas/css/app.css" />
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-claro: #8a3a44;
+      --dourado: #C9A961;
+      --bg: #f7f5f2;
+      --card: #ffffff;
+      --texto: #1a1a1a;
+      --texto-suave: #6b6b6b;
+      --borda: #e5e0d8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--texto); }
+
+    header {
+      background: var(--vinho); color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
+    }
+    .marca { font-size: 22px; font-weight: 800; }
+    .marca .dourado { color: var(--dourado); }
+    .marca small { font-size: 11px; color: rgba(255,255,255,0.7); margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+    .user-info .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--vinho); display: flex; align-items: center; justify-content: center; font-weight: 800; }
+    .btn-sair { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .btn-sair:hover { background: rgba(255,255,255,0.2); }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .voltar { color: var(--vinho); text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 16px; }
+    .voltar:hover { text-decoration: underline; }
+
+    h1 { font-size: 26px; margin-bottom: 4px; }
+    .vaga-meta { color: var(--texto-suave); margin-bottom: 8px; font-size: 14px; }
+    .vaga-desc { color: var(--texto); font-size: 14px; line-height: 1.5; max-width: 800px; margin-bottom: 24px; white-space: pre-wrap; }
+
+    .filtros { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filtros button { background: var(--card); border: 1px solid var(--borda); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--texto); }
+    .filtros button.ativo { background: var(--vinho); color: #fff; border-color: var(--vinho); }
+
+    .candidatos { background: var(--card); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
+    .cand-row { display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 16px; padding: 16px 20px; align-items: center; border-bottom: 1px solid var(--borda); cursor: pointer; transition: background 0.15s; }
+    .cand-row:hover { background: #faf8f5; }
+    .cand-row:last-child { border-bottom: 0; }
+    .cand-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--vinho); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+    .cand-info h4 { font-size: 15px; margin-bottom: 2px; }
+    .cand-info small { color: var(--texto-suave); font-size: 12px; }
+    .etapa-badge { background: #f3f0eb; color: var(--vinho); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .etapa-badge.dourado { background: rgba(201,169,97,0.15); color: #8a6914; }
+    .etapa-badge.verde { background: rgba(22,163,74,0.1); color: #16a34a; }
+    .etapa-badge.cinza { background: #eee; color: #666; }
+    .status { font-size: 12px; padding: 4px 8px; border-radius: 6px; }
+    .status.ativo { background: rgba(37,99,235,0.1); color: #2563eb; }
+    .status.contratado { background: rgba(22,163,74,0.1); color: #16a34a; }
+    .status.rejeitado { background: rgba(220,38,38,0.1); color: #dc2626; }
+    .status.pendente { background: rgba(245,158,11,0.1); color: #f59e0b; }
+
+    .acoes { display: flex; gap: 6px; }
+    .btn-acao { background: var(--vinho); color: #fff; border: 0; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .btn-acao:hover { background: var(--vinho-claro); }
+    .btn-acao.reprovar { background: #dc2626; }
+    .btn-acao.reprovar:hover { background: #b91c1c; }
+
+    .empty { padding: 60px 24px; text-align: center; color: var(--texto-suave); }
+    .empty .icon { font-size: 48px; margin-bottom: 12px; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--texto); color: #fff; padding: 12px 18px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
+    .toast.ativo { opacity: 1; }
+    .toast.erro { background: #dc2626; }
+    .toast.sucesso { background: #16a34a; }
+
+    @media (max-width: 768px) {
+      .cand-row { grid-template-columns: auto 1fr; gap: 8px; }
+      .cand-row .etapa-badge, .cand-row .status, .cand-row .acoes { grid-column: 2; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="marca">Vagas<span class="dourado">.io</span> <small>Portal da Empresa</small></div>
+    <div class="user-info">
+      <div class="avatar" id="avatar">--</div>
+      <div>
+        <div style="font-weight:600;" id="user-nome">--</div>
+        <div style="font-size:12px;opacity:0.8;" id="user-empresa">--</div>
+      </div>
+      <a class="btn-sair" href="perfil.html" style="text-decoration:none;display:inline-block;">⚙️ Perfil</a>
+<button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <a class="voltar" href="index.html">← Voltar para o dashboard</a>
+    <h1 id="vaga-titulo">Carregando...</h1>
+    <div class="vaga-meta" id="vaga-meta"></div>
+    <p class="vaga-desc" id="vaga-desc"></p>
+
+    <div class="filtros" id="filtros">
+      <button class="ativo" data-filtro="todos" onclick="filtrar('todos', this)">Todos</button>
+      <button data-filtro="em_andamento" onclick="filtrar('em_andamento', this)">Em andamento</button>
+      <button data-filtro="aguardando" onclick="filtrar('aguardando', this)">Aguardando você</button>
+      <button data-filtro="contratado" onclick="filtrar('contratado', this)">Contratados</button>
+      <button data-filtro="rejeitado" onclick="filtrar('rejeitado', this)">Reprovados</button>
+    </div>
+
+    <div class="candidatos" id="lista">
+      <div class="empty"><div class="icon">⏳</div>Carregando candidatos...</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = 'https://recrutamento-api.onrender.com';
+    const token = localStorage.getItem('empresa_token');
+    if (!token) window.location.href = 'login.html';
+
+    const url = new URL(window.location.href);
+    const vagaId = url.searchParams.get('id');
+    if (!vagaId) window.location.href = 'index.html';
+
+    let candidatosCache = [];
+    let filtroAtual = 'todos';
+
+    function iniciais(nome) {
+      if (!nome) return '?';
+      return nome.split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+    }
+
+    function sair() {
+      if (confirm('Sair do portal?')) {
+        localStorage.removeItem('empresa_token');
+        localStorage.removeItem('empresa_usuario');
+        window.location.href = 'login.html';
+      }
+    }
+
+    function toast(msg, tipo = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ativo ' + tipo;
+      setTimeout(() => t.className = 'toast', 3000);
+    }
+
+    function statusClass(s) {
+      if (s === 'contratado') return 'contratado';
+      if (s === 'rejeitado') return 'rejeitado';
+      if (s === 'pendente') return 'pendente';
+      return 'ativo';
+    }
+
+    function statusLabel(s) {
+      if (s === 'em_andamento') return 'Em andamento';
+      if (s === 'contratado') return 'Contratado';
+      if (s === 'rejeitado') return 'Reprovado';
+      if (s === 'pendente') return 'Pendente';
+      return s;
+    }
+
+    function filtrar(f, btn) {
+      filtroAtual = f;
+      document.querySelectorAll('.filtros button').forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      render();
+    }
+
+    function render() {
+      let lista = candidatosCache;
+      if (filtroAtual === 'aguardando') {
+        lista = lista.filter(c => c.status === 'em_andamento' && c.etapa_atual >= 4);
+      } else if (filtroAtual !== 'todos') {
+        lista = lista.filter(c => c.status === filtroAtual);
+      }
+
+      if (lista.length === 0) {
+        document.getElementById('lista').innerHTML = `<div class="empty"><div class="icon">📭</div>Nenhum candidato neste filtro.</div>`;
+        return;
+      }
+
+      document.getElementById('lista').innerHTML = lista.map(c => {
+        const etapaNum = c.etapa_atual || 1;
+        const etapaNome = c.etapa_nome || `Etapa ${etapaNum}`;
+        const podeAprovar = c.status === 'em_andamento' && etapaNum >= 4;
+        const status = statusClass(c.status);
+        const statusTxt = statusLabel(c.status);
+        return `
+          <div class="cand-row" onclick="window.location.href='candidato.html?id=${c.id}'">
+            <div class="cand-avatar">${iniciais(c.nome)}</div>
+            <div class="cand-info">
+              <h4>${c.nome}</h4>
+              <small>${c.email || ''}</small>
+            </div>
+            <span class="etapa-badge ${podeAprovar ? 'dourado' : ''}">${etapaNome}</span>
+            <span class="status ${status}">${statusTxt}</span>
+            <div class="acoes" onclick="event.stopPropagation()">
+              <button class="btn-acao" onclick="window.location.href='candidato.html?id=${c.id}'">Ver</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function carregar() {
+      const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
+      document.getElementById('avatar').textContent = iniciais(usuario.nome);
+      document.getElementById('user-nome').textContent = usuario.nome || '--';
+      document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
+
+      try {
+        // Info da vaga
+        const rv = await fetch(API + '/api/admin/vagas/' + vagaId, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (rv.status === 403 || rv.status === 401) { window.location.href = 'index.html'; return; }
+        // Se o admin endpoint recusar (token não é admin), tenta via empresa
+        let vaga = null;
+        if (rv.ok) {
+          vaga = await rv.json();
+        } else {
+          // Pega via dashboard que lista vagas liberadas
+          const rd = await fetch(API + '/api/empresa/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
+          if (!rd.ok) { window.location.href = 'index.html'; return; }
+          const dd = await rd.json();
+          vaga = (dd.vagas || []).find(v => String(v.id) === String(vagaId));
+        }
+        if (!vaga) { window.location.href = 'index.html'; return; }
+        document.getElementById('vaga-titulo').textContent = vaga.titulo || 'Vaga';
+        document.getElementById('vaga-meta').textContent = `📍 ${vaga.cidade || '--'}${vaga.estado ? ' / ' + vaga.estado : ''} · ${vaga.tipo_contrato || '--'}`;
+        document.getElementById('vaga-desc').textContent = vaga.descricao || '';
+
+        // Candidatos
+        const rc = await fetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await rc.json();
+        if (!rc.ok) { toast(data.erro || 'Erro', 'erro'); return; }
+        candidatosCache = data.candidatos || [];
+        render();
+      } catch (e) {
+        console.error(e);
+        toast('Erro de conexão', 'erro');
+      }
+    }
+
+    carregar();
+  </script>
+</body>
+</html>
