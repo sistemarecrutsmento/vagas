@@ -79,7 +79,8 @@ async function carregarDashboardV2() {
     const data = await r.json();
     if (!r.ok) {
       console.error('[DASHBOARD]', data);
-      document.getElementById('stats-grid').innerHTML = `<div class="alert alert-erro">Erro: ${data.erro || 'desconhecido'}</div>`;
+      const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
+      if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro: ${data.erro || 'desconhecido'}</div>`;
       return;
     }
     // === Saudação dinâmica (bom dia / boa tarde / boa noite) ===
@@ -97,7 +98,7 @@ async function carregarDashboardV2() {
       { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: k.deltas?.entrevistas, icon: '📅', cor: 'verde' },
       { label: 'Novos (7 dias)', valor: k.candidatos_novos_7d || 0, delta: k.deltas?.candidatos, icon: '✨', cor: 'laranja' }
     ];
-    document.getElementById('stats-grid').innerHTML = kpis.map(k => {
+    document.getElementById('kpis-grid').innerHTML = kpis.map(k => {
       const delta = k.delta == null ? '' : (k.delta > 0 ? `<span class="kpi-delta up">+${k.delta}% este mês</span>` : k.delta < 0 ? `<span class="kpi-delta down">${k.delta}% este mês</span>` : `<span class="kpi-delta flat">0% este mês</span>`);
       return `<div class="kpi-card kpi-${k.cor}">
         <div class="kpi-top">
@@ -114,7 +115,7 @@ async function carregarDashboardV2() {
     const labels = data.etapas_labels || ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'];
     const cores = ['#FF8FA3', '#5B9BD5', '#A78BFA', '#34D399', '#FBBF24', '#F472B6', '#722F37'];
     const maxEtapa = Math.max(1, ...Object.values(etapasObj).map(v => parseInt(v) || 0));
-    document.getElementById('chart-etapas').innerHTML = labels.map((label, i) => {
+    document.getElementById('grafico-etapas').innerHTML = labels.map((label, i) => {
       const etapaNum = i + 1;
       const val = parseInt(etapasObj[etapaNum] || 0);
       const pct = (val / maxEtapa) * 100;
@@ -139,19 +140,16 @@ async function carregarDashboardV2() {
       const points = hist.map((v, i) => `${i * stepX},${h - (v / maxConv) * h}`);
       pathD = `M ${points[0]} L ` + points.slice(1).join(' L ');
       const fillD = pathD + ` L ${(hist.length - 1) * stepX},${h} L 0,${h} Z`;
-      document.getElementById('chart-conversao').innerHTML = `
-        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:${h}px;">
-          <defs><linearGradient id="conv-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#5B9BD5" stop-opacity="0.3"/>
-            <stop offset="100%" stop-color="#5B9BD5" stop-opacity="0"/>
-          </linearGradient></defs>
-          <path d="${fillD}" fill="url(#conv-grad)"/>
-          <path d="${pathD}" fill="none" stroke="#5B9BD5" stroke-width="2"/>
-        </svg>
-        <div class="conv-valores">${hist.map((v, i) => `<span>${i + 1}º mês: ${v}%</span>`).join('')}</div>
-      `;
+      // Atualiza o SVG já existente no HTML
+      const pathEl = document.getElementById('conversao-path');
+      const lineEl = document.getElementById('conversao-line');
+      if (pathEl) pathEl.setAttribute('d', fillD);
+      if (lineEl) lineEl.setAttribute('d', pathD);
     } else {
-      document.getElementById('chart-conversao').innerHTML = '<div style="color:#999;font-size:12px;">Sem dados históricos</div>';
+      const pathEl = document.getElementById('conversao-path');
+      const lineEl = document.getElementById('conversao-line');
+      if (pathEl) pathEl.setAttribute('d', '');
+      if (lineEl) lineEl.setAttribute('d', '');
     }
     document.getElementById('conv-atual').textContent = (c.atual || 0) + '%';
     document.getElementById('conv-detalhes').textContent = `${c.contratados || 0} de ${c.total || 0} candidatos`;
@@ -248,7 +246,8 @@ async function carregarDashboardV2() {
     document.getElementById('ks-empresas').textContent = ks.empresas_ativas || 0;
   } catch (e) {
     console.error('[DASHBOARD V2]', e);
-    document.getElementById('stats-grid').innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
+    const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
+    grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
   }
 }
 
