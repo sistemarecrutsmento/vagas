@@ -70,11 +70,7 @@ function irPara(page) {
   if (page === 'candidatos') carregarCandidatos();
   if (page === 'candidaturas') carregarCandidaturas();
   if (page === 'equipe') {
-    // Para evitar tela branca em alguns navegadores, garantimos que a div exista
-    if (!document.getElementById('page-equipe')) {
-       window.location.href = 'equipe.html';
-       return;
-    }
+    // Página embutida no index.html — não redireciona mais!
   }
 }
 
