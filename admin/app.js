@@ -101,7 +101,7 @@ async function carregarEquipe() {
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
             <span style="background:#dcfce7; color:#16a34a; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Recrutador</span>
-            <button class="btn btn-sec btn-sm" onclick="alert borders;">Editar</button>
+            <button class="btn btn-sec btn-sm" onclick="alert('Editar em breve')">Editar</button>
           </div>
         </div>
       `).join('');
