@@ -250,9 +250,10 @@ async function carregarDashboardV2() {
     document.getElementById('ks-encerradas').textContent = ks.vagas_encerradas || 0;
     document.getElementById('ks-empresas').textContent = ks.empresas_ativas || 0;
   } catch (e) {
-    console.error('[DASHBOARD V2]', e);
+    console.error('[DASHBOARD V2] ERRO COMPLETO:', e);
+    console.error('[DASHBOARD V2] STACK:', e.stack);
     const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
-    grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
+    if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
   }
 }
 
