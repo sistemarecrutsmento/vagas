@@ -161,18 +161,22 @@ async function carregarDashboardV2() {
     const entrevistas = data.proximas_entrevistas || [];
     if (entrevistas.length > 0) {
       document.getElementById('proximas-entrevistas').innerHTML = entrevistas.map(e => {
-        const data = new Date(e.data_iso);
-        const dataStr = data.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
-        const horaStr = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const dataE = new Date(e.data_hora);
+        const dataStr = dataE.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+        const horaStr = dataE.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         const badgeClass = e.etapa === 3 ? 'rh' : 'gestor';
+        const nome = e.candidato_nome || e.nome || 'Candidato';
+        const vaga = e.vaga_titulo || e.vaga || '—';
+        const etapaNome = e.etapa === 3 ? 'RH' : e.etapa === 4 ? 'Gestor' : (e.etapa_nome || 'Entrevista');
+        const iniciais = nome.split(' ').map(s => s.charAt(0)).slice(0, 2).join('').toUpperCase();
         return `<div class="entrevista-item">
-          <div class="entrevista-avatar">${(e.nome || '?').charAt(0).toUpperCase()}</div>
+          <div class="entrevista-avatar">${iniciais}</div>
           <div class="entrevista-info">
-            <div class="entrevista-nome">${e.nome || '—'}</div>
-            <div class="entrevista-vaga">${e.vaga || '—'}</div>
+            <div class="entrevista-nome">${nome}</div>
+            <div class="entrevista-vaga">${vaga}</div>
             <div class="entrevista-data">📅 ${dataStr} às ${horaStr}</div>
           </div>
-          <div class="entrevista-badge entrevista-${badgeClass}">${e.etapa_nome || (e.etapa === 3 ? 'RH' : 'Gestor')}</div>
+          <div class="entrevista-badge entrevista-${badgeClass}">${etapaNome}</div>
         </div>`;
       }).join('');
     } else {
@@ -218,28 +222,35 @@ async function carregarDashboardV2() {
     // === Atividades recentes ===
     const ats = data.atividades_recentes || [];
     if (ats.length > 0) {
-      document.getElementById('atividades-recentes').innerHTML = ats.slice(0, 6).map(a => {
+      const tipoMap = {
+        'inscricao':        { icone: '✨', label: 'Nova inscrição',  tipo: 'inscricao' },
+        'avancar':          { icone: '▶️', label: 'Avançou etapa',   tipo: 'avancar' },
+        'reprovar':         { icone: '✖', label: 'Reprovado',       tipo: 'reprovar' },
+        'reabrir':          { icone: '↩', label: 'Reaberto',        tipo: 'reabrir' },
+        'recusar_proposta': { icone: '✖', label: 'Proposta recusada', tipo: 'proposta' },
+        'aceitar_proposta': { icone: '✓', label: 'Proposta aceita',  tipo: 'proposta' },
+        'enviar_proposta':  { icone: '📨', label: 'Proposta enviada', tipo: 'proposta' },
+        'entrevista':       { icone: '📅', label: 'Entrevista agendada', tipo: 'entrevista' }
+      };
+      document.getElementById('atividades-recentes').innerHTML = ats.slice(0, 8).map(a => {
+        const t = tipoMap[a.texto] || { icone: '•', label: a.texto, tipo: 'reabrir' };
         const quando = tempoRelativo(a.quando);
-        const acaoLabel = {
-          'inscricao': '✨ Nova inscrição',
-          'avancar': '▶️ Avançou etapa',
-          'reprovar': '✖ Reprovado',
-          'reabrir': '↩ Reaberto',
-          'recusar_proposta': '✖ Proposta recusada',
-          'aceitar_proposta': '✓ Proposta aceita',
-          'enviar_proposta': '📨 Proposta enviada'
-        }[a.texto] || a.texto;
-        return `<div class="atv-item">
-          <div class="atv-bullet"></div>
-          <div class="atv-content">
-            <div class="atv-titulo">${acaoLabel} — <strong>${a.candidato || '—'}</strong></div>
-            <div class="atv-sub">${a.vaga || '—'}</div>
-            <div class="atv-quando">${quando}</div>
+        return `<div class="atividade-item tipo-${t.tipo}">
+          <div class="atividade-icone">${t.icone}</div>
+          <div class="atividade-corpo">
+            <div class="atividade-topo">
+              <span class="atividade-tipo">${t.label}</span>
+              <span class="atividade-tempo">${quando}</span>
+            </div>
+            <div class="atividade-candidato">${a.candidato || '—'}</div>
+            <div class="atividade-vaga">${a.vaga || '—'}</div>
           </div>
         </div>`;
       }).join('');
+      const countEl = document.getElementById('atividades-count');
+      if (countEl) countEl.textContent = ats.length;
     } else {
-      document.getElementById('atividades-recentes').innerHTML = '<div class="empty-msg">Nenhuma atividade recente</div>';
+      document.getElementById('atividades-recentes').innerHTML = '<div class="atividade-empty">Nenhuma atividade recente</div>';
     }
     
     // === KPIs secundários ===
