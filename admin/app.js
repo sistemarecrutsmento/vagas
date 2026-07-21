@@ -70,8 +70,86 @@ function irPara(page) {
   if (page === 'candidatos') carregarCandidatos();
   if (page === 'candidaturas') carregarCandidaturas();
   if (page === 'equipe') {
-    // Página embutida no index.html — não redireciona mais!
+    carregarEquipe();
   }
+}
+
+// ===== EQUIPE =====
+let equipeCarregada = false;
+
+function trocarTabEquipe(tab) {
+  document.querySelectorAll('.tab-equipe').forEach(t => t.classList.remove('ativo'));
+  document.querySelector(`.tab-equipe[data-tab="${tab}"]`)?.classList.add('ativo');
+  document.querySelectorAll('.tab-content-equipe').forEach(c => c.style.display = 'none');
+  document.getElementById('tab-' + tab).style.display = 'block';
+}
+
+async function carregarEquipe() {
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/equipe', { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await r.json();
+
+    // Recrutadores
+    const recDiv = document.getElementById('lista-recrutadores');
+    if (data.recrutadores && data.recrutadores.length > 0) {
+      recDiv.innerHTML = data.recrutadores.map(u => `
+        <div class="vaga-card">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+            <div style="width:48px; height:48px; border-radius:50%; background:var(--vinho); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;">${(u.nome||'?').charAt(0).toUpperCase()}</div>
+            <div><div style="font-weight:700; font-size:16px;">${u.nome}</div><div style="color:#888; font-size:13px;">${u.email}</div></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+            <span style="background:#dcfce7; color:#16a34a; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Recrutador</span>
+            <button class="btn btn-sec btn-sm" onclick="alert borders;">Editar</button>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      recDiv.innerHTML = '<div class="empty">Nenhum recrutador cadastrado. Use "+ Novo Recrutador" acima.</div>';
+    }
+
+    // Empresas
+    const empDiv = document.getElementById('lista-empresas');
+    if (data.empresas && data.empresas.length > 0) {
+      empDiv.innerHTML = data.empresas.map(e => `
+        <div class="vaga-card">
+          <div style="font-weight:700; font-size:16px; margin-bottom:6px;">🏢 ${e.nome}</div>
+          <div style="color:#888; font-size:13px;">${e.email || '—'}</div>
+          <div style="margin-top:10px;"><span style="background:#dbeafe; color:#1e40af; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Empresa</span></div>
+        </div>
+      `).join('');
+    } else {
+      empDiv.innerHTML = '<div class="empty">Nenhuma empresa parceira cadastrada.</div>';
+    }
+    equipeCarregada = true;
+  } catch (e) {
+    document.getElementById('lista-recrutadores').innerHTML = '<div class="empty" style="color:var(--vermelho);">Erro ao carregar equipe. Verifique sua conexão.</div>';
+  }
+}
+
+function abrirModalRecrutador() {
+  const nome = prompt('Nome do recrutador:');
+  if (!nome) return;
+  const email = prompt('Email:');
+  if (!email) return;
+  const senha = prompt('Senha provisória:', 'mudar123');
+  if (!senha) return;
+  criarRecrutador({ nome, email, senha });
+}
+
+async function criarRecrutador(dados) {
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/recrutadores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(dados)
+    });
+    const data = await r.json();
+    if (r.ok) { alert('Recrutador criado com sucesso!'); carregarEquipe(); }
+    else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+  } catch (e) { alert('Erro de conexão'); }
 }
 
 // ===== DASHBOARD =====
