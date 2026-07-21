@@ -72,6 +72,9 @@ function irPara(page) {
   if (page === 'equipe') {
     carregarEquipe();
   }
+  if (page === 'agenda') {
+    carregarAgenda('hoje');
+  }
 }
 
 // ===== EQUIPE =====
@@ -150,6 +153,134 @@ async function criarRecrutador(dados) {
     if (r.ok) { alert('Recrutador criado com sucesso!'); carregarEquipe(); }
     else alert('Erro: ' + (data.erro || JSON.stringify(data)));
   } catch (e) { alert('Erro de conexão'); }
+}
+
+// ===== AGENDA =====
+let agendaPeriodoAtual = 'hoje';
+
+async function carregarAgenda(periodo) {
+  agendaPeriodoAtual = periodo || agendaPeriodoAtual;
+  document.querySelectorAll('.tab-agenda').forEach(t => t.classList.remove('ativo'));
+  document.querySelector(`.tab-agenda[data-periodo="${agendaPeriodoAtual}"]`)?.classList.add('ativo');
+
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  const lista = document.getElementById('agenda-lista');
+  lista.innerHTML = '<div class="empty">Carregando agenda...</div>';
+
+  try {
+    const r = await fetch(API + '/api/admin/entrevistas?periodo=' + agendaPeriodoAtual, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await r.json();
+    const entrevistas = data.entrevistas || [];
+
+    // Stats
+    const stats = document.getElementById('agenda-stats');
+    const cntHoje = entrevistas.filter(e => new Date(e.data_hora).toDateString() === new Date().toDateString()).length;
+    stats.innerHTML = `
+      <div class="card-mini"><div class="label">Hoje</div><div class="valor">${cntHoje}</div></div>
+      <div class="card-mini"><div class="label">Total no período</div><div class="valor">${entrevistas.length}</div></div>
+      <div class="card-mini"><div class="label">Confirmadas</div><div class="valor" style="color:#16a34a;">${entrevistas.filter(e => e.status === 'confirmada').length}</div></div>
+      <div class="card-mini"><div class="label">Agendadas</div><div class="valor" style="color:#2563eb;">${entrevistas.filter(e => e.status === 'agendada').length}</div></div>
+    `;
+
+    if (entrevistas.length === 0) {
+      lista.innerHTML = '<div class="empty">Nenhuma entrevista neste período. Clique em "+ Nova Entrevista" para agendar.</div>';
+      return;
+    }
+
+    lista.innerHTML = entrevistas.map(e => {
+      const dt = new Date(e.data_hora);
+      const dia = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+      const hora = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const etapaNome = { 3: 'RH', 4: 'Gestor', 5: 'Proposta' }[e.etapa] || `Etapa ${e.etapa}`;
+      const statusCores = {
+        agendada: { bg: '#dbeafe', fg: '#1e40af' },
+        confirmada: { bg: '#dcfce7', fg: '#16a34a' },
+        realizada: { bg: '#f3e8ff', fg: '#7c3aed' },
+        cancelada: { bg: '#fee2e2', fg: '#dc2626' },
+        faltou: { bg: '#fef3c7', fg: '#d97706' }
+      };
+      const cor = statusCores[e.status] || { bg: '#f3f4f6', fg: '#6b7280' };
+      const isPassada = dt < new Date();
+      return `
+        <div class="agenda-item">
+          <div class="agenda-data">
+            <div class="agenda-dia">${dia}</div>
+            <div class="agenda-hora">${hora}</div>
+            <div class="agenda-duracao">${e.duracao_minutos || 60}min</div>
+          </div>
+          <div class="agenda-info">
+            <div class="agenda-candidato">${e.candidato_nome || '—'}</div>
+            <div class="agenda-vaga">📋 ${e.vaga_titulo || 'Vaga'} <span style="color:#888;">• Etapa ${e.etapa} (${etapaNome})</span></div>
+            <div class="agenda-meta">
+              ${e.local ? `📍 ${e.local}` : ''}
+              ${e.link_reuniao ? ` • <a href="${e.link_reuniao}" target="_blank">🔗 Link da reunião</a>` : ''}
+              ${e.observacoes ? `<div style="margin-top:6px; color:#666; font-style:italic;">"${e.observacoes}"</div>` : ''}
+            </div>
+          </div>
+          <div class="agenda-acoes">
+            <span class="badge" style="background:${cor.bg}; color:${cor.fg};">${e.status}</span>
+            ${!isPassada ? `
+              <div style="display:flex; gap:4px; margin-top:8px;">
+                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'confirmada')">✓ Confirmar</button>
+                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'realizada')">✔ Realizada</button>
+                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'cancelada')">✕ Cancelar</button>
+              </div>
+            ` : `
+              <div style="display:flex; gap:4px; margin-top:8px;">
+                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'realizada')">✔ Realizada</button>
+                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'faltou')">⚠ Faltou</button>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    lista.innerHTML = '<div class="empty" style="color:var(--vermelho);">Erro ao carregar agenda.</div>';
+  }
+}
+
+async function atualizarEntrevista(id, status) {
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/entrevista/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ status })
+    });
+    if (r.ok) carregarAgenda();
+    else alert('Erro ao atualizar');
+  } catch (e) { alert('Erro de conexão'); }
+}
+
+function abrirModalNovaEntrevista() {
+  const candidaturaId = prompt('ID da candidatura (você encontra no analisar.html):');
+  if (!candidaturaId) return;
+  const etapa = prompt('Etapa (3=RH, 4=Gestor):', '3');
+  const dataHora = prompt('Data e hora (YYYY-MM-DD HH:MM):', new Date(Date.now() + 86400000).toISOString().slice(0,16).replace('T',' '));
+  if (!dataHora) return;
+  const duracao = prompt('Duração em minutos:', '60');
+  const local = prompt('Local (opcional):', '');
+  const link = prompt('Link da reunião (opcional):', '');
+
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  fetch(API + '/api/admin/entrevista', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({
+      candidatura_id: parseInt(candidaturaId),
+      etapa: parseInt(etapa),
+      data_hora: dataHora,
+      duracao_minutos: parseInt(duracao) || 60,
+      local: local || null,
+      link_reuniao: link || null
+    })
+  }).then(r => r.json()).then(d => {
+    if (d.erro) { alert('Erro: ' + d.erro); }
+    else { alert('Entrevista agendada com sucesso!'); carregarAgenda(); }
+  }).catch(() => alert('Erro de conexão'));
 }
 
 // ===== DASHBOARD =====
