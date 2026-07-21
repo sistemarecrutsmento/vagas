@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trocar Senha · Portal Empresa · Vagas.io</title>
+  <link rel="stylesheet" href="https://sistemarecrutsmento.github.io/vagas/css/app.css" />
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-claro: #8a3a44;
+      --dourado: #C9A961;
+      --bg: #f7f5f2;
+      --card: #ffffff;
+      --texto: #1a1a1a;
+      --texto-suave: #6b6b6b;
+      --borda: #e5e0d8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--texto); }
+
+    header {
+      background: var(--vinho); color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
+    }
+    .marca { font-size: 22px; font-weight: 800; }
+    .marca .dourado { color: var(--dourado); }
+    .marca small { font-size: 11px; color: rgba(255,255,255,0.7); margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+    .user-info .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--vinho); display: flex; align-items: center; justify-content: center; font-weight: 800; }
+    .btn-sair { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+
+    .container { max-width: 600px; margin: 0 auto; padding: 24px; }
+    .voltar { color: var(--vinho); text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 16px; }
+
+    .card { background: var(--card); border-radius: 12px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    .sub { color: var(--texto-suave); font-size: 14px; margin-bottom: 20px; }
+
+    .aviso-primeiro { background: rgba(201,169,97,0.12); color: #8a6914; padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; border-left: 3px solid var(--dourado); }
+    .aviso-primeiro strong { display: block; margin-bottom: 4px; }
+
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--texto); margin-top: 14px; margin-bottom: 6px; }
+    input { width: 100%; padding: 12px 14px; border: 1px solid var(--borda); border-radius: 8px; font-size: 15px; }
+    input:focus { outline: none; border-color: var(--vinho); box-shadow: 0 0 0 3px rgba(114,47,55,0.1); }
+
+    .btn-salvar { background: var(--vinho); color: #fff; border: 0; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 24px; width: 100%; }
+    .btn-salvar:hover { background: var(--vinho-claro); }
+    .btn-salvar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .erro { background: #fee; color: #c33; padding: 10px 12px; border-radius: 6px; font-size: 13px; margin-top: 12px; display: none; }
+    .erro.ativo { display: block; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--texto); color: #fff; padding: 12px 18px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
+    .toast.ativo { opacity: 1; }
+    .toast.erro { background: #dc2626; }
+    .toast.sucesso { background: #16a34a; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="marca">Vagas<span class="dourado">.io</span> <small>Portal da Empresa</small></div>
+    <div class="user-info">
+      <div class="avatar" id="avatar">--</div>
+      <div>
+        <div style="font-weight:600;" id="user-nome">--</div>
+        <div style="font-size:12px;opacity:0.8;" id="user-empresa">--</div>
+      </div>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <a class="voltar" id="voltar-link" href="index.html">← Voltar</a>
+    <div class="card">
+      <h1>Trocar senha</h1>
+      <p class="sub">Defina uma nova senha de acesso ao portal</p>
+
+      <div id="aviso-primeiro" class="aviso-primeiro" style="display:none;">
+        <strong>🔐 Primeiro acesso</strong>
+        Por segurança, troque sua senha temporária antes de continuar usando o portal.
+      </div>
+
+      <form onsubmit="return trocarSenha(event)">
+        <label for="senha-atual">Senha atual</label>
+        <input type="password" id="senha-atual" required autocomplete="current-password">
+
+        <label for="senha-nova">Nova senha (mínimo 6 caracteres)</label>
+        <input type="password" id="senha-nova" required minlength="6" autocomplete="new-password">
+
+        <label for="senha-confirma">Confirme a nova senha</label>
+        <input type="password" id="senha-confirma" required minlength="6" autocomplete="new-password">
+
+        <div class="erro" id="erro"></div>
+
+        <button type="submit" class="btn-salvar" id="btn-salvar">Salvar nova senha</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = 'https://recrutamento-api.onrender.com';
+    const token = localStorage.getItem('empresa_token');
+    if (!token) window.location.href = 'login.html';
+
+    const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
+    if (usuario.primeiro_acesso) {
+      document.getElementById('aviso-primeiro').style.display = 'block';
+      document.getElementById('voltar-link').style.display = 'none';
+    }
+    document.getElementById('avatar').textContent = (usuario.nome || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+    document.getElementById('user-nome').textContent = usuario.nome || '--';
+    document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
+
+    function sair() {
+      if (confirm('Sair do portal?')) {
+        localStorage.removeItem('empresa_token');
+        localStorage.removeItem('empresa_usuario');
+        window.location.href = 'login.html';
+      }
+    }
+
+    function mostrarErro(msg) {
+      const el = document.getElementById('erro');
+      el.textContent = msg;
+      el.classList.add('ativo');
+      setTimeout(() => el.classList.remove('ativo'), 5000);
+    }
+
+    function toast(msg, tipo = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ativo ' + tipo;
+      setTimeout(() => t.className = 'toast', 3000);
+    }
+
+    async function trocarSenha(e) {
+      e.preventDefault();
+      const atual = document.getElementById('senha-atual').value;
+      const nova = document.getElementById('senha-nova').value;
+      const confirma = document.getElementById('senha-confirma').value;
+      if (nova !== confirma) { mostrarErro('As senhas novas não coincidem'); return false; }
+      if (nova.length < 6) { mostrarErro('A senha deve ter no mínimo 6 caracteres'); return false; }
+
+      const btn = document.getElementById('btn-salvar');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+
+      try {
+        const r = await fetch(API + '/api/auth/trocar-senha', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ senha_atual: atual, senha_nova: nova })
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          mostrarErro(data.erro || 'Erro ao trocar senha');
+          btn.disabled = false;
+          btn.textContent = 'Salvar nova senha';
+          return false;
+        }
+        // Atualiza primeiro_acesso no localStorage
+        usuario.primeiro_acesso = false;
+        localStorage.setItem('empresa_usuario', JSON.stringify(usuario));
+        toast('Senha trocada com sucesso!', 'sucesso');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+        return false;
+      } catch (err) {
+        mostrarErro('Erro de conexão');
+        btn.disabled = false;
+        btn.textContent = 'Salvar nova senha';
+        return false;
+      }
+    }
+  </script>
+</body>
+</html>
