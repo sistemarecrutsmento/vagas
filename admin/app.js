@@ -252,6 +252,7 @@ async function carregarDashboardV2() {
   } catch (e) {
     console.error('[DASHBOARD V2] ERRO COMPLETO:', e);
     console.error('[DASHBOARD V2] STACK:', e.stack);
+    console.error('[DASHBOARD V2] LINHA:', e.stack?.split('\n')[1]);
     const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
     if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
   }
