@@ -735,6 +735,26 @@
       <div class="form-group"><label>Descrição</label><textarea id="v-descricao" rows="4"></textarea></div>
       <div class="form-group"><label>Requisitos</label><textarea id="v-requisitos" rows="3"></textarea></div>
       <div class="form-group"><label>Benefícios</label><textarea id="v-beneficios" rows="2"></textarea></div>
+
+      <div class="form-group" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--borda);">
+        <label>🔄 Modelo de processo seletivo</label>
+        <select id="v-template" onchange="aplicarTemplateEtapas()">
+          <option value="">— Usar padrão (6 etapas fixas) —</option>
+          <option value="operacional">Operacional (Auxiliar, Ajudante)</option>
+          <option value="administrativo">Administrativo (Assistente, Analista)</option>
+          <option value="ti">Técnico de TI</option>
+          <option value="comercial">Comercial / Vendas</option>
+          <option value="estagio">Estágio</option>
+          <option value="personalizado">Personalizado (definir manualmente)</option>
+        </select>
+        <small style="color:var(--txt-sec); display:block; margin-top:6px;">Escolha um modelo para preencher as etapas. Você pode editar abaixo.</small>
+      </div>
+
+      <div class="form-group">
+        <label>Etapas do processo (uma por linha)</label>
+        <textarea id="v-etapas" rows="6" placeholder="Cada linha = 1 etapa. Ex:&#10;Inscrição&#10;Triagem curricular&#10;Entrevista RH&#10;Contratação"></textarea>
+        <small style="color:var(--txt-sec); display:block; margin-top:6px;">📋 O candidato vai ver essa timeline. A ordem importa.</small>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-sec" onclick="fecharModal('vaga')">Cancelar</button>
@@ -775,6 +795,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260721170000_agenda_real"></script>
+<script src="app.js?v=20260721172200_templates_etapas"></script>
 </body>
 </html>
