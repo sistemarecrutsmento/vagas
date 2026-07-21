@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidato · Portal Empresa · Vagas.io</title>
+  <link rel="stylesheet" href="https://sistemarecrutsmento.github.io/vagas/css/app.css" />
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-claro: #8a3a44;
+      --dourado: #C9A961;
+      --bg: #f7f5f2;
+      --card: #ffffff;
+      --texto: #1a1a1a;
+      --texto-suave: #6b6b6b;
+      --borda: #e5e0d8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--texto); }
+
+    header {
+      background: var(--vinho); color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
+    }
+    .marca { font-size: 22px; font-weight: 800; }
+    .marca .dourado { color: var(--dourado); }
+    .marca small { font-size: 11px; color: rgba(255,255,255,0.7); margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+    .user-info .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--vinho); display: flex; align-items: center; justify-content: center; font-weight: 800; }
+    .btn-sair { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .btn-sair:hover { background: rgba(255,255,255,0.2); }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+    .voltar { color: var(--vinho); text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 16px; }
+    .voltar:hover { text-decoration: underline; }
+
+    /* HEADER DO CANDIDATO */
+    .cand-header { background: var(--card); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 20px; align-items: center; margin-bottom: 24px; }
+    .cand-foto { width: 80px; height: 80px; border-radius: 50%; background: var(--vinho); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; flex-shrink: 0; overflow: hidden; }
+    .cand-foto img { width: 100%; height: 100%; object-fit: cover; }
+    .cand-titulo h1 { font-size: 22px; margin-bottom: 4px; }
+    .cand-titulo .vaga { color: var(--dourado); font-size: 14px; font-weight: 600; }
+    .cand-titulo .contato { color: var(--texto-suave); font-size: 13px; margin-top: 4px; }
+
+    /* TIMELINE / ETAPAS */
+    .etapas { background: var(--card); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; }
+    .etapas h2 { font-size: 16px; margin-bottom: 16px; color: var(--vinho); }
+    .etapa-linha { display: flex; gap: 0; align-items: stretch; overflow-x: auto; padding-bottom: 4px; }
+    .etapa-item { flex: 1; min-width: 120px; text-align: center; padding: 0 8px; position: relative; }
+    .etapa-item .bola { width: 32px; height: 32px; border-radius: 50%; background: #eee; color: #999; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 6px; font-size: 14px; }
+    .etapa-item .bola.atual { background: var(--dourado); color: #fff; }
+    .etapa-item .bola.feita { background: #16a34a; color: #fff; }
+    .etapa-item .nome { font-size: 12px; color: var(--texto-suave); }
+    .etapa-item .nome.atual { color: var(--vinho); font-weight: 600; }
+
+    /* SEÇÕES DE INFO */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+    .bloco { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .bloco h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vinho); margin-bottom: 12px; }
+    .campo { margin-bottom: 10px; font-size: 14px; }
+    .campo .lbl { color: var(--texto-suave); font-size: 12px; display: block; margin-bottom: 2px; }
+    .campo .val { color: var(--texto); }
+
+    .texto-longo { white-space: pre-wrap; line-height: 1.5; font-size: 14px; color: var(--texto); }
+
+    /* AÇÕES */
+    .acoes { background: var(--card); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; text-align: center; }
+    .acoes h2 { font-size: 16px; margin-bottom: 12px; }
+    .acoes .aviso { color: var(--texto-suave); font-size: 13px; margin-bottom: 16px; }
+    .btn-aprovar { background: #16a34a; color: #fff; border: 0; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin: 4px; }
+    .btn-aprovar:hover { background: #15803d; }
+    .btn-reprovar { background: #dc2626; color: #fff; border: 0; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin: 4px; }
+    .btn-reprovar:hover { background: #b91c1c; }
+    .btn-aprovar:disabled, .btn-reprovar:disabled { opacity: 0.5; cursor: not-allowed; }
+    .etapa-bloqueada { background: #f3f0eb; padding: 12px; border-radius: 8px; color: var(--texto-suave); font-size: 13px; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--texto); color: #fff; padding: 12px 18px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
+    .toast.ativo { opacity: 1; }
+    .toast.erro { background: #dc2626; }
+    .toast.sucesso { background: #16a34a; }
+
+    /* MODAL */
+    .modal-fundo { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
+    .modal-fundo.ativo { display: flex; }
+    .modal { background: #fff; border-radius: 12px; max-width: 480px; width: 100%; padding: 24px; }
+    .modal h3 { font-size: 18px; margin-bottom: 8px; }
+    .modal p { color: var(--texto-suave); font-size: 14px; margin-bottom: 16px; }
+    .modal textarea { width: 100%; border: 1px solid var(--borda); border-radius: 6px; padding: 10px; font-size: 14px; min-height: 80px; font-family: inherit; resize: vertical; }
+    .modal .botoes { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+    .modal button { padding: 10px 16px; border-radius: 6px; border: 0; cursor: pointer; font-size: 14px; }
+    .btn-cancelar { background: #eee; color: var(--texto); }
+    .btn-confirmar { background: var(--vinho); color: #fff; }
+    .btn-confirmar.reprovar { background: #dc2626; }
+    .btn-confirmar:disabled { opacity: 0.5; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="marca">Vagas<span class="dourado">.io</span> <small>Portal da Empresa</small></div>
+    <div class="user-info">
+      <div class="avatar" id="avatar">--</div>
+      <div>
+        <div style="font-weight:600;" id="user-nome">--</div>
+        <div style="font-size:12px;opacity:0.8;" id="user-empresa">--</div>
+      </div>
+      <a class="btn-sair" href="perfil.html" style="text-decoration:none;display:inline-block;">⚙️ Perfil</a>
+<button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <a class="voltar" id="voltar-link" href="index.html">← Voltar</a>
+    <div id="conteudo">Carregando...</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-fundo" id="modal">
+    <div class="modal">
+      <h3 id="modal-titulo">Confirmar ação</h3>
+      <p id="modal-texto"></p>
+      <textarea id="modal-obs" placeholder="Observação (opcional)"></textarea>
+      <div class="botoes">
+        <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+        <button class="btn-confirmar" id="modal-btn" onclick="confirmarAcao()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://recrutamento-api.onrender.com';
+    const token = localStorage.getItem('empresa_token');
+    if (!token) window.location.href = 'login.html';
+
+    const url = new URL(window.location.href);
+    const candId = url.searchParams.get('id');
+    if (!candId) window.location.href = 'index.html';
+
+    let candidatura = null;
+    let acaoPendente = null;
+
+    function iniciais(nome) {
+      if (!nome) return '?';
+      return nome.split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+    }
+
+    function sair() {
+      if (confirm('Sair do portal?')) {
+        localStorage.removeItem('empresa_token');
+        localStorage.removeItem('empresa_usuario');
+        window.location.href = 'login.html';
+      }
+    }
+
+    function toast(msg, tipo = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ativo ' + tipo;
+      setTimeout(() => t.className = 'toast', 3000);
+    }
+
+    function abrirModal(acao) {
+      acaoPendente = acao;
+      const m = document.getElementById('modal');
+      const txt = document.getElementById('modal-texto');
+      const btn = document.getElementById('modal-btn');
+      const tit = document.getElementById('modal-titulo');
+      const obs = document.getElementById('modal-obs');
+      obs.value = '';
+      if (acao === 'avancar') {
+        tit.textContent = 'Aprovar e avançar etapa';
+        txt.textContent = 'O candidato será aprovado e avançará para a próxima etapa do processo seletivo.';
+        btn.textContent = '✓ Aprovar';
+        btn.className = 'btn-confirmar';
+      } else {
+        tit.textContent = 'Reprovar candidato';
+        txt.textContent = 'O candidato será reprovado e notificado por e-mail. Esta ação não pode ser desfeita pela empresa.';
+        btn.textContent = '✗ Reprovar';
+        btn.className = 'btn-confirmar reprovar';
+      }
+      m.classList.add('ativo');
+    }
+
+    function fecharModal() {
+      document.getElementById('modal').classList.remove('ativo');
+      acaoPendente = null;
+    }
+
+    async function confirmarAcao() {
+      if (!acaoPendente) return;
+      const btn = document.getElementById('modal-btn');
+      btn.disabled = true;
+      btn.textContent = 'Processando...';
+      try {
+        const obs = document.getElementById('modal-obs').value.trim();
+        const r = await fetch(API + '/api/empresa/candidatura/' + candId + '/acao', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ acao: acaoPendente, observacao: obs || null })
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          toast(data.erro || 'Erro', 'erro');
+          btn.disabled = false;
+          btn.textContent = 'Confirmar';
+          return;
+        }
+        toast(data.status === 'contratado' ? '🎉 Candidato contratado!' : (acaoPendente === 'avancar' ? '✅ Aprovado e avançado' : '❌ Candidato reprovado'), 'sucesso');
+        fecharModal();
+        carregar();
+      } catch (e) {
+        console.error(e);
+        toast('Erro de conexão', 'erro');
+        btn.disabled = false;
+        btn.textContent = 'Confirmar';
+      }
+    }
+
+    async function carregar() {
+      const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
+      document.getElementById('avatar').textContent = iniciais(usuario.nome);
+      document.getElementById('user-nome').textContent = usuario.nome || '--';
+      document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
+
+      try {
+        const r = await fetch(API + '/api/empresa/candidatura/' + candId, { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await r.json();
+        if (!r.ok) {
+          if (r.status === 403) { window.location.href = 'index.html'; return; }
+          toast(data.erro || 'Erro', 'erro');
+          return;
+        }
+        candidatura = data;
+        document.getElementById('voltar-link').href = 'vaga.html?id=' + candidatura.vaga_id;
+        render();
+      } catch (e) {
+        console.error(e);
+        toast('Erro de conexão', 'erro');
+      }
+    }
+
+    function render() {
+      const c = candidatura;
+      const etapaNum = c.etapa_atual || 1;
+      const etapasArr = (c.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
+      const totalEtapas = etapasArr.length || 7;
+      const podeAgir = c.status === 'em_andamento' && etapaNum >= 4;
+
+      const fotoHtml = c.foto_url
+        ? `<div class="cand-foto"><img src="${c.foto_url}" alt=""></div>`
+        : `<div class="cand-foto">${iniciais(c.nome)}</div>`;
+
+      // Timeline
+      let timelineHtml = '<div class="etapa-linha">';
+      for (let i = 1; i <= totalEtapas; i++) {
+        const nome = etapasArr[i-1] || `Etapa ${i}`;
+        const cls = i < etapaNum ? 'feita' : (i === etapaNum ? 'atual' : '');
+        timelineHtml += `
+          <div class="etapa-item">
+            <div class="bola ${cls}">${i < etapaNum ? '✓' : i}</div>
+            <div class="nome ${cls}">${nome}</div>
+          </div>
+        `;
+      }
+      timelineHtml += '</div>';
+
+      // Ações (só etapa >= 4 + status em_andamento)
+      let acoesHtml = '';
+      if (c.status === 'contratado') {
+        acoesHtml = `<div class="acoes"><h2>🎉 Candidato contratado</h2><p class="aviso">Este candidato foi contratado.</p></div>`;
+      } else if (c.status === 'rejeitado') {
+        acoesHtml = `<div class="acoes"><h2>Candidato reprovado</h2><p class="aviso">Este candidato foi reprovado no processo.</p></div>`;
+      } else if (podeAgir) {
+        acoesHtml = `
+          <div class="acoes">
+            <h2>Avaliação da empresa</h2>
+            <p class="aviso">Você está na etapa "${etapasArr[etapaNum-1] || 'atual'}". Como recrutador, decida:</p>
+            <button class="btn-aprovar" onclick="abrirModal('avancar')">✓ Aprovar e avançar</button>
+            <button class="btn-reprovar" onclick="abrirModal('reprovar')">✗ Reprovar</button>
+          </div>
+        `;
+      } else {
+        acoesHtml = `
+          <div class="acoes">
+            <h2>Avaliação da empresa</h2>
+            <div class="etapa-bloqueada">
+              🔒 A empresa só pode agir a partir da etapa "Entrevista com Gestor/Empresa".<br>
+              Este candidato está na etapa ${etapaNum} de ${totalEtapas}: <strong>${etapasArr[etapaNum-1] || 'atual'}</strong>.
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('conteudo').innerHTML = `
+        <div class="cand-header">
+          ${fotoHtml}
+          <div class="cand-titulo">
+            <h1>${c.nome}</h1>
+            <div class="vaga">📋 ${c.vaga_titulo || '--'}</div>
+            <div class="contato">${c.email || ''} ${c.celular ? ' · ' + c.celular : ''}</div>
+          </div>
+        </div>
+
+        <div class="etapas">
+          <h2>Progresso do processo</h2>
+          ${timelineHtml}
+        </div>
+
+        ${acoesHtml}
+
+        <div class="grid-2">
+          <div class="bloco">
+            <h2>📍 Endereço</h2>
+            ${c.cidade ? `<div class="campo"><span class="lbl">Cidade/UF</span><span class="val">${c.cidade || '--'}${c.estado ? ' / ' + c.estado : ''}</span></div>` : ''}
+            ${c.cep ? `<div class="campo"><span class="lbl">CEP</span><span class="val">${c.cep}</span></div>` : ''}
+            ${c.bairro ? `<div class="campo"><span class="lbl">Bairro</span><span class="val">${c.bairro}</span></div>` : ''}
+            ${c.logradouro ? `<div class="campo"><span class="lbl">Logradouro</span><span class="val">${c.logradouro}${c.numero ? ', ' + c.numero : ''}</span></div>` : ''}
+            ${(!c.cidade && !c.cep) ? '<div style="color:#999;font-size:13px;">Não informado</div>' : ''}
+          </div>
+          <div class="bloco">
+            <h2>👤 Dados pessoais</h2>
+            ${c.cpf ? `<div class="campo"><span class="lbl">CPF</span><span class="val">${c.cpf}</span></div>` : ''}
+            ${c.data_nascimento ? `<div class="campo"><span class="lbl">Nascimento</span><span class="val">${c.data_nascimento}</span></div>` : ''}
+            ${c.sexo ? `<div class="campo"><span class="lbl">Sexo</span><span class="val">${c.sexo}</span></div>` : ''}
+            ${c.escolaridade ? `<div class="campo"><span class="lbl">Escolaridade</span><span class="val">${c.escolaridade}</span></div>` : ''}
+          </div>
+        </div>
+
+        ${(c.experiencia || c.sobre_voce) ? `
+          <div class="bloco" style="margin-bottom:24px;">
+            ${c.experiencia ? `<h2>💼 Experiência</h2><div class="texto-longo" style="margin-bottom:16px;">${c.experiencia}</div>` : ''}
+            ${c.sobre_voce ? `<h2>📝 Sobre o candidato</h2><div class="texto-longo">${c.sobre_voce}</div>` : ''}
+          </div>
+        ` : ''}
+      `;
+    }
+
+    carregar();
+  </script>
+</body>
+</html>
