@@ -549,35 +549,109 @@ function abrirModalVaga(vaga) {
   // Carregar etapas (se for array de objetos, pegar só os nomes)
   let etapasArr = vaga?.etapas;
   if (typeof etapasArr === 'string') { try { etapasArr = JSON.parse(etapasArr); } catch (e) { etapasArr = []; } }
+  let etapasNomes;
   if (Array.isArray(etapasArr) && etapasArr.length > 0) {
-    const nomes = etapasArr.map(e => typeof e === 'string' ? e : (e.nome || '')).filter(Boolean);
-    document.getElementById('v-etapas').value = nomes.join('\n');
+    etapasNomes = etapasArr.map(e => typeof e === 'string' ? e : (e.nome || '')).filter(Boolean);
   } else {
-    document.getElementById('v-etapas').value = '';
+    etapasNomes = ['Inscrição', 'Triagem', 'Entrevista RH', 'Entrevista gestor', 'Contratação'];
   }
-  document.getElementById('v-template').value = ''; // reset template selector
+  // Garante que Inscrição e Triagem SEMPRE estejam no início (e nessa ordem)
+  etapasNomes = etapasNomes.filter(e => e.toLowerCase() !== 'inscrição' && e.toLowerCase() !== 'triagem');
+  etapasNomes.unshift('Inscrição', 'Triagem');
+  _etapasVagaTemp = etapasNomes;
+  document.getElementById('v-template').value = '';
+  renderEtapasVaga();
   document.getElementById('alert-vaga').innerHTML = '';
   abrirModal('vaga');
 }
 
+let _etapasVagaTemp = [];
+
 const TEMPLATES_ETAPAS = {
-  operacional: ['Inscrição', 'Triagem curricular', 'Teste prático', 'Entrevista gestor', 'Contratação'],
-  administrativo: ['Inscrição', 'Triagem curricular', 'Entrevista RH', 'Entrevista gestor', 'Contratação'],
-  ti: ['Inscrição', 'Triagem curricular', 'Teste técnico', 'Entrevista RH', 'Entrevista gestor', 'Contratação'],
-  comercial: ['Inscrição', 'Triagem curricular', 'Dinâmica de vendas', 'Entrevista gestor', 'Contratação'],
-  estagio: ['Inscrição', 'Triagem curricular', 'Entrevista RH', 'Teste prático', 'Contratação'],
-  personalizado: []
+  operacional: ['Inscrição', 'Triagem', 'Teste prático', 'Entrevista gestor', 'Contratação'],
+  administrativo: ['Inscrição', 'Triagem', 'Entrevista RH', 'Entrevista gestor', 'Contratação'],
+  ti: ['Inscrição', 'Triagem', 'Teste técnico', 'Entrevista RH', 'Entrevista gestor', 'Contratação'],
+  comercial: ['Inscrição', 'Triagem', 'Dinâmica de vendas', 'Entrevista gestor', 'Contratação'],
+  estagio: ['Inscrição', 'Triagem', 'Entrevista RH', 'Teste prático', 'Contratação'],
+  personalizado: '__vazio__'
 };
 
 function aplicarTemplateEtapas() {
   const tpl = document.getElementById('v-template').value;
   if (!tpl) return;
   const etapas = TEMPLATES_ETAPAS[tpl];
-  if (etapas && etapas.length > 0) {
-    document.getElementById('v-etapas').value = etapas.join('\n');
-  } else if (tpl === 'personalizado') {
-    document.getElementById('v-etapas').focus();
+  if (etapas && etapas !== '__vazio__') {
+    _etapasVagaTemp = [...etapas];
+  } else if (etapas === '__vazio__') {
+    _etapasVagaTemp = ['Inscrição', 'Triagem', ''];
   }
+  renderEtapasVaga();
+}
+
+function renderEtapasVaga() {
+  const container = document.getElementById('v-etapas-lista');
+  if (!container) return;
+  container.innerHTML = '';
+  _etapasVagaTemp.forEach((nome, idx) => {
+    const isFixa = idx < 2;
+    const bg = isFixa ? '#fef7e8' : '#fff';
+    const bd = isFixa ? '#f0c040' : 'var(--borda)';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:6px; align-items:center; background:' + bg + '; border:1px solid ' + bd + '; border-radius:6px; padding:8px 10px;';
+    const inputStyle = isFixa
+      ? 'flex:1; background:transparent; border:0; font-weight:600; color:var(--vinho); outline:none;'
+      : 'flex:1; padding:4px 6px; border:1px solid transparent; border-radius:4px;';
+    const inputAttrs = isFixa
+      ? `readonly style="${inputStyle}"`
+      : `oninput="_etapasVagaTemp[${idx}]=this.value" style="${inputStyle}"`;
+    const podeMoverCima = idx > 2;
+    const podeMoverBaixo = idx < _etapasVagaTemp.length - 1;
+    const botoes = isFixa
+      ? '<span title="Etapa obrigatória (fixa)" style="color:#c08020; font-size:14px;">🔒</span>'
+      : `<button type="button" onclick="moverEtapaVaga(${idx},-1)" ${podeMoverCima ? '' : 'disabled'} style="background:none; border:0; cursor:${podeMoverCima ? 'pointer' : 'not-allowed'}; padding:2px 4px; color:#888; font-size:13px;${podeMoverCima ? '' : 'opacity:0.3;'}">↑</button>
+         <button type="button" onclick="moverEtapaVaga(${idx},1)" ${podeMoverBaixo ? '' : 'disabled'} style="background:none; border:0; cursor:${podeMoverBaixo ? 'pointer' : 'not-allowed'}; padding:2px 4px; color:#888; font-size:13px;${podeMoverBaixo ? '' : 'opacity:0.3;'}">↓</button>
+         <button type="button" onclick="removerEtapaVaga(${idx})" style="background:none; border:0; cursor:pointer; padding:2px 6px; color:#c00; font-size:14px;" title="Remover">✕</button>`;
+    row.innerHTML =
+      '<span style="font-weight:700; color:#888; min-width:22px; text-align:center;">' + (idx + 1) + '</span>' +
+      '<input type="text" value="' + escapeHtml(nome) + '" ' + inputAttrs + ' placeholder="Nome da etapa">' +
+      botoes;
+    container.appendChild(row);
+  });
+  // Atualiza hidden com array de etapas (vai pro backend)
+  const validas = _etapasVagaTemp.filter(e => e && e.trim());
+  document.getElementById('v-etapas').value = JSON.stringify(validas.map(nome => ({ nome })));
+}
+
+function adicionarEtapaVaga() {
+  if (_etapasVagaTemp.length === 0) {
+    _etapasVagaTemp = ['Inscrição', 'Triagem', ''];
+  } else {
+    _etapasVagaTemp.push('');
+  }
+  renderEtapasVaga();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#v-etapas-lista input');
+    const last = inputs[inputs.length - 1];
+    if (last && !last.readOnly) last.focus();
+  }, 50);
+}
+
+function removerEtapaVaga(idx) {
+  if (idx < 2) { alert('⚠️ Inscrição e Triagem são etapas obrigatórias e não podem ser removidas.'); return; }
+  _etapasVagaTemp.splice(idx, 1);
+  renderEtapasVaga();
+}
+
+function moverEtapaVaga(idx, dir) {
+  const novo = idx + dir;
+  if (novo < 2) return;
+  if (novo >= _etapasVagaTemp.length) return;
+  [_etapasVagaTemp[idx], _etapasVagaTemp[novo]] = [_etapasVagaTemp[novo], _etapasVagaTemp[idx]];
+  renderEtapasVaga();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
 
 async function editarVaga(id) {
@@ -610,10 +684,11 @@ async function salvarVaga() {
   const salMax = document.getElementById('v-salario-max').value;
   if (salMin) body.salario_min = parseFloat(salMin);
   if (salMax) body.salario_max = parseFloat(salMax);
-  // Etapas (textarea linha-a-linha → array de objetos)
-  const etapasTexto = document.getElementById('v-etapas').value;
-  const etapasArr = etapasTexto.split('\n').map(s => s.trim()).filter(Boolean).map(nome => ({ nome }));
-  if (etapasArr.length > 0) body.etapas = etapasArr;
+  // Etapas (já estão montadas no hidden como JSON array de {nome})
+  const etapasVal = document.getElementById('v-etapas').value;
+  if (etapasVal) {
+    try { body.etapas = JSON.parse(etapasVal); } catch (e) { /* ignora */ }
+  }
   if (!body.titulo) {
     document.getElementById('alert-vaga').innerHTML = '<div class="alert alert-erro">Título é obrigatório</div>';
     return;
