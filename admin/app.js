@@ -83,11 +83,13 @@ async function carregarDashboardV2() {
       if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro: ${data.erro || 'desconhecido'}</div>`;
       return;
     }
+    console.log('[DEBUG] Dados chegaram, nome:', data.admin?.nome);
     // === Saudação dinâmica (bom dia / boa tarde / boa noite) ===
     const hora = new Date().getHours();
     const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
     const primeiroNome = (data.admin?.nome || 'Recrutador').split(' ')[0];
     document.getElementById('dash-greeting').textContent = `${saudacao}, ${primeiroNome}! 👋`;
+    console.log('[DEBUG] Saudação OK');
     
     // === KPIs principais (5) ===
     const k = data.kpis || {};
