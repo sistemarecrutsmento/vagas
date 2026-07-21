@@ -151,8 +151,11 @@ async function carregarDashboardV2() {
       if (pathEl) pathEl.setAttribute('d', '');
       if (lineEl) lineEl.setAttribute('d', '');
     }
-    document.getElementById('conv-atual').textContent = (c.atual || 0) + '%';
-    document.getElementById('conv-detalhes').textContent = `${c.contratados || 0} de ${c.total || 0} candidatos`;
+    document.getElementById('conversao-valor').textContent = (c.atual || 0) + '%';
+    const convDetalhes = document.getElementById('conversao-contratados');
+    if (convDetalhes) {
+      // texto já existe no HTML ("contratados de X processos")
+    }
     
     // === Próximas Entrevistas ===
     const entrevistas = data.proximas_entrevistas || [];
@@ -180,18 +183,20 @@ async function carregarDashboardV2() {
     const taxaDoc = data.kpis_secundarios?.taxa_documentacao || 0;
     const totalDocs = 16;
     const aprovados = Math.round(totalDocs * taxaDoc / 100);
-    const circ = 2 * Math.PI * 32;
+    const circ = 2 * Math.PI * 50; // raio=50 conforme o HTML
+    const dashTotal = circ;
     const offset = circ - (taxaDoc / 100) * circ;
-    document.getElementById('doc-rosca').innerHTML = `
-      <svg viewBox="0 0 80 80" style="width:80px;height:80px;transform:rotate(-90deg);">
-        <circle cx="40" cy="40" r="32" fill="none" stroke="#E5E5E5" stroke-width="8"/>
-        <circle cx="40" cy="40" r="32" fill="none" stroke="#722F37" stroke-width="8"
-          stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
-      </svg>
-      <div class="doc-rosca-texto">${taxaDoc}%</div>
-    `;
-    document.getElementById('doc-progresso-barra').style.width = taxaDoc + '%';
-    document.getElementById('doc-progresso-barra').textContent = taxaDoc > 10 ? `${aprovados}/${totalDocs} aprovados` : '';
+    const docFill = document.getElementById('doc-rosca-fill');
+    const docTexto = document.getElementById('doc-rosca-texto');
+    const docPercent = document.getElementById('doc-percent');
+    if (docFill) docFill.setAttribute('stroke-dasharray', `${dashTotal - offset} ${dashTotal}`);
+    if (docTexto) docTexto.textContent = taxaDoc + '%';
+    if (docPercent) docPercent.textContent = taxaDoc + '%';
+    const docProg = document.getElementById('doc-progresso-barra');
+    if (docProg) {
+      docProg.style.width = taxaDoc + '%';
+      docProg.textContent = taxaDoc > 10 ? `${aprovados}/${totalDocs} aprovados` : '';
+    }
     
     // === Vagas com mais candidatos ===
     const vRanking = data.vagas_mais_candidatos || [];
