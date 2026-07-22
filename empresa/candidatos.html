@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidatos da Vaga — Portal Empresa</title>
+  <link rel="stylesheet" href="empresa.css">
+  <style>
+    .topo { background: var(--vinho); color: white; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+    .topo h1 { font-size: 18px; }
+    .topo a { color: var(--dourado); text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid var(--dourado); border-radius: 6px; }
+    .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .page-header { margin-bottom: 20px; }
+    .page-header h2 { font-size: 22px; color: var(--texto); margin: 6px 0; }
+    .page-header .vaga-info { color: var(--texto-suave); font-size: 14px; }
+    .voltar { color: var(--vinho); text-decoration: none; font-size: 13px; }
+    .card { background: var(--card); border-radius: 12px; padding: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 14px 18px; background: #faf7f2; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--texto-suave); border-bottom: 1px solid var(--borda); }
+    td { padding: 16px 18px; border-bottom: 1px solid #f0ede7; font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    .cand-cell { display: flex; align-items: center; gap: 10px; }
+    .cand-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    .cand-nome { font-weight: 600; }
+    .cand-email { font-size: 12px; color: var(--texto-suave); }
+    .status { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .status-em_andamento { background: #dbeafe; color: #1e40af; }
+    .status-em_analise { background: #fef3c7; color: #92400e; }
+    .status-aprovado { background: #dcfce7; color: #166534; }
+    .status-reprovado, .status-rejeitado { background: #fee2e2; color: #991b1b; }
+    .status-contratado { background: #dcfce7; color: #166534; }
+    .etapa { display: inline-block; padding: 3px 8px; background: #f0ede7; border-radius: 4px; font-size: 11px; color: var(--texto); }
+    .acoes-cell { display: flex; gap: 6px; }
+    .btn { display: inline-block; padding: 6px 12px; background: var(--vinho); color: white; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; }
+    .btn:hover { background: var(--vinho-claro); }
+    .empty { text-align: center; padding: 40px; color: var(--texto-suave); }
+  </style>
+</head>
+<body>
+  <div class="topo">
+    <a href="vagas.html">← Vagas</a>
+    <h1>Portal Empresa</h1>
+    <div style="flex:1"></div>
+    <a href="#" onclick="logout()">Sair</a>
+  </div>
+
+  <div class="submenu">
+    <a href="index.html">📊 Dashboard</a>
+    <a href="vagas.html" class="ativo">📋 Vagas com Candidatos</a>
+    <a href="agenda.html">📅 Agenda</a>
+    <a href="perfil.html">⚙️ Perfil</a>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <a class="voltar" href="vagas.html">← Voltar para Vagas</a>
+      <h2 id="titulo-vaga">Carregando...</h2>
+      <div class="vaga-info" id="info-vaga"></div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Candidato</th>
+            <th>Local</th>
+            <th>Etapa</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="cands-tbody">
+          <tr><td colspan="6" class="empty">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://recrutamento-api.onrender.com';
+
+    function logout() {
+      localStorage.removeItem('empresa_token');
+      localStorage.removeItem('empresa_usuario');
+      window.location.href = 'login.html';
+    }
+
+    async function carregar() {
+      const token = localStorage.getItem('empresa_token');
+      if (!token) { window.location.href = 'login.html'; return; }
+
+      const params = new URLSearchParams(location.search);
+      const vagaId = params.get('vaga');
+      if (!vagaId) {
+        document.getElementById('titulo-vaga').textContent = 'Vaga não informada';
+        return;
+      }
+
+      // Info da vaga
+      try {
+        const r = await fetch(API + '/api/vagas/' + vagaId);
+        const data = await r.json();
+        if (r.ok && data.vaga) {
+          document.getElementById('titulo-vaga').textContent = data.vaga.titulo || 'Vaga';
+          document.getElementById('info-vaga').textContent = (data.vaga.cidade ? data.vaga.cidade + ' / ' : '') + (data.vaga.estado || '');
+        }
+      } catch (e) {}
+
+      // Candidatos
+      try {
+        const r = await fetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (r.status === 401 || r.status === 403) { logout(); return; }
+        const data = await r.json();
+        const cands = data.candidatos || [];
+
+        if (cands.length === 0) {
+          document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato ainda.</td></tr>';
+          return;
+        }
+
+        document.getElementById('cands-tbody').innerHTML = cands.map(c => {
+          const iniciais = (c.nome || '?').split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase();
+          return `<tr>
+            <td>
+              <div class="cand-cell">
+                <div class="cand-avatar">${iniciais}</div>
+                <div>
+                  <div class="cand-nome">${c.nome || '—'}</div>
+                  <div class="cand-email">${c.email || ''}</div>
+                </div>
+              </div>
+            </td>
+            <td>—</td>
+            <td><span class="etapa">Etapa ${c.etapa_atual || 1}</span></td>
+            <td>${badgeStatus(c.status)}</td>
+            <td>${formatarData(c.criada_em)}</td>
+            <td>
+              <a class="btn" href="analisar.html?id=${c.id}">👁 Analisar</a>
+            </td>
+          </tr>`;
+        }).join('');
+      } catch (e) {
+        document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="6" class="empty">Erro: ' + e.message + '</td></tr>';
+      }
+    }
+
+    function badgeStatus(s) {
+      const map = {
+        'em_analise': '<span class="status status-em_analise">Em análise</span>',
+        'em_andamento': '<span class="status status-em_andamento">Em andamento</span>',
+        'aprovado': '<span class="status status-aprovado">Aprovado</span>',
+        'reprovado': '<span class="status status-reprovado">Reprovado</span>',
+        'rejeitado': '<span class="status status-rejeitado">Reprovado</span>',
+        'contratado': '<span class="status status-contratado">Contratado</span>'
+      };
+      return map[s] || s;
+    }
+
+    function formatarData(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    carregar();
+  </script>
+</body>
+</html>
