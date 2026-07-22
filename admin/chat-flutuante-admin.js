@@ -15,6 +15,7 @@
   let conversas = [];          // [{ candidatura_id, candidato_nome, vaga_titulo, nao_lidas_admin }]
   let conversaAtiva = null;    // candidatura_id selecionada
   let mensagensCache = {};     // mensagens por candidatura_id
+  let statusCandidatura = {};  // status da candidatura por id
   let ultimaMensagemId = {};   // pra detectar não lidas
   let aberto = false;
 
@@ -292,8 +293,11 @@
     // Atualiza header
     const conv = conversas.find(c => c.candidatura_id === cid);
     if (conv) {
-      document.getElementById('chat-head-titulo').textContent = '💬 ' + (conv.candidato_nome || 'Candidato').split(' ')[0];
-      document.getElementById('chat-head-sub').textContent = conv.vaga_titulo || '';
+      // Título: nome curto + vaga, pra não confundir candidatos em múltiplas vagas
+      const primeiroNome = (conv.candidato_nome || 'Candidato').split(' ')[0];
+      document.getElementById('chat-head-titulo').textContent = '💬 ' + primeiroNome;
+      document.getElementById('chat-head-sub').innerHTML =
+        '<strong style="color:#d4a017">' + escapeHtml(conv.vaga_titulo || '') + '</strong>';
     }
     // Destaca bolinha ativa
     fabContainer.querySelectorAll('.chatfab-candidato').forEach(b => b.classList.remove('aberta'));
@@ -317,6 +321,10 @@
       if (!r.ok) return;
       const j = await r.json();
       mensagensCache[cid] = j.mensagens || [];
+      // Salva status da candidatura pra saber se está encerrada
+      if (j.candidatura_status) {
+        statusCandidatura[cid] = j.candidatura_status;
+      }
       // Detecta não lidas: se tem msg nova do admin e chat não tá aberto nessa conversa
       const ultima = mensagensCache[cid].length > 0 ? mensagensCache[cid][mensagensCache[cid].length - 1] : null;
       if (ultima && ultima.autor_tipo === 'admin') {
@@ -337,13 +345,29 @@
     const area = document.getElementById('chat-msg-area');
     const input = document.getElementById('chat-input-area');
     const msgs = mensagensCache[conversaAtiva] || [];
-    if (msgs.length === 0) {
-      area.innerHTML = `<div class="chat-vazio"><div class="icon">💬</div><p>Nenhuma mensagem ainda. Manda oi pro recrutador!</p></div>`;
+    const status = statusCandidatura[conversaAtiva];
+    const encerrada = ['rejeitado','reprovado','cancelado','contratado'].includes(status);
+
+    // Banner de status da candidatura
+    let banner = '';
+    if (status === 'contratado') {
+      banner = '<div style="background:#d1fae5;color:#065f46;padding:8px 12px;font-size:12px;text-align:center;font-weight:600">🎉 Candidato contratado — chat finalizado</div>';
+    } else if (['rejeitado','reprovado','cancelado'].includes(status)) {
+      banner = '<div style="background:#fee2e2;color:#991b1b;padding:8px 12px;font-size:12px;text-align:center;font-weight:600">🚫 Candidatura encerrada — somente leitura</div>';
+    }
+
+    if (msgs.length === 0 && !encerrada) {
+      area.innerHTML = banner + `<div class="chat-vazio"><div class="icon">💬</div><p>Nenhuma mensagem ainda. Manda oi pro candidato!</p></div>`;
       input.style.display = 'flex';
       return;
     }
-    input.style.display = 'flex';
-    area.innerHTML = msgs.map(m => {
+    if (msgs.length === 0 && encerrada) {
+      area.innerHTML = banner + `<div class="chat-vazio"><div class="icon">💬</div><p>Esta candidatura foi encerrada sem conversas.</p></div>`;
+      input.style.display = 'none';
+      return;
+    }
+    input.style.display = encerrada ? 'none' : 'flex';
+    area.innerHTML = banner + msgs.map(m => {
       const minha = m.autor_tipo === 'candidato';
       const iniciais = (m.autor_nome || '?').split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
       const dataFmt = new Date(m.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
