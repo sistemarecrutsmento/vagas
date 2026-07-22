@@ -174,6 +174,7 @@
       render(candidatura, docsCard);
       window.currentCandidatura = candidatura;
       carregarEntrevistasExistentes(id);
+      iniciarPollingChat(id);
     })();
 
     // Carrega entrevistas já existentes e pré-popula o card (modo edição/confirmação)
@@ -567,6 +568,22 @@
           '<h2>📜 Histórico do Processo</h2>' + histHtml +
         '</div>';
 
+      // Card de Chat com o candidato (jul/2026)
+      const chatCard =
+        '<div class="card" id="card-chat" style="border-top: 4px solid var(--dourado, #C9A961);">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
+            '<h2 style="margin:0;">💬 Chat com o Candidato</h2>' +
+            '<span id="chat-status" style="font-size:11px; background:#FEF3C7; color:#92400E; padding:4px 10px; border-radius:999px; font-weight:700;">Atualiza a cada 15s</span>' +
+          '</div>' +
+          '<div id="chat-mensagens" style="background:#fafafa; border:1px solid #e5e0d8; border-radius:8px; padding:12px; max-height:300px; overflow-y:auto; margin-bottom:12px; min-height:200px;">' +
+            '<div class="chat-empty-admin" style="text-align:center; color:#888; padding:20px;">Carregando mensagens…</div>' +
+          '</div>' +
+          '<div style="display:flex; gap:8px;">' +
+            '<textarea id="chat-texto" rows="2" placeholder="Digite uma mensagem para o candidato…" style="flex:1; resize:vertical; padding:10px; border:1px solid #DDD; border-radius:8px; font-family:inherit; font-size:14px;"></textarea>' +
+            '<button class="btn" style="background:#722F37; color:white; align-self:flex-end;" onclick="enviarMensagemChat(' + c.id + ')">📤 Enviar</button>' +
+          '</div>' +
+        '</div>';
+
       content.innerHTML =
         '<div class="header">' +
           '<button class="btn-voltar" onclick="voltar()" title="Voltar para a lista">' +
@@ -590,6 +607,9 @@
 
         // 2) Histórico do Processo (logo abaixo da timeline, conforme combinado)
         historicoCard +
+
+        // 2.5) Chat com o candidato
+        chatCard +
 
         // 3) Dados Pessoais + Endereço (SEM "sobre você")
         '<div class="card" id="card-dados-pessoais">' +
@@ -737,6 +757,104 @@
         btn.disabled = false;
         btn.innerHTML = '💾 Confirmar Agendamento';
       }
+    }
+
+    // ==== CHAT COM CANDIDATO ====
+    let chatPollingInterval = null;
+    let ultimaQtdMsgs = 0;
+
+    async function carregarChat(candidaturaId) {
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/chat/' + candidaturaId + '/mensagens', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          throw new Error(j.erro || 'Erro ao carregar mensagens');
+        }
+        const j = await r.json();
+        const mensagens = j.mensagens || [];
+        renderChat(mensagens);
+        // Notificação quando chega mensagem nova
+        if (mensagens.length > ultimaQtdMsgs && ultimaQtdMsgs > 0) {
+          const ultima = mensagens[mensagens.length - 1];
+          if (ultima.autor_tipo === 'candidato') {
+            mostrarNotificacaoChat(ultima);
+          }
+        }
+        ultimaQtdMsgs = mensagens.length;
+      } catch (e) {
+        console.error('[CHAT]', e);
+        const cont = document.getElementById('chat-mensagens');
+        if (cont) cont.innerHTML = '<div style="text-align:center; color:#888; padding:20px;">⚠️ Erro ao carregar chat: ' + e.message + '</div>';
+      }
+    }
+
+    function renderChat(mensagens) {
+      const cont = document.getElementById('chat-mensagens');
+      if (!cont) return;
+      if (mensagens.length === 0) {
+        cont.innerHTML = '<div style="text-align:center; color:#888; padding:20px;">💬 Nenhuma mensagem ainda. Inicie a conversa!</div>';
+        return;
+      }
+      cont.innerHTML = mensagens.map(m => {
+        const isAdmin = m.autor_tipo === 'admin';
+        const iniciais = (m.autor_nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+        const d = new Date(m.criado_em);
+        const dataFmt = d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        return '<div style="display:flex; margin-bottom:10px;' + (isAdmin ? 'flex-direction:row-reverse;' : '') + '">' +
+          '<div style="width:30px; height:30px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white; ' +
+            (isAdmin ? 'background:#722F37;' : 'background:#C9A961; color:#1a1a1a;') + '">' + iniciais + '</div>' +
+          '<div style="max-width:75%; ' + (isAdmin ? 'margin-right:8px; text-align:right;' : 'margin-left:8px;') + '">' +
+            '<div style="padding:8px 12px; border-radius:12px; font-size:13px; line-height:1.4; word-wrap:break-word; white-space:pre-wrap; ' +
+              (isAdmin ? 'background:#722F37; color:white;' : 'background:white; border:1px solid #e5e0d8;') + '">' + escapeHtml(m.texto) + '</div>' +
+            '<div style="font-size:10px; color:#888; margin-top:2px;">' + m.autor_nome + ' • ' + dataFmt + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      cont.scrollTop = cont.scrollHeight;
+    }
+
+    async function enviarMensagemChat(candidaturaId) {
+      const txt = document.getElementById('chat-texto');
+      const texto = (txt.value || '').trim();
+      if (!texto) return;
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '⏳';
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/chat/' + candidaturaId + '/mensagens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ texto })
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.erro || 'Erro ao enviar');
+        txt.value = '';
+        await carregarChat(candidaturaId);
+      } catch (e) {
+        alert('❌ ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '📤 Enviar';
+      }
+    }
+
+    function mostrarNotificacaoChat(msg) {
+      // Toast simples no canto
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#722F37; color:white; padding:14px 20px; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.2); z-index:9999; max-width:340px; font-size:14px; animation: slideIn 0.3s;';
+      toast.innerHTML = '<strong>💬 Nova mensagem de ' + msg.autor_nome + '</strong><br><span style="opacity:0.9; font-size:13px;">' + escapeHtml(msg.texto.substring(0, 80)) + (msg.texto.length > 80 ? '…' : '') + '</span>';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+
+    function iniciarPollingChat(candidaturaId) {
+      carregarChat(candidaturaId);
+      if (chatPollingInterval) clearInterval(chatPollingInterval);
+      chatPollingInterval = setInterval(() => carregarChat(candidaturaId), 15000);
     }
 
     async function acao(id, acao) {
