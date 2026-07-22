@@ -22,6 +22,7 @@
   const urlParams = new URLSearchParams(window.location.search);
   const idUrl = urlParams.get('id');
   const idUrlInt = idUrl ? parseInt(idUrl) : null;
+  console.log('[chatfab-admin] init', { idUrl, idUrlInt, href: window.location.href });
 
   // === Estilos injetados ===
   const style = document.createElement('style');
