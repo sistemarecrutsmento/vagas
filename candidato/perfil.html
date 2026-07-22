@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu perfil — Vagas.io</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--preto); line-height: 1.5; }
+  :root {
+    --branco: #ffffff;
+    --vinho: #722F37;
+    --vinho-escuro: #5C252C;
+    --vinho-claro: #8a3d47;
+    --borda: #e0e0e0;
+    --bg: #f5f5f7;
+    --preto: #222;
+    --cinza: #666;
+    --cinza-medio: #999;
+    --verde: #16a34a;
+    --vermelho: #dc2626;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* === Header padrão (igual painel.html) === */
+  header { background: var(--vinho); color: var(--branco); border-bottom: none; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+  .header-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; padding-right: 80px; }
+  .logo { font-weight: 800; font-size: 22px; color: var(--branco); text-decoration: none; }
+  .logo span { color: var(--branco); opacity: 0.8; font-weight: 300; }
+  .header-actions { display: flex; align-items: center; gap: 12px; }
+  .btn-outline { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.3); color: var(--branco); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .btn-outline:hover { background: rgba(255,255,255,0.22); border-color: white; }
+  .btn-menu-logo { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: var(--branco); width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 60; transition: all 0.15s; }
+  .btn-menu-logo:hover { background: rgba(255,255,255,0.25); border-color: white; color: white; }
+
+  /* === Subheader vinho === */
+  .subheader { background: var(--vinho); color: var(--branco); padding: 0 0 28px; margin-top: -1px; }
+  .subheader-inner { max-width: 1100px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+  .subheader h1 { font-size: 22px; font-weight: 700; }
+  .subheader-voltar { color: var(--branco); opacity: 0.9; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .subheader-voltar:hover { opacity: 1; }
+
+  /* === Container === */
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* === Drawer === */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+  .drawer-overlay.aberto { display: block; }
+  aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+  aside.drawer.aberto { transform: translateX(0); }
+  .drawer-head { background: var(--vinho); color: white; padding: 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; background-size: cover; background-position: center; overflow: hidden; }
+  .drawer-foto-info h3 { font-size: 16px; font-weight: 700; }
+  .drawer-foto-info p { font-size: 12px; opacity: 0.9; word-break: break-all; }
+  .drawer-close { margin-left: auto; background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; line-height: 1; }
+  .drawer-links { flex: 1 1 auto; min-height: 0; padding: 16px 0; overflow-y: auto; }
+  .drawer-link { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: var(--preto); font-size: 15px; font-weight: 500; }
+  .drawer-link:hover { background: var(--bg); }
+  .drawer-link.ativo { background: rgba(114,47,55,0.1); color: var(--vinho); font-weight: 700; }
+  .drawer-link .icon { width: 24px; text-align: center; font-size: 18px; }
+  .drawer-footer { padding: 16px 20px; border-top: 1px solid var(--borda); background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); flex-shrink: 0; }
+  .drawer-logout { width: 100%; background: transparent; color: var(--vinho); border: 1px solid var(--vinho); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .drawer-logout:hover { background: var(--vinho); color: white; }
+
+  /* === Card do perfil (cabeçalho com foto) === */
+  .perfil-header-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px; margin-bottom: 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .perfil-foto-wrapper { position: relative; flex-shrink: 0; }
+  .perfil-foto-grande { width: 120px; height: 120px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 700; background-size: cover; background-position: center; overflow: hidden; }
+  .perfil-foto-icon { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; border: 3px solid white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.15s; }
+  .perfil-foto-icon:hover { transform: scale(1.08); }
+  .perfil-foto-remove { position: absolute; top: 0; right: 0; width: 28px; height: 28px; border-radius: 50%; background: white; color: var(--vermelho); border: 2px solid var(--borda); display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+  .perfil-foto-remove:hover { background: var(--vermelho); color: white; border-color: var(--vermelho); }
+  .perfil-foto-remove.visivel { display: flex; }
+  .perfil-foto-info-col { flex: 1; min-width: 240px; }
+  .perfil-foto-info-col h2 { font-size: 22px; color: var(--preto); margin-bottom: 4px; }
+  .perfil-foto-info-col p { color: var(--cinza); font-size: 14px; word-break: break-all; }
+  .perfil-foto-info-col .perfil-progresso { margin-top: 12px; }
+  .progresso-titulo { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--cinza); margin-bottom: 6px; }
+  .progresso-titulo strong { color: var(--preto); font-weight: 700; }
+  .barra { width: 100%; height: 8px; background: #ebebed; border-radius: 4px; overflow: hidden; }
+  .barra-fill { height: 100%; background: var(--verde); border-radius: 4px; transition: width 0.4s ease; }
+  .input-file-hidden { display: none; }
+
+  /* === Abas === */
+  .perfil-form-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px; margin-bottom: 24px; }
+  .perfil-titulo { font-size: 20px; color: var(--vinho); margin-bottom: 20px; font-weight: 700; }
+  .perfil-abas { display: flex; gap: 6px; border-bottom: 1px solid var(--borda); margin-bottom: 24px; flex-wrap: wrap; }
+  .perfil-aba { background: transparent; border: none; padding: 10px 16px; cursor: pointer; font-size: 14px; color: var(--cinza); font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.15s; }
+  .perfil-aba:hover { color: var(--preto); }
+  .perfil-aba.ativo { color: var(--vinho); border-bottom-color: var(--vinho); }
+  .perfil-bloco { display: none; }
+  .perfil-bloco.ativo { display: block; }
+
+  /* Experiências (mesmo padrão do wizard de cadastro) */
+  .exp-form { background: #f8f9fa; border: 1px dashed var(--borda); padding: 16px; border-radius: 8px; margin-bottom: 12px; }
+  .exp-form h4 { margin: 0 0 12px; font-size: 14px; }
+  .exp-acoes { display: flex; gap: 8px; margin-top: 8px; }
+  .exp-acoes .btn { padding: 8px 16px; font-size: 13px; width: auto; }
+  .exp-item { background: #f8f9fa; border: 1px solid var(--borda); padding: 12px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .exp-item h4 { margin: 0 0 4px; font-size: 15px; }
+  .exp-item p { margin: 0; font-size: 13px; color: var(--cinza-medio); }
+  .exp-item .exp-text { flex: 1; min-width: 0; }
+  .exp-item .btn-x { background: none; border: none; color: var(--vermelho); cursor: pointer; font-size: 22px; padding: 0 8px; line-height: 1; }
+  .exp-item .btn-x:hover { background: #fee; border-radius: 4px; }
+  .exp-vazia { color: var(--cinza-medio); font-size: 14px; padding: 12px 0; }
+
+  /* === Form === */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--preto); margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 8px; font-size: 14px; font-family: inherit; background: white; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--vinho); box-shadow: 0 0 0 3px rgba(114,47,55,0.1); }
+  .form-group textarea { min-height: 100px; resize: vertical; }
+  .perfil-acoes { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .btn { padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary { background: var(--vinho); color: white; }
+  .btn-primary:hover { background: var(--vinho-escuro); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary { background: var(--bg); color: var(--preto); border: 1px solid var(--borda); }
+  .btn-secondary:hover { background: var(--borda); }
+  .checkbox-group { display: flex; align-items: center; gap: 8px; }
+  .checkbox-group input { width: auto; }
+
+  .loading, .empty { text-align: center; padding: 60px 20px; color: var(--cinza); }
+  @media (max-width: 700px) {
+    .form-row { grid-template-columns: 1fr; }
+    .perfil-header-card { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">Vagas<span>.io</span></a>
+    <div class="header-actions" id="header-actions"></div>
+  </div>
+</header>
+
+<section class="subheader">
+  <div class="subheader-inner">
+    <h1>Meu perfil</h1>
+    <a href="painel.html" class="subheader-voltar">← Voltar</a>
+  </div>
+</section>
+
+<!-- Drawer lateral -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="drawer-foto" id="drawer-foto">👤</div>
+    <div class="drawer-foto-info">
+      <h3 id="drawer-nome">Candidato</h3>
+      <p id="drawer-email">—</p>
+    </div>
+    <button class="drawer-close" onclick="fecharDrawer()">×</button>
+  </div>
+  <div class="drawer-links">
+    <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
+    <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
+    <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
+  </div>
+  <div class="drawer-footer">
+    <button class="drawer-logout" onclick="logout()" type="button" aria-label="Sair do perfil">🚪 Sair</button>
+  </div>
+</aside>
+
+<div class="container">
+  <div id="conteudo">
+    <div class="loading">Carregando perfil...</div>
+  </div>
+</div>
+
+<script src="app-v2.js?v=1784700000_FOOTER"></script>
+<script src="modals.js?v=1784700000_FOOTER"></script>
+<script>
+// ===== ROTEAMENTO =====
+function redirecionarSeNaoLogado() {
+  if (!tokenCandidato) location.href = 'index.html';
+}
+
+// ===== CARREGAR PÁGINA =====
+async function carregarPaginaPerfil() {
+  if (!tokenCandidato) { location.href = 'index.html'; return; }
+
+  let perfil = null;
+  let experiencias = [];
+  try {
+    const r = await fetch(API + '/api/candidato/perfil', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (r.status === 401) { logout(); return; }
+    const d = await r.json();
+    perfil = d.candidato;
+    experiencias = Array.isArray(d.experiencias) ? d.experiencias : [];
+  } catch (e) {}
+
+  if (!perfil) {
+    document.getElementById('conteudo').innerHTML = '<div class="empty">Erro ao carregar perfil.</div>';
+    return;
+  }
+
+  const nome = perfil.nome || emailLogado || 'Candidato';
+  localStorage.setItem('candidato_nome', nome);
+  if (perfil.foto_url) localStorage.setItem('candidato_foto', perfil.foto_url);
+  if (typeof atualizarHeaderUsuario === 'function') atualizarHeaderUsuario();
+
+  const inicial = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+  const temFoto = !!perfil.foto_url;
+  const fotoBg = temFoto ? `style="background-image:url(&quot;${perfil.foto_url.replace(/"/g,'\\"')}&quot;)"` : '';
+  const displayFoto = temFoto ? '' : inicial;
+
+  // Progresso
+  const checks = [
+    !!perfil.nome, !!perfil.cpf, !!perfil.data_nascimento, !!perfil.celular, !!perfil.sexo,
+    !!perfil.cep, !!perfil.cidade, !!perfil.logradouro, !!perfil.numero,
+    !!perfil.formacao, !!perfil.curso, !!perfil.situacao,
+    !!perfil.experiencia, !!perfil.sobre_voce,
+    !!perfil.acessibilidade
+  ];
+  const completos = checks.filter(Boolean).length;
+  const pct = Math.round((completos / checks.length) * 100);
+
+  document.getElementById('conteudo').innerHTML = `
+    <!-- Cabeçalho: foto + nome + progresso -->
+    <div class="perfil-header-card">
+      <div class="perfil-foto-wrapper">
+        <div class="perfil-foto-grande" id="perfil-foto-preview" ${fotoBg}>${displayFoto}</div>
+        <input type="file" id="perfil-foto-input" class="input-file-hidden" accept="image/jpeg,image/png,image/webp" onchange="perfilFotoEscolher(this)">
+        <label for="perfil-foto-input" class="perfil-foto-icon" title="Trocar foto">📷</label>
+        <button type="button" class="perfil-foto-remove ${temFoto ? 'visivel' : ''}" id="perfil-foto-remover" onclick="perfilFotoRemover()" title="Remover foto">✕</button>
+      </div>
+      <div class="perfil-foto-info-col">
+        <h2>${escapeHtml(nome)}</h2>
+        <p>${escapeHtml(perfil.email || emailLogado || '')}</p>
+        <div class="perfil-progresso">
+          <div class="progresso-titulo"><span>Perfil completo</span><strong>${pct}%</strong></div>
+          <div class="barra"><div class="barra-fill" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card de edição -->
+    <div class="perfil-form-card">
+      <h3 class="perfil-titulo">✏️ Editar perfil</h3>
+      <div class="perfil-abas">
+        <button class="perfil-aba ativo" data-sub="dados">Dados pessoais</button>
+        <button class="perfil-aba" data-sub="endereco">Endereço</button>
+        <button class="perfil-aba" data-sub="escolaridade">Escolaridade</button>
+        <button class="perfil-aba" data-sub="experiencia">Experiência</button>
+        <button class="perfil-aba" data-sub="acessibilidade">Acessibilidade</button>
+      </div>
+
+      <form class="perfil-form" id="perfil-form" onsubmit="event.preventDefault();salvarPerfilCompleto(event.currentTarget)">
+
+        <!-- DADOS PESSOAIS + SOBRE VOCÊ -->
+        <div class="perfil-bloco ativo" data-bloco="dados">
+          <div class="form-row">
+            <div class="form-group"><label>Nome completo *</label><input type="text" id="pe-nome" required value="${escapeHtml(perfil.nome || '')}"></div>
+            <div class="form-group"><label>CPF *</label><input type="text" id="pe-cpf" placeholder="000.000.000-00" maxlength="14" value="${escapeHtml(perfil.cpf || '')}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Data de nascimento</label><input type="date" id="pe-nascimento" value="${escapeHtml((perfil.data_nascimento||'').toString().substring(0,10))}"></div>
+            <div class="form-group"><label>Sexo</label>
+              <select id="pe-sexo">
+                <option value="">Prefiro não informar</option>
+                <option value="M" ${perfil.sexo==='M'?'selected':''}>Masculino</option>
+                <option value="F" ${perfil.sexo==='F'?'selected':''}>Feminino</option>
+                <option value="O" ${perfil.sexo==='O'?'selected':''}>Outro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label>Celular (com DDD) *</label><input type="text" id="pe-celular" placeholder="(11) 99999-9999" value="${escapeHtml(perfil.celular || '')}"></div>
+
+          <div class="form-group" style="margin-top:24px">
+            <label>Sobre você</label>
+            <textarea id="pe-sobre-voce" maxlength="500" placeholder="Conte um pouco sobre você, seus objetivos profissionais, o que te motiva...">${escapeHtml(perfil.sobre_voce || '')}</textarea>
+            <small style="color:var(--cinza);font-size:12px;display:block;margin-top:4px">Máximo 500 caracteres. Será visível para recrutadores.</small>
+          </div>
+        </div>
+
+        <!-- ENDEREÇO -->
+        <div class="perfil-bloco" data-bloco="endereco">
+          <div class="form-row">
+            <div class="form-group"><label>CEP *</label><input type="text" id="pe-cep" placeholder="00000-000" maxlength="9" value="${escapeHtml(perfil.cep || '')}" onblur="buscarCep()"></div>
+            <div class="form-group"><label>Estado (UF) *</label><input type="text" id="pe-estado" placeholder="SP" maxlength="2" value="${escapeHtml(perfil.estado || '')}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Cidade *</label><input type="text" id="pe-cidade" value="${escapeHtml(perfil.cidade || '')}"></div>
+            <div class="form-group"><label>Bairro</label><input type="text" id="pe-bairro" value="${escapeHtml(perfil.bairro || '')}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Logradouro (rua, avenida...) *</label><input type="text" id="pe-logradouro" value="${escapeHtml(perfil.logradouro || '')}"></div>
+            <div class="form-group"><label>Número *</label><input type="text" id="pe-numero" value="${escapeHtml(perfil.numero || '')}"></div>
+          </div>
+          <div class="form-group"><label>Complemento</label><input type="text" id="pe-complemento" placeholder="Apto, bloco, etc." value="${escapeHtml(perfil.complemento || '')}"></div>
+        </div>
+
+        <!-- ESCOLARIDADE -->
+        <div class="perfil-bloco" data-bloco="escolaridade">
+          <div class="form-row">
+            <div class="form-group"><label>Formação *</label>
+              <select id="pe-formacao">
+                <option value="">Selecione...</option>
+                <option value="fundamental" ${perfil.formacao==='fundamental'?'selected':''}>Fundamental</option>
+                <option value="medio" ${perfil.formacao==='medio'?'selected':''}>Médio</option>
+                <option value="tecnico" ${perfil.formacao==='tecnico'?'selected':''}>Técnico</option>
+                <option value="superior" ${perfil.formacao==='superior'?'selected':''}>Superior</option>
+                <option value="pos" ${perfil.formacao==='pos'?'selected':''}>Pós-graduação</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Situação *</label>
+              <select id="pe-situacao">
+                <option value="">Selecione...</option>
+                <option value="concluido" ${perfil.situacao==='concluido'?'selected':''}>Concluído</option>
+                <option value="cursando" ${perfil.situacao==='cursando'?'selected':''}>Cursando</option>
+                <option value="interrompido" ${perfil.situacao==='interrompido'?'selected':''}>Interrompido</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Instituição</label><input type="text" id="pe-instituicao" value="${escapeHtml(perfil.instituicao || '')}"></div>
+            <div class="form-group"><label>Curso</label><input type="text" id="pe-curso" value="${escapeHtml(perfil.curso || '')}"></div>
+          </div>
+          <div class="form-group">
+            <label>É seu primeiro emprego?</label>
+            <select id="pe-primeiro-emprego">
+              <option value="false" ${!perfil.primeiro_emprego?'selected':''}>Não</option>
+              <option value="true" ${perfil.primeiro_emprego?'selected':''}>Sim</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- EXPERIÊNCIA -->
+        <div class="perfil-bloco" data-bloco="experiencia">
+          <p style="color:var(--cinza);font-size:14px;margin-bottom:16px">Adicione suas últimas experiências profissionais. Você pode adicionar quantas quiser.</p>
+          <div id="perfil-exp-lista"></div>
+          <div class="exp-form">
+            <h4>+ Nova experiência</h4>
+            <div class="form-row">
+              <div class="form-group"><label>Cargo *</label><input type="text" id="perfil-exp-cargo" placeholder="Ex: Auxiliar administrativo"></div>
+              <div class="form-group"><label>Empresa *</label><input type="text" id="perfil-exp-empresa" placeholder="Nome da empresa"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Início *</label><input type="date" id="perfil-exp-inicio"></div>
+              <div class="form-group"><label>Término</label><input type="date" id="perfil-exp-fim"></div>
+            </div>
+            <div class="form-group">
+              <label class="check-label"><input type="checkbox" id="perfil-exp-atual"> Emprego atual</label>
+            </div>
+            <div class="form-group"><label>Atividades exercidas</label><textarea id="perfil-exp-descricao" rows="2" placeholder="Descreva brevemente suas atividades"></textarea></div>
+            <div class="exp-acoes">
+              <button type="button" class="btn btn-secondary" onclick="perfilAddExp()">+ Adicionar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACESSIBILIDADE -->
+        <div class="perfil-bloco" data-bloco="acessibilidade">
+          <p style="color:var(--cinza);font-size:14px;margin-bottom:16px">Você respondeu isso no momento do cadastro. Se precisar atualizar, é só editar abaixo.</p>
+          <div class="form-group">
+            <label>Possui alguma deficiência ou necessidade de acessibilidade?</label>
+            <select id="pe-acessibilidade">
+              <option value="">Nenhuma</option>
+              <option value="cadeirante" ${perfil.acessibilidade==='cadeirante'?'selected':''}>Cadeirante</option>
+              <option value="deficiencia_visual" ${perfil.acessibilidade==='deficiencia_visual'?'selected':''}>Deficiência visual</option>
+              <option value="deficiencia_auditiva" ${perfil.acessibilidade==='deficiencia_auditiva'?'selected':''}>Deficiência auditiva</option>
+              <option value="mobilidade_reduzida" ${perfil.acessibilidade==='mobilidade_reduzida'?'selected':''}>Mobilidade reduzida</option>
+              <option value="outra" ${perfil.acessibilidade==='outra'?'selected':''}>Outra</option>
+            </select>
+          </div>
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="pe-comunicacoes" ${perfil.recebe_comunicacoes?'checked':''}>
+            <label for="pe-comunicacoes" style="margin:0">Desejo receber comunicações sobre novas vagas e atualizações</label>
+          </div>
+        </div>
+
+        <div class="perfil-acoes">
+          <button type="submit" class="btn btn-primary" id="btn-salvar-perfil">Salvar perfil</button>
+          <a href="painel.html" class="btn btn-secondary">Voltar ao painel</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Card de senha -->
+    <div class="perfil-form-card">
+      <h3 class="perfil-titulo">🔑 Trocar senha</h3>
+      <form class="perfil-form" onsubmit="event.preventDefault();trocarSenha(this)">
+        <div class="form-group"><label>Senha atual *</label><input type="password" id="senha-atual" required minlength="6"></div>
+        <div class="form-group"><label>Nova senha * (mínimo 6 caracteres)</label><input type="password" id="senha-nova" required minlength="6"></div>
+        <div class="form-group"><label>Confirme a nova senha *</label><input type="password" id="senha-nova-conf" required minlength="6"></div>
+        <div class="perfil-acoes">
+          <button type="submit" class="btn btn-primary" id="btn-trocar-senha">Atualizar senha</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  // Abas internas
+  document.querySelectorAll('.perfil-aba').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.perfil-aba').forEach(b => b.classList.remove('ativo'));
+      document.querySelectorAll('.perfil-bloco').forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      document.querySelector(`.perfil-bloco[data-bloco="${btn.dataset.sub}"]`).classList.add('ativo');
+    });
+  });
+
+  // Inicializa experiencias: expõe o array globalmente para o app.js incluir no payload
+  window.__perfilExps = experiencias;
+  perfilRenderExps();
+
+  // Toggle "Emprego atual" desabilita "Término"
+  const chkAtual = document.getElementById('perfil-exp-atual');
+  const inpFim = document.getElementById('perfil-exp-fim');
+  if (chkAtual && inpFim) {
+    chkAtual.addEventListener('change', () => {
+      if (chkAtual.checked) { inpFim.value = ''; inpFim.disabled = true; }
+      else { inpFim.disabled = false; }
+    });
+  }
+}
+
+// ===== EXPERIÊNCIAS =====
+function fmtData(s) {
+  if (!s) return '?';
+  try {
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return String(s).slice(0, 7);
+    return d.toISOString().slice(0, 7);
+  } catch (e) { return String(s).slice(0, 7); }
+}
+
+function perfilAddExp() {
+  const cargo = document.getElementById('perfil-exp-cargo')?.value.trim();
+  const empresa = document.getElementById('perfil-exp-empresa')?.value.trim();
+  const inicio = document.getElementById('perfil-exp-inicio')?.value || null;
+  const fim = document.getElementById('perfil-exp-fim')?.value || null;
+  const empregoAtual = document.getElementById('perfil-exp-atual')?.checked;
+  const descricao = document.getElementById('perfil-exp-descricao')?.value.trim() || null;
+
+  if (!cargo) return alert('Informe o cargo');
+  if (!empresa) return alert('Informe a empresa');
+  if (!inicio) return alert('Informe a data de início');
+
+  const exp = { cargo, empresa, inicio, descricao };
+  if (empregoAtual) { exp.emprego_atual = true; exp.fim = null; }
+  else { exp.emprego_atual = false; if (fim) exp.fim = fim; }
+
+  window.__perfilExps = window.__perfilExps || [];
+  window.__perfilExps.push(exp);
+
+  // limpa form
+  ['perfil-exp-cargo','perfil-exp-empresa','perfil-exp-inicio','perfil-exp-fim','perfil-exp-descricao'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const at = document.getElementById('perfil-exp-atual'); if (at) { at.checked = false; }
+  const inpFim = document.getElementById('perfil-exp-fim'); if (inpFim) inpFim.disabled = false;
+
+  perfilRenderExps();
+}
+
+function perfilRemoverExp(idx) {
+  if (!Array.isArray(window.__perfilExps)) return;
+  window.__perfilExps.splice(idx, 1);
+  perfilRenderExps();
+}
+
+function perfilRenderExps() {
+  const cont = document.getElementById('perfil-exp-lista');
+  if (!cont) return;
+  const exps = Array.isArray(window.__perfilExps) ? window.__perfilExps : [];
+  if (exps.length === 0) {
+    cont.innerHTML = '<p class="exp-vazia">Nenhuma experiência adicionada. Use o formulário abaixo para adicionar.</p>';
+    return;
+  }
+  cont.innerHTML = exps.map((e, i) => {
+    const desc = e.descricao ? `<p>${escapeHtml(e.descricao)}</p>` : '';
+    return `
+      <div class="exp-item">
+        <div class="exp-text">
+          <h4>${escapeHtml(e.cargo)} — ${escapeHtml(e.empresa)}</h4>
+          <p>${fmtData(e.inicio)} → ${e.emprego_atual ? 'Atual' : (e.fim ? fmtData(e.fim) : '?')}</p>
+          ${desc}
+        </div>
+        <button type="button" class="btn-x" onclick="perfilRemoverExp(${i})" title="Remover">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+window.perfilAddExp = perfilAddExp;
+window.perfilRemoverExp = perfilRemoverExp;
+window.perfilRenderExps = perfilRenderExps;
+
+// ===== Helpers =====
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ===== Drawer =====
+function abrirDrawer() {
+  document.getElementById('drawer').classList.add('aberto');
+  document.getElementById('drawer-overlay').classList.add('aberto');
+  const nome = localStorage.getItem('candidato_nome') || emailLogado || 'Candidato';
+  const foto = localStorage.getItem('candidato_foto') || '';
+  document.getElementById('drawer-nome').textContent = nome;
+  document.getElementById('drawer-email').textContent = emailLogado || '';
+  const el = document.getElementById('drawer-foto');
+  if (foto) { el.style.backgroundImage = `url("${foto.replace(/"/g,'\\"')}")`; el.textContent = ''; }
+}
+function fecharDrawer() {
+  document.getElementById('drawer').classList.remove('aberto');
+  document.getElementById('drawer-overlay').classList.remove('aberto');
+}
+
+window.abrirDrawer = abrirDrawer;
+window.fecharDrawer = fecharDrawer;
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    if (!tokenCandidato) tokenCandidato = localStorage.getItem('candidato_token');
+    if (!emailLogado) emailLogado = localStorage.getItem('candidato_email');
+    if (!tokenCandidato) { location.href = 'index.html'; return; }
+    carregarPaginaPerfil();
+    if (typeof window.atualizarHeaderUsuario === 'function') window.atualizarHeaderUsuario();
+  }, 200);
+});
+</script>
+</body>
+</html>
