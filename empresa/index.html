@@ -74,6 +74,12 @@
     .toast.ativo { opacity: 1; }
     .toast.erro { background: #dc2626; }
     .toast.sucesso { background: #16a34a; }
+
+    /* SUBMENU */
+    .submenu { background: var(--card); border-bottom: 1px solid var(--borda); padding: 0 24px; display: flex; gap: 4px; overflow-x: auto; }
+    .submenu a { padding: 14px 18px; text-decoration: none; color: var(--texto-suave); font-weight: 600; font-size: 14px; border-bottom: 2px solid transparent; white-space: nowrap; }
+    .submenu a:hover { color: var(--vinho); }
+    .submenu a.ativo { color: var(--vinho); border-bottom-color: var(--dourado); }
   </style>
 </head>
 <body>
@@ -90,6 +96,13 @@
 <button class="btn-sair" onclick="sair()">Sair</button>
     </div>
   </header>
+
+  <div class="submenu">
+    <a href="index.html" class="ativo">📊 Dashboard</a>
+    <a href="vagas.html">📋 Vagas com Candidatos</a>
+    <a href="agenda.html">📅 Agenda</a>
+    <a href="perfil.html">⚙️ Perfil</a>
+  </div>
 
   <div class="container">
     <h1 id="saudacao">Olá! 👋</h1>
