@@ -918,6 +918,28 @@
   </div>
 </div>
 
+<!-- Modal: Vincular Vagas à Empresa -->
+<div class="modal-overlay" id="modal-vincular-vagas">
+  <div class="modal modal-lg" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3>🔗 Vincular vagas — <span id="vinc-empresa-nome"></span></h3>
+      <button class="modal-close" onclick="fecharModal('vincular-vagas')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color: var(--cinza-medio); font-size: 13px; margin-bottom: 16px;">Selecione quais vagas esta empresa terá acesso no portal. Os candidatos dessas vagas aparecerão no dashboard da empresa.</p>
+
+      <h4 style="font-size:13px; font-weight:700; color:#16a34a; margin: 0 0 10px;">✅ Vagas liberadas</h4>
+      <div id="vinc-liberadas" style="margin-bottom: 20px;"></div>
+
+      <h4 style="font-size:13px; font-weight:700; color:#555; margin: 0 0 10px;">📋 Outras vagas da plataforma</h4>
+      <div id="vinc-disponiveis"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('vincular-vagas')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Detalhes da Candidatura -->
 <div class="modal-overlay" id="modal-candidatura">
   <div class="modal modal-large">
@@ -950,6 +972,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260722165500_email_labels"></script>
+<script src="app.js?v=20260722170000_vincular_vagas"></script>
 </body>
 </html>
