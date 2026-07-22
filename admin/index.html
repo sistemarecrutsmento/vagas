@@ -856,6 +856,23 @@
         <label>E-mail principal</label>
         <input id="emp-email" type="email" placeholder="contato@empresa.com" autocomplete="off">
       </div>
+
+      <hr style="border:none; border-top:1px solid var(--borda); margin: 18px 0;">
+      <p style="color: var(--cinza-medio); font-size: 12px; margin-bottom: 12px;">👤 <b>Usuário principal</b> (terá acesso ao portal da empresa). Pode pular e adicionar depois.</p>
+      <div class="form-group">
+        <label>Nome do usuário</label>
+        <input id="emp-user-nome" placeholder="Ex: João da Silva" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>E-mail (login)</label>
+          <input id="emp-user-email" type="email" placeholder="joao@empresa.com" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Senha provisória</label>
+          <input id="emp-user-senha" type="text" value="mudar123">
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-sec" onclick="fecharModal('nova-empresa')">Cancelar</button>
@@ -931,6 +948,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260722163000_remove_voltar_site"></script>
+<script src="app.js?v=20260722164500_emp_user_login"></script>
 </body>
 </html>
