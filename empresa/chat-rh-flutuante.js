@@ -317,17 +317,7 @@
     }
   });
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const idUrl = urlParams.get('id');
-  if (idUrl) {
-    setTimeout(() => {
-      const cid = parseInt(idUrl);
-      if (conversas.find(c => c.candidatura_id === cid)) {
-        toggle();
-        abrir(cid);
-      }
-    }, 800);
-  }
+  // Chat abre SOMENTE quando o usuário clicar (sem auto-open)
 
   carregarConversas();
   setInterval(carregarConversas, 30000);
