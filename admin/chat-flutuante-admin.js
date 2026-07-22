@@ -109,6 +109,31 @@
   `;
   document.head.appendChild(styleUploader);
 
+  // CSS das bolinhas de candidato (avatar circular com iniciais)
+  const styleFab = document.createElement('style');
+  styleFab.textContent = `
+    .chatfab-candidato {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #d4a017 0%, #f0c14b 100%);
+      border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s;
+    }
+    .chatfab-candidato:hover { transform: scale(1.08); }
+    .chatfab-candidato.aberta { border-color: #d4a017; box-shadow: 0 0 0 3px rgba(212,160,23,0.4), 0 4px 12px rgba(0,0,0,0.3); }
+    .chatfab-iniciais { color: white; font-weight: 700; font-size: 16px; text-transform: uppercase; }
+    .chatfab-candidato .chatfab-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: #dc2626; color: white; border-radius: 999px;
+      min-width: 22px; height: 22px; padding: 0 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      border: 2px solid white;
+    }
+  `;
+  document.head.appendChild(styleFab);
+
   // Uploader já vem no <head> via <script src="../candidato/chat-uploader.js">
   function carregarUploader() {
     return new Promise(resolve => {
@@ -121,30 +146,29 @@
     });
   }
 
-  // === HTML da bolinha e janela ===
-  const fab = document.createElement('button');
-  fab.className = 'chatfab';
-  fab.id = 'chatfab-btn';
-  fab.innerHTML = '💬<span class="chatfab-badge" id="chatfab-badge" style="display:none;">0</span>';
-  fab.onclick = toggleChat;
-  document.body.appendChild(fab);
+  // === HTML: 1 bolinha por candidato (empilhadas) ===
+  // Container de bolinhas (vai ter 1 botão por candidato)
+  const fabContainer = document.createElement('div');
+  fabContainer.id = 'chatfab-container';
+  fabContainer.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:10px;z-index:9999;';
+  document.body.appendChild(fabContainer);
 
+  // Janela única de chat (abre a conversa do candidato clicado)
   const win = document.createElement('div');
   win.className = 'chat-window';
   win.id = 'chat-window';
   win.innerHTML = `
     <div class="chat-head">
       <div class="chat-head-titulo">
-        <h3 id="chat-head-titulo">💬 Conversas</h3>
-        <p id="chat-head-sub">Com os candidatos</p>
+        <h3 id="chat-head-titulo">💬 Chat</h3>
+        <p id="chat-head-sub">Candidato</p>
       </div>
-      <button class="chat-head-fechar" onclick="document.getElementById('chat-window').classList.remove('aberto')">×</button>
+      <button class="chat-head-fechar" onclick="window.__chatFab.fechar()">×</button>
     </div>
-    <div class="chat-vagas" id="chat-vagas"></div>
     <div class="chat-msg-area" id="chat-msg-area">
       <div class="chat-vazio">
         <div class="icon">💬</div>
-        <p>Suas conversas com o recrutador aparecem aqui.</p>
+        <p>Selecione um candidato para começar a conversar.</p>
       </div>
     </div>
     <div class="chat-input" id="chat-input-area" style="display:none;">
@@ -165,7 +189,6 @@
       const slot = document.getElementById('chat-anexo-slot');
       const btn = window.ChatUploader.criarBotaoAnexo((file) => {
         anexoPendente = file;
-        // Mostra preview embaixo do input
         const prev = document.getElementById('chat-anexo-preview');
         prev.innerHTML = `
           <div class="chat-anexo-preview">
@@ -180,7 +203,7 @@
   // Expor API global pros handlers inline
   window.__chatFab = {
     enviar: enviarMensagem,
-    selecionar: selecionarCandidatura,
+    fechar: fecharJanela,
     cancelarAnexo: () => {
       anexoPendente = null;
       document.getElementById('chat-anexo-preview').innerHTML = '';
@@ -189,73 +212,86 @@
 
   // === Lógica ===
 
-  function toggleChat() {
-    aberto = !aberto;
-    win.classList.toggle('aberto', aberto);
-    if (aberto && conversaAtiva === null && conversas.length > 0) {
-      selecionarCandidatura(conversas[0].id);
-    }
-    if (aberto) {
-      // Marca como lida
-      ultimaMensagemId[conversaAtiva] = mensagensCache[conversaAtiva]?.length || 0;
-      atualizarBadge();
-    }
+  function fecharJanela() {
+    win.classList.remove('aberto');
+    aberto = false;
   }
 
   async function carregarCandidaturas() {
     try {
-      // Admin: usa rota que retorna TODAS as conversas (candidatos com msg)
       const r = await fetch(API + '/api/admin/conversas', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      if (r.status === 401) return; // deslogado
+      if (r.status === 401) return;
       const j = await r.json();
       conversas = j.conversas || [];
 
-      // Se não tem nenhuma conversa → some
-      if (conversas.length === 0 && !idUrlInt) {
-        fab.style.display = 'none';
-        win.classList.remove('aberto');
+      // Se não tem nenhuma conversa, esconde container
+      if (conversas.length === 0) {
+        fabContainer.style.display = 'none';
+        fecharJanela();
         return;
       }
-      fab.style.display = 'flex';
+      fabContainer.style.display = 'flex';
 
-      // Se tem ?id= na URL, já abre essa
-      if (idUrlInt && !conversaAtiva) {
-        conversaAtiva = idUrlInt;
-      }
+      // Renderiza 1 bolinha por candidato
+      fabContainer.innerHTML = conversas.map(c => {
+        const iniciais = (c.candidato_nome || '?').split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
+        const naoLidas = c.nao_lidas_admin > 0 ? c.nao_lidas_admin : '';
+        const ativa = c.candidatura_id === conversaAtiva && aberto;
+        return `<button class="chatfab chatfab-candidato ${ativa ? 'aberta' : ''}"
+                        data-cid="${c.candidatura_id}"
+                        title="${escapeHtml(c.candidato_nome)} - ${escapeHtml(c.vaga_titulo)}">
+                  <span class="chatfab-iniciais">${iniciais}</span>
+                  ${naoLidas ? `<span class="chatfab-badge">${naoLidas}</span>` : ''}
+                </button>`;
+      }).join('');
 
-      // Renderiza abas (mostra "Nome Candidato - Vaga")
-      const tabs = document.getElementById('chat-vagas');
-      if (conversas.length === 0) {
-        tabs.style.display = 'none';
-      } else {
-        tabs.style.display = 'flex';
-        tabs.innerHTML = conversas.map(c => {
-          const ativa = c.candidatura_id === conversaAtiva;
-          const naoLidas = c.nao_lidas_admin > 0 ? `<span class="chat-nao-lida">${c.nao_lidas_admin}</span>` : '';
-          return `<button class="chat-vaga-tab ${ativa ? 'ativa' : ''}" onclick="window.__chatFab.selecionar(${c.candidatura_id})" title="${escapeHtml(c.candidato_nome)} - ${escapeHtml(c.vaga_titulo)}">${escapeHtml((c.candidato_nome || '?').split(' ')[0])} ${naoLidas}</button>`;
-        }).join('');
-      }
+      // Liga onclick em cada bolinha
+      fabContainer.querySelectorAll('.chatfab-candidato').forEach(btn => {
+        btn.onclick = () => {
+          const cid = parseInt(btn.dataset.cid);
+          abrirConversa(cid);
+        };
+      });
 
-      // Se a conversa ativa não tá mais disponível, troca pra primeira
-      if (!conversas.find(c => c.candidatura_id === conversaAtiva)) {
-        conversaAtiva = conversas[0] ? conversas[0].candidatura_id : idUrlInt;
-        if (conversaAtiva) carregarMensagens(conversaAtiva);
+      // Se tem ?id= na URL e ainda não abriu, abre essa
+      if (idUrlInt && (!conversaAtiva || !aberto)) {
+        abrirConversa(idUrlInt);
       }
     } catch (e) {
       console.error('[chatfab-admin] carregarCandidaturas', e);
     }
   }
 
-  function selecionarCandidatura(cid) {
+  function abrirConversa(cid) {
+    // Se clicou na mesma que já tá aberta → fecha
+    if (aberto && conversaAtiva === cid) {
+      fecharJanela();
+      // Remove o destaque da bolinha
+      fabContainer.querySelectorAll('.chatfab-candidato').forEach(b => b.classList.remove('aberta'));
+      return;
+    }
     conversaAtiva = cid;
-    // Atualiza abas
-    document.querySelectorAll('.chat-vaga-tab').forEach(t => t.classList.remove('ativa'));
-    document.querySelectorAll('.chat-vaga-tab')[
-      Array.from(document.querySelectorAll('.chat-vaga-tab')).findIndex(t => t.textContent.trim() === (conversas.find(c => c.candidatura_id === cid)?.candidato_nome || ''))
-    ]?.classList.add('ativa');
+    aberto = true;
+    // Atualiza header
+    const conv = conversas.find(c => c.candidatura_id === cid);
+    if (conv) {
+      document.getElementById('chat-head-titulo').textContent = '💬 ' + (conv.candidato_nome || 'Candidato').split(' ')[0];
+      document.getElementById('chat-head-sub').textContent = conv.vaga_titulo || '';
+    }
+    // Destaca bolinha ativa
+    fabContainer.querySelectorAll('.chatfab-candidato').forEach(b => b.classList.remove('aberta'));
+    fabContainer.querySelector(`.chatfab-candidato[data-cid="${cid}"]`)?.classList.add('aberta');
+    // Abre janela
+    win.classList.add('aberto');
+    // Mostra input
+    document.getElementById('chat-input-area').style.display = 'flex';
+    // Carrega msgs
     carregarMensagens(cid);
+    // Marca como lida
+    ultimaMensagemId[cid] = mensagensCache[cid]?.length || 0;
+    atualizarBadge();
   }
 
   async function carregarMensagens(cid) {
@@ -359,24 +395,40 @@
   }
 
   function atualizarBadge() {
-    let total = 0;
+    // Cada bolinha tem sua própria badge atualizada no HTML,
+    // mas a função original manipulava 1 badge única. Aqui só recalculamos.
     conversas.forEach(c => {
       const msgs = mensagensCache[c.candidatura_id] || [];
-      if (msgs.length > 0) {
-        const ultima = msgs[msgs.length - 1];
-        if (ultima.autor_tipo === 'admin' && (ultimaMensagemId[c.candidatura_id] || 0) < msgs.length) {
-          // chat tá aberto e olhando outra vaga OU chat tá fechado
-          if (!aberto || conversaAtiva !== c.candidatura_id) total += msgs.length - (ultimaMensagemId[c.candidatura_id] || 0);
+      if (msgs.length === 0) return;
+      const ultima = msgs[msgs.length - 1];
+      // Badge só conta se:
+      // 1) chat fechado
+      // 2) chat aberto mas olhando OUTRO candidato
+      // 3) msg é do CANDIDATO (e não do admin) - quem precisa de alerta
+      let naoLidas = 0;
+      if (ultima.autor_tipo === 'candidato') {
+        if (!aberto || conversaAtiva !== c.candidatura_id) {
+          naoLidas = msgs.length - (ultimaMensagemId[c.candidatura_id] || 0);
         }
       }
+      // Se a API já mandou nao_lidas_admin, usa ela
+      if (c.nao_lidas_admin) naoLidas = c.nao_lidas_admin;
+      const btn = fabContainer.querySelector(`.chatfab-candidato[data-cid="${c.candidatura_id}"]`);
+      if (!btn) return;
+      const badge = btn.querySelector('.chatfab-badge');
+      if (naoLidas > 0) {
+        if (badge) {
+          badge.textContent = naoLidas > 9 ? '9+' : naoLidas;
+        } else {
+          const b = document.createElement('span');
+          b.className = 'chatfab-badge';
+          b.textContent = naoLidas > 9 ? '9+' : naoLidas;
+          btn.appendChild(b);
+        }
+      } else {
+        if (badge) badge.remove();
+      }
     });
-    const badge = document.getElementById('chatfab-badge');
-    if (total > 0) {
-      badge.style.display = 'flex';
-      badge.textContent = total > 9 ? '9+' : total;
-    } else {
-      badge.style.display = 'none';
-    }
   }
 
   function escapeHtml(t) {
