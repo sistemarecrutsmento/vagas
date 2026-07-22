@@ -11,6 +11,56 @@ let emailLogado = null;
 let tokenCandidato = null;
 let cadastroCompleto = false;
 
+// =====================================================
+// FONTE DA VERDADE — Cálculo de % do perfil do candidato
+// Use em QUALQUER página: window.calcularProgressoPerfil(perfil)
+// Retorna { pct, completos, total, faltam, cadastroCompleto }
+// =====================================================
+window.CAMPOS_PERFIL = [
+  // [chave, obrigatorio, label]
+  { key: 'nome',            obrigatorio: true,  label: 'Nome' },
+  { key: 'cpf',             obrigatorio: true,  label: 'CPF' },
+  { key: 'data_nascimento', obrigatorio: false, label: 'Data de nascimento' },
+  { key: 'celular',         obrigatorio: true,  label: 'Celular' },
+  { key: 'sexo',            obrigatorio: false, label: 'Sexo' },
+  { key: 'cep',             obrigatorio: true,  label: 'CEP' },
+  { key: 'cidade',          obrigatorio: true,  label: 'Cidade' },
+  { key: 'estado',          obrigatorio: true,  label: 'Estado' },
+  { key: 'logradouro',      obrigatorio: true,  label: 'Logradouro' },
+  { key: 'numero',          obrigatorio: true,  label: 'Número' },
+  { key: 'bairro',          obrigatorio: false, label: 'Bairro' },
+  { key: 'formacao',        obrigatorio: true,  label: 'Formação' },
+  { key: 'instituicao',     obrigatorio: false, label: 'Instituição' },
+  { key: 'curso',           obrigatorio: false, label: 'Curso' },
+  { key: 'situacao',        obrigatorio: true,  label: 'Situação da formação' },
+  { key: 'sobre_voce',      obrigatorio: false, label: 'Sobre você' },
+  { key: 'experiencia',     obrigatorio: false, label: 'Experiências profissionais', isArray: true },
+  { key: 'foto_url',        obrigatorio: false, label: 'Foto de perfil' },
+  { key: 'acessibilidade',  obrigatorio: false, label: 'Acessibilidade' }
+];
+
+window.calcularProgressoPerfil = function(perfil) {
+  if (!perfil) return { pct: 0, completos: 0, total: window.CAMPOS_PERFIL.length, faltam: window.CAMPOS_PERFIL.length, cadastroCompleto: false };
+  const temValor = (v) => {
+    if (v === null || v === undefined) return false;
+    if (typeof v === 'string') return v.trim() !== '' && v.trim() !== 'null';
+    if (Array.isArray(v)) return v.length > 0;
+    return true;
+  };
+  let completos = 0;
+  const faltam = [];
+  for (const c of window.CAMPOS_PERFIL) {
+    const val = c.isArray ? (Array.isArray(perfil[c.key]) ? perfil[c.key] : []) : perfil[c.key];
+    if (temValor(val)) completos++;
+    else if (c.obrigatorio) faltam.push(c.label);
+  }
+  const total = window.CAMPOS_PERFIL.length;
+  const pct = Math.round((completos / total) * 100);
+  // cadastroCompleto = true só se TODOS os obrigatórios estão preenchidos
+  const cadastroCompleto = faltam.length === 0;
+  return { pct, completos, total, faltam, cadastroCompleto };
+};
+
 // Áreas de interesse (Banco de Talentos)
 const AREAS_INTERESSE = [
   'Atendimento ao Cliente','Caixa','Vendas','Comercial','Administrativo','Recepção','Estoque','Logística','Expedição','Compras',
@@ -757,19 +807,19 @@ async function carregarPainel() {
   // Foto de perfil no editor
   if (typeof window.perfilFotoInit === 'function') window.perfilFotoInit(perfil);
 
-  // 2) Progresso do perfil
+  // 2) Progresso do perfil — usa função UNIFICADA
   const pFill = document.getElementById('painel-progresso-fill');
   const pPct = document.getElementById('painel-progresso-pct');
   const pDica = document.getElementById('painel-progresso-dica');
   if (perfil) {
-    const campos = ['cpf', 'data_nascimento', 'sexo', 'celular', 'cep', 'cidade', 'estado', 'bairro', 'logradouro', 'formacao', 'instituicao'];
-    const preenchidos = campos.filter(c => perfil[c] && String(perfil[c]).trim() !== '').length;
-    const pct = Math.round((preenchidos / campos.length) * 100);
-    pFill.style.width = pct + '%';
-    pPct.textContent = pct + '%';
-    pDica.textContent = pct === 100
+    const r = window.calcularProgressoPerfil(perfil);
+    if (pFill) pFill.style.width = r.pct + '%';
+    if (pPct) pPct.textContent = r.pct + '%';
+    if (pDica) pDica.textContent = r.pct === 100
       ? '🎉 Seu perfil está completo!'
-      : `Preencha mais ${campos.length - preenchidos} campos para melhorar seu currículo.`;
+      : `Preencha mais ${r.faltam.length} campo(s) obrigatório(s): ${r.faltam.slice(0, 3).join(', ')}${r.faltam.length > 3 ? '…' : ''}.`;
+    // Atualiza flag global também
+    cadastroCompleto = r.cadastroCompleto;
   }
 
   // 3) Preencher form de edição
