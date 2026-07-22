@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esqueci minha senha — Vagas.io</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-escuro: #4A1F25;
+      --vinho-claro: #8B3A45;
+      --branco: #FFFFFF;
+      --preto: #1A1A1A;
+      --cinza-texto: #6B6B6B;
+      --cinza-bg: #F5F5F5;
+      --borda: #E5E5E5;
+      --verde: #28A745;
+      --vermelho: #C62828;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--cinza-bg);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      color: var(--preto);
+    }
+    .container {
+      max-width: 420px;
+      width: 100%;
+      background: var(--branco);
+      border-radius: 12px;
+      padding: 40px 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .logo {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-bottom: 28px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #FFF; font-weight: 900; font-size: 18px;
+    }
+    .logo span { font-size: 22px; font-weight: 800; }
+    .logo strong { color: var(--vinho); }
+
+    h1 {
+      font-size: 22px; font-weight: 800;
+      text-align: center; margin-bottom: 8px;
+      color: var(--preto);
+    }
+    .subtitulo {
+      text-align: center; color: var(--cinza-texto);
+      font-size: 14px; margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    label {
+      display: block;
+      font-size: 13px; font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--preto);
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--preto);
+      background: var(--branco);
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--vinho);
+    }
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--vinho);
+      color: #FFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--vinho-claro);
+      transform: translateY(-1px);
+    }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    .voltar {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--cinza-texto);
+    }
+    .voltar a {
+      color: var(--vinho);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .voltar a:hover { text-decoration: underline; }
+
+    .mensagem {
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 16px;
+      display: none;
+      line-height: 1.5;
+    }
+    .mensagem.sucesso {
+      background: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+      display: block;
+    }
+    .mensagem.erro {
+      background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+      display: block;
+    }
+    .loading { display: none; }
+    .loading.ativo { display: inline-block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-icon">V</div>
+      <span>Vagas<strong>.io</strong></span>
+    </div>
+    <h1>Esqueci minha senha</h1>
+    <p class="subtitulo">Digite seu e-mail abaixo. Se estiver cadastrado, enviaremos um link pra redefinir sua senha.</p>
+
+    <form id="form-esqueci">
+      <label for="email">E-mail</label>
+      <input type="email" id="email" name="email" required placeholder="seu@email.com" autocomplete="email" />
+
+      <button type="submit" class="btn" id="btn-enviar">
+        <span class="loading" id="loading">⏳</span>
+        <span id="btn-texto">Enviar link de redefinição</span>
+      </button>
+    </form>
+
+    <div id="msg" class="mensagem"></div>
+
+    <div class="voltar">
+      Lembrou a senha? <a href="/vagas/">Voltar pro login</a>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://recrutamento-api.onrender.com';
+    const FRONTEND = 'https://sistemarecrutsmento.github.io/vagas';
+
+    const form = document.getElementById('form-esqueci');
+    const emailInput = document.getElementById('email');
+    const btn = document.getElementById('btn-enviar');
+    const btnTexto = document.getElementById('btn-texto');
+    const loading = document.getElementById('loading');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.className = 'mensagem';
+      msg.textContent = '';
+
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      btn.disabled = true;
+      loading.classList.add('ativo');
+      btnTexto.textContent = 'Enviando...';
+
+      try {
+        const r = await fetch(`${API}/api/auth/esqueci-senha`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, frontendUrl: FRONTEND })
+        });
+        const data = await r.json();
+        // SEMPRE mostra sucesso (não revela se o e-mail existe)
+        msg.className = 'mensagem sucesso';
+        msg.textContent = '✅ ' + (data.mensagem || 'Se o e-mail estiver cadastrado, você receberá o link em instantes.');
+        form.style.display = 'none';
+      } catch (err) {
+        msg.className = 'mensagem erro';
+        msg.textContent = '❌ Erro de conexão. Tente de novo em alguns segundos.';
+      } finally {
+        btn.disabled = false;
+        loading.classList.remove('ativo');
+        btnTexto.textContent = 'Enviar link de redefinição';
+      }
+    });
+  </script>
+</body>
+</html>
