@@ -53,7 +53,27 @@ function toggleMenu() {
 function mostrarApp() {
   document.getElementById('login-page').style.display = 'none';
   document.getElementById('app').classList.add('logado');
+  carregarUsuarioSidebar();
   irPara('dashboard');
+}
+
+// === Sidebar: avatar + nome do admin logado ===
+function carregarUsuarioSidebar() {
+  try {
+    const t = token || localStorage.getItem('admin_token');
+    if (!t) return;
+    const parts = t.split('.');
+    if (parts.length < 2) return;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const nome = payload.nome || 'Admin';
+    const iniciais = nome.split(/\s+/).map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+    const elAvatar = document.getElementById('aside-user-avatar');
+    const elNome = document.getElementById('aside-user-nome');
+    const elEmpresa = document.getElementById('aside-user-empresa');
+    if (elAvatar) elAvatar.textContent = iniciais || 'A';
+    if (elNome) elNome.textContent = nome;
+    if (elEmpresa) elEmpresa.textContent = payload.email || '';
+  } catch (e) { /* silencioso */ }
 }
 
 // ===== NAVEGAÇÃO =====
