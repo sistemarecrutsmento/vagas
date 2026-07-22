@@ -92,6 +92,33 @@
   `;
   document.head.appendChild(style);
 
+  // CSS extra do uploader (injetado depois pra ter prioridade)
+  const styleUploader = document.createElement('style');
+  styleUploader.textContent = `
+    .chat-anexo-btn { background:transparent;border:0;font-size:22px;cursor:pointer;padding:0 6px;color:var(--dourado,#d4a017); }
+    .chat-anexo-btn:hover { transform:scale(1.1); }
+    .chat-anexo-btn:disabled { opacity:0.4;cursor:not-allowed; }
+    .chat-anexo-link { display:flex;align-items:center;gap:6px;padding:8px 10px;background:rgba(255,255,255,0.15);border-radius:8px;color:inherit;text-decoration:none;margin-top:4px;font-size:13px; }
+    .chat-anexo-link span { flex:1;word-break:break-all; }
+    .chat-anexo-link small { opacity:0.7;font-size:11px; }
+    .chat-anexo-preview { display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f1f1f1;border-radius:8px;margin-top:6px;font-size:12px; }
+    .chat-anexo-preview button { background:#dc2626;color:white;border:0;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:11px; }
+  `;
+  document.head.appendChild(styleUploader);
+
+  // Uploader já vem no <head> via tag <script>, só aguarda carregar
+  function carregarUploader() {
+    return new Promise(resolve => {
+      if (window.ChatUploader) return resolve();
+      // Aguarda até 2s o uploader carregar
+      let tentativas = 0;
+      const t = setInterval(() => {
+        tentativas++;
+        if (window.ChatUploader || tentativas > 20) { clearInterval(t); resolve(); }
+      }, 100);
+    });
+  }
+
   // === HTML da bolinha e janela ===
   const fab = document.createElement('button');
   fab.className = 'chatfab';
@@ -119,16 +146,43 @@
       </div>
     </div>
     <div class="chat-input" id="chat-input-area" style="display:none;">
+      <span id="chat-anexo-slot"></span>
       <textarea id="chat-input" placeholder="Digite sua mensagem…" rows="1"></textarea>
       <button class="chat-send-btn" id="chat-send-btn" onclick="window.__chatFab.enviar()">➤</button>
     </div>
+    <div id="chat-anexo-preview"></div>
   `;
   document.body.appendChild(win);
+
+  // Anexo pendente
+  let anexoPendente = null;
+
+  // Carrega uploader e injeta botão
+  carregarUploader().then(() => {
+    if (window.ChatUploader) {
+      const slot = document.getElementById('chat-anexo-slot');
+      const btn = window.ChatUploader.criarBotaoAnexo((file) => {
+        anexoPendente = file;
+        // Mostra preview embaixo do input
+        const prev = document.getElementById('chat-anexo-preview');
+        prev.innerHTML = `
+          <div class="chat-anexo-preview">
+            <span>📎 ${escapeHtml(file.name)} <small>(${window.ChatUploader.formatarTamanho(file.size)})</small></span>
+            <button onclick="window.__chatFab.cancelarAnexo()">remover</button>
+          </div>`;
+      });
+      slot.appendChild(btn);
+    }
+  });
 
   // Expor API global pros handlers inline
   window.__chatFab = {
     enviar: enviarMensagem,
-    selecionar: selecionarCandidatura
+    selecionar: selecionarCandidatura,
+    cancelarAnexo: () => {
+      anexoPendente = null;
+      document.getElementById('chat-anexo-preview').innerHTML = '';
+    }
   };
 
   // === Lógica ===
@@ -240,10 +294,11 @@
       const minha = m.autor_tipo === 'candidato';
       const iniciais = (m.autor_nome || '?').split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
       const dataFmt = new Date(m.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+      const arqs = (m.arquivos || []).map(a => window.ChatUploader ? window.ChatUploader.renderAnexo(a) : `📎 ${a.nome_original}`).join('');
       return `<div class="chat-msg ${minha ? 'minha' : m.autor_tipo}">
         <div class="chat-msg-av ${m.autor_tipo}">${iniciais}</div>
         <div class="chat-msg-balao">
-          <div class="chat-msg-conteudo">${escapeHtml(m.texto)}</div>
+          <div class="chat-msg-conteudo">${escapeHtml(m.texto || '')}${arqs}</div>
           <div class="chat-msg-meta">${escapeHtml(m.autor_nome || '')} • ${dataFmt}</div>
         </div>
       </div>`;
@@ -254,17 +309,44 @@
   async function enviarMensagem() {
     const ta = document.getElementById('chat-input');
     const texto = ta.value.trim();
-    if (!texto || !candidaturaAtiva) return;
+    if (!texto && !anexoPendente) return;
+    if (!candidaturaAtiva) return;
     const btn = document.getElementById('chat-send-btn');
     btn.disabled = true;
     try {
-      const r = await fetch(API + '/api/chat/' + candidaturaAtiva + '/mensagens', {
+      let endpoint = API + '/api/chat/' + candidaturaAtiva + '/mensagens';
+      let body;
+      let headers = { 'Authorization': 'Bearer ' + token };
+
+      if (anexoPendente) {
+        endpoint = API + '/api/chat/' + candidaturaAtiva + '/upload';
+        const base64 = await window.ChatUploader.lerComoBase64(anexoPendente);
+        body = {
+          texto: texto || null,
+          arquivo: {
+            nome: anexoPendente.name,
+            mime: anexoPendente.type,
+            base64
+          }
+        };
+        headers['Content-Type'] = 'application/json';
+      } else {
+        body = { texto };
+        headers['Content-Type'] = 'application/json';
+      }
+
+      const r = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ texto })
+        headers,
+        body: JSON.stringify(body)
       });
-      if (!r.ok) throw new Error('Falha ao enviar');
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error(j.erro || 'Falha ao enviar');
+      }
       ta.value = '';
+      anexoPendente = null;
+      document.getElementById('chat-anexo-preview').innerHTML = '';
       await carregarMensagens(candidaturaAtiva);
     } catch (e) {
       alert('Erro ao enviar: ' + e.message);
