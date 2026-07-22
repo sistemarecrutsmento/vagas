@@ -473,7 +473,7 @@
   </div>
 </div>
 
-<script src="app-v2.js?v=1784700000_ETAPA"></script>
+<script src="app-v2.js?v=1784725000_PROGRESSO"></script>
 <script src="modals.js?v=1784700000_ETAPA"></script>
 <script>
 // ===== ROTEAMENTO =====
@@ -519,22 +519,17 @@ async function carregarPaginaCandidato() {
     localStorage.setItem('candidato_nome', nome);
     if (perfil.foto_url) localStorage.setItem('candidato_foto', perfil.foto_url);
 
-    // Progresso (cópia da lógica)
-    const checks = [
-      !!perfil.nome, !!perfil.cpf, !!perfil.data_nascimento, !!perfil.celular, !!perfil.sexo,
-      !!perfil.cep, !!perfil.cidade, !!perfil.logradouro, !!perfil.numero,
-      !!perfil.formacao, !!perfil.instituicao, !!perfil.curso,
-      !!perfil.foto_url
-    ];
-    const total = checks.length;
-    const done = checks.filter(Boolean).length;
-    const pct = Math.round((done / total) * 100);
+    // Progresso — usa função UNIFICADA (mesma do app-v2.js e perfil.html)
+    const r = window.calcularProgressoPerfil(perfil);
+    const pct = r.pct;
     document.getElementById('painel-progresso-pct').textContent = pct + '%';
     document.getElementById('painel-progresso-fill').style.width = pct + '%';
-    document.getElementById('painel-progresso-pct-modal').textContent = pct + '%';
-    document.getElementById('painel-progresso-fill-modal').style.width = pct + '%';
+    const pctModalEl = document.getElementById('painel-progresso-pct-modal');
+    if (pctModalEl) pctModalEl.textContent = pct + '%';
+    const fillModalEl = document.getElementById('painel-progresso-fill-modal');
+    if (fillModalEl) fillModalEl.style.width = pct + '%';
     document.getElementById('painel-progresso-dica').textContent = pct < 100
-      ? 'Complete seu perfil para aumentar suas chances.'
+      ? `Complete mais ${r.faltam.length} campo(s) obrigatório(s) (${r.faltam.slice(0, 2).join(', ')}…)`
       : 'Perfil completo! ✨';
 
     // Também preenche o painel do modal
