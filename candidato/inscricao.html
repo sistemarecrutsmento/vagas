@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha inscrição — Vagas.io</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--preto); line-height: 1.5; }
+  :root {
+    --branco: #ffffff;
+    --vinho: #722F37;
+    --vinho-escuro: #5C252C;
+    --vinho-claro: #8a3d47;
+    --borda: #e0e0e0;
+    --bg: #f5f5f7;
+    --preto: #222;
+    --cinza: #666;
+    --cinza-medio: #999;
+    --verde: #16a34a;
+    --vermelho: #dc2626;
+    --azul: #2563eb;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* Top bar vinho */
+  header { background: var(--vinho); color: var(--branco); border-bottom: none; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+  .header-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-weight: 800; font-size: 22px; color: var(--branco); text-decoration: none; }
+  .logo span { color: var(--branco); opacity: 0.8; font-weight: 300; }
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-outline { background: transparent; color: var(--branco); border: 1px solid rgba(255,255,255,0.4); padding: 9px 18px; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px; }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--branco); color: var(--vinho); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; background-size: cover; background-position: center; flex-shrink: 0; }
+  .btn-menu-logo { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; }
+  .btn-menu-logo:hover { background: rgba(255,255,255,0.25); border-color: white; color: white; }
+  .header-inner { padding-right: 80px; }
+
+  /* Sub-header vinho */
+  .subheader { background: var(--vinho); color: white; padding: 22px 0; box-shadow: 0 2px 8px rgba(114, 47, 55, 0.15); }
+  .subheader-inner { max-width: 1100px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; gap: 16px; }
+  .subheader h1 { font-size: 22px; font-weight: 700; flex: 1; }
+  .subheader-voltar { color: rgba(255,255,255,0.85); font-size: 14px; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+  .subheader-voltar:hover { background: rgba(255,255,255,0.15); color: white; }
+
+  /* Drawer (igual painel) */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+  .drawer-overlay.aberto { display: block; }
+  aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+  aside.drawer.aberto { transform: translateX(0); }
+  .drawer-header { padding: 20px; background: var(--vinho); color: white; display: flex; align-items: center; gap: 12px; }
+  .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; background-size: cover; background-position: center; flex-shrink: 0; }
+  .drawer-info { flex: 1; min-width: 0; }
+  .drawer-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-info p { font-size: 12px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-close { background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .drawer-close:hover { background: rgba(255,255,255,0.25); }
+  .drawer-body { flex: 1 1 auto; min-height: 0; padding: 16px 0; overflow-y: auto; }
+  .drawer-section { padding: 8px 20px 4px; font-size: 11px; font-weight: 700; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 12px; }
+  .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--preto); font-size: 15px; font-weight: 500; transition: all 0.15s; border-right: 3px solid transparent; text-decoration: none; }
+  .drawer-link:hover { background: #f5f5f7; }
+  .drawer-link.ativo { background: #fdf2f3; border-right-color: var(--vinho); color: var(--vinho); font-weight: 700; }
+  .drawer-link .icon { font-size: 20px; width: 24px; text-align: center; }
+  .drawer-footer { padding: 12px 20px; border-top: 1px solid var(--borda); background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); flex-shrink: 0; }
+  .drawer-logout { width: 100%; background: transparent; color: var(--vinho); border: 1px solid var(--vinho); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .drawer-logout:hover { background: var(--vinho); color: white; }
+
+  /* Container */
+  .container { max-width: 800px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* Card principal (resumo da vaga) */
+  .insc-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 28px 32px; margin-bottom: 20px; }
+  .insc-info-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--cinza); margin-bottom: 8px; }
+  .insc-info-top .sep { color: var(--borda); }
+  .insc-titulo { font-size: 26px; font-weight: 800; color: var(--preto); line-height: 1.2; margin-bottom: 12px; }
+  .insc-status { display: inline-block; padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; background: var(--azul); color: white; margin-bottom: 16px; }
+  .insc-status.status-contratado, .insc-status.status-aprovado { background: var(--verde); }
+  .insc-status.status-rejeitado, .insc-status.status-reprovado { background: var(--vermelho); }
+  .insc-descricao { color: var(--preto); font-size: 15px; line-height: 1.6; margin-bottom: 16px; white-space: pre-line; }
+  .insc-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .insc-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #f0f4f8; color: var(--azul); border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .insc-tag .icon { font-size: 14px; }
+  .insc-alerta { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: #eef6ff; border: 1px solid #b6dcff; border-radius: 10px; color: #1e40af; font-size: 14px; margin-top: 18px; }
+
+  /* Card do processo seletivo */
+  .proc-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 24px 28px; }
+  .proc-card h3 { font-size: 18px; font-weight: 700; color: var(--preto); margin-bottom: 16px; }
+  .proc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .proc-etapa { background: #fafafa; border: 1px solid var(--borda); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
+  .proc-etapa.aprovada { background: #ecfdf5; border-color: #a7f3d0; }
+  .proc-etapa.rejeitada { background: #fef2f2; border-color: #fecaca; }
+  .proc-etapa.atual { background: #fff7ed; border-color: #fed7aa; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1); }
+  .proc-numero { width: 36px; height: 36px; border-radius: 50%; background: var(--cinza-medio); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+  .proc-etapa.aprovada .proc-numero { background: var(--verde); }
+  .proc-etapa.rejeitada .proc-numero { background: var(--vermelho); }
+  .proc-etapa.atual .proc-numero { background: #f97316; }
+  .proc-etapa-info { flex: 1; min-width: 0; }
+  .proc-etapa-nome { font-weight: 700; color: var(--preto); font-size: 14px; margin-bottom: 4px; }
+  .proc-etapa-status { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #e5e7eb; color: var(--cinza); }
+  .proc-etapa.aprovada .proc-etapa-status { background: var(--verde); color: white; }
+  .proc-etapa.rejeitada .proc-etapa-status { background: var(--vermelho); color: white; }
+  .proc-etapa.atual .proc-etapa-status { background: #f97316; color: white; }
+  .proc-etapa-desc { margin-top: 8px; font-size: 12.5px; color: var(--cinza); line-height: 1.4; }
+  .proc-etapa.aprovada .proc-etapa-desc { color: #166534; }
+  .proc-etapa.rejeitada .proc-etapa-desc { color: #991b1b; }
+  .proc-etapa.atual .proc-etapa-desc { color: #9a3412; }
+
+  /* Loading & empty */
+  .loading { padding: 80px 20px; text-align: center; color: var(--cinza); }
+  .spinner { display: inline-block; width: 36px; height: 36px; border: 3px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { padding: 40px 0; text-align: center; color: var(--cinza); }
+  .btn-voltar-painel { display: inline-block; margin-top: 20px; padding: 10px 20px; background: var(--vinho); color: white; border-radius: 8px; font-weight: 600; }
+  .btn-voltar-painel:hover { background: var(--vinho-escuro); }
+
+  @media (max-width: 720px) {
+    .container { padding: 20px 14px 40px; }
+    .insc-card { padding: 20px; }
+    .insc-titulo { font-size: 22px; }
+    .proc-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">Vagas<span>.io</span></a>
+    <div class="header-actions" id="header-actions"></div>
+  </div>
+</header>
+
+<section class="subheader">
+  <div class="subheader-inner">
+    <h1 id="sub-titulo">Minha inscrição</h1>
+    <span class="subheader-voltar" onclick="location.href='painel.html'">← Voltar</span>
+  </div>
+</section>
+
+<!-- Drawer lateral -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-foto" id="drawer-foto">👤</div>
+    <div class="drawer-info">
+      <h3 id="drawer-nome">Candidato</h3>
+      <p id="drawer-email">—</p>
+    </div>
+    <button class="drawer-close" onclick="fecharDrawer()" title="Fechar">×</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">Navegação</div>
+    <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
+    <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
+    <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
+  </div>
+  <div class="drawer-footer">
+    <button class="drawer-logout" onclick="logout()" type="button" aria-label="Sair do perfil">🚪 Sair</button>
+  </div>
+</aside>
+
+<main class="container" id="conteudo">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p style="margin-top:14px">Carregando inscrição...</p>
+  </div>
+</main>
+
+<script src="app-v2.js?v=1784700000_FOOTER"></script>
+<script src="modals.js?v=1784700000_FOOTER"></script>
+<script>
+// ===== PEGAR ID DA VAGA =====
+const params = new URLSearchParams(window.location.search);
+const vagaId = params.get('vaga');
+
+if (!vagaId) {
+  document.getElementById('conteudo').innerHTML = `
+    <div class="empty">
+      <p>Inscrição não informada.</p>
+      <a href="painel.html" class="btn-voltar-painel">Voltar ao painel</a>
+    </div>`;
+} else {
+  // O app.js inicializa a sessão no DOMContentLoaded; aguarda antes da consulta protegida.
+  function init() {
+    tokenCandidato = tokenCandidato || localStorage.getItem('candidato_token');
+    emailLogado = emailLogado || localStorage.getItem('candidato_email');
+    // Garante botão de menu no header
+    if (!document.getElementById('btn-menu-logo')) {
+      const h = document.querySelector('header');
+      if (h) {
+        const b = document.createElement('button');
+        b.id = 'btn-menu-logo';
+        b.className = 'btn-menu-logo';
+        b.innerHTML = '☰';
+        b.title = 'Menu';
+        b.setAttribute('aria-label', 'Abrir menu');
+        b.onclick = abrirDrawer;
+        h.appendChild(b);
+      }
+    }
+    if (typeof atualizarHeaderUsuario === 'function') atualizarHeaderUsuario();
+    if (!tokenCandidato) {
+      document.getElementById('conteudo').innerHTML = `<div class="empty"><p>Faça login para visualizar esta inscrição.</p><a href="index.html" class="btn-voltar-painel">Entrar</a></div>`;
+      return;
+    }
+    carregarInscricao();
+  }
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', () => setTimeout(init, 250));
+  } else {
+    setTimeout(init, 250);
+  }
+}
+
+function abrirDrawer() {
+  document.getElementById('drawer').classList.add('aberto');
+  document.getElementById('drawer-overlay').classList.add('aberto');
+  const nome = localStorage.getItem('candidato_nome') || emailLogado || 'Candidato';
+  const foto = localStorage.getItem('candidato_foto') || '';
+  document.getElementById('drawer-nome').textContent = nome;
+  document.getElementById('drawer-email').textContent = emailLogado || '';
+  const el = document.getElementById('drawer-foto');
+  if (foto) { el.style.backgroundImage = `url("${foto.replace(/"/g, '\\\"')}")`; el.textContent = ''; }
+}
+function fecharDrawer() {
+  document.getElementById('drawer').classList.remove('aberto');
+  document.getElementById('drawer-overlay').classList.remove('aberto');
+}
+
+function statusLabel(s) {
+  return ({
+    'em_analise': 'Em análise',
+    'em_andamento': 'Em andamento',
+    'andamento': 'Em andamento',
+    'contratado': 'Contratado',
+    'aprovado': 'Aprovado',
+    'rejeitado': 'Não selecionado',
+    'reprovado': 'Não selecionado',
+    'finalizado': 'Finalizado'
+  })[s] || s || 'Em análise';
+}
+
+function statusClass(s) {
+  if (s === 'contratado' || s === 'aprovado') return 'status-aprovado';
+  if (s === 'rejeitado' || s === 'reprovado') return 'status-rejeitado';
+  return '';
+}
+
+async function carregarInscricao() {
+  try {
+    // 1) Buscar todas as candidaturas do candidato
+    const r = await fetch(API + '/api/candidato/candidaturas', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (r.status === 401) { logout(); return; }
+    if (!r.ok) throw new Error('Erro ao buscar candidaturas');
+    const data = await r.json();
+    const cands = data.candidaturas || [];
+    const cand = cands.find(c => String(c.vaga_id) === String(vagaId));
+    if (!cand) {
+      document.getElementById('conteudo').innerHTML = `
+        <div class="empty">
+          <p>Você não está inscrito nesta vaga.</p>
+          <a href="index.html" class="btn-voltar-painel">Ver vagas abertas</a>
+        </div>`;
+      return;
+    }
+
+    // 2) Buscar dados completos da vaga (pra pegar etapas e descrição)
+    const rv = await fetch(API + '/api/vagas/' + vagaId);
+    if (!rv.ok) throw new Error('Vaga não encontrada');
+    const dv = await rv.json();
+    const v = dv.vaga || dv;
+
+    renderizar(cand, v);
+  } catch (e) {
+    document.getElementById('conteudo').innerHTML = `
+      <div class="empty">
+        <p>Erro ao carregar inscrição: ${e.message}</p>
+        <a href="painel.html" class="btn-voltar-painel">Voltar ao painel</a>
+      </div>`;
+  }
+}
+
+function renderizar(cand, v) {
+  // Parse etapas da vaga
+  let etapas = v.etapas;
+  if (typeof etapas === 'string') {
+    try { etapas = JSON.parse(etapas); } catch (e) { etapas = null; }
+  }
+  if (!Array.isArray(etapas) || !etapas.length) {
+    etapas = [
+      { nome: 'Inscrição',              descricao: 'Você se candidatou, agora nosso time vai analisar seu perfil.' },
+      { nome: 'Triagem curricular',     descricao: 'Nosso time vai analisar sua compatibilidade com a vaga.' },
+      { nome: 'Entrevista RH',          descricao: 'Vamos entrar em contato para agendar um bate papo com nosso time.' },
+      { nome: 'Entrevista gestor',      descricao: 'Segunda parte do processo, bate papo com o gestor/empresa.' },
+      { nome: 'Proposta',               descricao: 'Você receberá nossa proposta de trabalho. Avalie com calma e nos dê o seu aceite.' },
+      { nome: 'Coleta de documentos',   descricao: 'Nessa etapa será solicitado o anexo dos documentos necessários para contratação.' },
+      { nome: 'Contratação',            descricao: 'Fim do processo.' }
+    ];
+  }
+
+  // Descrições padrão das etapas. As etapas podem vir do banco apenas com o nome;
+  // nesse caso, completamos automaticamente a descrição correspondente.
+  const DESCRICOES_ETAPAS = {
+    'inscrição': 'Você se candidatou, agora nosso time vai analisar seu perfil.',
+    'triagem curricular': 'Nosso time vai analisar sua compatibilidade com a vaga.',
+    'entrevista rh': 'Vamos entrar em contato para agendar um bate papo com nosso time.',
+    'entrevista gestor': 'Segunda parte do processo, bate papo com o gestor/empresa.',
+    'proposta': 'Você receberá nossa proposta de trabalho. Avalie com calma e nos dê o seu aceite.',
+    'coleta de documentos': 'Nessa etapa será solicitado o anexo dos documentos necessários para contratação.',
+    'contratação': 'Fim do processo.'
+  };
+  const normalizarEtapa = nome => String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+  // Etapa atual (0 = nenhuma concluída; etapas.length = tudo concluído)
+  const etapaAtual = Number(cand.etapa_atual || 0);
+  const statusCand = cand.status || '';
+
+  // Bloco de Coleta de Documentos só aparece se a etapa atual for a "Coleta de Documentos" (etapa 6, 1-indexed)
+  const etapaAtualObj = etapas[etapaAtual];
+  const etapaAtualNome = (typeof etapaAtualObj === 'string' ? etapaAtualObj : (etapaAtualObj?.nome || '')).toLowerCase();
+  const emColetaDocumentos = etapaAtual === 6 || etapaAtualNome.includes('documento') || etapaAtualNome.includes('document');
+  // Bloco de Proposta só aparece na etapa 5 (Proposta)
+  const emProposta = etapaAtual === 5 || etapaAtualNome.includes('proposta');
+  const reprovadoGeral = (statusCand === 'rejeitado' || statusCand === 'reprovado');
+
+  // Tags
+  const tags = [];
+  if (v.empresa) tags.push(`<span class="insc-tag"><span class="icon">🏢</span> ${v.empresa}</span>`);
+  if (v.modalidade) tags.push(`<span class="insc-tag"><span class="icon">💼</span> ${v.modalidade}</span>`);
+  if (v.cidade) tags.push(`<span class="insc-tag"><span class="icon">📍</span> ${v.cidade}${v.estado ? '/' + v.estado : ''}</span>`);
+
+  // Cabeçalho
+  const codigo = cand.id ? `Código: ${String(cand.id).padStart(6, '0')}` : '';
+  document.getElementById('sub-titulo').textContent = v.titulo || 'Minha inscrição';
+
+  // Card resumo
+  const resumoHTML = `
+    <div class="insc-card">
+      <div class="insc-info-top">
+        <span>Inscrição${cand.criada_em ? ' em ' + new Date(cand.criada_em).toLocaleDateString('pt-BR') : ''}</span>
+        ${codigo ? `<span class="sep">|</span><span>${codigo}</span>` : ''}
+      </div>
+      <h1 class="insc-titulo">${v.titulo || 'Vaga'}</h1>
+      <span class="insc-status ${statusClass(statusCand)}">${statusLabel(statusCand)}</span>
+      ${v.descricao ? `<div class="insc-descricao">${v.descricao}</div>` : ''}
+      <div class="insc-tags">${tags.join('')}</div>
+      <div class="insc-alerta">
+        <span style="font-size:18px">ℹ️</span>
+        <span>Você está inscrito para esta vaga. Acompanhe abaixo o andamento do processo seletivo.</span>
+      </div>
+    </div>
+
+    <div class="proc-card">
+      <h3>Processo seletivo</h3>
+      <div class="proc-grid">
+        ${etapas.map((e, i) => {
+          const nome = (typeof e === 'string') ? e : (e.nome || e.titulo || `Etapa ${i+1}`);
+          const descricaoBanco = (typeof e === 'object' && e.descricao) ? e.descricao : '';
+          const descricao = descricaoBanco || DESCRICOES_ETAPAS[normalizarEtapa(nome)] || '';
+          let etapaClass = '';
+          let statusTxt = 'Aguardando';
+          // Etapa 0 (Inscrição) SEMPRE é concluída pra quem se inscreveu (mesmo se etapa_atual=0)
+          const inscConcluida = (i === 0);
+          if (reprovadoGeral) {
+            if (inscConcluida || i < etapaAtual) { etapaClass = 'aprovada'; statusTxt = (i === 0) ? 'Candidatura realizada' : 'Aprovado'; }
+            else if (i === etapaAtual) { etapaClass = 'rejeitada'; statusTxt = 'Não passou'; }
+            else { etapaClass = ''; statusTxt = '—'; }
+          } else if (statusCand === 'contratado' || statusCand === 'aprovado' || inscConcluida || (i < etapaAtual)) {
+            etapaClass = 'aprovada';
+            statusTxt = (i === 0) ? 'Candidatura realizada' : 'Aprovado';
+          } else if (i === etapaAtual) {
+            etapaClass = 'atual';
+            statusTxt = 'Em andamento';
+          }
+          return `
+            <div class="proc-etapa ${etapaClass}">
+              <div class="proc-numero">${i+1}</div>
+              <div class="proc-etapa-info">
+                <div class="proc-etapa-nome">${nome}</div>
+                <span class="proc-etapa-status">${statusTxt}</span>
+                ${descricao ? `<div class="proc-etapa-desc">${descricao}</div>` : ''}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:24px">
+      <a href="painel.html" class="btn-voltar-painel" style="display:inline-block;text-decoration:none;">← Voltar para Minhas Inscrições</a>
+      ${emColetaDocumentos && cand.id ? `<a href="documentos.html?candidatura=${cand.id}" class="btn-voltar-painel" style="display:inline-block;text-decoration:none;margin-left:12px;background:var(--vinho);color:white;border-color:var(--vinho);">📎 Enviar documentos para contratação</a>` : ''}
+    </div>
+
+    ${emProposta ? `<div id="bloco-proposta" style="margin-top:24px;background:white;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.05);text-align:center"></div>` : ''}
+  `;
+
+  document.getElementById('conteudo').innerHTML = resumoHTML;
+
+  // Se tiver bloco de proposta, busca os dados dela
+  if (emProposta) {
+    carregarProposta(cand.id);
+  }
+}
+
+// ====== Bloco de Proposta (etapa 5) ======
+async function carregarProposta(candidaturaId) {
+  const bloco = document.getElementById('bloco-proposta');
+  if (!bloco) return;
+  bloco.innerHTML = '<div class="spinner"></div>';
+  try {
+    const r = await fetch(API + '/api/candidato/candidatura/' + candidaturaId + '/proposta', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (r.status === 401) { logout(); return; }
+    if (!r.ok) throw new Error('Erro ao buscar proposta');
+    const data = await r.json();
+    const p = data.proposta || {};
+    const aceitou = !!p.aceita_em;
+    const recusou = !!p.recusada_em;
+
+    if (!p.enviada_em) {
+      bloco.innerHTML = `
+        <div style="font-size:48px">⏳</div>
+        <h3 style="margin:12px 0 6px;color:#444">Aguardando proposta</h3>
+        <p style="color:#666;font-size:14px">O recrutador está preparando sua proposta. Você será notificado assim que ela for enviada.</p>
+      `;
+      return;
+    }
+
+    if (aceitou) {
+      bloco.innerHTML = `
+        <div style="font-size:48px">✅</div>
+        <h3 style="margin:12px 0 6px;color:#16A34A">Proposta aceita em ${new Date(p.aceita_em).toLocaleDateString('pt-BR')}</h3>
+        <p style="color:#666;font-size:14px">Aguarde a próxima etapa (coleta de documentos).</p>
+        ${p.pdf_url ? `<p style="margin-top:12px"><a href="${p.pdf_url}" target="_blank" rel="noopener" style="color:var(--vinho)">📄 Baixar proposta (PDF)</a></p>` : ''}
+      `;
+      return;
+    }
+
+    if (recusou) {
+      bloco.innerHTML = `
+        <div style="font-size:48px">❌</div>
+        <h3 style="margin:12px 0 6px;color:#dc2626">Proposta recusada</h3>
+        <p style="color:#666;font-size:14px">O processo foi encerrado para esta candidatura.</p>
+      `;
+      return;
+    }
+
+    // Proposta pendente: mostra texto + PDF + botões
+    bloco.innerHTML = `
+      <div style="font-size:48px">📨</div>
+      <h3 style="margin:12px 0 6px;color:var(--vinho)">Você recebeu uma proposta!</h3>
+      <p style="color:#666;font-size:14px;margin-bottom:16px">Analise com calma e dê o seu aceite.</p>
+      ${p.texto ? `<div style="background:#f8f8f8;border-left:4px solid var(--vinho);padding:16px;border-radius:6px;text-align:left;margin-bottom:16px;white-space:pre-wrap;font-size:14px;color:#333">${escapeHtml(p.texto)}</div>` : ''}
+      ${p.pdf_url ? `<p style="margin-bottom:20px"><a href="${p.pdf_url}" target="_blank" rel="noopener" class="btn-voltar-painel" style="display:inline-block;text-decoration:none;background:#2563eb;color:white;border-color:#2563eb">📄 Baixar proposta em PDF</a></p>` : ''}
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+        <button id="btn-aceitar-proposta" style="background:#16A34A;color:white;border:none;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer">✅ Aceitar proposta</button>
+        <button id="btn-recusar-proposta" style="background:white;color:#dc2626;border:2px solid #dc2626;padding:12px 30px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer">❌ Recusar</button>
+      </div>
+    `;
+
+    document.getElementById('btn-aceitar-proposta').onclick = () => responderProposta(candidaturaId, 'aceitar');
+    document.getElementById('btn-recusar-proposta').onclick = () => responderProposta(candidaturaId, 'recusar');
+  } catch (e) {
+    bloco.innerHTML = `<p style="color:#dc2626">Erro ao carregar proposta: ${e.message}</p>`;
+  }
+}
+
+async function responderProposta(candidaturaId, acao) {
+  if (acao === 'aceitar') {
+    if (!confirm('Tem certeza que deseja ACEITAR a proposta? Você seguirá para a etapa de coleta de documentos.')) return;
+  } else {
+    const motivo = prompt('Motivo da recusa (opcional):') || '';
+    if (motivo === null) return; // cancelou
+    if (!confirm('Tem certeza que deseja RECUSAR a proposta? O processo será encerrado.')) return;
+    var motivoFinal = motivo;
+  }
+  const btnAceitar = document.getElementById('btn-aceitar-proposta');
+  const btnRecusar = document.getElementById('btn-recusar-proposta');
+  if (btnAceitar) btnAceitar.disabled = true;
+  if (btnRecusar) btnRecusar.disabled = true;
+
+  const endpoint = acao === 'aceitar'
+    ? API + '/api/candidato/aceitar-proposta/' + candidaturaId
+    : API + '/api/candidato/recusar-proposta/' + candidaturaId;
+  const body = acao === 'aceitar' ? {} : { motivo: motivoFinal };
+
+  try {
+    const r = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      alert(data.erro || 'Erro ao processar');
+      if (btnAceitar) btnAceitar.disabled = false;
+      if (btnRecusar) btnRecusar.disabled = false;
+      return;
+    }
+    // Recarrega a página
+    location.reload();
+  } catch (e) {
+    alert('Erro de conexão: ' + e.message);
+    if (btnAceitar) btnAceitar.disabled = false;
+    if (btnRecusar) btnRecusar.disabled = false;
+  }
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+</script>
+</body>
+</html>
