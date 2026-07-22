@@ -667,17 +667,7 @@
 
       // Card de chat RH × EMPRESA (somente se a candidatura tem empresa vinculada)
       const temEmpresa = !!c.empresa_id || !!c.empresa_nome; // candidatura pode ter empresa
-      const chatEmpresaCard = temEmpresa ? (
-        '<div class="card" id="card-chat-empresa">' +
-          '<h2>🏢 Chat com a Empresa</h2>' +
-          '<p style="font-size:12px;color:#999;margin-bottom:10px;margin-top:-8px">Canal direto entre o RH e a empresa responsável por esta vaga. Use para alinhar decisões sobre esta candidatura.</p>' +
-          '<div id="chat-empresa-mensagens" style="height:280px;overflow-y:auto;background:#fafafa;border-radius:6px;padding:10px;margin-bottom:8px">Carregando...</div>' +
-          '<div style="display:flex;gap:8px">' +
-            '<input type="text" id="chat-empresa-input" placeholder="Escreva uma mensagem para a empresa…" style="flex:1;padding:9px 12px;border:1px solid #e5e5e5;border-radius:6px;font-size:13px" onkeydown="if(event.key===\'Enter\')enviarChatEmpresa()">' +
-            '<button onclick="enviarChatEmpresa()" style="background:#722F37;color:white;border:0;padding:0 18px;border-radius:6px;font-weight:600;cursor:pointer">Enviar</button>' +
-          '</div>' +
-        '</div>'
-      ) : '';
+      const chatEmpresaCard = ''; // chat agora é flutuante (chat-empresa-flutuante.js)
 
       content.innerHTML =
         '<div class="header">' +
@@ -1316,5 +1306,6 @@
     #modal-proposta.aberto { display: flex !important; }
   </style>
 <script src="chat-flutuante-admin.js?v=20260722a"></script>
+<script src="chat-empresa-flutuante.js?v=20260722a"></script>
 </body>
 </html>
