@@ -89,6 +89,7 @@
     .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
     .nav-item.ativo { background: rgba(255,255,255,0.15); color: #fff; border-left-color: var(--branco); }
     .nav-item.sair { margin-top: auto; color: rgba(255,255,255,0.5); }
+    .nav-divisor { margin-top: 16px; padding: 8px 24px 4px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 11px; font-weight: 700; letter-spacing: 1px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
     /* Abas da página Equipe */
     .tab-equipe { background: none; border: 0; padding: 10px 18px; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 3px solid transparent; }
     .tab-equipe.ativo { color: var(--vinho); border-bottom-color: var(--vinho); }
@@ -406,6 +407,7 @@
     <a class="nav-item" data-page="candidaturas" onclick="irPara('candidaturas')">📋 Vagas com Candidatos</a>
     <a class="nav-item" data-page="agenda" onclick="irPara('agenda')">📅 Agenda</a>
     <a class="nav-item" data-page="equipe" onclick="irPara('equipe')">👥 Equipe</a>
+    <div class="nav-divisor">Links</div>
     <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
     <a class="nav-item" href="../empresa/">🏢 Portal da empresa</a>
     <a class="nav-item sair" onclick="sair()">🚪 Sair</a>
@@ -948,6 +950,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260722164500_emp_user_login"></script>
+<script src="app.js?v=20260722165000_nav_divisor_links"></script>
 </body>
 </html>
