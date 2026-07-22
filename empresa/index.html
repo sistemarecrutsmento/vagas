@@ -4,117 +4,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard · Portal Empresa · Vagas.io</title>
-  <!-- CSS é inline (<style>) neste arquivo; link externo removido -->
-  <style>
-    :root {
-      --vinho: #722F37;
-      --vinho-claro: #8a3a44;
-      --dourado: #C9A961;
-      --bg: #f7f5f2;
-      --card: #ffffff;
-      --texto: #1a1a1a;
-      --texto-suave: #6b6b6b;
-      --borda: #e5e0d8;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--texto); }
-
-    /* HEADER */
-    header {
-      background: var(--vinho);
-      color: #fff;
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      position: sticky; top: 0; z-index: 100;
-    }
-    .marca { font-size: 22px; font-weight: 800; }
-    .marca .dourado { color: var(--dourado); }
-    .marca small { font-size: 11px; color: rgba(255,255,255,0.7); margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
-    .user-info .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--vinho); display: flex; align-items: center; justify-content: center; font-weight: 800; }
-    .btn-sair { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-    .btn-sair:hover { background: rgba(255,255,255,0.2); }
-
-    /* CONTAINER */
-    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-
-    h1 { font-size: 24px; margin-bottom: 4px; }
-    .subtitulo { color: var(--texto-suave); margin-bottom: 24px; }
-
-    /* KPIs */
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
-    .kpi { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .kpi .valor { font-size: 32px; font-weight: 800; color: var(--vinho); }
-    .kpi .label { font-size: 13px; color: var(--texto-suave); margin-top: 4px; }
-    .kpi.dourado .valor { color: var(--dourado); }
-    .kpi.verde .valor { color: #16a34a; }
-    .kpi.azul .valor { color: #2563eb; }
-
-    /* VAGAS */
-    .vagas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-    .vaga-card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s; border-left: 4px solid var(--vinho); }
-    .vaga-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
-    .vaga-card h3 { font-size: 17px; margin-bottom: 6px; }
-    .vaga-card .local { font-size: 13px; color: var(--texto-suave); margin-bottom: 12px; }
-    .vaga-card .stats { display: flex; gap: 12px; padding-top: 12px; border-top: 1px solid var(--borda); }
-    .vaga-card .stat .num { font-size: 18px; font-weight: 700; color: var(--vinho); }
-    .vaga-card .stat .lbl { font-size: 11px; color: var(--texto-suave); text-transform: uppercase; }
-
-    /* EMPTY */
-    .empty { background: var(--card); border-radius: 12px; padding: 60px 24px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .empty .icon { font-size: 48px; margin-bottom: 12px; }
-    .empty h2 { font-size: 18px; margin-bottom: 8px; }
-    .empty p { color: var(--texto-suave); max-width: 400px; margin: 0 auto; }
-
-    /* TOAST */
-    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--texto); color: #fff; padding: 12px 18px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
-    .toast.ativo { opacity: 1; }
-    .toast.erro { background: #dc2626; }
-    .toast.sucesso { background: #16a34a; }
-
-    /* SUBMENU */
-    .submenu { background: var(--card); border-bottom: 1px solid var(--borda); padding: 0 24px; display: flex; gap: 4px; overflow-x: auto; }
-    .submenu a { padding: 14px 18px; text-decoration: none; color: var(--texto-suave); font-weight: 600; font-size: 14px; border-bottom: 2px solid transparent; white-space: nowrap; }
-    .submenu a:hover { color: var(--vinho); }
-    .submenu a.ativo { color: var(--vinho); border-bottom-color: var(--dourado); }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="empresa.css">
 </head>
 <body>
-  <header>
-    <div class="marca">Vagas<span class="dourado">.io</span> <small>Portal da Empresa</small></div>
-    <div class="user-info">
-      <div class="avatar" id="avatar">--</div>
-      <div>
-        <div style="font-weight:600;" id="user-nome">--</div>
-        <div style="font-size:12px;opacity:0.8;" id="user-empresa">--</div>
+  <button class="menu-toggle" onclick="document.querySelector('aside').classList.add('aberto'); document.querySelector('.app').classList.add('aside-aberto');" aria-label="Abrir menu">☰</button>
+
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside>
+      <button class="menu-close" onclick="document.querySelector('aside').classList.remove('aberto'); document.querySelector('.app').classList.remove('aside-aberto');" aria-label="Fechar menu">✕</button>
+      <div class="aside-logo">
+        <h1>Vagas<span class="dourado">.io</span></h1>
+        <small>Portal da Empresa</small>
       </div>
-      <a class="btn-sair" href="perfil.html" style="text-decoration:none;display:inline-block;">⚙️ Perfil</a>
-      <a class="btn-sair" href="../" style="text-decoration:none;display:inline-block;" title="Voltar pra página inicial">🏡 Site</a>
-<button class="btn-sair" onclick="sair()">Sair</button>
-    </div>
-  </header>
 
-  <div class="submenu">
-    <a href="index.html" class="ativo">📊 Dashboard</a>
-    <a href="vagas.html">📋 Vagas com Candidatos</a>
-    <a href="agenda.html">📅 Agenda</a>
-    <a href="perfil.html">⚙️ Perfil</a>
+      <a class="nav-item ativo" href="index.html">📊 Dashboard</a>
+      <a class="nav-item" href="vagas.html">📋 Vagas com Candidatos</a>
+      <a class="nav-item" href="agenda.html">📅 Agenda</a>
+      <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
+
+      <div class="aside-user">
+        <div class="aside-user-avatar" id="avatar">--</div>
+        <div class="aside-user-info">
+          <div class="nome" id="user-nome">--</div>
+          <div class="empresa" id="user-empresa">--</div>
+        </div>
+        <button class="btn-logout" onclick="sair()" title="Sair">↪</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
+      <div class="page-header">
+        <div>
+          <h2 id="saudacao">Olá! 👋</h2>
+          <div class="sub">Acompanhe suas vagas e candidatos em tempo real</div>
+        </div>
+        <div class="page-actions">
+          <a class="btn btn-sec" href="../" title="Voltar para o site">🏡 Site</a>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="kpis"></div>
+
+      <div class="page-header" style="margin-top:8px; padding-bottom:8px; border:0;">
+        <h2 style="font-size:18px;">Vagas liberadas</h2>
+      </div>
+      <div id="conteudo">Carregando...</div>
+    </main>
   </div>
 
-  <div class="container">
-    <h1 id="saudacao">Olá! 👋</h1>
-    <p class="subtitulo">Acompanhe suas vagas e candidatos em tempo real</p>
-
-    <div class="kpis" id="kpis"></div>
-
-    <h2 style="font-size:18px;margin-bottom:16px;">Vagas liberadas</h2>
-    <div id="conteudo">Carregando...</div>
-  </div>
-
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" style="position:fixed; bottom:24px; right:24px; background:#1A1A1A; color:#fff; padding:12px 18px; border-radius:8px; font-size:14px; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:200;"></div>
 
   <script>
     const API = 'https://recrutamento-api.onrender.com';
@@ -137,8 +78,9 @@
     function toast(msg, tipo = '') {
       const t = document.getElementById('toast');
       t.textContent = msg;
-      t.className = 'toast ativo ' + tipo;
-      setTimeout(() => t.className = 'toast', 3000);
+      t.style.opacity = '1';
+      t.style.background = tipo === 'erro' ? '#C62828' : tipo === 'sucesso' ? '#2E7D32' : '#1A1A1A';
+      setTimeout(() => t.style.opacity = '0', 3000);
     }
 
     async function carregar() {
@@ -160,20 +102,22 @@
         // KPIs
         const k = data.kpis || {};
         document.getElementById('kpis').innerHTML = `
-          <div class="kpi"><div class="valor">${k.vagas_liberadas || 0}</div><div class="label">Vagas liberadas</div></div>
-          <div class="kpi azul"><div class="valor">${k.total_candidatos || 0}</div><div class="label">Total de candidatos</div></div>
-          <div class="kpi dourado"><div class="valor">${k.em_etapa_gestor || 0}</div><div class="label">Aguardando sua avaliação</div></div>
-          <div class="kpi verde"><div class="valor">${k.contratacoes || 0}</div><div class="label">Contratações</div></div>
+          <div class="kpi"><div class="label">Vagas liberadas</div><div class="valor">${k.vagas_liberadas || 0}</div></div>
+          <div class="kpi"><div class="label">Total de candidatos</div><div class="valor">${k.total_candidatos || 0}</div></div>
+          <div class="kpi destaque"><div class="label">Aguardando sua avaliação</div><div class="valor">${k.em_etapa_gestor || 0}</div></div>
+          <div class="kpi"><div class="label">Contratações</div><div class="valor" style="color:#2E7D32;">${k.contratacoes || 0}</div></div>
         `;
 
         // Vagas
         const vagas = data.vagas || [];
         if (vagas.length === 0) {
           document.getElementById('conteudo').innerHTML = `
-            <div class="empty">
-              <div class="icon">🔒</div>
-              <h2>Nenhuma vaga liberada ainda</h2>
-              <p>Você ainda não tem vagas autorizadas neste portal. Entre em contato com seu recrutador para liberar o acesso às vagas da sua empresa.</p>
+            <div class="card">
+              <div class="empty">
+                <div style="font-size:48px; margin-bottom:12px;">🔒</div>
+                <h3 style="margin-bottom:8px;">Nenhuma vaga liberada ainda</h3>
+                <p>Você ainda não tem vagas autorizadas neste portal. Entre em contato com seu recrutador para liberar o acesso às vagas da sua empresa.</p>
+              </div>
             </div>
           `;
           return;
@@ -182,15 +126,15 @@
         document.getElementById('conteudo').innerHTML = `
           <div class="vagas-grid">
             ${vagas.map(v => `
-              <div class="vaga-card" onclick="window.location.href='vaga.html?id=${v.id}'">
+              <a class="vaga-card" href="candidatos.html?vaga=${v.id}">
                 <h3>${v.titulo}</h3>
                 <div class="local">📍 ${v.cidade || '--'}${v.estado ? ' / ' + v.estado : ''}</div>
                 <div class="stats">
-                  <div class="stat"><div class="num">${v.total_candidatos || 0}</div><div class="lbl">Candidatos</div></div>
-                  <div class="stat"><div class="num" style="color:var(--dourado);">${v.em_etapa_gestor || 0}</div><div class="lbl">Aguardando você</div></div>
-                  <div class="stat"><div class="num" style="color:#16a34a;">${v.contratacoes || 0}</div><div class="lbl">Contratados</div></div>
+                  <div class="stat"><strong>${v.total_candidatos || 0}</strong><small>Candidatos</small></div>
+                  <div class="stat"><strong style="color:#C9A961;">${v.em_etapa_gestor || 0}</strong><small>Aguardando você</small></div>
+                  <div class="stat"><strong style="color:#2E7D32;">${v.contratacoes || 0}</strong><small>Contratados</small></div>
                 </div>
-              </div>
+              </a>
             `).join('')}
           </div>
         `;
