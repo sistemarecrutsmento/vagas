@@ -85,6 +85,15 @@ function trocarTabEquipe(tab) {
   document.querySelector(`.tab-equipe[data-tab="${tab}"]`)?.classList.add('ativo');
   document.querySelectorAll('.tab-content-equipe').forEach(c => c.style.display = 'none');
   document.getElementById('tab-' + tab).style.display = 'block';
+  // Troca label/handler do botão de acordo com a aba
+  const btn = document.getElementById('btn-novo-equipe');
+  if (tab === 'empresas') {
+    btn.textContent = '+ Nova Empresa';
+    btn.onclick = abrirModalEmpresa;
+  } else {
+    btn.textContent = '+ Novo Recrutador';
+    btn.onclick = abrirModalRecrutador;
+  }
 }
 
 async function carregarEquipe() {
@@ -151,6 +160,29 @@ async function criarRecrutador(dados) {
     });
     const data = await r.json();
     if (r.ok) { alert('Recrutador criado com sucesso!'); carregarEquipe(); }
+    else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+  } catch (e) { alert('Erro de conexão'); }
+}
+
+function abrirModalEmpresa() {
+  const nome = prompt('Nome da empresa:');
+  if (!nome) return;
+  const cnpj = prompt('CNPJ (opcional):') || null;
+  const email = prompt('Email principal (opcional):') || null;
+  const telefone = prompt('Telefone (opcional):') || null;
+  criarEmpresa({ nome, cnpj, email_principal: email, telefone });
+}
+
+async function criarEmpresa(dados) {
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/empresas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(dados)
+    });
+    const data = await r.json();
+    if (r.ok) { alert('Empresa criada com sucesso!'); carregarEquipe(); }
     else alert('Erro: ' + (data.erro || JSON.stringify(data)));
   } catch (e) { alert('Erro de conexão'); }
 }
