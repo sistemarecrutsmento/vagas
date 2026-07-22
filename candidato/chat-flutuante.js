@@ -16,6 +16,7 @@
   let candidaturas = [];      // candidaturas com chat ativo
   let candidaturaAtiva = null; // ID da vaga selecionada no momento
   let mensagensCache = {};     // mensagens por candidatura_id
+  let statusCandidatura = {};  // status da candidatura por id
   let ultimaMensagemId = {};   // pra detectar não lidas
   let pollInterval = null;
   let aberto = false;
@@ -264,6 +265,18 @@
       if (!r.ok) return;
       const j = await r.json();
       mensagensCache[cid] = j.mensagens || [];
+      // Salva status da candidatura pra saber se está encerrada
+      if (j.candidatura_status) {
+        const statusAnterior = statusCandidatura[cid];
+        statusCandidatura[cid] = j.candidatura_status;
+        // Se ACABOU de ser encerrada, recarrega lista (some a bolinha)
+        if (!statusAnterior || !['rejeitado','reprovado','cancelado','contratado'].includes(statusAnterior)) {
+          if (['rejeitado','reprovado','cancelado','contratado'].includes(j.candidatura_status)) {
+            carregarCandidaturas();
+            return;
+          }
+        }
+      }
       // Detecta não lidas: se tem msg nova do admin e chat não tá aberto nessa conversa
       const ultima = mensagensCache[cid].length > 0 ? mensagensCache[cid][mensagensCache[cid].length - 1] : null;
       if (ultima && ultima.autor_tipo === 'admin') {
@@ -284,13 +297,29 @@
     const area = document.getElementById('chat-msg-area');
     const input = document.getElementById('chat-input-area');
     const msgs = mensagensCache[candidaturaAtiva] || [];
-    if (msgs.length === 0) {
-      area.innerHTML = `<div class="chat-vazio"><div class="icon">💬</div><p>Nenhuma mensagem ainda. Manda oi pro recrutador!</p></div>`;
+    const status = statusCandidatura[candidaturaAtiva];
+    const encerrada = ['rejeitado','reprovado','cancelado','contratado'].includes(status);
+
+    // Banner de status da candidatura
+    let banner = '';
+    if (status === 'contratado') {
+      banner = '<div style="background:#d1fae5;color:#065f46;padding:10px 12px;font-size:12px;text-align:center;font-weight:600">🎉 Parabéns! Você foi contratado(a) — chat finalizado</div>';
+    } else if (['rejeitado','reprovado','cancelado'].includes(status)) {
+      banner = '<div style="background:#fee2e2;color:#991b1b;padding:10px 12px;font-size:12px;text-align:center;font-weight:600">🚫 Esta candidatura foi encerrada — chat somente leitura</div>';
+    }
+
+    if (msgs.length === 0 && !encerrada) {
+      area.innerHTML = banner + `<div class="chat-vazio"><div class="icon">💬</div><p>Nenhuma mensagem ainda. Manda oi pro recrutador!</p></div>`;
       input.style.display = 'flex';
       return;
     }
-    input.style.display = 'flex';
-    area.innerHTML = msgs.map(m => {
+    if (msgs.length === 0 && encerrada) {
+      area.innerHTML = banner + `<div class="chat-vazio"><div class="icon">💬</div><p>Esta candidatura foi encerrada sem conversas.</p></div>`;
+      input.style.display = 'none';
+      return;
+    }
+    input.style.display = encerrada ? 'none' : 'flex';
+    area.innerHTML = banner + msgs.map(m => {
       const minha = m.autor_tipo === 'candidato';
       const iniciais = (m.autor_nome || '?').split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
       const dataFmt = new Date(m.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
