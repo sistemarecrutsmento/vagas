@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vagas — Encontre sua oportunidade</title>
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HWWYK98PE0"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-HWWYK98PE0');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-escuro: #4A1F25;
+      --vinho-claro: #8B3A45;
+      --branco: #FFFFFF;
+      --preto: #1A1A1A;
+      --cinza: #F5F5F5;
+      --cinza-medio: #888;
+      --borda: #E5E5E5;
+      --verde: #2E7D32;
+      --vermelho: #C62828;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--branco); color: var(--preto); line-height: 1.6; }
+
+    /* Header */
+    header { background: var(--vinho); color: var(--branco); padding: 20px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 100; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: var(--branco); }
+    .logo span { font-weight: 300; opacity: 0.9; }
+    .header-actions { display: flex; gap: 12px; align-items: center; }
+    .btn-outline { background: transparent; color: var(--branco); border: 1px solid rgba(255,255,255,0.4); padding: 9px 18px; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px; }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+    /* Hero */
+    .hero { background: linear-gradient(135deg, var(--vinho) 0%, var(--vinho-escuro) 100%); color: var(--branco); padding: 30px 0 35px; text-align: center; }
+    .hero h1 { display: none; }
+    .hero p { display: none; }
+    .search-box { max-width: 600px; margin: 0 auto; display: flex; gap: 0; background: var(--branco); padding: 6px; border-radius: 8px; align-items: stretch; }
+    .search-box input { flex: 1; border: none; padding: 12px 16px; font-size: 16px; outline: none; color: var(--preto); min-width: 0; background: transparent; }
+    .search-box button { background: var(--preto); color: var(--branco); border: none; padding: 0 22px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; white-space: nowrap; }
+    @media (max-width: 480px) {
+      .search-box input { font-size: 14px; padding: 10px 12px; }
+      .search-box input::placeholder { font-size: 13px; }
+    }
+
+    /* Filtros */
+    .filtros { padding: 12px 0; background: var(--cinza); border-bottom: 1px solid var(--borda); }
+    .filtros-row { display: flex; gap: 10px; align-items: center; position: relative; }
+    .filtro-toggle { background: var(--vinho); color: var(--branco); border: none; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .filtro-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 200px; z-index: 100; overflow: hidden; display: none; }
+    .filtro-dropdown.aberto { display: block; }
+    .filtro-dropdown button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--preto); }
+    .filtro-dropdown button:hover { background: var(--cinza); }
+    .filtro-dropdown button.ativo { background: var(--vinho); color: var(--branco); font-weight: 600; }
+
+    /* Vagas */
+    .vagas-section { padding: 24px 0 40px; min-height: 400px; }
+    .section-title { font-size: 28px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.5px; }
+    .section-sub { color: var(--cinza-medio); margin-bottom: 16px; }
+    .vagas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+    .vaga-card { background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.2s; }
+    .vaga-card:hover { border-color: var(--vinho); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(114,47,55,0.08); }
+    .vaga-card .empresa { font-size: 13px; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .vaga-card h3 { font-size: 20px; font-weight: 700; margin: 8px 0 12px; color: var(--preto); }
+    .vaga-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tag { background: var(--cinza); padding: 4px 10px; border-radius: 4px; font-size: 12px; color: var(--preto); }
+    .vaga-card .salario { color: var(--vinho); font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+    .vaga-card .footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--borda); }
+    .vaga-card .data { font-size: 13px; color: var(--cinza-medio); }
+    .vaga-card .cta { color: var(--vinho); font-weight: 600; font-size: 14px; }
+
+    .empty { text-align: center; padding: 60px 20px; }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty h3 { color: var(--preto); margin-bottom: 8px; }
+    .empty p { color: var(--cinza-medio); }
+
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; margin: 0 auto; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer { background: var(--preto); color: var(--branco); padding: 40px 0; text-align: center; }
+    footer p { opacity: 0.7; font-size: 14px; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-overlay.aberto { display: flex; }
+    .modal { background: var(--branco); border-radius: 12px; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-large { max-width: 800px; width: 95%; }
+    .modal-header { padding: 24px 28px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .modal-header > div { flex: 1; }
+    .modal-header h2 { font-size: 22px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--cinza-medio); }
+    .modal-body { padding: 28px; }
+    .modal-footer { padding: 16px 28px; border-top: 1px solid var(--borda); display: flex; justify-content: flex-end; gap: 12px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: var(--preto); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--borda); border-radius: 6px; font-size: 15px; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--vinho); }
+
+    /* Áreas de interesse (chips) */
+    .areas-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--borda); border-radius: 8px; background: #fafafa; min-height: 50px; align-items: flex-start; align-content: flex-start; }
+    .area-chip { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: auto; padding: 4px 10px; background: white; border: 1px solid var(--borda); border-radius: 20px; font-size: 12px; line-height: 1.3; cursor: pointer; transition: all 0.15s; user-select: none; white-space: nowrap; }
+    .area-chip:hover { border-color: var(--vinho); color: var(--vinho); }
+    .area-chip.selecionada { background: var(--vinho); color: white; border-color: var(--vinho); font-weight: 600; }
+    .area-chip.selecionada:hover { background: var(--vinho-escuro); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .btn { padding: 12px 24px; border-radius: 6px; font-weight: 600; font-size: 15px; cursor: pointer; border: none; }
+    .btn-primary { background: var(--vinho); color: var(--branco); width: 100%; }
+    .btn-primary:hover { background: var(--vinho-escuro); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary { background: var(--cinza); color: var(--preto); }
+    .btn-block { width: 100%; }
+
+    .info-box { background: var(--cinza); border-left: 3px solid var(--vinho); padding: 14px 16px; border-radius: 4px; font-size: 14px; margin-bottom: 20px; }
+    .info-box strong { color: var(--vinho); }
+
+    .det-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; padding: 16px; background: var(--cinza); border-radius: 8px; }
+    .det-item .det-label { font-size: 12px; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .det-item .det-value { font-size: 15px; color: var(--preto); font-weight: 500; margin-top: 2px; }
+    .det-section { margin: 20px 0; }
+    .det-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--vinho); }
+    .det-section p { color: var(--preto); white-space: pre-line; font-size: 15px; }
+
+    .status { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .status-em_analise { background: #FFF3CD; color: #856404; }
+    .status-aprovado { background: #D4EDDA; color: #155724; }
+    .status-reprovado { background: #F8D7DA; color: #721C24; }
+    .status-contratado { background: #D1ECF1; color: #0C5460; }
+    .cand-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--borda); }
+    .cand-item:last-child { border-bottom: none; }
+    .cand-item .muted { font-size: 13px; color: var(--cinza-medio); }
+
+    .step { display: none; }
+    .step-num { display: inline-block; background: var(--vinho); color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 700; font-size: 14px; margin-right: 8px; }
+
+    /* ====== PROCESSO SELETIVO (bolinhas numeradas) ====== */
+    .procsel { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+    .procsel-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; background: var(--cinza); border-radius: 8px; border-left: 3px solid var(--vinho); }
+    .procsel-num { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    .procsel-texto strong { display: block; font-size: 15px; color: var(--preto); margin-bottom: 2px; }
+    .procsel-texto small { color: var(--cinza-medio); font-size: 13px; }
+
+    /* ====== HEADER USUARIO LOGADO ====== */
+    .header-user { display: flex; align-items: center; gap: 12px; }
+    .header-user-email { font-size: 13px; color: rgba(255,255,255,0.9); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .header-user-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+    .header-user-btn:hover { background: rgba(255,255,255,0.25); }
+    .header-user-btn.primary { background: white; color: var(--vinho); }
+    .header-user-btn.primary:hover { background: var(--cinza); }
+    .header-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.25); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+
+    /* ====== PAINEL CANDIDATO (modal minhas) ====== */
+    .painel-resumo { display: grid; grid-template-columns: 80px 1fr auto; gap: 16px; align-items: center; padding: 20px; background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro)); color: white; border-radius: 12px; margin-bottom: 20px; }
+    .painel-avatar { width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; }
+    .painel-info h3 { font-size: 20px; margin-bottom: 4px; }
+    .painel-info p { opacity: 0.9; font-size: 14px; }
+
+    .cand-card { background: var(--cinza); border-radius: 8px; padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--vinho); }
+    .cand-card-topo { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 12px; flex-wrap: wrap; }
+    .cand-card-topo h4 { font-size: 16px; color: var(--preto); }
+    .cand-card-empresa { font-size: 13px; color: var(--cinza-medio); margin-bottom: 4px; }
+    .cand-card-data { font-size: 12px; color: var(--cinza-medio); }
+
+    .cand-timeline { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--borda); display: flex; flex-direction: column; gap: 8px; }
+    .cand-tl { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+    .cand-tl-dot { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--cinza); color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; border: 2px solid var(--borda); }
+    .cand-tl.done .cand-tl-dot { background: #D4EDDA; color: #155724; border-color: #28A745; }
+    .cand-tl.current .cand-tl-dot { background: var(--vinho); color: white; border-color: var(--vinho-escuro); }
+    .cand-tl.rejected .cand-tl-dot { background: #F8D7DA; color: #721C24; border-color: #C62828; }
+    .cand-tl strong { display: block; color: var(--preto); font-size: 13px; }
+    .cand-tl small { color: var(--cinza-medio); }
+
+    .cand-vazia { text-align: center; padding: 40px 20px; color: var(--cinza-medio); }
+    .cand-vazia-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+    .perfil-progresso { background: var(--cinza); border-radius: 6px; height: 8px; margin-top: 8px; overflow: hidden; }
+    .perfil-progresso-bar { background: linear-gradient(90deg, var(--vinho), var(--vinho-claro)); height: 100%; transition: width 0.3s; }
+    .perfil-progresso-texto { font-size: 12px; color: rgba(255,255,255,0.9); margin-top: 6px; }
+
+    /* Form group (padroniza inputs do modal) */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--preto); }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 11px 13px; border: 1px solid var(--borda); border-radius: 6px;
+      font-size: 14px; font-family: inherit; background: white;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--vinho); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ====== PAINEL DO CANDIDATO ====== */
+    .modal-painel { padding: 24px; }
+    .modal-xlarge { max-width: 1000px; width: 95%; }
+    .modal-body-painel { display: grid; grid-template-columns: 280px 1fr; gap: 24px; padding: 0; }
+    .painel-lateral { background: var(--cinza); padding: 24px; border-radius: 8px; }
+    .painel-perfil { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--borda); margin-bottom: 20px; }
+    .painel-foto { width: 80px; height: 80px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 12px; }
+    .painel-perfil h3 { font-size: 18px; color: var(--preto); margin-bottom: 4px; }
+    .painel-email { font-size: 13px; color: var(--cinza-medio); }
+
+    .painel-progresso { padding-bottom: 20px; border-bottom: 1px solid var(--borda); margin-bottom: 20px; }
+    .progresso-titulo { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .progresso-titulo strong { color: var(--vinho); font-size: 16px; }
+    .barra { background: white; height: 8px; border-radius: 4px; overflow: hidden; }
+    .barra-fill { background: var(--vinho); height: 100%; width: 0; transition: width .3s; }
+    .progresso-dica { font-size: 12px; color: var(--cinza-medio); margin-top: 8px; }
+
+    .painel-menu { display: flex; flex-direction: column; gap: 4px; }
+    .painel-tab { background: transparent; border: none; text-align: left; padding: 10px 14px; border-radius: 6px; font-size: 14px; color: var(--preto); cursor: pointer; font-weight: 500; }
+    .painel-tab:hover { background: white; }
+    .painel-tab.ativo { background: var(--vinho); color: white; }
+    .painel-tab-sair { color: var(--vermelho); margin-top: 8px; }
+    .painel-tab-sair:hover { background: #FFF3F3; }
+
+    .painel-conteudo { padding: 4px 8px 4px 0; }
+    .painel-titulo { font-size: 20px; color: var(--vinho); margin-bottom: 16px; }
+    .painel-secao { display: none; }
+    .painel-secao.ativo { display: block; }
+
+    /* Abas do perfil */
+    .perfil-abas { display: flex; gap: 4px; border-bottom: 2px solid var(--borda); margin-bottom: 20px; flex-wrap: wrap; }
+    .perfil-aba { background: transparent; border: none; padding: 10px 16px; font-size: 14px; color: var(--cinza-medio); cursor: pointer; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .perfil-aba:hover { color: var(--preto); }
+    .perfil-aba.ativo { color: var(--vinho); border-bottom-color: var(--vinho); }
+    .perfil-bloco { display: none; }
+    .perfil-bloco.ativo { display: block; }
+    .perfil-form { display: flex; flex-direction: column; gap: 16px; }
+    .perfil-acoes { margin-top: 8px; }
+
+    /* Timeline de candidatura */
+    .cand-card { background: var(--cinza); border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+    .cand-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .cand-card h4 { color: var(--vinho); font-size: 16px; margin-bottom: 2px; }
+    .cand-card .cand-empresa { font-size: 13px; color: var(--cinza-medio); }
+    .cand-timeline { display: flex; align-items: center; gap: 6px; padding-top: 12px; border-top: 1px solid var(--borda); overflow-x: auto; }
+    .cand-etapa { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; text-align: center; position: relative; }
+    .cand-etapa::after { content: ''; position: absolute; top: 14px; left: 50%; right: -50%; height: 2px; background: var(--borda); z-index: 0; }
+    .cand-etapa:last-child::after { display: none; }
+    .cand-etapa-bola { width: 28px; height: 28px; border-radius: 50%; background: var(--borda); color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; z-index: 1; position: relative; }
+    .cand-etapa.ativa .cand-etapa-bola { background: var(--vinho); color: white; }
+    .cand-etapa.concluida .cand-etapa-bola { background: var(--verde); color: white; }
+    .cand-etapa-label { font-size: 11px; color: var(--cinza-medio); }
+    .cand-etapa.ativa .cand-etapa-label, .cand-etapa.concluida .cand-etapa-label { color: var(--preto); font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .modal-body-painel { grid-template-columns: 1fr; }
+      .cand-timeline { gap: 2px; }
+      .cand-etapa { min-width: 70px; }
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 32px; }
+      .vagas-grid { grid-template-columns: 1fr; }
+      .det-grid, .form-row { grid-template-columns: 1fr; }
+      .header-inner { flex-direction: column; gap: 12px; }
+      .painel-resumo { grid-template-columns: 60px 1fr; }
+      .painel-resumo .btn { grid-column: 1 / -1; }
+    }
+
+    /* ===== WIZARD DE CADASTRO (4 ETAPAS) ===== */
+    .wizard-progresso { display: flex; gap: 4px; margin-top: 12px; flex-wrap: wrap; }
+    .wizard-passo { padding: 5px 10px; border-radius: 20px; background: #f0f0f0; font-size: 11px; font-weight: 500; display: flex; align-items: center; gap: 5px; color: var(--cinza-medio); white-space: nowrap; }
+    .wizard-passo span { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: #ddd; color: var(--cinza-medio); border-radius: 50%; font-size: 10px; font-weight: 700; }
+    .wizard-passo.ativo { background: var(--vinho); color: white; }
+    .wizard-passo.ativo span { background: white; color: var(--vinho); }
+    .wizard-passo.concluido { background: #2E7D32; color: white; }
+    .wizard-passo.concluido span { background: white; color: #2E7D32; }
+    .wizard-titulo { font-size: 22px; font-weight: 700; color: var(--vinho); margin-bottom: 4px; margin-top: 8px; }
+    .wizard-subtitulo { color: var(--cinza-medio); font-size: 14px; margin-bottom: 20px; }
+    .wizard-botoes { display: flex; justify-content: space-between; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--borda); gap: 12px; }
+    .wizard-botoes .btn-primary { width: auto; }
+    .wizard-botoes .btn-secondary { width: auto; }
+
+    .exp-form { background: #f8f9fa; border: 1px dashed var(--borda); padding: 16px; border-radius: 8px; margin-bottom: 12px; }
+    .exp-form h4 { margin: 0 0 12px; font-size: 14px; }
+    .exp-acoes { display: flex; gap: 8px; margin-top: 8px; }
+    .exp-acoes .btn { padding: 8px 16px; font-size: 13px; width: auto; }
+    .exp-item { background: #f8f9fa; border: 1px solid var(--borda); padding: 12px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .exp-item h4 { margin: 0 0 4px; font-size: 15px; }
+    .exp-item p { margin: 0; font-size: 13px; color: var(--cinza-medio); }
+    .exp-item .btn-x { background: none; border: none; color: var(--vermelho); cursor: pointer; font-size: 22px; padding: 0 8px; line-height: 1; }
+    .exp-item .btn-x:hover { background: #fee; border-radius: 4px; }
+    .check-label { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 14px; line-height: 1.4; }
+    .check-label input { width: auto !important; margin-top: 2px; }
+    .muted { color: var(--cinza-medio); font-size: 14px; }
+
+    /* Foto de perfil */
+    .perfil-foto-bloco { display: flex; align-items: center; gap: 24px; padding: 20px; background: #f8f9fa; border-radius: 10px; margin-bottom: 24px; border: 1px solid var(--borda); }
+    .perfil-foto-preview { width: 110px; height: 110px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 700; flex-shrink: 0; background-size: cover; background-position: center; overflow: hidden; }
+    .perfil-foto-inicial { line-height: 1; }
+    .perfil-foto-acoes { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+    .perfil-foto-acoes .btn { padding: 8px 16px; font-size: 14px; cursor: pointer; display: inline-block; }
+    .perfil-foto-info { margin: 0; font-size: 12px; color: var(--cinza-medio); }
+    .btn-vinho-outline { background: transparent; color: var(--vinho); border: 1px solid var(--vinho); }
+    .btn-vinho-outline:hover { background: var(--vinho); color: white; }
+
+    /* Avatar no header */
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background-size: cover; background-position: center; flex-shrink: 0; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">Vagas<span>.io</span></div>
+      <div class="header-actions" id="header-actions">
+        <button class="btn-outline" onclick="abrirModal('login')">Entrar</button>
+        <button id="btn-cadastrar" class="btn-outline" onclick="abrirModal('cad')">Cadastrar</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="search-box search-box-central">
+      <input type="text" id="busca" placeholder="Buscar por cargo ou empresa...">
+      <button onclick="carregarVagas()">Buscar</button>
+    </div>
+  </div>
+</section>
+
+<div class="filtros">
+  <div class="container">
+    <div class="filtros-row">
+      <button class="filtro-toggle" id="filtro-label">📂 Todas</button>
+      <button class="filtro-toggle" style="background: var(--branco); color: var(--preto); border: 1px solid var(--borda);" onclick="toggleFiltroDropdown()">Filtrar ▾</button>
+      <div class="filtro-dropdown" id="filtro-dropdown">
+        <button data-cat="" class="ativo">Todas</button>
+        <button data-cat="Tecnologia">Tecnologia</button>
+        <button data-cat="Administrativo">Administrativo</button>
+        <button data-cat="Comercial">Comercial</button>
+        <button data-cat="Operacional">Operacional</button>
+        <button data-cat="Saúde">Saúde</button>
+        <button data-cat="Educação">Educação</button>
+        <button data-cat="Atendimento / Vendas">Atendimento / Vendas</button>
+        <button data-cat="Administração / Gestão">Administração / Gestão</button>
+        <button data-cat="Farmacêutico">Saúde / Farmácia</button>
+        <button data-cat="Gastronomia">Gastronomia</button>
+        <button data-cat="Estágio">Estágio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="vagas-section">
+  <div class="container">
+    <h2 class="section-title">Vagas abertas</h2>
+    <p class="section-sub" id="contador">Carregando...</p>
+    <div class="vagas-grid" id="vagas-grid">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container"><p>© 2026 Vagas.io — Plataforma de recrutamento</p></div>
+</footer>
+
+<!-- MODAL DETALHES DA VAGA -->
+<div class="modal-overlay" id="modal-detalhes">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <div>
+        <div class="empresa" style="font-size:13px;color:var(--cinza-medio);text-transform:uppercase;font-weight:600;" id="det-empresa"></div>
+        <h2 id="det-titulo"></h2>
+      </div>
+      <button class="modal-close" onclick="fecharModal('detalhes')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="det-grid">
+        <div class="det-item"><div class="det-label">Localização</div><div class="det-value" id="det-local"></div></div>
+        <div class="det-item"><div class="det-label">Contrato</div><div class="det-value" id="det-contrato"></div></div>
+        <div class="det-item"><div class="det-label">Nível</div><div class="det-value" id="det-nivel"></div></div>
+        <div class="det-item"><div class="det-label">Área</div><div class="det-value" id="det-area"></div></div>
+        <div class="det-item" style="grid-column:1/-1"><div class="det-label">Salário</div><div class="det-value" id="det-salario"></div></div>
+      </div>
+      <div class="det-section"><h3>Descrição</h3><p id="det-descricao"></p></div>
+      <div class="det-section"><h3>Requisitos</h3><p id="det-requisitos"></p></div>
+      <div class="det-section"><h3>Benefícios</h3><p id="det-beneficios"></p></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="btn-candidatar" style="width:auto;">Candidatar-se</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL PAINEL DO CANDIDATO -->
+<div class="modal-overlay modal-painel" id="modal-minhas">
+  <div class="modal modal-xlarge">
+    <div class="modal-header">
+      <h2>Minha conta</h2>
+      <button class="modal-close" onclick="fecharModal('minhas')">×</button>
+    </div>
+    <div class="modal-body modal-body-painel">
+
+      <!-- Lado esquerdo: perfil + progresso -->
+      <aside class="painel-lateral">
+        <div class="painel-perfil">
+          <div class="painel-foto" id="painel-foto">👤</div>
+          <h3 id="painel-nome">—</h3>
+          <p id="painel-email" class="painel-email">—</p>
+        </div>
+        <div class="painel-progresso">
+          <div class="progresso-titulo">
+            <span>Perfil completo</span>
+            <strong id="painel-progresso-pct">0%</strong>
+          </div>
+          <div class="barra"><div class="barra-fill" id="painel-progresso-fill"></div></div>
+          <p class="progresso-dica" id="painel-progresso-dica">Complete seu perfil para aumentar suas chances.</p>
+        </div>
+        <nav class="painel-menu">
+          <button class="painel-tab ativo" data-tab="cands">📋 Minhas candidaturas</button>
+          <button class="painel-tab" data-tab="perfil">👤 Editar perfil</button>
+          <button class="painel-tab" data-tab="senha">🔑 Trocar senha</button>
+          <button class="painel-tab painel-tab-sair" onclick="logout()">🚪 Sair</button>
+        </nav>
+      </aside>
+
+      <!-- Lado direito: conteúdo da aba -->
+      <section class="painel-conteudo">
+        <!-- ABA: MINHAS CANDIDATURAS -->
+        <div class="painel-secao ativo" id="painel-secao-cands">
+          <h3 class="painel-titulo">Minhas candidaturas</h3>
+          <div id="painel-cands-lista"><div class="empty"><div class="spinner"></div></div></div>
+        </div>
+
+        <!-- ABA: EDITAR PERFIL (com sub-abas) -->
+        <div class="painel-secao" id="painel-secao-perfil">
+          <h3 class="painel-titulo">Meu perfil</h3>
+
+          <!-- Foto de perfil -->
+          <div class="perfil-foto-bloco">
+            <div class="perfil-foto-preview" id="perfil-foto-preview">
+              <span class="perfil-foto-inicial" id="perfil-foto-inicial">?</span>
+            </div>
+            <div class="perfil-foto-acoes">
+              <label class="btn btn-secondary" for="perfil-foto-input">📷 Escolher foto</label>
+              <input type="file" id="perfil-foto-input" accept="image/jpeg,image/png,image/webp" onchange="perfilFotoEscolher(this)" style="display:none">
+              <button type="button" class="btn btn-vinho-outline" id="perfil-foto-remover" style="display:none" onclick="perfilFotoRemover()">🗑️ Remover</button>
+              <p class="perfil-foto-info">JPG, PNG ou WebP — até 5 MB</p>
+            </div>
+          </div>
+
+          <div class="perfil-abas">
+            <button class="perfil-aba ativo" data-sub="dados">Dados pessoais</button>
+            <button class="perfil-aba" data-sub="endereco">Endereço</button>
+            <button class="perfil-aba" data-sub="escolaridade">Escolaridade</button>
+            <button class="perfil-aba" data-sub="acessibilidade">Acessibilidade</button>
+          </div>
+
+          <form class="perfil-form" id="perfil-form" onsubmit="event.preventDefault();salvarPerfilCompleto(this)">
+            <!-- Dados pessoais -->
+            <div class="perfil-bloco ativo" data-bloco="dados">
+              <div class="form-row">
+                <div class="form-group"><label>Nome completo *</label><input type="text" id="pe-nome" required></div>
+                <div class="form-group"><label>CPF *</label><input type="text" id="pe-cpf" placeholder="000.000.000-00" maxlength="14"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Data de nascimento</label><input type="date" id="pe-nascimento"></div>
+                <div class="form-group"><label>Sexo</label>
+                  <select id="pe-sexo">
+                    <option value="">Prefiro não informar</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Celular</label><input type="tel" id="pe-celular" placeholder="(00) 00000-0000"></div>
+                <div class="form-group"><label>E-mail</label><input type="email" id="pe-email" disabled></div>
+              </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="perfil-bloco" data-bloco="endereco">
+              <div class="form-row">
+                <div class="form-group"><label>CEP</label><input type="text" id="pe-cep" placeholder="00000-000" maxlength="9"></div>
+                <div class="form-group"><label>Cidade</label><input type="text" id="pe-cidade"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>UF</label><input type="text" id="pe-estado" maxlength="2" placeholder="BA"></div>
+                <div class="form-group"><label>Bairro</label><input type="text" id="pe-bairro"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group" style="grid-column:1/-1"><label>Logradouro</label><input type="text" id="pe-logradouro" placeholder="Rua, avenida..."></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Número</label><input type="text" id="pe-numero"></div>
+                <div class="form-group"><label>Complemento</label><input type="text" id="pe-complemento"></div>
+              </div>
+            </div>
+
+            <!-- Escolaridade -->
+            <div class="perfil-bloco" data-bloco="escolaridade">
+              <div class="form-row">
+                <div class="form-group"><label>Formação</label>
+                  <select id="pe-formacao">
+                    <option value="">Selecione...</option>
+                    <option value="Ensino fundamental">Ensino fundamental</option>
+                    <option value="Ensino médio">Ensino médio</option>
+                    <option value="Ensino técnico">Ensino técnico</option>
+                    <option value="Graduação">Graduação</option>
+                    <option value="Pós-graduação">Pós-graduação</option>
+                    <option value="Mestrado">Mestrado</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>Instituição</label><input type="text" id="pe-instituicao"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Curso</label><input type="text" id="pe-curso"></div>
+                <div class="form-group"><label>Situação</label>
+                  <select id="pe-situacao">
+                    <option value="">Selecione...</option>
+                    <option value="concluido">Concluído</option>
+                    <option value="cursando">Cursando</option>
+                    <option value="trancado">Trancado</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group"><label>Primeiro emprego?</label>
+                <select id="pe-primeiro-emprego">
+                  <option value="false">Não</option>
+                  <option value="true">Sim</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Acessibilidade -->
+            <div class="perfil-bloco" data-bloco="acessibilidade">
+              <div class="form-group"><label>Possui alguma necessidade de acessibilidade?</label>
+                <select id="pe-acessibilidade">
+                  <option value="">Nenhuma</option>
+                  <option value="cadeirante">Cadeirante</option>
+                  <option value="deficiencia_visual">Deficiência visual</option>
+                  <option value="deficiencia_auditiva">Deficiência auditiva</option>
+                  <option value="mobilidade_reduzida">Mobilidade reduzida</option>
+                  <option value="outra">Outra</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" id="pe-comunicacoes" style="width:auto;">
+                  Quero receber comunicações de novas vagas
+                </label>
+              </div>
+            </div>
+
+            <div class="perfil-acoes">
+              <button type="submit" class="btn btn-primary">Salvar perfil</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ABA: TROCAR SENHA -->
+        <div class="painel-secao" id="painel-secao-senha">
+          <h3 class="painel-titulo">Trocar senha</h3>
+          <form class="perfil-form" onsubmit="event.preventDefault();trocarSenha(this)">
+            <div class="form-group"><label>Senha atual *</label><input type="password" id="senha-atual" required minlength="6"></div>
+            <div class="form-group"><label>Nova senha * (mínimo 6 caracteres)</label><input type="password" id="senha-nova" required minlength="6"></div>
+            <div class="form-group"><label>Confirme a nova senha *</label><input type="password" id="senha-nova-conf" required minlength="6"></div>
+            <div class="perfil-acoes">
+              <button type="submit" class="btn btn-primary">Atualizar senha</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer lateral (menu hambúrguer) -->
+<style>
+  .btn-hamburguer-header { background: var(--branco); border: 1px solid var(--borda); color: var(--preto); width: 38px; height: 38px; border-radius: 8px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-hamburguer-header:hover { background: #f5f5f7; }
+
+  /* ☰ na lateral direita, alinhado com o logo "Vagas.io" */
+  .btn-menu-logo { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; }
+  .btn-menu-logo:hover { background: rgba(255,255,255,0.25); }
+  /* Empurra o header-actions pra não cobrir o ☰ */
+  /* nada */
+  /* (sem padding-right aqui — ☰ só aparece quando logado+cadastro completo) */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+  .drawer-overlay.aberto { display: block; }
+  /* Drawer abre pela DIREITA */
+  aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+  aside.drawer.aberto { transform: translateX(0); }
+  .drawer-header { padding: 20px; background: var(--vinho); color: white; display: flex; align-items: center; gap: 12px; }
+  .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; background-size: cover; background-position: center; flex-shrink: 0; }
+  .drawer-info { flex: 1; min-width: 0; }
+  .drawer-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-info p { font-size: 12px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-close { background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .drawer-close:hover { background: rgba(255,255,255,0.25); }
+  .drawer-body { flex: 1 1 auto; min-height: 0; padding: 16px 0; overflow-y: auto; }
+  .drawer-section { padding: 8px 20px 4px; font-size: 11px; font-weight: 700; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 12px; }
+  .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--preto); font-size: 15px; font-weight: 500; transition: all 0.15s; border-right: 3px solid transparent; text-decoration: none; }
+  .drawer-link:hover { background: #f5f5f7; }
+  .drawer-link.ativo { background: #fdf2f3; border-right-color: var(--vinho); color: var(--vinho); font-weight: 700; }
+  .drawer-link .icon { font-size: 20px; width: 24px; text-align: center; }
+  .drawer-footer { padding: 12px 20px; border-top: 1px solid var(--borda); background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); flex-shrink: 0; }
+  .drawer-logout { width: 100%; background: transparent; color: var(--vinho); border: 1px solid var(--vinho); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .drawer-logout:hover { background: var(--vinho); color: white; }
+</style>
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-foto" id="drawer-foto">👤</div>
+    <div class="drawer-info">
+      <h3 id="drawer-nome">Visitante</h3>
+      <p id="drawer-email">—</p>
+    </div>
+    <button class="drawer-close" onclick="fecharDrawer()" title="Fechar">×</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">Navegação</div>
+    <a href="index.html" class="drawer-link ativo"><span class="icon">🏠</span> Vagas</a>
+    <div id="drawer-logado" style="display:none">
+      <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
+      <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
+    </div>
+    <div id="drawer-deslogado">
+      <div class="drawer-section">Sua conta</div>
+      <a href="javascript:void(0)" onclick="fecharDrawer();abrirModal('login')" class="drawer-link"><span class="icon">🔐</span> Entrar</a>
+      <a href="javascript:void(0)" onclick="fecharDrawer();abrirModal('cad')" class="drawer-link"><span class="icon">📝</span> Cadastre-se</a>
+    </div>
+    <div id="drawer-atalhos" style="display:none">
+      <div class="drawer-section">Atalhos</div>
+      <a href="javascript:void(0)" onclick="abrirPainelCandidato();fecharDrawer()" class="drawer-link"><span class="icon">✏️</span> Editar perfil</a>
+    </div>
+  </div>
+  <div class="drawer-footer" id="drawer-footer-logado" style="display:none">
+    <button class="drawer-logout" onclick="logout()" type="button" aria-label="Sair do perfil">🚪 Sair</button>
+  </div>
+</aside>
+
+<script src="app-v2.js?v=1784700000_FOOTER"></script>
+<script src="modals.js?v=1784700000_FOOTER"></script>
+<script>
+function abrirDrawer(e) {
+  if (e) e.stopPropagation();
+  const drawer = document.getElementById('drawer');
+  const overlay = document.getElementById('drawer-overlay');
+  if (!drawer) return;
+  drawer.classList.add('aberto');
+  overlay.classList.add('aberto');
+  // Popula dados do usuário
+  // tokenCandidato é uma variável do app-v2.js; window.tokenCandidato
+  // pode ficar vazio mesmo quando o usuário está logado.
+  const logado = !!(typeof tokenCandidato !== 'undefined' && tokenCandidato);
+  const cadastroOk = !!(window.cadastroCompleto);
+  const podeAcessar = logado && cadastroOk;
+  const nome = localStorage.getItem('candidato_nome') || window.emailLogado || (logado ? 'Candidato' : 'Visitante');
+  const iniciais = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+  const fotoUrl = localStorage.getItem('candidato_foto') || '';
+  const drawerFoto = document.getElementById('drawer-foto');
+  const drawerNome = document.getElementById('drawer-nome');
+  const drawerEmail = document.getElementById('drawer-email');
+  if (drawerNome) drawerNome.textContent = nome;
+  if (drawerEmail) drawerEmail.textContent = window.emailLogado || (logado ? 'Complete seu cadastro' : 'Entre ou cadastre-se');
+  if (drawerFoto) {
+    if (fotoUrl) {
+      drawerFoto.style.backgroundImage = `url("${fotoUrl.replace(/"/g, '\\"')}")`;
+      drawerFoto.style.backgroundSize = 'cover';
+      drawerFoto.style.backgroundPosition = 'center';
+      drawerFoto.textContent = '';
+    } else {
+      drawerFoto.textContent = iniciais;
+      drawerFoto.style.backgroundImage = '';
+    }
+  }
+  // O botão Sair deve aparecer para qualquer usuário logado,
+  // mesmo antes de o cadastro estar completo.
+  const elLogado = document.getElementById('drawer-logado');
+  const elDeslogado = document.getElementById('drawer-deslogado');
+  const elAtalhos = document.getElementById('drawer-atalhos');
+  const elFooter = document.getElementById('drawer-footer-logado');
+  if (logado) {
+    if (elFooter) elFooter.style.display = '';
+  } else {
+    if (elFooter) elFooter.style.display = 'none';
+  }
+  if (podeAcessar) {
+    if (elLogado) elLogado.style.display = '';
+    if (elDeslogado) elDeslogado.style.display = 'none';
+    if (elAtalhos) elAtalhos.style.display = '';
+  } else {
+    if (elLogado) elLogado.style.display = 'none';
+    if (elDeslogado) elDeslogado.style.display = '';
+    if (elAtalhos) elAtalhos.style.display = 'none';
+  }
+}
+function fecharDrawer() {
+  const drawer = document.getElementById('drawer');
+  const overlay = document.getElementById('drawer-overlay');
+  if (drawer) drawer.classList.remove('aberto');
+  if (overlay) overlay.classList.remove('aberto');
+}
+window.addEventListener('keydown', e => { if (e.key === 'Escape') fecharDrawer(); });
+window.abrirDrawer = abrirDrawer;
+window.fecharDrawer = fecharDrawer;
+</script>
+</body>
+</html>
+
