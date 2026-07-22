@@ -4,95 +4,96 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vagas com Candidatos — Portal Empresa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="empresa.css">
-  <style>
-    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-    .vaga-card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-top: 3px solid var(--dourado); transition: all 0.15s; cursor: pointer; }
-    .vaga-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .vaga-card h3 { font-size: 17px; color: var(--vinho); margin-bottom: 6px; }
-    .vaga-card .empresa { font-size: 13px; color: var(--texto-suave); margin-bottom: 12px; }
-    .stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-    .stat-mini { font-size: 12px; color: var(--texto-suave); }
-    .stat-mini strong { color: var(--texto); font-size: 14px; }
-    .vaga-card .btn { display: inline-block; padding: 8px 16px; background: var(--vinho); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; }
-    .vaga-card .btn:hover { background: var(--vinho-claro); }
-    .empty { text-align: center; padding: 40px; color: var(--texto-suave); }
-    .topo { background: var(--vinho); color: white; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
-    .topo h1 { font-size: 18px; }
-    .topo a { color: var(--dourado); text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid var(--dourado); border-radius: 6px; }
-    .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
-    .page-header h2 { font-size: 22px; color: var(--vinho); margin-bottom: 4px; }
-    .page-header p { color: var(--texto-suave); font-size: 14px; }
-  </style>
 </head>
 <body>
-  <div class="topo">
-    <a href="index.html">← Voltar</a>
-    <h1>Portal Empresa</h1>
-    <div style="flex:1"></div>
-    <a href="#" onclick="logout()">Sair</a>
-  </div>
+  <button class="menu-toggle" onclick="document.querySelector('aside').classList.add('aberto'); document.querySelector('.app').classList.add('aside-aberto');" aria-label="Abrir menu">☰</button>
 
-  <div class="submenu">
-    <a href="index.html">📊 Dashboard</a>
-    <a href="vagas.html" class="ativo">📋 Vagas com Candidatos</a>
-    <a href="agenda.html">📅 Agenda</a>
-    <a href="perfil.html">⚙️ Perfil</a>
-  </div>
+  <div class="app">
+    <aside>
+      <button class="menu-close" onclick="document.querySelector('aside').classList.remove('aberto'); document.querySelector('.app').classList.remove('aside-aberto');" aria-label="Fechar menu">✕</button>
+      <div class="aside-logo">
+        <h1>Vagas<span class="dourado">.io</span></h1>
+        <small>Portal da Empresa</small>
+      </div>
 
-  <div class="container">
-    <div class="page-header">
-      <h2>📋 Vagas com Candidatos</h2>
-      <p>Apenas vagas liberadas para sua empresa</p>
-    </div>
+      <a class="nav-item" href="index.html">📊 Dashboard</a>
+      <a class="nav-item ativo" href="vagas.html">📋 Vagas com Candidatos</a>
+      <a class="nav-item" href="agenda.html">📅 Agenda</a>
+      <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
 
-    <div id="grid" class="grid">
-      <div class="empty">Carregando...</div>
-    </div>
+      <div class="aside-user">
+        <div class="aside-user-avatar" id="avatar">--</div>
+        <div class="aside-user-info">
+          <div class="nome" id="user-nome">--</div>
+          <div class="empresa" id="user-empresa">--</div>
+        </div>
+        <button class="btn-logout" onclick="sair()" title="Sair">↪</button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="page-header">
+        <div>
+          <h2>📋 Vagas com Candidatos</h2>
+          <div class="sub">Apenas vagas liberadas para sua empresa</div>
+        </div>
+      </div>
+
+      <div id="grid" class="vagas-grid">
+        <div class="card"><div class="empty">Carregando...</div></div>
+      </div>
+    </main>
   </div>
 
   <script>
     const API = 'https://recrutamento-api.onrender.com';
+    const token = localStorage.getItem('empresa_token');
+    if (!token) window.location.href = 'login.html';
 
-    function logout() {
-      localStorage.removeItem('empresa_token');
-      localStorage.removeItem('empresa_usuario');
-      window.location.href = 'login.html';
+    const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
+    document.getElementById('avatar').textContent = (usuario.nome || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+    document.getElementById('user-nome').textContent = usuario.nome || '--';
+    document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
+
+    function sair() {
+      if (confirm('Sair do portal?')) {
+        localStorage.removeItem('empresa_token');
+        localStorage.removeItem('empresa_usuario');
+        window.location.href = 'login.html';
+      }
     }
 
     async function carregar() {
-      const token = localStorage.getItem('empresa_token');
-      if (!token) { window.location.href = 'login.html'; return; }
-
       const grid = document.getElementById('grid');
       try {
         const r = await fetch(API + '/api/empresa/vagas-com-candidaturas', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
-        if (r.status === 401) { logout(); return; }
+        if (r.status === 401 || r.status === 403) { sair(); return; }
         const data = await r.json();
         const vagas = data.vagas || [];
 
         if (vagas.length === 0) {
-          grid.innerHTML = '<div class="empty">Nenhuma vaga com candidatos ainda.</div>';
+          grid.innerHTML = '<div class="card"><div class="empty">Nenhuma vaga com candidatos ainda.</div></div>';
           return;
         }
 
         grid.innerHTML = vagas.map(v => {
           const local = [v.cidade, v.estado].filter(Boolean).join(' / ') || '—';
-          return `<div class="vaga-card" onclick="window.location.href='candidatos.html?vaga=${v.id}'">
+          return `<a class="vaga-card" href="candidatos.html?vaga=${v.id}">
             <h3>${v.titulo || '—'}</h3>
-            <div class="empresa">${v.empresa || '—'} • ${local}</div>
+            <div class="local">${v.empresa || '—'} • ${local}</div>
             <div class="stats">
-              <span class="stat-mini">👥 <strong>${v.total_geral || 0}</strong> total</span>
-              <span class="stat-mini">🔍 <strong>${v.em_analise || 0}</strong> em análise</span>
-              ${parseInt(v.contratados) > 0 ? `<span class="stat-mini">✅ <strong>${v.contratados}</strong> contratado(s)</span>` : ''}
+              <div class="stat"><strong>${v.total_geral || 0}</strong><small>Total</small></div>
+              <div class="stat"><strong style="color:#F57C00;">${v.em_analise || 0}</strong><small>Em análise</small></div>
+              <div class="stat"><strong style="color:#2E7D32;">${v.contratados || 0}</strong><small>Contratados</small></div>
             </div>
-            <a class="btn" href="candidatos.html?vaga=${v.id}">👁 Ver candidatos</a>
-          </div>`;
+          </a>`;
         }).join('');
       } catch (e) {
-        grid.innerHTML = '<div class="empty">Erro ao carregar: ' + e.message + '</div>';
+        grid.innerHTML = '<div class="card"><div class="empty">Erro ao carregar: ' + e.message + '</div></div>';
       }
     }
 
