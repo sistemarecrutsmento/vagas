@@ -235,16 +235,12 @@
       }
       fab.style.display = 'flex';
 
-      // Renderiza abas
+      // Renderiza abas SEMPRE (mesmo com 1 candidatura, fica claro o contexto)
       const tabs = document.getElementById('chat-vagas');
-      if (candidaturas.length === 1) {
-        tabs.style.display = 'none';
-      } else {
-        tabs.style.display = 'flex';
-        tabs.innerHTML = candidaturas.map(c =>
-          `<button class="chat-vaga-tab ${c.id === candidaturaAtiva ? 'ativa' : ''}" onclick="window.__chatFab.selecionar(${c.id})">${escapeHtml(c.titulo || c.empresa || 'Vaga')}</button>`
-        ).join('');
-      }
+      tabs.style.display = 'flex';
+      tabs.innerHTML = candidaturas.map(c =>
+        `<button class="chat-vaga-tab ${c.id === candidaturaAtiva ? 'ativa' : ''}" onclick="window.__chatFab.selecionar(${c.id})">${escapeHtml(c.titulo || c.empresa || 'Vaga')}</button>`
+      ).join('');
 
       // Se a candidatura ativa não tá mais disponível, troca pra primeira
       if (!candidaturas.find(c => c.id === candidaturaAtiva)) {
@@ -305,9 +301,18 @@
   function renderMensagens() {
     const area = document.getElementById('chat-msg-area');
     const input = document.getElementById('chat-input-area');
+    const headTitulo = document.getElementById('chat-head-titulo');
+    const headSub = document.getElementById('chat-head-sub');
     const msgs = mensagensCache[candidaturaAtiva] || [];
     const status = statusCandidatura[candidaturaAtiva];
     const encerrada = ['rejeitado','reprovado','cancelado','contratado'].includes(status);
+
+    // === Atualiza header com nome da vaga ativa ===
+    const cand = candidaturas.find(c => c.id === candidaturaAtiva);
+    if (cand) {
+      headTitulo.innerHTML = `💬 ${escapeHtml(cand.titulo || cand.empresa || 'Vaga')}`;
+      headSub.textContent = `Chat com o recrutador desta vaga`;
+    }
 
     // === Candidatura encerrada: tela cheia de "chat indisponível" ===
     if (encerrada) {
