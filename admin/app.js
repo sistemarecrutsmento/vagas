@@ -135,6 +135,7 @@ async function carregarEquipe() {
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
             <div style="font-weight:700; font-size:16px;">🏢 ${e.nome}</div>
             <div style="display:flex; gap:6px;">
+              <button class="btn btn-sec btn-sm" onclick="abrirModalVincularVagas(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")})">🔗 Vagas (${e.qtd_vagas || 0})</button>
               <button class="btn btn-sec btn-sm" onclick="editarEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}', '${(e.cnpj||'').replace(/'/g, "\\'")}', '${(e.email_principal||'').replace(/'/g, "\\'")}', '${(e.telefone||'').replace(/'/g, "\\'")}')">✏️ Editar</button>
               <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
             </div>
@@ -332,6 +333,105 @@ function excluirEmpresa(id, nome) {
       else alert('Erro: ' + (data.erro || JSON.stringify(data)));
     })
     .catch(() => alert('Erro de conexão'));
+}
+
+// ===== VINCULAR VAGAS À EMPRESA =====
+let vincEmpresaId = null;
+let vincTodasVagas = [];
+let vincLiberadas = [];
+
+async function abrirModalVincularVagas(empresaId, empresaNome) {
+  vincEmpresaId = empresaId;
+  document.getElementById('vinc-empresa-nome').textContent = empresaNome;
+  document.getElementById('vinc-liberadas').innerHTML = '<div class="empty">Carregando...</div>';
+  document.getElementById('vinc-disponiveis').innerHTML = '';
+  abrirModal('vincular-vagas');
+  await carregarVincularVagas();
+}
+
+async function carregarVincularVagas() {
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    // Busca todas as vagas + as já liberadas pra essa empresa em paralelo
+    const [rVagas, rLiberadas] = await Promise.all([
+      fetch(API + '/api/admin/vagas', { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(API + '/api/admin/empresa-vaga/' + vincEmpresaId, { headers: { 'Authorization': 'Bearer ' + token } })
+    ]);
+    const dVagas = await rVagas.json();
+    const dLiberadas = await rLiberadas.json();
+    vincTodasVagas = dVagas.vagas || dVagas || [];
+    vincLiberadas = dLiberadas.vagas || [];
+    renderVincularVagas();
+  } catch (e) {
+    document.getElementById('vinc-liberadas').innerHTML = '<div class="empty" style="color:var(--vermelho);">Erro ao carregar vagas.</div>';
+  }
+}
+
+function renderVincularVagas() {
+  const liberadasIds = new Set(vincLiberadas.map(v => v.id));
+  const liberadas = vincTodasVagas.filter(v => liberadasIds.has(v.id));
+  const disponiveis = vincTodasVagas.filter(v => !liberadasIds.has(v.id));
+
+  // Vagas liberadas
+  const libDiv = document.getElementById('vinc-liberadas');
+  if (liberadas.length === 0) {
+    libDiv.innerHTML = '<div class="empty" style="padding: 14px;">Nenhuma vaga liberada ainda. Clique em ➕ abaixo pra liberar.</div>';
+  } else {
+    libDiv.innerHTML = liberadas.map(v => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid #16a34a; background:#f0fdf4; border-radius:6px; margin-bottom:6px;">
+        <div>
+          <div style="font-weight:600; color:#15803d;">${v.titulo}</div>
+          <div style="font-size:12px; color:#666;">${v.empresa || ''} ${v.cidade ? '• ' + v.cidade : ''}</div>
+        </div>
+        <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="desvincularVagaEmpresa(${v.id})">❌ Remover</button>
+      </div>
+    `).join('');
+  }
+
+  // Vagas disponíveis
+  const dispDiv = document.getElementById('vinc-disponiveis');
+  if (disponiveis.length === 0) {
+    dispDiv.innerHTML = '<div class="empty" style="padding: 14px;">Todas as vagas já estão liberadas pra essa empresa.</div>';
+  } else {
+    dispDiv.innerHTML = disponiveis.map(v => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid var(--borda); border-radius:6px; margin-bottom:6px;">
+        <div>
+          <div style="font-weight:600;">${v.titulo}</div>
+          <div style="font-size:12px; color:#666;">${v.empresa || ''} ${v.cidade ? '• ' + v.cidade : ''}</div>
+        </div>
+        <button class="btn btn-primary btn-sm" style="width:auto;" onclick="vincularVagaEmpresa(${v.id})">➕ Liberar</button>
+      </div>
+    `).join('');
+  }
+}
+
+async function vincularVagaEmpresa(vagaId) {
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/empresa-vaga', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ empresa_id: vincEmpresaId, vaga_id: vagaId })
+    });
+    const d = await r.json();
+    if (d.ok || d.empresa_id) { await carregarVincularVagas(); }
+    else alert('Erro: ' + (d.erro || JSON.stringify(d)));
+  } catch (e) { alert('Erro de conexão'); }
+}
+
+async function desvincularVagaEmpresa(vagaId) {
+  if (!confirm('Remover acesso dessa vaga para a empresa?')) return;
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/empresa-vaga', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ empresa_id: vincEmpresaId, vaga_id: vagaId })
+    });
+    const d = await r.json();
+    if (d.ok) { await carregarVincularVagas(); }
+    else alert('Erro: ' + (d.erro || JSON.stringify(d)));
+  } catch (e) { alert('Erro de conexão'); }
 }
 
 // ===== AGENDA =====
