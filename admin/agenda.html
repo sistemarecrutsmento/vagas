@@ -83,27 +83,73 @@
     /* Modal */
     .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
     .modal-bg.aberto { display: flex; }
-    .modal { background: white; border-radius: 14px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
-    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; }
+    .modal { background: white; border-radius: 14px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; background: var(--vinho); color: white; }
     .modal-header h3 { font-size: 18px; font-weight: 700; margin: 0; }
-    .modal-close { background: none; border: 0; font-size: 24px; cursor: pointer; color: var(--texto-suave); padding: 0; width: 32px; height: 32px; }
+    .modal-close { background: rgba(255,255,255,0.15); border: 0; font-size: 22px; cursor: pointer; color: white; padding: 0; width: 32px; height: 32px; border-radius: 6px; }
+    .modal-close:hover { background: rgba(255,255,255,0.25); }
     .modal-body { padding: 24px; }
-    .form-group { margin-bottom: 18px; }
+
+    /* Steps do modal */
+    .step { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--borda); }
+    .step:last-of-type { border-bottom: 0; padding-bottom: 0; }
+    .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--dourado); color: var(--vinho); font-weight: 800; font-size: 13px;
+      margin-right: 8px;
+    }
+    .step-titulo { font-size: 15px; font-weight: 700; display: flex; align-items: center; margin-bottom: 12px; }
+
+    .form-group { margin-bottom: 14px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--texto); }
     .form-group select, .form-group input, .form-group textarea {
       width: 100%; padding: 10px 12px; border: 1px solid var(--borda);
-      border-radius: 6px; font-size: 14px; font-family: inherit;
+      border-radius: 6px; font-size: 14px; font-family: inherit; background: white;
     }
     .form-group select:focus, .form-group input:focus, .form-group textarea:focus {
-      outline: none; border-color: var(--vinho);
+      outline: none; border-color: var(--vinho); box-shadow: 0 0 0 3px rgba(114,47,55,0.1);
     }
     .form-group .hint { font-size: 12px; color: var(--texto-suave); margin-top: 4px; }
-    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--borda); display: flex; justify-content: flex-end; gap: 8px; }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 540px) { .row-2 { grid-template-columns: 1fr; } }
+
+    /* Candidato preview card */
+    .cand-preview {
+      background: linear-gradient(135deg, #faf5ed 0%, #f7f5f2 100%);
+      border: 1px solid var(--borda); border-radius: 8px;
+      padding: 14px; margin-top: 8px; display: none;
+    }
+    .cand-preview.show { display: block; }
+    .cand-preview .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--vinho); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 18px; flex-shrink: 0;
+    }
+    .cand-preview .info { display: flex; align-items: center; gap: 12px; }
+    .cand-preview .nome { font-weight: 700; font-size: 14px; }
+    .cand-preview .vaga { font-size: 12px; color: var(--texto-suave); margin-top: 2px; }
+    .cand-preview .etapa { display: inline-block; padding: 2px 8px; background: var(--dourado); color: var(--vinho); border-radius: 10px; font-size: 10px; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
+
+    /* Slots rápidos de horário */
+    .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+    .slot {
+      padding: 8px 4px; background: white; border: 1px solid var(--borda);
+      border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+      text-align: center; color: var(--texto);
+    }
+    .slot:hover { border-color: var(--vinho); color: var(--vinho); }
+    .slot.ativo { background: var(--vinho); color: white; border-color: var(--vinho); }
+
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #fafafa; }
     .btn { padding: 10px 20px; border: 0; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
     .btn-primario { background: var(--vinho); color: white; }
     .btn-primario:hover { background: var(--vinho-claro); }
     .btn-primario:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-secundario { background: white; color: var(--texto); border: 1px solid var(--borda); }
+    .footer-info { font-size: 12px; color: var(--texto-suave); }
 
     .status-confirmada { background: #10b981; color: white; }
     .status-cancelada { background: #6b7280; color: white; }
@@ -169,39 +215,96 @@
         <button class="modal-close" onclick="fecharModalNova()">×</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Candidato (candidatura)</label>
-          <select id="nova-candidatura" required>
-            <option value="">Selecione um candidato...</option>
-          </select>
-          <div class="hint">Só aparecem candidaturas nas etapas 3 (RH) ou 4 (Gestor).</div>
+
+        <!-- STEP 1: Candidato -->
+        <div class="step">
+          <div class="step-titulo"><span class="step-num">1</span> Candidato e vaga</div>
+          <div class="form-group">
+            <label>Selecione o candidato</label>
+            <select id="nova-candidatura" required onchange="mostrarCandidatoPreview()">
+              <option value="">Escolha um candidato na etapa RH ou Gestor...</option>
+            </select>
+            <div class="hint">Só aparecem candidaturas nas etapas 3 (RH) ou 4 (Gestor).</div>
+          </div>
+          <div id="cand-preview" class="cand-preview"></div>
         </div>
-        <div class="form-group">
-          <label>Etapa da entrevista</label>
-          <select id="nova-etapa" required>
-            <option value="3">Etapa 3 — Entrevista RH</option>
-            <option value="4">Etapa 4 — Entrevista Gestor/Empresa</option>
-          </select>
+
+        <!-- STEP 2: Etapa -->
+        <div class="step">
+          <div class="step-titulo"><span class="step-num">2</span> Etapa da entrevista</div>
+          <div class="form-group" style="margin-bottom:0;">
+            <select id="nova-etapa" required>
+              <option value="3">Etapa 3 — Entrevista RH</option>
+              <option value="4">Etapa 4 — Entrevista com Gestor/Empresa</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Data e horário</label>
-          <input type="datetime-local" id="nova-data" required />
+
+        <!-- STEP 3: Data e hora -->
+        <div class="step">
+          <div class="step-titulo"><span class="step-num">3</span> Data e horário</div>
+          <div class="row-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Data</label>
+              <input type="date" id="nova-data" required />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Hora</label>
+              <input type="time" id="nova-hora" required value="14:00" />
+            </div>
+          </div>
+          <div class="hint" style="margin-top:10px;">⏰ Horário de Brasília (UTC-3). O candidato verá a sala 15 min antes.</div>
+
+          <div style="margin-top:14px;">
+            <label style="font-size:12px; color:var(--texto-suave); display:block; margin-bottom:6px;">Horários comuns (clique pra preencher):</label>
+            <div class="slots">
+              <div class="slot" onclick="setHora('09:00')">09:00</div>
+              <div class="slot" onclick="setHora('10:00')">10:00</div>
+              <div class="slot" onclick="setHora('11:00')">11:00</div>
+              <div class="slot" onclick="setHora('14:00')">14:00</div>
+              <div class="slot" onclick="setHora('15:00')">15:00</div>
+              <div class="slot" onclick="setHora('16:00')">16:00</div>
+              <div class="slot" onclick="setHora('17:00')">17:00</div>
+              <div class="slot" onclick="setHora('18:00')">18:00</div>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Duração (minutos)</label>
-          <input type="number" id="nova-duracao" value="60" min="15" max="240" step="15" />
+
+        <!-- STEP 4: Detalhes -->
+        <div class="step">
+          <div class="step-titulo"><span class="step-num">4</span> Detalhes</div>
+          <div class="row-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Duração</label>
+              <select id="nova-duracao">
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60" selected>1 hora</option>
+                <option value="90">1h30</option>
+                <option value="120">2 horas</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Local (opcional)</label>
+              <input type="text" id="nova-local" placeholder="Ex: Presencial - Sala 3" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:14px;">
+            <label>Observações (opcional)</label>
+            <textarea id="nova-obs" rows="2" placeholder="Ex: Trazer documento, teste prático, etc."></textarea>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Observações (opcional)</label>
-          <textarea id="nova-obs" rows="2" placeholder="Ex: Trazer documento, teste prático, etc."></textarea>
-        </div>
-        <div class="hint" style="background:#fef9e7; padding:10px; border-radius:6px; border-left:3px solid var(--dourado);">
-          💡 O link da sala de vídeo é gerado automaticamente. O candidato verá o agendamento e poderá entrar na sala 15 minutos antes do horário.
+
+        <div class="hint" style="background:#fef9e7; padding:12px; border-radius:6px; border-left:3px solid var(--dourado); margin-top:8px;">
+          💡 O link da sala de vídeo (Whereby) é gerado automaticamente. O candidato verá o agendamento e poderá entrar na sala 15 minutos antes.
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secundario" onclick="fecharModalNova()">Cancelar</button>
-        <button class="btn btn-primario" id="btn-confirmar-nova" onclick="confirmarNova()">Agendar entrevista</button>
+        <div class="footer-info">📹 Sala de vídeo será criada</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secundario" onclick="fecharModalNova()">Cancelar</button>
+          <button class="btn btn-primario" id="btn-confirmar-nova" onclick="confirmarNova()">Agendar entrevista</button>
+        </div>
       </div>
     </div>
   </div>
@@ -349,26 +452,78 @@ function filtrarPeriodo(periodo, el) {
 // ===== Modal Nova =====
 let candidaturasDisponiveis = [];
 
+function setHora(hora) {
+  document.getElementById('nova-hora').value = hora;
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('ativo'));
+  if (event && event.target) event.target.classList.add('ativo');
+}
+
 async function abrirModalNova() {
   document.getElementById('modal-nova').classList.add('aberto');
+  // Define data mínima = hoje
+  const hoje = new Date().toISOString().split('T')[0];
+  const inputData = document.getElementById('nova-data');
+  if (inputData) inputData.min = hoje;
+  // Sugere a próxima segunda como default
+  const d = new Date();
+  const dia = d.getDay();
+  const diff = dia === 0 ? 1 : (dia === 6 ? 2 : (dia < 5 ? 1 : 3));
+  d.setDate(d.getDate() + diff);
+  if (inputData) inputData.value = d.toISOString().split('T')[0];
+
   // Carrega candidaturas em etapa 3 ou 4
-  if (candidaturasDisponiveis.length === 0) {
-    try {
-      const r = await fetch(`${API}/api/admin/candidaturas?etapa=3,4`, {
+  candidaturasDisponiveis = [];
+  try {
+    let r = await fetch(`${API}/api/admin/candidaturas?etapa=3,4`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (r.ok) {
+      const data = await r.json();
+      candidaturasDisponiveis = (data.candidaturas || []).filter(c => [3, 4].includes(parseInt(c.etapa_atual)));
+    }
+    if (candidaturasDisponiveis.length === 0) {
+      // Fallback: pega todas e filtra
+      r = await fetch(`${API}/api/admin/candidaturas`, {
         headers: { 'Authorization': 'Bearer ' + token }
       });
       if (r.ok) {
         const data = await r.json();
-        candidaturasDisponiveis = data.candidaturas || [];
+        candidaturasDisponiveis = (data.candidaturas || []).filter(c => [3, 4].includes(parseInt(c.etapa_atual)));
       }
-    } catch (e) { console.error(e); }
-  }
+    }
+  } catch (e) { console.error(e); }
   // Preenche select
   const sel = document.getElementById('nova-candidatura');
-  sel.innerHTML = '<option value="">Selecione um candidato...</option>' +
-    candidaturasDisponiveis.map(c =>
-      `<option value="${c.id}">${c.candidato_nome} — ${c.vaga_titulo || ''}</option>`
-    ).join('');
+  if (candidaturasDisponiveis.length === 0) {
+    sel.innerHTML = '<option value="">Nenhum candidato em etapa 3 ou 4</option>';
+  } else {
+    sel.innerHTML = '<option value="">Selecione um candidato...</option>' +
+      candidaturasDisponiveis.map(c =>
+        `<option value="${c.id}">${c.candidato_nome} — ${c.titulo || c.vaga_titulo || ''} (Etapa ${c.etapa_atual})</option>`
+      ).join('');
+  }
+  // Limpa preview
+  const preview = document.getElementById('cand-preview');
+  if (preview) { preview.classList.remove('show'); preview.innerHTML = ''; }
+}
+
+function mostrarCandidatoPreview() {
+  const id = document.getElementById('nova-candidatura').value;
+  const preview = document.getElementById('cand-preview');
+  if (!id || !preview) { if (preview) preview.classList.remove('show'); return; }
+  const c = candidaturasDisponiveis.find(x => x.id == id);
+  if (!c) return;
+  const iniciais = (c.candidato_nome || 'C').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+  preview.innerHTML = `
+    <div class="info">
+      <div class="avatar">${iniciais}</div>
+      <div>
+        <div class="nome">${c.candidato_nome || 'Candidato'}</div>
+        <div class="vaga">${c.titulo || c.vaga_titulo || ''} ${c.candidato_email ? ' • ' + c.candidato_email : ''}</div>
+        <span class="etapa">Etapa ${c.etapa_atual}</span>
+      </div>
+    </div>`;
+  preview.classList.add('show');
 }
 
 function fecharModalNova() {
@@ -378,14 +533,22 @@ function fecharModalNova() {
 async function confirmarNova() {
   const candidatura_id = document.getElementById('nova-candidatura').value;
   const etapa = parseInt(document.getElementById('nova-etapa').value);
-  const data_hora = document.getElementById('nova-data').value;
+  const dataStr = document.getElementById('nova-data').value;
+  const horaStr = document.getElementById('nova-hora').value;
   const duracao_minutos = parseInt(document.getElementById('nova-duracao').value) || 60;
+  const local = document.getElementById('nova-local').value;
   const observacoes = document.getElementById('nova-obs').value;
 
-  if (!candidatura_id || !data_hora) {
-    alert('Preencha todos os campos obrigatórios');
+  if (!candidatura_id || !dataStr || !horaStr) {
+    alert('Preencha candidato, data e hora');
     return;
   }
+
+  // Junta data+hora no fuso local e converte pra ISO (corrige bug de 3h a menos)
+  const [ano, mes, dia] = dataStr.split('-');
+  const [h, m] = horaStr.split(':');
+  const d = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia), parseInt(h), parseInt(m), 0);
+  const data_hora = d.toISOString();
 
   const btn = document.getElementById('btn-confirmar-nova');
   btn.disabled = true;
@@ -398,19 +561,21 @@ async function confirmarNova() {
       body: JSON.stringify({
         candidatura_id: parseInt(candidatura_id),
         etapa,
-        data_hora: new Date(data_hora).toISOString(),
+        data_hora,
         duracao_minutos,
-        observacoes
+        local: local || undefined,
+        observacoes: observacoes || undefined
       })
     });
     if (r.ok) {
       showToast('✅ Entrevista agendada!');
       fecharModalNova();
       carregarEntrevistas();
-      // Limpar form
       document.getElementById('nova-candidatura').value = '';
-      document.getElementById('nova-data').value = '';
+      document.getElementById('nova-local').value = '';
       document.getElementById('nova-obs').value = '';
+      const preview = document.getElementById('cand-preview');
+      if (preview) { preview.classList.remove('show'); preview.innerHTML = ''; }
     } else {
       const err = await r.json();
       alert('Erro: ' + (err.erro || 'desconhecido'));
