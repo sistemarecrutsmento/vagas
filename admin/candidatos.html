@@ -175,7 +175,9 @@
 
         document.getElementById('cands-tbody').innerHTML = cands.map(c => {
           const etapa = c.etapa_atual || 0;
-          const etapaNome = ETAPAS[etapa - 1] || ('Etapa ' + etapa);
+          const totalEtapas = (data.vaga && data.vaga.etapas) ? data.vaga.etapas.length : 7;
+          const etapaExibida = Math.min(etapa, totalEtapas);
+          const etapaNome = ETAPAS[etapaExibida - 1] || ('Etapa ' + etapaExibida);
           const isColeta = etapa >= 6;  // Coleta é etapa 6
           return `<tr>
             <td>
@@ -184,7 +186,7 @@
             </td>
             <td>${[c.cidade, c.estado].filter(Boolean).join(' / ') || '—'}</td>
             <td>
-              <span class="etapa-tag ${isColeta ? 'coleta-docs' : ''}">${etapa}. ${etapaNome}</span>
+              <span class="etapa-tag ${isColeta ? 'coleta-docs' : ''}">${etapaExibida}. ${etapaNome}</span>
               ${isColeta ? '<span class="doc-pill">📄 validar docs</span>' : ''}
             </td>
             <td>${badgeStatus(c.status)}</td>
@@ -205,8 +207,10 @@
     function badgeStatus(s) {
       const map = {
         'em_andamento': '<span class="status status-em_andamento">Em andamento</span>',
+        'em_analise': '<span class="status status-em_andamento">Em análise</span>',
         'aprovado': '<span class="status status-aprovado">Aprovado</span>',
         'reprovado': '<span class="status status-reprovado">Reprovado</span>',
+        'rejeitado': '<span class="status status-reprovado">Reprovado</span>',
         'contratado': '<span class="status status-contratado">Contratado</span>'
       };
       return map[s] || s;
