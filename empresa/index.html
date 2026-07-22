@@ -125,17 +125,19 @@
 
         document.getElementById('conteudo').innerHTML = `
           <div class="vagas-grid">
-            ${vagas.map(v => `
+            ${vagas.map(v => {
+              const local = [v.cidade, v.estado].filter(Boolean).join(' / ') || '--';
+              return `
               <a class="vaga-card" href="candidatos.html?vaga=${v.id}">
                 <h3>${v.titulo}</h3>
-                <div class="local">📍 ${v.cidade || '--'}${v.estado ? ' / ' + v.estado : ''}</div>
+                <div class="local">${v.empresa || '—'} • 📍 ${local}</div>
                 <div class="stats">
                   <div class="stat"><strong>${v.total_candidatos || 0}</strong><small>Candidatos</small></div>
-                  <div class="stat"><strong style="color:#C9A961;">${v.em_etapa_gestor || 0}</strong><small>Aguardando você</small></div>
+                  <div class="stat"><strong style="color:#F57C00;">${v.em_andamento || 0}</strong><small>Em andamento</small></div>
                   <div class="stat"><strong style="color:#2E7D32;">${v.contratacoes || 0}</strong><small>Contratados</small></div>
                 </div>
-              </a>
-            `).join('')}
+              </a>`;
+            }).join('')}
           </div>
         `;
       } catch (e) {
