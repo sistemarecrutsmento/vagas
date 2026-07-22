@@ -398,6 +398,8 @@ function renderizar(cand, v) {
       ${emColetaDocumentos && cand.id ? `<a href="documentos.html?candidatura=${cand.id}" class="btn-voltar-painel" style="display:inline-block;text-decoration:none;margin-left:12px;background:var(--vinho);color:white;border-color:var(--vinho);">📎 Enviar documentos para contratação</a>` : ''}
     </div>
 
+    ${cand.id ? `<div id="bloco-chat-candidato" data-candidatura="${cand.id}" data-status="${escapeHtml(statusCand)}" data-etapa="${etapaAtual}" style="margin-top:24px"></div>` : ''}
+
     ${emProposta ? `<div id="bloco-proposta" style="margin-top:24px;background:white;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.05);text-align:center"></div>` : ''}
   `;
 
@@ -519,6 +521,6 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
 </script>
-<script src="chat-flutuante.js"></script>
+<script src="chat-embutido.js"></script>
 </body>
 </html>
