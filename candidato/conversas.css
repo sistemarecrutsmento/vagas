@@ -46,6 +46,14 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sa
 .conv-input textarea:focus { outline: none; border-color: #722F37; }
 .conv-input button { background: #722F37; color: white; border: none; border-radius: 50%; width: 38px; height: 38px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .conv-input button:disabled { background: #ccc; cursor: not-allowed; }
+/* botão de anexo (📎) — visual secundário, não chama tanta atenção quanto o enviar */
+#conv-anexo-btn { background: transparent !important; color: #722F37 !important; border: 1px solid #d4cfc4 !important; font-size: 18px !important; }
+#conv-anexo-btn:hover { background: #f5efe7 !important; border-color: #722F37 !important; }
+
+/* preview do arquivo anexado (aparece acima do input quando o candidato clica no 📎) */
+.conv-anexo-preview { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #f5efe7; border-top: 1px solid #e5e0d8; font-size: 13px; color: #4a3a3a; }
+.conv-anexo-preview span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conv-anexo-preview button { background: transparent !important; color: #722F37 !important; border: none !important; font-size: 16px !important; width: 28px !important; height: 28px !important; padding: 0 !important; }
 
 /* === Bolhas de mensagem === */
 .ce-msg { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -107,6 +115,8 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sa
   .conv-input { padding: 8px; gap: 6px; }
   .conv-input textarea { font-size: 14px; padding: 8px 10px; }
   .conv-input button { padding: 8px 14px; font-size: 13px; }
+  /* preview do anexo no mobile */
+  .conv-anexo-preview { padding: 6px 12px; font-size: 12px; }
 }
 
 /* telas muito pequenas (até 380px) - mais compacto ainda */
