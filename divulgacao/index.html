@@ -505,19 +505,113 @@
       .comparacao-row.header { display: none; }
     }
 
-    /* ============== CTA FINAL ============== */
+    /* ============== CTA FINAL / CONTATO ============== */
     .cta-final {
-      background: linear-gradient(135deg, var(--vinho-escuro) 0%, var(--vinho) 100%);
-      color: #FFF;
+      background: var(--cinza-bg);
+      color: var(--preto);
       padding: 80px 0;
+    }
+    .contato-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .contato-info h2 {
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--preto);
+    }
+    .contato-info > p {
+      font-size: 16px;
+      color: var(--cinza-texto);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .contato-lista {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .contato-lista li {
+      font-size: 15px;
+      color: var(--cinza-texto);
+      margin-bottom: 10px;
+    }
+    .contato-lista a {
+      color: var(--vinho);
+      text-decoration: none;
+    }
+    .contato-lista a:hover { text-decoration: underline; }
+    .contato-form {
+      background: var(--branco);
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+      border: 1px solid var(--borda);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--preto);
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--borda);
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--vinho);
+      box-shadow: 0 0 0 3px rgba(114,47,55,0.1);
+    }
+    .form-group textarea { resize: vertical; min-height: 100px; }
+    .contato-btn {
+      width: 100%;
+      margin-top: 8px;
+    }
+    .form-feedback {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
       text-align: center;
+      display: none;
     }
-    .cta-final h2 { color: #FFF; font-size: clamp(28px, 4vw, 40px); font-weight: 800; margin-bottom: 16px; }
-    .cta-final p { font-size: 18px; opacity: 0.9; max-width: 600px; margin: 0 auto 32px; }
-    .cta-final .btn-vinho {
-      background: #FFF; color: var(--vinho); border-color: #FFF; padding: 14px 32px; font-size: 16px;
+    .form-feedback.ok {
+      display: block;
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
     }
-    .cta-final .btn-vinho:hover { background: var(--cinza-bg-2); color: var(--vinho-escuro); }
+    .form-feedback.erro {
+      display: block;
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    @media (max-width: 768px) {
+      .contato-grid { grid-template-columns: 1fr; gap: 32px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
 
     /* ============== FOOTER ============== */
     footer {
@@ -828,9 +922,43 @@
 <!-- CTA FINAL -->
 <section class="cta-final" id="contato">
   <div class="container">
-    <h2>Pronto pra modernizar seu recrutamento?</h2>
-    <p>Teste grátis agora. Sem cartão, sem cadastro complicado, sem letras miúdas.</p>
-    <a href="https://sistemarecrutsmento.github.io/vagas/" target="_blank" class="btn-vinho btn-vinho-lg">Começar agora →</a>
+    <div class="contato-grid">
+      <div class="contato-info">
+        <h2>Entre em contato</h2>
+        <p>Dúvidas, sugestões ou quer uma demonstração? Preencha o formulário e a gente responde em até <strong>24 horas</strong>.</p>
+        <ul class="contato-lista">
+          <li>📧 <a href="mailto:contato@vagasio.com.br">contato@vagasio.com.br</a></li>
+          <li>💬 Resposta em até 24h</li>
+          <li>🔒 Seus dados estão seguros</li>
+        </ul>
+      </div>
+      <form class="contato-form" id="form-contato" onsubmit="return enviarContato(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ct-nome">Nome *</label>
+            <input type="text" id="ct-nome" name="nome" required placeholder="Seu nome" />
+          </div>
+          <div class="form-group">
+            <label for="ct-email">E-mail *</label>
+            <input type="email" id="ct-email" name="email" required placeholder="seu@email.com" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ct-empresa">Empresa</label>
+          <input type="text" id="ct-empresa" name="empresa" placeholder="Nome da sua empresa (opcional)" />
+        </div>
+        <div class="form-group">
+          <label for="ct-telefone">WhatsApp</label>
+          <input type="tel" id="ct-telefone" name="telefone" placeholder="(00) 00000-0000 (opcional)" />
+        </div>
+        <div class="form-group">
+          <label for="ct-mensagem">Mensagem *</label>
+          <textarea id="ct-mensagem" name="mensagem" rows="4" required placeholder="Como podemos ajudar?"></textarea>
+        </div>
+        <button type="submit" class="btn-vinho btn-vinho-lg contato-btn">Enviar mensagem</button>
+        <p class="form-feedback" id="form-feedback"></p>
+      </form>
+    </div>
   </div>
 </section>
 
@@ -868,6 +996,40 @@
     </div>
   </div>
 </footer>
+
+<script>
+function enviarContato(e) {
+  e.preventDefault();
+  const form = document.getElementById('form-contato');
+  const fb = document.getElementById('form-feedback');
+  const data = {
+    nome: form.nome.value.trim(),
+    email: form.email.value.trim(),
+    empresa: form.empresa.value.trim() || '(não informado)',
+    telefone: form.telefone.value.trim() || '(não informado)',
+    mensagem: form.mensagem.value.trim()
+  };
+  if (!data.nome || !data.email || !data.mensagem) {
+    fb.className = 'form-feedback erro';
+    fb.textContent = 'Preencha todos os campos obrigatórios.';
+    return false;
+  }
+  const corpo = encodeURIComponent(
+    `Nome: ${data.nome}\n` +
+    `E-mail: ${data.email}\n` +
+    `Empresa: ${data.empresa}\n` +
+    `WhatsApp: ${data.telefone}\n\n` +
+    `Mensagem:\n${data.mensagem}\n\n` +
+    `---\nEnviado pelo formulário do site vagasio.com.br`
+  );
+  const assunto = encodeURIComponent(`Contato via site - ${data.nome}`);
+  window.location.href = `mailto:contato@vagasio.com.br?subject=${assunto}&body=${corpo}`;
+  fb.className = 'form-feedback ok';
+  fb.textContent = '✓ Abrimos seu cliente de e-mail. É só enviar!';
+  setTimeout(() => { form.reset(); fb.className = 'form-feedback'; }, 4000);
+  return false;
+}
+</script>
 
 </body>
 </html>
