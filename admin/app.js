@@ -129,8 +129,25 @@ async function carregarEquipe() {
 
     // Empresas
     const empDiv = document.getElementById('lista-empresas');
+    const todosUsuarios = data.empresaUsuarios || [];
     if (data.empresas && data.empresas.length > 0) {
-      empDiv.innerHTML = data.empresas.map(e => `
+      empDiv.innerHTML = data.empresas.map(e => {
+        const usuariosEmp = todosUsuarios.filter(u => u.empresa_id === e.id);
+        const usuariosHtml = usuariosEmp.length > 0
+          ? usuariosEmp.map(u => `
+              <div style="display:flex; align-items:center; gap:8px; padding:8px; background:#f8fafc; border-radius:6px; margin-top:6px;">
+                <div style="width:32px; height:32px; border-radius:50%; background:#1e40af; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">${(u.nome||'?').charAt(0).toUpperCase()}</div>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-size:13px; font-weight:600; color:#333; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.nome}</div>
+                  <div style="font-size:11px; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.email}${u.cargo ? ' • ' + u.cargo : ''}</div>
+                </div>
+                <button class="btn btn-sec btn-sm" title="Editar" onclick="editarUsuarioEmpresa(${u.id}, ${e.id}, '${(u.nome||'').replace(/'/g, "\\'")}', '${(u.email||'').replace(/'/g, "\\'")}', '${(u.cargo||'').replace(/'/g, "\\'")}', ${u.ativo === false})">✏️</button>
+                <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" title="Excluir" onclick="excluirUsuarioEmpresa(${u.id}, '${(u.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
+              </div>
+            `).join('')
+          : '<div style="font-size:12px; color:#999; font-style:italic; padding:6px 0;">Nenhum usuário cadastrado</div>';
+
+        return `
         <div class="vaga-card">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
             <div style="font-weight:700; font-size:16px;">🏢 ${e.nome}</div>
@@ -144,8 +161,17 @@ async function carregarEquipe() {
           ${e.cnpj ? `<div style="color:#888; font-size:12px; margin-top:4px;">CNPJ: ${e.cnpj}</div>` : ''}
           ${e.telefone ? `<div style="color:#888; font-size:12px;">Tel: ${e.telefone}</div>` : ''}
           <div style="margin-top:10px;"><span style="background:#dbeafe; color:#1e40af; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Empresa</span></div>
+
+          <div style="margin-top:12px; padding-top:10px; border-top:1px solid #eee;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <div style="font-size:12px; font-weight:700; color:#555;">👥 Usuários (${usuariosEmp.length})</div>
+              <button class="btn btn-sec btn-sm" onclick="abrirModalNovoUsuarioEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")})">+ Usuário</button>
+            </div>
+            ${usuariosHtml}
+          </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
     } else {
       empDiv.innerHTML = '<div class="empty">Nenhuma empresa parceira cadastrada.</div>';
     }
@@ -430,6 +456,105 @@ async function desvincularVagaEmpresa(vagaId) {
     });
     const d = await r.json();
     if (d.ok) { await carregarVincularVagas(); }
+    else alert('Erro: ' + (d.erro || JSON.stringify(d)));
+  } catch (e) { alert('Erro de conexão'); }
+}
+
+// ===== USUÁRIOS DA EMPRESA =====
+function abrirModalNovoUsuarioEmpresa(empresaId, empresaNome) {
+  document.getElementById('ue-id').value = '';
+  document.getElementById('ue-empresa-id').value = empresaId;
+  document.getElementById('ue-empresa-nome').value = empresaNome;
+  document.getElementById('ue-nome').value = '';
+  document.getElementById('ue-email').value = '';
+  document.getElementById('ue-cargo').value = '';
+  document.getElementById('ue-senha').value = '';
+  document.getElementById('ue-ativo').checked = true;
+  document.getElementById('titu-usuario-empresa').textContent = '👤 Novo Usuário — ' + empresaNome;
+  document.getElementById('lue-senha').innerHTML = 'Senha *';
+  document.getElementById('hint-senha').style.display = 'block';
+  document.getElementById('hint-senha').textContent = 'Mínimo 6 caracteres. Será enviado ao usuário.';
+  document.getElementById('grp-ue-ativo').style.display = 'none';
+  document.getElementById('ue-email').disabled = false;
+  abrirModal('usuario-empresa');
+}
+
+function editarUsuarioEmpresa(id, empresaId, nome, email, cargo, inativo) {
+  document.getElementById('ue-id').value = id;
+  document.getElementById('ue-empresa-id').value = empresaId;
+  document.getElementById('ue-empresa-nome').value = '';
+  // Pega o nome da empresa do card (busca no DOM)
+  const empNome = document.querySelector(`#lista-empresas .vaga-card:nth-child(${empresaId}) > div > div`)?.textContent || '';
+  document.getElementById('ue-empresa-nome').value = empNome.replace('🏢', '').trim();
+  document.getElementById('ue-nome').value = nome;
+  document.getElementById('ue-email').value = email;
+  document.getElementById('ue-cargo').value = cargo;
+  document.getElementById('ue-senha').value = '';
+  document.getElementById('ue-ativo').checked = !inativo;
+  document.getElementById('titu-usuario-empresa').textContent = '✏️ Editar Usuário';
+  document.getElementById('lue-senha').innerHTML = 'Nova senha (opcional)';
+  document.getElementById('hint-senha').style.display = 'block';
+  document.getElementById('hint-senha').textContent = 'Deixe vazio para manter a senha atual.';
+  document.getElementById('grp-ue-ativo').style.display = 'block';
+  document.getElementById('ue-email').disabled = true;
+  abrirModal('usuario-empresa');
+}
+
+async function salvarUsuarioEmpresa() {
+  const id = document.getElementById('ue-id').value;
+  const empresaId = document.getElementById('ue-empresa-id').value;
+  const nome = document.getElementById('ue-nome').value.trim();
+  const email = document.getElementById('ue-email').value.trim();
+  const cargo = document.getElementById('ue-cargo').value.trim();
+  const senha = document.getElementById('ue-senha').value;
+  const ativo = document.getElementById('ue-ativo').checked;
+
+  if (!nome) return alert('Informe o nome.');
+  if (!email) return alert('Informe o e-mail.');
+  if (!id && !senha) return alert('Informe a senha inicial.');
+  if (senha && senha.length < 6) return alert('A senha deve ter no mínimo 6 caracteres.');
+
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    let r;
+    if (id) {
+      // Editar
+      const body = { nome, cargo, ativo };
+      if (senha) body.senha = senha;
+      r = await fetch(API + '/api/admin/empresa-usuarios/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(body)
+      });
+    } else {
+      // Criar
+      r = await fetch(API + '/api/admin/empresas/' + empresaId + '/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ nome, email, senha, cargo })
+      });
+    }
+    const d = await r.json();
+    if (r.ok && d.ok !== false) {
+      fecharModal('usuario-empresa');
+      alert('✅ Usuário ' + (id ? 'atualizado' : 'criado') + ' com sucesso!');
+      carregarEquipe();
+    } else {
+      alert('Erro: ' + (d.erro || JSON.stringify(d)));
+    }
+  } catch (e) { alert('Erro de conexão'); }
+}
+
+async function excluirUsuarioEmpresa(id, nome) {
+  if (!confirm('Excluir o usuário "' + nome + '"?\n\nEle não conseguirá mais acessar o portal da empresa.')) return;
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/empresa-usuarios/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    if (d.ok) { alert('Usuário excluído!'); carregarEquipe(); }
     else alert('Erro: ' + (d.erro || JSON.stringify(d)));
   } catch (e) { alert('Erro de conexão'); }
 }
