@@ -635,6 +635,7 @@
     <div id="drawer-logado" style="display:none">
       <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
       <a href="entrevistas.html" class="drawer-link"><span class="icon">📅</span> Entrevistas</a>
+    <a href="conversas.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">💬</span> Chat</a>
       <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
     </div>
     <div id="drawer-deslogado">
@@ -721,7 +722,6 @@ window.addEventListener('keydown', e => { if (e.key === 'Escape') fecharDrawer()
 window.abrirDrawer = abrirDrawer;
 window.fecharDrawer = fecharDrawer;
 </script>
-<script src="chat-flutuante.js"></script>
 </body>
 </html>
 
