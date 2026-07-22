@@ -155,73 +155,107 @@ async function carregarEquipe() {
 }
 
 function abrirModalRecrutador() {
-  const nome = prompt('Nome do recrutador:');
-  if (!nome) return;
-  const email = prompt('Email:');
-  if (!email) return;
-  const senha = prompt('Senha provisória:', 'mudar123');
-  if (!senha) return;
-  criarRecrutador({ nome, email, senha });
+  document.getElementById('membro-nome').value = '';
+  document.getElementById('membro-email').value = '';
+  document.getElementById('membro-senha').value = 'mudar123';
+  abrirModal('novo-membro');
+  setTimeout(() => document.getElementById('membro-nome').focus(), 100);
 }
 
-async function criarRecrutador(dados) {
+async function salvarNovoRecrutador() {
+  const nome = document.getElementById('membro-nome').value.trim();
+  const email = document.getElementById('membro-email').value.trim();
+  const senha = document.getElementById('membro-senha').value;
+  if (!nome || !email || !senha) {
+    alert('Preencha nome, e-mail e senha.');
+    return;
+  }
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
     const r = await fetch(API + '/api/admin/recrutadores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(dados)
+      body: JSON.stringify({ nome, email, senha })
     });
     const data = await r.json();
-    if (r.ok) { alert('Recrutador criado com sucesso!'); carregarEquipe(); }
-    else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    if (r.ok) {
+      fecharModal('novo-membro');
+      alert('✅ Recrutador criado com sucesso!');
+      carregarEquipe();
+    } else {
+      alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    }
   } catch (e) { alert('Erro de conexão'); }
 }
 
 function abrirModalEmpresa() {
-  const nome = prompt('Nome da empresa:');
-  if (!nome) return;
-  const cnpj = prompt('CNPJ (opcional):') || null;
-  const email = prompt('Email principal (opcional):') || null;
-  const telefone = prompt('Telefone (opcional):') || null;
-  criarEmpresa({ nome, cnpj, email_principal: email, telefone });
+  document.getElementById('emp-nome').value = '';
+  document.getElementById('emp-cnpj').value = '';
+  document.getElementById('emp-telefone').value = '';
+  document.getElementById('emp-email').value = '';
+  abrirModal('nova-empresa');
+  setTimeout(() => document.getElementById('emp-nome').focus(), 100);
 }
 
-async function criarEmpresa(dados) {
+async function salvarNovaEmpresa() {
+  const nome = document.getElementById('emp-nome').value.trim();
+  const cnpj = document.getElementById('emp-cnpj').value.trim() || null;
+  const telefone = document.getElementById('emp-telefone').value.trim() || null;
+  const email_principal = document.getElementById('emp-email').value.trim() || null;
+  if (!nome) {
+    alert('Preencha pelo menos o nome da empresa.');
+    return;
+  }
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
     const r = await fetch(API + '/api/admin/empresas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(dados)
+      body: JSON.stringify({ nome, cnpj, telefone, email_principal })
     });
     const data = await r.json();
-    if (r.ok) { alert('Empresa criada com sucesso!'); carregarEquipe(); }
-    else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    if (r.ok) {
+      fecharModal('nova-empresa');
+      alert('✅ Empresa criada com sucesso!');
+      carregarEquipe();
+    } else {
+      alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    }
   } catch (e) { alert('Erro de conexão'); }
 }
 
 function editarRecrutador(id, nomeAtual, inativo) {
-  const novoNome = prompt('Nome do recrutador:', nomeAtual);
-  if (novoNome === null) return;
-  const acaoAtivo = confirm('O recrutador deve ficar ATIVO?\n\nOK = Ativar\nCancelar = Desativar');
-  const resetar = confirm('Deseja resetar a senha para "mudar123"?\n\n(OK = sim, o recrutador terá que trocar no próximo login)');
-  const payload = { nome: novoNome, ativo: acaoAtivo };
-  if (resetar) payload.senha = 'mudar123';
-  atualizarRecrutador(id, payload);
+  document.getElementById('emembro-id').value = id;
+  document.getElementById('emembro-nome').value = nomeAtual || '';
+  document.getElementById('emembro-ativo').checked = !inativo;
+  document.getElementById('emembro-senha').value = '';
+  abrirModal('editar-membro');
+  setTimeout(() => document.getElementById('emembro-nome').focus(), 100);
 }
 
-async function atualizarRecrutador(id, dados) {
+async function salvarEdicaoRecrutador() {
+  const id = document.getElementById('emembro-id').value;
+  const nome = document.getElementById('emembro-nome').value.trim();
+  const ativo = document.getElementById('emembro-ativo').checked;
+  const senha = document.getElementById('emembro-senha').value.trim();
+  if (!nome) { alert('O nome é obrigatório.'); return; }
+  const payload = { nome, ativo };
+  if (senha) payload.senha = senha;
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
     const r = await fetch(API + '/api/admin/recrutadores/' + id, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(dados)
+      body: JSON.stringify(payload)
     });
     const data = await r.json();
-    if (r.ok) { alert('Recrutador atualizado!'); carregarEquipe(); }
-    else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    if (r.ok) {
+      fecharModal('editar-membro');
+      alert('✅ Recrutador atualizado!');
+      carregarEquipe();
+    } else {
+      alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    }
   } catch (e) { alert('Erro de conexão'); }
 }
 
@@ -240,25 +274,37 @@ function excluirRecrutador(id, nome) {
 }
 
 function editarEmpresa(id, nome, cnpj, email, telefone) {
-  const novoNome = prompt('Nome da empresa:', nome);
-  if (novoNome === null) return;
-  const novoCnpj = prompt('CNPJ:', cnpj) || null;
-  const novoEmail = prompt('Email principal:', email) || null;
-  const novoTel = prompt('Telefone:', telefone) || null;
-  atualizarEmpresa(id, { nome: novoNome, cnpj: novoCnpj, email_principal: novoEmail, telefone: novoTel });
+  document.getElementById('eemp-id').value = id;
+  document.getElementById('eemp-nome').value = nome || '';
+  document.getElementById('eemp-cnpj').value = cnpj || '';
+  document.getElementById('eemp-telefone').value = telefone || '';
+  document.getElementById('eemp-email').value = email || '';
+  abrirModal('editar-empresa');
+  setTimeout(() => document.getElementById('eemp-nome').focus(), 100);
 }
 
-async function atualizarEmpresa(id, dados) {
+async function salvarEdicaoEmpresa() {
+  const id = document.getElementById('eemp-id').value;
+  const nome = document.getElementById('eemp-nome').value.trim();
+  const cnpj = document.getElementById('eemp-cnpj').value.trim() || null;
+  const telefone = document.getElementById('eemp-telefone').value.trim() || null;
+  const email_principal = document.getElementById('eemp-email').value.trim() || null;
+  if (!nome) { alert('O nome é obrigatório.'); return; }
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
     const r = await fetch(API + '/api/admin/empresas/' + id, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(dados)
+      body: JSON.stringify({ nome, cnpj, telefone, email_principal })
     });
     const data = await r.json();
-    if (r.ok) { alert('Empresa atualizada!'); carregarEquipe(); }
-    else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    if (r.ok) {
+      fecharModal('editar-empresa');
+      alert('✅ Empresa atualizada!');
+      carregarEquipe();
+    } else {
+      alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    }
   } catch (e) { alert('Erro de conexão'); }
 }
 
