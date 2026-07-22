@@ -278,11 +278,6 @@
           abrirConversa(cid);
         };
       });
-
-      // Se tem ?id= na URL e ainda não abriu, abre essa
-      if (idUrlInt && (!conversaAtiva || !aberto)) {
-        abrirConversa(idUrlInt);
-      }
     } catch (e) {
       console.error('[chatfab-admin] carregarCandidaturas', e);
     }
