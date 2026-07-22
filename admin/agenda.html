@@ -1,39 +1,432 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agenda · Admin Vagas.io</title>
-  <!-- CSS é inline (<style>) neste arquivo; link externo removido -->
   <style>
-    :root { --vinho: #722F37; --dourado: #C9A961; --bg: #f7f5f2; --card: #ffffff; --texto: #1a1a1a; --borda: #e5e0d8; }
-    body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--texto); margin: 0; }
+    :root {
+      --vinho: #722F37; --vinho-claro: #8a3a44; --dourado: #C9A961;
+      --bg: #f7f5f2; --card: #ffffff; --texto: #1a1a1a; --texto-suave: #666;
+      --borda: #e5e0d8; --cinza-medio: #888;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--texto); margin: 0; }
     .app { display: flex; min-height: 100vh; }
-    aside { width: 260px; background: var(--vinho); color: #fff; padding: 20px; flex-shrink: 0; }
-    .nav-item { display: block; padding: 12px; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; cursor: pointer; margin-bottom: 4px; }
-    .nav-item:hover, .nav-item.ativo { background: rgba(255,255,255,0.1); color: #fff; }
-    main { flex: 1; padding: 32px; }
-    .card { background: #fff; padding: 40px; border-radius: 12px; text-align: center; border: 1px solid var(--borda); }
+    aside {
+      width: 260px; background: var(--vinho); color: #fff;
+      padding: 24px 16px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+    }
+    .nav-item {
+      display: block; padding: 12px 16px; color: rgba(255,255,255,0.75);
+      text-decoration: none; border-radius: 8px; cursor: pointer;
+      margin-bottom: 4px; font-size: 14px; font-weight: 500;
+      transition: background 0.15s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .nav-item.ativo { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
+    main { flex: 1; padding: 32px; max-width: 100%; overflow-x: auto; }
+    h1 { font-size: 28px; font-weight: 800; margin: 0 0 8px; }
+    .subtitulo { color: var(--texto-suave); margin: 0 0 28px; font-size: 15px; }
+
+    .topo { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+    .btn-novo {
+      background: var(--vinho); color: #fff; border: 0; padding: 12px 20px;
+      border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .btn-novo:hover { background: var(--vinho-claro); }
+
+    .filtros { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .filtro {
+      padding: 8px 14px; background: white; border: 1px solid var(--borda);
+      border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
+      color: var(--texto-suave);
+    }
+    .filtro.ativo { background: var(--vinho); color: white; border-color: var(--vinho); }
+
+    .lista { display: grid; gap: 16px; }
+    .entrev-card {
+      background: white; padding: 20px; border-radius: 12px;
+      border: 1px solid var(--borda); display: grid;
+      grid-template-columns: auto 1fr auto; gap: 20px; align-items: center;
+    }
+    .data-bloco {
+      background: var(--vinho); color: white; border-radius: 10px;
+      padding: 12px 16px; text-align: center; min-width: 80px;
+    }
+    .data-bloco .dia { font-size: 28px; font-weight: 800; line-height: 1; }
+    .data-bloco .mes { font-size: 12px; opacity: 0.85; text-transform: uppercase; margin-top: 2px; }
+    .data-bloco .hora { font-size: 13px; font-weight: 600; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.2); }
+    .info-cand .nome { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .info-cand .vaga { font-size: 13px; color: var(--texto-suave); }
+    .info-cand .etapa-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 700; margin-top: 6px;
+      background: var(--dourado); color: var(--vinho); text-transform: uppercase;
+    }
+    .acoes { display: flex; gap: 6px; }
+    .btn-acao {
+      background: white; color: var(--vinho); border: 1px solid var(--vinho);
+      padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
+    }
+    .btn-acao:hover { background: var(--vinho); color: white; }
+    .btn-acao.reprovar { border-color: #dc2626; color: #dc2626; }
+    .btn-acao.reprovar:hover { background: #dc2626; color: white; }
+    .btn-acao.copiar { border-color: var(--dourado); color: var(--vinho); }
+
+    .empty { text-align: center; padding: 60px 20px; color: var(--texto-suave); }
+    .empty .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+    .empty p { font-size: 15px; }
+
+    /* Modal */
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-bg.aberto { display: flex; }
+    .modal { background: white; border-radius: 14px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 18px; font-weight: 700; margin: 0; }
+    .modal-close { background: none; border: 0; font-size: 24px; cursor: pointer; color: var(--texto-suave); padding: 0; width: 32px; height: 32px; }
+    .modal-body { padding: 24px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--texto); }
+    .form-group select, .form-group input, .form-group textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--borda);
+      border-radius: 6px; font-size: 14px; font-family: inherit;
+    }
+    .form-group select:focus, .form-group input:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--vinho);
+    }
+    .form-group .hint { font-size: 12px; color: var(--texto-suave); margin-top: 4px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--borda); display: flex; justify-content: flex-end; gap: 8px; }
+    .btn { padding: 10px 20px; border: 0; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .btn-primario { background: var(--vinho); color: white; }
+    .btn-primario:hover { background: var(--vinho-claro); }
+    .btn-primario:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secundario { background: white; color: var(--texto); border: 1px solid var(--borda); }
+
+    .status-confirmada { background: #10b981; color: white; }
+    .status-cancelada { background: #6b7280; color: white; }
+    .status-realizada { background: #3b82f6; color: white; }
+    .status-faltou { background: #dc2626; color: white; }
+
+    @media (max-width: 768px) {
+      .app { flex-direction: column; }
+      aside { width: 100%; padding: 16px; }
+      main { padding: 20px 16px; }
+      .entrev-card { grid-template-columns: auto 1fr; }
+      .acoes { grid-column: 1 / -1; justify-content: stretch; }
+      .acoes .btn-acao { flex: 1; }
+    }
   </style>
 </head>
 <body>
   <div class="app">
     <aside>
-      <div style="margin-bottom:30px;"><h2>Admin</h2></div>
+      <div style="margin-bottom:30px; padding: 0 8px;">
+        <h2 style="margin:0; font-size:18px;">Admin</h2>
+        <small style="opacity:0.7; font-size:11px;">Vagas.io</small>
+      </div>
       <a class="nav-item" href="index.html">📊 Dashboard</a>
-      <a class="nav-item" href="vagas.html">💼 Vagas</a>
-      <a class="nav-item" href="candidatos.html">👥 Base de Talentos</a>
-      <a class="nav-item" href="candidaturas.html">📋 Candidaturas</a>
+      <a class="nav-item" href="index.html?page=vagas">💼 Vagas</a>
+      <a class="nav-item" href="index.html?page=candidatos">👥 Base de Talentos</a>
+      <a class="nav-item" href="index.html?page=candidaturas">📋 Vagas com Candidatos</a>
       <a class="nav-item ativo" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="equipe.html">👥 Equipe</a>
-      <a class="nav-item" href="index.html" style="margin-top:20px; opacity:0.5;">⬅️ Voltar</a>
+      <a class="nav-item" href="../" style="margin-top:auto; opacity:0.7;">🏡 Voltar pro site</a>
     </aside>
+
     <main>
-      <div class="card">
-        <h1 style="font-size:48px;">📅</h1>
-        <h2>Agenda em Desenvolvimento</h2>
-        <p style="color:#666; margin-top:10px;">Esta funcionalidade estará disponível em breve.</p>
+      <div class="topo">
+        <div>
+          <h1>📅 Agenda de Entrevistas</h1>
+          <p class="subtitulo">Gerencie as entrevistas com candidatos. Cada agendamento gera uma sala de vídeo automaticamente.</p>
+        </div>
+        <button class="btn-novo" onclick="abrirModalNova()">+ Nova entrevista</button>
+      </div>
+
+      <div class="filtros">
+        <button class="filtro ativo" data-periodo="proximas" onclick="filtrarPeriodo('proximas', this)">Próximas</button>
+        <button class="filtro" data-periodo="hoje" onclick="filtrarPeriodo('hoje', this)">Hoje</button>
+        <button class="filtro" data-periodo="passadas" onclick="filtrarPeriodo('passadas', this)">Passadas</button>
+        <button class="filtro" data-periodo="todas" onclick="filtrarPeriodo('todas', this)">Todas</button>
+      </div>
+
+      <div id="lista-entrevistas" class="lista">
+        <div class="empty">
+          <div class="icon">⏳</div>
+          <p>Carregando entrevistas...</p>
+        </div>
       </div>
     </main>
   </div>
+
+  <!-- Modal: Nova entrevista -->
+  <div class="modal-bg" id="modal-nova">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📅 Agendar nova entrevista</h3>
+        <button class="modal-close" onclick="fecharModalNova()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Candidato (candidatura)</label>
+          <select id="nova-candidatura" required>
+            <option value="">Selecione um candidato...</option>
+          </select>
+          <div class="hint">Só aparecem candidaturas nas etapas 3 (RH) ou 4 (Gestor).</div>
+        </div>
+        <div class="form-group">
+          <label>Etapa da entrevista</label>
+          <select id="nova-etapa" required>
+            <option value="3">Etapa 3 — Entrevista RH</option>
+            <option value="4">Etapa 4 — Entrevista Gestor/Empresa</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data e horário</label>
+          <input type="datetime-local" id="nova-data" required />
+        </div>
+        <div class="form-group">
+          <label>Duração (minutos)</label>
+          <input type="number" id="nova-duracao" value="60" min="15" max="240" step="15" />
+        </div>
+        <div class="form-group">
+          <label>Observações (opcional)</label>
+          <textarea id="nova-obs" rows="2" placeholder="Ex: Trazer documento, teste prático, etc."></textarea>
+        </div>
+        <div class="hint" style="background:#fef9e7; padding:10px; border-radius:6px; border-left:3px solid var(--dourado);">
+          💡 O link da sala de vídeo é gerado automaticamente. O candidato verá o agendamento e poderá entrar na sala 15 minutos antes do horário.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secundario" onclick="fecharModalNova()">Cancelar</button>
+        <button class="btn btn-primario" id="btn-confirmar-nova" onclick="confirmarNova()">Agendar entrevista</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const API = 'https://recrutamento-api.onrender.com';
+let token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
+let entrevistas = [];
+let filtroAtual = 'proximas';
+
+if (!token) {
+  // Não logado, redireciona pro login
+  window.location.href = 'index.html';
+}
+
+// ===== Carregar entrevistas =====
+async function carregarEntrevistas() {
+  try {
+    const r = await fetch(`${API}/api/admin/entrevistas?periodo=${filtroAtual}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!r.ok) {
+      if (r.status === 401 || r.status === 403) {
+        window.location.href = 'index.html';
+        return;
+      }
+      throw new Error('Erro ' + r.status);
+    }
+    const data = await r.json();
+    entrevistas = data.entrevistas || [];
+    renderizar();
+  } catch (e) {
+    document.getElementById('lista-entrevistas').innerHTML = `
+      <div class="empty">
+        <div class="icon">❌</div>
+        <p>Erro ao carregar entrevistas: ${e.message}</p>
+      </div>`;
+  }
+}
+
+function renderizar() {
+  const cont = document.getElementById('lista-entrevistas');
+  if (entrevistas.length === 0) {
+    cont.innerHTML = `
+      <div class="empty">
+        <div class="icon">📭</div>
+        <p>Nenhuma entrevista ${filtroAtual === 'proximas' ? 'agendada' : ''} no momento.</p>
+        <button class="btn btn-primario" onclick="abrirModalNova()" style="margin-top:16px;">+ Agendar primeira entrevista</button>
+      </div>`;
+    return;
+  }
+  cont.innerHTML = entrevistas.map(e => {
+    const data = new Date(e.data_hora);
+    const dia = data.getDate();
+    const mes = data.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+    const hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const etapaNome = e.etapa === 3 ? 'RH' : 'Gestor';
+    const statusClass = `status-${e.status}`;
+    return `
+      <div class="entrev-card">
+        <div class="data-bloco">
+          <div class="dia">${dia}</div>
+          <div class="mes">${mes}</div>
+          <div class="hora">${hora}</div>
+        </div>
+        <div class="info-cand">
+          <div class="nome">${e.candidato_nome || 'Candidato'}</div>
+          <div class="vaga">${e.vaga_titulo || ''} — ${e.vaga_empresa || ''}</div>
+          <span class="etapa-badge">Entrevista ${etapaNome}</span>
+          <span class="etapa-badge" style="background:${getStatusColor(e.status)}; color:white; margin-left:6px;">${formatarStatus(e.status)}</span>
+        </div>
+        <div class="acoes">
+          <button class="btn-acao copiar" onclick="copiarLink('${e.link_reuniao}')" title="Copiar link da sala">📋 Copiar link</button>
+          <a class="btn-acao" href="${e.link_reuniao}" target="_blank" title="Abrir sala">▶️ Abrir</a>
+          <button class="btn-acao reprovar" onclick="cancelarEntrevista(${e.id})" title="Cancelar">❌</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function getStatusColor(status) {
+  const cores = {
+    'agendada': '#C9A961',
+    'confirmada': '#10b981',
+    'cancelada': '#6b7280',
+    'realizada': '#3b82f6',
+    'faltou': '#dc2626'
+  };
+  return cores[status] || '#888';
+}
+
+function formatarStatus(status) {
+  return {
+    'agendada': 'AGENDADA',
+    'confirmada': 'CONFIRMADA',
+    'cancelada': 'CANCELADA',
+    'realizada': 'REALIZADA',
+    'faltou': 'FALTOU'
+  }[status] || status.toUpperCase();
+}
+
+function copiarLink(link) {
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('✅ Link copiado!');
+  }).catch(() => {
+    prompt('Copie o link:', link);
+  });
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a1a1a;color:white;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+async function cancelarEntrevista(id) {
+  if (!confirm('Cancelar esta entrevista?')) return;
+  try {
+    const r = await fetch(`${API}/api/admin/entrevista/${id}`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'cancelada' })
+    });
+    if (r.ok) {
+      showToast('✅ Entrevista cancelada');
+      carregarEntrevistas();
+    } else {
+      alert('Erro ao cancelar');
+    }
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
+
+// ===== Filtros =====
+function filtrarPeriodo(periodo, el) {
+  filtroAtual = periodo;
+  document.querySelectorAll('.filtro').forEach(f => f.classList.remove('ativo'));
+  el.classList.add('ativo');
+  carregarEntrevistas();
+}
+
+// ===== Modal Nova =====
+let candidaturasDisponiveis = [];
+
+async function abrirModalNova() {
+  document.getElementById('modal-nova').classList.add('aberto');
+  // Carrega candidaturas em etapa 3 ou 4
+  if (candidaturasDisponiveis.length === 0) {
+    try {
+      const r = await fetch(`${API}/api/admin/candidaturas?etapa=3,4`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (r.ok) {
+        const data = await r.json();
+        candidaturasDisponiveis = data.candidaturas || [];
+      }
+    } catch (e) { console.error(e); }
+  }
+  // Preenche select
+  const sel = document.getElementById('nova-candidatura');
+  sel.innerHTML = '<option value="">Selecione um candidato...</option>' +
+    candidaturasDisponiveis.map(c =>
+      `<option value="${c.id}">${c.candidato_nome} — ${c.vaga_titulo || ''}</option>`
+    ).join('');
+}
+
+function fecharModalNova() {
+  document.getElementById('modal-nova').classList.remove('aberto');
+}
+
+async function confirmarNova() {
+  const candidatura_id = document.getElementById('nova-candidatura').value;
+  const etapa = parseInt(document.getElementById('nova-etapa').value);
+  const data_hora = document.getElementById('nova-data').value;
+  const duracao_minutos = parseInt(document.getElementById('nova-duracao').value) || 60;
+  const observacoes = document.getElementById('nova-obs').value;
+
+  if (!candidatura_id || !data_hora) {
+    alert('Preencha todos os campos obrigatórios');
+    return;
+  }
+
+  const btn = document.getElementById('btn-confirmar-nova');
+  btn.disabled = true;
+  btn.textContent = 'Agendando...';
+
+  try {
+    const r = await fetch(`${API}/api/admin/entrevista`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        candidatura_id: parseInt(candidatura_id),
+        etapa,
+        data_hora: new Date(data_hora).toISOString(),
+        duracao_minutos,
+        observacoes
+      })
+    });
+    if (r.ok) {
+      showToast('✅ Entrevista agendada!');
+      fecharModalNova();
+      carregarEntrevistas();
+      // Limpar form
+      document.getElementById('nova-candidatura').value = '';
+      document.getElementById('nova-data').value = '';
+      document.getElementById('nova-obs').value = '';
+    } else {
+      const err = await r.json();
+      alert('Erro: ' + (err.erro || 'desconhecido'));
+    }
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Agendar entrevista';
+  }
+}
+
+// Inicializar
+carregarEntrevistas();
+// Recarregar a cada 60s
+setInterval(carregarEntrevistas, 60000);
+</script>
 </body>
 </html>
