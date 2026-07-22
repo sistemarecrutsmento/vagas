@@ -280,6 +280,14 @@
     .passo:hover .passo-num { background: var(--vinho); color: #FFF; }
     .passo h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
     .passo p { font-size: 12px; color: var(--cinza-texto); }
+    .passos-texto {
+      max-width: 760px;
+      margin: 32px auto 0;
+      text-align: center;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--cinza-texto);
+    }
     @media (max-width: 900px) {
       .passos { grid-template-columns: repeat(2, 1fr); gap: 28px; }
       .passos::before { display: none; }
@@ -596,18 +604,19 @@
   <div class="container">
     <div class="section-title">
       <span class="eyebrow">Como funciona</span>
-      <h2>7 etapas do <span class="vinho">anúncio à contratação</span></h2>
-      <p>Configure uma vez e o sistema cuida do resto. Cada vaga tem sua jornada configurável.</p>
+      <h2>Do anúncio da vaga à <span class="vinho">contratação em poucos passos</span></h2>
+      <p>Configure uma vez e acompanhe todo o processo em um único lugar. Cada vaga pode ter um fluxo personalizado de acordo com a necessidade da sua empresa.</p>
     </div>
     <div class="passos">
-      <div class="passo"><div class="passo-num">1</div><h4>Inscrição</h4><p>Candidato se cadastra</p></div>
-      <div class="passo"><div class="passo-num">2</div><h4>Triagem</h4><p>Filtro inicial</p></div>
-      <div class="passo"><div class="passo-num">3</div><h4>RH</h4><p>Entrevista com RH</p></div>
-      <div class="passo"><div class="passo-num">4</div><h4>Gestor</h4><p>Entrevista técnica</p></div>
-      <div class="passo"><div class="passo-num">5</div><h4>Proposta</h4><p>Envio e aceite</p></div>
-      <div class="passo"><div class="passo-num">6</div><h4>Documentos</h4><p>Coleta de docs</p></div>
-      <div class="passo"><div class="passo-num">✓</div><h4>Contratação</h4><p>Admissão</p></div>
+      <div class="passo"><div class="passo-num">1</div><h4>Inscrição</h4><p>O candidato se inscreve na vaga.</p></div>
+      <div class="passo"><div class="passo-num">2</div><h4>Triagem</h4><p>Filtro inicial e análise de perfil.</p></div>
+      <div class="passo"><div class="passo-num">3</div><h4>RH</h4><p>Entrevista e avaliação do RH.</p></div>
+      <div class="passo"><div class="passo-num">4</div><h4>Gestor</h4><p>Entrevista técnica com o gestor.</p></div>
+      <div class="passo"><div class="passo-num">5</div><h4>Proposta</h4><p>Envio e aceite da proposta.</p></div>
+      <div class="passo"><div class="passo-num">6</div><h4>Documentação</h4><p>Solicitação e validação dos documentos.</p></div>
+      <div class="passo"><div class="passo-num">7</div><h4>Contratação</h4><p>Admissão concluída e candidato contratado.</p></div>
     </div>
+    <p class="passos-texto">Centraliza todas as etapas do processo seletivo, permitindo que RH e gestores acompanhem cada candidato com histórico completo, feedbacks e documentos.</p>
   </div>
 </section>
 
