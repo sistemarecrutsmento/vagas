@@ -19,7 +19,7 @@
   // === Estilos injetados ===
   const style = document.createElement('style');
   style.textContent = `
-    .cefab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column-reverse; gap: 10px; z-index: 9998; }
+    .cefab-container { position: fixed; bottom: 20px; right: 90px; display: flex; flex-direction: column-reverse; gap: 10px; z-index: 9998; }
     .cefab-bolinha {
       width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, #d4a017 0%, #f0c14b 100%);
@@ -150,12 +150,14 @@
 
   function renderFab() {
     const totalNaoLidas = conversas.reduce((s, c) => s + parseInt(c.nao_lidas || 0), 0);
+    // Sempre mostra o FAB (mesmo sem conversa, pra admin poder iniciar)
     if (conversas.length === 0) {
-      fabContainer.innerHTML = '';
+      fabContainer.innerHTML = `
+        <button class="cefab-bolinha" onclick="window.__ceChat.toggle()" title="Chat com empresas (sem conversas ainda)">
+          <span class="cefab-iniciais">🏢</span>
+        </button>`;
       return;
     }
-    // Se só 1 conversa, mostra 1 bolinha com badge
-    // Se várias, mostra só 1 bolinha "Chat" com total
     if (conversas.length === 1) {
       const c = conversas[0];
       const ini = iniciais(c.candidato_nome);
