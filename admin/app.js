@@ -109,11 +109,17 @@ async function carregarEquipe() {
         <div class="vaga-card">
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
             <div style="width:48px; height:48px; border-radius:50%; background:var(--vinho); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;">${(u.nome||'?').charAt(0).toUpperCase()}</div>
-            <div><div style="font-weight:700; font-size:16px;">${u.nome}</div><div style="color:#888; font-size:13px;">${u.email}</div></div>
+            <div style="flex:1;">
+              <div style="font-weight:700; font-size:16px;">${u.nome}</div>
+              <div style="color:#888; font-size:13px;">${u.email}</div>
+            </div>
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-            <span style="background:#dcfce7; color:#16a34a; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Recrutador</span>
-            <button class="btn btn-sec btn-sm" onclick="alert('Editar em breve')">Editar</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; gap:8px; flex-wrap:wrap;">
+            <span style="background:${u.ativo === false ? '#fee2e2' : '#dcfce7'}; color:${u.ativo === false ? '#b91c1c' : '#16a34a'}; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">${u.ativo === false ? 'Inativo' : 'Recrutador'}</span>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-sec btn-sm" onclick="editarRecrutador(${u.id}, '${(u.nome||'').replace(/'/g, "\\'")}', ${u.ativo === false})">✏️ Editar</button>
+              <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirRecrutador(${u.id}, '${(u.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
+            </div>
           </div>
         </div>
       `).join('');
@@ -126,8 +132,16 @@ async function carregarEquipe() {
     if (data.empresas && data.empresas.length > 0) {
       empDiv.innerHTML = data.empresas.map(e => `
         <div class="vaga-card">
-          <div style="font-weight:700; font-size:16px; margin-bottom:6px;">🏢 ${e.nome}</div>
-          <div style="color:#888; font-size:13px;">${e.email || '—'}</div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
+            <div style="font-weight:700; font-size:16px;">🏢 ${e.nome}</div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-sec btn-sm" onclick="editarEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}', '${(e.cnpj||'').replace(/'/g, "\\'")}', '${(e.email_principal||'').replace(/'/g, "\\'")}', '${(e.telefone||'').replace(/'/g, "\\'")}')">✏️ Editar</button>
+              <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
+            </div>
+          </div>
+          <div style="color:#888; font-size:13px;">${e.email_principal || '—'}</div>
+          ${e.cnpj ? `<div style="color:#888; font-size:12px; margin-top:4px;">CNPJ: ${e.cnpj}</div>` : ''}
+          ${e.telefone ? `<div style="color:#888; font-size:12px;">Tel: ${e.telefone}</div>` : ''}
           <div style="margin-top:10px;"><span style="background:#dbeafe; color:#1e40af; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Empresa</span></div>
         </div>
       `).join('');
@@ -185,6 +199,81 @@ async function criarEmpresa(dados) {
     if (r.ok) { alert('Empresa criada com sucesso!'); carregarEquipe(); }
     else alert('Erro: ' + (data.erro || JSON.stringify(data)));
   } catch (e) { alert('Erro de conexão'); }
+}
+
+function editarRecrutador(id, nomeAtual, inativo) {
+  const novoNome = prompt('Nome do recrutador:', nomeAtual);
+  if (novoNome === null) return;
+  const acaoAtivo = confirm('O recrutador deve ficar ATIVO?\n\nOK = Ativar\nCancelar = Desativar');
+  const resetar = confirm('Deseja resetar a senha para "mudar123"?\n\n(OK = sim, o recrutador terá que trocar no próximo login)');
+  const payload = { nome: novoNome, ativo: acaoAtivo };
+  if (resetar) payload.senha = 'mudar123';
+  atualizarRecrutador(id, payload);
+}
+
+async function atualizarRecrutador(id, dados) {
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/recrutadores/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(dados)
+    });
+    const data = await r.json();
+    if (r.ok) { alert('Recrutador atualizado!'); carregarEquipe(); }
+    else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+  } catch (e) { alert('Erro de conexão'); }
+}
+
+function excluirRecrutador(id, nome) {
+  if (!confirm('Excluir o recrutador "' + nome + '"?\n\nEssa ação não pode ser desfeita.')) return;
+  fetch(API + '/api/admin/recrutadores/' + id, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('admin_token') || localStorage.getItem('token')) }
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) { alert('Recrutador excluído!'); carregarEquipe(); }
+      else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    })
+    .catch(() => alert('Erro de conexão'));
+}
+
+function editarEmpresa(id, nome, cnpj, email, telefone) {
+  const novoNome = prompt('Nome da empresa:', nome);
+  if (novoNome === null) return;
+  const novoCnpj = prompt('CNPJ:', cnpj) || null;
+  const novoEmail = prompt('Email principal:', email) || null;
+  const novoTel = prompt('Telefone:', telefone) || null;
+  atualizarEmpresa(id, { nome: novoNome, cnpj: novoCnpj, email_principal: novoEmail, telefone: novoTel });
+}
+
+async function atualizarEmpresa(id, dados) {
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/empresas/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(dados)
+    });
+    const data = await r.json();
+    if (r.ok) { alert('Empresa atualizada!'); carregarEquipe(); }
+    else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+  } catch (e) { alert('Erro de conexão'); }
+}
+
+function excluirEmpresa(id, nome) {
+  if (!confirm('Excluir a empresa "' + nome + '"?\n\nEssa ação não pode ser desfeita.')) return;
+  fetch(API + '/api/admin/empresas/' + id, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('admin_token') || localStorage.getItem('token')) }
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) { alert('Empresa excluída!'); carregarEquipe(); }
+      else alert('Erro: ' + (data.erro || JSON.stringify(data)));
+    })
+    .catch(() => alert('Erro de conexão'));
 }
 
 // ===== AGENDA =====
