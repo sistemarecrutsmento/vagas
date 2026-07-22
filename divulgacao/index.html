@@ -313,6 +313,42 @@
     }
     .tudo-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
     .tudo-item p { font-size: 12px; color: var(--cinza-texto); }
+    .portal-candidato-bloco {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 48px;
+      flex-wrap: wrap;
+    }
+    .portal-candidato-foto {
+      width: 220px;
+      flex-shrink: 0;
+    }
+    .portal-candidato-foto img {
+      width: 100%;
+      border-radius: 18px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+    }
+    .portal-candidato-texto {
+      text-align: left;
+    }
+    .portal-emoji { font-size: 32px; margin-bottom: 8px; }
+    .portal-candidato-texto h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--preto);
+    }
+    .portal-candidato-texto p {
+      font-size: 15px;
+      color: var(--cinza-texto);
+      max-width: 360px;
+    }
+    @media (max-width: 600px) {
+      .portal-candidato-bloco { flex-direction: column; text-align: center; gap: 24px; }
+      .portal-candidato-texto { text-align: center; }
+    }
     @media (max-width: 900px) {
       .tudo-grid { grid-template-columns: repeat(2, 1fr); }
     }
@@ -639,6 +675,16 @@
       <div class="tudo-item"><div class="tudo-emoji">🔔</div><h4>Notificações</h4><p>Alertas em tempo real</p></div>
       <div class="tudo-item"><div class="tudo-emoji">✉️</div><h4>E-mails</h4><p>Comunicação automática</p></div>
       <div class="tudo-item"><div class="tudo-emoji">🔐</div><h4>Multi-usuário</h4><p>Permissões e equipes</p></div>
+    </div>
+    <div class="portal-candidato-bloco">
+      <div class="portal-candidato-foto">
+        <img src="assets/portal-candidato-doc.jpg" alt="Portal do Candidato" />
+      </div>
+      <div class="portal-candidato-texto">
+        <div class="portal-emoji">👤</div>
+        <h3>Portal do Candidato</h3>
+        <p>Envio da documentação solicitada.</p>
+      </div>
     </div>
   </div>
 </section>
