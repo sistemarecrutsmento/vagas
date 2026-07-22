@@ -133,6 +133,14 @@
       font-size: 12px; font-weight: 700;
       border: 2px solid white;
     }
+    /* === Tela de chat encerrado === */
+    .chat-encerrado { text-align: center; padding: 32px 20px; color: #555; }
+    .chat-encerrado .icon { font-size: 48px; margin-bottom: 12px; }
+    .chat-encerrado h4 { margin: 0 0 8px; color: #333; font-size: 16px; }
+    .chat-encerrado p { margin: 0 0 20px; font-size: 13px; line-height: 1.5; color: #777; }
+    .chat-encerrado button { background: #d4a017; color: white; border: 0; padding: 10px 24px;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .chat-encerrado button:hover { background: #f0c14b; }
   `;
   document.head.appendChild(styleFab);
 
@@ -348,26 +356,36 @@
     const status = statusCandidatura[conversaAtiva];
     const encerrada = ['rejeitado','reprovado','cancelado','contratado'].includes(status);
 
-    // Banner de status da candidatura
-    let banner = '';
-    if (status === 'contratado') {
-      banner = '<div style="background:#d1fae5;color:#065f46;padding:8px 12px;font-size:12px;text-align:center;font-weight:600">🎉 Candidato contratado — chat finalizado</div>';
-    } else if (['rejeitado','reprovado','cancelado'].includes(status)) {
-      banner = '<div style="background:#fee2e2;color:#991b1b;padding:8px 12px;font-size:12px;text-align:center;font-weight:600">🚫 Candidatura encerrada — somente leitura</div>';
+    // === Candidatura encerrada: tela cheia de "chat indisponível" ===
+    if (encerrada) {
+      input.style.display = 'none';
+      let icone, titulo, msg;
+      if (status === 'contratado') {
+        icone = '🎉';
+        titulo = 'Candidato contratado';
+        msg = 'Esta candidatura foi finalizada com sucesso. O chat está arquivado somente para consulta.';
+      } else {
+        icone = '🚫';
+        titulo = 'Chat indisponível';
+        msg = 'Esta candidatura foi encerrada. O histórico de mensagens está disponível somente para consulta.';
+      }
+      area.innerHTML = `<div class="chat-encerrado">
+        <div class="icon">${icone}</div>
+        <h4>${titulo}</h4>
+        <p>${msg}</p>
+        <button onclick="window.__chatFab.fechar()">Fechar</button>
+      </div>`;
+      area.scrollTop = 0;
+      return;
     }
 
-    if (msgs.length === 0 && !encerrada) {
-      area.innerHTML = banner + `<div class="chat-vazio"><div class="icon">💬</div><p>Nenhuma mensagem ainda. Manda oi pro candidato!</p></div>`;
+    if (msgs.length === 0) {
+      area.innerHTML = `<div class="chat-vazio"><div class="icon">💬</div><p>Nenhuma mensagem ainda. Manda oi pro candidato!</p></div>`;
       input.style.display = 'flex';
       return;
     }
-    if (msgs.length === 0 && encerrada) {
-      area.innerHTML = banner + `<div class="chat-vazio"><div class="icon">💬</div><p>Esta candidatura foi encerrada sem conversas.</p></div>`;
-      input.style.display = 'none';
-      return;
-    }
-    input.style.display = encerrada ? 'none' : 'flex';
-    area.innerHTML = banner + msgs.map(m => {
+    input.style.display = 'flex';
+    area.innerHTML = msgs.map(m => {
       const minha = m.autor_tipo === 'candidato';
       const iniciais = (m.autor_nome || '?').split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
       const dataFmt = new Date(m.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
