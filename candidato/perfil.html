@@ -177,7 +177,7 @@
   </div>
 </div>
 
-<script src="app-v2.js?v=1784700000_FOOTER"></script>
+<script src="app-v2.js?v=1784725000_PROGRESSO"></script>
 <script src="modals.js?v=1784700000_FOOTER"></script>
 <script>
 // ===== ROTEAMENTO =====
@@ -216,16 +216,9 @@ async function carregarPaginaPerfil() {
   const fotoBg = temFoto ? `style="background-image:url(&quot;${perfil.foto_url.replace(/"/g,'\\"')}&quot;)"` : '';
   const displayFoto = temFoto ? '' : inicial;
 
-  // Progresso
-  const checks = [
-    !!perfil.nome, !!perfil.cpf, !!perfil.data_nascimento, !!perfil.celular, !!perfil.sexo,
-    !!perfil.cep, !!perfil.cidade, !!perfil.logradouro, !!perfil.numero,
-    !!perfil.formacao, !!perfil.curso, !!perfil.situacao,
-    !!perfil.experiencia, !!perfil.sobre_voce,
-    !!perfil.acessibilidade
-  ];
-  const completos = checks.filter(Boolean).length;
-  const pct = Math.round((completos / checks.length) * 100);
+  // Progresso — usa função UNIFICADA (mesma do painel.html e app-v2.js)
+  const r = window.calcularProgressoPerfil(perfil);
+  const pct = r.pct;
 
   document.getElementById('conteudo').innerHTML = `
     <!-- Cabeçalho: foto + nome + progresso -->
