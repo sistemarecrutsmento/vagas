@@ -88,6 +88,18 @@
 
     let periodoAtual = 'proximos';
 
+    function etapaLabel(e) {
+      // e.vaga_etapas é JSON string (vinda do backend). Pode ser array de {nome:...} ou strings.
+      let etapas = [];
+      if (e.vaga_etapas) {
+        try { etapas = typeof e.vaga_etapas === 'string' ? JSON.parse(e.vaga_etapas) : e.vaga_etapas; } catch (_) {}
+      }
+      const num = Number(e.etapa || e.etapa_atual || 0);
+      const item = etapas[num - 1];
+      const nome = item ? (typeof item === 'string' ? item : item.nome) : null;
+      return nome ? `Etapa ${num} — ${nome}` : `Etapa ${num}`;
+    }
+
     function sair() {
       if (confirm('Sair do portal?')) {
         localStorage.removeItem('empresa_token');
@@ -135,7 +147,7 @@
             <div class="entrev-info">
               <div class="titulo">${e.candidato_nome}</div>
               <div class="meta">📍 ${local} ${e.duracao_minutos ? '• ⏱ ' + e.duracao_minutos + 'min' : ''} <span class="badge-status ${statusClass}">${e.status || 'agendada'}</span></div>
-              <div class="vaga">💼 ${e.vaga_titulo} • Etapa ${e.etapa}</div>
+              <div class="vaga">💼 ${e.vaga_titulo} • ${etapaLabel(e)}</div>
               ${e.observacoes ? '<div class="obs">"' + e.observacoes + '"</div>' : ''}
             </div>
             <div class="acoes">
