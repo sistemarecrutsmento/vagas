@@ -127,6 +127,11 @@
 
         document.getElementById('cands-tbody').innerHTML = cands.map(c => {
           const iniciais = (c.nome || '?').split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase();
+          const etapaNum = Number(c.etapa_atual || 1);
+          const etapas = Array.isArray(c.etapas) ? c.etapas : [];
+          const etapaNome = etapas[etapaNum - 1]
+            ? (typeof etapas[etapaNum - 1] === 'string' ? etapas[etapaNum - 1] : etapas[etapaNum - 1].nome)
+            : `Etapa ${etapaNum}`;
           return `<tr>
             <td>
               <div class="cand-cell">
@@ -137,7 +142,7 @@
                 </div>
               </div>
             </td>
-            <td><span class="etapa">Etapa ${c.etapa_atual || 1}</span></td>
+            <td><span class="etapa">${etapaNum}. ${etapaNome}</span></td>
             <td><span class="status-pill status-${c.status}">${labelStatus(c.status)}</span></td>
             <td>${formatarData(c.criada_em)}</td>
             <td>
