@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha conta — Vagas.io</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--preto); line-height: 1.5; }
+  :root {
+    --branco: #ffffff;
+    --vinho: #722F37;
+    --vinho-escuro: #5C252C;
+    --vinho-claro: #8a3d47;
+    --borda: #e0e0e0;
+    --bg: #f5f5f7;
+    --preto: #222;
+    --cinza: #666;
+    --cinza-medio: #999;
+    --verde: #16a34a;
+    --vermelho: #dc2626;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* Top bar (igual à home) */
+  header { background: var(--vinho); color: var(--branco); border-bottom: none; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+  .header-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-weight: 800; font-size: 22px; color: var(--branco); text-decoration: none; }
+  .logo span { color: var(--branco); opacity: 0.8; font-weight: 300; }
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-voltar { background: transparent; color: var(--cinza); border: none; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-voltar:hover { color: var(--vinho); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--branco); color: var(--vinho); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background-size: cover; background-position: center; flex-shrink: 0; }
+  .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .user-info span { font-weight: 600; color: var(--branco); }
+  .btn-outline { background: transparent; color: var(--branco); border: 1px solid rgba(255,255,255,0.4); padding: 9px 18px; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px; }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+  /* Sub-header bordô */
+  .subheader { background: var(--vinho); color: white; padding: 24px 0; box-shadow: 0 2px 8px rgba(114, 47, 55, 0.15); }
+  .subheader-inner { max-width: 1100px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .subheader h1 { font-size: 22px; font-weight: 700; }
+  .subheader-icon { font-size: 22px; }
+  .subheader-menu { display: flex; align-items: center; gap: 8px; }
+  .subheader-link { color: white; padding: 8px 14px; border-radius: 6px; font-size: 14px; font-weight: 500; opacity: 0.9; transition: all 0.15s; }
+  .subheader-link:hover { background: rgba(255,255,255,0.15); opacity: 1; }
+  .subheader-link.ativo { background: rgba(255,255,255,0.2); opacity: 1; font-weight: 700; }
+
+  /* Botão hambúrguer (subheader bordô) */
+  .btn-hamburguer { background: rgba(255,255,255,0.15); color: white; border: none; width: 40px; height: 40px; border-radius: 8px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-hamburguer:hover { background: rgba(255,255,255,0.25); }
+
+  /* ☰ na lateral direita, alinhado com o logo "Vagas.io" */
+  .btn-menu-logo { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; }
+  .btn-menu-logo:hover { background: rgba(255,255,255,0.25); border-color: white; color: white; }
+  .header-inner { padding-right: 80px; } /* espaço pro botão na lateral */
+
+  /* Drawer (menu lateral deslizante) */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+  .drawer-overlay.aberto { display: block; }
+  /* Drawer abre pela DIREITA */
+  aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+  aside.drawer.aberto { transform: translateX(0); }
+  .drawer-header { padding: 20px; background: var(--vinho); color: white; display: flex; align-items: center; gap: 12px; }
+  .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; background-size: cover; background-position: center; flex-shrink: 0; }
+  .drawer-info { flex: 1; min-width: 0; }
+  .drawer-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-info p { font-size: 12px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-close { background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .drawer-close:hover { background: rgba(255,255,255,0.25); }
+  .drawer-body { flex: 1 1 auto; min-height: 0; padding: 16px 0; overflow-y: auto; }
+  .drawer-section { padding: 8px 20px 4px; font-size: 11px; font-weight: 700; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 12px; }
+  .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--preto); font-size: 15px; font-weight: 500; transition: all 0.15s; border-right: 3px solid transparent; text-decoration: none; }
+  .drawer-link:hover { background: #f5f5f7; }
+  .drawer-link.ativo { background: #fdf2f3; border-right-color: var(--vinho); color: var(--vinho); font-weight: 700; }
+  .drawer-link .icon { font-size: 20px; width: 24px; text-align: center; }
+  .drawer-footer { padding: 12px 20px; border-top: 1px solid var(--borda); background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); flex-shrink: 0; }
+  .drawer-logout { width: 100%; background: transparent; color: var(--vinho); border: 1px solid var(--vinho); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .drawer-logout:hover { background: var(--vinho); color: white; }
+
+  /* Container principal */
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* Card de perfil */
+  .perfil-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px; margin-bottom: 24px; }
+  .perfil-card-top { display: flex; align-items: center; gap: 24px; }
+  .perfil-card-foto { width: 130px; height: 130px; border-radius: 16px; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 56px; font-weight: 700; flex-shrink: 0; background-size: cover; background-position: center; overflow: hidden; }
+  .perfil-card-info { flex: 1; }
+  .perfil-card-info h2 { font-size: 30px; font-weight: 800; color: var(--preto); line-height: 1.1; margin-bottom: 6px; }
+  .perfil-card-info .role { color: var(--cinza); font-size: 16px; }
+  .perfil-card-sino { width: 44px; height: 44px; border-radius: 50%; background: #f5f5f7; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+  .perfil-card-sino:hover { background: #ebebed; }
+
+  .perfil-progresso { margin-top: 24px; }
+  .progresso-titulo { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--cinza); margin-bottom: 8px; }
+  .progresso-titulo strong { color: var(--preto); font-weight: 700; }
+  .progresso-titulo .help { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--cinza-medio); color: white; font-size: 11px; cursor: help; margin-left: 4px; }
+  .barra { width: 100%; height: 8px; background: #ebebed; border-radius: 4px; overflow: hidden; }
+  .barra-fill { height: 100%; background: var(--verde); border-radius: 4px; transition: width 0.4s ease; }
+  .progresso-dica { font-size: 12px; color: var(--cinza-medio); margin-top: 8px; }
+
+  .perfil-card-acao { margin-top: 28px; }
+  .btn-gerenciar { display: block; width: 100%; padding: 16px; background: var(--vinho); color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+  .btn-gerenciar:hover { background: var(--vinho-escuro); }
+
+  /* Card de candidaturas */
+  .cands-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px; }
+  .cands-card h3 { font-size: 20px; color: var(--preto); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  .cands-card h3 small { font-size: 13px; color: var(--cinza-medio); font-weight: 400; }
+  .cands-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .cands-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .cand-card { background: white; border: 1px solid var(--borda); border-radius: 12px; padding: 20px; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; position: relative; overflow: hidden; }
+  .cand-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(114,47,55,0.10); border-color: var(--vinho-claro); }
+  .cand-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .cand-card-info { flex: 1; min-width: 0; }
+  .cand-card h4 { color: var(--preto); font-size: 17px; margin-bottom: 4px; line-height: 1.3; }
+  .cand-card-meta { font-size: 13px; color: var(--cinza-medio); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .cand-card-meta span { display: inline-flex; align-items: center; gap: 4px; }
+  .cand-card-meta .sep { color: var(--borda); }
+  .cand-status { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; background: #fef3c7; color: #92400e; line-height: 1.2; }
+  .cand-status .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .cand-status.status-em_analise { background: #fef3c7; color: #92400e; }
+  .cand-status.status-aprovado { background: #d1fae5; color: #065f46; }
+  .cand-status.status-reprovado { background: #fee2e2; color: #991b1b; }
+  .cand-status.status-contratado { background: #d1fae5; color: #065f46; }
+  .cand-status.status-entrevista { background: #dbeafe; color: #1e40af; }
+  .cand-progresso { margin-top: 16px; }
+  .cand-progresso-top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--cinza-medio); margin-bottom: 6px; }
+  .cand-progresso-top strong { color: var(--preto); font-weight: 600; }
+  .cand-progresso-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+  .cand-progresso-fill { height: 100%; background: linear-gradient(90deg, var(--vinho) 0%, var(--vinho-claro) 100%); border-radius: 3px; transition: width .4s ease; }
+  .cand-progresso-desc { margin-top: 10px; font-size: 13px; color: var(--cinza); line-height: 1.45; padding: 10px 12px; background: #fafafa; border-left: 3px solid var(--vinho); border-radius: 4px; }
+  .cand-card.contratado .cand-progresso-desc { background: #f0fdf4; border-left-color: var(--verde); color: #166534; }
+  .cand-card.reprovado .cand-progresso-desc { background: #fef2f2; border-left-color: var(--vermelho); color: #991b1b; }
+  .cand-card.contratado { border-color: var(--verde); }
+  .cand-card.contratado .cand-progresso-fill { background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%); }
+  .cand-card.reprovado { border-color: var(--vermelho); opacity: 0.85; }
+  .cand-card.reprovado .cand-progresso-fill { background: var(--vermelho); }
+  .cand-timeline { display: flex; align-items: flex-start; gap: 4px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #f0f0f0; overflow-x: auto; }
+  .cand-etapa { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 78px; text-align: center; position: relative; flex: 1; }
+  .cand-etapa::after { content: ''; position: absolute; top: 13px; left: 50%; right: -50%; height: 2px; background: #e8e8e8; z-index: 0; }
+  .cand-etapa:last-child::after { display: none; }
+  .cand-etapa-bola { width: 28px; height: 28px; border-radius: 50%; background: #e8e8e8; color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; z-index: 1; position: relative; border: 2px solid white; box-shadow: 0 0 0 1px #e8e8e8; }
+  .cand-etapa.concluida .cand-etapa-bola { background: var(--verde); color: white; box-shadow: 0 0 0 1px var(--verde); }
+  .cand-etapa.concluida::after { background: var(--verde); }
+  .cand-etapa.andamento .cand-etapa-bola { background: #dbeafe; color: #1e40af; box-shadow: 0 0 0 2px #1e40af; animation: pulse-etapa 1.8s ease-in-out infinite; }
+  .cand-etapa.andamento::after { background: linear-gradient(90deg, #e8e8e8 0%, #e8e8e8 50%, #1e40af 50%, #1e40af 100%); }
+  .cand-etapa.reprovada .cand-etapa-bola { background: var(--vermelho); color: white; box-shadow: 0 0 0 1px var(--vermelho); }
+  .cand-etapa.reprovada::after { background: var(--vermelho); }
+  .cand-etapa-label { font-size: 10.5px; color: var(--cinza-medio); line-height: 1.2; max-width: 90px; }
+  .cand-etapa.concluida .cand-etapa-label { color: var(--preto); font-weight: 600; }
+  .cand-etapa.andamento .cand-etapa-label { color: #1e40af; font-weight: 700; }
+  .cand-etapa.reprovada .cand-etapa-label { color: var(--vermelho); font-weight: 600; }
+  @keyframes pulse-etapa {
+    0%, 100% { box-shadow: 0 0 0 2px #1e40af, 0 0 0 4px rgba(30,64,175,0); }
+    50% { box-shadow: 0 0 0 2px #1e40af, 0 0 0 8px rgba(30,64,175,0.15); }
+  }
+  .cand-card-footer { margin-top: 14px; padding-top: 14px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--cinza-medio); }
+  .cand-card-footer .ver-mais { color: var(--vinho); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+  .empty { padding: 40px 0; text-align: center; color: var(--cinza); }
+
+  /* Modal overlay (reutilizado) */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-overlay.aberto { display: flex; }
+  .modal { background: white; border-radius: 14px; max-width: 600px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+  .modal-large { max-width: 800px; }
+  .modal-xlarge { max-width: 1100px; }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header h2 { font-size: 20px; color: var(--vinho); }
+  .modal-close { background: transparent; border: none; font-size: 28px; cursor: pointer; color: var(--cinza); }
+  .modal-body { padding: 24px; overflow-y: auto; }
+  .modal-body-painel { padding: 0; display: grid; grid-template-columns: 280px 1fr; min-height: 500px; }
+
+  /* Painel dentro do modal */
+  .painel-lateral { background: #fafafa; border-right: 1px solid var(--borda); padding: 28px 20px; }
+  .painel-perfil { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--borda); }
+  .painel-foto { width: 90px; height: 90px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; margin: 0 auto 12px; background-size: cover; background-position: center; overflow: hidden; }
+  .painel-perfil h3 { font-size: 16px; color: var(--preto); margin-bottom: 4px; }
+  .painel-email { font-size: 12px; color: var(--cinza); word-break: break-all; }
+  .painel-progresso { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--borda); }
+  .painel-menu { display: flex; flex-direction: column; gap: 4px; }
+  .painel-tab { background: transparent; border: none; text-align: left; padding: 10px 14px; border-radius: 6px; font-size: 14px; color: var(--preto); cursor: pointer; font-weight: 500; }
+  .painel-tab:hover { background: white; }
+  .painel-tab.ativo { background: var(--vinho); color: white; }
+  .painel-tab-sair { color: var(--vermelho); margin-top: 8px; }
+  .painel-tab-sair:hover { background: #FFF3F3; }
+
+  .painel-conteudo { padding: 24px 28px; }
+  .painel-titulo { font-size: 20px; color: var(--vinho); margin-bottom: 16px; }
+  .painel-secao { display: none; }
+  .painel-secao.ativo { display: block; }
+  .perfil-abas { display: flex; gap: 4px; border-bottom: 2px solid var(--borda); margin-bottom: 20px; flex-wrap: wrap; }
+  .perfil-aba { background: transparent; border: none; padding: 10px 16px; font-size: 14px; color: var(--cinza); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; font-weight: 500; }
+  .perfil-aba:hover { color: var(--preto); }
+  .perfil-aba.ativo { color: var(--vinho); border-bottom-color: var(--vinho); }
+  .perfil-bloco { display: none; }
+  .perfil-bloco.ativo { display: block; }
+
+  .perfil-foto-bloco { display: flex; align-items: center; gap: 24px; padding: 20px; background: #f8f9fa; border-radius: 10px; margin-bottom: 24px; border: 1px solid var(--borda); }
+  .perfil-foto-preview { width: 110px; height: 110px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 700; flex-shrink: 0; background-size: cover; background-position: center; overflow: hidden; }
+  .perfil-foto-acoes { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .btn { padding: 10px 18px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--vinho); color: white; }
+  .btn-primary:hover { background: var(--vinho-escuro); }
+  .btn-secondary { background: white; color: var(--preto); border: 1px solid var(--borda); }
+  .btn-secondary:hover { background: #f5f5f7; }
+  .btn-vinho-outline { background: transparent; color: var(--vinho); border: 1px solid var(--vinho); }
+  .btn-vinho-outline:hover { background: var(--vinho); color: white; }
+  .perfil-foto-info { margin: 0; font-size: 12px; color: var(--cinza-medio); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--cinza); margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--borda); border-radius: 6px; font-size: 14px; font-family: inherit; background: white; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--vinho); }
+  .form-group input:disabled { background: #f5f5f7; color: var(--cinza); }
+  .perfil-acoes { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--borda); }
+
+  .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 720px) {
+    .perfil-card-top { flex-direction: column; text-align: center; }
+    .perfil-card-foto { width: 110px; height: 110px; font-size: 44px; }
+    .perfil-card-info h2 { font-size: 24px; }
+    .perfil-card-sino { align-self: flex-end; }
+    .form-row { grid-template-columns: 1fr; }
+    .modal-body-painel { grid-template-columns: 1fr; }
+    .painel-lateral { border-right: none; border-bottom: 1px solid var(--borda); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">Vagas<span>.io</span></a>
+    <div class="header-actions" id="header-actions"></div>
+  </div>
+</header>
+
+<section class="subheader">
+  <div class="subheader-inner">
+    <h1>Página do candidato</h1>
+  </div>
+</section>
+
+<!-- Drawer lateral -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-foto" id="drawer-foto">👤</div>
+    <div class="drawer-info">
+      <h3 id="drawer-nome">Candidato</h3>
+      <p id="drawer-email">—</p>
+    </div>
+    <button class="drawer-close" onclick="fecharDrawer()" title="Fechar">×</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">Navegação</div>
+    <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
+    <a href="painel.html" class="drawer-link ativo"><span class="icon">👤</span> Meu perfil</a>
+    <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
+    <a href="javascript:void(0)" onclick="abrirEdicaoPerfil();fecharDrawer()" class="drawer-link"><span class="icon">✏️</span> Editar perfil</a>
+    <a href="javascript:void(0)" onclick="abrirEdicaoPerfil();fecharDrawer()" class="drawer-link"><span class="icon">🔑</span> Trocar senha</a>
+  </div>
+  <div class="drawer-footer">
+    <button class="drawer-logout" onclick="logout()" type="button" aria-label="Sair do perfil">🚪 Sair</button>
+  </div>
+</aside>
+
+<div class="container">
+
+  <!-- Card principal: perfil -->
+  <div class="perfil-card">
+    <div class="perfil-card-top">
+      <div class="perfil-card-foto" id="painel-foto-grande">👤</div>
+      <div class="perfil-card-info">
+        <h2 id="painel-nome-grande">—</h2>
+        <p class="role" id="painel-role">Candidato</p>
+      </div>
+      <div class="perfil-card-sino" title="Notificações">🔔</div>
+    </div>
+    <div class="perfil-progresso">
+      <div class="progresso-titulo">
+        <span>Perfil completo <span class="help" title="Quanto mais completo seu perfil, mais chances de ser notado">?</span></span>
+        <strong id="painel-progresso-pct">0%</strong>
+      </div>
+      <div class="barra"><div class="barra-fill" id="painel-progresso-fill" style="width:0%"></div></div>
+      <p class="progresso-dica" id="painel-progresso-dica">Complete seu perfil para aumentar suas chances.</p>
+    </div>
+    <div class="perfil-card-acao">
+      <button class="btn-gerenciar" onclick="abrirEdicaoPerfil()">Gerenciar perfil</button>
+    </div>
+  </div>
+
+  <!-- Card de candidaturas -->
+  <div class="cands-card">
+    <h3>Minhas inscrições <small id="painel-cands-count"></small></h3>
+    <div class="cands-grid" id="painel-cands-lista">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal de edição (reutiliza estrutura do app.js) -->
+<div class="modal-overlay modal-painel" id="modal-edicao">
+  <div class="modal modal-xlarge">
+    <div class="modal-header">
+      <h2>Gerenciar perfil</h2>
+      <button class="modal-close" onclick="fecharEdicao()">×</button>
+    </div>
+    <div class="modal-body modal-body-painel">
+      <aside class="painel-lateral">
+        <div class="painel-perfil">
+          <div class="painel-foto" id="painel-foto">👤</div>
+          <h3 id="painel-nome">—</h3>
+          <p id="painel-email" class="painel-email">—</p>
+        </div>
+        <div class="painel-progresso">
+          <div class="progresso-titulo"><span>Perfil completo</span><strong id="painel-progresso-pct-modal">0%</strong></div>
+          <div class="barra"><div class="barra-fill" id="painel-progresso-fill-modal"></div></div>
+        </div>
+        <nav class="painel-menu">
+          <button class="painel-tab ativo" data-tab="perfil">👤 Editar perfil</button>
+          <button class="painel-tab" data-tab="senha">🔑 Trocar senha</button>
+          <button class="painel-tab painel-tab-sair" onclick="logout()">🚪 Sair</button>
+        </nav>
+      </aside>
+
+      <section class="painel-conteudo">
+        <div class="painel-secao ativo" id="painel-secao-perfil">
+          <h3 class="painel-titulo">Meu perfil</h3>
+          <div class="perfil-foto-bloco">
+            <div class="perfil-foto-preview" id="perfil-foto-preview">
+              <span class="perfil-foto-inicial" id="perfil-foto-inicial">?</span>
+            </div>
+            <div class="perfil-foto-acoes">
+              <label class="btn btn-secondary" for="perfil-foto-input">📷 Escolher foto</label>
+              <input type="file" id="perfil-foto-input" accept="image/jpeg,image/png,image/webp" onchange="perfilFotoEscolher(this)" style="display:none">
+              <button type="button" class="btn btn-vinho-outline" id="perfil-foto-remover" style="display:none" onclick="perfilFotoRemover()">🗑️ Remover</button>
+              <p class="perfil-foto-info">JPG, PNG ou WebP — até 5 MB</p>
+            </div>
+          </div>
+
+          <div class="perfil-abas">
+            <button class="perfil-aba ativo" data-sub="dados">Dados pessoais</button>
+            <button class="perfil-aba" data-sub="endereco">Endereço</button>
+            <button class="perfil-aba" data-sub="escolaridade">Escolaridade</button>
+            <button class="perfil-aba" data-sub="acessibilidade">Acessibilidade</button>
+          </div>
+
+          <form class="perfil-form" id="perfil-form" onsubmit="event.preventDefault();salvarPerfilCompleto(this)">
+            <div class="perfil-bloco ativo" data-bloco="dados">
+              <div class="form-row">
+                <div class="form-group"><label>Nome completo *</label><input type="text" id="pe-nome" required></div>
+                <div class="form-group"><label>CPF *</label><input type="text" id="pe-cpf" placeholder="000.000.000-00" maxlength="14"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Data de nascimento</label><input type="date" id="pe-nascimento"></div>
+                <div class="form-group"><label>Sexo</label>
+                  <select id="pe-sexo">
+                    <option value="">Prefiro não informar</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Celular</label><input type="tel" id="pe-celular" placeholder="(00) 00000-0000"></div>
+                <div class="form-group"><label>E-mail</label><input type="email" id="pe-email" disabled></div>
+              </div>
+            </div>
+
+            <div class="perfil-bloco" data-bloco="endereco">
+              <div class="form-row">
+                <div class="form-group"><label>CEP</label><input type="text" id="pe-cep" placeholder="00000-000" maxlength="9"></div>
+                <div class="form-group"><label>Cidade</label><input type="text" id="pe-cidade"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>UF</label><input type="text" id="pe-estado" maxlength="2" placeholder="BA"></div>
+                <div class="form-group"><label>Bairro</label><input type="text" id="pe-bairro"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group" style="grid-column:1/-1"><label>Logradouro</label><input type="text" id="pe-logradouro" placeholder="Rua, avenida..."></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Número</label><input type="text" id="pe-numero"></div>
+                <div class="form-group"><label>Complemento</label><input type="text" id="pe-complemento"></div>
+              </div>
+            </div>
+
+            <div class="perfil-bloco" data-bloco="escolaridade">
+              <div class="form-row">
+                <div class="form-group"><label>Formação</label>
+                  <select id="pe-formacao">
+                    <option value="">Selecione...</option>
+                    <option value="Ensino fundamental">Ensino fundamental</option>
+                    <option value="Ensino médio">Ensino médio</option>
+                    <option value="Ensino técnico">Ensino técnico</option>
+                    <option value="Graduação">Graduação</option>
+                    <option value="Pós-graduação">Pós-graduação</option>
+                    <option value="Mestrado">Mestrado</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>Instituição</label><input type="text" id="pe-instituicao"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Curso</label><input type="text" id="pe-curso"></div>
+                <div class="form-group"><label>Situação</label>
+                  <select id="pe-situacao">
+                    <option value="">Selecione...</option>
+                    <option value="concluido">Concluído</option>
+                    <option value="cursando">Cursando</option>
+                    <option value="trancado">Trancado</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group"><label>Primeiro emprego?</label>
+                <select id="pe-primeiro-emprego">
+                  <option value="false">Não</option>
+                  <option value="true">Sim</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="perfil-bloco" data-bloco="acessibilidade">
+              <div class="form-group"><label>Possui alguma necessidade de acessibilidade?</label>
+                <select id="pe-acessibilidade">
+                  <option value="">Nenhuma</option>
+                  <option value="cadeirante">Cadeirante</option>
+                  <option value="deficiencia_visual">Deficiência visual</option>
+                  <option value="deficiencia_auditiva">Deficiência auditiva</option>
+                  <option value="mobilidade_reduzida">Mobilidade reduzida</option>
+                  <option value="outra">Outra</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" id="pe-comunicacoes" style="width:auto;">
+                  Quero receber comunicações de novas vagas
+                </label>
+              </div>
+            </div>
+
+            <div class="perfil-acoes">
+              <button type="submit" class="btn btn-primary">Salvar perfil</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="painel-secao" id="painel-secao-senha">
+          <h3 class="painel-titulo">Trocar senha</h3>
+          <form class="perfil-form" onsubmit="event.preventDefault();trocarSenha(this)">
+            <div class="form-group"><label>Senha atual *</label><input type="password" id="senha-atual" required minlength="6"></div>
+            <div class="form-group"><label>Nova senha * (mínimo 6 caracteres)</label><input type="password" id="senha-nova" required minlength="6"></div>
+            <div class="form-group"><label>Confirme a nova senha *</label><input type="password" id="senha-nova-conf" required minlength="6"></div>
+            <div class="perfil-acoes">
+              <button type="submit" class="btn btn-primary">Atualizar senha</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script src="app-v2.js?v=1784700000_ETAPA"></script>
+<script src="modals.js?v=1784700000_ETAPA"></script>
+<script>
+// ===== ROTEAMENTO =====
+// (checarAuth no app.js vai popular tokenCandidato no DOMContentLoaded;
+// aqui só esperamos isso acontecer antes de redirecionar)
+function redirecionarSeNaoLogado() {
+  if (!tokenCandidato) {
+    location.href = 'index.html';
+  }
+}
+
+// ===== CARREGAR DADOS DA PÁGINA =====
+async function carregarPaginaCandidato() {
+  if (!tokenCandidato) return;
+  let perfil = null;
+  try {
+    const r = await fetch(API + '/api/candidato/perfil', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (r.status === 401) { logout(); return; }
+    const d = await r.json();
+    perfil = d.candidato;
+  } catch (e) {}
+
+  if (perfil) {
+    const nome = perfil.nome || emailLogado || 'Candidato';
+    const ini = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+    // Card grande
+    const fotoGrande = document.getElementById('painel-foto-grande');
+    if (fotoGrande) {
+      if (perfil.foto_url) {
+        fotoGrande.style.backgroundImage = `url("${perfil.foto_url.replace(/"/g, '\\"')}")`;
+        fotoGrande.style.backgroundSize = 'cover';
+        fotoGrande.style.backgroundPosition = 'center';
+        fotoGrande.textContent = '';
+      } else {
+        fotoGrande.style.backgroundImage = '';
+        fotoGrande.textContent = ini || '👤';
+      }
+    }
+    document.getElementById('painel-nome-grande').textContent = nome;
+    document.getElementById('painel-role').textContent = (perfil.cidade ? perfil.cidade : '') + (perfil.estado ? ' / ' + perfil.estado : '') || 'Candidato';
+    localStorage.setItem('candidato_nome', nome);
+    if (perfil.foto_url) localStorage.setItem('candidato_foto', perfil.foto_url);
+
+    // Progresso (cópia da lógica)
+    const checks = [
+      !!perfil.nome, !!perfil.cpf, !!perfil.data_nascimento, !!perfil.celular, !!perfil.sexo,
+      !!perfil.cep, !!perfil.cidade, !!perfil.logradouro, !!perfil.numero,
+      !!perfil.formacao, !!perfil.instituicao, !!perfil.curso,
+      !!perfil.foto_url
+    ];
+    const total = checks.length;
+    const done = checks.filter(Boolean).length;
+    const pct = Math.round((done / total) * 100);
+    document.getElementById('painel-progresso-pct').textContent = pct + '%';
+    document.getElementById('painel-progresso-fill').style.width = pct + '%';
+    document.getElementById('painel-progresso-pct-modal').textContent = pct + '%';
+    document.getElementById('painel-progresso-fill-modal').style.width = pct + '%';
+    document.getElementById('painel-progresso-dica').textContent = pct < 100
+      ? 'Complete seu perfil para aumentar suas chances.'
+      : 'Perfil completo! ✨';
+
+    // Também preenche o painel do modal
+    if (typeof window.perfilFotoInit === 'function') window.perfilFotoInit(perfil);
+  }
+
+  // Candidaturas
+  carregarCands();
+}
+
+window.abrirDetalhesCandidato = function(vagaId) {
+  // abre o mesmo modal de detalhes da home
+  if (typeof window.abrirDetalhes === 'function') {
+    window.abrirDetalhes(vagaId);
+  }
+};
+
+// ===== MODAL DE EDIÇÃO =====
+window.abrirEdicaoPerfil = function() {
+  // Navega para a página dedicada de perfil na MESMA aba
+  location.href = 'perfil.html';
+};
+window.fecharEdicao = function() {
+  document.getElementById('modal-edicao').classList.remove('aberto');
+};
+
+// Tabs do painel-edicao
+document.addEventListener('click', (e) => {
+  const tab = e.target.closest('.painel-tab[data-tab]');
+  if (!tab) return;
+  const sec = tab.dataset.tab;
+  document.querySelectorAll('#modal-edicao .painel-tab').forEach(t => t.classList.remove('ativo'));
+  document.querySelectorAll('#modal-edicao .painel-secao').forEach(s => s.classList.remove('ativo'));
+  tab.classList.add('ativo');
+  document.getElementById('painel-secao-' + sec)?.classList.add('ativo');
+});
+
+// Sub-abas do perfil (dados/endereco/escolaridade/acessibilidade)
+document.addEventListener('click', (e) => {
+  const aba = e.target.closest('.perfil-aba[data-sub]');
+  if (!aba || !aba.closest('#modal-edicao')) return;
+  const sub = aba.dataset.sub;
+  aba.closest('.perfil-abas').querySelectorAll('.perfil-aba').forEach(b => b.classList.remove('ativo'));
+  aba.classList.add('ativo');
+  aba.closest('.painel-secao').querySelectorAll('.perfil-bloco').forEach(b => b.classList.remove('ativo'));
+  aba.closest('.painel-secao').querySelector(`.perfil-bloco[data-bloco="${sub}"]`)?.classList.add('ativo');
+});
+
+// Quando modal abre, sincroniza abas
+window.addEventListener('DOMContentLoaded', () => {
+  // Espera checarAuth rodar (também no DOMContentLoaded)
+  setTimeout(() => {
+    if (!tokenCandidato && localStorage.getItem('candidato_token')) {
+      // checarAuth ainda não rodou — popula direto
+      tokenCandidato = localStorage.getItem('candidato_token');
+      emailLogado = localStorage.getItem('candidato_email');
+    }
+    if (!tokenCandidato) {
+      location.href = 'index.html';
+      return;
+    }
+    carregarPaginaCandidato();
+    if (typeof window.atualizarHeaderUsuario === 'function') window.atualizarHeaderUsuario();
+  }, 200);
+});
+
+// ===== DRAWER (menu lateral) =====
+function abrirDrawer() {
+  document.getElementById('drawer').classList.add('aberto');
+  document.getElementById('drawer-overlay').classList.add('aberto');
+  // Popula dados do usuário no drawer
+  const nome = localStorage.getItem('candidato_nome') || emailLogado || 'Candidato';
+  const iniciais = (nome || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+  const fotoUrl = localStorage.getItem('candidato_foto') || '';
+  const drawerFoto = document.getElementById('drawer-foto');
+  const drawerNome = document.getElementById('drawer-nome');
+  const drawerEmail = document.getElementById('drawer-email');
+  if (drawerNome) drawerNome.textContent = nome;
+  if (drawerEmail) drawerEmail.textContent = emailLogado || '';
+  if (drawerFoto) {
+    if (fotoUrl) {
+      drawerFoto.style.backgroundImage = `url("${fotoUrl.replace(/"/g, '\\"')}")`;
+      drawerFoto.style.backgroundSize = 'cover';
+      drawerFoto.style.backgroundPosition = 'center';
+      drawerFoto.textContent = '';
+    } else {
+      drawerFoto.textContent = iniciais;
+      drawerFoto.style.backgroundImage = '';
+    }
+  }
+}
+function fecharDrawer() {
+  document.getElementById('drawer').classList.remove('aberto');
+  document.getElementById('drawer-overlay').classList.remove('aberto');
+}
+// Esc fecha o drawer
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') fecharDrawer();
+});
+window.abrirDrawer = abrirDrawer;
+window.fecharDrawer = fecharDrawer;
+</script>
+
+</body>
+</html>
