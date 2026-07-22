@@ -69,14 +69,12 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sa
   /* shell ocupa a tela toda, sem sombra lateral */
   .chat-shell { max-width: 100%; box-shadow: none; }
 
-  /* lista ocupa 100% por padrão */
-  .conv-list { width: 100%; }
-
-  /* quando uma conversa está aberta, ESCONDE a lista */
+  /* lista e painel são camadas: uma de cada vez */
+  .conv-list { width: 100%; position: absolute; inset: 0; z-index: 1; background: #faf7f2; }
+  .conv-panel { width: 100%; position: absolute; inset: 0; z-index: 0; background: white; }
+  /* quando uma conversa está aberta, lista some e painel aparece */
   .chat-shell.com-conversa .conv-list { display: none; }
-
-  /* painel da conversa: 100% da largura */
-  .conv-panel { width: 100%; }
+  .chat-shell.com-conversa .conv-panel { z-index: 2; }
 
   /* head mais compacto */
   .conv-list-head { padding: 12px 16px; }
@@ -88,10 +86,17 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sa
   .conv-avatar { width: 40px; height: 40px; font-size: 13px; }
   .conv-nome { font-size: 14px; }
   .conv-preview { font-size: 12px; }
+  .conv-badge { font-size: 11px; min-width: 18px; height: 18px; }
 
-  /* head do painel com seta de voltar */
-  .conv-panel-head { padding: 10px 12px; }
-  .conv-panel-head .back { display: inline-flex; }
+  /* head do painel: esconde o link "Ver inscrição" (não cabe) */
+  .conv-panel-head { padding: 8px 12px; gap: 8px; }
+  .conv-panel-head a { display: none; }
+  .conv-panel-head h2 { font-size: 14px; line-height: 1.2; }
+  .conv-panel-head p { font-size: 11px; margin-top: 1px; }
+  .conv-panel-head .av { width: 36px; height: 36px; font-size: 13px; }
+
+  /* botão "‹" só aparece no mobile */
+  .conv-panel-head .back { display: inline-flex; align-items: center; justify-content: center; }
 
   /* mensagens: bolhas mais largas (85% no mobile) */
   .ce-msg-balao { max-width: 85%; padding: 8px 10px; }
@@ -102,4 +107,10 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sa
   .conv-input { padding: 8px; gap: 6px; }
   .conv-input textarea { font-size: 14px; padding: 8px 10px; }
   .conv-input button { padding: 8px 14px; font-size: 13px; }
+}
+
+/* telas muito pequenas (até 380px) - mais compacto ainda */
+@media (max-width: 380px) {
+  .conv-panel-head h2 { font-size: 13px; }
+  .conv-panel-head p { display: none; } /* esconde empresa+etapa, só mostra título */
 }
