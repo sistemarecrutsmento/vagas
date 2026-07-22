@@ -160,7 +160,7 @@
       background: var(--cinza-bg-2);
       border: 1px solid var(--borda);
       border-radius: 14px;
-      padding: 16px;
+      padding: 12px;
       box-shadow: 0 30px 60px rgba(0,0,0,0.12);
       transform: rotate(-2deg);
     }
@@ -172,49 +172,32 @@
       background: var(--borda);
       border-radius: 2px;
     }
-    .hero-laptop .laptop-screen {
-      background: #FFF;
+    .hero-laptop img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      object-position: top;
       border-radius: 6px;
-      height: 240px;
-      background: linear-gradient(135deg, #f9f9f9 0%, #fafafa 100%);
-      display: flex; flex-direction: column;
-      padding: 12px; gap: 8px;
-      overflow: hidden;
-    }
-    .laptop-bar { display: flex; gap: 4px; margin-bottom: 4px; }
-    .laptop-bar i { display: block; width: 8px; height: 8px; border-radius: 50%; background: #ddd; }
-    .laptop-row {
-      height: 12px; border-radius: 3px; background: #e5e5e5;
-    }
-    .laptop-row.vinho { background: var(--vinho); width: 60%; }
-    .laptop-row.escuro { background: #d0d0d0; width: 80%; }
-    .laptop-row.claro { background: #efefef; width: 70%; }
-    .laptop-card {
-      background: var(--vinho-bg);
-      border: 1px solid rgba(114,47,55,0.2);
-      border-radius: 6px; padding: 10px;
-      font-size: 11px; color: var(--vinho); font-weight: 600;
+      display: block;
     }
     .hero-phone {
       position: absolute;
       bottom: -20px; right: -10px;
-      width: 160px; height: 300px;
+      width: 160px;
       background: var(--preto);
       border-radius: 24px;
-      padding: 8px;
+      padding: 6px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.25);
       transform: rotate(4deg);
     }
-    .hero-phone .phone-screen {
-      background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
-      border-radius: 18px; height: 100%;
-      padding: 14px 10px;
-      display: flex; flex-direction: column; gap: 8px;
+    .hero-phone img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      object-position: top;
+      border-radius: 18px;
+      display: block;
     }
-    .phone-header { font-size: 11px; font-weight: 700; color: var(--vinho); }
-    .phone-card { background: #f5f5f5; border-radius: 6px; padding: 8px; font-size: 9px; color: #333; }
-    .phone-card .v { color: var(--vinho); font-weight: 700; }
-    .phone-btn { background: var(--vinho); color: #FFF; border-radius: 6px; padding: 6px; font-size: 9px; font-weight: 700; text-align: center; }
     @media (max-width: 900px) {
       .hero-grid { grid-template-columns: 1fr; }
       .hero-mockup { min-height: 360px; }
@@ -414,6 +397,13 @@
       overflow: hidden;
     }
     .screenshot-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .screenshot-empty .placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; padding: 16px; text-align: center; color: var(--cinza-texto);
+    }
+    .screenshot-empty .placeholder span { font-size: 36px; }
+    .screenshot-empty .placeholder p { font-size: 14px; font-weight: 600; color: var(--vinho); margin: 0; }
+    .screenshot-empty .placeholder small { font-size: 12px; color: var(--cinza-texto); font-weight: 400; }
     .screenshot-content { padding: 20px; }
     .screenshot-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
     .screenshot-content p { font-size: 13px; color: var(--cinza-texto); }
@@ -541,24 +531,10 @@
       </div>
       <div class="hero-mockup">
         <div class="hero-laptop">
-          <div class="laptop-screen">
-            <div class="laptop-bar"><i></i><i></i><i></i></div>
-            <div class="laptop-row vinho"></div>
-            <div class="laptop-row escuro"></div>
-            <div class="laptop-card">📊 7 candidatos novos hoje</div>
-            <div class="laptop-row claro"></div>
-            <div class="laptop-row escuro"></div>
-            <div class="laptop-row claro"></div>
-          </div>
+          <img src="assets/dashboard-admin.jpg" alt="Painel de gestão Vagas.io" />
         </div>
         <div class="hero-phone">
-          <div class="phone-screen">
-            <div class="phone-header">Vagas.io</div>
-            <div class="phone-card">Auxiliar Administrativo</div>
-            <div class="phone-card">Vendedor — <span class="v">R$ 1.800</span></div>
-            <div class="phone-card">Estágio em TI</div>
-            <div class="phone-btn">Inscreva-se</div>
-          </div>
+          <img src="assets/dashboard-candidato.jpg" alt="Painel do candidato Vagas.io" />
         </div>
       </div>
     </div>
@@ -702,27 +678,27 @@
     </div>
     <div class="screenshots-grid">
       <div class="screenshot">
-        <div class="screenshot-img"><img src="assets/screen-candidato.png" alt="Tela do candidato" /></div>
+        <div class="screenshot-img"><img src="assets/dashboard-candidato.jpg" alt="Tela do candidato" /></div>
         <div class="screenshot-content"><h4>Para candidatos</h4><p>Inscrição rápida pelo celular</p></div>
       </div>
       <div class="screenshot">
-        <div class="screenshot-img"><img src="assets/screen-admin.png" alt="Painel admin" /></div>
+        <div class="screenshot-img"><img src="assets/dashboard-admin.jpg" alt="Painel admin" /></div>
         <div class="screenshot-content"><h4>Para gestores</h4><p>Painel completo de vagas</p></div>
       </div>
-      <div class="screenshot">
-        <div class="screenshot-img"><img src="assets/screen-analisar.png" alt="Análise de candidato" /></div>
-        <div class="screenshot-content"><h4>Análise completa</h4><p>Currículo + etapas + histórico</p></div>
+      <div class="screenshot screenshot-empty">
+        <div class="screenshot-img"><div class="placeholder"><span>🔍</span><p>Análise completa do candidato<br><small>currículo + etapas + histórico</small></p></div></div>
+        <div class="screenshot-content"><h4>Análise completa</h4><p>Perfil detalhado de cada candidato</p></div>
       </div>
-      <div class="screenshot">
-        <div class="screenshot-img"><img src="assets/screen-vaga.png" alt="Editor de vaga" /></div>
-        <div class="screenshot-content"><h4>Editor visual</h4><p>Crie vagas e etapas com cliques</p></div>
-      </div>
-      <div class="screenshot">
-        <div class="screenshot-img"><img src="assets/screen-agenda.png" alt="Agenda" /></div>
+      <div class="screenshot screenshot-empty">
+        <div class="screenshot-img"><div class="placeholder"><span>📅</span><p>Agenda integrada<br><small>entrevistas e prazos</small></p></div></div>
         <div class="screenshot-content"><h4>Agenda integrada</h4><p>Entrevistas e prazos</p></div>
       </div>
-      <div class="screenshot">
-        <div class="screenshot-img"><img src="assets/screen-docs.png" alt="Documentos" /></div>
+      <div class="screenshot screenshot-empty">
+        <div class="screenshot-img"><div class="placeholder"><span>✏️</span><p>Editor visual de vagas<br><small>crie etapas com cliques</small></p></div></div>
+        <div class="screenshot-content"><h4>Editor visual</h4><p>Crie vagas e etapas com cliques</p></div>
+      </div>
+      <div class="screenshot screenshot-empty">
+        <div class="screenshot-img"><div class="placeholder"><span>📁</span><p>Coleta de documentos<br><small>16 docs obrigatórios</small></p></div></div>
         <div class="screenshot-content"><h4>Coleta de documentos</h4><p>16 docs obrigatórios</p></div>
       </div>
     </div>
