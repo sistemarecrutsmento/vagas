@@ -219,7 +219,21 @@
 
   async function carregarCandidaturas() {
     try {
-      const r = await fetch(API + '/api/admin/conversas', {
+      // Se tem ?id=XX na URL, busca SÓ essa conversa (analisar.html?id=X)
+      // Senão, não mostra nada (a bolinha só serve pro contexto da página atual)
+      let endpoint = '/api/admin/conversas';
+      let qs = '';
+      if (idUrlInt) {
+        qs = '?candidatura_id=' + idUrlInt;
+      } else {
+        // Sem ?id= na URL = sem chat (a bolinha é contextual por página)
+        conversas = [];
+        fabContainer.style.display = 'none';
+        fecharJanela();
+        return;
+      }
+
+      const r = await fetch(API + '/api/admin/conversas' + qs, {
         headers: { 'Authorization': 'Bearer ' + token }
       });
       if (r.status === 401) return;
