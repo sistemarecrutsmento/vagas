@@ -116,10 +116,13 @@
     conversaAtivaId = id;
     const c = conversas.find(x => x.candidatura_id === id);
     if (!c) return;
+    // No mobile, esconde a lista e mostra só a conversa (estilo WhatsApp)
+    document.getElementById('chat-shell').classList.add('com-conversa');
     renderLista(); // destaca a ativa
     renderPanelHead(c);
     document.getElementById('conv-panel').innerHTML = `
       <div class="conv-panel-head">
+        <button class="back" onclick="window.voltarLista()" aria-label="Voltar">‹</button>
         <div class="av">${iniciais(c.vaga_titulo)}</div>
         <div>
           <h2>${escapeHtml(c.vaga_titulo || 'Vaga')}</h2>
@@ -232,6 +235,19 @@
       ta.focus();
     }
   }
+
+  // === Voltar pra lista (mobile) ===
+  window.voltarLista = function() {
+    document.getElementById('chat-shell').classList.remove('com-conversa');
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    conversaAtivaId = null;
+    document.getElementById('conv-panel').innerHTML = `
+      <div class="conv-empty">
+        <div class="icon">💬</div>
+        <h3>Selecione uma conversa</h3>
+        <p>Escolha uma vaga na lista à esquerda pra começar a falar com o recrutador.</p>
+      </div>`;
+  };
 
   // === Inicialização ===
   carregarLista();
