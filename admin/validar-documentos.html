@@ -77,6 +77,7 @@
     .spinner-mini { border: 2px solid #E5D896; border-top: 2px solid var(--dourado); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
   </style>
+  <script src="../candidato/chat-uploader.js"></script>
 </head>
 <body>
   <div class="container">
@@ -615,5 +616,6 @@
       return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
   </script>
+<script src="chat-flutuante-admin.js"></script>
 </body>
 </html>
