@@ -48,7 +48,7 @@
     .etapas { background: var(--card); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; }
     .etapas h2 { font-size: 16px; margin-bottom: 16px; color: var(--vinho); }
     .etapa-linha { display: flex; gap: 0; align-items: stretch; overflow-x: auto; padding-bottom: 4px; }
-    .etapa-item { flex: 1; min-width: 120px; text-align: center; padding: 0 8px; position: relative; }
+    .etapa-item { flex: 1; min-width: 90px; text-align: center; padding: 0 4px; position: relative; }
     .etapa-item .bola { width: 32px; height: 32px; border-radius: 50%; background: #eee; color: #999; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 6px; font-size: 14px; }
     .etapa-item .bola.atual { background: var(--dourado); color: #fff; }
     .etapa-item .bola.feita { background: #16a34a; color: #fff; }
@@ -146,6 +146,14 @@
     function iniciais(nome) {
       if (!nome) return '?';
       return nome.split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+    }
+
+    function formatarData(s) {
+      if (!s) return '—';
+      // Tenta ISO 8601 (1999-07-17T00:00:00.000Z) ou só data (1999-07-17)
+      const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+      return s;
     }
 
     function sair() {
@@ -324,7 +332,7 @@
           <div class="bloco">
             <h2>👤 Dados pessoais</h2>
             ${c.cpf ? `<div class="campo"><span class="lbl">CPF</span><span class="val">${c.cpf}</span></div>` : ''}
-            ${c.data_nascimento ? `<div class="campo"><span class="lbl">Nascimento</span><span class="val">${c.data_nascimento}</span></div>` : ''}
+            ${c.data_nascimento ? `<div class="campo"><span class="lbl">Nascimento</span><span class="val">${formatarData(c.data_nascimento)}</span></div>` : ''}
             ${c.sexo ? `<div class="campo"><span class="lbl">Sexo</span><span class="val">${c.sexo}</span></div>` : ''}
             ${c.escolaridade ? `<div class="campo"><span class="lbl">Escolaridade</span><span class="val">${c.escolaridade}</span></div>` : ''}
           </div>
