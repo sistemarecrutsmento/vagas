@@ -386,7 +386,9 @@
     }
     input.style.display = 'flex';
     area.innerHTML = msgs.map(m => {
-      const minha = m.autor_tipo === 'candidato';
+      // No chat do ADMIN: msgs do admin (recrutador) ficam à DIREITA (.minha),
+      // msgs do candidato ficam à ESQUERDA (padrão, sem .minha)
+      const minha = m.autor_tipo === 'admin';
       const iniciais = (m.autor_nome || '?').split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
       const dataFmt = new Date(m.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
       const arqs = (m.arquivos || []).map(a => window.ChatUploader ? window.ChatUploader.renderAnexo(a) : `📎 ${a.nome_original}`).join('');
