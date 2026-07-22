@@ -26,6 +26,13 @@
     }
     .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
     .nav-item.ativo { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
+    .aside-user { margin-top: auto; padding: 16px 16px 12px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+    .aside-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .aside-user-info { flex: 1; min-width: 0; }
+    .aside-user-info .nome { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .aside-user-info .empresa { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-logout { background: rgba(255,255,255,0.1); color: #fff; border: 0; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none; }
+    .btn-logout:hover { background: rgba(255,255,255,0.2); }
     main { flex: 1; padding: 32px; max-width: 100%; overflow-x: auto; }
     h1 { font-size: 28px; font-weight: 800; margin: 0 0 8px; }
     .subtitulo { color: var(--texto-suave); margin: 0 0 28px; font-size: 15px; }
@@ -180,7 +187,15 @@
       <a class="nav-item" href="index.html?page=candidaturas">📋 Vagas com Candidatos</a>
       <a class="nav-item ativo" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="equipe.html">👥 Equipe</a>
-      <a class="nav-item" href="../" style="margin-top:auto; opacity:0.7;">🏡 Voltar pro site</a>
+      <a class="nav-item" href="../" style="opacity:0.7;">🏡 Voltar pro site</a>
+      <div class="aside-user">
+        <div class="aside-user-avatar" id="aside-user-avatar">--</div>
+        <div class="aside-user-info">
+          <div class="nome" id="aside-user-nome">--</div>
+          <div class="empresa" id="aside-user-empresa">--</div>
+        </div>
+        <a href="index.html" class="btn-logout" title="Sair">↪</a>
+      </div>
     </aside>
 
     <main>
@@ -319,6 +334,26 @@ let filtroAtual = 'proximas';
 if (!token) {
   // Não logado, redireciona pro login
   window.location.href = 'index.html';
+} else {
+  carregarUsuarioSidebar();
+}
+
+// === Sidebar: avatar + nome do admin logado ===
+function carregarUsuarioSidebar() {
+  try {
+    if (!token) return;
+    const parts = token.split('.');
+    if (parts.length < 2) return;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const nome = payload.nome || 'Admin';
+    const iniciais = nome.split(/\s+/).map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+    const elAvatar = document.getElementById('aside-user-avatar');
+    const elNome = document.getElementById('aside-user-nome');
+    const elEmpresa = document.getElementById('aside-user-empresa');
+    if (elAvatar) elAvatar.textContent = iniciais || 'A';
+    if (elNome) elNome.textContent = nome;
+    if (elEmpresa) elEmpresa.textContent = payload.email || '';
+  } catch (e) { /* silencioso */ }
 }
 
 // ===== Carregar entrevistas =====
