@@ -117,7 +117,11 @@
     const c = conversas.find(x => x.candidatura_id === id);
     if (!c) return;
     // No mobile, esconde a lista e mostra só a conversa (estilo WhatsApp)
+    // Usa TANTO a classe no shell (CSS media query) QUANTO o style inline (fallback)
     document.getElementById('chat-shell').classList.add('com-conversa');
+    if (window.innerWidth <= 768) {
+      document.getElementById('conv-list').style.display = 'none';
+    }
     renderLista(); // destaca a ativa
     renderPanelHead(c);
     document.getElementById('conv-panel').innerHTML = `
@@ -239,6 +243,7 @@
   // === Voltar pra lista (mobile) ===
   window.voltarLista = function() {
     document.getElementById('chat-shell').classList.remove('com-conversa');
+    document.getElementById('conv-list').style.display = ''; // remove inline
     if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
     conversaAtivaId = null;
     document.getElementById('conv-panel').innerHTML = `
