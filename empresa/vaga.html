@@ -216,20 +216,10 @@
       document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
 
       try {
-        // Info da vaga
-        const rv = await fetch(API + '/api/admin/vagas/' + vagaId, { headers: { 'Authorization': 'Bearer ' + token } });
-        if (rv.status === 403 || rv.status === 401) { window.location.href = 'index.html'; return; }
-        // Se o admin endpoint recusar (token não é admin), tenta via empresa
-        let vaga = null;
-        if (rv.ok) {
-          vaga = await rv.json();
-        } else {
-          // Pega via dashboard que lista vagas liberadas
-          const rd = await fetch(API + '/api/empresa/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
-          if (!rd.ok) { window.location.href = 'index.html'; return; }
-          const dd = await rd.json();
-          vaga = (dd.vagas || []).find(v => String(v.id) === String(vagaId));
-        }
+        // Info da vaga (rota da empresa, retorna todos os campos)
+        const rv = await fetch(API + '/api/empresa/vagas/' + vagaId, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!rv.ok) { window.location.href = 'index.html'; return; }
+        const vaga = (await rv.json()).vaga;
         if (!vaga) { window.location.href = 'index.html'; return; }
         document.getElementById('vaga-titulo').textContent = vaga.titulo || 'Vaga';
         document.getElementById('vaga-meta').textContent = `📍 ${vaga.cidade || '--'}${vaga.estado ? ' / ' + vaga.estado : ''} · ${vaga.tipo_contrato || '--'}`;
