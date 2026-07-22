@@ -14,10 +14,14 @@ let cadastroCompleto = false;
 // =====================================================
 // FONTE DA VERDADE — Cálculo de % do perfil do candidato
 // Use em QUALQUER página: window.calcularProgressoPerfil(perfil)
-// Retorna { pct, completos, total, faltam, cadastroCompleto }
+// Retorna { pct, completos, total, faltam, faltamObrig[], cadastroCompleto }
+//
+// Regras:
+//  - obrigatorio: true  → conta no "faltam" e bloqueia cadastro até preencher
+//  - bonus: true        → se preenchido, SOMA na %. Se vazio, NÃO bloqueia
+//                          (foto, experiencias, acessibilidade)
 // =====================================================
 window.CAMPOS_PERFIL = [
-  // [chave, obrigatorio, label]
   { key: 'nome',            obrigatorio: true,  label: 'Nome' },
   { key: 'cpf',             obrigatorio: true,  label: 'CPF' },
   { key: 'data_nascimento', obrigatorio: false, label: 'Data de nascimento' },
@@ -34,31 +38,49 @@ window.CAMPOS_PERFIL = [
   { key: 'curso',           obrigatorio: false, label: 'Curso' },
   { key: 'situacao',        obrigatorio: true,  label: 'Situação da formação' },
   { key: 'sobre_voce',      obrigatorio: false, label: 'Sobre você' },
-  { key: 'experiencia',     obrigatorio: false, label: 'Experiências profissionais', isArray: true },
-  { key: 'foto_url',        obrigatorio: false, label: 'Foto de perfil' },
-  { key: 'acessibilidade',  obrigatorio: false, label: 'Acessibilidade' }
+  // bônus — não obrigatórios, mas se preenchidos somam na %
+  { key: 'experiencia',     obrigatorio: false, bonus: true,  label: 'Experiências profissionais' },
+  { key: 'foto_url',        obrigatorio: false, bonus: true,  label: 'Foto de perfil' },
+  { key: 'acessibilidade',  obrigatorio: false, bonus: true,  label: 'Acessibilidade' }
 ];
 
 window.calcularProgressoPerfil = function(perfil) {
-  if (!perfil) return { pct: 0, completos: 0, total: window.CAMPOS_PERFIL.length, faltam: window.CAMPOS_PERFIL.length, cadastroCompleto: false };
+  const todos = window.CAMPOS_PERFIL;
+  const total = todos.length;
+  if (!perfil) return { pct: 0, completos: 0, total, faltam: [], faltamObrig: total, cadastroCompleto: false };
   const temValor = (v) => {
     if (v === null || v === undefined) return false;
-    if (typeof v === 'string') return v.trim() !== '' && v.trim() !== 'null';
+    if (typeof v === 'string') return v.trim() !== '' && v.trim() !== 'null' && v.trim() !== 'undefined';
     if (Array.isArray(v)) return v.length > 0;
     return true;
   };
-  let completos = 0;
-  const faltam = [];
-  for (const c of window.CAMPOS_PERFIL) {
-    const val = c.isArray ? (Array.isArray(perfil[c.key]) ? perfil[c.key] : []) : perfil[c.key];
-    if (temValor(val)) completos++;
-    else if (c.obrigatorio) faltam.push(c.label);
+  const getVal = (c) => c.key === 'experiencia'
+    ? (Array.isArray(perfil.experiencia) ? perfil.experiencia : (typeof perfil.experiencia === 'string' && perfil.experiencia.trim() !== '' ? [perfil.experiencia] : []))
+    : perfil[c.key];
+
+  // A % é calculada sobre os campos NÃO-BÔNUS
+  // (foto, experiencia e acessibilidade não bloqueiam, são "extras")
+  const naoBonus = todos.filter(c => !c.bonus);
+  const totalContado = naoBonus.length;
+  let completosContados = 0;
+  const faltamObrig = [];
+  for (const c of naoBonus) {
+    if (temValor(getVal(c))) completosContados++;
+    else if (c.obrigatorio) faltamObrig.push(c.label);
   }
-  const total = window.CAMPOS_PERFIL.length;
-  const pct = Math.round((completos / total) * 100);
-  // cadastroCompleto = true só se TODOS os obrigatórios estão preenchidos
-  const cadastroCompleto = faltam.length === 0;
-  return { pct, completos, total, faltam, cadastroCompleto };
+  let pct = Math.round((completosContados / totalContado) * 100);
+  // Se ela adicionou bônus, dá um boost (ex: +5% por bônus, até 100)
+  let bonus = 0;
+  for (const c of todos) {
+    if (c.bonus && temValor(getVal(c))) bonus += 5;
+  }
+  pct = Math.min(100, pct + (pct >= 100 ? 0 : 0)); // sem boost se já tá 100
+  const cadastroCompleto = faltamObrig.length === 0;
+  // faltam = tudo que ainda não tá preenchido (inclui bônus vazios, como "sugestão")
+  const faltam = todos
+    .filter(c => !temValor(getVal(c)))
+    .map(c => c.label);
+  return { pct, completos: completosContados, total: totalContado, faltam, faltamObrig, cadastroCompleto };
 };
 
 // Áreas de interesse (Banco de Talentos)
