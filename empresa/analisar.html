@@ -7,50 +7,80 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="empresa.css">
   <style>
-    .header-cand { display: flex; align-items: center; gap: 16px; }
-    .header-cand .avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 24px; flex-shrink: 0; }
-    .header-cand h1 { font-size: 22px; margin-bottom: 4px; }
-    .header-cand .sub { font-size: 14px; color: var(--cinza-medio); margin-bottom: 6px; }
-    .status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-    .status-em_andamento { background: #dbeafe; color: #1e40af; }
-    .status-em_analise { background: #fef3c7; color: #92400e; }
-    .status-aprovado { background: #dcfce7; color: #166534; }
-    .status-reprovado, .status-rejeitado { background: #fee2e2; color: #991b1b; }
-    .status-contratado { background: #dcfce7; color: #166534; }
-    .badge-etapa { display: inline-block; background: var(--dourado); color: white; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 20px; }
-    .info-item .lbl { font-size: 11px; text-transform: uppercase; color: var(--cinza-medio); letter-spacing: 0.5px; }
-    .info-item .val { font-size: 14px; color: var(--preto); margin-top: 2px; word-wrap: break-word; }
-    .timeline { display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
-    .etapa-pill { padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; background: #f0f0f0; color: var(--cinza-medio); }
-    .etapa-pill.atual { background: var(--dourado); color: white; }
-    .etapa-pill.feita { background: #dcfce7; color: #166534; }
-    .acoes-empresa { display: flex; flex-direction: column; gap: 10px; background: #fafafa; padding: 16px; border-radius: 8px; border: 1px solid var(--dourado); }
-    .acoes-empresa h3 { color: var(--vinho); font-size: 14px; margin-bottom: 6px; }
-    .acoes-empresa textarea { width: 100%; padding: 10px; border: 1px solid var(--borda); border-radius: 6px; font-family: inherit; font-size: 14px; resize: vertical; min-height: 60px; }
-    .acoes-empresa .row { display: flex; gap: 8px; }
-    .acoes-empresa .btn { flex: 1; }
-    .btn { display: inline-block; padding: 10px 16px; background: var(--vinho); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
-    .btn:hover { background: var(--vinho-escuro); }
-    .btn-aprovar { background: #2E7D32; }
-    .btn-aprovar:hover { background: #1B5E20; }
-    .btn-reprovar { background: #C62828; }
-    .btn-reprovar:hover { background: #B71C1C; }
-    .btn-sec { background: transparent; border: 1px solid var(--borda); color: var(--preto); }
-    .btn-sec:hover { background: #f5f5f5; }
-    .chat { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; }
-    .msg { padding: 10px 14px; border-radius: 10px; max-width: 75%; font-size: 14px; }
-    .msg-empresa { background: var(--vinho); color: white; align-self: flex-end; }
-    .msg-rh { background: #f0f0f0; color: var(--preto); align-self: flex-start; }
-    .msg .meta { font-size: 11px; opacity: 0.8; margin-top: 4px; }
-    .chat-input { display: flex; gap: 8px; margin-top: 10px; }
-    .chat-input input { flex: 1; padding: 10px; border: 1px solid var(--borda); border-radius: 6px; font-size: 14px; font-family: inherit; }
-    .hist { font-size: 13px; }
-    .hist-item { padding: 8px 0; border-bottom: 1px solid var(--borda); }
-    .hist-item:last-child { border-bottom: none; }
-    .hist-item .data { font-size: 11px; color: var(--cinza-medio); }
-    .badge-telespectador { background: #fff3e0; color: #92400e; padding: 12px 14px; border-radius: 6px; font-size: 13px; }
-    .alerta-info { background: #dbeafe; color: #1e40af; padding: 10px 14px; border-radius: 6px; font-size: 13px; }
+    /* === Página analisar: padding container === */
+    .analisar-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 24px 60px; }
+    .analisar-wrap .header-cand { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 24px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .analisar-wrap .btn-voltar { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid var(--cinza-medio); color: var(--preto); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s; }
+    .analisar-wrap .btn-voltar:hover { background: #f5f5f5; border-color: var(--vinho); color: var(--vinho); }
+    .analisar-wrap .btn-voltar svg { width: 16px; height: 16px; }
+    .analisar-wrap .header-cand-titulo { text-align: center; }
+    .analisar-wrap .header-cand h1 { font-size: 22px; margin: 0 0 4px; font-weight: 800; }
+    .analisar-wrap .header-cand .sub { font-size: 14px; color: var(--cinza-medio); margin-bottom: 6px; }
+    .analisar-wrap .header-cand .status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .status-em_andamento { background: #DBEAFE; color: #1E40AF; }
+    .status-em_analise { background: #FFF3E0; color: #E65100; }
+    .status-aprovado { background: #E8F5E9; color: #2E7D32; }
+    .status-reprovado, .status-rejeitado { background: #FFEBEE; color: #C62828; }
+    .status-contratado { background: #2E7D32; color: #fff; }
+
+    /* === Cards === */
+    .analisar-wrap .card { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 24px; margin-top: 16px; }
+    .analisar-wrap .card h2 { font-size: 16px; font-weight: 700; color: var(--vinho); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--borda); }
+
+    /* === Dados pessoais com foto === */
+    .dados-pessoais-header { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--borda); }
+    .dados-foto { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--dourado); }
+    .dados-foto-vazia { background: var(--vinho); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+    .field { padding: 8px 0; }
+    .field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--cinza-medio); font-weight: 600; margin-bottom: 4px; }
+    .field-value { font-size: 14px; color: var(--preto); }
+
+    /* === Timeline === */
+    .timeline { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; }
+    .etapa { flex-shrink: 0; min-width: 110px; padding: 10px 12px; background: #f5f5f5; border-radius: 6px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .etapa:hover { background: #ececec; }
+    .etapa .num { font-size: 11px; color: var(--cinza-medio); margin-bottom: 2px; }
+    .etapa.concluida { border-left-color: var(--verde); background: #E8F5E9; }
+    .etapa.atual { border-left-color: var(--dourado); background: #FFF8E1; }
+    .badge-etapa { display: inline-block; background: var(--dourado); color: var(--preto); padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+
+    /* === Experiências === */
+    .exp-lista { display: flex; flex-direction: column; gap: 12px; }
+    .exp-item { display: flex; gap: 12px; padding: 12px; background: #FAFAFA; border-radius: 6px; border-left: 3px solid var(--vinho); }
+    .exp-item-num { width: 28px; height: 28px; border-radius: 50%; background: var(--vinho); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+    .exp-item-corpo { flex: 1; }
+    .exp-item-titulo { font-size: 14px; margin-bottom: 2px; }
+    .exp-item-periodo { font-size: 12px; color: var(--cinza-medio); margin-bottom: 6px; }
+    .exp-item-desc { font-size: 13px; color: #444; line-height: 1.5; white-space: pre-wrap; }
+
+    /* === Histórico === */
+    .hist-item { padding: 12px; border-bottom: 1px solid #f0f0f0; }
+    .hist-item:last-child { border-bottom: 0; }
+
+    /* === Chat RH × Empresa === */
+    .chat-rh-card { display: flex; flex-direction: column; height: 400px; }
+    .chat-rh-mensagens { flex: 1; overflow-y: auto; padding: 12px; background: #fafafa; border-radius: 6px; margin-bottom: 10px; }
+    .chat-msg { margin-bottom: 10px; max-width: 75%; padding: 8px 12px; border-radius: 12px; font-size: 14px; }
+    .chat-msg-empresa { background: var(--vinho); color: #fff; margin-left: auto; border-bottom-right-radius: 2px; }
+    .chat-msg-rh { background: #fff; color: var(--preto); border: 1px solid var(--borda); border-bottom-left-radius: 2px; }
+    .chat-msg .meta { font-size: 10px; margin-top: 4px; opacity: 0.7; }
+    .chat-input-row { display: flex; gap: 8px; }
+    .chat-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 6px; font-family: inherit; font-size: 14px; }
+    .chat-input-row button { background: var(--vinho); color: #fff; border: 0; padding: 0 18px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .chat-input-row button:hover { background: var(--vinho-escuro); }
+
+    /* === Ações === */
+    .acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .aviso-bloq { padding: 12px 14px; border-radius: 6px; font-size: 13px; margin-top: 8px; }
+    .badge-readonly { background: #FFF8E1; color: #92400E; border-left: 4px solid var(--dourado); padding: 12px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 14px; }
+
+    /* === Mobile === */
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .dados-pessoais-header { flex-direction: column; text-align: center; }
+    }
   </style>
 </head>
 <body>
@@ -58,7 +88,7 @@
 
   <div class="app">
     <aside>
-      <button class="menu-close" onclick="document.querySelector('aside').classList.add('fechado'); document.querySelector('.app').classList.remove('aside-aberto');" aria-label="Fechar menu">✕</button>
+      <button class="menu-close" onclick="document.querySelector('aside').classList.remove('aberto'); document.querySelector('.app').classList.remove('aside-aberto');" aria-label="Fechar menu">✕</button>
       <div class="aside-logo">
         <h1>Vagas<span class="dourado">.io</span></h1>
         <small>Portal da Empresa</small>
@@ -80,16 +110,7 @@
     </aside>
 
     <main>
-      <div class="page-header">
-        <div>
-          <h2 id="page-titulo">Candidato</h2>
-          <div class="sub" id="page-sub">Carregando...</div>
-        </div>
-      </div>
-
-      <div id="content">
-        <div class="card"><div class="empty">Carregando...</div></div>
-      </div>
+      <div class="analisar-wrap" id="content">Carregando...</div>
     </main>
   </div>
 
@@ -97,207 +118,328 @@
     const API = 'https://recrutamento-api.onrender.com';
     const token = localStorage.getItem('empresa_token');
     if (!token) window.location.href = 'login.html';
-
     const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
-    document.getElementById('avatar').textContent = (usuario.nome || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+    document.getElementById('avatar').textContent = iniciais(usuario.nome);
     document.getElementById('user-nome').textContent = usuario.nome || '--';
     document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
 
+    function iniciais(n) {
+      if (!n) return '?';
+      return n.split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+    }
     function sair() {
-      if (confirm('Sair do portal?')) {
-        localStorage.removeItem('empresa_token');
-        localStorage.removeItem('empresa_usuario');
-        window.location.href = 'login.html';
+      localStorage.removeItem('empresa_token');
+      localStorage.removeItem('empresa_usuario');
+      window.location.href = 'login.html';
+    }
+    function escapeHtml(s) {
+      if (s == null) return '';
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function voltar() { history.back(); }
+
+    function fmtData(v) {
+      if (!v) return null;
+      const s = String(v);
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+        const [a, m, d] = s.substring(0, 10).split('-');
+        return d + '/' + m + '/' + a;
       }
+      return s;
+    }
+    function fmtDataHora(v) {
+      if (!v) return '';
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return String(v);
+      return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    (async () => {
-      const content = document.getElementById('content');
-      if (!token) {
-        content.innerHTML = '<div class="card"><div class="alerta-info">Você não está logado. <a href="login.html">Faça login</a> primeiro.</div></div>';
-        return;
-      }
+    const FORMACAO_LABELS = {
+      'fundamental': 'Ensino Fundamental', 'medio': 'Ensino Médio', 'tecnico': 'Ensino Técnico',
+      'superior': 'Ensino Superior', 'pos': 'Pós-graduação', 'mestrado': 'Mestrado', 'doutorado': 'Doutorado'
+    };
+    const SITUACAO_LABELS = {
+      'concluido': 'Concluído', 'cursando': 'Cursando', 'trancado': 'Trancado', 'incompleto': 'Incompleto'
+    };
 
-      const params = new URLSearchParams(location.search);
-      const id = params.get('id');
-      if (!id) {
-        content.innerHTML = '<div class="card"><div class="alerta-info">ID da candidatura não informado.</div></div>';
-        return;
-      }
-
-      let cand;
+    carregar();
+    async function carregar() {
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) { document.getElementById('content').innerHTML = '<div class="card">ID da candidatura não informado.</div>'; return; }
+      let c;
       try {
         const r = await fetch(API + '/api/empresa/candidatura/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
-        if (r.status === 401 || r.status === 403) { sair(); return; }
-        if (!r.ok) throw new Error('Erro ao carregar');
-        cand = await r.json();
+        if (r.status === 401 || r.status === 403) { window.location.href = 'login.html'; return; }
+        c = await r.json();
+        if (!r.ok) { document.getElementById('content').innerHTML = '<div class="card">' + (c.erro || 'Erro ao carregar') + '</div>'; return; }
       } catch (e) {
-        content.innerHTML = '<div class="card"><div class="alerta-info">Erro: ' + e.message + '</div></div>';
+        document.getElementById('content').innerHTML = '<div class="card">Erro: ' + e.message + '</div>';
         return;
       }
 
-      const etapa = cand.etapa_atual || 1;
-      const etapas = (cand.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
+      // etapas
+      let etapas = c.etapas;
+      if (typeof etapas === 'string') {
+        try { etapas = JSON.parse(etapas); } catch (e) { etapas = []; }
+      }
+      if (!Array.isArray(etapas)) etapas = [];
+      etapas = etapas.map(e => typeof e === 'string' ? e : (e.nome || e.titulo || ''));
       const totalEtapas = etapas.length || 7;
-      const podeAgir = etapa === 4; // somente etapa 4: Entrevista com gestor/empresa
-      const status = cand.status || 'em_analise';
+      const etapaAtual = Number(c.etapa_atual || 1);
+      const status = c.status || 'em_andamento';
+      const ehEtapaGestor = etapaAtual === 4; // Empresa só age na etapa 4
 
-      // Timeline
-      let timelineHtml = '';
-      if (etapas.length > 0) {
-        timelineHtml = etapas.map((nome, idx) => {
-          const num = idx + 1;
-          let cls = 'etapa-pill';
-          if (num < etapa) cls += ' feita';
-          else if (num === etapa) cls += ' atual';
-          return `<div class="${cls}">${num}. ${nome}</div>`;
-        }).join('');
+      // timeline
+      const timeline = etapas.map((nome, i) => {
+        const idx = i + 1;
+        let cls = '';
+        if (idx < etapaAtual) cls = 'concluida';
+        else if (idx === etapaAtual) cls = 'atual';
+        return '<div class="etapa ' + cls + '"><div class="num">' + idx + '/' + totalEtapas + '</div>' + (nome || '—') + '</div>';
+      }).join('');
+
+      // endereço
+      const endCompleto = [
+        c.logradouro ? c.logradouro : null,
+        c.numero ? ', ' + c.numero : null,
+        c.complemento ? ' — ' + c.complemento : null,
+        c.bairro ? '<br>' + c.bairro : null,
+        c.cidade ? '<br>' + c.cidade : null,
+        c.estado ? ' / ' + c.estado : null,
+        c.cep ? '<br>CEP ' + c.cep : null
+      ].filter(Boolean).join('');
+
+      // experiências
+      const exps = Array.isArray(c.experiencias) ? c.experiencias : [];
+      let expsHtml = '';
+      if (exps.length > 0) {
+        expsHtml = '<div class="exp-lista">' + exps.map((e, i) => {
+          const ini = fmtData(e.inicio) || '';
+          const isAtual = e.emprego_atual || e.atual;
+          const fim = e.fim ? fmtData(e.fim) : (isAtual ? 'Atual' : '');
+          return '<div class="exp-item">' +
+            '<div class="exp-item-num">' + (i + 1) + '</div>' +
+            '<div class="exp-item-corpo">' +
+              '<div class="exp-item-titulo"><strong>' + (e.cargo || '—') + '</strong> em ' + (e.empresa || '—') + '</div>' +
+              '<div class="exp-item-periodo">' + ini + (fim ? ' — ' + fim : '') + '</div>' +
+              (e.descricao ? '<div class="exp-item-desc">' + e.descricao + '</div>' : '') +
+            '</div></div>';
+        }).join('') + '</div>';
+      } else if (c.experiencia) {
+        expsHtml = '<div style="padding:10px;border-left:3px solid var(--vinho);background:#FAFAFA;font-size:14px;white-space:pre-wrap">' + c.experiencia + '</div>';
       } else {
-        timelineHtml = '<div class="etapa-pill">Etapa ' + etapa + '</div>';
+        expsHtml = '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma experiência informada.</p>';
       }
 
-      // Histórico
-      const histArr = cand.historico || [];
-      let histHtml = '';
-      if (histArr.length > 0) {
-        histHtml = histArr.map(h => {
-          const d = new Date(h.data || h.at || h.em);
-          return `<div class="hist-item">
-            <div>${h.texto || h.acao || JSON.stringify(h)}</div>
-            <div class="data">${isNaN(d) ? '' : d.toLocaleString('pt-BR')} ${h.autor ? '• ' + h.autor : ''}</div>
-          </div>`;
-        }).join('');
-      } else {
-        histHtml = '<div class="empty">Sem movimentações ainda.</div>';
+      // formação
+      function labelFormacao(v) {
+        if (!v) return null;
+        const s = String(v).toLowerCase().trim();
+        return FORMACAO_LABELS[s] || (v.charAt(0).toUpperCase() + v.slice(1));
+      }
+      function labelSituacao(v) {
+        if (!v) return null;
+        const s = String(v).toLowerCase().trim();
+        return SITUACAO_LABELS[s] || (v.charAt(0).toUpperCase() + v.slice(1));
+      }
+      let formacaoHtml = '<p style="color:var(--cinza-medio);font-size:14px">Não informada.</p>';
+      const f = c.formacao && typeof c.formacao === 'object' ? c.formacao : null;
+      const esc = (f && f.escolaridade) || (typeof c.formacao === 'string' ? c.formacao : null) || c.escolaridade;
+      const escLabel = labelFormacao(esc) || esc;
+      const curso = (f && f.curso) || c.curso;
+      const inst = (f && f.instituicao) || c.instituicao;
+      const sitRaw = (f && f.situacao) || c.situacao;
+      const sit = labelSituacao(sitRaw);
+      const concl = fmtData((f && f.data_conclusao) || c.data_conclusao);
+      if (esc || curso || inst) {
+        formacaoHtml =
+          '<div class="field-value" style="font-weight:600">' + (escLabel || '—') + '</div>' +
+          (curso ? '<div class="field-value" style="margin-top:6px">' + curso + '</div>' : '') +
+          (inst ? '<div class="field-value" style="font-weight:400;color:var(--cinza-medio);margin-top:2px">' + inst + '</div>' : '') +
+          ((sit || concl) ? '<div class="field-value" style="font-weight:400;font-size:13px;color:var(--cinza-medio);margin-top:4px">' + (sit || '') + (concl ? ' • Conclusão: ' + concl : '') + '</div>' : '');
       }
 
-      // Botões condicionais
+      // sobre
+      const sobre = c.sobre_voce || c.sobre;
+      const sobreHtml = sobre
+        ? '<p style="font-size:14px;line-height:1.6;white-space:pre-wrap">' + sobre + '</p>'
+        : '<p style="color:var(--cinza-medio);font-size:14px">Não informado.</p>';
+
+      // histórico
+      const hist = Array.isArray(c.historico) ? c.historico : [];
+      const histFiltrado = hist.filter(h => (h.etapa == null) || ((h.etapa + 1) <= etapaAtual));
+      let histHtml;
+      if (histFiltrado.length === 0) {
+        histHtml = '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma movimentação registrada ainda.</p>';
+      } else {
+        histHtml = histFiltrado.map(h => {
+          const dataFmt = fmtDataHora(h.data || h.quando);
+          const acaoLabel = h.tipo === 'avancar' ? '▶ Avançou para próxima etapa' :
+                            h.tipo === 'reprovar' ? '✖ Reprovado' :
+                            h.tipo === 'reabrir' ? '↻ Candidatura reaberta' :
+                            h.tipo === 'comentario' ? '💬 Comentário' :
+                            h.acao === 'avancar' ? '▶ Avançou' :
+                            h.acao === 'reprovar' ? '✖ Reprovado' :
+                            h.acao === 'inscricao' ? '📝 Inscrição' :
+                            (h.status || 'Movimentação');
+          const etapaNum = (h.etapa != null) ? h.etapa + 1 : null;
+          const etapaNome = (etapaNum != null && etapas[etapaNum - 1]) ? etapas[etapaNum - 1] : null;
+          return '<div class="hist-item" id="etapa-' + (etapaNum != null ? etapaNum : '0') + '">' +
+            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+              '<strong>' + acaoLabel + '</strong>' +
+              (etapaNum != null ? ' <span class="badge-etapa">Etapa ' + etapaNum + (etapaNome ? ' — ' + etapaNome : '') + '</span>' : '') +
+            '</div>' +
+            (h.texto ? '<div style="margin-top:4px;font-size:13px;color:#444">"' + escapeHtml(h.texto) + '"</div>' : '') +
+            (h.mensagem ? '<div style="margin-top:4px;font-size:13px;color:#444">"' + escapeHtml(h.mensagem) + '"</div>' : '') +
+            (h.motivo ? '<div style="margin-top:4px;font-size:13px;color:#444">"' + escapeHtml(h.motivo) + '"</div>' : '') +
+            '<div style="margin-top:4px;font-size:11px;color:var(--cinza-medio)">' +
+              (dataFmt ? dataFmt : '') +
+              (h.por ? ' • por ' + h.por : '') +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      // ações
+      const statusLabel = status === 'em_analise' ? 'Em análise' :
+                          status === 'em_andamento' ? 'Em andamento' :
+                          status === 'contratado' ? 'Contratado' :
+                          status === 'reprovado' ? 'Reprovado' :
+                          status === 'rejeitado' ? 'Reprovado' :
+                          status === 'aprovado' ? 'Aprovado' : status;
+
       let acoesHtml = '';
-      if (podeAgir && status !== 'reprovado' && status !== 'contratado' && status !== 'rejeitado') {
-        acoesHtml = `
-          <div class="acoes-empresa">
-            <h3>🎯 Sua avaliação (etapa ${etapa})</h3>
-            <div class="alerta-info" style="background:#fff3e0; color:#92400e;">
-              ℹ️ Você pode avançar, reprovar ou comentar nesta etapa (entrevista com gestor/empresa).
-            </div>
-            <textarea id="comentario" placeholder="Comentário sobre o candidato (opcional)..."></textarea>
-            <div class="row">
-              <button class="btn btn-aprovar" onclick="acao('avancar')">✅ Avançar para próxima etapa</button>
-              <button class="btn btn-reprovar" onclick="acao('reprovar')">❌ Reprovar</button>
-            </div>
-            <div class="row">
-              <button class="btn btn-sec" onclick="acao('comentar')">💬 Enviar só comentário</button>
-            </div>
-          </div>
-        `;
-      } else if (status === 'reprovado' || status === 'rejeitado') {
-        acoesHtml = '<div class="alerta-info" style="background:#fee2e2; color:#991b1b;">❌ Este candidato foi reprovado.</div>';
-      } else if (status === 'contratado') {
-        acoesHtml = '<div class="alerta-info" style="background:#dcfce7; color:#166534;">🎉 Candidato contratado!</div>';
+      if (status === 'reprovado' || status === 'rejeitado' || status === 'contratado') {
+        acoesHtml = '<div class="acoes">' +
+          '<div class="aviso-bloq" style="background:#FFF8E1;color:#92400E;border-left:4px solid #dourado">Candidatura ' + statusLabel + '. Sem ações disponíveis.</div>' +
+        '</div>';
+      } else if (ehEtapaGestor) {
+        // ETAPA 4 — empresa PODE agir
+        acoesHtml = '<div class="acoes">' +
+          '<button class="btn btn-verde" onclick="acao(' + c.id + ',\'avancar\')">✅ Aprovar e Avançar</button>' +
+          '<button class="btn btn-perigo" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button>' +
+        '</div>';
       } else {
-        acoesHtml = `
-          <div class="badge-telespectador">
-            👀 <strong>Modo espectador:</strong> você pode acompanhar todo o processo, mas só poderá agir quando o candidato chegar na etapa de entrevista com a empresa (etapa 4).
-          </div>
-        `;
+        // OUTRAS ETAPAS — read-only
+        acoesHtml = '<div class="badge-readonly">🔒 <strong>Modo leitura.</strong> Sua empresa só pode aprovar ou reprovar candidatos na etapa de Entrevista com o Gestor (etapa 4). Acompanhe o progresso abaixo e use o chat ao lado para falar com o RH.</div>';
       }
 
-      const iniciais = (cand.nome || '?').split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase();
-      const statusLabel = { em_analise: 'Em análise', em_andamento: 'Em andamento', aprovado: 'Aprovado', reprovado: 'Reprovado', rejeitado: 'Reprovado', contratado: 'Contratado' }[status] || status;
+      // monta HTML
+      const content = document.getElementById('content');
+      content.innerHTML =
+        // 1) Header
+        '<div class="header-cand">' +
+          '<button class="btn-voltar" onclick="voltar()" title="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg> Voltar</button>' +
+          '<div class="header-cand-titulo">' +
+            '<h1>' + (c.nome || 'Candidato') + '</h1>' +
+            '<div class="sub">' + (c.vaga_titulo || c.titulo || 'Vaga') + (c.v_cidade ? ' • ' + c.v_cidade : '') + '</div>' +
+            '<span class="status-pill status-' + status + '">' + statusLabel + '</span>' +
+          '</div>' +
+        '</div>' +
 
-      // Header da página
-      document.getElementById('page-titulo').textContent = cand.nome || 'Candidato';
-      document.getElementById('page-sub').textContent = (cand.vaga_titulo || cand.titulo || 'Vaga') + (cand.v_cidade ? ' • ' + cand.v_cidade : '');
+        // 2) Timeline
+        '<div class="card">' +
+          '<h2>📋 Status do Processo</h2>' +
+          '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual + '/' + totalEtapas + ' — ' + (etapas[etapaAtual - 1] || '—') + '</span></div>' +
+          '<div class="timeline">' + timeline + '</div>' +
+        '</div>' +
 
-      content.innerHTML = `
-        <div class="card">
-          <div class="header-cand">
-            <div class="avatar">${iniciais}</div>
-            <div style="flex:1">
-              <span class="status-pill status-${status}">${statusLabel}</span>
-            </div>
-          </div>
-        </div>
+        // 3) Histórico
+        '<div class="card">' +
+          '<h2>📜 Histórico do Processo</h2>' + histHtml +
+        '</div>' +
 
-        ${acoesHtml}
+        // 4) Chat RH × Empresa
+        '<div class="card chat-rh-card">' +
+          '<h2>💬 Chat com o RH</h2>' +
+          '<p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;margin-top:-8px">Canal direto entre sua empresa e o RH responsável por esta candidatura.</p>' +
+          '<div class="chat-rh-mensagens" id="chat-mensagens">Carregando...</div>' +
+          '<div class="chat-input-row">' +
+            '<input type="text" id="chat-text" placeholder="Escreva uma mensagem…" onkeydown="if(event.key===\'Enter\')enviarChat()">' +
+            '<button onclick="enviarChat()">Enviar</button>' +
+          '</div>' +
+        '</div>' +
 
-        <div class="card">
-          <h2>📋 Status do Processo</h2>
-          <div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">${etapa}/${totalEtapas} — ${etapas[etapa-1] || '—'}</span></div>
-          <div class="timeline">${timelineHtml}</div>
-        </div>
+        // 5) Dados Pessoais + Foto
+        '<div class="card">' +
+          '<div class="dados-pessoais-header">' +
+            (c.foto_url ? '<img class="dados-foto" src="' + c.foto_url + '" alt="Foto" onerror="this.outerHTML=\'<div class=&quot;dados-foto dados-foto-vazia&quot;>👤</div>\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
+            '<h2 style="margin:0">👤 Dados Pessoais</h2>' +
+          '</div>' +
+          '<div class="grid-2">' +
+            '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (c.email || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + (c.celular || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">CPF</div><div class="field-value">' + (c.cpf || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Data de Nascimento</div><div class="field-value">' + (fmtData(c.data_nascimento) || '—') + '</div></div>' +
+            (c.acessibilidade ? '<div class="field" style="grid-column:1/-1"><div class="field-label">Acessibilidade</div><div class="field-value">' + c.acessibilidade + '</div></div>' : '') +
+            '<div class="field" style="grid-column:1/-1"><div class="field-label">Endereço</div><div class="field-value">' + (endCompleto || '—') + '</div></div>' +
+          '</div>' +
+        '</div>' +
 
-        <div class="card">
-          <h2>📝 Histórico</h2>
-          <div class="hist">${histHtml}</div>
-        </div>
+        // 6) Sobre você
+        '<div class="card">' +
+          '<h2>💬 Sobre você</h2>' + sobreHtml +
+        '</div>' +
 
-        <div class="card">
-          <h2>👤 Dados do Candidato</h2>
-          <div class="info-grid">
-            <div class="info-item"><div class="lbl">E-mail</div><div class="val">${cand.email || '—'}</div></div>
-            <div class="info-item"><div class="lbl">Celular</div><div class="val">${cand.celular || '—'}</div></div>
-            <div class="info-item"><div class="lbl">Cidade</div><div class="val">${cand.cidade || '—'}${cand.estado ? ' / ' + cand.estado : ''}</div></div>
-            <div class="info-item"><div class="lbl">Formação</div><div class="val">${cand.formacao || '—'}</div></div>
-            <div class="info-item"><div class="lbl">Curso</div><div class="val">${cand.curso || '—'}${cand.instituicao ? ' • ' + cand.instituicao : ''}</div></div>
-            <div class="info-item"><div class="lbl">Primeiro emprego?</div><div class="val">${cand.primeiro_emprego ? 'Sim' : 'Não'}</div></div>
-          </div>
-        </div>
+        // 7) Formação
+        '<div class="card">' +
+          '<h2>🎓 Escolaridade</h2>' + formacaoHtml +
+        '</div>' +
 
-        ${cand.experiencia ? `<div class="card"><h2>💼 Experiência</h2><div style="white-space:pre-wrap; font-size:14px;">${cand.experiencia}</div></div>` : ''}
-        ${cand.sobre_voce ? `<div class="card"><h2>💬 Sobre o candidato</h2><div style="white-space:pre-wrap; font-size:14px;">${cand.sobre_voce}</div></div>` : ''}
+        // 8) Experiências
+        '<div class="card">' +
+          '<h2>💼 Experiências Profissionais</h2>' + expsHtml +
+        '</div>' +
 
-        <div class="card">
-          <h2>💬 Chat com o RH/Recrutador</h2>
-          <div id="chat-msgs" class="chat"><div class="empty">Carregando mensagens...</div></div>
-          <div class="chat-input">
-            <input id="chat-text" placeholder="Digite uma mensagem para o RH..." onkeydown="if(event.key==='Enter') enviarChat()">
-            <button class="btn" onclick="enviarChat()">Enviar</button>
-          </div>
-        </div>
-      `;
+        // 9) Ações
+        '<div class="card">' +
+          '<h2>⚡ Ações</h2>' + acoesHtml +
+        '</div>';
 
+      // carrega chat
       carregarChat();
-    })();
+    }
 
-    async function acao(tipo) {
-      const id = new URLSearchParams(location.search).get('id');
-      const comentario = document.getElementById('comentario').value.trim();
-      if ((tipo === 'avancar' || tipo === 'reprovar') && !confirm(tipo === 'avancar' ? 'Avançar candidato para a próxima etapa?' : 'Reprovar este candidato?')) return;
+    // === Ações ===
+    async function acao(id, ac) {
+      const labels = { 'avancar': 'aprovar e avançar este candidato para a próxima etapa?', 'reprovar': 'reprovar este candidato?' };
+      const motivo = ac === 'reprovar' ? prompt('Motivo da reprovação (opcional):') : null;
+      if (ac === 'reprovar' && motivo === null) return; // cancelou
+      if (!confirm('Tem certeza que deseja ' + labels[ac])) return;
       try {
         const r = await fetch(API + '/api/empresa/candidatura/' + id + '/acao', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ acao: tipo, motivo: comentario || null })
+          body: JSON.stringify({ acao: ac, motivo: motivo || '' })
         });
-        const d = await r.json();
-        if (!r.ok) { alert(d.erro || 'Erro'); return; }
-        alert(tipo === 'comentar' ? 'Comentário enviado!' : 'Ação registrada!');
-        location.reload();
-      } catch (e) { alert('Erro de conexão'); }
+        const data = await r.json();
+        if (r.ok) location.reload();
+        else alert('Erro: ' + (data.erro || 'Não foi possível atualizar'));
+      } catch (e) { alert('Erro: ' + e.message); }
     }
 
+    // === Chat RH × Empresa ===
+    let _chatInterval = null;
     async function carregarChat() {
       const id = new URLSearchParams(location.search).get('id');
+      const div = document.getElementById('chat-mensagens');
+      if (!div) return;
       try {
         const r = await fetch(API + '/api/empresa/candidatura/' + id + '/chat', { headers: { 'Authorization': 'Bearer ' + token } });
-        const data = await r.json();
-        const msgs = data.mensagens || [];
-        const div = document.getElementById('chat-msgs');
-        if (!div) return;
-        if (msgs.length === 0) { div.innerHTML = '<div class="empty">Nenhuma mensagem ainda.</div>'; return; }
+        const msgs = r.ok ? await r.json() : [];
+        if (!Array.isArray(msgs) || msgs.length === 0) {
+          div.innerHTML = '<p style="text-align:center;color:var(--cinza-medio);font-size:13px;padding:20px">Nenhuma mensagem ainda. Inicie a conversa com o RH!</p>';
+          return;
+        }
         div.innerHTML = msgs.map(m => {
-          const cls = m.remetente_tipo === 'empresa' ? 'msg-empresa' : 'msg-rh';
+          const cls = m.remetente_tipo === 'empresa' ? 'chat-msg-empresa' : 'chat-msg-rh';
+          const nome = m.remetente_nome || (m.remetente_tipo === 'empresa' ? 'Você' : 'RH');
           const d = new Date(m.criado_em);
-          return `<div class="msg ${cls}">
-            ${m.mensagem}
-            <div class="meta">${m.remetente_nome || (m.remetente_tipo === 'empresa' ? 'Você' : 'RH')} • ${d.toLocaleString('pt-BR')}</div>
-          </div>`;
+          return '<div class="chat-msg ' + cls + '">' + escapeHtml(m.mensagem) + '<div class="meta">' + nome + ' • ' + d.toLocaleString('pt-BR') + '</div></div>';
         }).join('');
         div.scrollTop = div.scrollHeight;
-      } catch (e) {}
+      } catch (e) { div.innerHTML = '<p style="color:var(--vermelho)">Erro ao carregar chat.</p>'; }
     }
-
     async function enviarChat() {
       const id = new URLSearchParams(location.search).get('id');
       const inp = document.getElementById('chat-text');
@@ -310,9 +452,15 @@
           body: JSON.stringify({ mensagem: msg })
         });
         if (r.ok) { inp.value = ''; carregarChat(); }
-        else alert('Erro ao enviar');
+        else alert('Erro ao enviar mensagem');
       } catch (e) { alert('Erro de conexão'); }
     }
+
+    // Inicia polling de chat (a cada 10s)
+    setInterval(carregarChat, 10000);
   </script>
 </body>
 </html>
+
+
+[File arg trimmed] content of /app/state/519f17ae-af11-4daf-9ccc-96d35055fca9/work/vagas/empresa/analisar.html — kept first 600 + last 400 of 25790 chars; re-read the file for the full content.
