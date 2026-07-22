@@ -476,7 +476,13 @@
       background: var(--branco);
       transition: all 0.3s;
     }
-    .screenshot:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(114,47,55,0.1); border-color: var(--vinho); }
+    .screenshot:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(114,47,55,0.12);
+      border-color: var(--vinho);
+    }
+    .screenshot:hover .placeholder span { transform: scale(1.15); transition: transform 0.3s; }
+    .screenshot-empty .placeholder span { transition: transform 0.3s; }
     .screenshot-img {
       height: 200px;
       background: var(--cinza-bg);
@@ -486,12 +492,14 @@
     }
     .screenshot-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
     .screenshot-empty .placeholder {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 6px; padding: 16px; text-align: center; color: var(--cinza-texto);
+      display: flex; align-items: center; justify-content: center;
+      padding: 0; text-align: center; color: var(--cinza-texto);
+      width: 100%;
     }
-    .screenshot-empty .placeholder span { font-size: 36px; }
-    .screenshot-empty .placeholder p { font-size: 14px; font-weight: 600; color: var(--vinho); margin: 0; }
-    .screenshot-empty .placeholder small { font-size: 12px; color: var(--cinza-texto); font-weight: 400; }
+    .screenshot-empty .placeholder span {
+      font-size: 64px; line-height: 1; display: block;
+      text-align: center;
+    }
     .screenshot-content { padding: 20px; }
     .screenshot-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
     .screenshot-content p { font-size: 13px; color: var(--cinza-texto); }
@@ -917,30 +925,47 @@
       <h2>A plataforma na <span class="vinho">prática</span></h2>
     </div>
     <div class="screenshots-grid">
-      <div class="screenshot">
       <div class="screenshot screenshot-empty">
-        <div class="screenshot-img"><div class="placeholder"><span>📱</span><p>Painel do candidato<br><small>inscrição pelo celular</small></p></div></div>
-        <div class="screenshot-content"><h4>Para candidatos</h4><p>Inscrição rápida pelo celular</p></div>
+        <div class="screenshot-img"><div class="placeholder"><span>📱</span></div></div>
+        <div class="screenshot-content">
+          <h4>Painel do candidato</h4>
+          <p>Inscrição rápida pelo celular</p>
+        </div>
       </div>
       <div class="screenshot screenshot-empty">
-        <div class="screenshot-img"><div class="placeholder"><span>💼</span><p>Painel de gestão<br><small>vagas, candidatos, agenda</small></p></div></div>
-        <div class="screenshot-content"><h4>Para gestores</h4><p>Painel completo de vagas</p></div>
+        <div class="screenshot-img"><div class="placeholder"><span>💼</span></div></div>
+        <div class="screenshot-content">
+          <h4>Painel de gestão</h4>
+          <p>Vagas, candidatos e agenda em um só lugar</p>
+        </div>
       </div>
       <div class="screenshot screenshot-empty">
-        <div class="screenshot-img"><div class="placeholder"><span>🔍</span><p>Análise completa do candidato<br><small>currículo + etapas + histórico</small></p></div></div>
-        <div class="screenshot-content"><h4>Análise completa</h4><p>Perfil detalhado de cada candidato</p></div>
+        <div class="screenshot-img"><div class="placeholder"><span>🔍</span></div></div>
+        <div class="screenshot-content">
+          <h4>Análise completa</h4>
+          <p>Currículo, etapas e histórico do candidato</p>
+        </div>
       </div>
       <div class="screenshot screenshot-empty">
-        <div class="screenshot-img"><div class="placeholder"><span>📅</span><p>Agenda integrada<br><small>entrevistas e prazos</small></p></div></div>
-        <div class="screenshot-content"><h4>Agenda integrada</h4><p>Entrevistas e prazos</p></div>
+        <div class="screenshot-img"><div class="placeholder"><span>📅</span></div></div>
+        <div class="screenshot-content">
+          <h4>Agenda integrada</h4>
+          <p>Entrevistas e prazos sob controle</p>
+        </div>
       </div>
       <div class="screenshot screenshot-empty">
-        <div class="screenshot-img"><div class="placeholder"><span>✏️</span><p>Editor visual de vagas<br><small>crie etapas com cliques</small></p></div></div>
-        <div class="screenshot-content"><h4>Editor visual</h4><p>Crie vagas e etapas com cliques</p></div>
+        <div class="screenshot-img"><div class="placeholder"><span>✏️</span></div></div>
+        <div class="screenshot-content">
+          <h4>Editor visual</h4>
+          <p>Crie vagas e etapas com poucos cliques</p>
+        </div>
       </div>
       <div class="screenshot screenshot-empty">
-        <div class="screenshot-img"><div class="placeholder"><span>📁</span><p>Coleta de documentos<br><small>16 docs obrigatórios</small></p></div></div>
-        <div class="screenshot-content"><h4>Coleta de documentos</h4><p>16 docs obrigatórios</p></div>
+        <div class="screenshot-img"><div class="placeholder"><span>📁</span></div></div>
+        <div class="screenshot-content">
+          <h4>Coleta de documentos</h4>
+          <p>16 documentos obrigatórios organizados</p>
+        </div>
       </div>
     </div>
   </div>
