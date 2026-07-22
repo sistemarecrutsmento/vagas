@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrevistas — Vagas.io</title>
+  <style>
+    :root {
+      --vinho: #722F37; --vinho-claro: #8a3a44; --dourado: #C9A961;
+      --bg: #f7f5f2; --card: #ffffff; --texto: #1a1a1a; --texto-suave: #666;
+      --borda: #e5e0d8; --cinza-medio: #888; --borda-escura: #d0c8bb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--texto); margin: 0; line-height: 1.5;
+    }
+    header {
+      background: var(--vinho); color: #fff; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 50;
+    }
+    .marca { font-size: 20px; font-weight: 800; }
+    .marca .dourado { color: var(--dourado); }
+    .marca small { font-size: 11px; opacity: 0.8; font-weight: 400; margin-left: 6px; }
+    .btn-menu { background: rgba(255,255,255,0.1); border: none; color: white; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; font-size: 20px; }
+    .btn-menu:hover { background: rgba(255,255,255,0.2); }
+
+    .subheader {
+      background: white; padding: 16px 20px; border-bottom: 1px solid var(--borda);
+    }
+    .subheader h1 { font-size: 20px; font-weight: 700; margin: 0; color: var(--vinho); }
+    .subheader p { font-size: 13px; color: var(--texto-suave); margin: 4px 0 0; }
+
+    .container { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; }
+    @media (max-width: 600px) {
+      .container { padding: 16px 14px 40px; }
+    }
+
+    .empty {
+      text-align: center; padding: 60px 20px; background: white;
+      border-radius: 12px; border: 1px solid var(--borda);
+    }
+    .empty .icon { font-size: 64px; margin-bottom: 16px; }
+    .empty h3 { color: var(--vinho); margin-bottom: 8px; }
+    .empty p { color: var(--texto-suave); margin-bottom: 20px; }
+
+    .entrevista {
+      background: white; border: 1px solid var(--borda); border-radius: 12px;
+      padding: 20px; margin-bottom: 16px; border-left: 4px solid var(--dourado);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .entrevista.hoje { border-left-color: #16a34a; background: linear-gradient(135deg, white 0%, #f0fdf4 100%); }
+    .entrevista.futura { border-left-color: var(--vinho); }
+    .entrevista.passada { border-left-color: #999; opacity: 0.7; }
+
+    .entrevista .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .badge.agendada { background: #fef3c7; color: #92400e; }
+    .badge.confirmada { background: #d1fae5; color: #065f46; }
+    .badge.realizada { background: #dbeafe; color: #1e40af; }
+
+    .entrevista .titulo { font-size: 16px; font-weight: 700; color: var(--vinho); margin-bottom: 4px; }
+    .entrevista .empresa { font-size: 14px; color: var(--texto-suave); margin-bottom: 12px; }
+    .entrevista .info { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; font-size: 14px; }
+    .entrevista .info-item { display: flex; align-items: center; gap: 6px; }
+    .entrevista .info-item .ico { font-size: 16px; }
+
+    .entrevista .acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+    .btn-entrar {
+      background: #16a34a; color: white; border: 0; padding: 12px 20px;
+      border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 2px 4px rgba(22,163,74,0.2);
+    }
+    .btn-entrar:hover { background: #15803d; }
+    .btn-entrar:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+    .btn-copiar {
+      background: var(--vinho); color: white; border: 0; padding: 12px 20px;
+      border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-copiar:hover { background: var(--vinho-claro); }
+
+    .contador {
+      font-size: 13px; color: var(--texto-suave); margin-top: 8px;
+      padding: 8px 12px; background: #f9fafb; border-radius: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .contador.ativo { background: #d1fae5; color: #065f46; font-weight: 600; }
+    .contador.urgente { background: #fee2e2; color: #991b1b; font-weight: 600; }
+
+    .observacoes {
+      margin-top: 12px; padding: 10px 12px; background: #f9fafb;
+      border-radius: 6px; font-size: 13px; color: var(--texto-suave);
+      border-left: 3px solid var(--dourado);
+    }
+    .observacoes strong { color: var(--vinho); }
+
+    /* === DRAWER (igual candidato) === */
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+    .drawer-overlay.aberto { display: block; }
+    aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+    aside.drawer.aberto { transform: translateX(0); }
+    .drawer-header { padding: 20px; background: var(--vinho); color: white; display: flex; align-items: center; gap: 12px; }
+    .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; flex-shrink: 0; }
+    .drawer-info { flex: 1; min-width: 0; }
+    .drawer-info h3 { font-size: 15px; font-weight: 700; margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .drawer-info p { font-size: 12px; opacity: 0.85; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .drawer-close { background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+    .drawer-body { flex: 1 1 auto; min-height: 0; padding: 16px 0; overflow-y: auto; }
+    .drawer-section { padding: 8px 20px 4px; font-size: 11px; font-weight: 700; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 12px; }
+    .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--texto); text-decoration: none; font-size: 14px; }
+    .drawer-link:hover { background: #f9fafb; }
+    .drawer-link .icon { font-size: 18px; }
+    .drawer-footer { padding: 12px 20px; border-top: 1px solid var(--borda); background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); flex-shrink: 0; }
+    .drawer-logout { width: 100%; background: #fef2f2; color: #991b1b; border: 0; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .drawer-logout:hover { background: #fee2e2; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="marca">Vagas<span class="dourado">.io</span> <small>Entrevistas</small></div>
+  <button class="btn-menu" id="btn-menu-logo" aria-label="Menu">☰</button>
+</header>
+
+<div class="subheader">
+  <h1>📅 Suas Entrevistas</h1>
+  <p>Acompanhe os horários e entre na sala de vídeo no dia marcado</p>
+</div>
+
+<main class="container" id="conteudo">
+  <div class="loading" style="text-align:center; padding:60px 20px;">
+    <div class="spinner" style="display:inline-block; width:40px; height:40px; border:4px solid #e5e0d8; border-top-color:#722F37; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+    <p style="margin-top:14px; color:#666;">Carregando entrevistas...</p>
+  </div>
+</main>
+
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+<!-- === DRAWER (menu lateral) === -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-foto" id="drawer-foto">👤</div>
+    <div class="drawer-info">
+      <h3 id="drawer-nome">Visitante</h3>
+      <p id="drawer-email">—</p>
+    </div>
+    <button class="drawer-close" onclick="fecharDrawer()">×</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">Navegação</div>
+    <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
+    <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
+    <a href="entrevistas.html" class="drawer-link ativo"><span class="icon">📅</span> Entrevistas</a>
+    <div class="drawer-section">Outros portais</div>
+    <a href="../" class="drawer-link"><span class="icon">🏡</span> Voltar pro site</a>
+    <a href="../empresa/" class="drawer-link"><span class="icon">🏢</span> Sou empresa</a>
+  </div>
+  <div class="drawer-footer" id="drawer-footer-logado" style="display:none">
+    <button class="drawer-logout" onclick="logout()">🚪 Sair</button>
+  </div>
+</aside>
+
+<script>
+// === UTILITÁRIOS DE AUTH (mesmo padrão do app-v2.js) ===
+let tokenCandidato = localStorage.getItem('candidato_token');
+let emailLogado = localStorage.getItem('candidato_email');
+
+function logout() {
+  if (!confirm('Sair da sua conta?')) return;
+  localStorage.removeItem('candidato_token');
+  localStorage.removeItem('candidato_email');
+  window.location.href = 'index.html';
+}
+
+function abrirDrawer() {
+  document.getElementById('drawer').classList.add('aberto');
+  document.getElementById('drawer-overlay').classList.add('aberto');
+}
+function fecharDrawer() {
+  document.getElementById('drawer').classList.remove('aberto');
+  document.getElementById('drawer-overlay').classList.remove('aberto');
+}
+
+// === CARREGA DADOS DO CANDIDATO LOGADO ===
+async function carregarCandidato() {
+  if (!tokenCandidato) {
+    document.getElementById('conteudo').innerHTML = `
+      <div class="empty">
+        <div class="icon">🔐</div>
+        <h3>Você precisa estar logado</h3>
+        <p>Entre na sua conta pra ver suas entrevistas agendadas</p>
+        <a href="index.html" class="btn-copiar">Ir pra tela de login</a>
+      </div>`;
+    return;
+  }
+  try {
+    const r = await fetch('https://recrutamento-api.onrender.com/api/candidato/perfil', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (r.status === 401 || r.status === 403) {
+      logout();
+      return;
+    }
+    const j = await r.json();
+    if (j.candidato) {
+      const nome = j.candidato.nome || 'Candidato';
+      document.getElementById('drawer-nome').textContent = nome;
+      document.getElementById('drawer-email').textContent = j.candidato.email || '';
+      document.getElementById('drawer-foto').textContent = nome.charAt(0).toUpperCase();
+      document.getElementById('drawer-footer-logado').style.display = 'block';
+    }
+  } catch (e) {
+    console.error('[carregarCandidato]', e);
+  }
+}
+
+// === CARREGA ENTREVISTAS ===
+async function carregarEntrevistas() {
+  if (!tokenCandidato) return;
+  try {
+    const r = await fetch('https://recrutamento-api.onrender.com/api/candidato/entrevistas', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (r.status === 401 || r.status === 403) {
+      logout();
+      return;
+    }
+    const j = await r.json();
+    const lista = j.entrevistas || [];
+    renderizar(lista);
+  } catch (e) {
+    console.error('[carregarEntrevistas]', e);
+    document.getElementById('conteudo').innerHTML = `
+      <div class="empty">
+        <div class="icon">⚠️</div>
+        <h3>Erro ao carregar</h3>
+        <p>Não conseguimos buscar suas entrevistas. Tenta de novo em alguns segundos.</p>
+      </div>`;
+  }
+}
+
+// === FORMATAÇÃO ===
+function formatarDataHora(isoString) {
+  const d = new Date(isoString);
+  return d.toLocaleString('pt-BR', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function formatarDataCurta(isoString) {
+  const d = new Date(isoString);
+  return d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+function minutosAte(isoString) {
+  const diff = new Date(isoString).getTime() - Date.now();
+  return Math.floor(diff / 60000);
+}
+
+function ehHoje(isoString) {
+  const d = new Date(isoString);
+  const hoje = new Date();
+  return d.getDate() === hoje.getDate() &&
+         d.getMonth() === hoje.getMonth() &&
+         d.getFullYear() === hoje.getFullYear();
+}
+
+// === RENDERIZAÇÃO ===
+function renderizar(lista) {
+  const cont = document.getElementById('conteudo');
+  if (lista.length === 0) {
+    cont.innerHTML = `
+      <div class="empty">
+        <div class="icon">📅</div>
+        <h3>Nenhuma entrevista agendada</h3>
+        <p>Quando o recrutador agendar uma entrevista com você, ela vai aparecer aqui com o link pra entrar.</p>
+        <a href="index.html" class="btn-copiar">Ver vagas disponíveis</a>
+      </div>`;
+    return;
+  }
+
+  // Separa em futuras, hoje, passadas
+  const agora = Date.now();
+  const futuras = lista.filter(e => new Date(e.data_hora).getTime() >= agora && e.status !== 'realizada');
+  const passadas = lista.filter(e => new Date(e.data_hora).getTime() < agora || e.status === 'realizada');
+
+  let html = '';
+
+  if (futuras.length > 0) {
+    html += `<h2 style="color:var(--vinho); font-size:18px; margin:0 0 14px;">📅 Próximas entrevistas (${futuras.length})</h2>`;
+    html += futuras.map(e => renderCard(e, false)).join('');
+  }
+
+  if (passadas.length > 0) {
+    html += `<h2 style="color:#666; font-size:18px; margin:30px 0 14px;">✅ Entrevistas realizadas (${passadas.length})</h2>`;
+    html += passadas.map(e => renderCard(e, true)).join('');
+  }
+
+  cont.innerHTML = html;
+}
+
+function renderCard(e, passada) {
+  const dataFmt = formatarDataHora(e.data_hora);
+  const dataCurta = formatarDataCurta(e.data_hora);
+  const hoje = ehHoje(e.data_hora) && !passada;
+  const classe = passada ? 'passada' : (hoje ? 'hoje' : 'futura');
+
+  // Janela de entrada: 15 min antes até 30 min depois do horário
+  const minAte = minutosAte(e.data_hora);
+  let podeEntrar = !passada && minAte <= 15 && minAte >= -30 && e.status !== 'cancelada';
+
+  // Contador
+  let contador = '';
+  if (!passada) {
+    if (minAte > 15) {
+      const dias = Math.floor(minAte / (60 * 24));
+      const horas = Math.floor((minAte % (60 * 24)) / 60);
+      const mins = minAte % 60;
+      let txt = '';
+      if (dias > 0) txt += `${dias}d `;
+      if (horas > 0) txt += `${horas}h `;
+      txt += `${mins}min`;
+      contador = `<div class="contador">⏱️ Faltam <strong style="margin-left:4px;">${txt.trim()}</strong> pra abrir a sala</div>`;
+    } else if (podeEntrar) {
+      contador = `<div class="contador ativo">✅ Sala liberada! Você pode entrar agora.</div>`;
+    } else if (minAte < -30) {
+      contador = `<div class="contador">⏱️ Horário já passou</div>`;
+    }
+  }
+
+  const tipoLabel = e.etapa === 3 ? '👥 Entrevista RH' : '🤝 Entrevista com Gestor';
+  const statusLabel = e.status ? e.status.charAt(0).toUpperCase() + e.status.slice(1) : 'Agendada';
+
+  return `
+    <div class="entrevista ${classe}">
+      <span class="badge ${e.status || 'agendada'}">${statusLabel}</span>
+      <div class="titulo">${tipoLabel}</div>
+      <div class="empresa">${e.vaga_titulo || 'Vaga'} • ${e.vaga_empresa || ''}</div>
+      <div class="info">
+        <div class="info-item"><span class="ico">📅</span> ${dataFmt}</div>
+        <div class="info-item"><span class="ico">⏱️</span> ${e.duracao_minutos || 60} min</div>
+        ${e.local ? `<div class="info-item"><span class="ico">📍</span> ${e.local}</div>` : ''}
+      </div>
+      ${contador}
+      ${e.observacoes ? `<div class="observacoes"><strong>📝 Recado:</strong> ${e.observacoes}</div>` : ''}
+      <div class="acoes">
+        <a href="${e.link_reuniao || '#'}"
+           target="_blank"
+           rel="noopener"
+           class="btn-entrar"
+           ${podeEntrar ? '' : 'aria-disabled="true" onclick="return false;" style="background:#cbd5e1;cursor:not-allowed;box-shadow:none;"'}>
+          📹 ${passada ? 'Rever sala' : (podeEntrar ? 'Entrar na sala' : 'Sala ainda fechada')}
+        </a>
+        ${!passada ? `
+          <button class="btn-copiar" onclick="copiarLink('${e.link_reuniao}')">
+            🔗 Copiar link
+          </button>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function copiarLink(link) {
+  if (!link || link === '#') {
+    alert('Link ainda não disponível.');
+    return;
+  }
+  navigator.clipboard.writeText(link).then(() => {
+    alert('✅ Link copiado! Cola no navegador pra abrir a sala.');
+  }).catch(() => {
+    prompt('Copia esse link:', link);
+  });
+}
+
+// === INIT ===
+document.addEventListener('DOMContentLoaded', () => {
+  const btnMenu = document.getElementById('btn-menu-logo');
+  if (btnMenu) btnMenu.addEventListener('click', abrirDrawer);
+
+  carregarCandidato();
+  carregarEntrevistas();
+
+  // Atualiza contadores a cada 30s
+  setInterval(() => {
+    if (document.querySelector('.contador')) {
+      carregarEntrevistas();
+    }
+  }, 30000);
+});
+</script>
+
+</body>
+</html>
