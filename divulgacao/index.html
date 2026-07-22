@@ -1,447 +1,501 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vagas.io — Sistema Completo de Recrutamento e Seleção</title>
-  <meta name="description" content="Plataforma própria de recrutamento e seleção. Da captação à contratação, tudo em um só lugar. Candidatos, gestores e empresa integrados.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vagas.io — Recrutamento e seleção completo, do anúncio à contratação</title>
+  <meta name="description" content="Sua plataforma completa de vagas. Candidatos se inscrevem pelo celular, gestores gerenciam tudo num painel só. Acabou planilha, e-mail perdido e bagunça no WhatsApp." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    /* ============== PALETA OFICIAL VAGAS.IO ============== */
+    /* ============== PALETA OFICIAL ============== */
     :root {
-      --bg: #FFFFFF;
-      --bg-2: #FAF7F8;
-      --bg-3: #F5EFF1;
       --vinho: #722F37;
       --vinho-escuro: #4A1F25;
       --vinho-claro: #8B3A45;
-      --txt: #1A1A1A;
-      --txt-sec: #6B6B6B;
-      --borda: #E5E5E5;
+      --vinho-bg: rgba(114,47,55,0.08);
+      --vinho-bg-2: rgba(114,47,55,0.12);
       --branco: #FFFFFF;
       --preto: #1A1A1A;
-      --cinza: #F5F5F5;
+      --cinza-texto: #6B6B6B;
+      --cinza-bg: #F5F5F5;
+      --cinza-bg-2: #FAF7F8;
+      --borda: #E5E5E5;
       --verde: #28A745;
-      --azul: #0C5460;
       --vermelho: #C62828;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--txt);
+      background: var(--branco);
+      color: var(--preto);
       line-height: 1.6;
       overflow-x: hidden;
     }
-    a { color: var(--vinho); text-decoration: none; }
+    a { color: var(--vinho); text-decoration: none; transition: color 0.2s; }
     a:hover { color: var(--vinho-escuro); }
+    img { max-width: 100%; display: block; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 90px 0; }
+    h1, h2, h3, h4 { color: var(--preto); line-height: 1.2; }
+    .section-title { text-align: center; max-width: 720px; margin: 0 auto 56px; }
+    .section-title .eyebrow { display: inline-block; font-size: 13px; font-weight: 700; color: var(--vinho); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
+    .section-title h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 800; margin-bottom: 16px; letter-spacing: -0.5px; }
+    .section-title p { font-size: 17px; color: var(--cinza-texto); }
+    .section-title h2 .vinho { color: var(--vinho); }
 
     /* ============== HEADER ============== */
     header {
-      position: fixed; top: 0; left: 0; right: 0;
-      z-index: 100;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--borda);
     }
     .header-inner {
-      max-width: 1200px; margin: 0 auto;
-      padding: 14px 24px;
       display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 24px;
+      max-width: 1200px; margin: 0 auto;
     }
-    .logo {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 22px; font-weight: 800;
-      color: var(--txt);
-    }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; }
     .logo-icon {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro));
-      border-radius: 8px;
+      width: 34px; height: 34px;
+      background: var(--vinho);
+      border-radius: 7px;
       display: flex; align-items: center; justify-content: center;
       color: #FFF; font-weight: 900; font-size: 18px;
-      box-shadow: 0 4px 12px rgba(114,47,55,0.3);
     }
-    .logo span { color: var(--vinho); }
-    nav { display: flex; gap: 28px; align-items: center; }
-    nav a {
-      color: var(--txt-sec); font-size: 14px; font-weight: 500;
-      transition: color 0.2s;
-    }
+    .logo-text { color: var(--preto); }
+    .logo-text span { color: var(--vinho); }
+    nav { display: flex; gap: 32px; align-items: center; }
+    nav a { color: var(--preto); font-size: 14px; font-weight: 500; }
     nav a:hover { color: var(--vinho); }
-    .btn-cta-header {
-      padding: 8px 18px;
+    .header-ctas { display: flex; gap: 10px; align-items: center; margin-left: 12px; }
+    .btn-outline {
+      background: transparent;
+      color: var(--vinho);
+      border: 1px solid var(--vinho);
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-weight: 600; font-size: 14px;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover { background: var(--vinho-bg); color: var(--vinho-escuro); }
+    .btn-vinho {
       background: var(--vinho);
       color: #FFF;
+      border: 1px solid var(--vinho);
+      padding: 9px 18px;
       border-radius: 6px;
-      font-weight: 700; font-size: 13px;
-      transition: transform 0.2s, background 0.2s;
+      font-weight: 600; font-size: 14px;
+      transition: all 0.2s;
     }
-    .btn-cta-header:hover {
-      background: var(--vinho-claro);
-      color: #FFF;
-      transform: translateY(-1px);
-    }
-    @media (max-width: 768px) {
-      nav a:not(.btn-cta-header) { display: none; }
-    }
-
-    /* ============== HERO ============== */
-    .hero {
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-      padding: 120px 24px 80px;
-      position: relative;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(114,47,55,0.12), transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(114,47,55,0.06), transparent 50%),
-        var(--bg);
-      text-align: center;
-    }
-    .hero-content { max-width: 900px; }
-    .hero-badge {
-      display: inline-block;
-      padding: 6px 16px;
-      background: rgba(114,47,55,0.08);
-      border: 1px solid rgba(114,47,55,0.25);
-      color: var(--vinho);
-      border-radius: 50px;
-      font-size: 13px; font-weight: 600;
-      margin-bottom: 24px;
-    }
-    .hero h1 {
-      font-size: clamp(36px, 6vw, 64px);
-      font-weight: 900;
-      line-height: 1.1;
-      margin-bottom: 24px;
-      letter-spacing: -1.5px;
-      color: var(--txt);
-    }
-    .hero h1 .destaque {
-      background: linear-gradient(135deg, var(--vinho), var(--vinho-claro));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero p {
-      font-size: clamp(16px, 2vw, 20px);
-      color: var(--txt-sec);
-      max-width: 700px;
-      margin: 0 auto 40px;
-    }
-    .hero-buttons {
-      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
-    }
-    .btn-primary, .btn-secondary {
+    .btn-vinho:hover { background: var(--vinho-escuro); border-color: var(--vinho-escuro); color: #FFF; }
+    .btn-vinho-lg { padding: 14px 28px; font-size: 15px; border-radius: 8px; }
+    .btn-vinho-lg:hover { transform: translateY(-1px); }
+    .btn-outline-lg {
+      background: transparent;
+      color: var(--preto);
+      border: 1px solid var(--borda);
       padding: 14px 28px;
       border-radius: 8px;
-      font-weight: 700; font-size: 15px;
-      display: inline-flex; align-items: center; gap: 8px;
+      font-weight: 600; font-size: 15px;
       transition: all 0.2s;
-      cursor: pointer; border: none;
     }
-    .btn-primary {
-      background: var(--vinho);
-      color: #FFF;
-      box-shadow: 0 8px 24px rgba(114,47,55,0.3);
-    }
-    .btn-primary:hover {
-      background: var(--vinho-claro);
-      color: #FFF;
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(114,47,55,0.4);
-    }
-    .btn-secondary {
-      background: transparent;
-      color: var(--txt);
-      border: 1px solid var(--borda);
-    }
-    .btn-secondary:hover {
-      border-color: var(--vinho);
-      color: var(--vinho);
-    }
-    .hero-stats {
-      display: flex; gap: 48px; justify-content: center;
-      margin-top: 64px; flex-wrap: wrap;
-    }
-    .stat { text-align: center; }
-    .stat-num {
-      font-size: 36px; font-weight: 900;
-      color: var(--vinho);
-      line-height: 1;
-    }
-    .stat-label {
-      font-size: 13px; color: var(--txt-sec);
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-top: 6px;
+    .btn-outline-lg:hover { border-color: var(--vinho); color: var(--vinho); }
+    @media (max-width: 900px) {
+      nav { display: none; }
     }
 
-    /* ============== SEÇÕES ============== */
-    section { padding: 100px 24px; }
-    .section-inner { max-width: 1200px; margin: 0 auto; }
-    .section-title {
-      text-align: center;
-      margin-bottom: 64px;
+    /* ============== HERO (2 colunas) ============== */
+    .hero {
+      padding: 60px 0 80px;
+      background:
+        radial-gradient(ellipse 800px 500px at 20% 30%, var(--vinho-bg), transparent 60%),
+        radial-gradient(ellipse 600px 400px at 90% 70%, var(--vinho-bg-2), transparent 60%),
+        var(--branco);
     }
-    .section-title h2 {
-      font-size: clamp(28px, 4vw, 44px);
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .hero h1 {
+      font-size: clamp(34px, 5vw, 56px);
       font-weight: 800;
-      margin-bottom: 16px;
-      letter-spacing: -0.5px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
     }
-    .section-title h2 .destaque { color: var(--vinho); }
-    .section-title p {
-      font-size: 18px; color: var(--txt-sec);
-      max-width: 600px; margin: 0 auto;
+    .hero h1 .vinho { color: var(--vinho); }
+    .hero-sub {
+      font-size: 18px;
+      color: var(--cinza-texto);
+      margin-bottom: 32px;
+      max-width: 520px;
     }
-
-    /* ============== ATALHOS (PORTAL) ============== */
-    .atalhos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
+    .hero-badges {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-bottom: 28px;
     }
-    .atalho-card {
-      background: var(--bg-2);
-      border: 1px solid var(--borda);
-      border-radius: 16px;
-      padding: 32px 28px;
-      text-align: center;
-      transition: all 0.3s;
-      cursor: pointer;
-      display: block;
-      text-decoration: none;
-      color: inherit;
-    }
-    .atalho-card:hover {
-      border-color: var(--vinho);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(114,47,55,0.15);
-    }
-    .atalho-icon {
-      width: 64px; height: 64px;
-      background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro));
-      border-radius: 14px;
-      margin: 0 auto 20px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 32px;
-      box-shadow: 0 8px 20px rgba(114,47,55,0.3);
-    }
-    .atalho-card h3 {
-      font-size: 22px; font-weight: 700;
-      margin-bottom: 10px;
-    }
-    .atalho-card p {
-      font-size: 14px; color: var(--txt-sec);
-      margin-bottom: 20px; min-height: 50px;
-    }
-    .atalho-link {
+    .hero-badge {
       display: inline-flex; align-items: center; gap: 6px;
-      color: var(--vinho); font-weight: 600; font-size: 14px;
-    }
-    .atalho-card:hover .atalho-link { gap: 10px; }
-
-    /* ============== RECURSOS ============== */
-    .recursos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 24px;
-    }
-    .recurso {
-      background: var(--bg-2);
-      border: 1px solid var(--borda);
-      border-radius: 12px;
-      padding: 28px;
-      transition: all 0.3s;
-    }
-    .recurso:hover {
-      border-color: var(--vinho);
-      background: linear-gradient(180deg, var(--bg-2), rgba(114,47,55,0.05));
-    }
-    .recurso-emoji {
-      font-size: 36px;
-      margin-bottom: 16px;
-      display: block;
-    }
-    .recurso h3 {
-      font-size: 18px; font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .recurso p {
-      font-size: 14px; color: var(--txt-sec);
-    }
-
-    /* ============== SCREENSHOTS ============== */
-    .screenshots-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-      gap: 32px;
-    }
-    .screenshot {
-      background: var(--bg-2);
-      border: 1px solid var(--borda);
-      border-radius: 16px;
-      overflow: hidden;
-      transition: all 0.3s;
-    }
-    .screenshot:hover {
-      border-color: var(--vinho);
-      transform: translateY(-4px);
-    }
-    .screenshot-img {
-      width: 100%; height: 240px;
-      background: var(--bg-3);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--txt-sec);
-      font-size: 14px;
-      position: relative;
-      overflow: hidden;
-    }
-    .screenshot-img img {
-      width: 100%; height: 100%;
-      object-fit: cover; object-position: top;
-    }
-    .screenshot-content { padding: 24px; }
-    .screenshot-content h3 {
-      font-size: 20px; font-weight: 700; margin-bottom: 8px;
-    }
-    .screenshot-content p {
-      font-size: 14px; color: var(--txt-sec);
-    }
-    .screenshot-tag {
-      display: inline-block;
-      padding: 4px 10px;
-      background: rgba(114,47,55,0.15);
+      padding: 5px 12px;
+      background: var(--vinho-bg);
       color: var(--vinho);
-      border-radius: 4px;
-      font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 12px;
+      border-radius: 50px;
+      font-size: 12px; font-weight: 600;
+    }
+    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-ctas .btn-vinho-lg::after { content: " →"; }
+    .hero-mockup {
+      position: relative;
+      min-height: 480px;
+    }
+    .hero-laptop {
+      position: relative;
+      background: var(--cinza-bg-2);
+      border: 1px solid var(--borda);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+      transform: rotate(-2deg);
+    }
+    .hero-laptop::before {
+      content: "";
+      position: absolute;
+      top: -8px; left: 50%; transform: translateX(-50%);
+      width: 60px; height: 4px;
+      background: var(--borda);
+      border-radius: 2px;
+    }
+    .hero-laptop .laptop-screen {
+      background: #FFF;
+      border-radius: 6px;
+      height: 240px;
+      background: linear-gradient(135deg, #f9f9f9 0%, #fafafa 100%);
+      display: flex; flex-direction: column;
+      padding: 12px; gap: 8px;
+      overflow: hidden;
+    }
+    .laptop-bar { display: flex; gap: 4px; margin-bottom: 4px; }
+    .laptop-bar i { display: block; width: 8px; height: 8px; border-radius: 50%; background: #ddd; }
+    .laptop-row {
+      height: 12px; border-radius: 3px; background: #e5e5e5;
+    }
+    .laptop-row.vinho { background: var(--vinho); width: 60%; }
+    .laptop-row.escuro { background: #d0d0d0; width: 80%; }
+    .laptop-row.claro { background: #efefef; width: 70%; }
+    .laptop-card {
+      background: var(--vinho-bg);
+      border: 1px solid rgba(114,47,55,0.2);
+      border-radius: 6px; padding: 10px;
+      font-size: 11px; color: var(--vinho); font-weight: 600;
+    }
+    .hero-phone {
+      position: absolute;
+      bottom: -20px; right: -10px;
+      width: 160px; height: 300px;
+      background: var(--preto);
+      border-radius: 24px;
+      padding: 8px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      transform: rotate(4deg);
+    }
+    .hero-phone .phone-screen {
+      background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+      border-radius: 18px; height: 100%;
+      padding: 14px 10px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .phone-header { font-size: 11px; font-weight: 700; color: var(--vinho); }
+    .phone-card { background: #f5f5f5; border-radius: 6px; padding: 8px; font-size: 9px; color: #333; }
+    .phone-card .v { color: var(--vinho); font-weight: 700; }
+    .phone-btn { background: var(--vinho); color: #FFF; border-radius: 6px; padding: 6px; font-size: 9px; font-weight: 700; text-align: center; }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-mockup { min-height: 360px; }
     }
 
-    /* ============== COMO FUNCIONA ============== */
-    .como-funciona {
-      background: linear-gradient(180deg, var(--bg), var(--bg-2));
-    }
-    .passos {
+    /* ============== DIFERENCIAIS (5 cards) ============== */
+    .diferenciais-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(5, 1fr);
       gap: 24px;
-      position: relative;
     }
-    .passo {
+    .diferencial {
       text-align: center;
-      position: relative;
+      padding: 20px 12px;
     }
-    .passo-num {
-      width: 56px; height: 56px;
-      background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro));
-      color: #FFF;
+    .dif-icon {
+      width: 64px; height: 64px;
+      border: 2px solid var(--vinho);
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 24px; font-weight: 900;
-      margin: 0 auto 20px;
-      box-shadow: 0 8px 20px rgba(114,47,55,0.3);
+      margin: 0 auto 16px;
+      font-size: 28px;
+      color: var(--vinho);
+      transition: all 0.3s;
     }
-    .passo h3 {
-      font-size: 17px; font-weight: 700; margin-bottom: 8px;
+    .diferencial:hover .dif-icon {
+      background: var(--vinho);
+      color: #FFF;
+      transform: scale(1.05);
     }
-    .passo p {
-      font-size: 14px; color: var(--txt-sec);
+    .diferencial h3 {
+      font-size: 15px; font-weight: 700;
+      color: var(--vinho);
+      margin-bottom: 8px;
+    }
+    .diferencial p { font-size: 13px; color: var(--cinza-texto); }
+    @media (max-width: 900px) {
+      .diferenciais-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ============== COMO FUNCIONA (timeline) ============== */
+    .como { background: var(--cinza-bg-2); }
+    .passos {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+      position: relative;
+    }
+    .passos::before {
+      content: "";
+      position: absolute;
+      top: 32px; left: 10%; right: 10%;
+      border-top: 2px dashed rgba(114,47,55,0.3);
+      z-index: 0;
+    }
+    .passo { text-align: center; position: relative; z-index: 1; }
+    .passo-num {
+      width: 64px; height: 64px;
+      background: var(--branco);
+      border: 2px solid var(--vinho);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 22px;
+      color: var(--vinho);
+      transition: all 0.3s;
+    }
+    .passo:hover .passo-num { background: var(--vinho); color: #FFF; }
+    .passo h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .passo p { font-size: 12px; color: var(--cinza-texto); }
+    @media (max-width: 900px) {
+      .passos { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+      .passos::before { display: none; }
+    }
+
+    /* ============== TUDO EM UM SÓ LUGAR (grid 5x2) ============== */
+    .tudo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 24px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .tudo-item { text-align: center; padding: 12px 6px; }
+    .tudo-item .tudo-emoji {
+      width: 56px; height: 56px;
+      background: var(--vinho-bg);
+      color: var(--vinho);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 24px;
+    }
+    .tudo-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .tudo-item p { font-size: 12px; color: var(--cinza-texto); }
+    @media (max-width: 900px) {
+      .tudo-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ============== EMPRESAS (2 colunas) ============== */
+    .empresas { background: var(--cinza-bg-2); }
+    .empresas-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .empresas-list { display: flex; flex-direction: column; gap: 12px; }
+    .empresa-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px;
+      background: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    .empresa-item:hover { border-color: var(--vinho); transform: translateX(4px); }
+    .empresa-check {
+      width: 32px; height: 32px;
+      background: var(--vinho-bg);
+      color: var(--vinho);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px;
+      flex-shrink: 0;
+    }
+    .empresa-item span { font-weight: 600; font-size: 15px; }
+    .empresas-mockup {
+      background: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.08);
+    }
+    .mockup-bar { display: flex; gap: 5px; margin-bottom: 14px; }
+    .mockup-bar i { display: block; width: 10px; height: 10px; border-radius: 50%; background: #ddd; }
+    .mockup-content { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
+    .mockup-side { background: var(--vinho-bg); border-radius: 8px; padding: 12px; }
+    .mockup-side .sb { background: var(--vinho); color: #FFF; padding: 8px; border-radius: 5px; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
+    .mockup-side .sb.off { background: #fff; color: var(--cinza-texto); }
+    .mockup-main { display: flex; flex-direction: column; gap: 8px; }
+    .mockup-stat { background: #f5f5f5; border-radius: 6px; padding: 10px; }
+    .mockup-stat strong { display: block; font-size: 18px; color: var(--vinho); }
+    .mockup-stat small { font-size: 10px; color: var(--cinza-texto); }
+    @media (max-width: 900px) {
+      .empresas-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ============== BANNER PLATAFORMA PERSONALIZADA ============== */
+    .banner {
+      background: var(--vinho);
+      color: #FFF;
+      padding: 32px 36px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 60px auto;
+      max-width: 1100px;
+    }
+    .banner-icon {
+      width: 56px; height: 56px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .banner-text { flex: 1; }
+    .banner h3 { color: #FFF; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .banner p { font-size: 14px; opacity: 0.9; }
+    .banner a { color: #FFF; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; }
+    .banner a:hover { text-decoration: underline; }
+    @media (max-width: 700px) {
+      .banner { flex-direction: column; text-align: center; }
+    }
+
+    /* ============== SCREENSHOTS (3x2) ============== */
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    .screenshot {
+      border: 1px solid var(--borda);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--branco);
+      transition: all 0.3s;
+    }
+    .screenshot:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(114,47,55,0.1); border-color: var(--vinho); }
+    .screenshot-img {
+      height: 200px;
+      background: var(--cinza-bg);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .screenshot-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .screenshot-content { padding: 20px; }
+    .screenshot-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .screenshot-content p { font-size: 13px; color: var(--cinza-texto); }
+    @media (max-width: 900px) {
+      .screenshots-grid { grid-template-columns: 1fr; }
     }
 
     /* ============== COMPARAÇÃO ============== */
     .comparacao-table {
-      max-width: 800px; margin: 0 auto;
-      background: var(--bg-2);
+      max-width: 900px; margin: 0 auto;
+      background: var(--branco);
       border: 1px solid var(--borda);
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
     }
     .comparacao-row {
       display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
       padding: 16px 20px;
       border-bottom: 1px solid var(--borda);
       align-items: center;
     }
     .comparacao-row:last-child { border-bottom: none; }
-    .comparacao-row.header {
-      background: var(--bg-3);
-      font-weight: 700; font-size: 14px;
-      color: var(--vinho);
-    }
+    .comparacao-row.header { background: var(--cinza-bg-2); font-weight: 700; font-size: 13px; }
     .comparacao-row .col { font-size: 14px; }
     .comparacao-row .col:first-child { font-weight: 600; }
-    .check { color: var(--verde); font-weight: 700; }
-    .x { color: var(--vermelho); font-weight: 700; }
-    .meio { color: var(--vinho); }
-    @media (max-width: 600px) {
-      .comparacao-row { grid-template-columns: 1fr 1fr; padding: 12px; font-size: 13px; }
-      .comparacao-row .col:first-child { grid-column: span 2; margin-bottom: 6px; }
+    .check { color: var(--verde); font-weight: 700; font-size: 18px; }
+    .x { color: var(--vermelho); font-weight: 700; font-size: 16px; }
+    .meio { color: #b8860b; font-weight: 700; }
+    .col.destaque { color: var(--vinho); font-weight: 700; }
+    .comparacao-row.header .col.destaque { color: var(--vinho); }
+    @media (max-width: 700px) {
+      .comparacao-row { grid-template-columns: 1fr 1fr; font-size: 13px; padding: 12px; }
+      .comparacao-row .col:first-child { grid-column: span 2; margin-bottom: 4px; }
       .comparacao-row.header { display: none; }
     }
 
-    /* ============== CONTATO ============== */
-    .contato-section {
-      background: linear-gradient(180deg, var(--bg-2), var(--bg));
+    /* ============== CTA FINAL ============== */
+    .cta-final {
+      background: linear-gradient(135deg, var(--vinho-escuro) 0%, var(--vinho) 100%);
+      color: #FFF;
+      padding: 80px 0;
       text-align: center;
     }
-    .contato-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      max-width: 800px; margin: 40px auto 0;
+    .cta-final h2 { color: #FFF; font-size: clamp(28px, 4vw, 40px); font-weight: 800; margin-bottom: 16px; }
+    .cta-final p { font-size: 18px; opacity: 0.9; max-width: 600px; margin: 0 auto 32px; }
+    .cta-final .btn-vinho {
+      background: #FFF; color: var(--vinho); border-color: #FFF; padding: 14px 32px; font-size: 16px;
     }
-    .contato-card {
-      background: var(--bg-3);
-      border: 1px solid var(--borda);
-      border-radius: 12px;
-      padding: 24px 20px;
-      transition: all 0.3s;
-    }
-    .contato-card:hover {
-      border-color: var(--vinho);
-    }
-    .contato-emoji {
-      font-size: 32px;
-      margin-bottom: 12px;
-      display: block;
-    }
-    .contato-card strong {
-      display: block;
-      font-size: 13px; color: var(--txt-sec);
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-    .contato-card a, .contato-card span {
-      font-size: 15px; font-weight: 600;
-      color: var(--txt);
-    }
-    .contato-card a:hover { color: var(--vinho); }
+    .cta-final .btn-vinho:hover { background: var(--cinza-bg-2); color: var(--vinho-escuro); }
 
     /* ============== FOOTER ============== */
     footer {
-      padding: 40px 24px;
-      border-top: 1px solid var(--borda);
-      text-align: center;
-      color: var(--txt-sec);
-      font-size: 14px;
+      background: var(--preto);
+      color: #999;
+      padding: 60px 0 24px;
     }
-    footer a { color: var(--vinho); font-weight: 600; }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer-brand { font-size: 14px; line-height: 1.7; }
+    .footer-brand .logo { margin-bottom: 16px; }
+    .footer-brand .logo-text { color: #FFF; }
+    .footer-col h4 { color: #FFF; font-size: 14px; font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+    .footer-col a { display: block; color: #999; font-size: 14px; margin-bottom: 10px; }
+    .footer-col a:hover { color: #FFF; }
+    .footer-bottom {
+      border-top: 1px solid #333;
+      padding-top: 24px;
+      text-align: center;
+      font-size: 13px;
+    }
+    @media (max-width: 700px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
 
     /* ============== ANIMAÇÕES ============== */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .hero-content, .section-title, .atalho-card, .recurso, .screenshot, .passo {
-      animation: fadeUp 0.6s ease-out backwards;
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .hero-content, .diferencial, .passo, .tudo-item, .screenshot, .empresa-item { animation: fadeUp 0.6s ease-out backwards; }
   </style>
 </head>
 <body>
@@ -451,359 +505,328 @@
   <div class="header-inner">
     <a href="#top" class="logo">
       <div class="logo-icon">V</div>
-      Vagas<span>.io</span>
+      <div class="logo-text">Vagas<span>.io</span></div>
     </a>
     <nav>
-      <a href="#recursos">Recursos</a>
+      <a href="#diferenciais">Diferenciais</a>
       <a href="#como-funciona">Como funciona</a>
+      <a href="#recursos">Recursos</a>
+      <a href="#empresas">Empresas</a>
       <a href="#comparacao">Comparação</a>
       <a href="#contato">Contato</a>
-      <a href="https://sistemarecrutsmento.github.io/vagas/" target="_blank" class="btn-cta-header">Acessar plataforma →</a>
     </nav>
+    <div class="header-ctas">
+      <a href="https://sistemarecrutsmento.github.io/vagas/" target="_blank" class="btn-outline">Acessar plataforma</a>
+      <a href="https://sistemarecrutsmento.github.io/vagas/" target="_blank" class="btn-vinho">Testar grátis agora</a>
+    </div>
   </div>
 </header>
 
 <!-- HERO -->
 <section class="hero" id="top">
-  <div class="hero-content">
-    <span class="hero-badge">🚀 Sistema próprio, sem mensalidade por candidato</span>
-    <h1>Recrutamento e seleção<br><span class="destaque">do anúncio à contratação</span></h1>
-    <p>Sua plataforma completa de vagas. Candidatos se inscrevem pelo celular, gestores gerenciam tudo num painel só. Acabou planilha, e-mail perdido e bagunça no WhatsApp.</p>
-    <div class="hero-buttons">
-      <a href="https://sistemarecrutsmento.github.io/vagas/" target="_blank" class="btn-primary">
-        🌐 Ver como candidato
-      </a>
-      <a href="https://sistemarecrutsmento.github.io/vagas/admin/" target="_blank" class="btn-secondary">
-        🔐 Acessar painel gestor
-      </a>
-    </div>
-    <div class="hero-stats">
-      <div class="stat">
-        <div class="stat-num">7+</div>
-        <div class="stat-label">Etapas configuráveis</div>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <h1>Sua plataforma de <span class="vinho">recrutamento e seleção</span> completa</h1>
+        <p class="hero-sub">Candidatos se inscrevem pelo celular. Gestores gerenciam tudo num painel só. Acabou planilha, e-mail perdido e bagunça no WhatsApp.</p>
+        <div class="hero-badges">
+          <span class="hero-badge">✓ Sem mensalidade por candidato</span>
+          <span class="hero-badge">✓ Pronto pra usar</span>
+          <span class="hero-badge">✓ Personalizável</span>
+        </div>
+        <div class="hero-ctas">
+          <a href="https://sistemarecrutsmento.github.io/vagas/" target="_blank" class="btn-vinho btn-vinho-lg">Testar grátis agora</a>
+          <a href="#como-funciona" class="btn-outline-lg">Ver como funciona</a>
+        </div>
       </div>
-      <div class="stat">
-        <div class="stat-num">100%</div>
-        <div class="stat-label">Personalizável</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">0</div>
-        <div class="stat-label">Planilhas</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ATALHOS -->
-<section id="portal">
-  <div class="section-inner">
-    <div class="section-title">
-      <h2>Acesse agora mesmo</h2>
-      <p>3 ambientes integrados, prontos pra usar. Clique e veja funcionando.</p>
-    </div>
-    <div class="atalhos-grid">
-      <a href="https://sistemarecrutsmento.github.io/vagas/" target="_blank" class="atalho-card">
-        <div class="atalho-icon">👤</div>
-        <h3>Portal do Candidato</h3>
-        <p>Vê vagas, se inscreve, envia currículo e documentos, acompanha a etapa atual.</p>
-        <span class="atalho-link">Acessar como candidato →</span>
-      </a>
-      <a href="https://sistemarecrutsmento.github.io/vagas/admin/" target="_blank" class="atalho-card">
-        <div class="atalho-icon">💼</div>
-        <h3>Painel do Gestor</h3>
-        <p>Publica vagas, gerencia candidatos, agenda entrevistas, manda proposta. Tudo num lugar.</p>
-        <span class="atalho-link">Acessar como gestor →</span>
-      </a>
-      <a href="https://sistemarecrutsmento.github.io/vagas/admin/candidaturas.html" target="_blank" class="atalho-card">
-        <div class="atalho-icon">📊</div>
-        <h3>Gestão de Candidaturas</h3>
-        <p>Lista de vagas com candidatos, análise de perfis, aprovar/reprovar com 1 clique.</p>
-        <span class="atalho-link">Ver gestão →</span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- RECURSOS -->
-<section id="recursos" style="background: var(--bg-2);">
-  <div class="section-inner">
-    <div class="section-title">
-      <h2>Tudo que você precisa,<br><span class="destaque">nada que você não precisa</span></h2>
-      <p>Cada recurso foi pensado pra eliminar planilha, e-mail perdido e WhatsApp infinito.</p>
-    </div>
-    <div class="recursos-grid">
-      <div class="recurso">
-        <span class="recurso-emoji">📢</span>
-        <h3>Publicação de vagas</h3>
-        <p>Formulário rápido, com modelos de etapas prontos. Sua vaga no ar em 2 minutos.</p>
-      </div>
-      <div class="recurso">
-        <span class="recurso-emoji">👥</span>
-        <h3>Gestão de candidatos</h3>
-        <p>Lista, busca, perfil completo (currículo, endereço, formação, experiências). Tudo organizado.</p>
-      </div>
-      <div class="recurso">
-        <span class="recurso-emoji">🔄</span>
-        <h3>Aprovar / Reprovar / Reabrir</h3>
-        <p>Botões diretos. Avança a etapa do candidato, ou volta atrás. Sem planilha, sem confusão.</p>
-      </div>
-      <div class="recurso">
-        <span class="recurso-emoji">📅</span>
-        <h3>Agenda de entrevistas</h3>
-        <p>Filtros por hoje, próximas, passadas. Visualização rápida de quem entrevista quando.</p>
-      </div>
-      <div class="recurso">
-        <span class="recurso-emoji">📨</span>
-        <h3>Envio de proposta</h3>
-        <p>Anexa PDF, candidato aceita ou recusa direto pelo celular. Resposta automática no sistema.</p>
-      </div>
-      <div class="recurso">
-        <span class="recurso-emoji">📄</span>
-        <h3>Validação de documentos</h3>
-        <p>16 documentos obrigatórios na admissão. Status individual (pendente, aprovado, reprovado).</p>
-      </div>
-      <div class="recurso">
-        <span class="recurso-emoji">⚙️</span>
-        <h3>Etapas personalizáveis</h3>
-        <p>Você define quantas e quais etapas cada vaga tem. Não fica preso a template fixo.</p>
-      </div>
-      <div class="recurso">
-        <span class="recurso-emoji">👥</span>
-        <h3>Multi-usuário</h3>
-        <p>Vários recrutadores, cada um com sua conta. Vê só o que precisa ver.</p>
-      </div>
-      <div class="recurso">
-        <span class="recurso-emoji">📱</span>
-        <h3>Mobile-first pro candidato</h3>
-        <p>O candidato acessa pelo celular, inscreve em 2 minutos. Não tem app pra baixar.</p>
+      <div class="hero-mockup">
+        <div class="hero-laptop">
+          <div class="laptop-screen">
+            <div class="laptop-bar"><i></i><i></i><i></i></div>
+            <div class="laptop-row vinho"></div>
+            <div class="laptop-row escuro"></div>
+            <div class="laptop-card">📊 7 candidatos novos hoje</div>
+            <div class="laptop-row claro"></div>
+            <div class="laptop-row escuro"></div>
+            <div class="laptop-row claro"></div>
+          </div>
+        </div>
+        <div class="hero-phone">
+          <div class="phone-screen">
+            <div class="phone-header">Vagas.io</div>
+            <div class="phone-card">Auxiliar Administrativo</div>
+            <div class="phone-card">Vendedor — <span class="v">R$ 1.800</span></div>
+            <div class="phone-card">Estágio em TI</div>
+            <div class="phone-btn">Inscreva-se</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- SCREENSHOTS -->
-<section id="screenshots">
-  <div class="section-inner">
+<!-- DIFERENCIAIS -->
+<section id="diferenciais">
+  <div class="container">
     <div class="section-title">
-      <h2>Veja como fica <span class="destaque">na prática</span></h2>
-      <p>Telas reais do sistema rodando em produção.</p>
+      <span class="eyebrow">Nossos diferenciais</span>
+      <h2>Por que escolher o <span class="vinho">Vagas.io</span>?</h2>
     </div>
-    <div class="screenshots-grid">
-      <div class="screenshot">
-        <div class="screenshot-img">
-          <img src="assets/screenshot-candidato.jpg" alt="Portal do candidato" onerror="this.parentElement.innerHTML='<div style=&quot;color:#888;&quot;>📱 Portal do Candidato</div>'">
-        </div>
-        <div class="screenshot-content">
-          <span class="screenshot-tag">Candidato</span>
-          <h3>Inscrição em 2 minutos</h3>
-          <p>O candidato vê a vaga, preenche dados, anexa currículo — tudo pelo celular, sem baixar app.</p>
-        </div>
+    <div class="diferenciais-grid">
+      <div class="diferencial">
+        <div class="dif-icon">⚡</div>
+        <h3>Rápido</h3>
+        <p>Setup em minutos, sem complicação</p>
       </div>
-      <div class="screenshot">
-        <div class="screenshot-img">
-          <img src="assets/screenshot-admin.jpg" alt="Painel admin" onerror="this.parentElement.innerHTML='<div style=&quot;color:#888;&quot;>💼 Painel do Gestor</div>'">
-        </div>
-        <div class="screenshot-content">
-          <span class="screenshot-tag">Gestor</span>
-          <h3>Painel completo de gestão</h3>
-          <p>Visão geral das vagas, candidatos por etapa, agenda do dia, KPIs tudo num lugar só.</p>
-        </div>
+      <div class="diferencial">
+        <div class="dif-icon">🔒</div>
+        <h3>Seguro</h3>
+        <p>Seus dados são seus, sem mensalidade</p>
       </div>
-      <div class="screenshot">
-        <div class="screenshot-img">
-          <img src="assets/screenshot-analisar.jpg" alt="Análise de candidato" onerror="this.parentElement.innerHTML='<div style=&quot;color:#888;&quot;>🔍 Análise de Candidato</div>'">
-        </div>
-        <div class="screenshot-content">
-          <span class="screenshot-tag">Análise</span>
-          <h3>Perfil completo do candidato</h3>
-          <p>Currículo, endereço, formação, experiências, timeline de etapas. Tudo na mesma tela.</p>
-        </div>
+      <div class="diferencial">
+        <div class="dif-icon">📱</div>
+        <h3>Mobile</h3>
+        <p>Candidatos se inscrevem pelo celular</p>
       </div>
-      <div class="screenshot">
-        <div class="screenshot-img">
-          <img src="assets/screenshot-agenda.jpg" alt="Agenda de entrevistas" onerror="this.parentElement.innerHTML='<div style=&quot;color:#888;&quot;>📅 Agenda</div>'">
-        </div>
-        <div class="screenshot-content">
-          <span class="screenshot-tag">Agenda</span>
-          <h3>Agenda de entrevistas</h3>
-          <p>Filtros por período (hoje, próximas, passadas). Estatísticas em tempo real.</p>
-        </div>
+      <div class="diferencial">
+        <div class="dif-icon">🎨</div>
+        <h3>Personalizável</h3>
+        <p>Adapte o sistema ao seu processo</p>
+      </div>
+      <div class="diferencial">
+        <div class="dif-icon">💰</div>
+        <h3>Econômico</h3>
+        <p>Sem taxa por candidato contratado</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- COMO FUNCIONA -->
-<section class="como-funciona" id="como-funciona">
-  <div class="section-inner">
+<section class="como" id="como-funciona">
+  <div class="container">
     <div class="section-title">
-      <h2>Como funciona na <span class="destaque">prática</span></h2>
-      <p>Do clique do candidato à contratação fechada, em 8 passos.</p>
+      <span class="eyebrow">Como funciona</span>
+      <h2>7 etapas do <span class="vinho">anúncio à contratação</span></h2>
+      <p>Configure uma vez e o sistema cuida do resto. Cada vaga tem sua jornada configurável.</p>
     </div>
     <div class="passos">
-      <div class="passo">
-        <div class="passo-num">1</div>
-        <h3>Empresa publica a vaga</h3>
-        <p>Com título, descrição e modelo de etapas.</p>
+      <div class="passo"><div class="passo-num">1</div><h4>Inscrição</h4><p>Candidato se cadastra</p></div>
+      <div class="passo"><div class="passo-num">2</div><h4>Triagem</h4><p>Filtro inicial</p></div>
+      <div class="passo"><div class="passo-num">3</div><h4>RH</h4><p>Entrevista com RH</p></div>
+      <div class="passo"><div class="passo-num">4</div><h4>Gestor</h4><p>Entrevista técnica</p></div>
+      <div class="passo"><div class="passo-num">5</div><h4>Proposta</h4><p>Envio e aceite</p></div>
+      <div class="passo"><div class="passo-num">6</div><h4>Documentos</h4><p>Coleta de docs</p></div>
+      <div class="passo"><div class="passo-num">✓</div><h4>Contratação</h4><p>Admissão</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TUDO EM UM SÓ LUGAR -->
+<section id="recursos">
+  <div class="container">
+    <div class="section-title">
+      <span class="eyebrow">Recursos</span>
+      <h2>Tudo em <span class="vinho">um só lugar</span></h2>
+      <p>Cadastro de candidatos, agenda, documentos, propostas, relatórios — tudo integrado.</p>
+    </div>
+    <div class="tudo-grid">
+      <div class="tudo-item"><div class="tudo-emoji">📋</div><h4>Vagas</h4><p>CRUD completo</p></div>
+      <div class="tudo-item"><div class="tudo-emoji">👥</div><h4>Candidatos</h4><p>Banco de talentos</p></div>
+      <div class="tudo-item"><div class="tudo-emoji">📅</div><h4>Agenda</h4><p>Entrevistas e prazos</p></div>
+      <div class="tudo-item"><div class="tudo-emoji">📄</div><h4>Currículos</h4><p>Upload de PDF</p></div>
+      <div class="tudo-item"><div class="tudo-emoji">📨</div><h4>Propostas</h4><p>Envio e aceite</p></div>
+      <div class="tudo-item"><div class="tudo-emoji">📁</div><h4>Documentos</h4><p>16 docs obrigatórios</p></div>
+      <div class="tudo-item"><div class="tudo-emoji">📊</div><h4>Relatórios</h4><p>Dashboards</p></div>
+      <div class="tudo-item"><div class="tudo-emoji">🔔</div><h4>Notificações</h4><p>Alertas em tempo real</p></div>
+      <div class="tudo-item"><div class="tudo-emoji">✉️</div><h4>E-mails</h4><p>Comunicação automática</p></div>
+      <div class="tudo-item"><div class="tudo-emoji">🔐</div><h4>Multi-usuário</h4><p>Permissões e equipes</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- EMPRESAS -->
+<section class="empresas" id="empresas">
+  <div class="container">
+    <div class="section-title">
+      <span class="eyebrow">Para todos os portes</span>
+      <h2>Para empresas de <span class="vinho">todos os tamanhos</span></h2>
+    </div>
+    <div class="empresas-grid">
+      <div class="empresas-list">
+        <div class="empresa-item"><div class="empresa-check">✓</div><span>Indústria</span></div>
+        <div class="empresa-item"><div class="empresa-check">✓</div><span>Comércio</span></div>
+        <div class="empresa-item"><div class="empresa-check">✓</div><span>Serviços</span></div>
+        <div class="empresa-item"><div class="empresa-check">✓</div><span>Saúde</span></div>
+        <div class="empresa-item"><div class="empresa-check">✓</div><span>Educação</span></div>
+        <div class="empresa-item"><div class="empresa-check">✓</div><span>Advocacia</span></div>
+        <div class="empresa-item"><div class="empresa-check">✓</div><span>Hotelaria</span></div>
+        <div class="empresa-item"><div class="empresa-check">✓</div><span>Construção</span></div>
       </div>
-      <div class="passo">
-        <div class="passo-num">2</div>
-        <h3>Candidato vê e se inscreve</h3>
-        <p>Pelo celular, em 2 minutos.</p>
+      <div class="empresas-mockup">
+        <div class="mockup-bar"><i></i><i></i><i></i></div>
+        <div class="mockup-content">
+          <div class="mockup-side">
+            <div class="sb">Vagas</div>
+            <div class="sb off">Candidatos</div>
+            <div class="sb off">Agenda</div>
+            <div class="sb off">Relatórios</div>
+          </div>
+          <div class="mockup-main">
+            <div class="mockup-stat"><strong>12</strong><small>Vagas abertas</small></div>
+            <div class="mockup-stat"><strong>48</strong><small>Candidatos ativos</small></div>
+            <div class="mockup-stat"><strong>3</strong><small>Propostas pendentes</small></div>
+          </div>
+        </div>
       </div>
-      <div class="passo">
-        <div class="passo-num">3</div>
-        <h3>Currículo entra no painel</h3>
-        <p>Aparece automaticamente pro gestor.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BANNER -->
+<div class="banner">
+  <div class="banner-icon">🎨</div>
+  <div class="banner-text">
+    <h3>Plataforma 100% personalizada</h3>
+    <p>Cada empresa configura suas etapas, documentos e fluxo do jeito que precisa.</p>
+    <a href="#contato">Fale com a gente →</a>
+  </div>
+</div>
+
+<!-- SCREENSHOTS -->
+<section>
+  <div class="container">
+    <div class="section-title">
+      <span class="eyebrow">Na prática</span>
+      <h2>A plataforma na <span class="vinho">prática</span></h2>
+    </div>
+    <div class="screenshots-grid">
+      <div class="screenshot">
+        <div class="screenshot-img"><img src="assets/screen-candidato.png" alt="Tela do candidato" /></div>
+        <div class="screenshot-content"><h4>Para candidatos</h4><p>Inscrição rápida pelo celular</p></div>
       </div>
-      <div class="passo">
-        <div class="passo-num">4</div>
-        <h3>Gestor aprova / reprova</h3>
-        <p>Com 1 clique, sem planilha.</p>
+      <div class="screenshot">
+        <div class="screenshot-img"><img src="assets/screen-admin.png" alt="Painel admin" /></div>
+        <div class="screenshot-content"><h4>Para gestores</h4><p>Painel completo de vagas</p></div>
       </div>
-      <div class="passo">
-        <div class="passo-num">5</div>
-        <h3>Agenda entrevista</h3>
-        <p>Direto no sistema, sem e-mail.</p>
+      <div class="screenshot">
+        <div class="screenshot-img"><img src="assets/screen-analisar.png" alt="Análise de candidato" /></div>
+        <div class="screenshot-content"><h4>Análise completa</h4><p>Currículo + etapas + histórico</p></div>
       </div>
-      <div class="passo">
-        <div class="passo-num">6</div>
-        <h3>Manda proposta</h3>
-        <p>Com PDF anexo.</p>
+      <div class="screenshot">
+        <div class="screenshot-img"><img src="assets/screen-vaga.png" alt="Editor de vaga" /></div>
+        <div class="screenshot-content"><h4>Editor visual</h4><p>Crie vagas e etapas com cliques</p></div>
       </div>
-      <div class="passo">
-        <div class="passo-num">7</div>
-        <h3>Candidato aceita</h3>
-        <p>Pelo celular, com 1 toque.</p>
+      <div class="screenshot">
+        <div class="screenshot-img"><img src="assets/screen-agenda.png" alt="Agenda" /></div>
+        <div class="screenshot-content"><h4>Agenda integrada</h4><p>Entrevistas e prazos</p></div>
       </div>
-      <div class="passo">
-        <div class="passo-num">8</div>
-        <h3>Valida documentos</h3>
-        <p>16 docs obrigatórios. Contratação fechada 🎉</p>
+      <div class="screenshot">
+        <div class="screenshot-img"><img src="assets/screen-docs.png" alt="Documentos" /></div>
+        <div class="screenshot-content"><h4>Coleta de documentos</h4><p>16 docs obrigatórios</p></div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- COMPARAÇÃO -->
-<section id="comparacao">
-  <div class="section-inner">
+<section style="background: var(--cinza-bg-2);" id="comparacao">
+  <div class="container">
     <div class="section-title">
-      <h2>Comparado com <span class="destaque">concorrentes</span></h2>
-      <p>Plataformas prontas cobram caro, vendem seus dados e travam personalização.</p>
+      <span class="eyebrow">Comparação</span>
+      <h2>Vagas.io vs <span class="vinho">concorrentes</span></h2>
+      <p>Sem taxa por candidato, sem mensalidade abusiva, sem perder o controle dos seus dados.</p>
     </div>
     <div class="comparacao-table">
       <div class="comparacao-row header">
         <div class="col">Recurso</div>
-        <div class="col">Vagas.io</div>
-        <div class="col">Concorrentes</div>
+        <div class="col destaque">Vagas.io</div>
+        <div class="col">Gupy</div>
+        <div class="col">Vagas.com</div>
       </div>
       <div class="comparacao-row">
-        <div class="col">💰 Custo</div>
-        <div class="col"><span class="check">✓</span> Valor único de implantação</div>
-        <div class="col"><span class="x">✗</span> R$ 500 a R$ 5.000+/mês</div>
+        <div class="col">Custo por candidato</div>
+        <div class="col destaque"><span class="check">✓</span> Grátis</div>
+        <div class="col"><span class="x">R$ 9-29/cand</span></div>
+        <div class="col"><span class="x">R$ 5-15/cand</span></div>
       </div>
       <div class="comparacao-row">
-        <div class="col">⚙️ Personalização</div>
-        <div class="col"><span class="check">✓</span> 100% customizado</div>
-        <div class="col"><span class="x">✗</span> Limitada ao template</div>
+        <div class="col">Propriedade dos dados</div>
+        <div class="col destaque"><span class="check">✓</span> Sua</div>
+        <div class="col"><span class="x">Da plataforma</span></div>
+        <div class="col"><span class="x">Da plataforma</span></div>
       </div>
       <div class="comparacao-row">
-        <div class="col">🔒 Seus dados</div>
-        <div class="col"><span class="check">✓</span> No seu servidor</div>
-        <div class="col"><span class="x">✗</span> Na nuvem deles</div>
+        <div class="col">Personalização de etapas</div>
+        <div class="col destaque"><span class="check">✓</span> Total</div>
+        <div class="col"><span class="meio">~</span> Parcial</div>
+        <div class="col"><span class="x">Fixa</span></div>
       </div>
       <div class="comparacao-row">
-        <div class="col">📋 Etapas do processo</div>
-        <div class="col"><span class="check">✓</span> Você escolhe</div>
-        <div class="col"><span class="x">✗</span> Padrão fixo</div>
+        <div class="col">Painel do candidato</div>
+        <div class="col destaque"><span class="check">✓</span> Mobile</div>
+        <div class="col"><span class="check">✓</span> Mobile</div>
+        <div class="col"><span class="meio">~</span> Web</div>
       </div>
       <div class="comparacao-row">
-        <div class="col">🌐 Domínio próprio</div>
-        <div class="col"><span class="check">✓</span> vagas.suaempresa.com.br</div>
-        <div class="col"><span class="x">✗</span> empresa.plataforma.com</div>
+        <div class="col">Coleta de documentos</div>
+        <div class="col destaque"><span class="check">✓</span> Integrada</div>
+        <div class="col"><span class="meio">~</span> Básica</div>
+        <div class="col"><span class="x">Não tem</span></div>
       </div>
       <div class="comparacao-row">
-        <div class="col">📞 Suporte</div>
-        <div class="col"><span class="check">✓</span> WhatsApp direto comigo</div>
-        <div class="col"><span class="meio">~</span> Chat genérico, fila</div>
-      </div>
-      <div class="comparacao-row">
-        <div class="col">🔄 Mudanças</div>
-        <div class="col"><span class="check">✓</span> Eu implemento quando pedir</div>
-        <div class="col"><span class="x">✗</span> Depende do roadmap deles</div>
+        <div class="col">Setup</div>
+        <div class="col destaque"><span class="check">✓</span> Imediato</div>
+        <div class="col"><span class="x">Dias/semanas</span></div>
+        <div class="col"><span class="meio">~</span> Dias</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CONTATO -->
-<section class="contato-section" id="contato">
-  <div class="section-inner">
-    <div class="section-title">
-      <h2>Vamos conversar?</h2>
-      <p>Quer ver funcionando, tirar dúvidas ou já fechar? Me chama no canal que preferir.</p>
-    </div>
-    <div class="contato-grid">
-      <div class="contato-card">
-        <span class="contato-emoji">📱</span>
-        <strong>WhatsApp</strong>
-        <a href="https://wa.me/5516997902168" target="_blank">(16) 99790-2168</a>
-      </div>
-      <div class="contato-card">
-        <span class="contato-emoji">📧</span>
-        <strong>E-mail</strong>
-        <a href="mailto:contato@vagasio.com.br">contato@vagasio.com.br</a>
-      </div>
-      <div class="contato-card">
-        <span class="contato-emoji">💼</span>
-        <strong>Painel Demo</strong>
-        <a href="https://sistemarecrutsmento.github.io/vagas/admin/" target="_blank">Acessar agora</a>
-      </div>
-      <div class="contato-card">
-        <span class="contato-emoji">👤</span>
-        <strong>Desenvolvedor</strong>
-        <span>Fabio Júnior</span>
-      </div>
-    </div>
+<!-- CTA FINAL -->
+<section class="cta-final" id="contato">
+  <div class="container">
+    <h2>Pronto pra modernizar seu recrutamento?</h2>
+    <p>Teste grátis agora. Sem cartão, sem cadastro complicado, sem letras miúdas.</p>
+    <a href="https://sistemarecrutsmento.github.io/vagas/" target="_blank" class="btn-vinho btn-vinho-lg">Começar agora →</a>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <p>© 2026 <strong>Vagas.io</strong> — Desenvolvido por <a href="https://wa.me/5516997902168" target="_blank">Fabio Júnior</a></p>
-  <p style="margin-top:8px; font-size:12px;">Sistema próprio de recrutamento e seleção. Da captação à contratação.</p>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-icon">V</div>
+          <div class="logo-text">Vagas<span>.io</span></div>
+        </div>
+        <p>Sua plataforma completa de recrutamento e seleção. Do anúncio à contratação, sem complicação.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Plataforma</h4>
+        <a href="https://sistemarecrutsmento.github.io/vagas/" target="_blank">Candidatos</a>
+        <a href="https://sistemarecrutsmento.github.io/vagas/admin/" target="_blank">Gestor</a>
+        <a href="https://sistemarecrutsmento.github.io/vagas/empresa/" target="_blank">Empresa</a>
+      </div>
+      <div class="footer-col">
+        <h4>Recursos</h4>
+        <a href="#diferenciais">Diferenciais</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#comparacao">Comparação</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contato</h4>
+        <a href="https://wa.me/5516997902168" target="_blank">WhatsApp</a>
+        <a href="mailto:contato@vagasio.com.br">E-mail</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2026 Vagas.io — Todos os direitos reservados.
+    </div>
+  </div>
 </footer>
-
-<script>
-  // Smooth scroll pro header fixo
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const href = a.getAttribute('href');
-      if (href === '#') return;
-      const target = document.querySelector(href);
-      if (target) {
-        e.preventDefault();
-        const offset = 80;
-        const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-      }
-    });
-  });
-
-  // Animação de entrada ao scrollar
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.animation = 'fadeUp 0.6s ease-out forwards';
-      }
-    });
-  }, { threshold: 0.1 });
-
-  document.querySelectorAll('.atalho-card, .recurso, .screenshot, .passo').forEach(el => {
-    observer.observe(el);
-  });
-</script>
 
 </body>
 </html>
