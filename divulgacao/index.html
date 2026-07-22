@@ -38,7 +38,7 @@
     a:hover { color: var(--vinho-escuro); }
     img { max-width: 100%; display: block; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    section { padding: 90px 0; }
+    section { padding: 72px 0; }
     h1, h2, h3, h4 { color: var(--preto); line-height: 1.2; }
     .section-title { text-align: center; max-width: 720px; margin: 0 auto 56px; }
     .section-title .eyebrow { display: inline-block; font-size: 13px; font-weight: 700; color: var(--vinho); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
@@ -56,46 +56,48 @@
     }
     .header-inner {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 16px 24px;
+      padding: 14px 24px;
       max-width: 1200px; margin: 0 auto;
-      gap: 32px;
+      gap: 24px;
     }
-    .logo { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 800; flex-shrink: 0; }
     .logo-icon {
-      width: 34px; height: 34px;
+      width: 32px; height: 32px;
       background: var(--vinho);
       border-radius: 7px;
       display: flex; align-items: center; justify-content: center;
-      color: #FFF; font-weight: 900; font-size: 18px;
+      color: #FFF; font-weight: 900; font-size: 17px;
     }
     .logo-text { color: var(--preto); }
     .logo-text span { color: var(--vinho); }
-    nav { display: flex; gap: 32px; align-items: center; }
-    nav a { color: var(--preto); font-size: 14px; font-weight: 500; }
+    nav { display: flex; gap: 24px; align-items: center; flex: 1; justify-content: center; }
+    nav a { color: var(--preto); font-size: 13.5px; font-weight: 500; transition: color 0.2s; white-space: nowrap; }
     nav a:hover { color: var(--vinho); }
-    .header-ctas { display: flex; gap: 10px; align-items: center; margin-left: 12px; }
+    .header-ctas { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
     .btn-outline {
       background: transparent;
       color: var(--vinho);
       border: 1px solid var(--vinho);
-      padding: 9px 18px;
+      padding: 8px 16px;
       border-radius: 6px;
-      font-weight: 600; font-size: 14px;
+      font-weight: 600; font-size: 13.5px;
       transition: all 0.2s;
       min-width: 160px;
       text-align: center;
+      white-space: nowrap;
     }
     .btn-outline:hover { background: var(--vinho-bg); color: var(--vinho-escuro); }
     .btn-vinho {
       background: var(--vinho);
       color: #FFF;
       border: 1px solid var(--vinho);
-      padding: 9px 18px;
+      padding: 8px 16px;
       border-radius: 6px;
-      font-weight: 600; font-size: 14px;
+      font-weight: 600; font-size: 13.5px;
       transition: all 0.2s;
       min-width: 160px;
       text-align: center;
+      white-space: nowrap;
     }
     .btn-vinho:hover { background: var(--vinho-escuro); border-color: var(--vinho-escuro); color: #FFF; }
     .btn-vinho-lg { padding: 14px 28px; font-size: 15px; border-radius: 8px; }
@@ -110,13 +112,17 @@
       transition: all 0.2s;
     }
     .btn-outline-lg:hover { border-color: var(--vinho); color: var(--vinho); }
+    @media (max-width: 1100px) {
+      nav { gap: 18px; }
+      .header-ctas .btn-outline { display: none; }
+    }
     @media (max-width: 900px) {
       nav { display: none; }
     }
 
     /* ============== HERO (2 colunas) ============== */
     .hero {
-      padding: 60px 0 80px;
+      padding: 70px 0 90px;
       background:
         radial-gradient(ellipse 800px 500px at 20% 30%, var(--vinho-bg), transparent 60%),
         radial-gradient(ellipse 600px 400px at 90% 70%, var(--vinho-bg-2), transparent 60%),
@@ -125,22 +131,23 @@
     .hero-grid {
       display: grid;
       grid-template-columns: 1.1fr 1fr;
-      gap: 60px;
+      gap: 50px;
       align-items: center;
     }
     .hero h1 {
-      font-size: clamp(34px, 5vw, 56px);
+      font-size: clamp(32px, 4.5vw, 52px);
       font-weight: 800;
-      line-height: 1.1;
+      line-height: 1.15;
       margin-bottom: 20px;
-      letter-spacing: -1px;
+      letter-spacing: -0.8px;
     }
     .hero h1 .vinho { color: var(--vinho); }
     .hero-sub {
-      font-size: 18px;
+      font-size: 17px;
       color: var(--cinza-texto);
-      margin-bottom: 32px;
+      margin-bottom: 28px;
       max-width: 520px;
+      line-height: 1.6;
     }
     .hero-badges {
       display: flex; flex-wrap: wrap; gap: 10px;
@@ -289,9 +296,12 @@
       line-height: 1.7;
       color: var(--cinza-texto);
     }
-    @media (max-width: 900px) {
-      .passos { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+    @media (max-width: 1100px) {
+      .passos { grid-template-columns: repeat(3, 1fr); gap: 28px 16px; }
       .passos::before { display: none; }
+    }
+    @media (max-width: 700px) {
+      .passos { grid-template-columns: repeat(2, 1fr); gap: 24px 12px; }
     }
 
     /* ============== TUDO EM UM SÓ LUGAR (grid 5x2) ============== */
@@ -301,8 +311,9 @@
       gap: 24px 20px;
       max-width: 1000px;
       margin: 0 auto;
+      justify-items: center;
     }
-    .tudo-item { text-align: center; padding: 12px 6px; }
+    .tudo-item { text-align: center; padding: 12px 6px; width: 100%; }
     .tudo-item .tudo-emoji {
       width: 56px; height: 56px;
       background: var(--vinho-bg);
@@ -311,6 +322,12 @@
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 12px;
       font-size: 24px;
+      transition: all 0.3s;
+    }
+    .tudo-item:hover .tudo-emoji {
+      background: var(--vinho);
+      color: #FFF;
+      transform: translateY(-3px);
     }
     .tudo-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
     .tudo-item p { font-size: 12px; color: var(--cinza-texto); }
@@ -319,11 +336,14 @@
       align-items: center;
       justify-content: center;
       gap: 48px;
-      margin-top: 48px;
+      margin-top: 56px;
       flex-wrap: wrap;
+      padding: 40px;
+      background: var(--cinza-bg-2);
+      border-radius: 16px;
     }
     .portal-candidato-foto {
-      width: 220px;
+      width: 200px;
       flex-shrink: 0;
     }
     .portal-candidato-foto img {
@@ -346,11 +366,14 @@
       color: var(--cinza-texto);
       max-width: 360px;
     }
-    @media (max-width: 600px) {
-      .portal-candidato-bloco { flex-direction: column; text-align: center; gap: 24px; }
+    @media (max-width: 700px) {
+      .portal-candidato-bloco { flex-direction: column; text-align: center; gap: 24px; padding: 24px; }
       .portal-candidato-texto { text-align: center; }
     }
     @media (max-width: 900px) {
+      .tudo-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 600px) {
       .tudo-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
@@ -487,10 +510,12 @@
     .comparacao-row {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr 1fr;
-      padding: 16px 20px;
+      padding: 18px 24px;
       border-bottom: 1px solid var(--borda);
       align-items: center;
+      transition: background 0.2s;
     }
+    .comparacao-row:not(.header):hover { background: var(--cinza-bg); }
     .comparacao-row:last-child { border-bottom: none; }
     .comparacao-row.header { background: var(--cinza-bg-2); font-weight: 700; font-size: 13px; }
     .comparacao-row .col { font-size: 14px; }
@@ -552,9 +577,9 @@
     .contato-lista a:hover { text-decoration: underline; }
     .contato-form {
       background: var(--branco);
-      padding: 32px;
-      border-radius: 12px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+      padding: 36px;
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.08);
       border: 1px solid var(--borda);
     }
     .form-row {
@@ -573,18 +598,23 @@
       color: var(--preto);
     }
     .form-group input,
-    .form-group textarea {
+    .form-group textarea,
+    .form-group select {
       width: 100%;
-      padding: 10px 12px;
+      padding: 11px 14px;
       border: 1px solid var(--borda);
       border-radius: 6px;
       font-size: 14px;
       font-family: inherit;
       transition: border-color 0.2s, box-shadow 0.2s;
       box-sizing: border-box;
+      background: var(--branco);
+      color: var(--preto);
     }
+    .form-group select { cursor: pointer; }
     .form-group input:focus,
-    .form-group textarea:focus {
+    .form-group textarea:focus,
+    .form-group select:focus {
       outline: none;
       border-color: var(--vinho);
       box-shadow: 0 0 0 3px rgba(114,47,55,0.1);
