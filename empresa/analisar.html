@@ -127,7 +127,7 @@
       const etapa = cand.etapa_atual || 1;
       const etapas = (cand.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
       const totalEtapas = etapas.length || 7;
-      const podeAgir = etapa >= 4; // só etapa 4+ (Entrevista com gestor)
+      const podeAgir = etapa === 4; // somente etapa 4: Entrevista com gestor/empresa
       const status = cand.status || 'em_analise';
 
       // Timeline
