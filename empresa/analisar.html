@@ -4,18 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Analisar Candidato — Portal Empresa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="empresa.css">
   <style>
-    .topo { background: var(--vinho); color: white; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
-    .topo h1 { font-size: 18px; }
-    .topo a { color: var(--dourado); text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid var(--dourado); border-radius: 6px; }
-    .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
-    .card { background: var(--card); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 16px; }
-    .card h2 { font-size: 16px; font-weight: 700; color: var(--vinho); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--borda); }
-    .header { display: flex; align-items: center; gap: 16px; }
-    .header .avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 24px; flex-shrink: 0; }
-    .header h1 { font-size: 22px; margin-bottom: 4px; }
-    .header .sub { font-size: 14px; color: var(--texto-suave); margin-bottom: 6px; }
+    .header-cand { display: flex; align-items: center; gap: 16px; }
+    .header-cand .avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 24px; flex-shrink: 0; }
+    .header-cand h1 { font-size: 22px; margin-bottom: 4px; }
+    .header-cand .sub { font-size: 14px; color: var(--cinza-medio); margin-bottom: 6px; }
     .status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
     .status-em_andamento { background: #dbeafe; color: #1e40af; }
     .status-em_analise { background: #fef3c7; color: #92400e; }
@@ -24,83 +19,100 @@
     .status-contratado { background: #dcfce7; color: #166534; }
     .badge-etapa { display: inline-block; background: var(--dourado); color: white; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
     .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 20px; }
-    .info-item .lbl { font-size: 11px; text-transform: uppercase; color: var(--texto-suave); letter-spacing: 0.5px; }
-    .info-item .val { font-size: 14px; color: var(--texto); margin-top: 2px; word-wrap: break-word; }
+    .info-item .lbl { font-size: 11px; text-transform: uppercase; color: var(--cinza-medio); letter-spacing: 0.5px; }
+    .info-item .val { font-size: 14px; color: var(--preto); margin-top: 2px; word-wrap: break-word; }
     .timeline { display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
-    .etapa-pill { padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; background: #f0ede7; color: var(--texto-suave); }
+    .etapa-pill { padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; background: #f0f0f0; color: var(--cinza-medio); }
     .etapa-pill.atual { background: var(--dourado); color: white; }
     .etapa-pill.feita { background: #dcfce7; color: #166534; }
-    .acoes-empresa { display: flex; flex-direction: column; gap: 10px; background: #faf7f2; padding: 16px; border-radius: 10px; border: 1px solid var(--dourado); }
+    .acoes-empresa { display: flex; flex-direction: column; gap: 10px; background: #fafafa; padding: 16px; border-radius: 8px; border: 1px solid var(--dourado); }
     .acoes-empresa h3 { color: var(--vinho); font-size: 14px; margin-bottom: 6px; }
     .acoes-empresa textarea { width: 100%; padding: 10px; border: 1px solid var(--borda); border-radius: 6px; font-family: inherit; font-size: 14px; resize: vertical; min-height: 60px; }
     .acoes-empresa .row { display: flex; gap: 8px; }
     .acoes-empresa .btn { flex: 1; }
     .btn { display: inline-block; padding: 10px 16px; background: var(--vinho); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
-    .btn:hover { background: var(--vinho-claro); }
-    .btn-aprovar { background: #16a34a; }
-    .btn-aprovar:hover { background: #15803d; }
-    .btn-reprovar { background: #dc2626; }
-    .btn-reprovar:hover { background: #b91c1c; }
-    .btn-sec { background: transparent; border: 1px solid var(--borda); color: var(--texto); }
+    .btn:hover { background: var(--vinho-escuro); }
+    .btn-aprovar { background: #2E7D32; }
+    .btn-aprovar:hover { background: #1B5E20; }
+    .btn-reprovar { background: #C62828; }
+    .btn-reprovar:hover { background: #B71C1C; }
+    .btn-sec { background: transparent; border: 1px solid var(--borda); color: var(--preto); }
     .btn-sec:hover { background: #f5f5f5; }
     .chat { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; }
     .msg { padding: 10px 14px; border-radius: 10px; max-width: 75%; font-size: 14px; }
     .msg-empresa { background: var(--vinho); color: white; align-self: flex-end; }
-    .msg-rh { background: #f0ede7; color: var(--texto); align-self: flex-start; }
+    .msg-rh { background: #f0f0f0; color: var(--preto); align-self: flex-start; }
     .msg .meta { font-size: 11px; opacity: 0.8; margin-top: 4px; }
     .chat-input { display: flex; gap: 8px; margin-top: 10px; }
-    .chat-input input { flex: 1; padding: 10px; border: 1px solid var(--borda); border-radius: 6px; font-size: 14px; }
+    .chat-input input { flex: 1; padding: 10px; border: 1px solid var(--borda); border-radius: 6px; font-size: 14px; font-family: inherit; }
     .hist { font-size: 13px; }
-    .hist-item { padding: 8px 0; border-bottom: 1px solid #f0ede7; }
+    .hist-item { padding: 8px 0; border-bottom: 1px solid var(--borda); }
     .hist-item:last-child { border-bottom: none; }
-    .hist-item .data { font-size: 11px; color: var(--texto-suave); }
-    .badge-telespectador { background: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 10px; }
-    .empty { text-align: center; padding: 40px; color: var(--texto-suave); }
+    .hist-item .data { font-size: 11px; color: var(--cinza-medio); }
+    .badge-telespectador { background: #fff3e0; color: #92400e; padding: 12px 14px; border-radius: 6px; font-size: 13px; }
     .alerta-info { background: #dbeafe; color: #1e40af; padding: 10px 14px; border-radius: 6px; font-size: 13px; }
   </style>
 </head>
 <body>
-  <div class="topo">
-    <a href="#" id="btn-voltar">← Voltar</a>
-    <h1>Portal Empresa</h1>
-    <div style="flex:1"></div>
-    <a href="#" onclick="logout()">Sair</a>
-  </div>
+  <button class="menu-toggle" onclick="document.querySelector('aside').classList.add('aberto'); document.querySelector('.app').classList.add('aside-aberto');" aria-label="Abrir menu">☰</button>
 
-  <div class="submenu">
-    <a href="index.html">📊 Dashboard</a>
-    <a href="vagas.html">📋 Vagas com Candidatos</a>
-    <a href="agenda.html">📅 Agenda</a>
-    <a href="perfil.html">⚙️ Perfil</a>
-  </div>
+  <div class="app">
+    <aside>
+      <button class="menu-close" onclick="document.querySelector('aside').classList.add('fechado'); document.querySelector('.app').classList.remove('aside-aberto');" aria-label="Fechar menu">✕</button>
+      <div class="aside-logo">
+        <h1>Vagas<span class="dourado">.io</span></h1>
+        <small>Portal da Empresa</small>
+      </div>
 
-  <div class="container">
-    <div id="content">
-      <div class="card"><div class="empty">Carregando...</div></div>
-    </div>
+      <a class="nav-item" href="index.html">📊 Dashboard</a>
+      <a class="nav-item" href="vagas.html">📋 Vagas com Candidatos</a>
+      <a class="nav-item" href="agenda.html">📅 Agenda</a>
+      <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
+
+      <div class="aside-user">
+        <div class="aside-user-avatar" id="avatar">--</div>
+        <div class="aside-user-info">
+          <div class="nome" id="user-nome">--</div>
+          <div class="empresa" id="user-empresa">--</div>
+        </div>
+        <button class="btn-logout" onclick="sair()" title="Sair">↪</button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="page-header">
+        <div>
+          <h2 id="page-titulo">Candidato</h2>
+          <div class="sub" id="page-sub">Carregando...</div>
+        </div>
+      </div>
+
+      <div id="content">
+        <div class="card"><div class="empty">Carregando...</div></div>
+      </div>
+    </main>
   </div>
 
   <script>
     const API = 'https://recrutamento-api.onrender.com';
+    const token = localStorage.getItem('empresa_token');
+    if (!token) window.location.href = 'login.html';
 
-    function logout() {
-      localStorage.removeItem('empresa_token');
-      localStorage.removeItem('empresa_usuario');
-      window.location.href = 'login.html';
-    }
+    const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
+    document.getElementById('avatar').textContent = (usuario.nome || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+    document.getElementById('user-nome').textContent = usuario.nome || '--';
+    document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
 
-    document.getElementById('btn-voltar').addEventListener('click', (e) => {
-      e.preventDefault();
-      if (document.referrer && document.referrer.includes(location.host) && !document.referrer.includes('analisar.html')) {
-        history.back();
-      } else {
-        window.location.href = 'candidatos.html' + (new URLSearchParams(location.search).get('from_vaga') ? '?vaga=' + new URLSearchParams(location.search).get('from_vaga') : '');
+    function sair() {
+      if (confirm('Sair do portal?')) {
+        localStorage.removeItem('empresa_token');
+        localStorage.removeItem('empresa_usuario');
+        window.location.href = 'login.html';
       }
-    });
+    }
 
     (async () => {
       const content = document.getElementById('content');
-      const token = localStorage.getItem('empresa_token');
       if (!token) {
         content.innerHTML = '<div class="card"><div class="alerta-info">Você não está logado. <a href="login.html">Faça login</a> primeiro.</div></div>';
         return;
@@ -116,7 +128,7 @@
       let cand;
       try {
         const r = await fetch(API + '/api/empresa/candidatura/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
-        if (r.status === 401 || r.status === 403) { logout(); return; }
+        if (r.status === 401 || r.status === 403) { sair(); return; }
         if (!r.ok) throw new Error('Erro ao carregar');
         cand = await r.json();
       } catch (e) {
@@ -144,7 +156,7 @@
         timelineHtml = '<div class="etapa-pill">Etapa ' + etapa + '</div>';
       }
 
-      // Histórico (timeline textual)
+      // Histórico
       const histArr = cand.historico || [];
       let histHtml = '';
       if (histArr.length > 0) {
@@ -159,13 +171,13 @@
         histHtml = '<div class="empty">Sem movimentações ainda.</div>';
       }
 
-      // Botões condicionais (só etapa 4+)
+      // Botões condicionais
       let acoesHtml = '';
       if (podeAgir && status !== 'reprovado' && status !== 'contratado' && status !== 'rejeitado') {
         acoesHtml = `
           <div class="acoes-empresa">
             <h3>🎯 Sua avaliação (etapa ${etapa})</h3>
-            <div class="alerta-info" style="background:#fef3c7; color:#92400e;">
+            <div class="alerta-info" style="background:#fff3e0; color:#92400e;">
               ℹ️ Você pode avançar, reprovar ou comentar nesta etapa (entrevista com gestor/empresa).
             </div>
             <textarea id="comentario" placeholder="Comentário sobre o candidato (opcional)..."></textarea>
@@ -193,13 +205,15 @@
       const iniciais = (cand.nome || '?').split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase();
       const statusLabel = { em_analise: 'Em análise', em_andamento: 'Em andamento', aprovado: 'Aprovado', reprovado: 'Reprovado', rejeitado: 'Reprovado', contratado: 'Contratado' }[status] || status;
 
+      // Header da página
+      document.getElementById('page-titulo').textContent = cand.nome || 'Candidato';
+      document.getElementById('page-sub').textContent = (cand.vaga_titulo || cand.titulo || 'Vaga') + (cand.v_cidade ? ' • ' + cand.v_cidade : '');
+
       content.innerHTML = `
         <div class="card">
-          <div class="header">
+          <div class="header-cand">
             <div class="avatar">${iniciais}</div>
             <div style="flex:1">
-              <h1>${cand.nome || 'Candidato'}</h1>
-              <div class="sub">${cand.vaga_titulo || cand.titulo || 'Vaga'}${cand.v_cidade ? ' • ' + cand.v_cidade : ''}</div>
               <span class="status-pill status-${status}">${statusLabel}</span>
             </div>
           </div>
@@ -249,7 +263,6 @@
     async function acao(tipo) {
       const id = new URLSearchParams(location.search).get('id');
       const comentario = document.getElementById('comentario').value.trim();
-      const token = localStorage.getItem('empresa_token');
       if ((tipo === 'avancar' || tipo === 'reprovar') && !confirm(tipo === 'avancar' ? 'Avançar candidato para a próxima etapa?' : 'Reprovar este candidato?')) return;
       try {
         const r = await fetch(API + '/api/empresa/candidatura/' + id + '/acao', {
@@ -266,12 +279,12 @@
 
     async function carregarChat() {
       const id = new URLSearchParams(location.search).get('id');
-      const token = localStorage.getItem('empresa_token');
       try {
         const r = await fetch(API + '/api/empresa/candidatura/' + id + '/chat', { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await r.json();
         const msgs = data.mensagens || [];
         const div = document.getElementById('chat-msgs');
+        if (!div) return;
         if (msgs.length === 0) { div.innerHTML = '<div class="empty">Nenhuma mensagem ainda.</div>'; return; }
         div.innerHTML = msgs.map(m => {
           const cls = m.remetente_tipo === 'empresa' ? 'msg-empresa' : 'msg-rh';
@@ -290,7 +303,6 @@
       const inp = document.getElementById('chat-text');
       const msg = inp.value.trim();
       if (!msg) return;
-      const token = localStorage.getItem('empresa_token');
       try {
         const r = await fetch(API + '/api/empresa/candidatura/' + id + '/chat', {
           method: 'POST',
