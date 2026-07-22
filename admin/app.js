@@ -135,7 +135,7 @@ async function carregarEquipe() {
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
             <div style="font-weight:700; font-size:16px;">🏢 ${e.nome}</div>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-sec btn-sm" onclick="abrirModalVincularVagas(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")})">🔗 Vagas (${e.qtd_vagas || 0})</button>
+              <button class="btn btn-sec btn-sm" onclick="abrirModalVincularVagas(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}')">🔗 Vagas (${e.qtd_vagas || 0})</button>
               <button class="btn btn-sec btn-sm" onclick="editarEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}', '${(e.cnpj||'').replace(/'/g, "\\'")}', '${(e.email_principal||'').replace(/'/g, "\\'")}', '${(e.telefone||'').replace(/'/g, "\\'")}')">✏️ Editar</button>
               <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
             </div>
