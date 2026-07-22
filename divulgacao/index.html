@@ -495,8 +495,13 @@
     .screenshot-content { padding: 20px; }
     .screenshot-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
     .screenshot-content p { font-size: 13px; color: var(--cinza-texto); }
+    /* Tablet: 2 colunas */
     @media (max-width: 900px) {
-      .screenshots-grid { grid-template-columns: 1fr; }
+      .screenshots-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    }
+    /* Mobile: 1 coluna */
+    @media (max-width: 600px) {
+      .screenshots-grid { grid-template-columns: 1fr; gap: 20px; }
     }
 
     /* ============== COMPARAÇÃO ============== */
@@ -525,10 +530,51 @@
     .meio { color: #b8860b; font-weight: 700; }
     .col.destaque { color: var(--vinho); font-weight: 700; }
     .comparacao-row.header .col.destaque { color: var(--vinho); }
+    /* Mobile: cada .col vira "linha" com label visível */
     @media (max-width: 700px) {
-      .comparacao-row { grid-template-columns: 1fr 1fr; font-size: 13px; padding: 12px; }
-      .comparacao-row .col:first-child { grid-column: span 2; margin-bottom: 4px; }
+      .comparacao-table { border-radius: 10px; }
+      .comparacao-row {
+        display: block;
+        padding: 14px 16px;
+        border-bottom: 2px solid var(--cinza-bg-2);
+      }
       .comparacao-row.header { display: none; }
+      .comparacao-row .col {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        font-size: 14px;
+        border-bottom: 1px dashed var(--borda);
+      }
+      .comparacao-row .col:last-child { border-bottom: none; }
+      .comparacao-row .col::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--cinza-texto);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-right: 12px;
+      }
+      .comparacao-row .col.destaque {
+        background: var(--vinho-bg);
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin: 4px -12px;
+        border-bottom: none;
+      }
+      .comparacao-row .col.destaque::before { color: var(--vinho); font-weight: 700; }
+      .comparacao-row .col:first-child {
+        font-size: 15px;
+        color: var(--preto);
+        margin-bottom: 8px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--vinho);
+        font-weight: 700;
+      }
+      .comparacao-row .col:first-child::before { display: none; }
     }
 
     /* ============== CTA FINAL / CONTATO ============== */
@@ -916,40 +962,40 @@
         <div class="col">Vagas.com</div>
       </div>
       <div class="comparacao-row">
-        <div class="col">Custo por candidato</div>
-        <div class="col destaque"><span class="check">✓</span> Grátis</div>
-        <div class="col"><span class="x">R$ 9-29/cand</span></div>
-        <div class="col"><span class="x">R$ 5-15/cand</span></div>
+        <div class="col" data-label="Recurso">Custo por candidato</div>
+        <div class="col destaque" data-label="Vagas.io"><span class="check">✓</span> Grátis</div>
+        <div class="col" data-label="Gupy"><span class="x">R$ 9-29/cand</span></div>
+        <div class="col" data-label="Vagas.com"><span class="x">R$ 5-15/cand</span></div>
       </div>
       <div class="comparacao-row">
-        <div class="col">Propriedade dos dados</div>
-        <div class="col destaque"><span class="check">✓</span> Sua</div>
-        <div class="col"><span class="x">Da plataforma</span></div>
-        <div class="col"><span class="x">Da plataforma</span></div>
+        <div class="col" data-label="Recurso">Propriedade dos dados</div>
+        <div class="col destaque" data-label="Vagas.io"><span class="check">✓</span> Sua</div>
+        <div class="col" data-label="Gupy"><span class="x">Da plataforma</span></div>
+        <div class="col" data-label="Vagas.com"><span class="x">Da plataforma</span></div>
       </div>
       <div class="comparacao-row">
-        <div class="col">Personalização de etapas</div>
-        <div class="col destaque"><span class="check">✓</span> Total</div>
-        <div class="col"><span class="meio">~</span> Parcial</div>
-        <div class="col"><span class="x">Fixa</span></div>
+        <div class="col" data-label="Recurso">Personalização de etapas</div>
+        <div class="col destaque" data-label="Vagas.io"><span class="check">✓</span> Total</div>
+        <div class="col" data-label="Gupy"><span class="meio">~</span> Parcial</div>
+        <div class="col" data-label="Vagas.com"><span class="x">Fixa</span></div>
       </div>
       <div class="comparacao-row">
-        <div class="col">Painel do candidato</div>
-        <div class="col destaque"><span class="check">✓</span> Mobile</div>
-        <div class="col"><span class="check">✓</span> Mobile</div>
-        <div class="col"><span class="meio">~</span> Web</div>
+        <div class="col" data-label="Recurso">Painel do candidato</div>
+        <div class="col destaque" data-label="Vagas.io"><span class="check">✓</span> Mobile</div>
+        <div class="col" data-label="Gupy"><span class="check">✓</span> Mobile</div>
+        <div class="col" data-label="Vagas.com"><span class="meio">~</span> Web</div>
       </div>
       <div class="comparacao-row">
-        <div class="col">Coleta de documentos</div>
-        <div class="col destaque"><span class="check">✓</span> Integrada</div>
-        <div class="col"><span class="meio">~</span> Básica</div>
-        <div class="col"><span class="x">Não tem</span></div>
+        <div class="col" data-label="Recurso">Coleta de documentos</div>
+        <div class="col destaque" data-label="Vagas.io"><span class="check">✓</span> Integrada</div>
+        <div class="col" data-label="Gupy"><span class="meio">~</span> Básica</div>
+        <div class="col" data-label="Vagas.com"><span class="x">Não tem</span></div>
       </div>
       <div class="comparacao-row">
-        <div class="col">Setup</div>
-        <div class="col destaque"><span class="check">✓</span> Imediato</div>
-        <div class="col"><span class="x">Dias/semanas</span></div>
-        <div class="col"><span class="meio">~</span> Dias</div>
+        <div class="col" data-label="Recurso">Setup</div>
+        <div class="col destaque" data-label="Vagas.io"><span class="check">✓</span> Imediato</div>
+        <div class="col" data-label="Gupy"><span class="x">Dias/semanas</span></div>
+        <div class="col" data-label="Vagas.com"><span class="meio">~</span> Dias</div>
       </div>
     </div>
   </div>
