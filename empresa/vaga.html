@@ -186,7 +186,9 @@
 
       document.getElementById('lista').innerHTML = lista.map(c => {
         const etapaNum = c.etapa_atual || 1;
-        const etapaNome = c.etapa_nome || `Etapa ${etapaNum}`;
+        const etapas = (typeof c.etapas === 'string') ? JSON.parse(c.etapas) : (c.etapas || []);
+        const item = etapas[etapaNum - 1];
+        const etapaNome = item ? (typeof item === 'string' ? item : item.nome) : `Etapa ${etapaNum}`;
         const podeAprovar = c.status === 'em_andamento' && etapaNum >= 4;
         const status = statusClass(c.status);
         const statusTxt = statusLabel(c.status);
