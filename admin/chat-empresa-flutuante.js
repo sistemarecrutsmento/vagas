@@ -19,7 +19,7 @@
   // === Estilos injetados ===
   const style = document.createElement('style');
   style.textContent = `
-    .cefab-container { position: fixed; bottom: 20px; right: 90px; display: flex; flex-direction: column-reverse; gap: 10px; z-index: 9998; }
+    .cefab-container { position: fixed; bottom: 20px; right: 100px; display: flex; flex-direction: column-reverse; gap: 14px; z-index: 9998; }
     .cefab-bolinha {
       width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, #d4a017 0%, #f0c14b 100%);
@@ -327,18 +327,7 @@
     }
   });
 
-  // Se tiver ?id=XX na URL, abre direto essa conversa
-  const urlParams = new URLSearchParams(window.location.search);
-  const idUrl = urlParams.get('id');
-  if (idUrl) {
-    setTimeout(() => {
-      const cid = parseInt(idUrl);
-      if (conversas.find(c => c.candidatura_id === cid)) {
-        toggle();
-        abrir(cid);
-      }
-    }, 800);
-  }
+  // Chat abre SOMENTE quando o usuário clicar (sem auto-open)
 
   // === INIT ===
   carregarConversas();
