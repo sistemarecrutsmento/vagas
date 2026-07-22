@@ -953,6 +953,19 @@
           <input type="tel" id="ct-telefone" name="telefone" placeholder="(00) 00000-0000 (opcional)" />
         </div>
         <div class="form-group">
+          <label for="ct-setor">Assunto *</label>
+          <select id="ct-setor" name="setor" required>
+            <option value="">Selecione o setor...</option>
+            <option value="Comercial">Comercial / Quero contratar o Vagas.io</option>
+            <option value="Suporte">Suporte / Dúvidas técnicas</option>
+            <option value="Financeiro">Financeiro / Pagamentos e cobrança</option>
+            <option value="Parcerias">Parcerias / Indicação</option>
+            <option value="Imprensa">Imprensa / Mídia</option>
+            <option value="Sugestoes">Sugestões / Feedback</option>
+            <option value="Outros">Outros assuntos</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label for="ct-mensagem">Mensagem *</label>
           <textarea id="ct-mensagem" name="mensagem" rows="4" required placeholder="Como podemos ajudar?"></textarea>
         </div>
@@ -1008,9 +1021,10 @@ function enviarContato(e) {
     email: form.email.value.trim(),
     empresa: form.empresa.value.trim() || '(não informado)',
     telefone: form.telefone.value.trim() || '(não informado)',
+    setor: form.setor.value || '(não selecionado)',
     mensagem: form.mensagem.value.trim()
   };
-  if (!data.nome || !data.email || !data.mensagem) {
+  if (!data.nome || !data.email || !data.setor || !data.mensagem) {
     fb.className = 'form-feedback erro';
     fb.textContent = 'Preencha todos os campos obrigatórios.';
     return false;
@@ -1019,11 +1033,12 @@ function enviarContato(e) {
     `Nome: ${data.nome}\n` +
     `E-mail: ${data.email}\n` +
     `Empresa: ${data.empresa}\n` +
-    `WhatsApp: ${data.telefone}\n\n` +
+    `WhatsApp: ${data.telefone}\n` +
+    `Assunto: ${data.setor}\n\n` +
     `Mensagem:\n${data.mensagem}\n\n` +
     `---\nEnviado pelo formulário do site vagasio.com.br`
   );
-  const assunto = encodeURIComponent(`Contato via site - ${data.nome}`);
+  const assunto = encodeURIComponent(`[${data.setor}] Contato via site - ${data.nome}`);
   window.location.href = `mailto:contato@vagasio.com.br?subject=${assunto}&body=${corpo}`;
   fb.className = 'form-feedback ok';
   fb.textContent = '✓ Abrimos seu cliente de e-mail. É só enviar!';
