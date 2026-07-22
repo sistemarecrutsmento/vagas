@@ -354,16 +354,7 @@
           '<h2>📜 Histórico do Processo</h2>' + histHtml +
         '</div>' +
 
-        // 4) Chat RH × Empresa
-        '<div class="card chat-rh-card">' +
-          '<h2>💬 Chat com o RH</h2>' +
-          '<p style="font-size:12px;color:var(--cinza-medio);margin-bottom:10px;margin-top:-8px">Canal direto entre sua empresa e o RH responsável por esta candidatura.</p>' +
-          '<div class="chat-rh-mensagens" id="chat-mensagens">Carregando...</div>' +
-          '<div class="chat-input-row">' +
-            '<input type="text" id="chat-text" placeholder="Escreva uma mensagem…" onkeydown="if(event.key===\'Enter\')enviarChat()">' +
-            '<button onclick="enviarChat()">Enviar</button>' +
-          '</div>' +
-        '</div>' +
+        // 4) Chat RH × Empresa (agora é flutuante, sem card inline)
 
         // 5) Dados Pessoais + Foto
         '<div class="card">' +
@@ -464,6 +455,7 @@
     // Inicia polling de chat (a cada 10s)
     setInterval(carregarChat, 10000);
   </script>
+  <script src="chat-rh-flutuante.js?v=20260722a"></script>
 </body>
 </html>
 
