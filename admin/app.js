@@ -193,6 +193,9 @@ function abrirModalEmpresa() {
   document.getElementById('emp-cnpj').value = '';
   document.getElementById('emp-telefone').value = '';
   document.getElementById('emp-email').value = '';
+  document.getElementById('emp-user-nome').value = '';
+  document.getElementById('emp-user-email').value = '';
+  document.getElementById('emp-user-senha').value = 'mudar123';
   abrirModal('nova-empresa');
   setTimeout(() => document.getElementById('emp-nome').focus(), 100);
 }
@@ -202,16 +205,25 @@ async function salvarNovaEmpresa() {
   const cnpj = document.getElementById('emp-cnpj').value.trim() || null;
   const telefone = document.getElementById('emp-telefone').value.trim() || null;
   const email_principal = document.getElementById('emp-email').value.trim() || null;
+  const userNome = document.getElementById('emp-user-nome').value.trim();
+  const userEmail = document.getElementById('emp-user-email').value.trim();
+  const userSenha = document.getElementById('emp-user-senha').value;
   if (!nome) {
     alert('Preencha pelo menos o nome da empresa.');
     return;
+  }
+  // Monta payload
+  const payload = { nome, cnpj, telefone, email_principal };
+  // Se preenchou pelo menos nome+email do usuário, inclui (senha tem default)
+  if (userNome && userEmail) {
+    payload.usuario = { nome: userNome, email: userEmail, senha: userSenha || 'mudar123', cargo: 'admin' };
   }
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
     const r = await fetch(API + '/api/admin/empresas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ nome, cnpj, telefone, email_principal })
+      body: JSON.stringify(payload)
     });
     const data = await r.json();
     if (r.ok) {
