@@ -28,6 +28,7 @@
   let conversaAtivaId = null;
   let pollInterval = null;
   let pollListInterval = null;
+  let anexoPendente = null; // File selecionado pra enviar na próxima msg
 
   // === Helpers ===
   function fmtHorario(iso) {
@@ -116,6 +117,7 @@
     conversaAtivaId = id;
     const c = conversas.find(x => x.candidatura_id === id);
     if (!c) return;
+    anexoPendente = null; // reset
     // No mobile, esconde a lista e mostra só a conversa (estilo WhatsApp)
     // Usa TANTO a classe no shell (CSS media query) QUANTO o style inline (fallback)
     document.getElementById('chat-shell').classList.add('com-conversa');
@@ -137,7 +139,12 @@
       <div class="conv-msgs" id="conv-msgs">
         <div class="ce-vazio"><div class="icon">⏳</div><p>Carregando mensagens...</p></div>
       </div>
+      <div class="conv-anexo-preview" id="conv-anexo-preview" style="display:none">
+        <span id="conv-anexo-info"></span>
+        <button type="button" id="conv-anexo-remover" title="Remover anexo">✕</button>
+      </div>
       <div class="conv-input">
+        <button type="button" id="conv-anexo-btn" title="Anexar arquivo" aria-label="Anexar arquivo">📎</button>
         <textarea id="conv-texto" placeholder="Escreve uma mensagem..." rows="1"></textarea>
         <button id="conv-enviar" disabled>➤</button>
       </div>
@@ -148,7 +155,7 @@
     ta.addEventListener('input', () => {
       ta.style.height = 'auto';
       ta.style.height = Math.min(ta.scrollHeight, 100) + 'px';
-      btn.disabled = ta.value.trim().length === 0;
+      btn.disabled = ta.value.trim().length === 0 && !anexoPendente;
     });
     ta.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -158,9 +165,35 @@
     });
     btn.addEventListener('click', enviar);
 
+    // Botão de anexo — usa o helper do chat-uploader.js
+    const btnAnexo = document.getElementById('conv-anexo-btn');
+    const novoBotaoAnexo = window.ChatUploader.criarBotaoAnexo(file => {
+      anexoPendente = file;
+      mostrarPreviewAnexo(file);
+      btn.disabled = false; // libera o envio (pode enviar só com anexo)
+    });
+    // Substitui o botão "vazio" pelo botão real (com input file escondido dentro)
+    btnAnexo.replaceWith(novoBotaoAnexo);
+    novoBotaoAnexo.id = 'conv-anexo-btn';
+
+    // Botão de remover anexo
+    document.getElementById('conv-anexo-remover').addEventListener('click', () => {
+      anexoPendente = null;
+      document.getElementById('conv-anexo-preview').style.display = 'none';
+      btn.disabled = ta.value.trim().length === 0;
+    });
+
     await carregarMensagens(id);
     if (pollInterval) clearInterval(pollInterval);
     pollInterval = setInterval(() => carregarMensagens(id, true), 5000);
+  }
+
+  function mostrarPreviewAnexo(file) {
+    const preview = document.getElementById('conv-anexo-preview');
+    const info = document.getElementById('conv-anexo-info');
+    const emoji = window.ChatUploader.TIPOS_PERMITIDOS[file.type] || '📎';
+    info.textContent = `${emoji} ${file.name} (${window.ChatUploader.formatarTamanho(file.size)})`;
+    preview.style.display = 'flex';
   }
 
   function renderPanelHead(c) {
@@ -198,10 +231,14 @@
       const minha = m.autor_tipo === 'candidato';
       const ini = iniciais(m.autor_nome);
       const meta = new Date(m.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+      // Renderiza anexos (imagens/PDF/etc)
+      const arqs = (m.arquivos || []).map(a => window.ChatUploader.renderAnexo(a)).join('');
+      const textoHtml = m.texto ? `<div class="ce-msg-conteudo">${escapeHtml(m.texto)}</div>` : '';
       return `<div class="ce-msg ${minha ? 'minha' : m.autor_tipo}">
         <div class="ce-msg-av">${ini}</div>
         <div class="ce-msg-balao">
-          <div class="ce-msg-conteudo">${escapeHtml(m.texto)}</div>
+          ${textoHtml}
+          ${arqs}
           <div class="ce-msg-meta">${m.autor_nome ? escapeHtml(m.autor_nome) + ' · ' : ''}${meta}</div>
         </div>
       </div>`;
@@ -209,19 +246,39 @@
     el.scrollTop = el.scrollHeight;
   }
 
-  // === Enviar mensagem ===
+  // === Enviar mensagem (com ou sem anexo) ===
   async function enviar() {
     const ta = document.getElementById('conv-texto');
     const btn = document.getElementById('conv-enviar');
     const texto = ta.value.trim();
-    if (!texto || !conversaAtivaId) return;
+    if ((!texto && !anexoPendente) || !conversaAtivaId) return;
     btn.disabled = true;
     ta.disabled = true;
     try {
-      const r = await fetch(API + '/api/chat/' + conversaAtivaId + '/mensagens', {
+      let endpoint = API + '/api/chat/' + conversaAtivaId + '/mensagens';
+      let body;
+      const headers = { Authorization: 'Bearer ' + token };
+
+      if (anexoPendente) {
+        endpoint = API + '/api/chat/' + conversaAtivaId + '/upload';
+        const base64 = await window.ChatUploader.lerComoBase64(anexoPendente);
+        body = {
+          texto: texto || null,
+          arquivo: {
+            nome: anexoPendente.name,
+            mime: anexoPendente.type,
+            base64
+          }
+        };
+      } else {
+        body = { texto };
+      }
+      headers['Content-Type'] = 'application/json';
+
+      const r = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-        body: JSON.stringify({ texto })
+        headers,
+        body: JSON.stringify(body)
       });
       if (!r.ok) {
         const err = await r.json().catch(() => ({}));
@@ -230,6 +287,9 @@
       }
       ta.value = '';
       ta.style.height = 'auto';
+      anexoPendente = null;
+      const preview = document.getElementById('conv-anexo-preview');
+      if (preview) preview.style.display = 'none';
       await carregarMensagens(conversaAtivaId, true);
       await carregarLista(); // atualiza preview
     } catch (e) {
