@@ -598,11 +598,56 @@
       }
 
       // Card de agendamento de entrevista (jul/2026)
-      const entrevistaCard = (idxEtapaRH >= 0 && (idxEtapaRH + 1) === etapaAtual) || (idxEtapaGestor >= 0 && (idxEtapaGestor + 1) === etapaAtual) ? (
+      // Se já existe entrevista ativa pra essa etapa → mostra card de confirmação (read-only)
+      const entrevistaAtiva = (c.entrevistas || []).find(e => Number(e.etapa) === etapaAtualBanco && e.status !== 'cancelada');
+      const podeAgendarAqui = (idxEtapaRH >= 0 && (idxEtapaRH + 1) === etapaAtual) || (idxEtapaGestor >= 0 && (idxEtapaGestor + 1) === etapaAtual);
+
+      // === Card READ-ONLY da entrevista já agendada (com botão "❌ Falhou") ===
+      let cardEntrevistaJaAgendada = '';
+      if (podeAgendarAqui && entrevistaAtiva) {
+        const e = entrevistaAtiva;
+        const dataFmt = new Date(e.data_hora).toLocaleString('pt-BR', {
+          weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+        const isOnline = !!e.link_reuniao;
+        const blocoFormato = isOnline
+          ? '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
+              '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Link do Google Meet:</div>' +
+              '<div style="display:flex; gap:8px; align-items:center;">' +
+                '<a href="' + e.link_reuniao + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + e.link_reuniao + '</a>' +
+                '<button type="button" onclick="navigator.clipboard.writeText(\'' + e.link_reuniao + '\').then(function(b){b.textContent=\'✅ Copiado!\'; setTimeout(function(){b.textContent=\'📋 Copiar\';}, 2000)})" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
+              '</div>' +
+            '</div>'
+          : '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +
+              '<div style="font-size:12px; font-weight:600; margin-bottom:6px;">📍 Endereço:</div>' +
+              '<div style="font-size:14px; white-space:pre-wrap;">' + (e.local || '').replace(/^Presencial\s*—\s*/, '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+            '</div>';
+
+        cardEntrevistaJaAgendada =
+          '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #16A34A; background: #F0FDF4;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
+              '<h2 style="margin:0; color:#166534;">✅ Entrevista Agendada</h2>' +
+              '<span style="font-size:11px; background:#16A34A; color:white; padding:4px 10px; border-radius:999px; font-weight:700;">AGUARDANDO</span>' +
+            '</div>' +
+            '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
+              '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
+              '<div><strong style="color:#166534;">' + (isOnline ? '🎥 Formato:</strong><br>Online (Google Meet)' : '📍 Formato:</strong><br>Presencial') + '</div>' +
+            '</div>' +
+            blocoFormato +
+            (e.observacoes ? '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:13px; color:#166534; border:1px solid #BBF7D0;"><strong>💬 Observações:</strong> ' + e.observacoes.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' : '') +
+            '<div style="margin-top:14px; padding-top:14px; border-top:1px solid #BBF7D0; display:flex; justify-content:space-between; align-items:center; font-size:12px; gap:10px;">' +
+              '<div style="color:#166534;">' + (isOnline ? '📧 Convite enviado por e-mail ao candidato.' : '📍 Endereço visível ao candidato no painel dele.') + ' Aparece também na aba <strong>📅 Agenda</strong>.</div>' +
+              '<button type="button" onclick="cancelarEntrevistaExistente(' + e.id + ')" style="background:#FEE2E2; color:#991B1B; border:1px solid #FCA5A5; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer; font-size:12px; white-space:nowrap;" title="Libera novo agendamento. Use se a entrevista não aconteceu.">❌ Falhou</button>' +
+            '</div>' +
+          '</div>';
+      }
+
+      const entrevistaCard = (podeAgendarAqui && !entrevistaAtiva) ? (
         '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #7C3AED;">' +
           '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
             '<h2 style="margin:0;">📅 Agendar Entrevista</h2>' +
-            '<span style="font-size:11px; background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:999px; font-weight:700;">FLEXÍVEL</span>' +
+            '<span style="font-size:11px; background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:999px; font-weight:700;">NOVA</span>' +
           '</div>' +
           '<p style="font-size:13px; color:#666; margin-bottom:16px;">Defina a data, hora e formato. Para entrevistas online o sistema gera o link do <strong>Google Meet</strong> automaticamente.</p>' +
           '<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:16px;">' +
@@ -631,7 +676,7 @@
           // Campo de endereço — só aparece se for presencial
           '<div id="entrevista-endereco-box" style="display:none; margin-bottom:16px;">' +
             '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">📍 Endereço completo</label>' +
-            '<textarea id="entrevista-endereco" rows="2" placeholder="Ex: Rua das Flores, 123 — Centro, São Paulo / SP&#10;Sala 4, 2º andar&#10;Referência: próximo ao metrô Sé" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>' +
+            '<textarea id="entrevista-endereco" rows="2" placeholder="Ex: Rua das Flores, 123 — Centro, São Paulo / SP" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>' +
           '</div>' +
           // Aviso online — só aparece se for online
           '<div id="entrevista-online-msg" style="background:#EDE9FE; border:1px solid #C4B5FD; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#5B21B6;">' +
@@ -646,6 +691,9 @@
           '</div>' +
         '</div>'
       ) : '';
+
+      // === Decisão: prioriza card read-only se já existe entrevista ===
+      const entrevistaFinalHtml = cardEntrevistaJaAgendada || entrevistaCard;
 
       // Constrói o card de comentário por etapa (só aparece se a vaga tem essa etapa E foi atingida)
       const comentarioRHCard = (idxEtapaRH >= 0 && etapaRHAtingida) ? (
@@ -709,7 +757,7 @@
           '<div class="timeline">' + timeline + '</div>' +
         '</div>' +
 
-        entrevistaCard +
+        entrevistaFinalHtml +
 
         // 2) Histórico do Processo (logo abaixo da timeline, conforme combinado)
         historicoCard +
@@ -818,6 +866,30 @@
       } else {
         enderecoBox.style.display = 'none';
         onlineMsg.style.display = 'block';
+      }
+    }
+
+    // Cancela a entrevista ativa (libera novo agendamento)
+    async function cancelarEntrevistaExistente(entrevistaId) {
+      const motivo = prompt('A entrevista falhou. Quer descrever o motivo?\n\n(Cancelar texto = "Candidato/recrutador não compareceu")') || 'Candidato/recrutador não compareceu';
+      if (motivo === null) return; // usuário cancelou
+      const token = localStorage.getItem('admin_token');
+      const btn = document.querySelector('#card-agendamento-entrevista button[onclick*="cancelarEntrevistaExistente"]');
+      const originalText = btn ? btn.innerHTML : '';
+      try {
+        if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Cancelando...'; }
+        const r = await fetch(API + '/api/admin/entrevista/' + entrevistaId + '/cancelar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ motivo })
+        });
+        const res = await r.json();
+        if (!r.ok) throw new Error(res.erro || 'Falha ao cancelar');
+        // Recarrega a página → volta o form de novo agendamento
+        render(currentCandidatura);
+      } catch (e) {
+        alert('Erro ao cancelar: ' + e.message);
+        if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
       }
     }
 
