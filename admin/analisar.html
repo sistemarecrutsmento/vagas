@@ -151,15 +151,18 @@
       } catch (e) {}
     }
 
-    // Restaura estado dos cards colapsáveis no carregamento
-    document.addEventListener('DOMContentLoaded', () => {
+    // Restaura estado dos cards colapsáveis. Alguns cards são criados
+    // dinamicamente depois do DOMContentLoaded, por isso esta função também
+    // é chamada após a renderização da candidatura.
+    function restaurarEstadoCards() {
       document.querySelectorAll('.card-colapsavel').forEach(el => {
         try {
           const salvo = localStorage.getItem('card_' + el.id);
-          if (salvo === '1') el.classList.add('aberto');
+          el.classList.toggle('aberto', salvo === '1');
         } catch (e) {}
       });
-    });
+    }
+    document.addEventListener('DOMContentLoaded', restaurarEstadoCards);
 
     function voltar() {
       // Volta pra lista de candidatos da vaga (SPA)
@@ -246,6 +249,8 @@
       render(candidatura, docsCard);
       window.currentCandidatura = candidatura;
       carregarEntrevistasExistentes(id);
+      // Reaplica estado dos accordions (cards podem ter sido criados dinâmicamente)
+      restaurarEstadoCards();
       // Chat agora é via bolinha flutuante — sem polling embutido
     })();
 
