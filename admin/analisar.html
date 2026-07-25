@@ -602,16 +602,16 @@
         '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #7C3AED;">' +
           '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
             '<h2 style="margin:0;">📅 Agendar Entrevista</h2>' +
-            '<span style="font-size:11px; background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:999px; font-weight:700;">GOOGLE MEET AUTOMÁTICO</span>' +
+            '<span style="font-size:11px; background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:999px; font-weight:700;">FLEXÍVEL</span>' +
           '</div>' +
-          '<p style="font-size:13px; color:#666; margin-bottom:16px;">Defina a data e hora. O sistema gera automaticamente o link do <strong>Google Meet</strong> e envia o convite por e-mail pro candidato.</p>' +
-          '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">' +
+          '<p style="font-size:13px; color:#666; margin-bottom:16px;">Defina a data, hora e formato. Para entrevistas online o sistema gera o link do <strong>Google Meet</strong> automaticamente.</p>' +
+          '<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:16px;">' +
             '<div>' +
               '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Data e Hora</label>' +
               '<input type="datetime-local" id="entrevista-data" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
             '</div>' +
             '<div>' +
-              '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Duração (minutos)</label>' +
+              '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Duração</label>' +
               '<select id="entrevista-duracao" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
                 '<option value="30">30 minutos</option>' +
                 '<option value="45">45 minutos</option>' +
@@ -620,16 +620,29 @@
                 '<option value="120">2 horas</option>' +
               '</select>' +
             '</div>' +
+            '<div>' +
+              '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Formato</label>' +
+              '<select id="entrevista-formato" onchange="alternarFormatoEntrevista()" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
+                '<option value="online">🎥 Online (Google Meet)</option>' +
+                '<option value="presencial">📍 Presencial</option>' +
+              '</select>' +
+            '</div>' +
+          '</div>' +
+          // Campo de endereço — só aparece se for presencial
+          '<div id="entrevista-endereco-box" style="display:none; margin-bottom:16px;">' +
+            '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">📍 Endereço completo</label>' +
+            '<textarea id="entrevista-endereco" rows="2" placeholder="Ex: Rua das Flores, 123 — Centro, São Paulo / SP&#10;Sala 4, 2º andar&#10;Referência: próximo ao metrô Sé" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>' +
+          '</div>' +
+          // Aviso online — só aparece se for online
+          '<div id="entrevista-online-msg" style="background:#EDE9FE; border:1px solid #C4B5FD; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#5B21B6;">' +
+            '🎥 <strong>Google Meet automático:</strong> ao confirmar, o sistema cria a sala de videoconferência e envia o link por e-mail pro candidato + recrutador.' +
           '</div>' +
           '<div style="margin-bottom:16px;">' +
             '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Observações (opcional)</label>' +
             '<textarea id="entrevista-obs" rows="2" placeholder="Ex: Trazer documento X, falar com recruiter Y…" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>' +
           '</div>' +
-          '<div style="background:#EDE9FE; border:1px solid #C4B5FD; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#5B21B6;">' +
-            '🎥 <strong>Google Meet automático:</strong> ao confirmar, o sistema cria a sala de videoconferência e envia o link por e-mail pro candidato + recrutador.' +
-          '</div>' +
           '<div style="display:flex; justify-content:flex-end; gap:8px;">' +
-            '<button class="btn" style="background:#7C3AED; color:white;" onclick="salvarEntrevista(' + c.id + ', ' + etapaAtual + ')">🚀 Confirmar e Gerar Meet</button>' +
+            '<button class="btn" style="background:#7C3AED; color:white;" onclick="salvarEntrevista(' + c.id + ', ' + etapaAtual + ')">🚀 Confirmar Entrevista</button>' +
           '</div>' +
         '</div>'
       ) : '';
@@ -794,45 +807,99 @@
       }
     }
 
+    // Alterna entre Online (Meet) e Presencial (campo de endereço)
+    function alternarFormatoEntrevista() {
+      const formato = document.getElementById('entrevista-formato').value;
+      const enderecoBox = document.getElementById('entrevista-endereco-box');
+      const onlineMsg = document.getElementById('entrevista-online-msg');
+      if (formato === 'presencial') {
+        enderecoBox.style.display = 'block';
+        onlineMsg.style.display = 'none';
+      } else {
+        enderecoBox.style.display = 'none';
+        onlineMsg.style.display = 'block';
+      }
+    }
+
     async function salvarEntrevista(candidaturaId, etapaNum) {
       const card = document.getElementById('card-agendamento-entrevista');
       const btn = card.querySelector('button');
       const dataVal = document.getElementById('entrevista-data').value;
       const duracaoVal = document.getElementById('entrevista-duracao').value;
+      const formatoVal = document.getElementById('entrevista-formato').value;
+      const enderecoVal = document.getElementById('entrevista-endereco').value;
       const obsVal = document.getElementById('entrevista-obs').value;
       const token = localStorage.getItem('admin_token');
 
       if (!dataVal) return alert('Por favor, selecione a data e hora da entrevista.');
 
+      // Se presencial, exige endereço
+      if (formatoVal === 'presencial' && !enderecoVal.trim()) {
+        return alert('Por favor, informe o endereço da entrevista presencial.');
+      }
+
+      const isOnline = formatoVal === 'online';
+      const btnOriginalText = isOnline ? '⏳ Gerando Meet...' : '⏳ Salvando...';
+
       try {
         btn.disabled = true;
-        btn.innerHTML = '⏳ Gerando Meet...';
+        btn.innerHTML = btnOriginalText;
+
+        // Monta o body. Para online: NÃO envia link_reuniao (backend gera).
+        // Para presencial: envia o local com endereço (sem link).
+        const body = {
+          candidatura_id: candidaturaId,
+          etapa: etapaNum,
+          data_hora: dataVal,
+          duracao_minutos: parseInt(duracaoVal),
+          local: isOnline ? 'Online (Google Meet)' : ('Presencial — ' + enderecoVal.trim()),
+          observacoes: obsVal || (isOnline ? 'Entrevista online via Google Meet.' : 'Entrevista presencial.')
+        };
+        // Só envia link_reuniao se o backend precisar gerar (não envia nada, deixa gerar)
+        if (!isOnline) {
+          // presencial: não envia link, backend não vai gerar
+          body.link_reuniao = null;
+        }
 
         const r = await fetch(API + '/api/admin/entrevista', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({
-            candidatura_id: candidaturaId,
-            etapa: etapaNum,
-            data_hora: dataVal,
-            duracao_minutos: parseInt(duracaoVal),
-            local: 'Google Meet',
-            observacoes: obsVal || 'Entrevista agendada via painel de análise.'
-          })
+          body: JSON.stringify(body)
         });
 
         const res = await r.json();
         if (!r.ok) throw new Error(res.erro || 'Falha ao agendar');
 
-        // Pega o link gerado pelo backend (Meet)
+        // Pega o link gerado pelo backend (Meet) e o local salvo
         const linkGerado = (res.entrevista && res.entrevista.link_reuniao) || '';
-        const localGerado = (res.entrevista && res.entrevista.local) || 'Google Meet';
+        const localSalvo = (res.entrevista && res.entrevista.local) || (isOnline ? 'Online (Google Meet)' : ('Presencial — ' + enderecoVal.trim()));
+        const isPresencialFinal = !linkGerado;
 
         // Troca o card pelo modo de confirmação (sem recarregar a página!)
         const dataFmt = new Date(dataVal).toLocaleString('pt-BR', {
           weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
           hour: '2-digit', minute: '2-digit'
         });
+
+        // Bloco do formato: link Meet (online) OU endereço (presencial)
+        let blocoFormato = '';
+        if (linkGerado) {
+          blocoFormato =
+            '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
+              '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Link do Google Meet (gerado automaticamente):</div>' +
+              '<div style="display:flex; gap:8px; align-items:center;">' +
+                '<a href="' + linkGerado + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + linkGerado + '</a>' +
+                '<button type="button" onclick="navigator.clipboard.writeText(\'' + linkGerado + '\').then(()=>this.textContent=\'✅ Copiado!\')" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
+              '</div>' +
+            '</div>';
+        } else {
+          blocoFormato =
+            '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +
+              '<div style="font-size:12px; font-weight:600; margin-bottom:6px;">📍 Endereço:</div>' +
+              '<div style="font-size:14px; white-space:pre-wrap;">' + (enderecoVal || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+            '</div>';
+        }
+
         card.outerHTML =
           '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #16A34A; background: #F0FDF4;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
@@ -841,20 +908,12 @@
             '</div>' +
             '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
               '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
-              '<div><strong style="color:#166534;">🎥 Plataforma:</strong><br>' + localGerado + '</div>' +
+              '<div><strong style="color:#166534;">🎥 Formato:</strong><br>' + (isPresencialFinal ? '📍 Presencial' : '🎥 Online (Google Meet)') + '</div>' +
             '</div>' +
-            (linkGerado ? (
-              '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
-                '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Link da reunião (gerado automaticamente):</div>' +
-                '<div style="display:flex; gap:8px; align-items:center;">' +
-                  '<a href="' + linkGerado + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + linkGerado + '</a>' +
-                  '<button type="button" onclick="navigator.clipboard.writeText(\'' + linkGerado + '\').then(()=>this.textContent=\'✅ Copiado!\')" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
-                '</div>' +
-              '</div>'
-            ) : '') +
-            (obsVal ? '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:13px; color:#166534; border:1px solid #BBF7D0;"><strong>💬 Observações:</strong> ' + obsVal + '</div>' : '') +
+            blocoFormato +
+            (obsVal ? '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:13px; color:#166534; border:1px solid #BBF7D0;"><strong>💬 Observações:</strong> ' + obsVal.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' : '') +
             '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:12px; color:#166534; border:1px solid #BBF7D0;">' +
-              '📧 E-mail com o convite enviado pro candidato. A entrevista aparece na aba <strong>📅 Agenda</strong> do Dashboard.' +
+              (isPresencialFinal ? '📧 Candidato verá o endereço no painel dele. Aparece também na aba <strong>📅 Agenda</strong>.' : '📧 Candidato recebeu o convite do Google Meet por e-mail. Aparece também na aba <strong>📅 Agenda</strong>.') +
             '</div>' +
           '</div>';
 
