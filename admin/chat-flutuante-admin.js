@@ -160,9 +160,8 @@
   // Container de bolinhas (vai ter 1 botão por candidato)
   const fabContainer = document.createElement('div');
   fabContainer.id = 'chatfab-container';
-  // column-reverse: primeiro item no DOM fica embaixo, último fica em cima.
-  // Bolinhas candidato ficam ABAIXO da bolinha empresa (canto inferior direito).
-  fabContainer.style.cssText = 'position:fixed;bottom:90px;right:20px;display:flex;flex-direction:column-reverse;gap:6px;z-index:9999;';
+  // Bolinhas candidato ficam EMBAIXO da bolinha empresa (canto inferior direito).
+  fabContainer.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:4px;z-index:9999;';
   document.body.appendChild(fabContainer);
 
   // Janela única de chat (abre a conversa do candidato clicado)
