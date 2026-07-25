@@ -5,7 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard · Portal Empresa · Vagas.io</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="empresa.css">
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-escuro: #4A1F25;
+      --vinho-claro: #8B3A45;
+      --branco: #FFFFFF;
+      --preto: #1A1A1A;
+      --preto-suave: #2A2A2A;
+      --cinza-escuro: #3A3A3A;
+      --cinza: #F5F5F5;
+      --cinza-medio: #666;
+      --borda: #E5E5E5;
+      --verde: #2E7D32;
+      --amarelo: #F57C00;
+      --vermelho: #C62828;
+      --dourado: #D4A155;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #FAFAFA; color: var(--preto); }
+    .menu-toggle { display: none; position: fixed; top: 12px; left: 12px; z-index: 1100; background: var(--vinho); color: #fff; border: 0; border-radius: 8px; width: 40px; height: 40px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .menu-close { display: none; position: absolute; top: 12px; right: 12px; background: transparent; color: #fff; border: 0; font-size: 22px; cursor: pointer; padding: 4px 8px; }
+    @media (max-width: 700px) {
+      .menu-toggle { display: block; }
+      .app.aside-aberto .menu-toggle { display: none; }
+      aside { position: fixed; top: 0; left: 0; height: 100vh; z-index: 1000; transform: translateX(-100%); transition: transform 0.25s ease; }
+      aside.aberto { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
+      aside.aberto .menu-close { display: block; }
+      main { padding: 20px 16px; padding-top: 64px; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .page-header h2 { font-size: 20px; }
+    }
+    /* Sidebar */
+    aside { width: 240px; background: var(--vinho); color: var(--branco); padding: 24px 0; flex-shrink: 0; display: flex; flex-direction: column; min-height: 100vh; }
+    .aside-logo { padding: 0 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
+    .aside-logo h1 { font-size: 20px; font-weight: 800; color: #fff; }
+    .aside-logo h1 .dourado { color: var(--dourado); }
+    .aside-logo small { color: rgba(255,255,255,0.6); font-size: 12px; }
+    .nav-item { display: block; padding: 12px 24px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; font-weight: 500; border-left: 3px solid transparent; cursor: pointer; transition: background 0.2s; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .nav-item.ativo { background: rgba(255,255,255,0.15); color: #fff; border-left-color: var(--branco); }
+    .aside-user { margin-top: auto; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+    .aside-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .aside-user-info { flex: 1; min-width: 0; }
+    .aside-user-info .nome { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .aside-user-info .empresa { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-logout { background: rgba(255,255,255,0.1); color: #fff; border: 0; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .btn-logout:hover { background: rgba(255,255,255,0.2); }
+    /* Layout */
+    .app { display: flex; min-height: 100vh; }
+    main { flex: 1; padding: 32px; overflow-y: auto; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
+    .page-header h2 { font-size: 24px; font-weight: 700; }
+    .page-header p { color: #888; font-size: 14px; margin-top: 2px; }
+    .btn { padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 15px; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-sec { background: var(--preto); color: var(--branco); padding: 8px 14px; font-size: 13px; }
+    .btn-sec:hover { background: var(--cinza-escuro); }
+    .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 12px; }
+    .alert-erro { background: #ffebee; color: var(--vermelho); }
+    .empty { text-align: center; padding: 40px; color: #888; }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ==== DASHBOARD v2 (mesmo visual admin) ==== */
+    .kpis-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 1100px) { .kpis-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .kpis-grid { grid-template-columns: 1fr; } }
+    .kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .kpi-icon { font-size: 24px; margin-bottom: 8px; display: inline-block; }
+    .kpi-label { font-size: 13px; color: #666; font-weight: 500; }
+    .kpi-valor { font-size: 32px; font-weight: 700; color: #1A1A1A; line-height: 1.1; margin-top: 4px; }
+    .kpi-sub { font-size: 12px; color: #999; font-weight: 500; margin-top: 6px; }
+    /* Acento colorido lateral */
+    .kpi-rosa     { border-left: 4px solid #EC4899; }
+    .kpi-rosa .kpi-icon { color: #EC4899; }
+    .kpi-azul     { border-left: 4px solid #3B82F6; }
+    .kpi-azul .kpi-icon { color: #3B82F6; }
+    .kpi-roxo     { border-left: 4px solid #8B5CF6; }
+    .kpi-roxo .kpi-icon { color: #8B5CF6; }
+    .kpi-verde    { border-left: 4px solid #10B981; }
+    .kpi-verde .kpi-icon { color: #10B981; }
+    .kpi-laranja  { border-left: 4px solid #F59E0B; }
+    .kpi-laranja .kpi-icon { color: #F59E0B; }
+
+    .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 900px) { .dash-row { grid-template-columns: 1fr; } }
+    .dash-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); }
+    .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .dash-card-header h3 { font-size: 15px; font-weight: 600; color: #1A1A1A; }
+    .dash-card-tag { font-size: 11px; padding: 3px 10px; background: #F3F4F6; color: #666; border-radius: 12px; font-weight: 500; }
+
+    /* Gráfico de etapas - barras horizontais */
+    .grafico-etapas { display: flex; flex-direction: column; gap: 10px; }
+    .etapa-barra-row { display: grid; grid-template-columns: 130px 1fr 50px; align-items: center; gap: 10px; }
+    @media (max-width: 500px) { .etapa-barra-row { grid-template-columns: 90px 1fr 30px; } }
+    .etapa-barra-nome { font-size: 13px; color: #444; font-weight: 500; }
+    .etapa-barra-fundo { background: #F3F4F6; height: 28px; border-radius: 6px; overflow: hidden; position: relative; }
+    .etapa-barra-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; display: flex; align-items: center; padding-left: 10px; color: #fff; font-size: 11px; font-weight: 600; min-width: 24px; }
+    .etapa-barra-fill.e1 { background: linear-gradient(90deg, #EC4899, #F472B6); }
+    .etapa-barra-fill.e2 { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+    .etapa-barra-fill.e3 { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+    .etapa-barra-fill.e4 { background: linear-gradient(90deg, #06B6D4, #22D3EE); }
+    .etapa-barra-fill.e5 { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+    .etapa-barra-fill.e6 { background: linear-gradient(90deg, #10B981, #34D399); }
+    .etapa-barra-fill.e7 { background: linear-gradient(90deg, #722F37, #8B3A45); }
+    .etapa-barra-count { font-size: 14px; font-weight: 700; color: #1A1A1A; text-align: right; }
+
+    /* Lista de Entrevistas */
+    .lista-entrevistas { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+    .entrevista-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #FAFAFA; border-radius: 8px; border-left: 3px solid #722F37; }
+    .entrevista-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #722F37, #4A1F25); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .entrevista-info { flex: 1; min-width: 0; }
+    .entrevista-nome { font-size: 14px; font-weight: 600; color: #1A1A1A; }
+    .entrevista-vaga { font-size: 12px; color: #666; margin-top: 2px; }
+    .entrevista-data { font-size: 12px; color: #444; margin-top: 4px; }
+    .entrevista-tag { font-size: 11px; padding: 3px 8px; background: #fff; border: 1px solid var(--borda); border-radius: 6px; color: var(--cinza-medio); font-weight: 600; white-space: nowrap; }
+    .entrevista-empty { padding: 20px; text-align: center; color: #888; font-size: 13px; }
+
+    /* Feed de Atividades (mesmo do admin) */
+    .atividades-feed { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+    .atividade-item { display: flex; gap: 12px; padding: 12px; background: #FAFAFA; border-radius: 10px; border-left: 3px solid #E5E7EB; transition: background 0.15s; }
+    .atividade-item:hover { background: #F3F4F6; }
+    .atividade-icone { width: 36px; height: 36px; border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+    .atividade-corpo { flex: 1; min-width: 0; }
+    .atividade-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; }
+    .atividade-tipo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .atividade-tempo { font-size: 11px; color: #999; flex-shrink: 0; }
+    .atividade-candidato { font-size: 14px; font-weight: 600; color: #1A1A1A; line-height: 1.3; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .atividade-vaga { font-size: 12px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .atividade-vaga::before { content: "💼 "; }
+    .atividade-empty { padding: 20px; text-align: center; color: #888; font-size: 13px; }
+    /* Cores por tipo (mesmo do admin) */
+    .atividade-item.tipo-inscricao { border-left-color: #10B981; }
+    .atividade-item.tipo-inscricao .atividade-icone { background: #D1FAE5; }
+    .atividade-item.tipo-inscricao .atividade-tipo { color: #047857; }
+    .atividade-item.tipo-avancar { border-left-color: #3B82F6; }
+    .atividade-item.tipo-avancar .atividade-icone { background: #DBEAFE; }
+    .atividade-item.tipo-avancar .atividade-tipo { color: #1D4ED8; }
+    .atividade-item.tipo-reprovar { border-left-color: #DC2626; }
+    .atividade-item.tipo-reprovar .atividade-icone { background: #FEE2E2; }
+    .atividade-item.tipo-reprovar .atividade-tipo { color: #B91C1C; }
+    .atividade-item.tipo-reabrir { border-left-color: #F59E0B; }
+    .atividade-item.tipo-reabrir .atividade-icone { background: #FEF3C7; }
+    .atividade-item.tipo-reabrir .atividade-tipo { color: #B45309; }
+    .atividade-item.tipo-proposta { border-left-color: #722F37; }
+    .atividade-item.tipo-proposta .atividade-icone { background: #FDF2F4; }
+    .atividade-item.tipo-proposta .atividade-tipo { color: #722F37; }
+    .atividade-item.tipo-entrevista { border-left-color: #06B6D4; }
+    .atividade-item.tipo-entrevista .atividade-icone { background: #CFFAFE; }
+    .atividade-item.tipo-entrevista .atividade-tipo { color: #0E7490; }
+  </style>
 </head>
 <body>
   <button class="menu-toggle" onclick="document.querySelector('aside').classList.add('aberto'); document.querySelector('.app').classList.add('aside-aberto');" aria-label="Abrir menu">☰</button>
@@ -39,19 +189,47 @@
       <div class="page-header">
         <div>
           <h2 id="saudacao">Olá! 👋</h2>
-          <div class="sub">Acompanhe suas vagas e candidatos em tempo real</div>
+          <p>Acompanhe suas vagas e candidatos em tempo real</p>
         </div>
-        <div class="page-actions">
-          <a class="btn btn-sec" href="../" title="Voltar para o site">🏡 Site</a>
+        <a class="btn btn-sec" href="../" title="Voltar para o site">🏡 Site</a>
+      </div>
+
+      <!-- 4 KPIs coloridos (mesmo padrão do admin) -->
+      <div class="kpis-grid" id="kpis-grid">
+        <div class="kpi-card kpi-rosa"><div class="kpi-icon">💼</div><div class="kpi-label">Vagas ativas</div><div class="kpi-valor" id="kpi-vagas">—</div><div class="kpi-sub" id="kpi-vagas-sub"></div></div>
+        <div class="kpi-card kpi-azul"><div class="kpi-icon">📅</div><div class="kpi-label">Entrevistas agendadas</div><div class="kpi-valor" id="kpi-entrevistas">—</div><div class="kpi-sub" id="kpi-entrevistas-sub"></div></div>
+        <div class="kpi-card kpi-roxo"><div class="kpi-icon">⏳</div><div class="kpi-label">Aguardando sua avaliação</div><div class="kpi-valor" id="kpi-aguardando">—</div><div class="kpi-sub" id="kpi-aguardando-sub"></div></div>
+        <div class="kpi-card kpi-verde"><div class="kpi-icon">🎉</div><div class="kpi-label">Contratações</div><div class="kpi-valor" id="kpi-contratacoes">—</div><div class="kpi-sub" id="kpi-contratacoes-sub"></div></div>
+      </div>
+
+      <!-- Funil por etapa + Entrevistas -->
+      <div class="dash-row">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📊 Candidatos por etapa do processo</h3>
+            <span class="dash-card-tag" id="etapas-total">0 candidatos</span>
+          </div>
+          <div class="grafico-etapas" id="grafico-etapas"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📅 Próximas Entrevistas</h3>
+            <span class="dash-card-tag" id="entrevistas-count">0 agendadas</span>
+          </div>
+          <div class="lista-entrevistas" id="lista-entrevistas"></div>
         </div>
       </div>
 
-      <div class="kpi-grid" id="kpis"></div>
-
-      <div class="page-header" style="margin-top:8px; padding-bottom:8px; border:0;">
-        <h2 style="font-size:18px;">Vagas liberadas</h2>
+      <!-- Atividades recentes -->
+      <div class="dash-row" style="grid-template-columns: 1fr;">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>⚡ Atividades Recentes</h3>
+            <span class="dash-card-tag" id="atividades-count">0 eventos</span>
+          </div>
+          <div class="atividades-feed" id="atividades-recentes"></div>
+        </div>
       </div>
-      <div id="conteudo">Carregando...</div>
     </main>
   </div>
 
@@ -83,71 +261,141 @@
       setTimeout(() => t.style.opacity = '0', 3000);
     }
 
-    async function carregar() {
+    function tempoRelativo(dataIso) {
+      if (!dataIso) return '—';
+      const agora = new Date();
+      const data = new Date(dataIso);
+      const diffMs = agora - data;
+      const diffMin = Math.floor(diffMs / 60000);
+      if (diffMin < 1) return 'agora mesmo';
+      if (diffMin < 60) return `há ${diffMin} min`;
+      const diffH = Math.floor(diffMin / 60);
+      if (diffH < 24) return `há ${diffH} hora${diffH > 1 ? 's' : ''}`;
+      const diffD = Math.floor(diffH / 24);
+      if (diffD < 7) return `há ${diffD} dia${diffD > 1 ? 's' : ''}`;
+      return data.toLocaleDateString('pt-BR');
+    }
+
+    async function carregarDashboard() {
       const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
       document.getElementById('avatar').textContent = iniciais(usuario.nome);
       document.getElementById('user-nome').textContent = usuario.nome || '--';
       document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
-      document.getElementById('saudacao').textContent = `Olá, ${(usuario.nome || '').split(' ')[0]}! 👋`;
+
+      // Saudação dinâmica
+      const hora = new Date().getHours();
+      const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+      const primeiroNome = (usuario.nome || '').split(' ')[0] || 'Empresa';
+      document.getElementById('saudacao').textContent = `${saudacao}, ${primeiroNome}! 👋`;
 
       try {
         const r = await fetch(API + '/api/empresa/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await r.json();
         if (!r.ok) {
           if (r.status === 401 || r.status === 403) { sair(); return; }
-          toast(data.erro || 'Erro ao carregar', 'erro');
+          document.getElementById('kpis-grid').innerHTML = `<div class="alert alert-erro">Erro: ${data.erro || 'desconhecido'}</div>`;
           return;
         }
 
-        // KPIs
+        // === 4 KPIs (Vagas / Entrevistas / Aguardando / Contratações) ===
         const k = data.kpis || {};
-        document.getElementById('kpis').innerHTML = `
-          <div class="kpi"><div class="label">Vagas liberadas</div><div class="valor">${k.vagas_liberadas || 0}</div></div>
-          <div class="kpi"><div class="label">Total de candidatos</div><div class="valor">${k.total_candidatos || 0}</div></div>
-          <div class="kpi destaque"><div class="label">Aguardando sua avaliação</div><div class="valor">${k.em_etapa_gestor || 0}</div></div>
-          <div class="kpi"><div class="label">Contratações</div><div class="valor" style="color:#2E7D32;">${k.contratacoes || 0}</div></div>
-        `;
+        const kpiVagas = k.vagas_liberadas || 0;
+        const kpiEntrevistas = k.entrevistas_agendadas || 0;
+        const kpiAguardando = k.em_etapa_gestor || 0;
+        const kpiContratacoes = k.contratacoes || 0;
+        document.getElementById('kpi-vagas').textContent = kpiVagas;
+        document.getElementById('kpi-entrevistas').textContent = kpiEntrevistas;
+        document.getElementById('kpi-aguardando').textContent = kpiAguardando;
+        document.getElementById('kpi-contratacoes').textContent = kpiContratacoes;
+        document.getElementById('kpi-vagas-sub').textContent = kpiVagas === 1 ? '1 vaga liberada' : `${kpiVagas} vagas liberadas`;
+        document.getElementById('kpi-entrevistas-sub').textContent = kpiEntrevistas === 0 ? 'Nenhuma' : kpiEntrevistas === 1 ? '1 agendada' : `${kpiEntrevistas} agendadas`;
+        document.getElementById('kpi-aguardando-sub').textContent = 'Candidatos em etapa do gestor';
+        document.getElementById('kpi-contratacoes-sub').textContent = kpiContratacoes === 0 ? 'Nenhuma ainda' : kpiContratacoes === 1 ? '1 contratado(a)' : `${kpiContratacoes} contratados(as)`;
 
-        // Vagas
-        const vagas = data.vagas || [];
-        if (vagas.length === 0) {
-          document.getElementById('conteudo').innerHTML = `
-            <div class="card">
-              <div class="empty">
-                <div style="font-size:48px; margin-bottom:12px;">🔒</div>
-                <h3 style="margin-bottom:8px;">Nenhuma vaga liberada ainda</h3>
-                <p>Você ainda não tem vagas autorizadas neste portal. Entre em contato com seu recrutador para liberar o acesso às vagas da sua empresa.</p>
+        // === Funil por etapa ===
+        const etapasObj = data.etapas || {};
+        const labels = ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'];
+        const etapasTotal = Object.values(etapasObj).reduce((s, v) => s + (parseInt(v) || 0), 0);
+        const maxEtapa = Math.max(1, ...Object.values(etapasObj).map(v => parseInt(v) || 0));
+        document.getElementById('grafico-etapas').innerHTML = labels.map((label, i) => {
+          const etapaNum = i + 1;
+          const val = parseInt(etapasObj[etapaNum] || 0);
+          const pct = (val / maxEtapa) * 100;
+          return `<div class="etapa-barra-row">
+            <div class="etapa-barra-nome">${i + 1}. ${label}</div>
+            <div class="etapa-barra-fundo"><div class="etapa-barra-fill e${etapaNum}" style="width:${pct}%">${val > 0 ? val : ''}</div></div>
+            <div class="etapa-barra-count">${val}</div>
+          </div>`;
+        }).join('');
+        document.getElementById('etapas-total').textContent = `${etapasTotal} candidato${etapasTotal !== 1 ? 's' : ''}`;
+
+        // === Próximas entrevistas ===
+        const entrevistas = data.proximas || [];
+        document.getElementById('entrevistas-count').textContent = `${entrevistas.length} agendada${entrevistas.length !== 1 ? 's' : ''}`;
+        if (entrevistas.length > 0) {
+          document.getElementById('lista-entrevistas').innerHTML = entrevistas.slice(0, 8).map(e => {
+            const dataE = new Date(e.data_hora);
+            const dataStr = dataE.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+            const horaStr = dataE.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const tagClass = e.etapa === 3 ? 'rh' : e.etapa === 4 ? 'gestor' : 'outra';
+            const tagNome = e.etapa === 3 ? 'RH' : e.etapa === 4 ? 'Gestor' : (e.etapa_nome || `Etapa ${e.etapa}`);
+            const nome = e.candidato_nome || 'Candidato';
+            const vaga = e.vaga_titulo || '—';
+            const iniciaisN = iniciais(nome);
+            return `<div class="entrevista-item">
+              <div class="entrevista-avatar">${iniciaisN}</div>
+              <div class="entrevista-info">
+                <div class="entrevista-nome">${nome}</div>
+                <div class="entrevista-vaga">${vaga}</div>
+                <div class="entrevista-data">📅 ${dataStr} às ${horaStr}</div>
               </div>
-            </div>
-          `;
-          return;
+              <div class="entrevista-tag">${tagNome}</div>
+            </div>`;
+          }).join('');
+        } else {
+          document.getElementById('lista-entrevistas').innerHTML = '<div class="entrevista-empty">Nenhuma entrevista agendada</div>';
         }
 
-        document.getElementById('conteudo').innerHTML = `
-          <div class="vagas-grid">
-            ${vagas.map(v => {
-              const local = [v.cidade, v.estado].filter(Boolean).join(' / ') || '--';
-              return `
-              <a class="vaga-card" href="candidatos.html?vaga=${v.id}">
-                <h3>${v.titulo}</h3>
-                <div class="local">${v.empresa || '—'} • 📍 ${local}</div>
-                <div class="stats">
-                  <div class="stat"><strong>${v.total_candidatos || 0}</strong><small>Candidatos</small></div>
-                  <div class="stat"><strong style="color:#F57C00;">${v.em_andamento || 0}</strong><small>Em andamento</small></div>
-                  <div class="stat"><strong style="color:#2E7D32;">${v.contratacoes || 0}</strong><small>Contratados</small></div>
+        // === Atividades recentes ===
+        const ats = data.atividades || [];
+        document.getElementById('atividades-count').textContent = `${ats.length} evento${ats.length !== 1 ? 's' : ''}`;
+        if (ats.length > 0) {
+          const tipoMap = {
+            'inscricao':        { icone: '✨', label: 'Nova inscrição',     tipo: 'inscricao' },
+            'avancar':          { icone: '▶️', label: 'Avançou etapa',      tipo: 'avancar' },
+            'reprovar':         { icone: '✖', label: 'Reprovado',           tipo: 'reprovar' },
+            'reabrir':          { icone: '↩', label: 'Reaberto',           tipo: 'reabrir' },
+            'recusar_proposta': { icone: '✖', label: 'Proposta recusada',   tipo: 'proposta' },
+            'aceitar_proposta': { icone: '✓', label: 'Proposta aceita',    tipo: 'proposta' },
+            'enviar_proposta':  { icone: '📨', label: 'Proposta enviada',   tipo: 'proposta' },
+            'entrevista':       { icone: '📅', label: 'Entrevista agendada', tipo: 'entrevista' }
+          };
+          document.getElementById('atividades-recentes').innerHTML = ats.slice(0, 10).map(a => {
+            const t = tipoMap[a.texto] || { icone: '•', label: a.texto || 'Atualização', tipo: 'reabrir' };
+            const quando = tempoRelativo(a.quando);
+            return `<div class="atividade-item tipo-${t.tipo}">
+              <div class="atividade-icone">${t.icone}</div>
+              <div class="atividade-corpo">
+                <div class="atividade-topo">
+                  <span class="atividade-tipo">${t.label}</span>
+                  <span class="atividade-tempo">${quando}</span>
                 </div>
-              </a>`;
-            }).join('')}
-          </div>
-        `;
+                <div class="atividade-candidato">${a.candidato || '—'}</div>
+                <div class="atividade-vaga">${a.vaga || '—'}</div>
+              </div>
+            </div>`;
+          }).join('');
+        } else {
+          document.getElementById('atividades-recentes').innerHTML = '<div class="atividade-empty">Nenhuma atividade recente nas suas vagas</div>';
+        }
       } catch (e) {
         console.error(e);
-        toast('Erro de conexão', 'erro');
+        document.getElementById('kpis-grid').innerHTML = '<div class="alert alert-erro">Erro de conexão: ' + e.message + '</div>';
       }
     }
 
-    carregar();
+    carregarDashboard();
   </script>
-<script src="chat-rh-flutuante.js?v=20260722a"></script>
+<script src="chat-rh-flutuante.js?v=20260725a"></script>
 </body>
 </html>
