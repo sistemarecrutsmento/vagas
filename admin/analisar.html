@@ -8,24 +8,22 @@
   <meta http-equiv="Expires" content="0">
   <title>Analisar Candidato — Admin</title>
   <style>
-    :root { --vinho:#6B0F1A; --vinho-claro:#8B1A2B; --vinho-escuro:#5a1414; --dourado:#D4AF37; --cinza:#F5F5F5; --cinza-medio:#999; --cinza-escuro:#2A2A2A; --cinza-claro:#ccc; --branco:#fff; --borda:#e0e0e0; }
+    :root { --vinho:#6B0F1A; --vinho-claro:#8B1A2B; --cinza:#F5F5F5; --cinza-medio:#999; --cinza-escuro:#2A2A2A; --branco:#fff; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--cinza); color: var(--cinza-escuro); padding: 24px; }
     .container { max-width: 1100px; margin: 0 auto; }
-    .header { background: var(--branco); padding: 24px 24px 24px 130px; min-height: 128px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; position: relative; }
+    .header { background: var(--branco); padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; position: relative; }
     .header .btn-voltar { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid var(--cinza-medio); color: var(--cinza-escuro); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s; }
     .header .btn-voltar:hover { background: var(--cinza); border-color: var(--vinho); color: var(--vinho); }
     .header .btn-voltar svg { width: 18px; height: 18px; }
-    .header h1 { color: var(--vinho); font-size: 24px; margin-bottom: 4px; }
-    .header .sub { color: var(--cinza-medio); font-size: 14px; }
-    .header .header-foto { position: absolute; left: 24px; top: 24px; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: var(--cinza-claro); border: 3px solid var(--branco); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    .header .header-foto-vazia { display: inline-flex; align-items: center; justify-content: center; color: var(--cinza-medio); font-size: 32px; }
+    .header h1 { color: var(--vinho); font-size: 24px; margin-bottom: 4px; padding-left: 110px; }
+    .header .sub { color: var(--cinza-medio); font-size: 14px; padding-left: 110px; }
     .status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-top: 8px; }
     .status-em_andamento { background: #FFF4E5; color: #B45309; }
     .status-aprovado { background: #E5F8E5; color: #166534; }
     .status-reprovado { background: #FEE2E2; color: #991B1B; }
     .status-contratado { background: #DBEAFE; color: #1E40AF; }
-    .card { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 16px; }
+    .card { background: var(--branco); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; }
     .card h2 { font-size: 16px; color: var(--vinho); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cinza); }
     .dados-pessoais-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cinza); }
     .dados-pessoais-header h2 { margin: 0; padding: 0; border: none; }
@@ -92,108 +90,18 @@
     .doc-btn-reprovar:hover { background: #B91C1C; }
     .doc-btn-reverter { background: var(--cinza-medio); color: white; }
     .doc-btn-reverter:hover { background: var(--cinza-escuro); }
-
-    /* === Sidebar vinho (mesma do index) === */
-    body { padding: 0; }
-    .app { display: flex; min-height: 100vh; }
-    .menu-toggle { display: none; position: fixed; top: 12px; left: 12px; z-index: 1100; background: var(--vinho); color: #fff; border: 0; border-radius: 8px; width: 40px; height: 40px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-    .menu-close { display: none; position: absolute; top: 12px; right: 12px; background: transparent; color: #fff; border: 0; font-size: 22px; cursor: pointer; padding: 4px 8px; }
-    .app.aside-aberto .menu-toggle { display: none; }
-    aside { position: fixed; top: 0; left: 0; height: 100vh; z-index: 1000; transform: translateX(-100%); transition: transform 0.25s ease; }
-    aside.aberto { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
-    aside.aberto .menu-close { display: block; }
-    .aside-logo { padding: 12px 24px 24px; }
-    @media (min-width: 769px) {
-      .menu-toggle { display: none !important; }
-      aside { position: static; transform: none; width: 240px; background: var(--vinho); color: #fff; padding: 24px 0; flex-shrink: 0; display: flex; flex-direction: column; min-height: 100vh; box-shadow: none; }
-      .aside-logo { padding: 0 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
-      .menu-close { display: none !important; }
-    }
-    .aside-logo h1 { font-size: 20px; font-weight: 800; color: #fff; }
-    .aside-logo .dourado { color: var(--dourado); }
-    .aside-logo small { color: rgba(255,255,255,0.6); font-size: 12px; }
-    .nav-item { display: block; padding: 12px 24px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; font-weight: 500; border-left: 3px solid transparent; cursor: pointer; transition: background 0.2s; }
-    .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .nav-item.ativo { background: rgba(255,255,255,0.15); color: #fff; border-left-color: #fff; }
-    .nav-item.sair { margin-top: auto; color: rgba(255,255,255,0.5); }
-    .nav-item.sair:hover { color: #fff; }
-    .aside-user { margin-top: auto; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
-    .aside-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-    .aside-user-info { flex: 1; min-width: 0; }
-    .aside-user-info .nome { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .aside-user-info .empresa { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .btn-logout { background: rgba(255,255,255,0.1); color: #fff; border: 0; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; }
-    .btn-logout:hover { background: rgba(255,255,255,0.2); }
-    .main-content { flex: 1; padding: 24px; max-width: 100%; overflow-x: hidden; }
-    .main-content .container { max-width: 1100px; margin: 0 auto; }
-    @media (max-width: 768px) {
-      .menu-toggle { display: block; }
-      .app.aside-aberto { overflow: hidden; }
-      .main-content { padding: 16px; }
-    }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
 </head>
 <body>
-  <button class="menu-toggle" onclick="document.querySelector('aside').classList.add('aberto'); document.querySelector('.app').classList.add('aside-aberto');" aria-label="Abrir menu">☰</button>
-
-  <div class="app">
-    <aside>
-      <button class="menu-close" onclick="document.querySelector('aside').classList.remove('aberto'); document.querySelector('.app').classList.remove('aside-aberto');" aria-label="Fechar menu">✕</button>
-      <div class="aside-logo">
-        <h1>Vagas<span class="dourado">.io</span></h1>
-        <small>Painel Administrativo</small>
-      </div>
-
-      <a class="nav-item" href="index.html#dashboard">📊 Dashboard</a>
-      <a class="nav-item" href="index.html#vagas">💼 Vagas</a>
-      <a class="nav-item" href="index.html#candidatos">👥 Base de Talentos</a>
-      <a class="nav-item" href="candidaturas.html">📋 Vagas com Candidatos</a>
-      <a class="nav-item" href="agenda.html">📅 Agenda</a>
-      <a class="nav-item" href="equipe.html">👤 Equipe</a>
-
-      <div class="aside-user">
-        <div class="aside-user-avatar" id="avatar">--</div>
-        <div class="aside-user-info">
-          <div class="nome" id="user-nome">--</div>
-          <div class="empresa" id="user-empresa">--</div>
-        </div>
-        <button class="btn-logout" onclick="sair()" title="Sair">↪</button>
-      </div>
-    </aside>
-
-    <div class="main-content">
-      <div class="container">
-        <div id="content">
-          <div class="card"><div class="empty"><div class="spinner"></div>Carregando...</div></div>
-        </div>
-      </div>
+  <div class="container">
+    <div id="content">
+      <div class="card"><div class="empty"><div class="spinner"></div>Carregando...</div></div>
     </div>
   </div>
 
   <script>
     const API = 'https://recrutamento-api.onrender.com';
-
-    // Pega nome e email do token JWT pra sidebar
-    (function(){
-      const token = localStorage.getItem('admin_token');
-      if (token) {
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          if (payload.nome) document.getElementById('user-nome').textContent = payload.nome;
-          if (payload.email) document.getElementById('user-empresa').textContent = payload.email;
-          // Iniciais do nome
-          const ini = (payload.nome || 'A').split(' ').filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join('');
-          document.getElementById('avatar').textContent = ini;
-        } catch(e) {}
-      }
-    })();
-    function sair() {
-      if (confirm('Sair do painel?')) {
-        localStorage.removeItem('admin_token');
-        location.href = 'index.html';
-      }
-    }
 
     function voltar() {
       // Volta pra lista de candidatos da vaga (SPA)
@@ -667,7 +575,17 @@
 
       // Card de chat RH × EMPRESA (somente se a candidatura tem empresa vinculada)
       const temEmpresa = !!c.empresa_id || !!c.empresa_nome; // candidatura pode ter empresa
-      const chatEmpresaCard = ''; // chat agora é flutuante (chat-empresa-flutuante.js)
+      const chatEmpresaCard = temEmpresa ? (
+        '<div class="card" id="card-chat-empresa">' +
+          '<h2>🏢 Chat com a Empresa</h2>' +
+          '<p style="font-size:12px;color:#999;margin-bottom:10px;margin-top:-8px">Canal direto entre o RH e a empresa responsável por esta vaga. Use para alinhar decisões sobre esta candidatura.</p>' +
+          '<div id="chat-empresa-mensagens" style="height:280px;overflow-y:auto;background:#fafafa;border-radius:6px;padding:10px;margin-bottom:8px">Carregando...</div>' +
+          '<div style="display:flex;gap:8px">' +
+            '<input type="text" id="chat-empresa-input" placeholder="Escreva uma mensagem para a empresa…" style="flex:1;padding:9px 12px;border:1px solid #e5e5e5;border-radius:6px;font-size:13px" onkeydown="if(event.key===\'Enter\')enviarChatEmpresa()">' +
+            '<button onclick="enviarChatEmpresa()" style="background:#722F37;color:white;border:0;padding:0 18px;border-radius:6px;font-weight:600;cursor:pointer">Enviar</button>' +
+          '</div>' +
+        '</div>'
+      ) : '';
 
       content.innerHTML =
         '<div class="header">' +
@@ -675,9 +593,6 @@
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>' +
             'Voltar' +
           '</button>' +
-          (c.foto_url
-            ? '<img class="header-foto" src="' + c.foto_url + '" alt="Foto de ' + (c.nome || '') + '">'
-            : '<div class="header-foto header-foto-vazia">👤</div>') +
           '<h1><span id="v-build" style="display:none">V2</span> ' + (c.nome || 'Candidato') + '</h1>' +
           '<div class="sub">' + (c.titulo || 'Vaga') + (c.v_cidade ? ' • ' + c.v_cidade : '') + '</div>' +
           '<span class="status-pill status-' + status + '">' + (status === 'em_analise' ? 'Em análise' : status === 'em_andamento' ? 'Em andamento' : status === 'contratado' ? 'Contratado' : status === 'reprovado' ? 'Reprovado' : status === 'rejeitado' ? 'Reprovado' : status === 'aprovado' ? 'Aprovado' : status) + '</span>' +
@@ -1306,6 +1221,5 @@
     #modal-proposta.aberto { display: flex !important; }
   </style>
 <script src="chat-flutuante-admin.js?v=20260722a"></script>
-<script src="chat-empresa-flutuante.js?v=20260722a"></script>
 </body>
 </html>
