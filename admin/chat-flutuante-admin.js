@@ -92,7 +92,7 @@
     .chat-send-btn:hover:not(:disabled) { background: #f0c14b; }
     .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     @media (max-width: 480px) {
-      .chat-window { right: 8px; left: 8px; width: auto; bottom: 90px; }
+      .chat-window { right: 0; left: 0; top: 0; bottom: 0; width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; border-radius: 0; }
     }
   `;
   document.head.appendChild(style);
@@ -162,7 +162,7 @@
   fabContainer.id = 'chatfab-container';
   // column-reverse: primeiro item no DOM fica embaixo, último fica em cima.
   // Bolinhas candidato ficam ABAIXO da bolinha empresa (canto inferior direito).
-  fabContainer.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:10px;z-index:9999;';
+  fabContainer.style.cssText = 'position:fixed;bottom:90px;right:20px;display:flex;flex-direction:column-reverse;gap:6px;z-index:9999;';
   document.body.appendChild(fabContainer);
 
   // Janela única de chat (abre a conversa do candidato clicado)
