@@ -384,7 +384,23 @@
   }
 
   // === INIT ===
-  btn.onclick = toggle;
+  // DEBUG FABIO 25/07: capturar se o clique chega
+  const _debugOverlay = document.createElement('div');
+  _debugOverlay.style.cssText = 'position:fixed;bottom:0;left:0;background:#000;color:#0f0;font:11px monospace;padding:6px;z-index:99999;max-width:300px;white-space:pre-wrap;border:2px solid #0f0';
+  _debugOverlay.textContent = '[chatfab-empresa] init OK\n';
+  document.body.appendChild(_debugOverlay);
+  window.__chatfabDebug = (msg) => {
+    _debugOverlay.textContent += msg + '\n';
+    console.log('[chatfab-empresa]', msg);
+  };
+  window.__chatfabDebug('btn ref: ' + (btn ? 'OK' : 'NULL'));
+  window.__chatfabDebug('win ref: ' + (win ? 'OK' : 'NULL'));
+  btn.onclick = function() {
+    window.__chatfabDebug('>>> CLIQUE NA BOLINHA AZUL <<<');
+    window.__chatfabDebug('aberto ANTES: ' + aberto);
+    toggle();
+    window.__chatfabDebug('aberto DEPOIS: ' + aberto);
+  };
 
   document.body.addEventListener('keydown', (e) => {
     if (e.target.id === 'chatfab-empresa-input' && e.key === 'Enter' && !e.shiftKey) {
