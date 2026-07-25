@@ -7,32 +7,47 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="empresa.css">
   <style>
-    /* === Página analisar: padding container === */
+    /* === Página analisar (espelho do admin) === */
     .analisar-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 24px 60px; }
-    .analisar-wrap .header-cand { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 24px 24px 24px 130px; min-height: 128px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .analisar-wrap .btn-voltar { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid var(--cinza-medio); color: var(--preto); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s; }
-    .analisar-wrap .btn-voltar:hover { background: #f5f5f5; border-color: var(--vinho); color: var(--vinho); }
-    .analisar-wrap .btn-voltar svg { width: 16px; height: 16px; }
-    .analisar-wrap .header-cand-titulo { text-align: left; }
-    .analisar-wrap .header-cand h1 { font-size: 24px; margin: 0 0 4px; font-weight: 800; color: var(--vinho); }
-    .analisar-wrap .header-cand .sub { font-size: 14px; color: var(--cinza-medio); margin-bottom: 6px; }
-    .analisar-wrap .header-foto { position: absolute; left: 24px; top: 24px; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: var(--cinza-claro); border: 3px solid var(--branco); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    .analisar-wrap .header-foto-vazia { display: inline-flex; align-items: center; justify-content: center; color: var(--cinza-medio); font-size: 32px; }
-    .analisar-wrap .header-cand .status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-    .status-em_andamento { background: #DBEAFE; color: #1E40AF; }
+
+    /* === Header (igual admin) === */
+    .analisar-wrap .header { background: var(--branco); padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; position: relative; }
+    .analisar-wrap .btn-voltar { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid var(--cinza-medio); color: var(--cinza-escuro); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s; }
+    .analisar-wrap .btn-voltar:hover { background: var(--cinza); border-color: var(--vinho); color: var(--vinho); }
+    .analisar-wrap .btn-voltar svg { width: 18px; height: 18px; }
+    .analisar-wrap .header h1 { color: var(--vinho); font-size: 24px; margin-bottom: 4px; padding-left: 110px; font-weight: 800; }
+    .analisar-wrap .header .sub { color: var(--cinza-medio); font-size: 14px; padding-left: 110px; }
+    .status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-top: 8px; margin-left: 110px; }
+    .status-em_andamento { background: #FFF4E5; color: #B45309; }
     .status-em_analise { background: #FFF3E0; color: #E65100; }
-    .status-aprovado { background: #E8F5E9; color: #2E7D32; }
-    .status-reprovado, .status-rejeitado { background: #FFEBEE; color: #C62828; }
-    .status-contratado { background: #2E7D32; color: #fff; }
+    .status-aprovado { background: #E5F8E5; color: #166534; }
+    .status-reprovado, .status-rejeitado { background: #FEE2E2; color: #991B1B; }
+    .status-contratado { background: #DBEAFE; color: #1E40AF; }
 
     /* === Cards === */
-    .analisar-wrap .card { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 24px; margin-top: 16px; }
-    .analisar-wrap .card h2 { font-size: 16px; font-weight: 700; color: var(--vinho); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--borda); }
+    .analisar-wrap .card { background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 24px; margin-top: 16px; }
+    .analisar-wrap .card h2 { font-size: 16px; color: var(--vinho); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cinza); font-weight: 700; }
 
-    /* === Dados pessoais com foto === */
-    .dados-pessoais-header { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--borda); }
-    .dados-foto { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--dourado); }
-    .dados-foto-vazia { background: var(--vinho); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+    /* === Cards colapsáveis (igual admin) === */
+    .card-colapsavel > .card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; cursor: pointer; border-radius: 12px; transition: background 0.15s; margin: -24px -24px 0; }
+    .card-colapsavel > .card-header:hover { background: #faf7f0; }
+    .card-colapsavel > .card-header h2 { margin: 0; padding: 0; border: none; flex: 1; min-width: 0; }
+    .card-colapsavel > .card-header h2.flex { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .card-colapsavel > .card-header .card-toggle { color: var(--cinza-medio); flex-shrink: 0; }
+    .card-colapsavel > .card-header .card-toggle svg { display: none; }
+    .card-colapsavel > .card-header .card-toggle .chevron-baixo { display: block; }
+    .card-colapsavel > .card-header .card-toggle .chevron-cima { display: none; }
+    .card-colapsavel.aberto > .card-header .card-toggle .chevron-baixo { display: none; }
+    .card-colapsavel.aberto > .card-header .card-toggle .chevron-cima { display: block; }
+    .card-colapsavel > .card-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .card-colapsavel.aberto > .card-body { max-height: 5000px; padding-top: 16px; }
+    .card-colapsavel.aberto > .card-header { border-radius: 12px 12px 0 0; }
+
+    /* === Dados pessoais === */
+    .dados-pessoais-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cinza); }
+    .dados-pessoais-header h2 { margin: 0; padding: 0; border: none; }
+    .dados-foto { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--dourado); }
+    .dados-foto-vazia { background: var(--vinho); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; width: 48px; height: 48px; border-radius: 50%; }
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
     .field { padding: 8px 0; }
@@ -61,27 +76,16 @@
     .hist-item { padding: 12px; border-bottom: 1px solid #f0f0f0; }
     .hist-item:last-child { border-bottom: 0; }
 
-    /* === Chat RH × Empresa === */
-    .chat-rh-card { display: flex; flex-direction: column; height: 400px; }
-    .chat-rh-mensagens { flex: 1; overflow-y: auto; padding: 12px; background: #fafafa; border-radius: 6px; margin-bottom: 10px; }
-    .chat-msg { margin-bottom: 10px; max-width: 75%; padding: 8px 12px; border-radius: 12px; font-size: 14px; }
-    .chat-msg-empresa { background: var(--vinho); color: #fff; margin-left: auto; border-bottom-right-radius: 2px; }
-    .chat-msg-rh { background: #fff; color: var(--preto); border: 1px solid var(--borda); border-bottom-left-radius: 2px; }
-    .chat-msg .meta { font-size: 10px; margin-top: 4px; opacity: 0.7; }
-    .chat-input-row { display: flex; gap: 8px; }
-    .chat-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 6px; font-family: inherit; font-size: 14px; }
-    .chat-input-row button { background: var(--vinho); color: #fff; border: 0; padding: 0 18px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-    .chat-input-row button:hover { background: var(--vinho-escuro); }
-
     /* === Ações === */
     .acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .acoes button { font-size: 14px; padding: 12px 18px; }
     .aviso-bloq { padding: 12px 14px; border-radius: 6px; font-size: 13px; margin-top: 8px; }
     .badge-readonly { background: #FFF8E1; color: #92400E; border-left: 4px solid var(--dourado); padding: 12px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 14px; }
 
     /* === Mobile === */
     @media (max-width: 768px) {
       .grid-2 { grid-template-columns: 1fr; }
-      .dados-pessoais-header { flex-direction: column; text-align: center; }
+      .analisar-wrap .header h1, .analisar-wrap .header .sub, .status-pill { padding-left: 0; margin-left: 0; }
     }
   </style>
 </head>
@@ -343,41 +347,78 @@
         acoesHtml = '<div class="badge-readonly">🔒 <strong>Modo leitura.</strong> Sua empresa só pode aprovar ou reprovar candidatos na etapa de Entrevista com o Gestor (etapa 4). Acompanhe o progresso abaixo e use o chat ao lado para falar com o RH.</div>';
       }
 
-      // monta HTML
+      // monta HTML (espelho do admin)
       const content = document.getElementById('content');
-      content.innerHTML =
-        // 1) Header
-        '<div class="header-cand">' +
-          '<button class="btn-voltar" onclick="voltar()" title="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg> Voltar</button>' +
-          (c.foto_url
-            ? '<img class="header-foto" src="' + c.foto_url + '" alt="Foto de ' + (c.nome || '') + '">'
-            : '<div class="header-foto header-foto-vazia">👤</div>') +
-          '<div class="header-cand-titulo">' +
-            '<h1>' + (c.nome || 'Candidato') + '</h1>' +
-            '<div class="sub">' + (c.vaga_titulo || c.titulo || 'Vaga') + (c.v_cidade ? ' • ' + c.v_cidade : '') + '</div>' +
-            '<span class="status-pill status-' + status + '">' + statusLabel + '</span>' +
+      const histCount = histFiltrado.length;
+
+      const parecerCard =
+        '<div class="card" id="card-comentario-empresa">' +
+          '<h2>📝 Parecer da Empresa</h2>' +
+          '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:10px">Anotações internas sobre a entrevista com o gestor. <strong>Não é exibido ao candidato.</strong></p>' +
+          '<textarea id="txt-comentario-empresa" rows="4" placeholder="Pontos fortes, pontos de atenção, fit com a vaga, próximos passos…" style="width:100%;padding:10px;border:1px solid #DDD;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' +
+            (ultComentario ? escapeHtml(ultComentario.texto || '') : '') +
+          '</textarea>' +
+          '<div style="margin-top:8px;display:flex;justify-content:flex-end">' +
+            '<button class="btn" style="background:var(--dourado);color:var(--cinza-escuro)" onclick="salvarComentarioEmpresa(' + c.id + ')">💾 Salvar parecer</button>' +
           '</div>' +
+        '</div>';
+
+      const parecerSection = ehEtapaGestor ? parecerCard : '';
+
+      // Card "Comentários do RH" — empresa NÃO mexe, mas pode ler (read-only)
+      const comentarioRHReadonly = (() => {
+        // Pega observações da etapa 3 (RH), se houver
+        const obs3 = c.observacoes_etapas && c.observacoes_etapas[String(3)];
+        if (!obs3) return '';
+        return '<div class="card" id="card-comentario-rh-readonly">' +
+          '<h2>🗣️ Comentários da Entrevista RH</h2>' +
+          '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:10px">Anotações internas do RH sobre a entrevista. <strong>Não é exibido ao candidato.</strong></p>' +
+          '<div style="width:100%;padding:10px;border:1px solid #DDD;border-radius:8px;background:#fafafa;font-size:14px;line-height:1.5;white-space:pre-wrap;color:#444">' +
+            escapeHtml(obs3) +
+          '</div>' +
+        '</div>';
+      })();
+
+      // Card de Histórico do Processo (colapsável, igual admin)
+      const historicoCard =
+        '<div class="card card-colapsavel" id="card-historico">' +
+          '<div class="card-header" onclick="toggleCard(\'card-historico\')">' +
+            '<h2 class="flex">📜 Histórico do Processo <span style="font-weight:400;font-size:13px;color:var(--cinza-medio)">(' + histCount + (histCount === 1 ? ' evento' : ' eventos') + ')</span></h2>' +
+            '<span class="card-toggle">' +
+              '<svg class="chevron-baixo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+              '<svg class="chevron-cima" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 15 12 9 18 15"></polyline></svg>' +
+            '</span>' +
+          '</div>' +
+          '<div class="card-body">' + histHtml + '</div>' +
+        '</div>';
+
+      content.innerHTML =
+        '<div class="header">' +
+          '<button class="btn-voltar" onclick="voltar()" title="Voltar">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>' +
+            'Voltar' +
+          '</button>' +
+          '<h1>' + (c.nome || 'Candidato') + '</h1>' +
+          '<div class="sub">' + (c.titulo || c.vaga_titulo || 'Vaga') + (c.v_cidade ? ' • ' + c.v_cidade : '') + '</div>' +
+          '<span class="status-pill status-' + status + '">' + statusLabel + '</span>' +
         '</div>' +
 
-        // 2) Timeline
-        '<div class="card">' +
+        // 1) Status do Processo (timeline)
+        '<div class="card" id="card-timeline">' +
           '<h2>📋 Status do Processo</h2>' +
           '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual + '/' + totalEtapas + ' — ' + (etapas[etapaAtual - 1] || '—') + '</span></div>' +
+          '<div style="font-size:12px;color:var(--cinza-medio);margin-bottom:6px">💡 Clique em uma etapa para ver detalhes.</div>' +
           '<div class="timeline">' + timeline + '</div>' +
         '</div>' +
 
-        // 3) Histórico
-        '<div class="card">' +
-          '<h2>📜 Histórico do Processo</h2>' + histHtml +
-        '</div>' +
+        // 2) Histórico do Processo (colapsável)
+        historicoCard +
 
-        // 4) Chat RH × Empresa (agora é flutuante, sem card inline)
-
-        // 5) Dados Pessoais + Foto
-        '<div class="card">' +
+        // 3) Dados Pessoais + Foto
+        '<div class="card" id="card-dados-pessoais">' +
           '<div class="dados-pessoais-header">' +
-            (c.foto_url ? '<img class="dados-foto" src="' + c.foto_url + '" alt="Foto" onerror="this.outerHTML=\'<div class=&quot;dados-foto dados-foto-vazia&quot;>👤</div>\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
-            '<h2 style="margin:0">👤 Dados Pessoais</h2>' +
+            (c.foto_url ? '<img class="dados-foto" src="' + c.foto_url + '" alt="Foto" onerror="this.style.display=\'none\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
+            '<h2>👤 Dados Pessoais</h2>' +
           '</div>' +
           '<div class="grid-2">' +
             '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (c.email || '—') + '</div></div>' +
@@ -389,28 +430,36 @@
           '</div>' +
         '</div>' +
 
-        // 6) Sobre você
-        '<div class="card">' +
+        // 4) Sobre você
+        '<div class="card" id="card-sobre-voce">' +
           '<h2>💬 Sobre você</h2>' + sobreHtml +
         '</div>' +
 
-        // 7) Formação
-        '<div class="card">' +
+        // 5) Escolaridade
+        '<div class="card" id="card-formacao">' +
           '<h2>🎓 Escolaridade</h2>' + formacaoHtml +
         '</div>' +
 
-        // 8) Experiências
-        '<div class="card">' +
+        // 6) Experiências
+        '<div class="card" id="card-experiencias">' +
           '<h2>💼 Experiências Profissionais</h2>' + expsHtml +
         '</div>' +
 
-        // 9) Ações
-        '<div class="card">' +
+        // 7) Comentários do RH (read-only)
+        comentarioRHReadonly +
+
+        // 8) Parecer da Empresa (só na etapa 4)
+        parecerSection +
+
+        // 9) Ações (read-only ou Avançar/Reprovar)
+        '<div class="card" id="card-acoes">' +
           '<h2>⚡ Ações</h2>' + acoesHtml +
         '</div>';
 
       // carrega chat
       carregarChat();
+      // restaura cards colapsáveis
+      setTimeout(restaurarEstadoCards, 50);
     }
 
     // === Ações ===
