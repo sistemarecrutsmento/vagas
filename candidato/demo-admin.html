@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vagas.io — Demo: Painel Administrativo</title>
+<style>
+  :root {
+    --vinho:#722F37; --vinho-escuro:#4A1F25; --dourado:#D4AF37; --dourado-claro:#F5E6A8;
+    --cinza:#F5F5F5; --cinza-medio:#999; --cinza-escuro:#1A1A1A; --texto:#1A1A1A;
+    --branco:#FFFFFF; --verde:#16A34A; --verde-bg:#DCFCE7; --vermelho:#DC2626; --vermelho-bg:#FEE2E2;
+    --laranja:#F59E0B; --laranja-bg:#FEF3C7; --azul:#2563EB; --azul-bg:#DBEAFE; --roxo:#7C3AED; --roxo-bg:#EDE9FE;
+    --sombra:0 2px 8px rgba(0,0,0,0.08); --sombra-forte:0 4px 16px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: #FAFAFA; color: var(--texto); line-height: 1.5; }
+  button { font-family: inherit; cursor: pointer; border: none; }
+  a { color: var(--vinho); text-decoration: none; }
+
+  .demo-banner {
+    background: linear-gradient(90deg, #FEF3C7, #FDE68A);
+    color: #92400E; padding: 10px 20px; text-align: center; font-size: 13px;
+    border-bottom: 2px solid #F59E0B; font-weight: 500;
+  }
+  .demo-banner strong { color: #78350F; }
+
+  .app { max-width: 1100px; margin: 0 auto; background: var(--branco); min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+
+  /* Sidebar */
+  .layout { display: flex; min-height: calc(100vh - 50px); }
+  .sidebar {
+    width: 240px; background: linear-gradient(180deg, var(--vinho) 0%, var(--vinho-escuro) 100%);
+    color: var(--branco); padding: 20px 0; flex-shrink: 0;
+  }
+  .sidebar h2 { padding: 0 20px; color: var(--dourado); font-size: 22px; margin-bottom: 24px; }
+  .sidebar h2 span { color: var(--branco); }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer;
+    transition: all 0.2s; font-size: 14px; color: rgba(255,255,255,0.85);
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,0.1); color: var(--branco); }
+  .sidebar-item.active { background: rgba(212,175,55,0.2); color: var(--dourado); border-left: 3px solid var(--dourado); }
+  .sidebar-item .icon { font-size: 18px; }
+  .sidebar-item .badge {
+    background: var(--vermelho); color: var(--branco); font-size: 11px; padding: 2px 6px;
+    border-radius: 10px; margin-left: auto; font-weight: 700;
+  }
+
+  .main { flex: 1; padding: 24px 32px; overflow-x: auto; }
+
+  /* Top Bar */
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .topbar h1 { color: var(--vinho); font-size: 24px; }
+  .topbar-actions { display: flex; gap: 12px; align-items: center; }
+  .topbar-actions .user { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .topbar-actions .avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--dourado);
+    color: var(--cinza-escuro); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+
+  /* Tabs (sub-navigation) */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid #E5E5E5; margin-bottom: 20px; }
+  .tab {
+    padding: 12px 20px; background: transparent; color: var(--cinza-medio);
+    font-size: 14px; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.2s;
+  }
+  .tab:hover { color: var(--vinho); }
+  .tab.active { color: var(--vinho); border-bottom-color: var(--vinho); font-weight: 600; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* KPI Cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--branco); border-radius: 12px; padding: 20px; box-shadow: var(--sombra);
+    border-left: 4px solid var(--vinho); position: relative; overflow: hidden;
+  }
+  .kpi-card.kpi-verde { border-left-color: var(--verde); }
+  .kpi-card.kpi-azul { border-left-color: var(--azul); }
+  .kpi-card.kpi-laranja { border-left-color: var(--laranja); }
+  .kpi-card.kpi-roxo { border-left-color: var(--roxo); }
+  .kpi-top { display: flex; justify-content: space-between; align-items: center; }
+  .kpi-icon { font-size: 32px; opacity: 0.4; }
+  .kpi-label { font-size: 13px; color: var(--cinza-medio); margin-top: 8px; font-weight: 500; }
+  .kpi-valor { font-size: 32px; font-weight: 700; color: var(--cinza-escuro); margin-top: 4px; }
+  .kpi-delta { font-size: 12px; margin-top: 8px; display: inline-block; padding: 2px 8px; border-radius: 12px; }
+  .kpi-delta.up { background: var(--verde-bg); color: var(--verde); }
+  .kpi-delta.down { background: var(--vermelho-bg); color: var(--vermelho); }
+  .kpi-delta.flat { background: var(--cinza); color: var(--cinza-medio); }
+
+  /* Cards genéricos */
+  .card { background: var(--branco); border-radius: 12px; padding: 20px; box-shadow: var(--sombra); margin-bottom: 16px; }
+  .card h3 { color: var(--vinho); font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+  /* Listas */
+  .lista-entrevistas { display: flex; flex-direction: column; gap: 10px; }
+  .entrevista-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px;
+    background: var(--cinza); border-radius: 8px; border-left: 3px solid var(--vinho);
+  }
+  .entrevista-avatar {
+    width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--vinho), var(--vinho-escuro));
+    color: var(--branco); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; flex-shrink: 0;
+  }
+  .entrevista-info { flex: 1; }
+  .entrevista-nome { font-size: 14px; font-weight: 600; }
+  .entrevista-vaga { font-size: 12px; color: #666; margin-top: 2px; }
+  .entrevista-data { font-size: 12px; color: #444; white-space: nowrap; font-weight: 500; }
+  .entrevista-badge {
+    font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 700;
+  }
+  .entrevista-rh { background: var(--azul-bg); color: var(--azul); }
+  .entrevista-gestor { background: var(--roxo-bg); color: var(--roxo); }
+
+  .atividade-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F0F0F0; }
+  .atividade-item:last-child { border-bottom: none; }
+  .atividade-icon {
+    width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 14px; flex-shrink: 0;
+  }
+  .atividade-icon.avancar { background: var(--verde-bg); color: var(--verde); }
+  .atividade-icon.reprovar { background: var(--vermelho-bg); color: var(--vermelho); }
+  .atividade-icon.inscricao { background: var(--azul-bg); color: var(--azul); }
+  .atividade-icon.entrevista { background: var(--roxo-bg); color: var(--roxo); }
+  .atividade-icon.proposta { background: var(--laranja-bg); color: var(--laranja); }
+  .atividade-texto { font-size: 13px; flex: 1; }
+  .atividade-meta { font-size: 11px; color: var(--cinza-medio); margin-top: 2px; }
+  .atividade-tempo { font-size: 11px; color: var(--cinza-medio); white-space: nowrap; }
+
+  /* Tabela */
+  .table-container { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead { background: var(--cinza); }
+  th { text-align: left; padding: 12px; font-weight: 600; color: var(--cinza-escuro); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 12px; border-bottom: 1px solid #F0F0F0; }
+  tr:hover { background: #FAFAFA; }
+  tr { cursor: pointer; }
+  .status-badge {
+    display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;
+  }
+  .status-em_andamento { background: var(--azul-bg); color: var(--azul); }
+  .status-em_analise { background: var(--laranja-bg); color: var(--laranja); }
+  .status-contratado { background: var(--verde-bg); color: var(--verde); }
+  .status-rejeitado { background: var(--vermelho-bg); color: var(--vermelho); }
+  .status-em_proposta { background: var(--roxo-bg); color: var(--roxo); }
+
+  .candidato-cell { display: flex; align-items: center; gap: 8px; }
+  .candidato-cell .avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--vinho);
+    color: var(--branco); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px;
+  }
+  .filtro-linha { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+  .filtro-linha input, .filtro-linha select {
+    padding: 8px 12px; border: 1.5px solid #E5E5E5; border-radius: 8px; font-size: 13px;
+  }
+
+  /* Tela de Análise do Candidato */
+  .analise-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .analise-section { background: var(--branco); border-radius: 12px; padding: 20px; box-shadow: var(--sombra); margin-bottom: 16px; }
+  .analise-section h3 { color: var(--vinho); font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .info-item { font-size: 13px; }
+  .info-item .label { color: var(--cinza-medio); font-size: 11px; }
+  .info-item .value { color: var(--cinza-escuro); font-weight: 500; margin-top: 2px; }
+
+  .timeline { position: relative; padding-left: 30px; }
+  .timeline::before { content: ''; position: absolute; left: 12px; top: 8px; bottom: 8px; width: 2px; background: #E5E5E5; }
+  .timeline-item { position: relative; padding-bottom: 16px; }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -23px; top: 4px; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--cinza); border: 3px solid var(--branco); box-shadow: 0 0 0 2px var(--cinza-medio);
+  }
+  .timeline-item.done::before { background: var(--verde); box-shadow: 0 0 0 2px var(--verde); }
+  .timeline-item.current::before { background: var(--laranja); box-shadow: 0 0 0 2px var(--laranja); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 2px var(--laranja); } 50% { box-shadow: 0 0 0 6px rgba(245,158,11,0.3); } }
+
+  /* Botões */
+  .btn { padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-aprovar { background: var(--verde); color: var(--branco); }
+  .btn-reprovar { background: var(--vermelho); color: var(--branco); }
+  .btn-reabrir { background: var(--laranja); color: var(--branco); }
+  .btn-novo { background: var(--vinho); color: var(--branco); }
+  .btn-outline { background: transparent; color: var(--vinho); border: 1.5px solid var(--vinho); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  .acoes { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .acoes .btn { flex: 1; min-width: 140px; justify-content: center; }
+
+  /* Validação de documentos */
+  .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .doc-card {
+    background: var(--cinza); border-radius: 8px; padding: 12px; border-left: 3px solid var(--cinza-medio);
+  }
+  .doc-card.aprovado { border-left-color: var(--verde); background: var(--verde-bg); }
+  .doc-card.pendente { border-left-color: var(--laranja); background: var(--laranja-bg); }
+  .doc-card.rejeitado { border-left-color: var(--vermelho); background: var(--vermelho-bg); }
+  .doc-card .doc-nome { font-size: 13px; font-weight: 600; }
+  .doc-card .doc-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+  /* Agenda / Calendário */
+  .calendario { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .calendario .dia-header { font-size: 11px; font-weight: 700; text-align: center; padding: 8px; color: var(--cinza-medio); }
+  .calendario .dia {
+    aspect-ratio: 1; background: var(--branco); border: 1px solid #F0F0F0; border-radius: 6px;
+    padding: 6px; font-size: 12px; position: relative; min-height: 60px;
+  }
+  .calendario .dia.hoje { background: var(--dourado-claro); border-color: var(--dourado); font-weight: 700; }
+  .calendario .dia.vazio { background: transparent; border: none; }
+  .calendario .dia .num { font-weight: 600; }
+  .calendario .dia .evento {
+    background: var(--vinho); color: var(--branco); font-size: 9px; padding: 2px 4px;
+    border-radius: 3px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .calendario .dia .evento.gestor { background: var(--roxo); }
+  .calendario .dia .evento.outro { background: var(--cinza-medio); }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--branco); border-radius: 12px; width: 90%; max-width: 600px;
+    max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: var(--sombra-forte);
+  }
+  .modal h2 { color: var(--vinho); margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+
+  .toast {
+    position: fixed; top: 20px; right: 20px; background: var(--cinza-escuro); color: var(--branco);
+    padding: 12px 20px; border-radius: 8px; z-index: 300; opacity: 0; transition: all 0.3s;
+    box-shadow: var(--sombra-forte); font-size: 14px; max-width: 350px;
+  }
+  .toast.show { opacity: 1; }
+  .toast.success { background: var(--verde); }
+  .toast.error { background: var(--vermelho); }
+
+  /* Login */
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--vinho) 0%, var(--vinho-escuro) 100%); }
+  .login-card { background: var(--branco); padding: 40px; border-radius: 16px; box-shadow: var(--sombra-forte); max-width: 400px; width: 100%; }
+  .login-card h2 { color: var(--vinho); margin-bottom: 8px; text-align: center; font-size: 28px; }
+  .login-card .sub { text-align: center; color: var(--cinza-medio); margin-bottom: 24px; }
+  .login-card input { width: 100%; padding: 12px; border: 1.5px solid #E5E5E5; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+  .login-card input:focus { outline: none; border-color: var(--vinho); }
+  .login-card button { width: 100%; padding: 14px; background: var(--vinho); color: var(--branco); border-radius: 8px; font-weight: 600; }
+  .login-card .hint { background: var(--dourado-claro); padding: 10px; border-radius: 8px; font-size: 12px; margin-top: 16px; color: #78350F; }
+</style>
+</head>
+<body>
+<div class="demo-banner">🎬 <strong>DEMO INTERATIVA</strong> — Painel administrativo do Vagas.io. Dados fictícios.</div>
+
+<div class="app" id="app">
+
+  <!-- LOGIN -->
+  <div id="page-login" class="page active">
+    <div class="login-wrap">
+      <div class="login-card">
+        <h2>👋 Bem-vindo</h2>
+        <p class="sub">Painel Administrativo — Vagas.io</p>
+        <input type="email" id="login-email" value="admin@vertice.com" placeholder="E-mail">
+        <input type="password" id="login-senha" value="admin" placeholder="Senha">
+        <button onclick="fazerLogin()">Entrar no Painel</button>
+        <div class="hint">💡 Demo: qualquer e-mail/senha funciona. Clique em "Entrar".</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page" style="display:none">
+    <div class="layout">
+      <aside class="sidebar">
+        <h2>VagasIO</h2>
+        <div class="sidebar-item active" onclick="irPara('page-dashboard')"><span class="icon">📊</span> Dashboard</div>
+        <div class="sidebar-item" onclick="irPara('page-vagas')"><span class="icon">💼</span> Vagas</div>
+        <div class="sidebar-item" onclick="irPara('page-candidatos')"><span class="icon">👥</span> Candidatos <span class="badge">5</span></div>
+        <div class="sidebar-item" onclick="irPara('page-agenda')"><span class="icon">📅</span> Agenda <span class="badge">3</span></div>
+        <div class="sidebar-item" onclick="irPara('page-documentos')"><span class="icon">📄</span> Documentos</div>
+        <div class="sidebar-item" onclick="irPara('page-relatorios')"><span class="icon">📈</span> Relatórios</div>
+        <div class="sidebar-item" onclick="irPara('page-config')"><span class="icon">⚙️</span> Configurações</div>
+        <div class="sidebar-item" style="margin-top: 40px;" onclick="fazerLogout()"><span class="icon">🚪</span> Sair</div>
+      </aside>
+
+      <div class="main" id="main-content">
+        <!-- preenchido via JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  DADOS FICTÍCIOS
+// ============================================================
+const VAGAS = [
+  { id:1, titulo:"Estagiário(a) de Administração", empresa:"Grupo Vértice", candidatos:18, status:"ativa", criada:"2026-06-10" },
+  { id:2, titulo:"Gerente Administrativo", empresa:"Grupo Vértice", candidatos:7, status:"ativa", criada:"2026-06-15" },
+  { id:3, titulo:"Atendente de Sorveteria", empresa:"Sorveteria Gelato Bahiano", candidatos:24, status:"ativa", criada:"2026-07-01" },
+  { id:4, titulo:"Desenvolvedor Full Stack Pleno", empresa:"Tech Solutions", candidatos:12, status:"ativa", criada:"2026-07-05" },
+  { id:5, titulo:"Designer UX/UI Júnior", empresa:"Pixel Studio", candidatos:9, status:"pausada", criada:"2026-06-20" },
+  { id:6, titulo:"Técnico de Enfermagem", empresa:"Hospital São Rafael", candidatos:15, status:"ativa", criada:"2026-07-08" }
+];
+
+const CANDIDATOS = [
+  { id:1, nome:"Camila Silva Queiroz", email:"camila@email.com", vaga:"Gerente Administrativo", vagaId:2, status:"em_proposta", etapa:5, etapaNome:"Proposta", nota:9.2, data:"2026-07-15" },
+  { id:2, nome:"Rafael Costa Lima", email:"rafael@email.com", vaga:"Desenvolvedor Full Stack", vagaId:4, status:"em_andamento", etapa:3, etapaNome:"Entrevista RH", nota:8.5, data:"2026-07-18" },
+  { id:3, nome:"Juliana Pereira", email:"juliana@email.com", vaga:"Designer UX/UI", vagaId:5, status:"em_andamento", etapa:4, etapaNome:"Entrevista Gestor", nota:8.8, data:"2026-07-17" },
+  { id:4, nome:"Marcos Antônio Souza", email:"marcos@email.com", vaga:"Técnico Enfermagem", vagaId:6, status:"em_analise", etapa:1, etapaNome:"Triagem", nota:7.5, data:"2026-07-19" },
+  { id:5, nome:"Beatriz Almeida", email:"beatriz@email.com", vaga:"Atendente Sorveteria", vagaId:3, status:"em_andamento", etapa:2, etapaNome:"Triagem", nota:8.0, data:"2026-07-19" },
+  { id:6, nome:"Lucas Oliveira", email:"lucas@email.com", vaga:"Desenvolvedor Full Stack", vagaId:4, status:"em_andamento", etapa:3, etapaNome:"Entrevista RH", nota:7.8, data:"2026-07-18" },
+  { id:7, nome:"Fernanda Santos", email:"fernanda@email.com", vaga:"Gerente Administrativo", vagaId:2, status:"contratado", etapa:7, etapaNome:"Contratado", nota:9.5, data:"2026-06-10" },
+  { id:8, nome:"Pedro Henrique", email:"pedro@email.com", vaga:"Estagiário Administração", vagaId:1, status:"rejeitado", etapa:2, etapaNome:"Triagem", nota:5.5, data:"2026-07-05" }
+];
+
+const ENTREVISTAS = [
+  { data:"2026-07-21", hora:"10:00", candidato:"Rafael Costa Lima", vaga:"Desenvolvedor Full Stack", tipo:"rh", entrevistador:"Ana Paula (RH)" },
+  { data:"2026-07-22", hora:"14:30", candidato:"Juliana Pereira", vaga:"Designer UX/UI", tipo:"gestor", entrevistador:"Marcos Vinícius (Diretor)" },
+  { data:"2026-07-23", hora:"09:00", candidato:"Camila Silva Queiroz", vaga:"Gerente Administrativo", tipo:"gestor", entrevistador:"Roberto (CEO)" },
+  { data:"2026-07-25", hora:"15:00", candidato:"Lucas Oliveira", vaga:"Desenvolvedor Full Stack", tipo:"rh", entrevistador:"Ana Paula (RH)" }
+];
+
+const ATIVIDADES = [
+  { tipo:"entrevista", texto:"Entrevista agendada: Entrevista RH", candidato:"Rafael Costa Lima", vaga:"Desenvolvedor Full Stack", tempo:"Há 30 min" },
+  { tipo:"proposta", texto:"Proposta enviada ao candidato", candidato:"Camila Silva Queiroz", vaga:"Gerente Administrativo", tempo:"Há 2 horas" },
+  { tipo:"avancar", texto:"Candidato avançou para próxima etapa", candidato:"Juliana Pereira", vaga:"Designer UX/UI", tempo:"Há 4 horas" },
+  { tipo:"inscricao", texto:"Nova inscrição recebida", candidato:"Beatriz Almeida", vaga:"Atendente Sorveteria", tempo:"Há 6 horas" },
+  { tipo:"reprovar", texto:"Candidato reprovado na triagem", candidato:"Pedro Henrique", vaga:"Estagiário", tempo:"Há 1 dia" },
+  { tipo:"avancar", texto:"Documentos aprovados - etapa liberada", candidato:"Camila Silva Queiroz", vaga:"Gerente Administrativo", tempo:"Há 2 dias" }
+];
+
+const DOCUMENTOS_SCHEMA = [
+  "RG ou CNH", "CPF", "Comprovante de Residência", "Título de Eleitor",
+  "Carteira de Trabalho (CTPS)", "PIS/PASEP", "Certificado de Reservista",
+  "Foto 3x4", "Comprovante de Escolaridade", "Diploma (frente e verso)",
+  "Histórico Escolar", "Certidão de Nascimento/Casamento", "Comprovante de Vacinação",
+  "Antecedentes Criminais", "Dados Bancários", "Declaração de IR"
+];
+
+// ============================================================
+//  ESTADO
+// ============================================================
+let currentPage = "page-login";
+let currentSection = "dashboard";
+let docsStatus = {}; // candidatoId -> {docName: status}
+
+// ============================================================
+//  NAVEGAÇÃO
+// ============================================================
+function irPara(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.getElementById(pageId).style.display = (pageId === 'page-dashboard') ? 'block' : 'block';
+  if (pageId === 'page-dashboard') {
+    document.getElementById('page-dashboard').style.display = 'block';
+    document.getElementById('page-login').style.display = 'none';
+  }
+  currentPage = pageId;
+}
+
+function fazerLogin() {
+  document.getElementById('page-login').style.display = 'none';
+  document.getElementById('page-dashboard').style.display = 'block';
+  currentSection = 'dashboard';
+  renderMain();
+  mostrarToast('✅ Login realizado!', 'success');
+}
+
+function fazerLogout() {
+  document.getElementById('page-dashboard').style.display = 'none';
+  document.getElementById('page-login').style.display = 'block';
+  mostrarToast('👋 Até logo!', '');
+}
+
+function setSection(section, el) {
+  currentSection = section;
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderMain();
+}
+
+function irPara(pageId) {
+  // pageId é só rótulo de UI; usa o que foi clicado
+  const map = {
+    'page-dashboard': 'dashboard',
+    'page-vagas': 'vagas',
+    'page-candidatos': 'candidatos',
+    'page-agenda': 'agenda',
+    'page-documentos': 'documentos',
+    'page-relatorios': 'relatorios',
+    'page-config': 'config'
+  };
+  const section = map[pageId] || 'dashboard';
+  const el = (typeof event !== 'undefined' && event && event.currentTarget) || null;
+  setSection(section, el);
+}
+
+function mostrarToast(msg, tipo = "") {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + tipo;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+//  RENDER PRINCIPAL (troca de seção)
+// ============================================================
+function renderMain() {
+  const main = document.getElementById('main-content');
+  switch (currentSection) {
+    case 'dashboard': main.innerHTML = renderDashboard(); break;
+    case 'vagas': main.innerHTML = renderVagas(); break;
+    case 'candidatos': main.innerHTML = renderCandidatos(); break;
+    case 'agenda': main.innerHTML = renderAgenda(); break;
+    case 'documentos': main.innerHTML = renderDocumentosSection(); break;
+    case 'relatorios': main.innerHTML = renderRelatorios(); break;
+    case 'config': main.innerHTML = renderConfig(); break;
+  }
+  // Re-aplica o estado ativo do sidebar (caso tenha sido setado por outra função)
+  if (typeof event !== 'undefined' && event && event.currentTarget && event.currentTarget.classList && event.currentTarget.classList.contains('sidebar-item')) {
+    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+  }
+}
+
+// ============================================================
+//  DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const entrevistas_agendadas = ENTREVISTAS.length;
+  const candidatos_total = CANDIDATOS.length;
+  const processos_ativos = CANDIDATOS.filter(c => ['em_andamento', 'em_analise', 'em_proposta'].includes(c.status)).length;
+  const contratados = CANDIDATOS.filter(c => c.status === 'contratado').length;
+  const taxa_conversao = ((contratados / candidatos_total) * 100).toFixed(1);
+
+  return `
+    <div class="topbar">
+      <h1>📊 Dashboard</h1>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm">📥 Exportar</button>
+        <div class="user"><div class="avatar">FJ</div>Fabio Júnior</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-top"><div class="kpi-icon">💼</div></div>
+        <div class="kpi-label">Vagas Ativas</div>
+        <div class="kpi-valor">5</div>
+        <span class="kpi-delta up">+2 este mês</span>
+      </div>
+      <div class="kpi-card kpi-azul">
+        <div class="kpi-top"><div class="kpi-icon">👥</div></div>
+        <div class="kpi-label">Total de Candidatos</div>
+        <div class="kpi-valor">${candidatos_total}</div>
+        <span class="kpi-delta up">+4 esta semana</span>
+      </div>
+      <div class="kpi-card kpi-laranja">
+        <div class="kpi-top"><div class="kpi-icon">🔄</div></div>
+        <div class="kpi-label">Processos Ativos</div>
+        <div class="kpi-valor">${processos_ativos}</div>
+        <span class="kpi-delta up">+3 este mês</span>
+      </div>
+      <div class="kpi-card kpi-verde">
+        <div class="kpi-top"><div class="kpi-icon">🎉</div></div>
+        <div class="kpi-label">Contratados</div>
+        <div class="kpi-valor">${contratados}</div>
+        <span class="kpi-delta up">+1 este mês</span>
+      </div>
+      <div class="kpi-card kpi-roxo">
+        <div class="kpi-top"><div class="kpi-icon">📅</div></div>
+        <div class="kpi-label">Entrevistas Agendadas</div>
+        <div class="kpi-valor">${entrevistas_agendadas}</div>
+        <span class="kpi-delta up">+${entrevistas_agendadas} nos próximos 7 dias</span>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div>
+        <div class="card">
+          <h3>📅 Próximas Entrevistas</h3>
+          <div class="lista-entrevistas">
+            ${ENTREVISTAS.slice(0, 4).map(e => `
+              <div class="entrevista-item">
+                <div class="entrevista-avatar">${e.candidato.charAt(0)}</div>
+                <div class="entrevista-info">
+                  <div class="entrevista-nome">${e.candidato}</div>
+                  <div class="entrevista-vaga">${e.vaga} • ${e.entrevistador}</div>
+                </div>
+                <div>
+                  <div class="entrevista-data">📅 ${new Date(e.data).toLocaleDateString('pt-BR')}</div>
+                  <div class="entrevista-data">🕐 ${e.hora}</div>
+                </div>
+                <span class="entrevista-badge entrevista-${e.tipo}">${e.tipo === 'rh' ? 'RH' : 'GESTOR'}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📈 Funil de Conversão</h3>
+          <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
+            ${[
+              { nome: "Inscrição", valor: 85, cor: "#2563EB" },
+              { nome: "Triagem", valor: 42, cor: "#7C3AED" },
+              { nome: "Entrevista RH", valor: 18, cor: "#D4AF37" },
+              { nome: "Entrevista Gestor", valor: 9, cor: "#F59E0B" },
+              { nome: "Proposta", valor: 5, cor: "#16A34A" },
+              { nome: "Contratado", valor: 3, cor: "#16A34A" }
+            ].map((etapa, i, arr) => {
+              const pct = (etapa.valor / arr[0].valor) * 100;
+              return `<div>
+                <div style="display:flex; justify-content:space-between; font-size: 12px; margin-bottom: 2px;">
+                  <span>${etapa.nome}</span><strong>${etapa.valor}</strong>
+                </div>
+                <div style="background: #F0F0F0; height: 24px; border-radius: 4px; overflow: hidden;">
+                  <div style="background: ${etapa.cor}; width: ${pct}%; height: 100%; transition: width 0.5s;"></div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3>🔔 Atividade Recente</h3>
+          ${ATIVIDADES.map(a => `
+            <div class="atividade-item">
+              <div class="atividade-icon ${a.tipo}">${
+                a.tipo === 'avancar' ? '✓' :
+                a.tipo === 'reprovar' ? '✕' :
+                a.tipo === 'inscricao' ? '👤' :
+                a.tipo === 'entrevista' ? '📅' : '📨'
+              }</div>
+              <div class="atividade-texto">
+                <div><strong>${a.texto}</strong></div>
+                <div class="atividade-meta">${a.candidato} • ${a.vaga}</div>
+              </div>
+              <div class="atividade-tempo">${a.tempo}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="card">
+          <h3>🏆 Vagas com mais candidatos</h3>
+          ${VAGAS.sort((a, b) => b.candidatos - a.candidatos).slice(0, 4).map(v => `
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F0F0F0;">
+              <div>
+                <div style="font-size: 13px; font-weight: 600;">${v.titulo}</div>
+                <div style="font-size: 11px; color: #999;">${v.empresa}</div>
+              </div>
+              <div style="background: var(--vinho); color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 700;">${v.candidatos}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+//  VAGAS
+// ============================================================
+function renderVagas() {
+  return `
+    <div class="topbar">
+      <h1>💼 Vagas</h1>
+      <div class="topbar-actions">
+        <button class="btn btn-novo" onclick="abrirModalNovaVaga()">+ Nova Vaga</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="filtro-linha">
+        <input type="text" placeholder="🔍 Buscar vagas..." style="flex: 1; min-width: 200px;">
+        <select><option>Todas as situações</option><option>Ativas</option><option>Pausadas</option><option>Encerradas</option></select>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Vaga</th><th>Empresa</th><th>Candidatos</th><th>Status</th><th>Criada em</th><th></th></tr>
+          </thead>
+          <tbody>
+            ${VAGAS.map(v => `
+              <tr>
+                <td><strong>${v.titulo}</strong></td>
+                <td>${v.empresa}</td>
+                <td><span style="background: var(--cinza); padding: 2px 8px; border-radius: 4px; font-weight: 600;">${v.candidatos}</span></td>
+                <td><span class="status-badge status-${v.status === 'ativa' ? 'em_andamento' : 'rejeitado'}">${v.status === 'ativa' ? '✅ Ativa' : '⏸️ Pausada'}</span></td>
+                <td>${new Date(v.criada).toLocaleDateString('pt-BR')}</td>
+                <td><button class="btn btn-sm btn-outline" onclick="verCandidatosVaga(${v.id})">Ver candidatos</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function abrirModalNovaVaga() {
+  document.getElementById('modal-content').innerHTML = `
+    <h2>+ Criar Nova Vaga</h2>
+    <div class="form-group" style="margin-top: 16px;">
+      <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Título da vaga *</label>
+      <input id="nv-titulo" placeholder="Ex: Analista de Marketing" style="width: 100%; padding: 10px; border: 1.5px solid #E5E5E5; border-radius: 8px;">
+    </div>
+    <div class="form-group">
+      <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Empresa</label>
+      <input value="Grupo Vértice Empreendimentos" style="width: 100%; padding: 10px; border: 1.5px solid #E5E5E5; border-radius: 8px;">
+    </div>
+    <div class="form-group">
+      <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Tipo de contratação</label>
+      <select style="width: 100%; padding: 10px; border: 1.5px solid #E5E5E5; border-radius: 8px;">
+        <option>CLT</option><option>Estágio</option><option>Temporário</option><option>PJ</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Salário</label>
+      <input placeholder="Ex: R$ 3.500,00" style="width: 100%; padding: 10px; border: 1.5px solid #E5E5E5; border-radius: 8px;">
+    </div>
+    <div class="form-group">
+      <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Etapas do processo</label>
+      <div style="display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--cinza); border-radius: 8px;">
+        <label><input type="checkbox" checked> 1. Inscrição</label>
+        <label><input type="checkbox" checked> 2. Triagem Curricular</label>
+        <label><input type="checkbox" checked> 3. Entrevista RH</label>
+        <label><input type="checkbox" checked> 4. Entrevista Gestor</label>
+        <label><input type="checkbox" checked> 5. Proposta</label>
+        <label><input type="checkbox" checked> 6. Coleta de Documentos</label>
+        <label><input type="checkbox" checked> 7. Contratação</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-novo" onclick="criarVaga()">✅ Publicar Vaga</button>
+    </div>
+  `;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function criarVaga() {
+  const titulo = document.getElementById('nv-titulo').value || 'Nova Vaga';
+  VAGAS.unshift({ id: Date.now(), titulo, empresa: 'Grupo Vértice', candidatos: 0, status: 'ativa', criada: new Date().toISOString().split('T')[0] });
+  fecharModal();
+  renderMain();
+  mostrarToast('✅ Vaga publicada!', 'success');
+}
+
+function verCandidatosVaga(vagaId) {
+  currentSection = 'candidatos';
+  renderMain();
+  setTimeout(() => {
+    const sel = document.getElementById('filtro-vaga');
+    if (sel) { sel.value = vagaId; filtrarCandidatos(); }
+  }, 50);
+}
+
+function fecharModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+// ============================================================
+//  CANDIDATOS
+// ============================================================
+function renderCandidatos() {
+  return `
+    <div class="topbar">
+      <h1>👥 Candidatos</h1>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm">📥 Exportar lista</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="filtro-linha">
+        <input type="text" id="filtro-texto" placeholder="🔍 Buscar por nome, e-mail..." style="flex: 1; min-width: 200px;" oninput="filtrarCandidatos()">
+        <select id="filtro-vaga" onchange="filtrarCandidatos()">
+          <option value="">Todas as vagas</option>
+          ${VAGAS.map(v => `<option value="${v.id}">${v.titulo}</option>`).join('')}
+        </select>
+        <select id="filtro-status" onchange="filtrarCandidatos()">
+          <option value="">Todos os status</option>
+          <option value="em_andamento">Em Andamento</option>
+          <option value="em_analise">Em Análise</option>
+          <option value="em_proposta">Em Proposta</option>
+          <option value="contratado">Contratado</option>
+          <option value="rejeitado">Reprovado</option>
+        </select>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Candidato</th><th>Vaga</th><th>Etapa</th><th>Status</th><th>Nota</th><th>Data</th><th></th></tr>
+          </thead>
+          <tbody id="tabela-candidatos">
+            ${renderLinhaCandidatos(CANDIDATOS)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderLinhaCandidatos(lista) {
+  if (lista.length === 0) return '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #999;">Nenhum candidato encontrado</td></tr>';
+  return lista.map(c => {
+    const initials = c.nome.split(' ').slice(0, 2).map(n => n.charAt(0)).join('').toUpperCase();
+    const statusLabel = { em_andamento: 'Em Andamento', em_analise: 'Em Análise', em_proposta: 'Em Proposta', contratado: 'Contratado', rejeitado: 'Reprovado' }[c.status];
+    return `
+      <tr onclick="abrirCandidato(${c.id})">
+        <td>
+          <div class="candidato-cell">
+            <div class="avatar">${initials}</div>
+            <div>
+              <div style="font-weight: 600;">${c.nome}</div>
+              <div style="font-size: 11px; color: #999;">${c.email}</div>
+            </div>
+          </div>
+        </td>
+        <td>${c.vaga}</td>
+        <td>${c.etapaNome}</td>
+        <td><span class="status-badge status-${c.status}">${statusLabel}</span></td>
+        <td>${'<span style="color: var(--dourado);">' + '★'.repeat(Math.round(c.nota/2)) + '</span>'}</td>
+        <td>${new Date(c.data).toLocaleDateString('pt-BR')}</td>
+        <td><button class="btn btn-sm" style="background: var(--vinho); color: white;" onclick="event.stopPropagation(); abrirCandidato(${c.id})">Analisar →</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filtrarCandidatos() {
+  const texto = (document.getElementById('filtro-texto')?.value || '').toLowerCase();
+  const vaga = document.getElementById('filtro-vaga')?.value || '';
+  const status = document.getElementById('filtro-status')?.value || '';
+  const filtrados = CANDIDATOS.filter(c =>
+    (c.nome.toLowerCase().includes(texto) || c.email.toLowerCase().includes(texto)) &&
+    (!vaga || c.vagaId == vaga) &&
+    (!status || c.status === status)
+  );
+  document.getElementById('tabela-candidatos').innerHTML = renderLinhaCandidatos(filtrados);
+}
+
+// ============================================================
+//  ANÁLISE DO CANDIDATO
+// ============================================================
+function abrirCandidato(id) {
+  const c = CANDIDATOS.find(x => x.id === id);
+  if (!c) return;
+  currentSection = 'candidato-' + id;
+  const main = document.getElementById('main-content');
+
+  const initials = c.nome.split(' ').slice(0, 2).map(n => n.charAt(0)).join('').toUpperCase();
+  const etapas = ["Inscrição", "Triagem", "Entrevista RH", "Entrevista Gestor", "Proposta", "Coleta Docs", "Contratação"];
+
+  main.innerHTML = `
+    <div class="topbar">
+      <div>
+        <button class="btn btn-outline btn-sm" onclick="setSection && renderMain()" style="margin-bottom: 8px;">← Voltar</button>
+        <h1>👤 ${c.nome}</h1>
+      </div>
+      <div class="topbar-actions">
+        <span class="status-badge status-${c.status}">${({em_andamento:'Em Andamento',em_analise:'Em Análise',em_proposta:'Em Proposta',contratado:'Contratado',rejeitado:'Reprovado'})[c.status]}</span>
+      </div>
+    </div>
+
+    <div class="analise-grid">
+      <div>
+        <div class="analise-section">
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <div class="avatar" style="width: 60px; height: 60px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px;">${initials}</div>
+            <div style="flex: 1;">
+              <h2 style="margin: 0; color: var(--vinho);">${c.nome}</h2>
+              <p style="margin: 4px 0; color: #666;">${c.email} • (71) 99999-${1000 + id}</p>
+              <p style="margin: 0; color: #666;">📍 Salvador - BA • ${26 + id} anos</p>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 32px; color: var(--dourado); font-weight: 700;">${c.nota}</div>
+              <div style="font-size: 11px; color: #999;">Score IA</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="analise-section">
+          <h3>📋 Resumo do Candidato</h3>
+          <p style="font-size: 14px; line-height: 1.6; color: #444;">Profissional com ${3 + (id % 4)} anos de experiência na área. Formado em ${id % 2 ? 'Administração' : 'Engenharia'} pela UFBA. Já atuou em empresas de grande porte com excelentes resultados. Demonstrou forte alinhamento cultural durante as entrevistas.</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+            <span class="status-badge status-em_andamento">🎯 Liderança</span>
+            <span class="status-badge status-em_andamento">💡 Proatividade</span>
+            <span class="status-badge status-em_andamento">🤝 Trabalho em equipe</span>
+            <span class="status-badge status-em_andamento">📊 Análise de dados</span>
+          </div>
+        </div>
+
+        <div class="analise-section">
+          <h3>📝 Currículo</h3>
+          <div class="info-grid">
+            <div class="info-item"><div class="label">Formação</div><div class="value">Administração - UFBA (2018)</div></div>
+            <div class="info-item"><div class="label">Inglês</div><div class="value">Avançado (C1)</div></div>
+            <div class="info-item"><div class="label">Última empresa</div><div class="value">Construtora Bahia LTDA</div></div>
+            <div class="info-item"><div class="label">Último cargo</div><div class="value">Coordenadora Administrativa</div></div>
+            <div class="info-item"><div class="label">Tempo de experiência</div><div class="value">6 anos</div></div>
+            <div class="info-item"><div class="label">Pretensão salarial</div><div class="value">R$ ${(c.nota * 1000).toFixed(0)}</div></div>
+          </div>
+          <button class="btn btn-outline btn-sm" style="margin-top: 12px;">📥 Baixar currículo (PDF)</button>
+        </div>
+
+        <div class="analise-section">
+          <h3>🎯 Vaga Pretendida</h3>
+          <p><strong>${c.vaga}</strong></p>
+          <p style="font-size: 13px; color: #666; margin-top: 4px;">${VAGAS.find(v => v.id === c.vagaId)?.empresa || 'Grupo Vértice'}</p>
+        </div>
+
+        <div class="analise-section">
+          <h3>💬 Sobre o Candidato</h3>
+          <p style="font-size: 14px; line-height: 1.6;">"Sou uma profissional dedicada e apaixonada por desafios. Nos últimos ${5 + id} anos, tive a oportunidade de desenvolver habilidades em gestão de equipes e projetos, sempre buscando entregar resultados consistentes e contribuir para o crescimento das equipes onde atuo."</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="analise-section">
+          <h3>🔄 Linha do Tempo</h3>
+          <div class="timeline">
+            ${etapas.map((nome, i) => {
+              const isCurrent = i === c.etapa - 1;
+              const isDone = i < c.etapa - 1;
+              const cls = isDone ? 'done' : isCurrent ? 'current' : '';
+              return `
+                <div class="timeline-item ${cls}">
+                  <div style="font-weight: ${isCurrent ? 700 : 500}; color: ${isCurrent ? 'var(--laranja)' : isDone ? 'var(--verde)' : 'var(--cinza-medio)'};">${nome}</div>
+                  <div style="font-size: 11px; color: #999;">${isDone ? '✓ Concluída em ' + (15 + i) + '/07/2026' : isCurrent ? '⏳ Em andamento' : 'Aguardando'}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="analise-section" style="background: var(--roxo-bg); border-left: 4px solid var(--roxo);">
+          <h3 style="color: var(--roxo);">📅 Agendar Entrevista</h3>
+          <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Configure a entrevista desta etapa</p>
+          <input type="datetime-local" style="width: 100%; padding: 8px; border: 1px solid #DDD; border-radius: 6px; margin-bottom: 8px; font-size: 13px;" value="2026-07-25T10:00">
+          <input type="text" placeholder="Local / Plataforma" style="width: 100%; padding: 8px; border: 1px solid #DDD; border-radius: 6px; margin-bottom: 8px; font-size: 13px;" value="Google Meet">
+          <input type="url" placeholder="Link da reunião (opcional)" style="width: 100%; padding: 8px; border: 1px solid #DDD; border-radius: 6px; margin-bottom: 8px; font-size: 13px;" value="https://meet.google.com/abc-defg-hij">
+          <button class="btn btn-sm" style="background: var(--roxo); color: white; width: 100%;" onclick="mostrarToast('✅ Entrevista agendada!', 'success')">💾 Confirmar Agendamento</button>
+        </div>
+
+        <div class="analise-section">
+          <h3>💭 Comentários da Equipe</h3>
+          <div style="background: var(--cinza); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 600;">Ana Paula (RH)</div>
+            <div style="font-size: 11px; color: #999;">Há 3 dias</div>
+            <p style="font-size: 13px; margin-top: 4px;">Candidata muito preparada, demonstrou forte alinhamento com a vaga.</p>
+          </div>
+          <div style="background: var(--cinza); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 12px; font-weight: 600;">Marcos Vinícius (Gestor)</div>
+            <div style="font-size: 11px; color: #999;">Há 1 dia</div>
+            <p style="font-size: 13px; margin-top: 4px;">Aprovado para a etapa de proposta. Excelente fit cultural.</p>
+          </div>
+          <textarea placeholder="Adicionar comentário..." style="width: 100%; padding: 8px; border: 1px solid #DDD; border-radius: 6px; margin-top: 8px; font-size: 13px; min-height: 60px;"></textarea>
+        </div>
+
+        <div class="analise-section">
+          <h3>⚡ Ações</h3>
+          <div class="acoes">
+            <button class="btn btn-aprovar" onclick="mostrarToast('✅ Candidato avançado para próxima etapa!', 'success')">▶ Avançar Etapa</button>
+            <button class="btn btn-reabrir" onclick="mostrarToast('↻ Candidato reaberto para triagem', '')">↻ Reabrir</button>
+            <button class="btn btn-reprovar" onclick="mostrarToast('❌ Candidato reprovado', 'error')">✕ Reprovar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+//  AGENDA
+// ============================================================
+function renderAgenda() {
+  const hoje = new Date(2026, 6, 21); // 21/07/2026
+  const mes = hoje.getMonth();
+  const ano = hoje.getFullYear();
+  const primeiroDia = new Date(ano, mes, 1).getDay();
+  const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+  const mesNome = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][mes];
+
+  let dias = '';
+  for (let i = 0; i < primeiroDia; i++) dias += '<div class="dia vazio"></div>';
+  for (let d = 1; d <= ultimoDia; d++) {
+    const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const eventos = ENTREVISTAS.filter(e => e.data === dataStr);
+    const isHoje = d === hoje.getDate();
+    dias += `
+      <div class="dia ${isHoje ? 'hoje' : ''}">
+        <div class="num">${d}</div>
+        ${eventos.map(e => `<div class="evento ${e.tipo}">${e.hora} ${e.candidato.split(' ')[0]}</div>`).join('')}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="topbar">
+      <h1>📅 Agenda</h1>
+      <div class="topbar-actions">
+        <button class="btn btn-novo" onclick="mostrarToast('➕ Abrindo nova agenda...', '')">+ Agendar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>${mesNome} ${ano}</h3>
+      <div class="calendario">
+        <div class="dia-header">Dom</div><div class="dia-header">Seg</div><div class="dia-header">Ter</div>
+        <div class="dia-header">Qua</div><div class="dia-header">Qui</div><div class="dia-header">Sex</div><div class="dia-header">Sáb</div>
+        ${dias}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📋 Entrevistas Agendadas</h3>
+      ${ENTREVISTAS.map(e => `
+        <div class="entrevista-item">
+          <div class="entrevista-avatar">${e.candidato.charAt(0)}</div>
+          <div class="entrevista-info">
+            <div class="entrevista-nome">${e.candidato}</div>
+            <div class="entrevista-vaga">${e.vaga} • ${e.entrevistador}</div>
+          </div>
+          <div style="text-align: right;">
+            <div class="entrevista-data">📅 ${new Date(e.data).toLocaleDateString('pt-BR')}</div>
+            <div class="entrevista-data">🕐 ${e.hora}</div>
+          </div>
+          <span class="entrevista-badge entrevista-${e.tipo}">${e.tipo === 'rh' ? 'RH' : 'GESTOR'}</span>
+          <div style="display: flex; gap: 4px; margin-left: 8px;">
+            <button class="btn btn-sm btn-outline" onclick="mostrarToast('✏️ Editando entrevista...', '')">✏️</button>
+            <button class="btn btn-sm" style="background: var(--vermelho); color: white;" onclick="mostrarToast('🗑️ Cancelada', 'error')">🗑️</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ============================================================
+//  DOCUMENTOS
+// ============================================================
+function renderDocumentosSection() {
+  if (!docsStatus[1]) {
+    docsStatus[1] = {};
+    DOCUMENTOS_SCHEMA.forEach((d, i) => docsStatus[1][d] = i < 12 ? 'aprovado' : i < 14 ? 'pendente' : 'pendente');
+  }
+  const stats = {
+    aprovados: Object.values(docsStatus[1]).filter(v => v === 'aprovado').length,
+    pendentes: Object.values(docsStatus[1]).filter(v => v === 'pendente').length,
+    rejeitados: Object.values(docsStatus[1]).filter(v => v === 'rejeitado').length
+  };
+
+  return `
+    <div class="topbar">
+      <h1>📄 Validação de Documentos</h1>
+      <div class="topbar-actions">
+        <select>
+          <option>Camila Silva Queiroz - Gerente Adm.</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="kpi-card kpi-verde">
+        <div class="kpi-label">Aprovados</div>
+        <div class="kpi-valor">${stats.aprovados}/${DOCUMENTOS_SCHEMA.length}</div>
+      </div>
+      <div class="kpi-card kpi-laranja">
+        <div class="kpi-label">Pendentes</div>
+        <div class="kpi-valor">${stats.pendentes}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Rejeitados</div>
+        <div class="kpi-valor">${stats.rejeitados}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📋 Documentos de Contratação</h3>
+      <p style="font-size: 13px; color: #666; margin-bottom: 16px;">Aprove todos os documentos abaixo para liberar o avanço da etapa.</p>
+      <div class="doc-grid">
+        ${DOCUMENTOS_SCHEMA.map(d => {
+          const status = docsStatus[1][d];
+          return `
+            <div class="doc-card ${status}">
+              <div class="doc-nome">${status === 'aprovado' ? '✅' : status === 'pendente' ? '⏳' : '❌'} ${d}</div>
+              <div style="font-size: 11px; color: #666; margin-top: 4px;">Enviado em 15/07/2026</div>
+              <div class="doc-actions">
+                <button class="btn btn-sm btn-aprovar" onclick="alterarDoc('${d}', 'aprovado')">✓ Aprovar</button>
+                <button class="btn btn-sm" style="background: var(--vermelho); color: white;" onclick="alterarDoc('${d}', 'rejeitado')">✕ Rejeitar</button>
+                <button class="btn btn-sm btn-outline">👁</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      ${stats.aprovados === DOCUMENTOS_SCHEMA.length ? `
+        <div style="margin-top: 24px; padding: 16px; background: var(--verde-bg); border-radius: 8px; text-align: center;">
+          <h3 style="color: var(--verde); margin-bottom: 8px;">🎉 Todos os documentos aprovados!</h3>
+          <p style="color: #166534; margin-bottom: 12px;">A etapa de Coleta de Documentos pode ser finalizada.</p>
+          <button class="btn btn-aprovar" onclick="mostrarToast('✅ Etapa avançada!', 'success')">✅ Aprovar tudo e avançar etapa</button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function alterarDoc(doc, novoStatus) {
+  docsStatus[1][doc] = novoStatus;
+  renderMain();
+  mostrarToast('✅ Status atualizado!', 'success');
+}
+
+// ============================================================
+//  RELATÓRIOS
+// ============================================================
+function renderRelatorios() {
+  return `
+    <div class="topbar">
+      <h1>📈 Relatórios</h1>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm">📥 Exportar PDF</button>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Tempo médio até contratação</div>
+        <div class="kpi-valor">23 dias</div>
+        <span class="kpi-delta down">-3 dias vs. mês anterior</span>
+      </div>
+      <div class="kpi-card kpi-verde">
+        <div class="kpi-label">Taxa de conversão</div>
+        <div class="kpi-valor">18.5%</div>
+        <span class="kpi-delta up">+2.3% vs. mês anterior</span>
+      </div>
+      <div class="kpi-card kpi-laranja">
+        <div class="kpi-label">Candidatos por vaga</div>
+        <div class="kpi-valor">14.2</div>
+        <span class="kpi-delta up">+1.8 vs. mês anterior</span>
+      </div>
+      <div class="kpi-card kpi-roxo">
+        <div class="kpi-label">Vagas abertas há mais de 30 dias</div>
+        <div class="kpi-valor">2</div>
+        <span class="kpi-delta flat">0 vs. mês anterior</span>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>📊 Candidatos por Etapa (últimos 90 dias)</h3>
+        <div style="margin-top: 16px;">
+          ${["Inscrição", "Triagem", "Entrevista RH", "Entrevista Gestor", "Proposta", "Contratado"].map((nome, i) => {
+            const valores = [85, 42, 18, 9, 5, 3];
+            return `
+              <div style="margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                  <span>${nome}</span><strong>${valores[i]}</strong>
+                </div>
+                <div style="background: #F0F0F0; height: 8px; border-radius: 4px; overflow: hidden;">
+                  <div style="background: var(--vinho); width: ${(valores[i] / 85) * 100}%; height: 100%;"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🌟 Origem dos Candidatos</h3>
+        ${[
+          { fonte: "Indicação", qtd: 32, pct: 38 },
+          { fonte: "LinkedIn", qtd: 22, pct: 26 },
+          { fonte: "Site da empresa", qtd: 15, pct: 18 },
+          { fonte: "Indeed", qtd: 9, pct: 11 },
+          { fonte: "Outros", qtd: 6, pct: 7 }
+        ].map(o => `
+          <div style="margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 2px;">
+              <span>${o.fonte}</span><strong>${o.qtd} (${o.pct}%)</strong>
+            </div>
+            <div style="background: #F0F0F0; height: 6px; border-radius: 3px; overflow: hidden;">
+              <div style="background: var(--dourado); width: ${o.pct}%; height: 100%;"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderConfig() {
+  return `
+    <div class="topbar"><h1>⚙️ Configurações</h1></div>
+    <div class="card">
+      <h3>👤 Conta</h3>
+      <div class="form-group" style="margin-top: 12px;">
+        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Nome</label>
+        <input value="Fabio Júnior" style="width: 100%; padding: 10px; border: 1.5px solid #E5E5E5; border-radius: 8px;">
+      </div>
+      <div class="form-group">
+        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">E-mail</label>
+        <input value="admin@vertice.com" style="width: 100%; padding: 10px; border: 1.5px solid #E5E5E5; border-radius: 8px;">
+      </div>
+      <button class="btn btn-novo" onclick="mostrarToast('✅ Configurações salvas!', 'success')">💾 Salvar</button>
+    </div>
+    <div class="card">
+      <h3>🔔 Notificações</h3>
+      <label style="display: block; padding: 8px 0;"><input type="checkbox" checked> Receber e-mail quando um candidato se inscrever</label>
+      <label style="display: block; padding: 8px 0;"><input type="checkbox" checked> Receber e-mail quando uma entrevista for agendada</label>
+      <label style="display: block; padding: 8px 0;"><input type="checkbox" checked> Receber e-mail quando documentos forem enviados</label>
+      <label style="display: block; padding: 8px 0;"><input type="checkbox"> Receber resumo semanal por e-mail</label>
+    </div>
+  `;
+}
+
+// Init: clique no sidebar
+document.querySelectorAll('.sidebar-item').forEach(item => {
+  item.addEventListener('click', function() {
+    const text = this.textContent.trim().toLowerCase();
+    if (text.includes('dashboard')) currentSection = 'dashboard';
+    else if (text.includes('vagas')) currentSection = 'vagas';
+    else if (text.includes('candidatos')) currentSection = 'candidatos';
+    else if (text.includes('agenda')) currentSection = 'agenda';
+    else if (text.includes('documentos')) currentSection = 'documentos';
+    else if (text.includes('relatórios')) currentSection = 'relatorios';
+    else if (text.includes('configurações')) currentSection = 'config';
+    else if (text.includes('sair')) { fazerLogout(); return; }
+    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+    this.classList.add('active');
+    renderMain();
+  });
+});
+</script>
+</body>
+</html>
