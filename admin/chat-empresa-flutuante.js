@@ -386,7 +386,7 @@
   // === INIT ===
   // DEBUG FABIO 25/07: capturar se o clique chega
   const _debugOverlay = document.createElement('div');
-  _debugOverlay.style.cssText = 'position:fixed;bottom:0;left:0;background:#000;color:#0f0;font:11px monospace;padding:6px;z-index:99999;max-width:300px;white-space:pre-wrap;border:2px solid #0f0';
+  _debugOverlay.style.cssText = 'position:fixed;bottom:0;left:0;background:#000;color:#0f0;font:11px monospace;padding:6px;z-index:99999;max-width:340px;white-space:pre-wrap;border:2px solid #0f0';
   _debugOverlay.textContent = '[chatfab-empresa] init OK\n';
   document.body.appendChild(_debugOverlay);
   window.__chatfabDebug = (msg) => {
@@ -395,11 +395,20 @@
   };
   window.__chatfabDebug('btn ref: ' + (btn ? 'OK' : 'NULL'));
   window.__chatfabDebug('win ref: ' + (win ? 'OK' : 'NULL'));
+  // Dump das dimensões iniciais
+  const _r0 = win.getBoundingClientRect();
+  window.__chatfabDebug('win initial: ' + Math.round(_r0.width) + 'x' + Math.round(_r0.height) + ' @ ' + Math.round(_r0.left) + ',' + Math.round(_r0.top));
+  window.__chatfabDebug('win style.display=' + getComputedStyle(win).display);
   btn.onclick = function() {
-    window.__chatfabDebug('>>> CLIQUE NA BOLINHA AZUL <<<');
+    window.__chatfabDebug('>>> CLIQUE <<<');
     window.__chatfabDebug('aberto ANTES: ' + aberto);
     toggle();
     window.__chatfabDebug('aberto DEPOIS: ' + aberto);
+    const r = win.getBoundingClientRect();
+    window.__chatfabDebug('win APÓS: ' + Math.round(r.width) + 'x' + Math.round(r.height) + ' @ ' + Math.round(r.left) + ',' + Math.round(r.top));
+    window.__chatfabDebug('win display: ' + getComputedStyle(win).display);
+    window.__chatfabDebug('win z-index: ' + getComputedStyle(win).zIndex);
+    window.__chatfabDebug('win classes: ' + win.className);
   };
 
   document.body.addEventListener('keydown', (e) => {
