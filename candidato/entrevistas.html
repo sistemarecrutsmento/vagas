@@ -3,111 +3,224 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Entrevistas — Vagas.io</title>
+  <title>Entrevistas — VagasIO</title>
   <style>
     :root {
       --vinho: #722F37; --vinho-claro: #8a3a44; --dourado: #C9A961;
       --bg: #f7f5f2; --card: #ffffff; --texto: #1a1a1a; --texto-suave: #666;
-      --borda: #e5e0d8; --cinza-medio: #888; --borda-escura: #d0c8bb;
+      --borda: #e5e0d8; --cinza-medio: #888;
+      --verde: #16a34a; --verde-bg: #f0fdf4; --vermelho: #C62828; --vermelho-bg: #FFEBEE;
+      --azul: #1e40af; --azul-bg: #dbeafe; --amarelo: #f59e0b; --amarelo-bg: #fef3c7;
     }
     * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--texto); margin: 0; line-height: 1.5;
+      background: var(--bg); color: var(--texto); margin: 0; line-height: 1.5; -webkit-font-smoothing: antialiased;
     }
+
+    /* === HEADER === */
     header {
       background: var(--vinho); color: #fff; padding: 14px 20px;
       display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 50;
     }
-    .marca { font-size: 20px; font-weight: 800; }
+    .marca { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
     .marca .dourado { color: var(--dourado); }
-    .marca small { font-size: 11px; opacity: 0.8; font-weight: 400; margin-left: 6px; }
+    .marca small { font-size: 11px; opacity: 0.85; font-weight: 400; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
     .btn-menu { background: rgba(255,255,255,0.1); border: none; color: white; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; font-size: 20px; }
     .btn-menu:hover { background: rgba(255,255,255,0.2); }
 
+    /* === SUBHEADER === */
     .subheader {
-      background: white; padding: 16px 20px; border-bottom: 1px solid var(--borda);
+      background: white; padding: 18px 20px; border-bottom: 1px solid var(--borda);
     }
-    .subheader h1 { font-size: 20px; font-weight: 700; margin: 0; color: var(--vinho); }
+    .subheader h1 { font-size: 20px; font-weight: 700; margin: 0; color: var(--vinho); display: flex; align-items: center; gap: 8px; }
     .subheader p { font-size: 13px; color: var(--texto-suave); margin: 4px 0 0; }
 
-    .container { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; }
-    @media (max-width: 600px) {
-      .container { padding: 16px 14px 40px; }
+    /* === KPI strip (resumo no topo) === */
+    .kpi-strip {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; padding: 16px 20px; max-width: 800px; margin: 0 auto;
+    }
+    .kpi {
+      background: white; border: 1px solid var(--borda); border-radius: 10px;
+      padding: 12px 14px; text-align: center;
+    }
+    .kpi .num {
+      font-size: 24px; font-weight: 800; color: var(--vinho); line-height: 1;
+    }
+    .kpi .lbl {
+      font-size: 11px; color: var(--texto-suave); text-transform: uppercase;
+      letter-spacing: 0.4px; font-weight: 600; margin-top: 4px;
+    }
+    .kpi.verde .num { color: var(--verde); }
+    .kpi.azul .num { color: var(--azul); }
+
+    /* === SECTIONS === */
+    main.container { max-width: 800px; margin: 0 auto; padding: 8px 20px 60px; }
+    .section-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--texto-suave);
+      margin: 24px 0 12px;
+    }
+    .section-title .count {
+      background: var(--vinho); color: white; font-size: 11px;
+      padding: 2px 8px; border-radius: 10px; font-weight: 700;
     }
 
-    .empty {
-      text-align: center; padding: 60px 20px; background: white;
-      border-radius: 12px; border: 1px solid var(--borda);
-    }
-    .empty .icon { font-size: 64px; margin-bottom: 16px; }
-    .empty h3 { color: var(--vinho); margin-bottom: 8px; }
-    .empty p { color: var(--texto-suave); margin-bottom: 20px; }
-
+    /* === CARD DE ENTREVISTA (CALENDÁRIO) === */
     .entrevista {
-      background: white; border: 1px solid var(--borda); border-radius: 12px;
-      padding: 20px; margin-bottom: 16px; border-left: 4px solid var(--dourado);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      background: white; border: 1px solid var(--borda); border-radius: 14px;
+      margin-bottom: 14px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      display: flex; transition: all 0.2s;
     }
-    .entrevista.hoje { border-left-color: #16a34a; background: linear-gradient(135deg, white 0%, #f0fdf4 100%); }
-    .entrevista.futura { border-left-color: var(--vinho); }
-    .entrevista.passada { border-left-color: #999; opacity: 0.7; }
+    .entrevista:hover { box-shadow: 0 4px 14px rgba(114,47,55,0.10); }
 
-    .entrevista .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;
+    /* Coluna da data (estilo calendário) */
+    .entrevista .data-bloco {
+      width: 90px; flex-shrink: 0; padding: 18px 12px;
+      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+      border-right: 1px solid var(--borda);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; position: relative;
     }
-    .badge.agendada { background: #fef3c7; color: #92400e; }
-    .badge.confirmada { background: #d1fae5; color: #065f46; }
-    .badge.realizada { background: #dbeafe; color: #1e40af; }
-
-    .entrevista .titulo { font-size: 16px; font-weight: 700; color: var(--vinho); margin-bottom: 4px; }
-    .entrevista .empresa { font-size: 14px; color: var(--texto-suave); margin-bottom: 12px; }
-    .entrevista .info { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; font-size: 14px; }
-    .entrevista .info-item { display: flex; align-items: center; gap: 6px; }
-    .entrevista .info-item .ico { font-size: 16px; }
-
-    .entrevista .acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-
-    .btn-entrar {
-      background: #16a34a; color: white; border: 0; padding: 12px 20px;
-      border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;
-      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-      box-shadow: 0 2px 4px rgba(22,163,74,0.2);
+    .entrevista.urgente .data-bloco { background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); }
+    .entrevista.hoje    .data-bloco { background: linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 100%); }
+    .entrevista.passada .data-bloco { background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); opacity: 0.85; }
+    .data-bloco .dia-num {
+      font-size: 32px; font-weight: 800; color: var(--vinho); line-height: 1;
     }
-    .btn-entrar:hover { background: #15803d; }
-    .btn-entrar:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
-
-    .btn-copiar {
-      background: var(--vinho); color: white; border: 0; padding: 12px 20px;
-      border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;
-      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    .data-bloco .mes {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      color: var(--texto-suave); margin-top: 2px; letter-spacing: 1px;
     }
-    .btn-copiar:hover { background: var(--vinho-claro); }
-
-    .contador {
-      font-size: 13px; color: var(--texto-suave); margin-top: 8px;
-      padding: 8px 12px; background: #f9fafb; border-radius: 6px;
-      display: flex; align-items: center; gap: 6px;
+    .data-bloco .ano {
+      font-size: 10px; color: var(--cinza-medio); margin-top: 4px;
     }
-    .contador.ativo { background: #d1fae5; color: #065f46; font-weight: 600; }
-    .contador.urgente { background: #fee2e2; color: #991b1b; font-weight: 600; }
+    .data-bloco .ring-pulse {
+      position: absolute; top: 8px; right: 8px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--verde); box-shadow: 0 0 0 0 rgba(22,163,74,0.6);
+      animation: pulse 1.6s infinite;
+    }
+    .entrevista.passada .ring-pulse { display: none; }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.6); }
+      70% { box-shadow: 0 0 0 8px rgba(22,163,74,0); }
+      100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+    }
+
+    /* Coluna do conteúdo */
+    .entrevista .conteudo {
+      flex: 1; min-width: 0; padding: 14px 18px;
+    }
+    .cabecalho {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 12px; margin-bottom: 6px;
+    }
+    .tipo {
+      font-size: 15px; font-weight: 700; color: var(--vinho);
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 999px; font-size: 11px;
+      font-weight: 700; text-transform: uppercase; white-space: nowrap;
+      letter-spacing: 0.3px;
+    }
+    .badge.dot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .badge.agendada   { background: var(--amarelo-bg); color: #92400e; }
+    .badge.confirmada { background: var(--verde-bg);    color: #065f46; }
+    .badge.realizada  { background: var(--azul-bg);     color: #1e40af; }
+    .badge.cancelada  { background: var(--vermelho-bg); color: #991b1b; }
+
+    .vaga {
+      font-size: 13px; color: var(--texto-suave); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+    }
+    .vaga strong { color: var(--texto); font-weight: 600; }
+
+    /* Grid de infos (data/hora, duração, local) */
+    .info-grid {
+      display: flex; flex-wrap: wrap; gap: 8px 14px;
+      font-size: 13px; color: #555; margin-bottom: 10px;
+    }
+    .info-item { display: inline-flex; align-items: center; gap: 5px; }
+    .info-item .ico {
+      width: 22px; height: 22px; display: inline-flex;
+      align-items: center; justify-content: center;
+      background: #f9fafb; border-radius: 6px; font-size: 12px;
+    }
+
+    .countdown {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; padding: 5px 10px; border-radius: 8px;
+      font-weight: 600; margin-bottom: 10px;
+    }
+    .countdown.futuro  { background: #eef2ff; color: #4338ca; }
+    .countdown.ativo   { background: var(--verde-bg); color: #065f46; }
+    .countdown.urgente { background: #fef3c7; color: #92400e; }
+    .countdown.expirado { background: #fee2e2; color: #991b1b; }
 
     .observacoes {
-      margin-top: 12px; padding: 10px 12px; background: #f9fafb;
-      border-radius: 6px; font-size: 13px; color: var(--texto-suave);
-      border-left: 3px solid var(--dourado);
+      padding: 9px 12px; background: #fffbeb; border-left: 3px solid var(--dourado);
+      border-radius: 6px; font-size: 13px; color: #444; margin-bottom: 10px;
     }
     .observacoes strong { color: var(--vinho); }
+
+    .acoes {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 14px; border-radius: 8px; font-size: 13px;
+      font-weight: 700; cursor: pointer; text-decoration: none; border: 0;
+      transition: all 0.15s;
+    }
+    .btn-entrar {
+      background: var(--verde); color: white;
+      box-shadow: 0 2px 5px rgba(22,163,74,0.25);
+    }
+    .btn-entrar:hover { background: #15803d; transform: translateY(-1px); }
+    .btn-entrar:disabled, .btn-entrar.disabled {
+      background: #e5e7eb; color: #9ca3af; cursor: not-allowed;
+      box-shadow: none; transform: none;
+    }
+    .btn-copiar {
+      background: white; color: var(--vinho); border: 1.5px solid var(--vinho);
+    }
+    .btn-copiar:hover { background: #faf5f5; }
+    .btn-confirmar {
+      background: white; color: var(--verde); border: 1.5px solid var(--verde);
+    }
+    .btn-confirmar:hover { background: var(--verde-bg); }
+    .btn-sm { padding: 7px 10px; font-size: 12px; }
+
+    /* === EMPTY STATE === */
+    .empty {
+      text-align: center; padding: 60px 24px; background: white;
+      border-radius: 14px; border: 1px solid var(--borda);
+    }
+    .empty .icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+    .empty h3 { color: var(--vinho); margin: 0 0 8px; font-size: 18px; }
+    .empty p { color: var(--texto-suave); margin-bottom: 20px; font-size: 14px; }
 
     /* === DRAWER (igual candidato) === */
     .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
     .drawer-overlay.aberto { display: block; }
-    aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+    aside.drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw;
+      background: white; z-index: 200; transform: translateX(100%);
+      transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
     aside.drawer.aberto { transform: translateX(0); }
     .drawer-header { padding: 20px; background: var(--vinho); color: white; display: flex; align-items: center; gap: 12px; }
-    .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; flex-shrink: 0; }
+    .drawer-foto {
+      width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; flex-shrink: 0;
+    }
     .drawer-info { flex: 1; min-width: 0; }
     .drawer-info h3 { font-size: 15px; font-weight: 700; margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .drawer-info p { font-size: 12px; opacity: 0.85; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -116,12 +229,39 @@
     .drawer-section { padding: 8px 20px 4px; font-size: 11px; font-weight: 700; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 12px; }
     .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--texto); text-decoration: none; font-size: 14px; }
     .drawer-link:hover { background: #f9fafb; }
+    .drawer-link.ativo { background: #faf5f5; color: var(--vinho); font-weight: 600; }
     .drawer-link .icon { font-size: 18px; }
     .drawer-footer { padding: 12px 20px; border-top: 1px solid var(--borda); background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); flex-shrink: 0; }
     .drawer-logout { width: 100%; background: #fef2f2; color: #991b1b; border: 0; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
     .drawer-logout:hover { background: #fee2e2; }
+
+    /* Toast mini (substitui alert()) */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120%);
+      background: #1a1a1a; color: white; padding: 12px 20px; border-radius: 10px;
+      font-size: 14px; font-weight: 600; box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      z-index: 1000; opacity: 0; transition: all 0.3s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    @media (max-width: 600px) {
+      .kpi-strip { padding: 12px 14px; }
+      main.container { padding: 8px 14px 40px; }
+      .entrevista { flex-direction: row; }
+      .entrevista .data-bloco { width: 70px; padding: 14px 8px; }
+      .data-bloco .dia-num { font-size: 24px; }
+      .entrevista .conteudo { padding: 12px 14px; }
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block; width: 40px; height: 40px;
+      border: 4px solid var(--borda); border-top-color: var(--vinho);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
-  <script src="chat-uploader.js"></script>
 </head>
 <body>
 
@@ -135,16 +275,27 @@
   <p>Acompanhe os horários e entre na sala de vídeo no dia marcado</p>
 </div>
 
+<!-- KPIs (preenchidos via JS) -->
+<div class="kpi-strip" id="kpi-strip" style="display:none">
+  <div class="kpi verde" id="kpi-hoje">
+    <div class="num">—</div><div class="lbl">Hoje</div>
+  </div>
+  <div class="kpi" id="kpi-futuras">
+    <div class="num">—</div><div class="lbl">Próximas</div>
+  </div>
+  <div class="kpi azul" id="kpi-realizadas">
+    <div class="num">—</div><div class="lbl">Realizadas</div>
+  </div>
+</div>
+
 <main class="container" id="conteudo">
-  <div class="loading" style="text-align:center; padding:60px 20px;">
-    <div class="spinner" style="display:inline-block; width:40px; height:40px; border:4px solid #e5e0d8; border-top-color:#722F37; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+  <div style="text-align:center; padding:60px 20px;">
+    <div class="spinner"></div>
     <p style="margin-top:14px; color:#666;">Carregando entrevistas...</p>
   </div>
 </main>
 
-<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-
-<!-- === DRAWER (menu lateral) === -->
+<!-- Drawer -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-header">
@@ -167,232 +318,285 @@
   </div>
 </aside>
 
+<!-- Toast (substitui alert) -->
+<div class="toast" id="toast"></div>
+
 <script>
-// === UTILITÁRIOS DE AUTH (mesmo padrão do app-v2.js) ===
-let tokenCandidato = localStorage.getItem('candidato_token');
-let emailLogado = localStorage.getItem('candidato_email');
+  // === UTILITÁRIOS ===
+  const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const DIAS = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
 
-function logout() {
-  if (!confirm('Sair da sua conta?')) return;
-  localStorage.removeItem('candidato_token');
-  localStorage.removeItem('candidato_email');
-  window.location.href = 'index.html';
-}
-
-function abrirDrawer() {
-  document.getElementById('drawer').classList.add('aberto');
-  document.getElementById('drawer-overlay').classList.add('aberto');
-}
-function fecharDrawer() {
-  document.getElementById('drawer').classList.remove('aberto');
-  document.getElementById('drawer-overlay').classList.remove('aberto');
-}
-
-// === CARREGA DADOS DO CANDIDATO LOGADO ===
-async function carregarCandidato() {
-  if (!tokenCandidato) {
-    document.getElementById('conteudo').innerHTML = `
-      <div class="empty">
-        <div class="icon">🔐</div>
-        <h3>Você precisa estar logado</h3>
-        <p>Entre na sua conta pra ver suas entrevistas agendadas</p>
-        <a href="index.html" class="btn-copiar">Ir pra tela de login</a>
-      </div>`;
-    return;
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
-  try {
-    const r = await fetch('https://recrutamento-api.onrender.com/api/candidato/perfil', {
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
-    if (r.status === 401 || r.status === 403) {
-      logout();
+
+  function showToast(msg, icone = '✅') {
+    const t = document.getElementById('toast');
+    t.innerHTML = `<span>${icone}</span><span>${escapeHtml(msg)}</span>`;
+    t.classList.add('show');
+    clearTimeout(t._timeout);
+    t._timeout = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  let tokenCandidato = localStorage.getItem('candidato_token');
+  let emailLogado = localStorage.getItem('candidato_email');
+
+  function logout() {
+    showToast('Saindo...', '🚪');
+    setTimeout(() => {
+      localStorage.removeItem('candidato_token');
+      localStorage.removeItem('candidato_email');
+      window.location.href = 'index.html';
+    }, 600);
+  }
+
+  function abrirDrawer() {
+    document.getElementById('drawer').classList.add('aberto');
+    document.getElementById('drawer-overlay').classList.add('aberto');
+  }
+  function fecharDrawer() {
+    document.getElementById('drawer').classList.remove('aberto');
+    document.getElementById('drawer-overlay').classList.remove('aberto');
+  }
+
+  // === DADOS DO CANDIDATO ===
+  async function carregarCandidato() {
+    if (!tokenCandidato) {
+      document.getElementById('conteudo').innerHTML = `
+        <div class="empty">
+          <div class="icon">🔐</div>
+          <h3>Você precisa estar logado</h3>
+          <p>Entre na sua conta pra ver suas entrevistas agendadas.</p>
+          <a href="index.html" class="btn btn-copiar">Ir pra tela de login</a>
+        </div>`;
       return;
     }
-    const j = await r.json();
-    if (j.candidato) {
-      const nome = j.candidato.nome || 'Candidato';
-      document.getElementById('drawer-nome').textContent = nome;
-      document.getElementById('drawer-email').textContent = j.candidato.email || '';
-      document.getElementById('drawer-foto').textContent = nome.charAt(0).toUpperCase();
-      document.getElementById('drawer-footer-logado').style.display = 'block';
-    }
-  } catch (e) {
-    console.error('[carregarCandidato]', e);
+    try {
+      const r = await fetch('https://recrutamento-api.onrender.com/api/candidato/perfil', {
+        headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+      });
+      if (r.status === 401 || r.status === 403) { logout(); return; }
+      const j = await r.json();
+      if (j.candidato) {
+        const nome = j.candidato.nome || 'Candidato';
+        document.getElementById('drawer-nome').textContent = nome;
+        document.getElementById('drawer-email').textContent = j.candidato.email || '';
+        document.getElementById('drawer-foto').textContent = nome.charAt(0).toUpperCase();
+        document.getElementById('drawer-footer-logado').style.display = 'block';
+      }
+    } catch (e) { console.error('[carregarCandidato]', e); }
   }
-}
 
-// === CARREGA ENTREVISTAS ===
-async function carregarEntrevistas() {
-  if (!tokenCandidato) return;
-  try {
-    const r = await fetch('https://recrutamento-api.onrender.com/api/candidato/entrevistas', {
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
-    if (r.status === 401 || r.status === 403) {
-      logout();
-      return;
-    }
-    const j = await r.json();
-    const lista = j.entrevistas || [];
-    renderizar(lista);
-  } catch (e) {
-    console.error('[carregarEntrevistas]', e);
-    document.getElementById('conteudo').innerHTML = `
-      <div class="empty">
-        <div class="icon">⚠️</div>
-        <h3>Erro ao carregar</h3>
-        <p>Não conseguimos buscar suas entrevistas. Tenta de novo em alguns segundos.</p>
-      </div>`;
-  }
-}
-
-// === FORMATAÇÃO ===
-function formatarDataHora(isoString) {
-  const d = new Date(isoString);
-  return d.toLocaleString('pt-BR', {
-    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
-}
-
-function formatarDataCurta(isoString) {
-  const d = new Date(isoString);
-  return d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-}
-
-function minutosAte(isoString) {
-  const diff = new Date(isoString).getTime() - Date.now();
-  return Math.floor(diff / 60000);
-}
-
-function ehHoje(isoString) {
-  const d = new Date(isoString);
-  const hoje = new Date();
-  return d.getDate() === hoje.getDate() &&
-         d.getMonth() === hoje.getMonth() &&
-         d.getFullYear() === hoje.getFullYear();
-}
-
-// === RENDERIZAÇÃO ===
-function renderizar(lista) {
-  const cont = document.getElementById('conteudo');
-  let html = '';
-
-  if (lista.length === 0) {
-    html += `
-      <div class="empty">
-        <div class="icon">📅</div>
-        <h3>Nenhuma entrevista agendada</h3>
-        <p>Quando o recrutador agendar uma entrevista com você, ela vai aparecer aqui com o link pra entrar.</p>
-        <a href="index.html" class="btn-copiar">Ver vagas disponíveis</a>
-      </div>`;
-  } else {
-    // Separa em futuras, hoje, passadas
-    const agora = Date.now();
-    const futuras = lista.filter(e => new Date(e.data_hora).getTime() >= agora && e.status !== 'realizada');
-    const passadas = lista.filter(e => new Date(e.data_hora).getTime() < agora || e.status === 'realizada');
-
-    if (futuras.length > 0) {
-      html += `<h2 style="color:var(--vinho); font-size:18px; margin:0 0 14px;">📅 Próximas entrevistas (${futuras.length})</h2>`;
-      html += futuras.map(e => renderCard(e, false)).join('');
-    }
-
-    if (passadas.length > 0) {
-      html += `<h2 style="color:#666; font-size:18px; margin:30px 0 14px;">✅ Entrevistas realizadas (${passadas.length})</h2>`;
-      html += passadas.map(e => renderCard(e, true)).join('');
+  // === ENTREVISTAS ===
+  async function carregarEntrevistas() {
+    if (!tokenCandidato) return;
+    try {
+      const r = await fetch('https://recrutamento-api.onrender.com/api/candidato/entrevistas', {
+        headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+      });
+      if (r.status === 401 || r.status === 403) { logout(); return; }
+      const j = await r.json();
+      renderizar(j.entrevistas || []);
+    } catch (e) {
+      console.error('[carregarEntrevistas]', e);
+      document.getElementById('conteudo').innerHTML = `
+        <div class="empty">
+          <div class="icon">⚠️</div>
+          <h3>Erro ao carregar</h3>
+          <p>Não conseguimos buscar suas entrevistas. Tenta de novo em alguns segundos.</p>
+        </div>`;
     }
   }
 
-function renderCard(e, passada) {
-  const dataFmt = formatarDataHora(e.data_hora);
-  const dataCurta = formatarDataCurta(e.data_hora);
-  const hoje = ehHoje(e.data_hora) && !passada;
-  const classe = passada ? 'passada' : (hoje ? 'hoje' : 'futura');
+  // === HELPERS DE DATA ===
+  function parseData(iso) {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+    return d;
+  }
+  function partesData(d) {
+    return { diaNum: d.getDate(), mes: MESES[d.getMonth()], ano: d.getFullYear() };
+  }
+  function diaSemana(d) { return DIAS[d.getDay()]; }
+  function horaMin(d) {
+    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+  function ehHoje(d) {
+    const h = new Date();
+    return d.getFullYear() === h.getFullYear() &&
+           d.getMonth() === h.getMonth() &&
+           d.getDate() === h.getDate();
+  }
+  function minutosAte(iso) {
+    return Math.floor((parseData(iso).getTime() - Date.now()) / 60000);
+  }
 
-  // Janela de entrada: 15 min antes até 30 min depois do horário
-  const minAte = minutosAte(e.data_hora);
-  let podeEntrar = !passada && minAte <= 15 && minAte >= -30 && e.status !== 'cancelada';
-
-  // Contador
-  let contador = '';
-  if (!passada) {
-    if (minAte > 15) {
-      const dias = Math.floor(minAte / (60 * 24));
-      const horas = Math.floor((minAte % (60 * 24)) / 60);
+  // === FORMATAÇÃO DE COUNTDOWN ===
+  function fmtCountdown(minAte, podeEntrar) {
+    if (podeEntrar) return { txt: '🔴 Sala liberada — pode entrar agora', classe: 'ativo' };
+    if (minAte < 0) {
+      const m = Math.abs(minAte);
+      if (m <= 30) return { txt: `⏱️ Janela expirada há ${m} min`, classe: 'expirado' };
+      return null;
+    }
+    if (minAte <= 60) {
+      return { txt: `⏰ Abre em ${minAte} min — fique atento`, classe: 'urgente' };
+    }
+    const dias = Math.floor(minAte / 1440);
+    const hrs = Math.floor((minAte % 1440) / 60);
+    if (dias >= 1) return { txt: `📅 Faltam ${dias}d ${hrs}h`, classe: 'futuro' };
+    if (hrs >= 1) {
       const mins = minAte % 60;
-      let txt = '';
-      if (dias > 0) txt += `${dias}d `;
-      if (horas > 0) txt += `${horas}h `;
-      txt += `${mins}min`;
-      contador = `<div class="contador">⏱️ Faltam <strong style="margin-left:4px;">${txt.trim()}</strong> pra abrir a sala</div>`;
-    } else if (podeEntrar) {
-      contador = `<div class="contador ativo">✅ Sala liberada! Você pode entrar agora.</div>`;
-    } else if (minAte < -30) {
-      contador = `<div class="contador">⏱️ Horário já passou</div>`;
+      return { txt: `⏰ Faltam ${hrs}h ${mins}min`, classe: 'futuro' };
     }
+    return null;
   }
 
-  const tipoLabel = e.etapa === 3 ? '👥 Entrevista RH' : '🤝 Entrevista com Gestor';
-  const statusLabel = e.status ? e.status.charAt(0).toUpperCase() + e.status.slice(1) : 'Agendada';
+  // === RENDERIZAÇÃO ===
+  function renderizar(lista) {
+    const cont = document.getElementById('conteudo');
+    const kpiStrip = document.getElementById('kpi-strip');
 
-  return `
-    <div class="entrevista ${classe}">
-      <span class="badge ${e.status || 'agendada'}">${statusLabel}</span>
-      <div class="titulo">${tipoLabel}</div>
-      <div class="empresa">${e.vaga_titulo || 'Vaga'} • ${e.vaga_empresa || ''}</div>
-      <div class="info">
-        <div class="info-item"><span class="ico">📅</span> ${dataFmt}</div>
-        <div class="info-item"><span class="ico">⏱️</span> ${e.duracao_minutos || 60} min</div>
-        ${e.local ? `<div class="info-item"><span class="ico">📍</span> ${e.local}</div>` : ''}
-      </div>
-      ${contador}
-      ${e.observacoes ? `<div class="observacoes"><strong>📝 Recado:</strong> ${e.observacoes}</div>` : ''}
-      <div class="acoes">
-        <a href="${e.link_reuniao || '#'}"
-           target="_blank"
-           rel="noopener"
-           class="btn-entrar"
-           ${podeEntrar ? '' : 'aria-disabled="true" onclick="return false;" style="background:#cbd5e1;cursor:not-allowed;box-shadow:none;"'}>
-          📹 ${passada ? 'Rever sala' : (podeEntrar ? 'Entrar na sala' : 'Sala ainda fechada')}
-        </a>
-        ${!passada ? `
-          <button class="btn-copiar" onclick="copiarLink('${e.link_reuniao}')">
-            🔗 Copiar link
-          </button>
-        ` : ''}
-      </div>
-    </div>
-  `;
-}
+    if (!lista.length) {
+      kpiStrip.style.display = 'none';
+      cont.innerHTML = `
+        <div class="empty">
+          <div class="icon">📅</div>
+          <h3>Nenhuma entrevista agendada</h3>
+          <p>Quando o recrutador marcar uma entrevista com você, ela vai aparecer aqui com tudo pronto pra você entrar.</p>
+          <a href="index.html" class="btn btn-copiar">Ver vagas disponíveis</a>
+        </div>`;
+      return;
+    }
 
-function copiarLink(link) {
-  if (!link || link === '#') {
-    alert('Link ainda não disponível.');
-    return;
+    // KPIs
+    const agora = Date.now();
+    const numHoje = lista.filter(e => !parseData(e.data_hora) ? false : ehHoje(parseData(e.data_hora)) && parseData(e.data_hora).getTime() >= agora).length;
+    const numFuturas = lista.filter(e => parseData(e.data_hora) && parseData(e.data_hora).getTime() >= agora && e.status !== 'realizada').length;
+    const numRealizadas = lista.filter(e => e.status === 'realizada' || (parseData(e.data_hora) && parseData(e.data_hora).getTime() < agora)).length;
+    kpiStrip.style.display = 'grid';
+    document.querySelector('#kpi-hoje .num').textContent = numHoje;
+    document.querySelector('#kpi-futuras .num').textContent = numFuturas;
+    document.querySelector('#kpi-realizadas .num').textContent = numRealizadas;
+
+    // Separa em: hoje, futuras, passadas (ordenadas)
+    const hoje = [];
+    const futuras = [];
+    const passadas = [];
+    lista.forEach(e => {
+      const d = parseData(e.data_hora);
+      if (!d) return;
+      if (d.getTime() < agora || e.status === 'realizada') passadas.push(e);
+      else if (ehHoje(d)) hoje.push(e);
+      else futuras.push(e);
+    });
+
+    let html = '';
+    if (hoje.length) {
+      html += `<div class="section-title">🔴 Hoje <span class="count">${hoje.length}</span></div>`;
+      html += hoje.map(e => renderCard(e, false, true)).join('');
+    }
+    if (futuras.length) {
+      html += `<div class="section-title">📆 Próximas <span class="count">${futuras.length}</span></div>`;
+      html += futuras.map(e => renderCard(e, false, false)).join('');
+    }
+    if (passadas.length) {
+      html += `<div class="section-title">✅ Realizadas <span class="count">${passadas.length}</span></div>`;
+      html += passadas.map(e => renderCard(e, true, false)).join('');
+    }
+    cont.innerHTML = html;
   }
-  navigator.clipboard.writeText(link).then(() => {
-    alert('✅ Link copiado! Cola no navegador pra abrir a sala.');
-  }).catch(() => {
-    prompt('Copia esse link:', link);
+
+  function renderCard(e, passada, isHoje) {
+    const d = parseData(e.data_hora);
+    if (!d) return '';
+    const { diaNum, mes, ano } = partesData(d);
+    const minAte = minutosAte(e.data_hora);
+    const podeEntrar = !passada && minAte <= 15 && minAte >= -30 && e.status !== 'cancelada';
+    const cls = passada ? 'passada' : (isHoje || podeEntrar ? 'hoje' : (minAte <= 60 ? 'urgente' : ''));
+    const tipoLabel = e.etapa === 3 ? '👥 Entrevista RH' : '🤝 Entrevista com Gestor';
+    const statusLabel = (e.status || 'agendada').charAt(0).toUpperCase() + (e.status || 'agendada').slice(1);
+    const pulso = (!passada && (podeEntrar || isHoje)) ? '<div class="ring-pulse"></div>' : '';
+
+    // Countdown
+    let countdown = '';
+    if (!passada) {
+      const cd = fmtCountdown(minAte, podeEntrar);
+      if (cd) countdown = `<div class="countdown ${cd.classe}">${cd.txt}</div>`;
+    }
+
+    // Botões
+    const btnEntrarCls = podeEntrar ? 'btn btn-entrar' : 'btn btn-entrar disabled';
+    const btnEntrarTxt = passada ? '📹 Rever sala' : (podeEntrar ? '📹 Entrar na sala' : '🔒 Sala fechada');
+    const btnEntrarExtra = passada ? '' : (podeEntrar ? '' : 'onclick="return false;" aria-disabled="true"');
+
+    return `
+      <article class="entrevista ${cls}">
+        <div class="data-bloco">
+          ${pulso}
+          <div class="dia-num">${diaNum}</div>
+          <div class="mes">${mes}</div>
+          <div class="ano">${ano}</div>
+        </div>
+        <div class="conteudo">
+          <div class="cabecalho">
+            <div class="tipo">${escapeHtml(tipoLabel)}</div>
+            <span class="badge ${e.status || 'agendada'} dot">${escapeHtml(statusLabel)}</span>
+          </div>
+          <div class="vaga"><strong>${escapeHtml(e.vaga_titulo || 'Vaga')}</strong>${e.vaga_empresa ? ' • ' + escapeHtml(e.vaga_empresa) : ''}</div>
+          <div class="info-grid">
+            <span class="info-item"><span class="ico">🗓️</span> ${diaSemana(d)}, ${horaMin(d)}</span>
+            <span class="info-item"><span class="ico">⏱️</span> ${e.duracao_minutos || 60} min</span>
+            ${e.local ? `<span class="info-item"><span class="ico">📍</span> ${escapeHtml(e.local)}</span>` : ''}
+          </div>
+          ${countdown}
+          ${e.observacoes ? `<div class="observacoes"><strong>📝 Recado do recrutador:</strong> ${escapeHtml(e.observacoes)}</div>` : ''}
+          <div class="acoes">
+            <a href="${e.link_reuniao || '#'}" target="_blank" rel="noopener"
+               class="${btnEntrarCls}" ${btnEntrarExtra}>
+              ${btnEntrarTxt}
+            </a>
+            ${!passada && e.link_reuniao ? `
+              <button class="btn btn-copiar btn-sm" onclick="copiarLink('${e.link_reuniao}')">
+                🔗 Copiar link
+              </button>` : ''}
+          </div>
+        </div>
+      </article>`;
+  }
+
+  // === AÇÕES ===
+  function copiarLink(link) {
+    if (!link || link === '#') {
+      showToast('Link ainda não disponível', '⚠️');
+      return;
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(link)
+        .then(() => showToast('Link copiado pra área de transferência', '🔗'))
+        .catch(() => fallback(link));
+    } else { fallback(link); }
+  }
+  function fallback(link) {
+    const t = document.createElement('textarea');
+    t.value = link; t.style.position = 'fixed'; t.style.opacity = '0';
+    document.body.appendChild(t); t.select();
+    try { document.execCommand('copy'); showToast('Link copiado!', '🔗'); }
+    catch (e) { prompt('Copia esse link:', link); }
+    document.body.removeChild(t);
+  }
+
+  // === INIT ===
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnMenu = document.getElementById('btn-menu-logo');
+    if (btnMenu) btnMenu.addEventListener('click', abrirDrawer);
+    carregarCandidato();
+    carregarEntrevistas();
+    // Atualiza a cada 30s pra countdown ficar certo
+    setInterval(() => {
+      if (document.querySelector('.countdown')) carregarEntrevistas();
+    }, 30000);
   });
-}
-
-// === INIT ===
-document.addEventListener('DOMContentLoaded', () => {
-  const btnMenu = document.getElementById('btn-menu-logo');
-  if (btnMenu) btnMenu.addEventListener('click', abrirDrawer);
-
-  carregarCandidato();
-  carregarEntrevistas();
-
-  // Atualiza contadores a cada 30s
-  setInterval(() => {
-    if (document.querySelector('.contador')) {
-      carregarEntrevistas();
-    }
-  }, 30000);
-});
 </script>
-
 </body>
 </html>
