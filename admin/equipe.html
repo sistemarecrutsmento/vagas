@@ -98,7 +98,7 @@
 
     async function carregar() {
       try {
-        const r = await fetch('https://recrutamento-api.onrender.com/api/admin/equipe', {
+        const r = await fetch('https://recrutamento-api-novo.onrender.com/api/admin/equipe', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await r.json();
