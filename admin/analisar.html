@@ -602,25 +602,34 @@
         '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #7C3AED;">' +
           '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
             '<h2 style="margin:0;">📅 Agendar Entrevista</h2>' +
-            '<span style="font-size:11px; background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:999px; font-weight:700;">DASHBOARD PROFISSIONAL</span>' +
+            '<span style="font-size:11px; background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:999px; font-weight:700;">GOOGLE MEET AUTOMÁTICO</span>' +
           '</div>' +
-          '<p style="font-size:13px; color:#666; margin-bottom:16px;">Configure a data, hora e local da entrevista para aparecer na sua Agenda Administrativa.</p>' +
+          '<p style="font-size:13px; color:#666; margin-bottom:16px;">Defina a data e hora. O sistema gera automaticamente o link do <strong>Google Meet</strong> e envia o convite por e-mail pro candidato.</p>' +
           '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">' +
             '<div>' +
               '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Data e Hora</label>' +
               '<input type="datetime-local" id="entrevista-data" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
             '</div>' +
             '<div>' +
-              '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Local / Plataforma</label>' +
-              '<input type="text" id="entrevista-local" placeholder="Ex: Google Meet, Presencial..." style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
+              '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Duração (minutos)</label>' +
+              '<select id="entrevista-duracao" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
+                '<option value="30">30 minutos</option>' +
+                '<option value="45">45 minutos</option>' +
+                '<option value="60" selected>60 minutos (padrão)</option>' +
+                '<option value="90">90 minutos</option>' +
+                '<option value="120">2 horas</option>' +
+              '</select>' +
             '</div>' +
           '</div>' +
           '<div style="margin-bottom:16px;">' +
-            '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Link da Reunião (opcional)</label>' +
-            '<input type="url" id="entrevista-link" placeholder="https://meet.google.com/..." style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
+            '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Observações (opcional)</label>' +
+            '<textarea id="entrevista-obs" rows="2" placeholder="Ex: Trazer documento X, falar com recruiter Y…" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>' +
+          '</div>' +
+          '<div style="background:#EDE9FE; border:1px solid #C4B5FD; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#5B21B6;">' +
+            '🎥 <strong>Google Meet automático:</strong> ao confirmar, o sistema cria a sala de videoconferência e envia o link por e-mail pro candidato + recrutador.' +
           '</div>' +
           '<div style="display:flex; justify-content:flex-end; gap:8px;">' +
-            '<button class="btn" style="background:#7C3AED; color:white;" onclick="salvarEntrevista(' + c.id + ', ' + etapaAtual + ')">💾 Confirmar Agendamento</button>' +
+            '<button class="btn" style="background:#7C3AED; color:white;" onclick="salvarEntrevista(' + c.id + ', ' + etapaAtual + ')">🚀 Confirmar e Gerar Meet</button>' +
           '</div>' +
         '</div>'
       ) : '';
@@ -789,15 +798,15 @@
       const card = document.getElementById('card-agendamento-entrevista');
       const btn = card.querySelector('button');
       const dataVal = document.getElementById('entrevista-data').value;
-      const localVal = document.getElementById('entrevista-local').value;
-      const linkVal = document.getElementById('entrevista-link').value;
+      const duracaoVal = document.getElementById('entrevista-duracao').value;
+      const obsVal = document.getElementById('entrevista-obs').value;
       const token = localStorage.getItem('admin_token');
 
       if (!dataVal) return alert('Por favor, selecione a data e hora da entrevista.');
 
       try {
         btn.disabled = true;
-        btn.innerHTML = 'Salvando...';
+        btn.innerHTML = '⏳ Gerando Meet...';
 
         const r = await fetch(API + '/api/admin/entrevista', {
           method: 'POST',
@@ -806,18 +815,18 @@
             candidatura_id: candidaturaId,
             etapa: etapaNum,
             data_hora: dataVal,
-            local: localVal,
-            link_reuniao: linkVal,
-            observacoes: `Entrevista agendada via painel de análise.`
+            duracao_minutos: parseInt(duracaoVal),
+            local: 'Google Meet',
+            observacoes: obsVal || 'Entrevista agendada via painel de análise.'
           })
         });
 
         const res = await r.json();
         if (!r.ok) throw new Error(res.erro || 'Falha ao agendar');
 
-        // Pega o link gerado pelo backend (Meet) — se houver
-        const linkGerado = (res.entrevista && res.entrevista.link_reuniao) || linkVal;
-        const localGerado = (res.entrevista && res.entrevista.local) || localVal || '—';
+        // Pega o link gerado pelo backend (Meet)
+        const linkGerado = (res.entrevista && res.entrevista.link_reuniao) || '';
+        const localGerado = (res.entrevista && res.entrevista.local) || 'Google Meet';
 
         // Troca o card pelo modo de confirmação (sem recarregar a página!)
         const dataFmt = new Date(dataVal).toLocaleString('pt-BR', {
@@ -832,11 +841,20 @@
             '</div>' +
             '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
               '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
-              '<div><strong style="color:#166534;">📍 Local:</strong><br>' + localGerado + '</div>' +
-              (linkGerado ? '<div style="grid-column: 1 / -1;"><strong style="color:#166534;">🔗 Link:</strong> <a href="' + linkGerado + '" target="_blank" style="color:#7C3AED;">' + linkGerado + '</a></div>' : '') +
+              '<div><strong style="color:#166534;">🎥 Plataforma:</strong><br>' + localGerado + '</div>' +
             '</div>' +
+            (linkGerado ? (
+              '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
+                '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Link da reunião (gerado automaticamente):</div>' +
+                '<div style="display:flex; gap:8px; align-items:center;">' +
+                  '<a href="' + linkGerado + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + linkGerado + '</a>' +
+                  '<button type="button" onclick="navigator.clipboard.writeText(\'' + linkGerado + '\').then(()=>this.textContent=\'✅ Copiado!\')" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
+                '</div>' +
+              '</div>'
+            ) : '') +
+            (obsVal ? '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:13px; color:#166534; border:1px solid #BBF7D0;"><strong>💬 Observações:</strong> ' + obsVal + '</div>' : '') +
             '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:12px; color:#166534; border:1px solid #BBF7D0;">' +
-              '💡 Esta entrevista já está visível na aba <strong>📅 Agenda</strong> do seu Dashboard.' +
+              '📧 E-mail com o convite enviado pro candidato. A entrevista aparece na aba <strong>📅 Agenda</strong> do Dashboard.' +
             '</div>' +
           '</div>';
 
