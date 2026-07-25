@@ -27,6 +27,9 @@
     .vaga-card .stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
     .stat-mini { background: var(--cinza, #f5f5f5); padding: 5px 10px; border-radius: 6px; font-size: 12px; }
     .stat-mini strong { color: #7B1F1F; }
+    .vaga-card .btn-ver { display: block; width: 100%; text-align: center; padding: 10px; background: var(--vinho, #7B1F1F); color: #fff; border-radius: 6px; font-size: 13px; font-weight: 500; text-decoration: none; }
+    .vaga-card .btn-ver:hover { background: var(--vinho-escuro, #5a1414); }
+    .vaga-card .card-rodape { margin-top: auto; padding-top: 4px; }
   </style>
 </head>
 <body>
@@ -132,6 +135,9 @@
               <span class="stat-mini">🔍 <strong>${emAnalise}</strong> em análise</span>
               ${contratados > 0 ? `<span class="stat-mini">✅ <strong>${contratados}</strong> contratado(s)</span>` : ''}
               ${reprovados > 0 ? `<span class="stat-mini">❌ <strong>${reprovados}</strong> reprovado(s)</span>` : ''}
+            </div>
+            <div class="card-rodape">
+              <span class="btn-ver">👁 Ver candidatos</span>
             </div>
           </a>`;
         }).join('');
