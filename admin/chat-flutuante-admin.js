@@ -40,8 +40,8 @@
       display: flex; align-items: center; justify-content: center; padding: 0 5px;
       border: 2px solid white;
     }
-    .chat-window { position: fixed; bottom: 580px; right: 24px; z-index: 9998;
-      width: 380px; max-width: calc(100vw - 32px); height: 460px; max-height: calc(100vh - 600px);
+    .chat-window { position: fixed; bottom: 640px; right: 24px; z-index: 9998;
+      width: 380px; max-width: calc(100vw - 32px); height: 420px; max-height: calc(100vh - 680px);
       background: white; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
       display: none; flex-direction: column; overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -161,8 +161,8 @@
   const fabContainer = document.createElement('div');
   fabContainer.id = 'chatfab-container';
   // column-reverse: primeiro item no DOM fica embaixo, último fica em cima.
-  // Bolinhas candidato ficam ACIMA da bolinha empresa.
-  fabContainer.style.cssText = 'position:fixed;bottom:96px;right:20px;display:flex;flex-direction:column-reverse;gap:10px;z-index:9999;';
+  // Bolinhas candidato ficam ABAIXO da bolinha empresa (canto inferior direito).
+  fabContainer.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:10px;z-index:9999;';
   document.body.appendChild(fabContainer);
 
   // Janela única de chat (abre a conversa do candidato clicado)
