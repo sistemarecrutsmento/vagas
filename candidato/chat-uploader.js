@@ -71,7 +71,7 @@ window.ChatUploader = (function() {
   // Renderiza preview do arquivo numa mensagem
   function renderAnexo(arquivo) {
     const isImage = arquivo.mime_type.startsWith('image/');
-    const url = `https://recrutamento-api.onrender.com/api/chat/arquivo/${arquivo.id}`;
+    const url = `https://recrutamento-api-novo.onrender.com/api/chat/arquivo/${arquivo.id}`;
     if (isImage) {
       return `<a href="${url}" target="_blank" rel="noopener">
                 <img src="${url}" alt="${escapeAttr(arquivo.nome_original)}"
