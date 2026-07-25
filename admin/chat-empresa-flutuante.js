@@ -33,7 +33,7 @@
   style.textContent = `
     /* Bolinha do chat empresa */
     .chatfab-empresa-btn {
-      position: fixed; bottom: 96px; right: 24px; z-index: 9999;
+      position: fixed; bottom: 124px; right: 24px; z-index: 9999;
       width: 60px; height: 60px; border-radius: 50%;
       background: linear-gradient(135deg, #1A4D7A 0%, #2E6BA8 100%);
       color: white; border: none; box-shadow: 0 6px 20px rgba(26,77,122,0.4);
@@ -67,7 +67,7 @@
 
     /* Janela do chat empresa (mesmo layout, cor azul) */
     .chatfab-empresa-window {
-      position: fixed; bottom: 170px; right: 24px; z-index: 9998;
+      position: fixed; bottom: 200px; right: 24px; z-index: 9998;
       width: 380px; max-width: calc(100vw - 32px); height: 480px; max-height: calc(100vh - 200px);
       background: white; border-radius: 16px;
       box-shadow: 0 12px 40px rgba(26,77,122,0.25);
@@ -154,8 +154,8 @@
     .chatfab-empresa-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
     @media (max-width: 480px) {
-      .chatfab-empresa-window { right: 8px; left: 8px; width: auto; bottom: 160px; }
-      .chatfab-empresa-btn { right: 16px; bottom: 88px; }
+      .chatfab-empresa-window { right: 8px; left: 8px; width: auto; bottom: 190px; }
+      .chatfab-empresa-btn { right: 16px; bottom: 116px; }
     }
   `;
   document.head.appendChild(style);
