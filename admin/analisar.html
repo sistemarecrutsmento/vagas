@@ -569,20 +569,20 @@
           '<h2>📜 Histórico do Processo</h2>' + histHtml +
         '</div>';
 
-      // Chat agora é SÓ via bolinha flutuante (chat-flutuante-admin.js) - jul/2026
-      // Removido card embutido no meio da página pra não confundir
+      // Chat com candidato fica SÓ via bolinha flutuante (chat-flutuante-admin.js)
       const chatCard = '';
 
       // Card de chat RH × EMPRESA (somente se a candidatura tem empresa vinculada)
-      const temEmpresa = !!c.empresa_id || !!c.empresa_nome; // candidatura pode ter empresa
+      // COR AZUL (#1A4D7A) — diferencia do chat com candidato (que usa bolinha dourada flutuante)
+      const temEmpresa = !!c.empresa_id || !!c.empresa_nome;
       const chatEmpresaCard = temEmpresa ? (
-        '<div class="card" id="card-chat-empresa">' +
-          '<h2>🏢 Chat com a Empresa</h2>' +
-          '<p style="font-size:12px;color:#999;margin-bottom:10px;margin-top:-8px">Canal direto entre o RH e a empresa responsável por esta vaga. Use para alinhar decisões sobre esta candidatura.</p>' +
-          '<div id="chat-empresa-mensagens" style="height:280px;overflow-y:auto;background:#fafafa;border-radius:6px;padding:10px;margin-bottom:8px">Carregando...</div>' +
+        '<div class="card" id="card-chat-empresa" style="border-top:4px solid #1A4D7A">' +
+          '<h2 style="color:#1A4D7A">🏢 Chat com a Empresa</h2>' +
+          '<p style="font-size:12px;color:#999;margin-bottom:14px;margin-top:-8px">Canal direto entre o RH e a empresa responsável por esta vaga. Use para alinhar decisões sobre esta candidatura.</p>' +
+          '<div id="chat-empresa-mensagens" style="height:280px;overflow-y:auto;background:#F0F7FF;border:1px solid #D6E4F2;border-radius:8px;padding:12px;margin-bottom:10px">Carregando...</div>' +
           '<div style="display:flex;gap:8px">' +
-            '<input type="text" id="chat-empresa-input" placeholder="Escreva uma mensagem para a empresa…" style="flex:1;padding:9px 12px;border:1px solid #e5e5e5;border-radius:6px;font-size:13px" onkeydown="if(event.key===\'Enter\')enviarChatEmpresa()">' +
-            '<button onclick="enviarChatEmpresa()" style="background:#722F37;color:white;border:0;padding:0 18px;border-radius:6px;font-weight:600;cursor:pointer">Enviar</button>' +
+            '<input type="text" id="chat-empresa-input" placeholder="Escreva uma mensagem para a empresa…" style="flex:1;padding:10px 14px;border:1px solid #D6E4F2;border-radius:8px;font-size:13px;background:white" onkeydown="if(event.key===\'Enter\')enviarChatEmpresa()">' +
+            '<button onclick="enviarChatEmpresa()" style="background:#1A4D7A;color:white;border:0;padding:0 20px;border-radius:8px;font-weight:600;cursor:pointer">Enviar</button>' +
           '</div>' +
         '</div>'
       ) : '';
@@ -611,11 +611,11 @@
         // 2) Histórico do Processo (logo abaixo da timeline, conforme combinado)
         historicoCard +
 
-        // 2.5) Chat com o candidato
-        chatCard +
-
-        // 2.6) Chat com a Empresa (RH ↔ Empresa)
+        // 2.5) Chat com a Empresa (RH ↔ Empresa) — ACIMA do chat candidato
         chatEmpresaCard +
+
+        // 2.6) Chat com o candidato
+        chatCard +
 
         // 3) Dados Pessoais + Endereço (SEM "sobre você")
         '<div class="card" id="card-dados-pessoais">' +
@@ -786,8 +786,10 @@
         }
         div.innerHTML = msgs.map(m => {
           const cls = m.remetente_tipo === 'rh' ? 'chat-msg-rh' : 'chat-msg-empresa';
-          const cor = m.remetente_tipo === 'rh' ? '#722F37' : '#1A4D7A';
-          const fundo = m.remetente_tipo === 'rh' ? '#FFF8E1' : '#E3F2FD';
+          // RH (admin) fica à direita em vinho (combina com identidade admin)
+          // Empresa fica à esquerda em azul (combina com card)
+          const cor = m.remetente_tipo === 'rh' ? '#6B0F1A' : '#1A4D7A';
+          const fundo = m.remetente_tipo === 'rh' ? '#FAEBEC' : '#E3F2FD';
           const d = new Date(m.criado_em);
           return '<div style="margin-bottom:8px;max-width:75%;padding:8px 12px;border-radius:12px;font-size:13px;background:' + fundo + ';color:' + cor + (m.remetente_tipo === 'rh' ? ';margin-left:auto;border-bottom-right-radius:2px' : ';margin-right:auto;border-bottom-left-radius:2px') + '">' +
             escapeHtml(m.mensagem) +
