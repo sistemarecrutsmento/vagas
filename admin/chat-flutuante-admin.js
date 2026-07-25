@@ -11,7 +11,7 @@
   const token = localStorage.getItem('admin_token') || localStorage.getItem('recrutador_token');
   if (!token) return;
 
-  const API = 'https://recrutamento-api.onrender.com';
+  const API = 'https://recrutamento-api-novo.onrender.com';
   let conversas = [];          // [{ candidatura_id, candidato_nome, vaga_titulo, nao_lidas_admin }]
   let conversaAtiva = null;    // candidatura_id selecionada
   let mensagensCache = {};     // mensagens por candidatura_id
