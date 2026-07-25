@@ -649,10 +649,10 @@ async function carregarAgenda(periodo) {
           <div class="agenda-acoes">
             <span class="badge" style="background:${cor.bg}; color:${cor.fg};">${e.status}</span>
             ${!isPassada ? `
-              <div style="display:flex; gap:4px; margin-top:8px;">
+              <div style="display:flex; gap:4px; margin-top:8px; flex-wrap:wrap;">
                 <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'confirmada')">✓ Confirmar</button>
                 <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'realizada')">✔ Realizada</button>
-                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'cancelada')">✕ Cancelar</button>
+                <button class="btn btn-sm btn-sec" style="background:#FEE2E2;color:#991B1B;border-color:#FCA5A5;" onclick="cancelarEntrevistaFalhou(${e.id})" title="Libera novo agendamento. Use se a entrevista não aconteceu.">❌ Falhou</button>
               </div>
             ` : `
               <div style="display:flex; gap:4px; margin-top:8px;">
@@ -679,6 +679,27 @@ async function atualizarEntrevista(id, status) {
     });
     if (r.ok) carregarAgenda();
     else alert('Erro ao atualizar');
+  } catch (e) { alert('Erro de conexão'); }
+}
+
+// Marca a entrevista como FALHOU — usa a rota de cancelamento pra deletar do Calendar e liberar novo agendamento
+async function cancelarEntrevistaFalhou(id) {
+  if (!confirm('A entrevista não aconteceu?\n\nEla será cancelada (deleta o Meet, se houver) e o recrutador poderá fazer um novo agendamento.')) return;
+  const motivo = prompt('Motivo (opcional):') || '';
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+  try {
+    const r = await fetch(API + '/api/admin/entrevista/' + id + '/cancelar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ motivo })
+    });
+    const res = await r.json();
+    if (r.ok) {
+      alert('✅ Entrevista marcada como "Falhou". O recrutador pode fazer um novo agendamento.');
+      carregarAgenda();
+    } else {
+      alert('Erro: ' + (res.erro || 'desconhecido'));
+    }
   } catch (e) { alert('Erro de conexão'); }
 }
 
