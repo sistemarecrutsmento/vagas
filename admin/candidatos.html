@@ -194,7 +194,7 @@
             <td>
               <div class="acoes-cell">
                 <a class="btn" href="analisar.html?id=${c.id}&v=FIX_${Date.now()}" target="_blank">👁 Analisar</a>
-                ${isColeta ? '<a class="btn btn-dourado" href="validar-documentos.html?id=' + c.id + '" target="_blank">📄 Validar docs</a>' : ''}
+                ${isColeta ? '<a class="btn btn-dourado" href="analisar.html?id=' + c.id + '&v=FIX_' + Date.now() + '#card-documentos" target="_blank">📄 Validar docs</a>' : ''}
               </div>
             </td>
           </tr>`;
