@@ -18,7 +18,7 @@
 
   const token = localStorage.getItem('candidato_token');
   if (!token) return;
-  const API = 'https://recrutamento-api.onrender.com';
+  const API = 'https://recrutamento-api-novo.onrender.com';
 
   const ENCERRADO = ['rejeitado', 'reprovado', 'cancelado', 'contratado'];
 
