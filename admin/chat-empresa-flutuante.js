@@ -17,7 +17,7 @@
   const idUrlInt = idUrl ? parseInt(idUrl) : null;
   if (!idUrlInt) return;
 
-  const API = 'https://recrutamento-api.onrender.com';
+  const API = 'https://recrutamento-api-novo.onrender.com';
 
   // === 2. Estado ===
   let aberto = false;
