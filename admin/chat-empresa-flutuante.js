@@ -394,12 +394,9 @@
   });
 
   // Carrega e posiciona após dados prontos
+  // NOTA: NÃO abre sozinho — só abre com clique na bolinha (Fabio, jul/2026)
   carregarMensagens().then(() => {
     posicionar();
-    setTimeout(() => {
-      const msgs = mensagensCache[idUrlInt] || [];
-      if (msgs.length > 0) abrir();
-    }, 800);
   });
 
   // Polling
