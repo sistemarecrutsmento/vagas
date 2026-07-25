@@ -10,7 +10,7 @@
   const token = localStorage.getItem('empresa_token');
   if (!token) return;
 
-  const API = 'https://recrutamento-api.onrender.com';
+  const API = 'https://recrutamento-api-novo.onrender.com';
   let conversas = [];
   let conversaAtiva = null;
   let aberto = false;
