@@ -372,7 +372,7 @@
       return;
     }
     try {
-      const r = await fetch('https://recrutamento-api.onrender.com/api/candidato/perfil', {
+      const r = await fetch('https://recrutamento-api-novo.onrender.com/api/candidato/perfil', {
         headers: { 'Authorization': 'Bearer ' + tokenCandidato }
       });
       if (r.status === 401 || r.status === 403) { logout(); return; }
@@ -391,7 +391,7 @@
   async function carregarEntrevistas() {
     if (!tokenCandidato) return;
     try {
-      const r = await fetch('https://recrutamento-api.onrender.com/api/candidato/entrevistas', {
+      const r = await fetch('https://recrutamento-api-novo.onrender.com/api/candidato/entrevistas', {
         headers: { 'Authorization': 'Bearer ' + tokenCandidato }
       });
       if (r.status === 401 || r.status === 403) { logout(); return; }
