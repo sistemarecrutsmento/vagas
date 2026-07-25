@@ -38,6 +38,7 @@ aside { width: 240px; background: var(--vinho); color: var(--branco); padding: 2
 .nav-item { display: block; padding: 12px 24px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; font-weight: 500; border-left: 3px solid transparent; cursor: pointer; transition: background 0.2s; }
 .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
 .nav-item.ativo { background: rgba(255,255,255,0.15); color: #fff; border-left-color: var(--dourado); }
+.nav-divisor { margin-top: 16px; padding: 8px 24px 4px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 11px; font-weight: 700; letter-spacing: 1px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
 .aside-user { margin-top: auto; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
 .aside-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 .aside-user-info { flex: 1; min-width: 0; }
