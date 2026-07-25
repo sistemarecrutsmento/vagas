@@ -36,7 +36,9 @@
     /* Bolinha do chat empresa - IGUAL à chatfab-candidato (56x56, border 3px branco) */
     .chatfab-empresa-btn {
       position: fixed; right: 20px; z-index: 9999;
-      width: 56px; height: 56px; border-radius: 50%;
+      box-sizing: border-box; width: 56px !important; height: 56px !important;
+      min-width: 56px; min-height: 56px; max-width: 56px; max-height: 56px;
+      border-radius: 50%;
       background: linear-gradient(135deg, #1A4D7A 0%, #2E6BA8 100%);
       border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       cursor: pointer;
