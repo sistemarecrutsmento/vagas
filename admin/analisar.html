@@ -50,7 +50,7 @@
     .card-colapsavel > .card-header .card-toggle .chevron-baixo { display: block; }
     .card-colapsavel > .card-header .card-toggle .chevron-cima { display: none; }
     .card-colapsavel.aberto > .card-header .card-toggle {
-      background: var(--dourado); color: white;
+      background: var(--dourado); color: var(--cinza-escuro);
     }
     .card-colapsavel.aberto > .card-header .card-toggle .chevron-baixo { display: none; }
     .card-colapsavel.aberto > .card-header .card-toggle .chevron-cima { display: block; }
@@ -223,9 +223,8 @@
           if (_obrigatoriosDocs.length) {
             docsCard = '<div class="card card-colapsavel" id="card-documentos">' +
               '<div class="card-header" onclick="toggleCard(\'card-documentos\')">' +
-                '<h2 class="flex" style="align-items:center;gap:8px;flex-wrap:wrap;min-width:0">' +
+                '<h2 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0">' +
                   '<span>📄 Documentos de Contratação <span id="docs-count-header" style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px"></span></span>' +
-                  '<button id="btn-baixar-tudo-pdf" class="btn" style="background:var(--dourado);color:var(--cinza-escuro);font-size:13px;padding:8px 14px;margin:0" onclick="event.stopPropagation();docBaixarTudo()">📥 Baixar tudo (PDF único)</button>' +
                 '</h2>' +
                 '<span class="card-toggle">' +
                   '<svg class="chevron-baixo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
@@ -233,6 +232,17 @@
                 '</span>' +
               '</div>' +
               '<div class="card-body">' +
+                '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid var(--cinza);margin-bottom:14px">' +
+                  '<div id="docs-resumo" style="font-size:13px;color:var(--cinza-medio);line-height:1.7;flex:1;min-width:0">' +
+                    '<strong style="color:var(--vinho);font-size:14px">Resumo:</strong><br>' +
+                    '<span id="docs-count-line">0/16 enviados</span><br>' +
+                    '<span style="color:#16A34A">● <span id="docs-count-aprov">0</span> aprovados</span><br>' +
+                    '<span style="color:#EAB308">● <span id="docs-count-reenv">0</span> a reenviar</span><br>' +
+                    '<span style="color:#DC2626">● <span id="docs-count-repr">0</span> reprovados</span><br>' +
+                    '<span style="color:var(--cinza-medio)">● <span id="docs-count-pend">16</span> pendentes</span>' +
+                  '</div>' +
+                  '<button id="btn-baixar-tudo-pdf" class="btn" style="background:var(--dourado);color:var(--cinza-escuro);font-size:13px;padding:10px 14px;margin:0;white-space:nowrap;flex-shrink:0;height:fit-content" onclick="docBaixarTudo()">📥 Baixar tudo (PDF único)</button>' +
+                '</div>' +
                 '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Use os botões em cada documento para <strong>aprovar</strong>, <strong>retornar</strong> (com mensagem ao candidato) ou <strong>baixar</strong> individualmente. Quando <strong>todos</strong> estiverem aprovados, clique no botão abaixo para avançar a etapa de uma vez.</p>' +
                 '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
                 '<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--cinza)">' +
@@ -888,14 +898,37 @@
       return renderizarDocumentos();
     }
 
-    // Atualiza contador no header do card de Documentos
+    // Atualiza contadores no Resumo do card de Documentos
     function atualizarDocsCount() {
-      const el = document.getElementById('docs-count-header');
-      if (!el) return;
       const total = _obrigatoriosDocs.length;
-      if (!total) { el.textContent = ''; return; }
-      const aprovados = _docsCache.filter(d => d.status === 'aprovado').length;
-      el.textContent = '(' + aprovados + '/' + total + ' aprovados)';
+      // Header antigo (X/Y aprovados) — continua mostrando no header do card
+      const elH = document.getElementById('docs-count-header');
+      if (elH) elH.textContent = total ? '(' + _docsCache.filter(d => d.status === 'aprovado').length + '/' + total + ' aprovados)' : '';
+      if (!total) return;
+      // Novo bloco "Resumo" — calcula status por documento
+      // Cada documento é obrigatório; status por tipo:
+      // - 'aprovado' = OK
+      // - 'retornado' = a reenviar
+      // - 'reprovado' = reprovado (não vai aceitar)
+      // - null/enviado-outros = pendente (candidato ainda não enviou ou ainda na triagem)
+      const porTipo = {};
+      for (const d of _docsCache) porTipo[d.tipo] = d;
+      let aprovados = 0, reenviar = 0, reprovados = 0, enviados = 0;
+      for (const o of _obrigatoriosDocs) {
+        const d = porTipo[o.tipo];
+        if (!d) continue;
+        enviados++;
+        if (d.status === 'aprovado') aprovados++;
+        else if (d.status === 'retornado') reenviar++;
+        else if (d.status === 'reprovado') reprovados++;
+      }
+      const pendentes = total - enviados;
+      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setText('docs-count-line', enviados + '/' + total + ' enviados');
+      setText('docs-count-aprov', aprovados);
+      setText('docs-count-reenv', reenviar);
+      setText('docs-count-repr', reprovados);
+      setText('docs-count-pend', pendentes);
     }
 
     function renderizarDocumentos() {
