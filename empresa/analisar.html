@@ -310,6 +310,12 @@
                           status === 'rejeitado' ? 'Reprovado' :
                           status === 'aprovado' ? 'Aprovado' : status;
 
+      // Pega último comentário da empresa (do histórico) pra exibir como "Parecer atual"
+      const ultComentario = (() => {
+        const coms = hist.filter(h => h.tipo === 'comentario' && h.por && h.por.startsWith('empresa:'));
+        return coms.length ? coms[coms.length - 1] : null;
+      })();
+
       let acoesHtml = '';
       if (status === 'reprovado' || status === 'rejeitado' || status === 'contratado') {
         acoesHtml = '<div class="acoes">' +
@@ -317,10 +323,21 @@
         '</div>';
       } else if (ehEtapaGestor) {
         // ETAPA 4 — empresa PODE agir
-        acoesHtml = '<div class="acoes">' +
-          '<button class="btn btn-verde" onclick="acao(' + c.id + ',\'avancar\')">✅ Aprovar e Avançar</button>' +
-          '<button class="btn btn-perigo" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button>' +
-        '</div>';
+        acoesHtml =
+          '<div class="card" id="card-comentario-empresa" style="margin-bottom:14px">' +
+            '<h2 style="margin-top:0">📝 Parecer da Empresa</h2>' +
+            '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:10px">Anotações internas sobre a entrevista com o gestor. <strong>Não é exibido ao candidato.</strong></p>' +
+            '<textarea id="txt-comentario-empresa" rows="4" placeholder="Pontos fortes, pontos de atenção, fit com a vaga, próximos passos…" style="width:100%;padding:10px;border:1px solid #DDD;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' +
+              (ultComentario ? escapeHtml(ultComentario.texto || '') : '') +
+            '</textarea>' +
+            '<div style="margin-top:8px;display:flex;justify-content:flex-end">' +
+              '<button class="btn" style="background:var(--dourado);color:var(--cinza-escuro)" onclick="salvarComentarioEmpresa(' + c.id + ')">💾 Salvar parecer</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="acoes">' +
+            '<button class="btn btn-verde" onclick="acao(' + c.id + ',\'avancar\')">✅ Aprovar e Avançar</button>' +
+            '<button class="btn btn-perigo" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button>' +
+          '</div>';
       } else {
         // OUTRAS ETAPAS — read-only
         acoesHtml = '<div class="badge-readonly">🔒 <strong>Modo leitura.</strong> Sua empresa só pode aprovar ou reprovar candidatos na etapa de Entrevista com o Gestor (etapa 4). Acompanhe o progresso abaixo e use o chat ao lado para falar com o RH.</div>';
@@ -399,18 +416,46 @@
     // === Ações ===
     async function acao(id, ac) {
       const labels = { 'avancar': 'aprovar e avançar este candidato para a próxima etapa?', 'reprovar': 'reprovar este candidato?' };
-      const motivo = ac === 'reprovar' ? prompt('Motivo da reprovação (opcional):') : null;
-      if (ac === 'reprovar' && motivo === null) return; // cancelou
+      // Pega parecer digitado na textarea (se houver)
+      const ta = document.getElementById('txt-comentario-empresa');
+      const parecer = ta ? (ta.value || '').trim() : '';
+      if (ac === 'reprovar' && !parecer) {
+        const motivo = prompt('Motivo da reprovação (opcional):');
+        if (motivo === null) return; // cancelou
+        if (motivo) {
+          // Se digitou motivo mas não escreveu no textarea, usa o motivo como parecer também
+          ta.value = motivo;
+        }
+      }
       if (!confirm('Tem certeza que deseja ' + labels[ac])) return;
       try {
+        const parecerFinal = ta ? (ta.value || '').trim() : '';
         const r = await fetch(API + '/api/empresa/candidatura/' + id + '/acao', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ acao: ac, motivo: motivo || '' })
+          body: JSON.stringify({ acao: ac, motivo: parecerFinal || '', comentario: parecerFinal || '' })
         });
         const data = await r.json();
         if (r.ok) location.reload();
         else alert('Erro: ' + (data.erro || 'Não foi possível atualizar'));
+      } catch (e) { alert('Erro: ' + e.message); }
+    }
+
+    // === Salvar parecer (sem ação de avançar/reprovar) ===
+    async function salvarComentarioEmpresa(id) {
+      const ta = document.getElementById('txt-comentario-empresa');
+      const parecer = ta ? (ta.value || '').trim() : '';
+      if (!parecer) { alert('Digite um parecer antes de salvar.'); return; }
+      if (!confirm('Salvar este parecer?')) return;
+      try {
+        const r = await fetch(API + '/api/empresa/candidatura/' + id + '/acao', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ acao: 'comentar', comentario: parecer })
+        });
+        const data = await r.json();
+        if (r.ok) location.reload();
+        else alert('Erro: ' + (data.erro || 'Não foi possível salvar'));
       } catch (e) { alert('Erro: ' + e.message); }
     }
 
