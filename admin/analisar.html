@@ -36,7 +36,7 @@
       transition: background 0.15s;
     }
     .card-colapsavel > .card-header:hover { background: #faf7f0; }
-    .card-colapsavel > .card-header h2 { margin: 0; padding: 0; border: none; flex: 1; }
+    .card-colapsavel > .card-header h2 { margin: 0; padding: 0; border: none; flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     .card-colapsavel > .card-header .card-toggle {
       width: 32px; height: 32px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
@@ -216,16 +216,24 @@
         try {
           await carregarDocumentos(id);
           if (_obrigatoriosDocs.length) {
-            docsCard = '<div class="card" id="card-documentos">' +
-              '<h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' +
-                '<span>📄 Documentos de Contratação <span id="docs-count-header" style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px"></span></span>' +
-                '<button id="btn-baixar-tudo-pdf" class="btn" style="background:var(--dourado);color:var(--cinza-escuro);font-size:13px;padding:8px 14px;margin:0" onclick="docBaixarTudo()">📥 Baixar tudo (PDF único)</button>' +
-              '</h2>' +
-              '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Use os botões em cada documento para <strong>aprovar</strong>, <strong>retornar</strong> (com mensagem ao candidato) ou <strong>baixar</strong> individualmente. Quando <strong>todos</strong> estiverem aprovados, clique no botão abaixo para avançar a etapa de uma vez.</p>' +
-              '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
-              '<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--cinza)">' +
-                '<button id="btn-aprovar-tudo" class="btn" style="background:#16A34A;color:white;font-size:15px;padding:14px 20px;width:100%" onclick="aprovarTodosEAvancar()">✅ Aprovar tudo e avançar etapa</button>' +
-                '<p style="font-size:12px;color:var(--cinza-medio);margin-top:8px;text-align:center">Só fica disponível quando todos os documentos estiverem aprovados.</p>' +
+            docsCard = '<div class="card card-colapsavel" id="card-documentos">' +
+              '<div class="card-header" onclick="toggleCard(\'card-documentos\')">' +
+                '<h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;width:100%">' +
+                  '<span>📄 Documentos de Contratação <span id="docs-count-header" style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px"></span></span>' +
+                  '<button id="btn-baixar-tudo-pdf" class="btn" style="background:var(--dourado);color:var(--cinza-escuro);font-size:13px;padding:8px 14px;margin:0" onclick="event.stopPropagation();docBaixarTudo()">📥 Baixar tudo (PDF único)</button>' +
+                '</h2>' +
+                '<span class="card-toggle">' +
+                  '<svg class="chevron-baixo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+                  '<svg class="chevron-cima" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 15 12 9 18 15"></polyline></svg>' +
+                '</span>' +
+              '</div>' +
+              '<div class="card-body">' +
+                '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Use os botões em cada documento para <strong>aprovar</strong>, <strong>retornar</strong> (com mensagem ao candidato) ou <strong>baixar</strong> individualmente. Quando <strong>todos</strong> estiverem aprovados, clique no botão abaixo para avançar a etapa de uma vez.</p>' +
+                '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
+                '<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--cinza)">' +
+                  '<button id="btn-aprovar-tudo" class="btn" style="background:#16A34A;color:white;font-size:15px;padding:14px 20px;width:100%" onclick="aprovarTodosEAvancar()">✅ Aprovar tudo e avançar etapa</button>' +
+                  '<p style="font-size:12px;color:var(--cinza-medio);margin-top:8px;text-align:center">Só fica disponível quando todos os documentos estiverem aprovados.</p>' +
+                '</div>' +
               '</div>' +
             '</div>';
           }
