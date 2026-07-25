@@ -676,7 +676,7 @@
       return;
     }
     try {
-      const r = await fetch('https://recrutamento-api.onrender.com/api/candidato/notificacoes', {
+      const r = await fetch('https://recrutamento-api-novo.onrender.com/api/candidato/notificacoes', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
       const data = await r.json();
