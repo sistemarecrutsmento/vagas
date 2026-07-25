@@ -25,6 +25,33 @@
     .status-contratado { background: #DBEAFE; color: #1E40AF; }
     .card { background: var(--branco); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; }
     .card h2 { font-size: 16px; color: var(--vinho); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cinza); }
+
+    /* === Accordion (cards colapsáveis) === */
+    .card-colapsavel > .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none;
+      margin: -20px -20px 0 -20px; padding: 16px 20px;
+      border-bottom: 1px solid var(--cinza);
+      border-radius: 12px 12px 0 0;
+      transition: background 0.15s;
+    }
+    .card-colapsavel > .card-header:hover { background: #faf7f0; }
+    .card-colapsavel > .card-header h2 { margin: 0; padding: 0; border: none; flex: 1; }
+    .card-colapsavel > .card-header .card-toggle {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: #f1ecdf; color: var(--vinho);
+      font-size: 14px; transition: transform 0.2s, background 0.15s;
+      flex-shrink: 0; margin-left: 12px;
+    }
+    .card-colapsavel.aberto > .card-header .card-toggle {
+      transform: rotate(180deg); background: var(--dourado); color: white;
+    }
+    .card-colapsavel > .card-body {
+      max-height: 0; overflow: hidden; transition: max-height 0.35s ease;
+    }
+    .card-colapsavel.aberto > .card-body { max-height: 5000px; }
+    .card-colapsavel.aberto > .card-header { border-radius: 12px 12px 0 0; }
     .dados-pessoais-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cinza); }
     .dados-pessoais-header h2 { margin: 0; padding: 0; border: none; }
     .dados-foto { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: var(--cinza-claro); }
@@ -103,6 +130,28 @@
   <script>
     const API = 'https://recrutamento-api.onrender.com';
 
+    // Accordion: expandir/recolher card colapsável
+    function toggleCard(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('aberto');
+      // Salva estado pra não recolher toda hora no F5
+      try {
+        const aberto = el.classList.contains('aberto');
+        localStorage.setItem('card_' + id, aberto ? '1' : '0');
+      } catch (e) {}
+    }
+
+    // Restaura estado dos cards colapsáveis no carregamento
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.card-colapsavel').forEach(el => {
+        try {
+          const salvo = localStorage.getItem('card_' + el.id);
+          if (salvo === '1') el.classList.add('aberto');
+        } catch (e) {}
+      });
+    });
+
     function voltar() {
       // Volta pra lista de candidatos da vaga (SPA)
       const params = new URLSearchParams(location.search);
@@ -158,16 +207,23 @@
         try {
           await carregarDocumentos(id);
           if (_obrigatoriosDocs.length) {
-            docsCard = '<div class="card" id="card-documentos">' +
-              '<h2>📄 Documentos de Contratação</h2>' +
-              '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Use <strong>"Retornar para candidato"</strong> em cada item para pedir reenvio com uma mensagem personalizada. Quando <strong>todos</strong> estiverem aprovados, clique no botão abaixo para aprovar tudo e avançar a etapa de uma vez.</p>' +
-              '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
-              '<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--cinza)">' +
-                '<button id="btn-aprovar-tudo" class="btn" style="background:#16A34A;color:white;font-size:15px;padding:14px 20px;width:100%" onclick="aprovarTodosEAvancar()">✅ Aprovar tudo e avançar etapa</button>' +
-                '<p style="font-size:12px;color:var(--cinza-medio);margin-top:8px;text-align:center">Só fica disponível quando todos os documentos estiverem aprovados.</p>' +
+            docsCard = '<div class="card card-colapsavel" id="card-documentos">' +
+              '<div class="card-header" onclick="toggleCard(\'card-documentos\')">' +
+                '<h2>📄 Documentos de Contratação <span id="docs-count-header" style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px"></span></h2>' +
+                '<span class="card-toggle">▼</span>' +
+              '</div>' +
+              '<div class="card-body">' +
+                '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Use <strong>"Retornar para candidato"</strong> em cada item para pedir reenvio com uma mensagem personalizada. Quando <strong>todos</strong> estiverem aprovados, clique no botão abaixo para aprovar tudo e avançar a etapa de uma vez.</p>' +
+                '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
+                '<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--cinza)">' +
+                  '<button id="btn-aprovar-tudo" class="btn" style="background:#16A34A;color:white;font-size:15px;padding:14px 20px;width:100%" onclick="aprovarTodosEAvancar()">✅ Aprovar tudo e avançar etapa</button>' +
+                  '<p style="font-size:12px;color:var(--cinza-medio);margin-top:8px;text-align:center">Só fica disponível quando todos os documentos estiverem aprovados.</p>' +
+                '</div>' +
               '</div>' +
             '</div>';
           }
+          // Atualiza contador no header (X/Y aprovados)
+          setTimeout(atualizarDocsCount, 0);
         } catch (e) {
           console.error('Erro ao carregar documentos:', e);
         }
@@ -564,9 +620,15 @@
       ) : '';
 
       // Card de Histórico do Processo (com data + etapa + ação + status)
+      // Colapsável por padrão — admin clica no header pra expandir
+      const histCount = hist.length;
       const historicoCard =
-        '<div class="card" id="card-historico">' +
-          '<h2>📜 Histórico do Processo</h2>' + histHtml +
+        '<div class="card card-colapsavel" id="card-historico">' +
+          '<div class="card-header" onclick="toggleCard(\'card-historico\')">' +
+            '<h2>📜 Histórico do Processo <span style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px">(' + histCount + ' ' + (histCount === 1 ? 'evento' : 'eventos') + ')</span></h2>' +
+            '<span class="card-toggle">▼</span>' +
+          '</div>' +
+          '<div class="card-body">' + histHtml + '</div>' +
         '</div>';
 
       // Chat com candidato fica SÓ via bolinha flutuante (chat-flutuante-admin.js)
@@ -802,6 +864,16 @@
       return renderizarDocumentos();
     }
 
+    // Atualiza contador no header do card de Documentos
+    function atualizarDocsCount() {
+      const el = document.getElementById('docs-count-header');
+      if (!el) return;
+      const total = _obrigatoriosDocs.length;
+      if (!total) { el.textContent = ''; return; }
+      const aprovados = _docsCache.filter(d => d.status === 'aprovado').length;
+      el.textContent = '(' + aprovados + '/' + total + ' aprovados)';
+    }
+
     function renderizarDocumentos() {
       if (!_obrigatoriosDocs.length) return '';
       // Indexa docs existentes por tipo
@@ -950,6 +1022,7 @@
         if (card) {
           const novaHtml = renderizarDocumentos();
           card.querySelector('.doc-lista-wrapper').innerHTML = novaHtml;
+          atualizarDocsCount();
         }
         alert('Documento retornado. O candidato será notificado e poderá reenviar.');
       } catch (e) {
@@ -980,6 +1053,7 @@
         const card = document.getElementById('card-documentos');
         if (card) {
           card.querySelector('.doc-lista-wrapper').innerHTML = renderizarDocumentos();
+          atualizarDocsCount();
         }
       } catch (e) {
         alert('Erro: ' + e.message);
