@@ -156,7 +156,7 @@
     <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
     <a href="entrevistas.html" class="drawer-link"><span class="icon">📅</span> Entrevistas</a>
     <a href="conversas.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">💬</span> Chat</a>
-    <a href="javascript:void(0)" onclick="alert('Sem notificações no momento');fecharDrawer()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
+    <a href="javascript:void(0)" onclick="abrirModalNotificacoes()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
   </div>
   <div class="drawer-footer">
     <button class="drawer-logout" onclick="logout()" type="button" aria-label="Sair do perfil">🚪 Sair</button>
@@ -171,7 +171,7 @@
 </main>
 
 <script src="app-v2.js?v=1784700000_FOOTER"></script>
-<script src="modals.js?v=1784700000_FOOTER"></script>
+<script src="modals.js?v=NOTIF_994902"></script>
 <script>
 // ===== PEGAR ID DA VAGA =====
 const params = new URLSearchParams(window.location.search);
