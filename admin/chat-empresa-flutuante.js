@@ -39,7 +39,7 @@
       width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, #1A4D7A 0%, #2E6BA8 100%);
       border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      cursor: pointer; position: relative;
+      cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: transform 0.15s;
       color: white; font-size: 24px;
@@ -199,30 +199,24 @@
   // Estratégia: mede a posição real via getBoundingClientRect a cada redraw
 
   function posicionar() {
-    // Bolinha azul: acima da lista de candidatos
     const fabContainer = document.getElementById('chatfab-container');
     if (fabContainer) {
       const rect = fabContainer.getBoundingClientRect();
-      // Topo da lista de candidatos em coords de viewport
-      // bottom que precisamos = (altura viewport - rect.top) + gap
-      const gap = 12;
+      const gap = 16;
       const bottomBolinha = (window.innerHeight - rect.top) + gap;
       btn.style.bottom = bottomBolinha + 'px';
     } else {
-      // Sem lista de candidato → posiciona sozinha acima do candidato principal
       btn.style.bottom = '88px';
     }
 
-    // Janela azul: acima da janela do candidato (se ela existir e estiver aberta)
     const chatWin = document.querySelector('.chat-window');
     if (chatWin) {
       const rect = chatWin.getBoundingClientRect();
-      const bottomJanela = (window.innerHeight - rect.top) + 12;
+      const bottomJanela = (window.innerHeight - rect.top) + 16;
       win.style.bottom = bottomJanela + 'px';
     } else {
-      // Sem janela candidata → fica acima da bolinha azul
       const btnRect = btn.getBoundingClientRect();
-      const bottomJanela = (window.innerHeight - btnRect.top) + 12;
+      const bottomJanela = (window.innerHeight - btnRect.top) + 16;
       win.style.bottom = bottomJanela + 'px';
     }
   }
