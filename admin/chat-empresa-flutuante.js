@@ -202,9 +202,11 @@
     const fabContainer = document.getElementById('chatfab-container');
     if (fabContainer) {
       const rect = fabContainer.getBoundingClientRect();
-      // Usa exatamente o mesmo eixo horizontal do container dos candidatos.
-      // Assim a borda externa das duas bolinhas termina na mesma reta.
-      btn.style.right = (window.innerWidth - rect.right) + 'px';
+      // Usa a borda da própria bolinha do candidato, não a largura do container.
+      // Isso garante uma única reta vertical mesmo no celular.
+      const candidato = fabContainer.querySelector('.chatfab-candidato');
+      const eixoDireito = candidato ? candidato.getBoundingClientRect().right : rect.right;
+      btn.style.right = (window.innerWidth - eixoDireito) + 'px';
       const gap = 16;
       const bottomBolinha = (window.innerHeight - rect.top) + gap;
       btn.style.bottom = bottomBolinha + 'px';
@@ -215,7 +217,8 @@
     const chatWin = document.querySelector('.chat-window');
     if (chatWin) {
       const rect = chatWin.getBoundingClientRect();
-      win.style.right = (window.innerWidth - rect.right) + 'px';
+      // Mesmo eixo vertical das bolinhas (reforço do alinhamento)
+      win.style.right = btn.style.right;
       const bottomJanela = (window.innerHeight - rect.top) + 16;
       win.style.bottom = bottomJanela + 'px';
     } else {
