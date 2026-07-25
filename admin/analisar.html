@@ -221,7 +221,7 @@
           if (_obrigatoriosDocs.length) {
             docsCard = '<div class="card card-colapsavel" id="card-documentos">' +
               '<div class="card-header" onclick="toggleCard(\'card-documentos\')">' +
-                '<h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;width:100%">' +
+                '<h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0">' +
                   '<span>📄 Documentos de Contratação <span id="docs-count-header" style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px"></span></span>' +
                   '<button id="btn-baixar-tudo-pdf" class="btn" style="background:var(--dourado);color:var(--cinza-escuro);font-size:13px;padding:8px 14px;margin:0" onclick="event.stopPropagation();docBaixarTudo()">📥 Baixar tudo (PDF único)</button>' +
                 '</h2>' +
