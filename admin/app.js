@@ -1,9 +1,9 @@
 // ============================================
 // ADMIN — Painel de Recrutamento
-// Conecta com backend: https://recrutamento-api.onrender.com
+// Conecta com backend: https://recrutamento-api-novo.onrender.com
 // ============================================
 
-const API = 'https://recrutamento-api.onrender.com';
+const API = 'https://recrutamento-api-novo.onrender.com';
 let token = null;
 let vagaEmEdicao = null;
 
