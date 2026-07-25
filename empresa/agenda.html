@@ -1,32 +1,69 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agenda — Portal Empresa</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda · Portal Empresa</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="empresa.css">
   <style>
-    .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; padding: 6px; border-radius: 8px; width: fit-content; border: 1px solid var(--borda); }
-    .tab { padding: 8px 16px; background: transparent; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--cinza-medio); font-family: inherit; }
-    .tab.ativo { background: var(--vinho); color: white; }
-    .entrev-list { display: flex; flex-direction: column; gap: 12px; }
-    .entrev-card { background: white; border-radius: 8px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 16px; border-left: 4px solid var(--dourado); }
-    .data-box { background: var(--vinho); color: white; padding: 12px 16px; border-radius: 8px; text-align: center; min-width: 80px; }
-    .data-box .dia { font-size: 24px; font-weight: 800; line-height: 1; }
-    .data-box .mes { font-size: 11px; text-transform: uppercase; opacity: 0.9; margin-top: 4px; }
-    .data-box .hora { font-size: 11px; opacity: 0.8; margin-top: 4px; }
-    .entrev-info { flex: 1; }
-    .entrev-info .titulo { font-size: 16px; font-weight: 700; color: var(--preto); margin-bottom: 4px; }
-    .entrev-info .meta { font-size: 13px; color: var(--cinza-medio); }
-    .entrev-info .vaga { font-size: 12px; color: var(--dourado); margin-top: 4px; font-weight: 600; }
-    .entrev-info .obs { font-size: 12px; color: var(--cinza-medio); margin-top: 6px; font-style: italic; }
-    .btn-analisar { display: inline-block; padding: 8px 14px; background: var(--vinho); color: white !important; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; }
-    .btn-analisar:hover { background: var(--vinho-escuro); }
-    .badge-status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 6px; }
-    .badge-agendada { background: #dbeafe; color: #1e40af; }
-    .badge-realizada { background: #dcfce7; color: #166534; }
-    .badge-cancelada { background: #fee2e2; color: #991b1b; }
+    /* === Mesma tipografia do novo dashboard === */
+    body { font-family: 'Inter', sans-serif; }
+    .topo { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 8px; }
+    .topo .left h2 { font-size: 24px; margin-bottom: 4px; }
+    .topo .left .sub { color: #666; font-size: 14px; }
+
+    /* === Filtros horizontais (mesmo estilo admin) === */
+    .filtros { display: flex; gap: 8px; margin: 20px 0 24px; flex-wrap: wrap; }
+    .filtro {
+      padding: 8px 14px; background: white; border: 1px solid var(--borda);
+      border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
+      color: var(--cinza-medio); font-family: inherit;
+    }
+    .filtro.ativo { background: var(--vinho); color: white; border-color: var(--vinho); }
+
+    /* === Cards de entrevista (mesmo estilo admin) === */
+    .lista { display: grid; gap: 16px; }
+    .entrev-card {
+      background: white; padding: 20px; border-radius: 12px;
+      border: 1px solid var(--borda); display: grid;
+      grid-template-columns: auto 1fr auto; gap: 20px; align-items: center;
+    }
+    .data-bloco {
+      background: var(--vinho); color: white; border-radius: 10px;
+      padding: 12px 16px; text-align: center; min-width: 80px;
+    }
+    .data-bloco .dia { font-size: 28px; font-weight: 800; line-height: 1; }
+    .data-bloco .mes { font-size: 12px; opacity: 0.85; text-transform: uppercase; margin-top: 2px; }
+    .data-bloco .hora { font-size: 13px; font-weight: 600; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.2); }
+    .info-cand .nome { font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--preto); }
+    .info-cand .vaga { font-size: 13px; color: var(--cinza-medio); }
+    .info-cand .etapa-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 700; margin-top: 6px;
+      background: var(--dourado); color: var(--vinho); text-transform: uppercase;
+    }
+    .info-cand .etapa-badge.status { color: white; margin-left: 6px; }
+    .info-cand .obs { font-size: 12px; color: var(--cinza-medio); margin-top: 6px; font-style: italic; }
+
+    .acoes { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-acao {
+      background: white; color: var(--vinho); border: 1px solid var(--vinho);
+      padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
+      text-decoration: none; font-family: inherit;
+    }
+    .btn-acao:hover { background: var(--vinho); color: white; }
+    .btn-acao.copiar { border-color: var(--dourado); color: var(--vinho); }
+    .btn-acao.copiar:hover { background: var(--dourado); color: var(--vinho-escuro); }
+    .btn-acao.analisar { border-color: #2E7D32; color: #2E7D32; }
+    .btn-acao.analisar:hover { background: #2E7D32; color: white; }
+
+    .empty { text-align: center; padding: 60px 20px; color: var(--cinza-medio); }
+    .empty .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+    .empty p { font-size: 15px; }
+
+    /* Toast (mesmo do admin) */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
@@ -56,22 +93,29 @@
     </aside>
 
     <main>
-      <div class="page-header">
-        <div>
+      <div class="topo">
+        <div class="left">
           <h2>📅 Agenda de Entrevistas</h2>
-          <div class="sub">Entrevistas marcadas para as vagas da sua empresa</div>
+          <p class="sub">Entrevistas marcadas para as vagas da sua empresa</p>
         </div>
+        <div class="right"></div>
       </div>
 
-      <div class="tabs">
-        <button class="tab ativo" data-periodo="proximos">Próximas</button>
-        <button class="tab" data-periodo="hoje">Hoje</button>
-        <button class="tab" data-periodo="passados">Passadas</button>
-        <button class="tab" data-periodo="todas">Todas</button>
+      <div class="filtros" id="filtros">
+        <button class="filtro ativo" data-periodo="proximos" onclick="filtrarPeriodo('proximos', this)">Próximas</button>
+        <button class="filtro" data-periodo="hoje" onclick="filtrarPeriodo('hoje', this)">Hoje</button>
+        <button class="filtro" data-periodo="semana" onclick="filtrarPeriodo('semana', this)">Esta semana</button>
+        <button class="filtro" data-periodo="7dias" onclick="filtrarPeriodo('7dias', this)">Próx. 7 dias</button>
+        <button class="filtro" data-periodo="30dias" onclick="filtrarPeriodo('30dias', this)">Próx. 30 dias</button>
+        <button class="filtro" data-periodo="atrasadas" onclick="filtrarPeriodo('atrasadas', this)">Atrasadas</button>
+        <button class="filtro" data-periodo="passados" onclick="filtrarPeriodo('passados', this)">Passadas</button>
+        <button class="filtro" data-periodo="realizadas" onclick="filtrarPeriodo('realizadas', this)">Realizadas</button>
+        <button class="filtro" data-periodo="canceladas" onclick="filtrarPeriodo('canceladas', this)">Canceladas</button>
+        <button class="filtro" data-periodo="" onclick="filtrarPeriodo('', this)">Todas</button>
       </div>
 
-      <div id="lista" class="entrev-list">
-        <div class="card"><div class="empty">Carregando...</div></div>
+      <div id="lista" class="lista">
+        <div class="empty"><div class="icon">📅</div><p>Carregando...</p></div>
       </div>
     </main>
   </div>
@@ -88,16 +132,47 @@
 
     let periodoAtual = 'proximos';
 
-    function etapaLabel(e) {
-      // e.vaga_etapas é JSON string (vinda do backend). Pode ser array de {nome:...} ou strings.
-      let etapas = [];
-      if (e.vaga_etapas) {
-        try { etapas = typeof e.vaga_etapas === 'string' ? JSON.parse(e.vaga_etapas) : e.vaga_etapas; } catch (_) {}
-      }
-      const num = Number(e.etapa || e.etapa_atual || 0);
-      const item = etapas[num - 1];
-      const nome = item ? (typeof item === 'string' ? item : item.nome) : null;
-      return nome ? `Etapa ${num} — ${nome}` : `Etapa ${num}`;
+    function etapaLabel(etapa) {
+      const mapa = { 1: 'Inscrição', 2: 'Triagem', 3: 'RH', 4: 'Gestor', 5: 'Proposta', 6: 'Coleta Docs', 7: 'Contratação' };
+      return mapa[etapa] || `Etapa ${etapa}`;
+    }
+
+    function getStatusColor(status) {
+      const cores = {
+        'agendada': '#C9A961',
+        'confirmada': '#10b981',
+        'cancelada': '#6b7280',
+        'realizada': '#3b82f6',
+        'faltou': '#dc2626'
+      };
+      return cores[status] || '#888';
+    }
+
+    function formatarStatus(status) {
+      return {
+        'agendada': 'AGENDADA',
+        'confirmada': 'CONFIRMADA',
+        'cancelada': 'CANCELADA',
+        'realizada': 'REALIZADA',
+        'faltou': 'FALTOU'
+      }[status] || (status || '').toUpperCase();
+    }
+
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+
+    function copiarLink(link) {
+      if (!link) { showToast('Sem link pra copiar'); return; }
+      navigator.clipboard.writeText(link).then(() => {
+        showToast('✅ Link copiado!');
+      }).catch(() => {
+        prompt('Copie o link:', link);
+      });
     }
 
     function sair() {
@@ -108,17 +183,16 @@
       }
     }
 
-    document.querySelectorAll('.tab').forEach(t => {
-      t.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('ativo'));
-        t.classList.add('ativo');
-        periodoAtual = t.dataset.periodo === 'todas' ? '' : t.dataset.periodo;
-        carregar();
-      });
-    });
+    function filtrarPeriodo(periodo, el) {
+      periodoAtual = periodo;
+      document.querySelectorAll('.filtro').forEach(f => f.classList.remove('ativo'));
+      if (el) el.classList.add('ativo');
+      carregar();
+    }
 
     async function carregar() {
       const lista = document.getElementById('lista');
+      lista.innerHTML = '<div class="empty"><div class="icon">📅</div><p>Carregando...</p></div>';
       try {
         const url = API + '/api/empresa/agenda' + (periodoAtual ? '?periodo=' + periodoAtual : '');
         const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
@@ -127,41 +201,50 @@
         const entrevistas = data.entrevistas || [];
 
         if (entrevistas.length === 0) {
-          lista.innerHTML = '<div class="card"><div class="empty">📭 Nenhuma entrevista ' + (periodoAtual === 'proximos' ? 'futura' : periodoAtual === 'hoje' ? 'hoje' : periodoAtual === 'passados' ? 'passada' : '') + '.</div></div>';
+          lista.innerHTML = `
+            <div class="empty">
+              <div class="icon">📭</div>
+              <p>Nenhuma entrevista ${periodoAtual === 'proximos' ? 'futura' : periodoAtual === 'hoje' ? 'hoje' : periodoAtual === 'passados' ? 'passada' : ''}${periodoAtual === '' ? '' : ' encontrada'}.</p>
+            </div>`;
           return;
         }
 
         lista.innerHTML = entrevistas.map(e => {
           const dt = new Date(e.data_hora);
-          const dia = dt.getDate().toString().padStart(2, '0');
+          const dia = String(dt.getDate()).padStart(2, '0');
           const mes = dt.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
           const hora = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-          const statusClass = e.status === 'realizada' ? 'badge-realizada' : e.status === 'cancelada' ? 'badge-cancelada' : 'badge-agendada';
-          const local = e.local || e.link_reuniao || '—';
-          return `<div class="entrev-card">
-            <div class="data-box">
-              <div class="dia">${dia}</div>
-              <div class="mes">${mes}</div>
-              <div class="hora">${hora}</div>
-            </div>
-            <div class="entrev-info">
-              <div class="titulo">${e.candidato_nome}</div>
-              <div class="meta">📍 ${local} ${e.duracao_minutos ? '• ⏱ ' + e.duracao_minutos + 'min' : ''} <span class="badge-status ${statusClass}">${e.status || 'agendada'}</span></div>
-              <div class="vaga">💼 ${e.vaga_titulo} • ${etapaLabel(e)}</div>
-              ${e.observacoes ? '<div class="obs">"' + e.observacoes + '"</div>' : ''}
-            </div>
-            <div class="acoes">
-              <a class="btn-analisar" href="analisar.html?id=${e.candidatura_id}">Ver candidato</a>
-            </div>
-          </div>`;
+          const etapaNome = etapaLabel(e.etapa).toUpperCase();
+          return `
+            <div class="entrev-card">
+              <div class="data-bloco">
+                <div class="dia">${dia}</div>
+                <div class="mes">${mes}</div>
+                <div class="hora">${hora}</div>
+              </div>
+              <div class="info-cand">
+                <div class="nome">${e.candidato_nome || 'Candidato'}</div>
+                <div class="vaga">${e.vaga_titulo || ''}${e.vaga_empresa ? ' — ' + e.vaga_empresa : ''}</div>
+                <span class="etapa-badge">Entrevista ${etapaNome}</span>
+                <span class="etapa-badge status" style="background:${getStatusColor(e.status)};">${formatarStatus(e.status)}</span>
+                ${e.observacoes ? '<div class="obs">"' + e.observacoes + '"</div>' : ''}
+                ${e.duracao_minutos ? '<div class="obs" style="margin-top:4px;">⏱ ' + e.duracao_minutos + ' min</div>' : ''}
+                ${e.link_reuniao ? '<div class="obs">🔗 ' + e.link_reuniao + '</div>' : ''}
+              </div>
+              <div class="acoes">
+                ${e.link_reuniao ? `<button class="btn-acao copiar" onclick="copiarLink('${e.link_reuniao}')" title="Copiar link">📋 Link</button>` : ''}
+                ${e.link_reuniao ? `<a class="btn-acao" href="${e.link_reuniao}" target="_blank" title="Abrir sala">▶️ Abrir</a>` : ''}
+                <a class="btn-acao analisar" href="analisar.html?id=${e.candidatura_id}" title="Ver candidato">👤 Ver candidato</a>
+              </div>
+            </div>`;
         }).join('');
       } catch (e) {
-        lista.innerHTML = '<div class="card"><div class="empty">Erro: ' + e.message + '</div></div>';
+        lista.innerHTML = '<div class="empty"><div class="icon">⚠️</div><p>Erro: ' + e.message + '</p></div>';
       }
     }
 
     carregar();
   </script>
-<script src="chat-rh-flutuante.js?v=20260722a"></script>
+<script src="chat-rh-flutuante.js?v=20260725a"></script>
 </body>
 </html>
