@@ -1,8 +1,8 @@
 // ============================================
 // CHAT FLUTUANTE - ADMIN x EMPRESA (jul/2026)
-// Bolinha AZUL (#1A4D7A), empilhada ACIMA da bolinha do candidato
+// Bolinha AZUL (#1A4D7A), mesmo tamanho/estilo do candidato,
+// posicionada ACIMA da lista de candidatos (alinhada à direita)
 // Chat contextual: SÓ aparece no analisar.html? id=X
-// (não abre se não tiver candidatura_id na URL)
 // ============================================
 
 (function() {
@@ -28,25 +28,30 @@
 
   console.log('[chatfab-empresa] init', { idUrl, idUrlInt });
 
-  // === Estilos injetados (mesmo padrão do candidato, só mudando cor) ===
+  // === Estilos injetados ===
+  // MESMO padrão visual do .chatfab-candidato, só mudando cor (azul em vez de dourado)
+  // e usando position: fixed pra controlar empilhamento acima da lista
   const style = document.createElement('style');
   style.textContent = `
-    /* Bolinha do chat empresa */
+    /* Bolinha do chat empresa - IGUAL à chatfab-candidato (56x56, border 3px branco) */
     .chatfab-empresa-btn {
-      position: fixed; bottom: 104px; right: 24px; z-index: 9999;
-      width: 60px; height: 60px; border-radius: 50%;
+      position: fixed; right: 20px; z-index: 9999;
+      width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, #1A4D7A 0%, #2E6BA8 100%);
-      color: white; border: none; box-shadow: 0 6px 20px rgba(26,77,122,0.4);
-      cursor: pointer; font-size: 26px;
+      border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer; position: relative;
       display: flex; align-items: center; justify-content: center;
-      transition: transform 0.2s;
+      transition: transform 0.15s;
+      color: white; font-size: 24px;
     }
     .chatfab-empresa-btn:hover { transform: scale(1.08); }
     .chatfab-empresa-btn.aberta {
-      background: linear-gradient(135deg, #15416A 0%, #1A4D7A 100%);
-      box-shadow: 0 0 0 3px rgba(26,77,122,0.3), 0 6px 20px rgba(26,77,122,0.4);
+      border-color: #1A4D7A;
+      box-shadow: 0 0 0 3px rgba(26,77,122,0.4), 0 4px 12px rgba(0,0,0,0.3);
     }
-    .chatfab-empresa-badge {
+
+    /* Badge (mesma posição da .chatfab-candidato .chatfab-badge) */
+    .chatfab-empresa-btn .chatfab-badge {
       position: absolute; top: -4px; right: -4px;
       background: #dc2626; color: white; border-radius: 999px;
       min-width: 22px; height: 22px; padding: 0 6px;
@@ -54,21 +59,12 @@
       font-size: 12px; font-weight: 700;
       border: 2px solid white;
     }
-    .chatfab-empresa-tooltip {
-      position: absolute; bottom: 70px; right: 0;
-      background: #1A4D7A; color: white; font-size: 11px;
-      padding: 4px 10px; border-radius: 6px; white-space: nowrap;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-    .chatfab-empresa-tooltip::after {
-      content: ''; position: absolute; top: 100%; right: 18px;
-      border: 6px solid transparent; border-top-color: #1A4D7A;
-    }
 
-    /* Janela do chat empresa (mesmo layout, cor azul) */
+    /* Janela do chat empresa - mesma largura/visual, cor azul */
     .chatfab-empresa-window {
-      position: fixed; bottom: 180px; right: 24px; z-index: 9998;
-      width: 380px; max-width: calc(100vw - 32px); height: 480px; max-height: calc(100vh - 200px);
+      position: fixed; right: 20px; z-index: 9998;
+      width: 380px; max-width: calc(100vw - 32px); height: 540px;
+      max-height: calc(100vh - 130px);
       background: white; border-radius: 16px;
       box-shadow: 0 12px 40px rgba(26,77,122,0.25);
       display: none; flex-direction: column; overflow: hidden;
@@ -110,9 +106,7 @@
       font-size: 11px; font-weight: 700; color: white;
     }
     .chatfab-empresa-msg-av.empresa { background: #1A4D7A; }
-    .chatfab-empresa-msg-av.rh {
-      background: #6B0F1A;
-    }
+    .chatfab-empresa-msg-av.rh { background: #6B0F1A; }
     .chatfab-empresa-msg-balao { max-width: 70%; margin: 0 8px; }
     .chatfab-empresa-msg-conteudo {
       padding: 8px 12px; border-radius: 14px; font-size: 13px;
@@ -153,9 +147,10 @@
     .chatfab-empresa-send:hover:not(:disabled) { background: #15416A; }
     .chatfab-empresa-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    /* Mobile */
     @media (max-width: 480px) {
-      .chatfab-empresa-window { right: 8px; left: 8px; width: auto; bottom: 170px; }
-      .chatfab-empresa-btn { right: 16px; bottom: 96px; }
+      .chatfab-empresa-window { right: 8px; left: 8px; width: auto; }
+      .chatfab-empresa-btn { right: 20px; }
     }
   `;
   document.head.appendChild(style);
@@ -198,6 +193,47 @@
     fechar: fecharJanela
   };
 
+  // === POSICIONAMENTO DINÂMICO ===
+  // A bolinha azul precisa ficar ACIMA da lista de candidatos (#chatfab-container)
+  // e a janela azul ACIMA da janela do candidato (.chat-window)
+  // Estratégia: mede a posição real via getBoundingClientRect a cada redraw
+
+  function posicionar() {
+    // Bolinha azul: acima da lista de candidatos
+    const fabContainer = document.getElementById('chatfab-container');
+    if (fabContainer) {
+      const rect = fabContainer.getBoundingClientRect();
+      // Topo da lista de candidatos em coords de viewport
+      // bottom que precisamos = (altura viewport - rect.top) + gap
+      const gap = 12;
+      const bottomBolinha = (window.innerHeight - rect.top) + gap;
+      btn.style.bottom = bottomBolinha + 'px';
+    } else {
+      // Sem lista de candidato → posiciona sozinha acima do candidato principal
+      btn.style.bottom = '88px';
+    }
+
+    // Janela azul: acima da janela do candidato (se ela existir e estiver aberta)
+    const chatWin = document.querySelector('.chat-window');
+    if (chatWin) {
+      const rect = chatWin.getBoundingClientRect();
+      const bottomJanela = (window.innerHeight - rect.top) + 12;
+      win.style.bottom = bottomJanela + 'px';
+    } else {
+      // Sem janela candidata → fica acima da bolinha azul
+      const btnRect = btn.getBoundingClientRect();
+      const bottomJanela = (window.innerHeight - btnRect.top) + 12;
+      win.style.bottom = bottomJanela + 'px';
+    }
+  }
+
+  // Posiciona inicial e em resize
+  posicionar();
+  window.addEventListener('resize', posicionar);
+
+  // Re-medir a cada 2s (caso a lista de candidatos mude de altura ao longo do uso)
+  setInterval(posicionar, 2000);
+
   // === Lógica ===
 
   function abrir() {
@@ -206,8 +242,8 @@
     conversaAtiva = idUrlInt;
     btn.classList.add('aberta');
     win.classList.add('aberto');
-    // Atualiza header com nome da empresa se tiver
     carregarMensagens();
+    posicionar();
   }
 
   function fecharJanela() {
@@ -226,7 +262,6 @@
         headers: { 'Authorization': 'Bearer ' + token }
       });
       if (!r.ok) {
-        // Candidatura sem empresa cadastrada → esconde tudo
         btn.style.display = 'none';
         return;
       }
@@ -234,7 +269,6 @@
       const msgs = j.mensagens || [];
       mensagensCache[idUrlInt] = msgs;
 
-      // Tenta pegar o nome da empresa (vai estar em alguma msg)
       const primeiraComNome = msgs.find(m => m.remetente_nome && m.remetente_tipo === 'empresa');
       if (primeiraComNome) {
         const sub = document.getElementById('chatfab-empresa-sub');
@@ -263,8 +297,6 @@
     }
     input.style.display = 'flex';
     area.innerHTML = msgs.map(m => {
-      // No chat empresa: msgs do RH (admin) ficam à DIREITA (.minha),
-      // msgs da empresa ficam à ESQUERDA
       const minha = m.remetente_tipo === 'rh';
       const tipo = m.remetente_tipo === 'rh' ? 'rh' : 'empresa';
       const iniciais = (m.remetente_nome || (tipo === 'rh' ? 'RH' : 'Empresa'))
@@ -317,30 +349,28 @@
   function atualizarBadge() {
     const msgs = mensagensCache[idUrlInt] || [];
     if (msgs.length === 0) {
-      const b = btn.querySelector('.chatfab-empresa-badge');
+      const b = btn.querySelector('.chatfab-badge');
       if (b) b.remove();
       return;
     }
     const ultima = msgs[msgs.length - 1];
-    // Badge só conta se: chat fechado E msg é da empresa (não do RH)
     let naoLidas = 0;
     if (ultima.remetente_tipo === 'empresa' && !aberto) {
       naoLidas = msgs.length - (ultimaMensagemId[idUrlInt] || 0);
     }
-    let badge = btn.querySelector('.chatfab-empresa-badge');
+    let badge = btn.querySelector('.chatfab-badge');
     if (naoLidas > 0) {
       if (badge) {
         badge.textContent = naoLidas > 9 ? '9+' : naoLidas;
       } else {
         badge = document.createElement('span');
-        badge.className = 'chatfab-empresa-badge';
+        badge.className = 'chatfab-badge';
         badge.textContent = naoLidas > 9 ? '9+' : naoLidas;
         btn.appendChild(badge);
       }
     } else {
       if (badge) badge.remove();
     }
-    // Marca como lida se tá aberto
     if (aberto) ultimaMensagemId[idUrlInt] = msgs.length;
   }
 
@@ -360,13 +390,11 @@
     }
   });
 
-  // Auto-open no analisar.html? id=X (igual ao chat candidato)
+  // Carrega e posiciona após dados prontos
   carregarMensagens().then(() => {
-    // Se tem candidatura carregada E temos ?id= → abre direto após 1s
-    // pra deixar o admin ver as duas janelas
+    posicionar();
     setTimeout(() => {
       const msgs = mensagensCache[idUrlInt] || [];
-      // Só auto-abre se tiver mensagens (senão o admin abre quando quiser)
       if (msgs.length > 0) abrir();
     }, 800);
   });
