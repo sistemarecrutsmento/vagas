@@ -74,7 +74,7 @@
       bottom: 170px !important;
       width: 380px;
       max-width: calc(100vw - 40px);
-      height: 500px;
+      height: 400px;
       max-height: calc(100vh - 240px);
       background: white;
       border-radius: 16px;
