@@ -118,8 +118,12 @@
     .doc-btn { padding: 6px 12px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
     .doc-btn-aprovar { background: #16A34A; color: white; }
     .doc-btn-aprovar:hover { background: #15803D; }
+    .doc-btn-baixar { background: #2563EB; color: white; }
+    .doc-btn-baixar:hover { background: #1D4ED8; }
     .doc-btn-reprovar { background: #DC2626; color: white; }
     .doc-btn-reprovar:hover { background: #B91C1C; }
+    .doc-btn-retornar { background: #EA580C; color: white; }
+    .doc-btn-retornar:hover { background: #C2410C; }
     .doc-btn-reverter { background: var(--cinza-medio); color: white; }
     .doc-btn-reverter:hover { background: var(--cinza-escuro); }
   </style>
@@ -212,21 +216,16 @@
         try {
           await carregarDocumentos(id);
           if (_obrigatoriosDocs.length) {
-            docsCard = '<div class="card card-colapsavel" id="card-documentos">' +
-              '<div class="card-header" onclick="toggleCard(\'card-documentos\')">' +
-                '<h2>📄 Documentos de Contratação <span id="docs-count-header" style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px"></span></h2>' +
-                '<span class="card-toggle">' +
-                  '<svg class="chevron-baixo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
-                  '<svg class="chevron-cima" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 15 12 9 18 15"></polyline></svg>' +
-                '</span>' +
-              '</div>' +
-              '<div class="card-body">' +
-                '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Use <strong>"Retornar para candidato"</strong> em cada item para pedir reenvio com uma mensagem personalizada. Quando <strong>todos</strong> estiverem aprovados, clique no botão abaixo para aprovar tudo e avançar a etapa de uma vez.</p>' +
-                '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
-                '<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--cinza)">' +
-                  '<button id="btn-aprovar-tudo" class="btn" style="background:#16A34A;color:white;font-size:15px;padding:14px 20px;width:100%" onclick="aprovarTodosEAvancar()">✅ Aprovar tudo e avançar etapa</button>' +
-                  '<p style="font-size:12px;color:var(--cinza-medio);margin-top:8px;text-align:center">Só fica disponível quando todos os documentos estiverem aprovados.</p>' +
-                '</div>' +
+            docsCard = '<div class="card" id="card-documentos">' +
+              '<h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' +
+                '<span>📄 Documentos de Contratação <span id="docs-count-header" style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px"></span></span>' +
+                '<button id="btn-baixar-tudo-pdf" class="btn" style="background:var(--dourado);color:var(--cinza-escuro);font-size:13px;padding:8px 14px;margin:0" onclick="docBaixarTudo()">📥 Baixar tudo (PDF único)</button>' +
+              '</h2>' +
+              '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Use os botões em cada documento para <strong>aprovar</strong>, <strong>retornar</strong> (com mensagem ao candidato) ou <strong>baixar</strong> individualmente. Quando <strong>todos</strong> estiverem aprovados, clique no botão abaixo para avançar a etapa de uma vez.</p>' +
+              '<div class="doc-lista-wrapper" id="doc-lista-wrapper">' + renderizarDocumentos() + '</div>' +
+              '<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--cinza)">' +
+                '<button id="btn-aprovar-tudo" class="btn" style="background:#16A34A;color:white;font-size:15px;padding:14px 20px;width:100%" onclick="aprovarTodosEAvancar()">✅ Aprovar tudo e avançar etapa</button>' +
+                '<p style="font-size:12px;color:var(--cinza-medio);margin-top:8px;text-align:center">Só fica disponível quando todos os documentos estiverem aprovados.</p>' +
               '</div>' +
             '</div>';
           }
@@ -559,14 +558,13 @@
         acoesHtml = '<div class="acoes">' +
           '<button class="btn btn-primary" ' + _botaoAvancarDisabled + ' ' + _botaoAvancarOnclick + ' ' + _avancarTitle + '>' + labelAvancar + '</button>' +
           '<button class="btn btn-reprovar" onclick="acao(' + c.id + ',\'reprovar\')">✖ Reprovar</button>' +
-          (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank" rel="noopener">📄 Ver documentos anexados</a>' : '') +
           (ehProposta ? '<button class="btn" style="background:#7C3AED;color:white" onclick="abrirModalProposta(' + c.id + ')">📨 ' + (c.proposta_enviada_em ? 'Reenviar / Editar Proposta' : 'Enviar Proposta') + '</button>' : '') +
           (ehProposta && c.proposta_enviada_em ? '<div class="aviso-bloq" style="background:#EDE9FE;color:#5B21B6;border-left:4px solid #7C3AED;margin-top:8px;text-align:left">📨 <strong>Proposta enviada</strong>' + (c.proposta_aceita_em ? ' — ✅ aceita pelo candidato' : c.proposta_recusada_em ? ' — ❌ recusada' : ' — aguardando aceite do candidato') + '</div>' : '') +
           _hintColeta +
         '</div>';
       } else if (status === 'reprovado' || status === 'rejeitado') {
         acoesHtml = '<div class="acoes">' +
-          (_temDocs ? '<a class="btn" style="background:var(--dourado);color:var(--cinza-escuro);text-decoration:none" href="validar-documentos.html?id=' + c.id + '" target="_blank" rel="noopener">📄 Ver documentos anexados</a>' : '') +
+          // (Removido link "Ver documentos anexados" — tudo agora é inline no card-documentos)
           '<button class="btn btn-reabrir" onclick="acao(' + c.id + ',\'reabrir\')">↻ Reabrir</button>' +
         '</div>';
       } else if (status === 'contratado') {
@@ -927,13 +925,23 @@
         else if (d.status === 'reprovado') badge = '<span class="doc-badge doc-badge-reprovado">✗ reprovado</span>';
         else badge = '<span class="doc-badge doc-badge-pendente">⏳ pendente</span>';
 
-        // Botões de ação individuais — apenas "Retornar ao candidato" (sem aprovar/reprovar individual)
+        // Botões individuais por documento:
+        // 📥 Baixar (apenas p/ arquivos enviados)
+        // ✅ Aprovar (se ainda não aprovado)
+        // 📨 Retornar (com mensagem pro candidato)
+        // ↩️ Reverter (se aprovado -> volta pra pendente)
         let acoesHtml = '';
-        if (d && d.status !== 'aprovado') {
+        if (d) {
           acoesHtml = '<div class="doc-acoes">';
-          acoesHtml += '<button class="doc-btn doc-btn-retornar" onclick="retornarDocumento(' + d.id + ')">📨 Retornar para candidato</button>';
-          if (d.status !== 'pendente') {
-            acoesHtml += '<button class="doc-btn doc-btn-reverter" onclick="revisarDocumento(' + d.id + ',\'reverter\')">↻ Reverter para pendente</button>';
+          if (isArquivo && d.arquivo_url) {
+            acoesHtml += '<button class="doc-btn doc-btn-baixar" onclick="docBaixarUm(' + d.id + ')">📥 Baixar</button>';
+          }
+          if (d.status !== 'aprovado') {
+            acoesHtml += '<button class="doc-btn doc-btn-aprovar" onclick="docRevisar(' + d.id + ',\'aprovar\')">✅ Aprovar</button>';
+            acoesHtml += '<button class="doc-btn doc-btn-retornar" onclick="docRetornar(' + d.id + ')">📨 Retornar</button>';
+          }
+          if (d.status === 'aprovado') {
+            acoesHtml += '<button class="doc-btn doc-btn-reverter" onclick="docRevisar(' + d.id + ',\'reverter\')">↩️ Reverter</button>';
           }
           acoesHtml += '</div>';
         }
@@ -969,6 +977,270 @@
       setTimeout(() => atualizarBotaoAprovarTudo(), 0);
 
       return html + resumo;
+    }
+
+    // === Ações individuais por documento (consolidadas da antiga validar-documentos.html) ===
+
+    async function docRevisar(docId, acao) {
+      // acao = 'aprovar' ou 'reverter'
+      if (acao === 'aprovar' && !confirm('Aprovar este documento?')) return;
+      if (acao === 'reverter' && !confirm('Reverter este documento para status pendente?')) return;
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/documento/' + docId + '/revisar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ acao })
+        });
+        const data = await r.json();
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao revisar')); return; }
+        const idx = _docsCache.findIndex(d => d.id === docId);
+        if (idx >= 0) {
+          _docsCache[idx] = {
+            ..._docsCache[idx],
+            status: data.documento ? data.documento.status : (acao === 'aprovar' ? 'aprovado' : 'pendente'),
+            justificativa_admin: null,
+            revisado_em: new Date().toISOString()
+          };
+        }
+        // Re-renderiza
+        const card = document.getElementById('card-documentos');
+        if (card) {
+          card.querySelector('.doc-lista-wrapper').innerHTML = renderizarDocumentos();
+          atualizarDocsCount();
+          atualizarBotaoAprovarTudo();
+        }
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
+    }
+
+    async function docRetornar(docId) {
+      const d = _docsCache.find(x => x.id === docId);
+      const label = d ? (d.tipo || 'este documento') : 'este documento';
+      const msg = prompt(
+        'Retornar "' + label + '" para o candidato?\n\n' +
+        'Escreva uma mensagem explicando o que precisa ser corrigido/enviado:\n(mínimo 10 caracteres)',
+        d && d.justificativa_admin ? d.justificativa_admin : ''
+      );
+      if (msg === null) return;
+      if (msg.trim().length < 10) { alert('Mensagem muito curta (mínimo 10 caracteres).'); return; }
+      try {
+        const token = localStorage.getItem('admin_token');
+        const r = await fetch(API + '/api/admin/documento/' + docId + '/revisar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ acao: 'retornar', justificativa: msg.trim() })
+        });
+        const data = await r.json();
+        if (!r.ok) { alert('Erro: ' + (data.erro || 'Falha ao retornar')); return; }
+        const idx = _docsCache.findIndex(x => x.id === docId);
+        if (idx >= 0) {
+          _docsCache[idx] = {
+            ..._docsCache[idx],
+            status: 'retornado',
+            justificativa_admin: msg.trim(),
+            revisado_em: new Date().toISOString()
+          };
+        }
+        const card = document.getElementById('card-documentos');
+        if (card) {
+          card.querySelector('.doc-lista-wrapper').innerHTML = renderizarDocumentos();
+          atualizarDocsCount();
+          atualizarBotaoAprovarTudo();
+        }
+        alert('Documento retornado. O candidato será notificado e poderá reenviar.');
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
+    }
+
+    async function docBaixarUm(docId) {
+      const d = _docsCache.find(x => x.id === docId);
+      if (!d || !d.arquivo_url) { alert('Arquivo não disponível.'); return; }
+      try {
+        const r = await fetch(d.arquivo_url);
+        if (!r.ok) throw new Error('Falha ao baixar');
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = d.arquivo_nome || ('documento_' + docId);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } catch (e) {
+        // Fallback: abre em nova aba
+        window.open(d.arquivo_url, '_blank');
+      }
+    }
+
+    // === BAIXAR TUDO NUM ÚNICO PDF (pdf-lib, 100% client-side) ===
+    let _docPDFLibLoading = null;
+    async function loadPDFLib() {
+      if (window.PDFLib) return window.PDFLib;
+      if (_docPDFLibLoading) return _docPDFLibLoading;
+      _docPDFLibLoading = new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+        s.onload = () => res(window.PDFLib);
+        s.onerror = rej;
+        document.head.appendChild(s);
+      });
+      return _docPDFLibLoading;
+    }
+
+    async function docBaixarTudo() {
+      const arquivos = _docsCache.filter(d => d.categoria === 'arquivo' && d.arquivo_url);
+      if (!arquivos.length) { alert('Nenhum arquivo pra baixar.'); return; }
+      const btn = document.getElementById('btn-baixar-tudo-pdf');
+      const origTxt = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando PDF...'; }
+
+      try {
+        const { PDFDocument, StandardFonts, rgb } = await loadPDFLib();
+        const out = await PDFDocument.create();
+        const fontBold = await out.embedFont(StandardFonts.HelveticaBold);
+        const fontNorm = await out.embedFont(StandardFonts.Helvetica);
+        const fontItalic = await out.embedFont(StandardFonts.HelveticaOblique);
+        const A4 = { w: 595.28, h: 841.89 };
+        const margin = 40;
+
+        const Vinho = rgb(0.42, 0.06, 0.10);
+        const Texto = rgb(0.10, 0.10, 0.10);
+        const Cinza = rgb(0.45, 0.45, 0.45);
+        const CinzaClaro = rgb(0.92, 0.92, 0.92);
+        const Verde = rgb(0.09, 0.64, 0.29);
+        const Vermelho = rgb(0.86, 0.16, 0.16);
+        const Branco = rgb(1, 1, 1);
+
+        const txt = (str, maxW, font, size) => {
+          const words = String(str || '').split(/\s+/);
+          const linhas = []; let linha = '';
+          for (const w of words) {
+            const test = linha ? linha + ' ' + w : w;
+            if (font.widthOfTextAtSize(test, size) > maxW && linha) { linhas.push(linha); linha = w; }
+            else linha = test;
+          }
+          if (linha) linhas.push(linha);
+          return linhas;
+        };
+        const safe = (s) => String(s || '').replace(/[\u0000-\u001F\u007F-\u00A0]/g, ' ');
+
+        const cand = window.currentCandidatura || {};
+        const candNome = cand.nome || 'Candidato';
+        const candDoc = cand.cpf || '';
+        const candVaga = cand.titulo || 'Vaga';
+
+        // === Capa ===
+        const capa = out.addPage([A4.w, A4.h]);
+        capa.drawRectangle({ x: 0, y: A4.h - 120, width: A4.w, height: 120, color: Vinho });
+        capa.drawText('Documentos de Contratação', { x: margin, y: A4.h - 60, size: 22, font: fontBold, color: Branco });
+        capa.drawText(safe(candNome), { x: margin, y: A4.h - 95, size: 14, font: fontNorm, color: Branco });
+        let yy = A4.h - 160;
+        const labelInfo = [
+          ['Vaga', candVaga],
+          ['CPF', candDoc],
+          ['Gerado em', new Date().toLocaleString('pt-BR')]
+        ];
+        for (const [k, v] of labelInfo) {
+          capa.drawText(k + ':', { x: margin, y: yy, size: 11, font: fontBold, color: Vinho });
+          capa.drawText(safe(v), { x: margin + 100, y: yy, size: 11, font: fontNorm, color: Texto });
+          yy -= 20;
+        }
+        const totalKB = arquivos.reduce((acc, d) => acc + (d.arquivo_tamanho || 0), 0);
+        capa.drawText('Total de arquivos: ' + arquivos.length + ' (' + (totalKB / 1024).toFixed(1) + ' KB)',
+          { x: margin, y: yy, size: 10, font: fontItalic, color: Cinza });
+
+        // === Uma página por documento ===
+        for (let i = 0; i < arquivos.length; i++) {
+          const doc = arquivos[i];
+          const label = (_obrigatoriosDocs.find(o => o.tipo === doc.tipo) || {}).label || doc.tipo;
+          if (btn) btn.textContent = '⏳ Processando ' + (i + 1) + '/' + arquivos.length + '...';
+
+          try {
+            const r = await fetch(doc.arquivo_url);
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const bytes = await r.arrayBuffer();
+            let img = null;
+            const isPdf = (doc.arquivo_nome || '').toLowerCase().endsWith('.pdf') || (doc.arquivo_url || '').toLowerCase().indexOf('.pdf') > -1;
+            try {
+              if (isPdf) {
+                const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
+                const pages = await out.copyPages(src, src.getPageIndices());
+                pages.forEach(p => out.addPage(p));
+              } else {
+                img = await out.embedJpg(bytes).catch(async () => await out.embedPng(bytes));
+                if (!img) throw new Error('formato não suportado');
+                const pagina = out.addPage([A4.w, A4.h]);
+                pagina.drawRectangle({ x: 0, y: A4.h - 50, width: A4.w, height: 50, color: Vinho });
+                pagina.drawText((i + 1) + '. ' + safe(label), { x: margin, y: A4.h - 30, size: 13, font: fontBold, color: Branco });
+                const maxW = A4.w - margin * 2, maxH = A4.h - 100;
+                const ratio = Math.min(maxW / img.width, maxH / img.height);
+                const w = img.width * ratio, h = img.height * ratio;
+                const x = (A4.w - w) / 2;
+                const yImg = (A4.h - 50 - h) / 2;
+                pagina.drawImage(img, { x, y: yImg, width: w, height: h });
+              }
+            } catch (innerErr) {
+              const errPage = out.addPage([A4.w, A4.h]);
+              errPage.drawText('Atenção: Não foi possível incorporar:', { x: margin, y: A4.h - 60, size: 12, font: fontBold, color: Vermelho });
+              errPage.drawText(safe(label) + ' (' + safe(doc.arquivo_nome || doc.tipo) + ')',
+                { x: margin, y: A4.h - 80, size: 10, font: fontNorm, color: Texto });
+              errPage.drawText('Link original:', { x: margin, y: A4.h - 110, size: 9, font: fontBold, color: Cinza });
+              const linhas = txt(safe(doc.arquivo_url), A4.w - margin * 2, fontNorm, 8);
+              linhas.forEach((linha, idx) => {
+                errPage.drawText(linha, { x: margin, y: A4.h - 125 - idx * 10, size: 8, font: fontNorm, color: Cinza });
+              });
+            }
+          } catch (e) {
+            console.error('Erro ao processar doc', doc.tipo, e);
+          }
+        }
+
+        // === Sumário no final ===
+        const sumario = out.addPage([A4.w, A4.h]);
+        sumario.drawRectangle({ x: 0, y: A4.h - 50, width: A4.w, height: 50, color: Vinho });
+        sumario.drawText('Sumário', { x: margin, y: A4.h - 30, size: 14, font: fontBold, color: Branco });
+        let sy = A4.h - 90;
+        arquivos.forEach((a, i) => {
+          if (sy < margin + 40) return;
+          const label = (_obrigatoriosDocs.find(o => o.tipo === a.tipo) || {}).label || a.tipo;
+          const statusTxt = a.status === 'aprovado' ? '✓ aprovado' : a.status === 'retornado' ? '📨 a reenviar' : a.status === 'reprovado' ? '✗ reprovado' : '⏳ pendente';
+          const cor = a.status === 'aprovado' ? Verde : a.status === 'reprovado' ? Vermelho : Cinza;
+          sumario.drawText((i + 1) + '.', { x: margin, y: sy, size: 11, font: fontBold, color: Texto });
+          sumario.drawText(safe(label), { x: margin + 25, y: sy, size: 11, font: fontNorm, color: Texto });
+          sumario.drawText(statusTxt, { x: margin + 350, y: sy, size: 10, font: fontBold, color: cor });
+          sy -= 18;
+          if (a.justificativa_admin) {
+            const linhas = txt('"' + safe(a.justificativa_admin) + '"', A4.w - margin * 2, fontItalic, 9);
+            linhas.slice(0, 2).forEach((l, idx) => {
+              sumario.drawText(l, { x: margin + 25, y: sy - idx * 11, size: 9, font: fontItalic, color: Cinza });
+            });
+            sy -= 24;
+          } else {
+            sy -= 4;
+          }
+        });
+
+        const pdfBytes = await out.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const nomeArq = 'documentos_' + (candNome || 'candidato').replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf';
+        a.download = nomeArq;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        if (btn) { btn.disabled = false; btn.textContent = origTxt || '📥 Baixar tudo (PDF)'; }
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao gerar PDF: ' + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = origTxt || '📥 Baixar tudo (PDF)'; }
+      }
     }
 
     function atualizarBotaoAprovarTudo() {
