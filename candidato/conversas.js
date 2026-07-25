@@ -17,7 +17,7 @@
 (function() {
   'use strict';
 
-  const API = 'https://recrutamento-api.onrender.com';
+  const API = 'https://recrutamento-api-novo.onrender.com';
   const token = localStorage.getItem('candidato_token');
   if (!token) {
     window.location.href = 'index.html';
