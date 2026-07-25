@@ -1,10 +1,10 @@
 // ============================================
 // VAGAS.IO — Front-end do Candidato
-// Conecta com backend: https://recrutamento-api.onrender.com
+// Conecta com backend: https://recrutamento-api-novo.onrender.com
 // Fluxo: Cadastro/Login com e-mail + senha (sem código de verificação)
 // ============================================
 
-const API = 'https://recrutamento-api.onrender.com';
+const API = 'https://recrutamento-api-novo.onrender.com';
 let categoriaAtiva = '';
 let vagaSelecionada = null;
 let emailLogado = null;
@@ -945,7 +945,8 @@ async function carregarCands() {
         </div>`;
       }).join('');
       // --- Barra de progresso (% concluído) ---
-      // etapaAtualBanco = quantas etapas já passaram (0 = nenhuma, total = tudo concluído)
+      // etapaAtualBanco = índice 0-based da etapa em andamento (0 = Inscrição, acabou de se candidatar)
+      // Concluídas = etapaAtualBanco (etapas 0..etapaAtualBanco-1 já passaram)
       const etapasConcluidas = Math.min(etapaAtualBanco, totalEtapas);
       const pct = totalEtapas > 0 ? Math.round((etapasConcluidas / totalEtapas) * 100) : 0;
       // --- Descrição da etapa atual (destaque) ---
