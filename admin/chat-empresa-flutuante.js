@@ -29,7 +29,8 @@
     .chatfab-empresa-btn {
       position: fixed !important;
       right: 20px !important;
-      bottom: 20px !important;
+      bottom: 88px !important;
+      z-index: 10000 !important;
       width: 56px !important;
       height: 56px !important;
       border-radius: 50%;
@@ -72,6 +73,7 @@
       position: fixed !important;
       right: 20px !important;
       bottom: 160px !important;
+      z-index: 10000 !important;
       width: 380px;
       max-width: calc(100vw - 40px);
       height: 420px;
