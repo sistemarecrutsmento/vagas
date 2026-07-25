@@ -29,7 +29,7 @@
     .chatfab-empresa-btn {
       position: fixed !important;
       right: 20px !important;
-      bottom: 88px !important;
+      bottom: 20px !important;
       width: 56px !important;
       height: 56px !important;
       border-radius: 50%;
@@ -71,11 +71,11 @@
     .chatfab-empresa-window {
       position: fixed !important;
       right: 20px !important;
-      bottom: 180px !important;
+      bottom: 160px !important;
       width: 380px;
       max-width: calc(100vw - 40px);
       height: 420px;
-      max-height: calc(100vh - 240px);
+      max-height: calc(100vh - 200px);
       background: white;
       border-radius: 16px;
       box-shadow: 0 12px 40px rgba(0,0,0,.3);
@@ -200,11 +200,18 @@
 
     @media (max-width: 480px) {
       .chatfab-empresa-window {
-        right: 8px !important;
-        left: 8px;
-        width: auto;
+        right: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
       }
-      .chatfab-empresa-btn { right: 16px !important; }
+      .chatfab-empresa-btn { right: 16px !important; bottom: 88px !important; }
+      .chatfab-empresa-window .chatfab-empresa-header { border-radius: 0 !important; }
     }
   `;
   document.head.appendChild(style);
