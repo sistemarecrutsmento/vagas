@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Teste chat empresa azul</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; }
+  pre { background: #f0f0f0; padding: 10px; border-radius: 4px; }
+</style>
+</head>
+<body>
+  <h1>Teste isolado do chat-empresa-flutuante.js</h1>
+  <p>Vai abrir o ID da candidatura: <strong id="cand-id">—</strong></p>
+  <pre id="log"></pre>
+
+  <script>
+    // Pega id da URL
+    const url = new URLSearchParams(location.search);
+    const id = url.get('id') || 26;
+    document.getElementById('cand-id').textContent = id;
+
+    // Simula login (só pra ter localStorage com token)
+    const TOKEN = 'TEST_TOKEN_FAKE';
+    localStorage.setItem('admin_token', TOKEN);
+
+    const log = document.getElementById('log');
+    const print = (msg) => {
+      log.textContent += msg + '\n';
+      console.log(msg);
+    };
+
+    // Monitora criação de elementos
+    const observer = new MutationObserver((muts) => {
+      for (const m of muts) {
+        for (const node of m.addedNodes) {
+          if (node.id === 'chatfab-empresa-btn') {
+            print('🟢 Bolinha azul criada: ' + node.outerHTML.substring(0, 200));
+            print('   - tem onclick? ' + (typeof node.onclick));
+            print('   - classes: ' + node.className);
+            print('   - parent: ' + node.parentElement.tagName);
+            // Tenta click programaticamente
+            setTimeout(() => {
+              print('⏰ disparando click() programático...');
+              node.click();
+              setTimeout(() => {
+                const win = document.getElementById('chatfab-empresa-window');
+                print('🪟 Janela tem classe .aberto? ' + (win && win.classList.contains('aberto')));
+                print('🪟 Janela display: ' + (win ? getComputedStyle(win).display : 'sem janela'));
+                print('🪟 Janela position: ' + (win ? getComputedStyle(win).position : '—'));
+                print('🪟 Janela bottom: ' + (win ? getComputedStyle(win).bottom : '—'));
+                print('🪟 Janela right: ' + (win ? getComputedStyle(win).right : '—'));
+                print('🪟 Janela visibility: ' + (win ? getComputedStyle(win).visibility : '—'));
+                print('🪟 Janela z-index: ' + (win ? getComputedStyle(win).zIndex : '—'));
+              }, 1000);
+            }, 500);
+          }
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    print('📜 Carregando chat-empresa-flutuante.js...');
+  </script>
+
+  <!-- Importa o arquivo real -->
+  <script src="vagas/admin/chat-empresa-flutuante.js?v=teste"></script>
+
+  <script>
+    print('✓ Script carregado. Procurando bolinha...');
+
+    // Espera 3s e checa o estado final
+    setTimeout(() => {
+      const btn = document.getElementById('chatfab-empresa-btn');
+      const win = document.getElementById('chatfab-empresa-window');
+      print('---');
+      print('🔘 Botão existe? ' + !!btn);
+      if (btn) {
+        print('   - position: ' + getComputedStyle(btn).position);
+        print('   - right: ' + getComputedStyle(btn).right);
+        print('   - bottom: ' + getComputedStyle(btn).bottom);
+        print('   - z-index: ' + getComputedStyle(btn).zIndex);
+        print('   - pointer-events: ' + getComputedStyle(btn).pointerEvents);
+        print('   - visibility: ' + getComputedStyle(btn).visibility);
+        print('   - onclick: ' + typeof btn.onclick);
+        const rect = btn.getBoundingClientRect();
+        print('   - rect: ' + JSON.stringify(rect));
+      }
+      print('🪟 Janela existe? ' + !!win);
+      if (win) {
+        print('   - display: ' + getComputedStyle(win).display);
+        print('   - classes: ' + win.className);
+      }
+      print('---');
+
+      // Tenta click programático de novo
+      if (btn) {
+        print('⏰ Disparando click() de novo após 3s...');
+        btn.click();
+        setTimeout(() => {
+          print('🪟 Após click: .aberto = ' + win.classList.contains('aberto'));
+          print('🪟 Após click: display = ' + getComputedStyle(win).display);
+        }, 500);
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
