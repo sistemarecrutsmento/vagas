@@ -41,12 +41,17 @@
       width: 32px; height: 32px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       background: #f1ecdf; color: var(--vinho);
-      font-size: 14px; transition: transform 0.2s, background 0.15s;
-      flex-shrink: 0; margin-left: 12px;
+      font-size: 14px; transition: background 0.15s, color 0.15s;
+      flex-shrink: 0; margin-left: 12px; padding: 0;
     }
+    .card-colapsavel > .card-header .card-toggle svg { display: none; }
+    .card-colapsavel > .card-header .card-toggle .chevron-baixo { display: block; }
+    .card-colapsavel > .card-header .card-toggle .chevron-cima { display: none; }
     .card-colapsavel.aberto > .card-header .card-toggle {
-      transform: rotate(180deg); background: var(--dourado); color: white;
+      background: var(--dourado); color: white;
     }
+    .card-colapsavel.aberto > .card-header .card-toggle .chevron-baixo { display: none; }
+    .card-colapsavel.aberto > .card-header .card-toggle .chevron-cima { display: block; }
     .card-colapsavel > .card-body {
       max-height: 0; overflow: hidden; transition: max-height 0.35s ease;
     }
@@ -210,7 +215,10 @@
             docsCard = '<div class="card card-colapsavel" id="card-documentos">' +
               '<div class="card-header" onclick="toggleCard(\'card-documentos\')">' +
                 '<h2>📄 Documentos de Contratação <span id="docs-count-header" style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px"></span></h2>' +
-                '<span class="card-toggle">▼</span>' +
+                '<span class="card-toggle">' +
+                  '<svg class="chevron-baixo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+                  '<svg class="chevron-cima" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 15 12 9 18 15"></polyline></svg>' +
+                '</span>' +
               '</div>' +
               '<div class="card-body">' +
                 '<p style="font-size:13px;color:var(--cinza-medio);margin-bottom:14px">Use <strong>"Retornar para candidato"</strong> em cada item para pedir reenvio com uma mensagem personalizada. Quando <strong>todos</strong> estiverem aprovados, clique no botão abaixo para aprovar tudo e avançar a etapa de uma vez.</p>' +
@@ -626,7 +634,10 @@
         '<div class="card card-colapsavel" id="card-historico">' +
           '<div class="card-header" onclick="toggleCard(\'card-historico\')">' +
             '<h2>📜 Histórico do Processo <span style="font-size:12px;color:var(--cinza-medio);font-weight:400;margin-left:8px">(' + histCount + ' ' + (histCount === 1 ? 'evento' : 'eventos') + ')</span></h2>' +
-            '<span class="card-toggle">▼</span>' +
+            '<span class="card-toggle">' +
+              '<svg class="chevron-baixo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+              '<svg class="chevron-cima" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 15 12 9 18 15"></polyline></svg>' +
+            '</span>' +
           '</div>' +
           '<div class="card-body">' + histHtml + '</div>' +
         '</div>';
@@ -1229,7 +1240,7 @@
   <style>
     #modal-proposta.aberto { display: flex !important; }
   </style>
-<script src="chat-flutuante-admin.js?v=20260722a"></script>
-<script src="chat-empresa-flutuante.js?v=20260725alinhado"></script>
+<script src="chat-flutuante-admin.js?v=20260725acc2
+<script src="chat-empresa-flutuante.js?v=20260725acc2
 </body>
 </html>
