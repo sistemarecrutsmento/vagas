@@ -638,8 +638,11 @@ async function carregarAgenda(periodo) {
             <div class="agenda-candidato">${e.candidato_nome || '—'}</div>
             <div class="agenda-vaga">📋 ${e.vaga_titulo || 'Vaga'} <span style="color:#888;">• Etapa ${e.etapa} (${etapaNome})</span></div>
             <div class="agenda-meta">
-              ${e.local ? `📍 ${e.local}` : '🎥 Google Meet'}
-              ${e.link_reuniao ? ` • <a href="${e.link_reuniao}" target="_blank" style="color:#16A34A; font-weight:600;">🔗 Entrar no Meet</a>` : ''}
+              ${e.link_reuniao
+                ? `🎥 Online (Google Meet) • <a href="${e.link_reuniao}" target="_blank" style="color:#16A34A; font-weight:600;">🔗 Entrar no Meet</a>`
+                : (e.local
+                    ? `📍 ${e.local}`
+                    : '🎥 Online (Google Meet)')}
               ${e.observacoes ? `<div style="margin-top:6px; color:#666; font-style:italic;">"${e.observacoes}"</div>` : ''}
             </div>
           </div>
