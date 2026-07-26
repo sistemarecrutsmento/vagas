@@ -1398,32 +1398,388 @@ async function carregarDashboard() {
 }
 
 // ===== VAGAS =====
+// Estado interno da nova tela de vagas (filtros, paginação, ordenação)
+const _vagasState = {
+  page: 1, limit: 10, status: '', search: '', empresa: '', area: '',
+  ordenar: 'criada_em', ordem_dir: 'DESC',
+  total: 0, vagas: []
+};
+
 async function carregarVagasAdmin() {
-  const tb = document.querySelector('#vagas-table tbody');
-  tb.innerHTML = '<tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr>';
-  try {
-    const r = await fetch(API + '/api/admin/vagas', { headers: { 'Authorization': 'Bearer ' + token } });
-    const data = await r.json();
-    const vagas = data.vagas || [];
-    if (vagas.length === 0) {
-      tb.innerHTML = '<tr><td colspan="5" class="empty">Nenhuma vaga cadastrada. Clique em "+ Nova vaga" pra começar.</td></tr>';
-      return;
+  // Compatibilidade com chamada legacy (botão +, modais etc.)
+  // A renderização nova agora usa /api/admin/vagas com filtros server-side.
+  _vagasState.page = 1;
+  await carregarVagasAdminNovo();
+  // Inicializa UI uma vez (listeners de busca/filtro/abas/pag)
+  if (!window._vagasUIInicializada) {
+    window._vagasUIInicializada = true;
+    inicializarUIVagas();
+  }
+}
+
+function inicializarUIVagas() {
+  // Busca (debounce 350ms)
+  let timer = null;
+  const busca = document.getElementById('vagas-busca');
+  if (busca) {
+    busca.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        _vagasState.search = busca.value.trim();
+        _vagasState.page = 1;
+        carregarVagasAdminNovo();
+      }, 350);
+    });
+  }
+  // Filtros select
+  const empEl = document.getElementById('vagas-filtro-empresa');
+  if (empEl) empEl.addEventListener('change', () => {
+    _vagasState.empresa = empEl.value;
+    _vagasState.page = 1;
+    carregarVagasAdminNovo();
+  });
+  const areaEl = document.getElementById('vagas-filtro-area');
+  if (areaEl) areaEl.addEventListener('change', () => {
+    _vagasState.area = areaEl.value;
+    _vagasState.page = 1;
+    carregarVagasAdminNovo();
+  });
+  // Botão Filtros (mostra/esconde painel — placeholder funcional)
+  const fBtn = document.getElementById('vagas-filtros-toggle');
+  if (fBtn) fBtn.addEventListener('click', () => {
+    // Sem filtros adicionais no momento — apenas alterna foco na busca
+    busca && busca.focus();
+  });
+  // Abas de status
+  document.querySelectorAll('#vagas-abas .vaga-aba').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#vagas-abas .vaga-aba').forEach(b => b.classList.remove('ativa'));
+      btn.classList.add('ativa');
+      _vagasState.status = btn.getAttribute('data-status') || '';
+      _vagasState.page = 1;
+      carregarVagasAdminNovo();
+    });
+  });
+  // Paginação
+  document.getElementById('vagas-pag-ant').addEventListener('click', () => {
+    if (_vagasState.page > 1) { _vagasState.page--; carregarVagasAdminNovo(); }
+  });
+  document.getElementById('vagas-pag-prox').addEventListener('click', () => {
+    const max = Math.max(1, Math.ceil(_vagasState.total / _vagasState.limit));
+    if (_vagasState.page < max) { _vagasState.page++; carregarVagasAdminNovo(); }
+  });
+  // Fecha menu de ações ao clicar fora
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('vaga-menu-acoes');
+    if (menu && menu.style.display !== 'none' && !menu.contains(e.target) && !e.target.closest('.vaga-linha-btn-acoes')) {
+      menu.style.display = 'none';
     }
-    tb.innerHTML = vagas.map(v => {
-      const badge = v.status === 'publicada' ? 'badge-ativa' : v.status === 'pausada' ? 'badge-pendente' : 'badge-fechada';
-      return `<tr>
-        <td><strong>${v.titulo}</strong></td>
-        <td>${v.empresa || '—'}</td>
-        <td>${v.area || v.categoria || '—'}</td>
-        <td><span class="badge ${badge}">${v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status}</span></td>
-        <td><div class="acoes">
-          <button onclick="editarVaga(${v.id})">Editar</button>
-          <button class="perigo" onclick="deletarVaga(${v.id})">Excluir</button>
-        </div></td>
-      </tr>`;
-    }).join('');
-  } catch {
-    tb.innerHTML = '<tr><td colspan="5" class="alert-erro">Erro ao carregar</td></tr>';
+  });
+}
+
+async function carregarVagasAdminNovo() {
+  const lista = document.getElementById('vagas-lista');
+  if (lista) lista.innerHTML = '<div class="vagas-lista-vazia"><div class="spinner"></div></div>';
+
+  // Monta query string
+  const params = new URLSearchParams({
+    page: _vagasState.page,
+    limit: _vagasState.limit,
+    ordenar: _vagasState.ordenar,
+    ordem_dir: _vagasState.ordem_dir
+  });
+  if (_vagasState.status) params.set('status', _vagasState.status);
+  if (_vagasState.search) params.set('search', _vagasState.search);
+  if (_vagasState.empresa) params.set('empresa', _vagasState.empresa);
+  if (_vagasState.area) params.set('area', _vagasState.area);
+
+  try {
+    const r = await fetch(API + '/api/admin/vagas?' + params.toString(), {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await r.json();
+    _vagasState.vagas = data.vagas || [];
+    _vagasState.total = data.total || 0;
+    renderizarVagas(_vagasState.vagas);
+    atualizarAbasVagas();     // contagens das abas (sempre todas, ignorando filtro de aba atual)
+    atualizarPaginacaoVagas();
+    popularFiltrosVagas(_vagasState.vagas);
+  } catch (e) {
+    if (lista) lista.innerHTML = '<div class="vagas-lista-vazia">❌ Erro ao carregar vagas: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function renderizarVagas(vagas) {
+  const lista = document.getElementById('vagas-lista');
+  if (!lista) return;
+  if (!vagas.length) {
+    // Estado vazio (com busca ou não)
+    const hasFilter = _vagasState.search || _vagasState.status || _vagasState.empresa || _vagasState.area;
+    lista.innerHTML = `
+      <div class="vagas-lista-vazia">
+        <div class="vagas-lista-vazia-icone">🔎</div>
+        <h3>Nenhuma vaga encontrada</h3>
+        <p>${hasFilter ? 'Não encontramos vagas com os filtros selecionados.' : 'Nenhuma vaga cadastrada. Clique em "+ Nova vaga" pra começar.'}</p>
+        ${hasFilter ? '<button class="btn btn-sec" onclick="limparFiltrosVagas()">Limpar filtros</button>' : ''}
+      </div>`;
+    return;
+  }
+  lista.innerHTML = vagas.map(v => renderizarVagaLinha(v)).join('');
+}
+
+function renderizarVagaLinha(v) {
+  // Status badge
+  let badgeHtml;
+  if (v.status === 'publicada') {
+    badgeHtml = '<span class="badge badge-ativa">🟢 Publicada</span>';
+  } else if (v.status === 'fechada') {
+    badgeHtml = '<span class="badge badge-fechada">⚪ Encerrada</span>';
+  } else if (v.status === 'pausada') {
+    badgeHtml = '<span class="badge badge-pendente">📝 Rascunho</span>';
+  } else {
+    badgeHtml = '<span class="badge">' + escapeHtml(v.status || '—') + '</span>';
+  }
+
+  // Publicada há X dias (calcula a partir de criada_em)
+  let publicadaHa = '—';
+  if (v.status === 'publicada' && v.criada_em) {
+    const d = new Date(v.criada_em);
+    const diff = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24));
+    publicadaHa = diff <= 0 ? 'hoje' : (diff === 1 ? '1 dia' : (diff + ' dias'));
+  } else if (v.status === 'fechada' && v.criada_em) {
+    // Pra fechadas, mostra a data de criação como referência
+    const d = new Date(v.criada_em);
+    publicadaHa = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  const cand = v.candidatos_count || 0;
+  const candPlural = cand === 1 ? 'candidato' : 'candidatos';
+  const candHtml = cand > 0
+    ? `<a href="#" class="vaga-linha-cand" onclick="irParaCandidatosDaVaga(${v.id}); return false;" title="Ver candidatos">${cand}<span>${candPlural}</span></a>`
+    : `<span class="vaga-linha-cand zero">${cand}<span>${candPlural}</span></span>`;
+
+  return `
+    <div class="vaga-linha" data-id="${v.id}">
+      <div data-label="Vaga">
+        <strong>${escapeHtml(v.titulo || '(sem título)')}</strong>
+        <div class="vaga-linha-id">ID: ${v.id}</div>
+      </div>
+      <div data-label="Empresa">${escapeHtml(v.empresa || '—')}</div>
+      <div data-label="Categoria">${escapeHtml(v.area || '—')}</div>
+      <div data-label="Candidatos">${candHtml}</div>
+      <div data-label="Publicada há">${publicadaHa}</div>
+      <div data-label="Status">${badgeHtml}</div>
+      <div class="vaga-linha-acoes" data-label="">
+        <button class="vaga-linha-btn-acoes" onclick="abrirMenuAcoesVaga(event, ${v.id})" title="Ações">⋮</button>
+      </div>
+    </div>`;
+}
+
+function abrirMenuAcoesVaga(event, vagaId) {
+  event.stopPropagation();
+  const v = _vagasState.vagas.find(x => x.id === vagaId);
+  if (!v) return;
+  const menu = document.getElementById('vaga-menu-acoes');
+  // Define ações baseado no status
+  const acoes = [];
+  acoes.push({ icon: '✏️', label: 'Editar vaga', onclick: `editarVaga(${v.id}); fecharMenuAcoesVaga();` });
+  acoes.push({ icon: '👥', label: 'Ver candidatos', onclick: `irParaCandidatosDaVaga(${v.id}); fecharMenuAcoesVaga();` });
+  if (v.status === 'publicada' || v.status === 'pausada') {
+    acoes.push({ icon: '📋', label: 'Duplicar vaga', onclick: `duplicarVagaAdmin(${v.id}); fecharMenuAcoesVaga();` });
+  }
+  if (v.status === 'publicada') {
+    acoes.push({ icon: '⏸', label: 'Pausar vaga', onclick: `pausarVagaAdmin(${v.id}); fecharMenuAcoesVaga();` });
+  }
+  if (v.status === 'pausada') {
+    acoes.push({ icon: '▶', label: 'Reativar vaga', onclick: `reativarVagaAdmin(${v.id}); fecharMenuAcoesVaga();` });
+  }
+  if (v.status !== 'fechada') {
+    acoes.push({ icon: '🚩', label: 'Encerrar vaga', onclick: `encerrarVagaAdmin(${v.id}); fecharMenuAcoesVaga();` });
+  }
+  acoes.push({ icon: '🗑', label: 'Excluir vaga', perigo: true, onclick: `confirmarExcluirVaga(${v.id}); fecharMenuAcoesVaga();` });
+  menu.innerHTML = acoes.map(a =>
+    `<button class="vaga-menu-item ${a.perigo ? 'perigo' : ''}" onclick="${a.onclick}">
+       <span class="vaga-menu-item-icone">${a.icon}</span>
+       <span>${a.label}</span>
+     </button>`
+  ).join('');
+  // Posiciona o menu perto do botão
+  const rect = event.target.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 200) + 'px';
+  menu.style.display = 'block';
+}
+
+function fecharMenuAcoesVaga() {
+  const menu = document.getElementById('vaga-menu-acoes');
+  if (menu) menu.style.display = 'none';
+}
+
+function confirmarExcluirVaga(id) {
+  const v = _vagasState.vagas.find(x => x.id === id);
+  if (!v) return;
+  const modal = document.getElementById('vaga-modal-confirmar');
+  const nomeEl = document.getElementById('vaga-modal-confirmar-nome');
+  const btn = document.getElementById('vaga-modal-confirmar-btn');
+  nomeEl.textContent = v.titulo || ('Vaga #' + id);
+  // Substitui o onclick pra evitar handlers antigos
+  btn.onclick = () => { fecharModalConfirmarVaga(); deletarVaga(id); };
+  modal.style.display = 'flex';
+}
+
+function fecharModalConfirmarVaga() {
+  const modal = document.getElementById('vaga-modal-confirmar');
+  if (modal) modal.style.display = 'none';
+}
+
+function limparFiltrosVagas() {
+  _vagasState.search = ''; _vagasState.empresa = ''; _vagasState.area = ''; _vagasState.status = '';
+  document.getElementById('vagas-busca').value = '';
+  document.getElementById('vagas-filtro-empresa').value = '';
+  document.getElementById('vagas-filtro-area').value = '';
+  document.querySelectorAll('#vagas-abas .vaga-aba').forEach(b => b.classList.remove('ativa'));
+  document.querySelector('#vagas-abas .vaga-aba[data-status=""]').classList.add('ativa');
+  _vagasState.page = 1;
+  carregarVagasAdminNovo();
+}
+
+function atualizarAbasVagas() {
+  // Atualiza a contagem de cada aba (ignora o filtro de status atual pra mostrar contagens reais)
+  ['todas', 'publicadas', 'fechadas', 'pausadas'].forEach(async (key) => {
+    const statusMap = { todas: '', publicadas: 'publicada', fechadas: 'fechada', pausadas: 'pausada' };
+    try {
+      const r = await fetch(API + '/api/admin/vagas?status=' + statusMap[key] + '&limit=1', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const d = await r.json();
+      const el = document.getElementById('vagas-aba-count-' + key);
+      if (el) el.textContent = d.total || 0;
+    } catch {}
+  });
+}
+
+function atualizarPaginacaoVagas() {
+  const total = _vagasState.total;
+  const page = _vagasState.page;
+  const limit = _vagasState.limit;
+  const max = Math.max(1, Math.ceil(total / limit));
+  const inicio = total === 0 ? 0 : ((page - 1) * limit + 1);
+  const fim = Math.min(page * limit, total);
+  document.getElementById('vagas-paginacao-info').textContent =
+    total === 0 ? 'Nenhuma vaga' : ('Mostrando ' + inicio + ' a ' + fim + ' de ' + total + ' vaga' + (total === 1 ? '' : 's'));
+  // Numerais (max 5 botões: 1 ... 4 5 6 ... 10)
+  const nums = document.getElementById('vagas-pag-nums');
+  nums.innerHTML = '';
+  const paginas = [];
+  if (max <= 7) {
+    for (let i = 1; i <= max; i++) paginas.push(i);
+  } else {
+    paginas.push(1);
+    if (page > 3) paginas.push('…');
+    const start = Math.max(2, page - 1);
+    const end = Math.min(max - 1, page + 1);
+    for (let i = start; i <= end; i++) paginas.push(i);
+    if (page < max - 2) paginas.push('…');
+    paginas.push(max);
+  }
+  paginas.forEach(p => {
+    if (p === '…') {
+      const span = document.createElement('span');
+      span.className = 'vagas-pag-elipse';
+      span.textContent = '…';
+      nums.appendChild(span);
+    } else {
+      const b = document.createElement('button');
+      b.className = 'vagas-pag-btn' + (p === page ? ' ativo' : '');
+      b.textContent = p;
+      b.onclick = () => { _vagasState.page = p; carregarVagasAdminNovo(); };
+      nums.appendChild(b);
+    }
+  });
+  // Estado dos botões ← e →
+  document.getElementById('vagas-pag-ant').disabled = (page <= 1);
+  document.getElementById('vagas-pag-prox').disabled = (page >= max);
+}
+
+function popularFiltrosVagas(vagas) {
+  // Coleta empresas e áreas distintas da listagem atual (limitado ao exibido)
+  const empresas = [...new Set(vagas.map(v => v.empresa).filter(Boolean))].sort();
+  const areas = [...new Set(vagas.map(v => v.area).filter(Boolean))].sort();
+  const empEl = document.getElementById('vagas-filtro-empresa');
+  const areaEl = document.getElementById('vagas-filtro-area');
+  if (empEl) {
+    const atual = empEl.value;
+    empEl.innerHTML = '<option value="">Todas as empresas</option>' +
+      empresas.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+    // Mantém o valor selecionado se ainda existir
+    if (empresas.includes(atual)) empEl.value = atual;
+  }
+  if (areaEl) {
+    const atual = areaEl.value;
+    areaEl.innerHTML = '<option value="">Todas as categorias</option>' +
+      areas.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+    if (areas.includes(atual)) areaEl.value = atual;
+  }
+}
+
+// Ações da vaga (mantêm compatibilidade com o backend existente)
+async function duplicarVagaAdmin(id) {
+  try {
+    // Busca dados da vaga
+    const r1 = await fetch(API + '/api/admin/vagas/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+    const d1 = await r1.json();
+    const v = d1.vaga || d1;
+    if (!v || !v.titulo) { alert('Erro ao carregar dados da vaga'); return; }
+    // Monta nova vaga sem ID, criada com status 'pausada' (rascunho)
+    const nova = {
+      titulo: v.titulo + ' (cópia)',
+      empresa: v.empresa, cidade: v.cidade, estado: v.estado,
+      tipo_contrato: v.tipo_contrato, nivel: v.nivel, area: v.area,
+      salario_min: v.salario_min, salario_max: v.salario_max,
+      descricao: v.descricao, requisitos: v.requisitos, beneficios: v.beneficios,
+      etapas: v.etapas, status: 'pausada'
+    };
+    const r2 = await fetch(API + '/api/admin/vagas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(nova)
+    });
+    const d2 = await r2.json();
+    if (r2.ok) {
+      carregarVagasAdminNovo();
+    } else {
+      alert('Erro ao duplicar: ' + (d2.erro || r2.status));
+    }
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
+
+async function pausarVagaAdmin(id) {
+  await atualizarStatusVagaAdmin(id, 'pausada', 'Vaga pausada');
+}
+async function reativarVagaAdmin(id) {
+  await atualizarStatusVagaAdmin(id, 'publicada', 'Vaga reativada');
+}
+async function encerrarVagaAdmin(id) {
+  if (!confirm('Encerrar esta vaga? Ela deixará de receber novos candidatos.')) return;
+  await atualizarStatusVagaAdmin(id, 'fechada', 'Vaga encerrada');
+}
+async function atualizarStatusVagaAdmin(id, novoStatus, msg) {
+  try {
+    const r = await fetch(API + '/api/admin/vagas/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ status: novoStatus })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      carregarVagasAdminNovo();
+    } else {
+      alert('Erro: ' + (d.erro || r2 ? '' : r.status));
+    }
+  } catch (e) {
+    alert('Erro: ' + e.message);
   }
 }
 
