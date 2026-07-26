@@ -2147,8 +2147,7 @@ function iniciaisDe(nome) {
   if (!nome) return '?';
   const p = nome.trim().split(/\s+/).filter(Boolean);
   if (p.length === 0) return '?';
-  if (p.length === 1) return p[0].slice(0, 1).toUpperCase();
-  return (p[0][0] + p[p.length - 1][0]).toUpperCase();
+  return p.map(parte => parte[0]).join('').toUpperCase();
 }
 function htmlAvatar(c, classes) {
   const cls = classes || 'cand-iniciais';
@@ -2169,10 +2168,10 @@ function statusCandidato(c) {
   const ult = (c.ultimo_status || '').toLowerCase();
   if (ult === 'contratado') return 'contratado';
   if (ult === 'em_andamento' || ult === 'aprovado' || ult === 'em_processo') return 'em_processo';
-  return 'disponivel';
+  return null;
 }
 function labelStatus(s) {
-  return { disponivel: '🟢 Disponível', em_processo: '🟡 Em processo', contratado: '🔵 Contratado' }[s] || '🟢 Disponível';
+  return { em_processo: '🟡 Em processo', contratado: '🔵 Contratado' }[s] || '';
 }
 function escapeHtml(s) {
   return String(s == null ? '' : s)
@@ -2219,7 +2218,7 @@ function aplicarBuscaEAbaCandidatos() {
   _candidatosState.pagina = 1;
   renderizarCandidatos();
   atualizarAbasCandidatos();
-  atualizarContadorCandidatos(lista.length);
+  atualizarContadorCandidatos(_candidatosState.todos.length);
 }
 
 function atualizarContadorCandidatos(qtdFiltrados) {
@@ -2235,12 +2234,15 @@ function atualizarAbasCandidatos() {
     if (abas) abas.style.display = 'none';
     return;
   }
-  const counts = { todos: total, disponivel: 0, em_processo: 0, contratado: 0 };
-  _candidatosState.todos.forEach(c => { counts[statusCandidato(c)]++; });
+  const counts = { todos: total, em_processo: 0, contratado: 0 };
+  _candidatosState.todos.forEach(c => {
+    const status = statusCandidato(c);
+    if (status && counts[status] !== undefined) counts[status]++;
+  });
   const temVariedade = (counts.em_processo + counts.contratado) > 0;
   const abas = document.getElementById('talentos-abas');
   if (abas) abas.style.display = temVariedade ? 'flex' : 'none';
-  ['todos','em_processo','contratado','disponivel'].forEach(k => {
+  ['todos','em_processo','contratado'].forEach(k => {
     const el = document.getElementById('talentos-aba-' + k + '-num');
     if (el) el.textContent = String(counts[k]);
   });
@@ -2320,9 +2322,7 @@ function renderizarCandidatos() {
             <span class="ico">📅</span><span>${formatarData(c.criado_em)}</span>
           </div>
         </div>
-        <div class="cand-card-meta">
-          <span class="cand-status ${status}">${labelStatus(status)}</span>
-        </div>
+        ${status ? `<div class="cand-card-meta"><span class="cand-status ${status}">${labelStatus(status)}</span></div>` : ''}
         <div class="cand-card-rodape">
           <button class="cand-card-btn-ver" onclick="abrirCurriculo(${c.id})">👁 Ver perfil</button>
         </div>
@@ -2398,7 +2398,7 @@ async function abrirCurriculo(id) {
           <div class="curriculo-sub">${escapeHtml(cand.email || '—')}</div>
           <div class="curriculo-sub">${escapeHtml(formatarCelular(cand.celular) || 'Não informado')}</div>
           <div class="curriculo-badges">
-            <span class="cand-status ${statusCand}">${labelStatus(statusCand)}</span>
+            ${statusCand ? `<span class="cand-status ${statusCand}">${labelStatus(statusCand)}</span>` : ''}
             <span class="curriculo-meta-inline">📅 Cadastrado em ${formatarData(cand.criado_em)}</span>
           </div>
         </div>
