@@ -774,8 +774,7 @@ async function carregarDashboardV2() {
       { label: 'Vagas ativas', valor: k.vagas_ativas || 0, delta: k.deltas?.vagas, icon: '💼', cor: 'rosa' },
       { label: 'Candidatos', valor: k.total_candidatos || 0, delta: k.deltas?.candidatos, icon: '👥', cor: 'azul' },
       { label: 'Processos ativos', valor: k.processos_ativos || 0, delta: k.deltas?.processos, icon: '📋', cor: 'roxo' },
-      { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: k.deltas?.entrevistas, icon: '📅', cor: 'verde' },
-      { label: 'Novos (7 dias)', valor: k.candidatos_novos_7d || 0, delta: k.deltas?.candidatos, icon: '✨', cor: 'laranja' }
+      { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: k.deltas?.entrevistas, icon: '📅', cor: 'verde' }
     ];
     document.getElementById('kpis-grid').innerHTML = kpis.map(k => {
       const delta = k.delta == null ? '' : (k.delta > 0 ? `<span class="kpi-delta up">+${k.delta}% este mês</span>` : k.delta < 0 ? `<span class="kpi-delta down">${k.delta}% este mês</span>` : `<span class="kpi-delta flat">0% este mês</span>`);
@@ -786,6 +785,8 @@ async function carregarDashboardV2() {
         link = "abrirModalVagasAtivas()"; linkText = 'ver lista →'; titleLink = 'Ver todas as vagas ativas';
       } else if (k.label === 'Candidatos') {
         link = "window.location.href='candidatos.html'"; linkText = 'base de talentos →'; titleLink = 'Abrir base de talentos';
+      } else if (k.label === 'Processos ativos') {
+        link = "window.location.href='candidaturas.html'"; linkText = 'ver processos →'; titleLink = 'Abrir lista de processos/candidaturas';
       } else if (k.label === 'Entrevistas agendadas') {
         link = "window.location.href='agenda.html'"; linkText = 'abrir agenda →'; titleLink = 'Abrir agenda de entrevistas';
       }
