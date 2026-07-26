@@ -779,15 +779,70 @@ async function carregarDashboardV2() {
     ];
     document.getElementById('kpis-grid').innerHTML = kpis.map(k => {
       const delta = k.delta == null ? '' : (k.delta > 0 ? `<span class="kpi-delta up">+${k.delta}% este mês</span>` : k.delta < 0 ? `<span class="kpi-delta down">${k.delta}% este mês</span>` : `<span class="kpi-delta flat">0% este mês</span>`);
-      return `<div class="kpi-card kpi-${k.cor}">
+      // Card "Vagas ativas" é clicável — abre modal com lista de todas as vagas publicadas
+      const isVagasAtivas = k.label === 'Vagas ativas';
+      return `<div class="kpi-card kpi-${k.cor}${isVagasAtivas ? ' kpi-clickable' : ''}"${isVagasAtivas ? ' onclick="abrirModalVagasAtivas()" title="Ver todas as vagas ativas"' : ''}>
         <div class="kpi-top">
           <div class="kpi-icon">${k.icon}</div>
+          ${isVagasAtivas ? '<div class="kpi-link-icon">🔗</div>' : ''}
         </div>
-        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-label">${k.label}${isVagasAtivas ? ' <span class="kpi-abre">ver lista →</span>' : ''}</div>
         <div class="kpi-valor">${k.valor}</div>
         ${delta}
       </div>`;
     }).join('');
+
+    // === Modal: lista de vagas ativas (clicado no KPI "Vagas ativas") ===
+    async function abrirModalVagasAtivas() {
+      const body = document.getElementById('vagas-ativas-lista');
+      body.innerHTML = '<div class="spinner"></div>';
+      abrirModal('vagas-ativas');
+      try {
+        const r = await fetch(API + '/api/admin/vagas?status=publicada', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await r.json();
+        const vagas = data.vagas || [];
+        if (vagas.length === 0) {
+          body.innerHTML = '<div class="empty">Nenhuma vaga ativa no momento.</div>';
+          return;
+        }
+        // Ordena: mais recentes primeiro
+        vagas.sort((a, b) => new Date(b.criada_em || 0) - new Date(a.criada_em || 0));
+        body.innerHTML = `
+          <div class="vagas-ativas-tabela">
+            <div class="vagas-ativas-header">
+              <div>Título</div>
+              <div>Empresa</div>
+              <div>Publicada em</div>
+              <div>Ações</div>
+            </div>
+            ${vagas.map(v => {
+              const dataPub = v.criada_em ? new Date(v.criada_em).toLocaleDateString('pt-BR') : '—';
+              return `
+                <div class="vagas-ativas-row">
+                  <div class="vagas-ativas-titulo">
+                    <strong>${escapeHtml(v.titulo)}</strong>
+                    ${v.cidade || v.estado ? `<span class="vagas-ativas-local">${escapeHtml(v.cidade || '')}${v.cidade && v.estado ? '/' : ''}${escapeHtml(v.estado || '')}</span>` : ''}
+                  </div>
+                  <div>${escapeHtml(v.empresa || '—')}</div>
+                  <div class="vagas-ativas-data">${dataPub}</div>
+                  <div class="vagas-ativas-acoes">
+                    <a href="../candidato/vaga.html?id=${v.id}" target="_blank" class="btn-modal btn-modal-ver" title="Ver como o candidato vê">
+                      👁 Ver
+                    </a>
+                    <button class="btn-modal btn-modal-editar" onclick="editarVaga(${v.id});fecharModal('vagas-ativas');" title="Editar vaga">
+                      ✏️ Editar
+                    </button>
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>
+        `;
+      } catch (e) {
+        body.innerHTML = '<div class="alert-erro">Erro ao carregar vagas: ' + e.message + '</div>';
+      }
+    }
     
     // === Gráfico: Candidatos por etapa ===
     const etapasObj = data.etapas || {};
