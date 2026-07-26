@@ -2112,10 +2112,33 @@ function popularSelectAreas() {
   });
 }
 
+function popularSelectCidades(candidatos) {
+  const sel = document.getElementById('candidatos-filtro-cidade');
+  if (!sel) return;
+  // Preserva seleção atual para não resetar visualmente
+  const valorAtual = sel.value;
+  // Coleta cidades distintas e ordena
+  const set = new Set();
+  (candidatos || []).forEach(c => {
+    if (c.cidade) set.add(String(c.cidade).trim());
+  });
+  const cidades = Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  sel.innerHTML = '<option value="">🏙 Todas as cidades</option>';
+  cidades.forEach(cid => {
+    const o = document.createElement('option');
+    o.value = cid;
+    o.textContent = cid;
+    sel.appendChild(o);
+  });
+  if (valorAtual && cidades.includes(valorAtual)) sel.value = valorAtual;
+}
+
 function limparFiltrosCandidatos() {
-  const sel = document.getElementById('candidatos-filtro-area');
+  ['candidatos-filtro-area','candidatos-filtro-cidade','candidatos-filtro-status'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
   const inp = document.getElementById('candidatos-filtro-busca');
-  if (sel) sel.value = '';
   if (inp) inp.value = '';
   carregarCandidatos();
 }
@@ -2194,6 +2217,7 @@ async function carregarCandidatos() {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
     _candidatosState.todos = data.candidatos || [];
+    popularSelectCidades(_candidatosState.todos);
     aplicarBuscaEAbaCandidatos();
   } catch (e) {
     if (tb) tb.innerHTML = '<tr><td colspan="6" class="empty">Erro ao carregar</td></tr>';
@@ -2204,6 +2228,8 @@ async function carregarCandidatos() {
 
 function aplicarBuscaEAbaCandidatos() {
   const busca = (document.getElementById('candidatos-filtro-busca')?.value || '').toLowerCase().trim();
+  const cidade = (document.getElementById('candidatos-filtro-cidade')?.value || '').trim();
+  const statusFiltro = (document.getElementById('candidatos-filtro-status')?.value || '').trim();
   let lista = _candidatosState.todos.slice();
   if (busca) {
     lista = lista.filter(c => {
@@ -2211,6 +2237,16 @@ function aplicarBuscaEAbaCandidatos() {
         .filter(Boolean).map(v => String(v).toLowerCase());
       return campos.some(v => v.includes(busca));
     });
+  }
+  if (cidade) {
+    lista = lista.filter(c => String(c.cidade || '').trim() === cidade);
+  }
+  if (statusFiltro) {
+    if (statusFiltro === 'disponivel') {
+      lista = lista.filter(c => statusCandidato(c) === null);
+    } else {
+      lista = lista.filter(c => statusCandidato(c) === statusFiltro);
+    }
   }
   const aba = _candidatosState.aba;
   if (aba !== 'todos') {
@@ -2264,8 +2300,15 @@ function renderizarCandidatos() {
   const lista = _candidatosState.filtrados;
   if (lista.length === 0) {
     const area = document.getElementById('candidatos-filtro-area')?.value || '';
+    const cidade = document.getElementById('candidatos-filtro-cidade')?.value || '';
+    const statusF = document.getElementById('candidatos-filtro-status')?.value || '';
     const busca = (document.getElementById('candidatos-filtro-busca')?.value || '').trim();
-    const contexto = area ? ` com a área "${escapeHtml(area)}"` : (busca ? ` com "${escapeHtml(busca)}"` : '');
+    const partes = [];
+    if (area) partes.push(`área "${escapeHtml(area)}"`);
+    if (cidade) partes.push(`cidade "${escapeHtml(cidade)}"`);
+    if (statusF) partes.push(`status "${escapeHtml(statusF)}"`);
+    if (busca) partes.push(`"${escapeHtml(busca)}"`);
+    const contexto = partes.length ? ' com ' + partes.join(', ') : '';
     const vazio = `<div class="talentos-vazio">
       <div class="talentos-vazio-icone">🔎</div>
       <div class="talentos-vazio-titulo">Nenhum candidato encontrado${contexto}</div>
