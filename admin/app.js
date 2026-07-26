@@ -2145,9 +2145,11 @@ function corAvatarPara(nome) {
 }
 function iniciaisDe(nome) {
   if (!nome) return '?';
-  const p = nome.trim().split(/\s+/).filter(Boolean);
-  if (p.length === 0) return '?';
-  return p.map(parte => parte[0]).join('').toUpperCase();
+  const stopwords = new Set(['de','da','do','dos','das','e']);
+  const partes = nome.trim().split(/\s+/).filter(Boolean).filter(p => !stopwords.has(p.toLowerCase()));
+  if (partes.length === 0) return '?';
+  if (partes.length === 1) return partes[0].slice(0, 1).toUpperCase();
+  return (partes[0][0] + partes[1][0]).toUpperCase();
 }
 function htmlAvatar(c, classes) {
   const cls = classes || 'cand-iniciais';
