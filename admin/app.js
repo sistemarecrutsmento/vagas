@@ -1233,7 +1233,7 @@ const chartH = 220; // deve bater com CSS
             const pct = Math.round((total / totalGeral) * 100);
             const cor = coresVivas[i % coresVivas.length].fill;
             return `
-              <div class="vaga-destaque-card" onclick="window.location.href=\'candidaturas.html\'">
+              <div class="vaga-destaque-card" onclick="irPara('candidaturas')">
                 <div class="card-bg-icon">💼</div>
                 <div class="vaga-card-header">
                   <div class="vaga-card-info">
