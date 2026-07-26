@@ -1272,7 +1272,9 @@ const chartH = 220; // deve bater com CSS
     const ks = data.kpis_secundarios || {};
     document.getElementById('ks-tempo').textContent = (ks.tempo_medio_contratacao || 0) + 'd';
     document.getElementById('ks-aprovacao').textContent = (ks.taxa_aprovacao || 0) + '%';
-    document.getElementById('ks-desligamento').textContent = (ks.taxa_desligamento || 0) + '%';
+    document.getElementById('ks-desistencia').textContent = (ks.taxa_desistencia || 0) + '%';
+    const ksFech = document.getElementById('ks-fechadas-sem-contrato');
+    if (ksFech) ksFech.textContent = (ks.vagas_fechadas_sem_contratacao || 0);
     document.getElementById('ks-encerradas').textContent = ks.vagas_encerradas || 0;
     document.getElementById('ks-empresas').textContent = ks.empresas_ativas || 0;
   } catch (e) {
