@@ -805,14 +805,17 @@
           "categoria categoria categoria"
           "cand  cand cand"
           "tempo status status";
-        gap: 6px 12px; padding: 16px 14px;
+        grid-template-rows: auto auto auto auto auto auto;
+        gap: 8px 12px; padding: 16px 14px;
         border-bottom: 1px solid #F0F0F0;
+        align-items: start;
       }
       .vaga-linha-icone { grid-area: icone; align-self: start; }
-      .vaga-linha [data-label="Vaga"] { grid-area: titulo; }
+      .vaga-linha [data-label="Vaga"] { grid-area: titulo; min-width: 0; }
+      .vaga-linha [data-label="Vaga"] > div { min-width: 0; }
       .vaga-linha-id-row { grid-area: meta; }
       .vaga-linha-acoes { grid-area: acoes; text-align: right; }
-      .vaga-linha-empresa { grid-area: empresa; padding-top: 8px; border-top: 1px dashed #EEE; margin-top: 4px; }
+      .vaga-linha-empresa { grid-area: empresa; padding-top: 8px; border-top: 1px dashed #EEE; margin-top: 6px; }
       .vaga-linha-categoria { grid-area: categoria; }
       .vaga-linha-candidatos { grid-area: cand; }
       .vaga-linha-tempo { grid-area: tempo; }
