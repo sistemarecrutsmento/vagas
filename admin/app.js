@@ -1166,101 +1166,151 @@ async function carregarDashboardV2() {
       docProg.textContent = taxaDoc > 10 ? `${aprovados}/${totalDocs} aprovados` : '';
     }
     
-    // === Gráfico: Vagas ATIVAS com mais candidatos (estilo lollipop + área ascendente) ===
+    // === Gráfico: Vagas ATIVAS com mais candidatos (barras verticais + curva) ===
     const vRanking = data.vagas_mais_candidatos || [];
     const containerRanking = document.getElementById('grafico-ranking');
     const containerLegend = document.getElementById('grafico-ranking-legend');
     if (vRanking.length > 0) {
       const maxCands = Math.max(1, ...vRanking.map(v => v.total_candidatos || 0));
+      // Gera os pontos da curva (pontos no topo de cada barra) — interpolação suave (Catmull-Rom -> cubic Bézier)
       const n = vRanking.length;
-      // Posição X (em %) de cada coluna — formato proporcional uniforme
-      const colCenters = vRanking.map((_, i) => {
-        const slot = 100 / n;
-        return slot * i + slot / 2;
-      });
-      // Posição Y (em %): topo da bolinha (8% = topo, 95% = base)
-      const colTops = vRanking.map(v => {
+      const colPts = []; // {xPct, yPct} em % do gráfico
+      vRanking.forEach((v, i) => {
         const total = v.total_candidatos || 0;
-        const ratio = total / maxCands;
-        return 95 - ratio * 87;
+        const yPct = (total / maxCands) * 100; // 0 (base) → 100 (topo)
+        const xPct = n === 1 ? 50 : (i / (n - 1)) * 100;
+        colPts.push({ xPct, yPct });
       });
-      // Cor: 1ª posição = preto, com contratado = vinho, sem = dourado
-      const palettes = vRanking.map((v, i) => {
-        const contrat = v.contratados || 0;
-        const total = v.total_candidatos || 0;
-        if (i === 0) return { stick: 'preto', dot: 'preto' };
-        if (contrat > 0 && contrat === total) return { stick: 'vinho', dot: 'vinho' };
-        if (contrat > 0 && contrat < total) return { stick: 'dourado', dot: 'vinho' };
-        return { stick: 'dourado', dot: 'dourado' };
-      });
-      // Curva Catmull-Rom -> Bezier passando pelos topos
-      function catmullRomToBezier(pts) {
-        if (pts.length < 2) return '';
-        if (pts.length === 2) return `M ${pts[0].x} ${pts[0].y} L ${pts[1].x} ${pts[1].y}`;
-        let d = `M ${pts[0].x} ${pts[0].y}`;
-        for (let i = 0; i < pts.length - 1; i++) {
-          const p0 = pts[i - 1] || pts[i];
-          const p1 = pts[i];
-          const p2 = pts[i + 1];
-          const p3 = pts[i + 2] || p2;
-          const cp1x = p1.x + (p2.x - p0.x) / 6;
-          const cp1y = p1.y + (p2.y - p0.y) / 6;
-          const cp2x = p2.x - (p3.x - p1.x) / 6;
-          const cp2y = p2.y - (p3.y - p1.y) / 6;
-          d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+      // Constrói path suave (Catmull-Rom -> Bézier)
+      let curvaPath = '';
+      if (colPts.length > 0) {
+        // Substitui y por 100-y (porque y SVG cresce pra baixo, e aqui queremos top→0)
+        const pts = colPts.map(p => ({ x: p.xPct, y: 100 - p.yPct }));
+        if (pts.length === 1) {
+          curvaPath = `M ${pts[0].x},${pts[0].y}`;
+        } else {
+          let d = `M ${pts[0].x},${pts[0].y}`;
+          for (let i = 0; i < pts.length - 1; i++) {
+            const p0 = i === 0 ? pts[0] : pts[i - 1];
+            const p1 = pts[i];
+            const p2 = pts[i + 1];
+            const p3 = i + 2 < pts.length ? pts[i + 2] : p2;
+            // Pontos de controle Bézier (Catmull-Rom simplificado, tension 0.5)
+            const c1x = p1.x + (p2.x - p0.x) / 6;
+            const c1y = p1.y + (p2.y - p0.y) / 6;
+            const c2x = p2.x - (p3.x - p1.x) / 6;
+            const c2y = p2.y - (p3.y - p1.y) / 6;
+            d += ` C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2.x},${p2.y}`;
+          }
+          curvaPath = d;
         }
-        return d;
       }
-      const topPts = colCenters.map((x, i) => ({ x, y: colTops[i] }));
-      const pathTop = catmullRomToBezier(topPts);
-      const pathArea = `${pathTop} L 100 100 L 0 100 Z`;
-      const labelsHtml = vRanking.map(v => {
-        const total = v.total_candidatos || 0;
-        const contrat = v.contratados || 0;
-        const taxa = total > 0 ? Math.round((contrat / total) * 100) : 0;
-        return `<div class="ranking-label-col" title="${(v.titulo || '').replace(/"/g, '&quot;')} - ${v.empresa || ''}">
-          <div class="vaga-titulo">${v.titulo || '—'}</div>
-          <div class="vaga-empresa">${v.empresa || '—'}</div>
-          <div style="font-size:10px;margin-top:2px;color:#999;">${taxa}% contrat. · ${total} cand.</div>
-        </div>`;
-      }).join('');
+      const curvaFill = curvaPath
+        ? curvaPath + ` L ${colPts[colPts.length - 1].xPct},100 L ${colPts[0].xPct},100 Z`
+        : '';
+
+const chartH = 220; // deve bater com CSS
+      // Cores vivas (mesmas do funil de etapas e KPIs)
+      const coresVivas = [
+        { gradient: 'linear-gradient(180deg, #F472B6 0%, #EC4899 100%)', stroke: '#EC4899' },
+        { gradient: 'linear-gradient(180deg, #A78BFA 0%, #8B5CF6 100%)', stroke: '#8B5CF6' },
+        { gradient: 'linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%)', stroke: '#3B82F6' },
+        { gradient: 'linear-gradient(180deg, #22D3EE 0%, #06B6D4 100%)', stroke: '#06B6D4' },
+        { gradient: 'linear-gradient(180deg, #34D399 0%, #10B981 100%)', stroke: '#10B981' }
+      ];
       containerRanking.innerHTML = `
-        <div class="grafico-ranking-chart">
-          <svg class="area-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <div class="grafico-ranking-chart" style="position:relative;">
+          <svg class="curva-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
-              <linearGradient id="grad-area" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#D4A857" stop-opacity="0.55"/>
-                <stop offset="100%" stop-color="#D4A857" stop-opacity="0.05"/>
-              </linearGradient>
-              <linearGradient id="grad-line" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#1A1A1A"/>
-                <stop offset="50%" stop-color="#722F37"/>
-                <stop offset="100%" stop-color="#D4A857"/>
+              <linearGradient id="curva-grad" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
               </linearGradient>
             </defs>
-            <path d="${pathArea}" fill="url(#grad-area)"/>
-            <path d="${pathTop}" fill="none" stroke="url(#grad-line)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="${curvaFill}" fill="url(#curva-grad)"/>
+            <path d="${curvaPath}" fill="none" stroke="#8B5CF6" stroke-width="0.7" stroke-opacity="0.65"/>
           </svg>
-          <div class="ranking-lollipops">
-            ${vRanking.map((v, i) => {
-              const total = v.total_candidatos || 0;
-              const contrat = v.contratados || 0;
-              const taxa = total > 0 ? Math.round((contrat / total) * 100) : 0;
-              const stickPct = 100 - colTops[i] - 4; // do topo da bolinha até quase a base
-              const palette = palettes[i];
-              return `<div class="ranking-col" onclick="irParaCandidatosDaVaga(${v.id})" title="${(v.titulo || '').replace(/"/g, '&quot;')}">
-                <div class="ranking-pct">${taxa}%</div>
-                <div class="ranking-dot ranking-dot-${palette.dot}"></div>
-                <div class="ranking-stick ranking-stick-${palette.stick}" style="height:${stickPct.toFixed(2)}%"></div>
-              </div>`;
-            }).join('')}
-          </div>
-        </div>
-        <div class="ranking-labels">${labelsHtml}</div>`;
+          ${vRanking.map((v, i) => {
+            const total = v.total_candidatos || 0;
+            const contrat = v.contratados || 0;
+            const hTotal = (total / maxCands) * (chartH - 8);
+            const cor = coresVivas[i % coresVivas.length];
+            const styleBar = hTotal > 0
+              ? `height:${hTotal.toFixed(1)}px;background:${cor.gradient};`
+              : `height:6px;background:#D4A857;`;
+            return `<div class="ranking-col" onclick="irParaCandidatosDaVaga(${v.id})" title="${(v.titulo || '').replace(/"/g, '&quot;')}">
+              <div class="ranking-num-top">${total}<small>${contrat} contrat.</small></div>
+              <div class="ranking-bar" style="${styleBar}"></div>
+              <div class="ranking-label">
+                <div class="vaga-titulo">${v.titulo || '—'}</div>
+                <div class="vaga-empresa">${v.empresa || ''}</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+
+      // Bolinhas de porcentagem sobre a curva
+      const chartEl = containerRanking.querySelector('.grafico-ranking-chart');
+      if (chartEl && colPts.length > 0) {
+        const w = chartEl.clientWidth;
+        const hArea = chartEl.clientHeight - 28; // desconta altura do label
+        const svgNs = 'http://www.w3.org/2000/svg';
+        const overlay = document.createElementNS(svgNs, 'svg');
+        overlay.setAttribute('class', 'curva-bolhas');
+        overlay.setAttribute('viewBox', `0 0 ${w} ${hArea}`);
+        overlay.setAttribute('width', w);
+        overlay.setAttribute('height', hArea);
+        overlay.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:2;overflow:visible;';
+        colPts.forEach((p, i) => {
+          const cx = (p.xPct / 100) * w;
+          // Altura real da barra (não 100% do gráfico) — bolinha sobre a curva que é a tendência
+          const cy = hArea - (p.yPct / 100) * hArea;
+          const pctVaga = maxCands > 0 ? ((vRanking[i].total_candidatos || 0) / maxCands * 100).toFixed(0) : 0;
+          const cor = coresVivas[i % coresVivas.length].stroke;
+          const group = document.createElementNS(svgNs, 'g');
+          group.setAttribute('class', 'ranking-bolha-group');
+          group.style.pointerEvents = 'auto';
+          group.style.cursor = 'pointer';
+          group.setAttribute('onclick', `irParaCandidatosDaVaga(${vRanking[i].id})`);
+          // Sombra leve abaixo da bolinha
+          const shadow = document.createElementNS(svgNs, 'ellipse');
+          shadow.setAttribute('cx', cx);
+          shadow.setAttribute('cy', cy + 26);
+          shadow.setAttribute('rx', 20);
+          shadow.setAttribute('ry', 3);
+          shadow.setAttribute('fill', 'rgba(0,0,0,0.18)');
+          group.appendChild(shadow);
+          // Bolinha com borda colorida viva
+          const circle = document.createElementNS(svgNs, 'circle');
+          circle.setAttribute('cx', cx);
+          circle.setAttribute('cy', cy);
+          circle.setAttribute('r', 26);
+          circle.setAttribute('class', 'ranking-bolha-bg');
+          circle.setAttribute('stroke', cor);
+          group.appendChild(circle);
+          // % grande (texto principal)
+          const txt1 = document.createElementNS(svgNs, 'text');
+          txt1.setAttribute('x', cx);
+          txt1.setAttribute('y', cy - 3);
+          txt1.setAttribute('class', 'ranking-bolha-texto');
+          txt1.textContent = pctVaga + '%';
+          group.appendChild(txt1);
+          // Sub: total cand
+          const txt2 = document.createElementNS(svgNs, 'text');
+          txt2.setAttribute('x', cx);
+          txt2.setAttribute('y', cy + 9);
+          txt2.setAttribute('class', 'ranking-bolha-texto-sub');
+          txt2.textContent = vRanking[i].total_candidatos + ' cand';
+          group.appendChild(txt2);
+          overlay.appendChild(group);
+        });
+        chartEl.appendChild(overlay);
+      }
+
       containerLegend.innerHTML = `
-        <div><span class="leg-dot" style="background:#D4A857"></span>Candidatos totais</div>
-        <div><span class="leg-dot" style="background:#722F37"></span>Taxa de contratação</div>
-        <div><span class="leg-dot" style="background:#1A1A1A"></span>Líder</div>`;
+        <div><span class="leg-dot" style="background:linear-gradient(180deg, #F472B6, #EC4899)"></span>Volume por vaga</div>
+        <div><span class="leg-dot" style="background:#8B5CF6"></span>Curva de tendência</div>
+        <div style="color:#888;font-size:11px;margin-left:auto;">💡 Clique nas barras para ver os candidatos</div>`;
     } else {
       containerRanking.innerHTML = '<div class="empty">Nenhuma vaga ativa com candidatos</div>';
       containerLegend.innerHTML = '';
