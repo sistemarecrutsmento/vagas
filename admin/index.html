@@ -234,27 +234,7 @@
     /* Gráfico Ranking de Vagas - Barras verticais + curva */
     /* Novo Estilo: Vagas em Destaque (Cards Modernos) */
     .grafico-ranking { margin-top: 20px; }
-    /* Modal: Candidatos da Vaga (aberto a partir do Dashboard) */
-    .modal-cand-vaga { max-width: 720px; }
-    .modal-cand-vaga .modal-header { padding: 16px 20px; background: linear-gradient(180deg, #FAFAFA 0%, #fff 100%); border-bottom: 1px solid var(--borda); }
-    .modal-cand-vaga .modal-title-wrap { display: flex; flex-direction: column; gap: 2px; }
-    .modal-cand-vaga .modal-title-wrap small { font-size: 12px; color: var(--cinza-medio); font-weight: 500; }
-    .modal-cand-vaga .modal-body { padding: 0; max-height: 65vh; overflow-y: auto; }
-    .cand-vaga-item { padding: 12px 20px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.15s; }
-    .cand-vaga-item:hover { background: #FAFAFA; }
-    .cand-vaga-item:last-child { border-bottom: none; }
-    .cand-vaga-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-    .cand-vaga-info { flex: 1; min-width: 0; }
-    .cand-vaga-nome { font-size: 14px; font-weight: 600; color: var(--preto); margin-bottom: 2px; }
-    .cand-vaga-meta { font-size: 12px; color: var(--cinza-medio); }
-    .cand-vaga-etapa { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #F3F4F6; color: #4B5563; white-space: nowrap; }
-    .cand-vaga-etapa.etapa-em-andamento { background: #DBEAFE; color: #1E40AF; }
-    .cand-vaga-etapa.etapa-rejeitado { background: #FEE2E2; color: #991B1B; }
-    .cand-vaga-etapa.etapa-contratado { background: #DCFCE7; color: #166534; }
-    .cand-vaga-empty { text-align: center; padding: 40px 20px; color: var(--cinza-medio); }
-    .cand-vaga-loading { text-align: center; padding: 40px; }
-    .cand-vaga-loading .spinner { margin: 0 auto; }
-    .ranking-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 12px; }
+.ranking-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 12px; }
     .vaga-destaque-card { background: #fff; border: 1px solid var(--borda); border-radius: 12px; padding: 16px; position: relative; overflow: hidden; transition: all 0.2s ease; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px; }
     .vaga-destaque-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); border-color: #D1D5DB; }
     .vaga-destaque-card .card-bg-icon { position: absolute; right: -10px; bottom: -10px; font-size: 80px; opacity: 0.04; pointer-events: none; }
@@ -882,25 +862,6 @@
   </div>
 </div>
 
-<!-- MODAL CANDIDATOS DA VAGA (aberto a partir do Dashboard) -->
-<div class="modal-overlay" id="modal-cand-vaga">
-  <div class="modal modal-cand-vaga">
-    <div class="modal-header">
-      <div class="modal-title-wrap">
-        <h3 id="cand-vaga-titulo">Candidatos da vaga</h3>
-        <small id="cand-vaga-subtitulo"></small>
-      </div>
-      <button class="btn-fechar-modal" onclick="fecharModal('cand-vaga')" aria-label="Fechar">×</button>
-    </div>
-    <div class="modal-body" id="cand-vaga-lista">
-      <div class="cand-vaga-loading"><div class="spinner"></div></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secundario" onclick="fecharModal('cand-vaga')">Fechar</button>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL VAGA -->
 <div class="modal-overlay" id="modal-vaga">
   <div class="modal modal-lg">
@@ -1229,7 +1190,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260726132000_grafico_cards_v5_top4"></script>
+<script src="app.js?v=20260726132000_grafico_cards_v6_pagina"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
