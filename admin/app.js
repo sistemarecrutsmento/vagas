@@ -2120,40 +2120,247 @@ function limparFiltrosCandidatos() {
   carregarCandidatos();
 }
 
+// === BASE DE TALENTOS — VERSÃO NOVA ===
+let _candidatosState = {
+  todos: [],
+  filtrados: [],
+  aba: 'todos',
+  pagina: 1,
+  porPagina: 12,
+  fotoBgCache: {}
+};
+
+const TONS_AVATAR = [
+  '#722F37', '#8B3A45', '#A04555', '#9C5A6A',
+  '#5E7280', '#7B8B7B', '#A0765A', '#8E6F5A'
+];
+function corAvatarPara(nome) {
+  if (!nome) return TONS_AVATAR[0];
+  if (_candidatosState.fotoBgCache[nome]) return _candidatosState.fotoBgCache[nome];
+  let h = 0;
+  for (let i = 0; i < nome.length; i++) h = (h * 31 + nome.charCodeAt(i)) >>> 0;
+  const cor = TONS_AVATAR[h % TONS_AVATAR.length];
+  _candidatosState.fotoBgCache[nome] = cor;
+  return cor;
+}
+function iniciaisDe(nome) {
+  if (!nome) return '?';
+  const p = nome.trim().split(/\s+/).filter(Boolean);
+  if (p.length === 0) return '?';
+  if (p.length === 1) return p[0].slice(0, 1).toUpperCase();
+  return (p[0][0] + p[p.length - 1][0]).toUpperCase();
+}
+function htmlAvatar(c, classes) {
+  const cls = classes || 'cand-iniciais';
+  const temFoto = c.foto_url && typeof c.foto_url === 'string' && c.foto_url.startsWith('data:image/');
+  if (temFoto) {
+    return `<img class="${cls}" src="${c.foto_url}" alt="Foto de ${escapeHtml(c.nome || 'candidato')}" loading="lazy" />`;
+  }
+  return `<div class="${cls}" style="background:${corAvatarPara(c.nome)}">${iniciaisDe(c.nome)}</div>`;
+}
+function formatarCelular(v) {
+  if (!v) return '';
+  const d = String(v).replace(/\D/g, '');
+  if (d.length === 11) return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return v;
+}
+function statusCandidato(c) {
+  const ult = (c.ultimo_status || '').toLowerCase();
+  if (ult === 'contratado') return 'contratado';
+  if (ult === 'em_andamento' || ult === 'aprovado' || ult === 'em_processo') return 'em_processo';
+  return 'disponivel';
+}
+function labelStatus(s) {
+  return { disponivel: '🟢 Disponível', em_processo: '🟡 Em processo', contratado: '🔵 Contratado' }[s] || '🟢 Disponível';
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 async function carregarCandidatos() {
   popularSelectAreas();
   const tb = document.querySelector('#candidatos-table tbody');
-  tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
+  const cards = document.getElementById('candidatos-cards');
+  if (tb) tb.innerHTML = '<tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>';
+  if (cards) cards.innerHTML = '<div class="talentos-vazio"><div class="spinner"></div></div>';
   try {
     const area = document.getElementById('candidatos-filtro-area')?.value || '';
-    const busca = (document.getElementById('candidatos-filtro-busca')?.value || '').toLowerCase().trim();
     const url = API + '/api/admin/candidatos' + (area ? '?area=' + encodeURIComponent(area) : '');
     const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
-    let lista = data.candidatos || [];
-    if (busca) {
-      lista = lista.filter(c =>
-        (c.nome || '').toLowerCase().includes(busca) ||
-        (c.email || '').toLowerCase().includes(busca)
-      );
-    }
-    if (lista.length === 0) {
-      tb.innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato encontrado' + (area ? ' com a área "' + area + '"' : '') + '</td></tr>';
-      return;
-    }
-    tb.innerHTML = lista.map(c => {
+    _candidatosState.todos = data.candidatos || [];
+    aplicarBuscaEAbaCandidatos();
+  } catch (e) {
+    if (tb) tb.innerHTML = '<tr><td colspan="6" class="empty">Erro ao carregar</td></tr>';
+    if (cards) cards.innerHTML = '<div class="talentos-vazio"><div class="talentos-vazio-icone">⚠️</div><div class="talentos-vazio-titulo">Erro ao carregar candidatos</div><div class="talentos-vazio-texto">' + escapeHtml(e.message) + '</div></div>';
+    atualizarContadorCandidatos(0);
+  }
+}
+
+function aplicarBuscaEAbaCandidatos() {
+  const busca = (document.getElementById('candidatos-filtro-busca')?.value || '').toLowerCase().trim();
+  let lista = _candidatosState.todos.slice();
+  if (busca) {
+    lista = lista.filter(c => {
+      const campos = [c.nome, c.email, c.celular, c.cidade, c.estado]
+        .filter(Boolean).map(v => String(v).toLowerCase());
+      return campos.some(v => v.includes(busca));
+    });
+  }
+  const aba = _candidatosState.aba;
+  if (aba !== 'todos') {
+    lista = lista.filter(c => statusCandidato(c) === aba);
+  }
+  _candidatosState.filtrados = lista;
+  _candidatosState.pagina = 1;
+  renderizarCandidatos();
+  atualizarAbasCandidatos();
+  atualizarContadorCandidatos(lista.length);
+}
+
+function atualizarContadorCandidatos(qtdFiltrados) {
+  const el = document.getElementById('talentos-contador');
+  if (!el) return;
+  el.querySelector('.talentos-contador-num').textContent = String(qtdFiltrados);
+}
+
+function atualizarAbasCandidatos() {
+  const total = _candidatosState.todos.length;
+  if (total === 0) {
+    const abas = document.getElementById('talentos-abas');
+    if (abas) abas.style.display = 'none';
+    return;
+  }
+  const counts = { todos: total, disponivel: 0, em_processo: 0, contratado: 0 };
+  _candidatosState.todos.forEach(c => { counts[statusCandidato(c)]++; });
+  const temVariedade = (counts.em_processo + counts.contratado) > 0;
+  const abas = document.getElementById('talentos-abas');
+  if (abas) abas.style.display = temVariedade ? 'flex' : 'none';
+  ['todos','em_processo','contratado','disponivel'].forEach(k => {
+    const el = document.getElementById('talentos-aba-' + k + '-num');
+    if (el) el.textContent = String(counts[k]);
+  });
+}
+
+function filtrarCandidatosPorAba(aba) {
+  _candidatosState.aba = aba;
+  document.querySelectorAll('#talentos-abas .talentos-aba').forEach(b => {
+    b.classList.toggle('ativa', b.dataset.aba === aba);
+  });
+  aplicarBuscaEAbaCandidatos();
+}
+
+function renderizarCandidatos() {
+  const tb = document.querySelector('#candidatos-table tbody');
+  const cards = document.getElementById('candidatos-cards');
+  const lista = _candidatosState.filtrados;
+  if (lista.length === 0) {
+    const area = document.getElementById('candidatos-filtro-area')?.value || '';
+    const busca = (document.getElementById('candidatos-filtro-busca')?.value || '').trim();
+    const contexto = area ? ` com a área "${escapeHtml(area)}"` : (busca ? ` com "${escapeHtml(busca)}"` : '');
+    const vazio = `<div class="talentos-vazio">
+      <div class="talentos-vazio-icone">🔎</div>
+      <div class="talentos-vazio-titulo">Nenhum candidato encontrado${contexto}</div>
+      <div class="talentos-vazio-texto">Ajuste os filtros ou limpe para ver todos os candidatos cadastrados.</div>
+      <button class="talentos-vazio-btn" onclick="limparFiltrosCandidatos()">Limpar filtros</button>
+    </div>`;
+    if (tb) tb.innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato encontrado</td></tr>';
+    if (cards) cards.innerHTML = vazio;
+    const pag = document.getElementById('candidatos-paginacao');
+    if (pag) pag.style.display = 'none';
+    return;
+  }
+  const total = lista.length;
+  const porPagina = _candidatosState.porPagina;
+  const totalPaginas = Math.max(1, Math.ceil(total / porPagina));
+  if (_candidatosState.pagina > totalPaginas) _candidatosState.pagina = totalPaginas;
+  const inicio = (_candidatosState.pagina - 1) * porPagina;
+  const pagina = lista.slice(inicio, inicio + porPagina);
+
+  if (tb) {
+    tb.innerHTML = pagina.map(c => {
+      const cidade = c.cidade ? (c.cidade + (c.estado ? '/' + c.estado : '')) : '—';
       return `<tr>
-        <td data-label="Nome"><strong>${c.nome}</strong></td>
-        <td data-label="Email">${c.email || '—'}</td>
-        <td data-label="Telefone">${c.celular || '—'}</td>
-        <td data-label="Cidade">${c.cidade ? c.cidade + (c.estado ? '/' + c.estado : '') : '—'}</td>
+        <td data-label="Nome"><div class="cand-nome-cell">${htmlAvatar(c, 'cand-foto cand-iniciais')}<strong>${escapeHtml(c.nome || '—')}</strong></div></td>
+        <td data-label="Email">${escapeHtml(c.email || '—')}</td>
+        <td data-label="Telefone">${escapeHtml(formatarCelular(c.celular) || '—')}</td>
+        <td data-label="Cidade">${escapeHtml(cidade)}</td>
         <td data-label="Cadastro">${formatarData(c.criado_em)}</td>
-        <td data-label="Ações"><a class="btn-ver" href="javascript:void(0)" onclick="abrirCurriculo(${c.id})">👁 Ver currículo</a></td>
+        <td data-label="Ações"><button class="btn btn-primary cand-tabela-btn-ver" onclick="abrirCurriculo(${c.id})">👁 Ver perfil</button></td>
       </tr>`;
     }).join('');
-  } catch {
-    tb.innerHTML = '<tr><td colspan="6" class="alert-erro">Erro ao carregar</td></tr>';
   }
+
+  if (cards) {
+    cards.innerHTML = pagina.map(c => {
+      const cidade = c.cidade ? (c.cidade + (c.estado ? '/' + c.estado : '')) : 'Não informado';
+      const tel = formatarCelular(c.celular) || 'Não informado';
+      const email = c.email || 'Não informado';
+      const status = statusCandidato(c);
+      const temFoto = c.foto_url && typeof c.foto_url === 'string' && c.foto_url.startsWith('data:image/');
+      return `<div class="cand-card" data-id="${c.id}">
+        <div class="cand-card-topo">
+          <div class="cand-card-avatar" style="background:${corAvatarPara(c.nome)}">${
+            temFoto
+              ? `<img src="${c.foto_url}" alt="Foto de ${escapeHtml(c.nome || 'candidato')}" loading="lazy" />`
+              : iniciaisDe(c.nome)
+          }</div>
+          <div class="cand-card-nome">${escapeHtml(c.nome || '—')}</div>
+        </div>
+        <div class="cand-card-info">
+          <div class="cand-card-info-linha"><span class="ico">✉</span><span>${escapeHtml(email)}</span></div>
+          <div class="cand-card-info-linha"><span class="ico">📱</span><span>${escapeHtml(tel)}</span></div>
+          <div class="cand-card-info-linha">
+            <span class="ico">📍</span><span>${escapeHtml(cidade)}</span>
+            <span style="color:#bbb">·</span>
+            <span class="ico">📅</span><span>${formatarData(c.criado_em)}</span>
+          </div>
+        </div>
+        <div class="cand-card-meta">
+          <span class="cand-status ${status}">${labelStatus(status)}</span>
+        </div>
+        <div class="cand-card-rodape">
+          <button class="cand-card-btn-ver" onclick="abrirCurriculo(${c.id})">👁 Ver perfil</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  const pagEl = document.getElementById('candidatos-paginacao');
+  const infoEl = document.getElementById('candidatos-paginacao-info');
+  const btnsEl = document.getElementById('candidatos-paginacao-btns');
+  if (total > porPagina) {
+    if (pagEl) pagEl.style.display = 'flex';
+    if (infoEl) infoEl.textContent = `Mostrando ${inicio + 1}–${Math.min(inicio + porPagina, total)} de ${total} candidatos`;
+    if (btnsEl) {
+      const html = [];
+      html.push(`<button class="talentos-pag-btn" ${_candidatosState.pagina === 1 ? 'disabled' : ''} onclick="irPaginaCandidatos(${_candidatosState.pagina - 1})">‹</button>`);
+      for (let p = 1; p <= totalPaginas; p++) {
+        html.push(`<button class="talentos-pag-btn ${p === _candidatosState.pagina ? 'ativa' : ''}" onclick="irPaginaCandidatos(${p})">${p}</button>`);
+      }
+      html.push(`<button class="talentos-pag-btn" ${_candidatosState.pagina === totalPaginas ? 'disabled' : ''} onclick="irPaginaCandidatos(${_candidatosState.pagina + 1})">›</button>`);
+      btnsEl.innerHTML = html.join('');
+    }
+  } else {
+    if (pagEl) pagEl.style.display = 'none';
+  }
+}
+
+function irPaginaCandidatos(p) {
+  if (p < 1) return;
+  _candidatosState.pagina = p;
+  renderizarCandidatos();
+  const page = document.getElementById('page-candidatos');
+  if (page) page.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function abrirPainelFiltrosCandidatos() {
+  const sel = document.getElementById('candidatos-filtro-area');
+  if (sel) { sel.scrollIntoView({ behavior: 'smooth', block: 'center' }); sel.focus(); }
 }
 
 async function abrirCurriculo(id) {
@@ -2175,52 +2382,72 @@ async function abrirCurriculo(id) {
 
     const areas = Array.isArray(cand.areas_interesse) ? cand.areas_interesse : [];
     const areasHtml = areas.length
-      ? areas.map(a => `<span class="badge-area">${a}</span>`).join(' ')
+      ? areas.map(a => `<span class="badge-area">${escapeHtml(a)}</span>`).join(' ')
       : '<span style="color:var(--cinza-medio)">Nenhuma área selecionada</span>';
 
+    const temFoto = cand.foto_url && typeof cand.foto_url === 'string' && cand.foto_url.startsWith('data:image/');
+    const avatarHtml = temFoto
+      ? `<img class="curriculo-foto" src="${cand.foto_url}" alt="Foto de ${escapeHtml(cand.nome || 'candidato')}" />`
+      : `<div class="curriculo-foto-iniciais" style="background:${corAvatarPara(cand.nome)}">${iniciaisDe(cand.nome)}</div>`;
+    const statusCand = statusCandidato(cand);
+    const headerHtml = `
+      <div class="curriculo-header">
+        ${avatarHtml}
+        <div class="curriculo-header-info">
+          <h2 class="curriculo-nome">${escapeHtml(cand.nome || '—')}</h2>
+          <div class="curriculo-sub">${escapeHtml(cand.email || '—')}</div>
+          <div class="curriculo-sub">${escapeHtml(formatarCelular(cand.celular) || 'Não informado')}</div>
+          <div class="curriculo-badges">
+            <span class="cand-status ${statusCand}">${labelStatus(statusCand)}</span>
+            <span class="curriculo-meta-inline">📅 Cadastrado em ${formatarData(cand.criado_em)}</span>
+          </div>
+        </div>
+      </div>`;
+
     body.innerHTML = `
+      ${headerHtml}
       <div class="curriculo-grid">
+        <div class="curriculo-card curriculo-full">
+          <h4>📁 Áreas de interesse</h4>
+          <div class="areas-badges">${areasHtml}</div>
+        </div>
         <div class="curriculo-card">
           <h4>👤 Dados pessoais</h4>
-          <div class="kv"><span>Nome</span><strong>${cand.nome || '—'}</strong></div>
-          <div class="kv"><span>CPF</span><strong>${cand.cpf || '—'}</strong></div>
-          <div class="kv"><span>Nascimento</span><strong>${formatarData(cand.data_nascimento)}</strong></div>
-          <div class="kv"><span>Sexo</span><strong>${cand.sexo || '—'}</strong></div>
-          <div class="kv"><span>Email</span><strong>${cand.email || '—'}</strong></div>
-          <div class="kv"><span>Celular</span><strong>${cand.celular || '—'}</strong></div>
-          <div class="kv"><span>Acessibilidade</span><strong>${cand.acessibilidade || 'Nenhuma'}</strong></div>
+          <div class="kv"><span>Nome</span><strong>${escapeHtml(cand.nome || 'Não informado')}</strong></div>
+          <div class="kv"><span>Email</span><strong>${escapeHtml(cand.email || 'Não informado')}</strong></div>
+          <div class="kv"><span>CPF</span><strong>${escapeHtml(cand.cpf || 'Não informado')}</strong></div>
+          <div class="kv"><span>Celular</span><strong>${escapeHtml(formatarCelular(cand.celular) || 'Não informado')}</strong></div>
+          <div class="kv"><span>Data de nascimento</span><strong>${cand.data_nascimento ? formatarData(cand.data_nascimento) : 'Não informado'}</strong></div>
+          <div class="kv"><span>Sexo</span><strong>${escapeHtml(cand.sexo || 'Não informado')}</strong></div>
+          <div class="kv"><span>Acessibilidade</span><strong>${escapeHtml(cand.acessibilidade || 'Não informado')}</strong></div>
         </div>
         <div class="curriculo-card">
           <h4>📍 Endereço</h4>
-          <div class="kv"><span>CEP</span><strong>${cand.cep || '—'}</strong></div>
-          <div class="kv"><span>Logradouro</span><strong>${(cand.logradouro || '—') + (cand.numero ? ', ' + cand.numero : '')}${cand.complemento ? ' — ' + cand.complemento : ''}</strong></div>
-          <div class="kv"><span>Bairro</span><strong>${cand.bairro || '—'}</strong></div>
-          <div class="kv"><span>Cidade/UF</span><strong>${(cand.cidade || '—') + (cand.estado ? '/' + cand.estado : '')}</strong></div>
+          <div class="kv"><span>CEP</span><strong>${escapeHtml(cand.cep || 'Não informado')}</strong></div>
+          <div class="kv"><span>Cidade/UF</span><strong>${escapeHtml((cand.cidade || '—') + (cand.estado ? '/' + cand.estado : ''))}</strong></div>
+          <div class="kv"><span>Bairro</span><strong>${escapeHtml(cand.bairro || 'Não informado')}</strong></div>
+          <div class="kv"><span>Logradouro</span><strong>${escapeHtml(cand.logradouro || 'Não informado')}${cand.numero ? ', ' + escapeHtml(cand.numero) : ''}</strong></div>
+          <div class="kv"><span>Complemento</span><strong>${escapeHtml(cand.complemento || 'Não informado')}</strong></div>
         </div>
         <div class="curriculo-card">
-          <h4>🎓 Escolaridade</h4>
-          <div class="kv"><span>Formação</span><strong>${cand.formacao || '—'}</strong></div>
-          <div class="kv"><span>Instituição</span><strong>${cand.instituicao || '—'}</strong></div>
-          <div class="kv"><span>Curso</span><strong>${cand.curso || '—'}</strong></div>
-          <div class="kv"><span>Situação</span><strong>${cand.situacao || '—'}</strong></div>
-          <div class="kv"><span>Conclusão</span><strong>${formatarData(cand.data_conclusao)}</strong></div>
-          <div class="kv"><span>Primeiro emprego?</span><strong>${cand.primeiro_emprego ? 'Sim' : 'Não'}</strong></div>
+          <h4>🎓 Formação</h4>
+          <div class="kv"><span>Escolaridade</span><strong>${escapeHtml(cand.formacao || 'Não informado')}</strong></div>
+          <div class="kv"><span>Instituição</span><strong>${escapeHtml(cand.instituicao || 'Não informado')}</strong></div>
+          <div class="kv"><span>Curso</span><strong>${escapeHtml(cand.curso || 'Não informado')}</strong></div>
+          <div class="kv"><span>Situação</span><strong>${escapeHtml(cand.situacao || 'Não informado')}</strong></div>
+          <div class="kv"><span>Conclusão</span><strong>${cand.data_conclusao ? formatarData(cand.data_conclusao) : 'Não informado'}</strong></div>
+          <div class="kv"><span>Primeiro emprego?</span><strong>${cand.primeiro_emprego ? '✅ Sim' : 'Não'}</strong></div>
         </div>
         <div class="curriculo-card">
-          <h4>🎯 Áreas de interesse</h4>
-          <div class="areas-badges" style="margin-top:8px">${areasHtml}</div>
-        </div>
-        <div class="curriculo-card curriculo-full">
-          <h4>💼 Experiências</h4>
-          <pre style="white-space:pre-wrap;font-family:inherit;background:#fafafa;padding:10px;border-radius:6px;margin-top:6px">${cand.experiencia || 'Não informado'}</pre>
+          <h4>💼 Experiência</h4>
+          <div class="kv"><span>Histórico</span><strong style="white-space:pre-wrap">${escapeHtml(cand.experiencia || 'Não informado')}</strong></div>
         </div>
         <div class="curriculo-card curriculo-full">
           <h4>📝 Sobre você</h4>
-          <pre style="white-space:pre-wrap;font-family:inherit;background:#fafafa;padding:10px;border-radius:6px;margin-top:6px">${cand.sobre_voce || 'Não informado'}</pre>
+          <div style="font-size:13px;color:#333;white-space:pre-wrap">${escapeHtml(cand.sobre_voce || 'Não informado')}</div>
         </div>
-        <div class="curriculo-card curriculo-full">
-          <h4>📊 Status no Banco de Talentos</h4>
-          <div class="kv"><span>Cadastro criado em</span><strong>${formatarData(cand.criado_em)}</strong></div>
+        <div class="curriculo-card">
+          <h4>🔒 Preferências</h4>
           <div class="kv"><span>Autoriza banco de talentos</span><strong>${cand.banco_talentos ? '✅ Sim' : '❌ Não'}</strong></div>
         </div>
       </div>`;
@@ -2228,7 +2455,6 @@ async function abrirCurriculo(id) {
     body.innerHTML = '<div class="alert alert-erro">Erro: ' + e.message + '</div>';
   }
 }
-
 // ===== CANDIDATURAS =====
 // ===== CANDIDATURAS (visão por vaga) =====
 let vagaAtualCands = null;
