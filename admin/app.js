@@ -1116,10 +1116,13 @@ async function carregarDashboardV2() {
       if (lineEl) lineEl.setAttribute('d', '');
     }
     document.getElementById('conversao-valor').textContent = (c.atual || 0) + '%';
-    const convDetalhes = document.getElementById('conversao-contratados');
-    if (convDetalhes) {
-      // texto já existe no HTML ("contratados de X processos")
-    }
+    // Texto "aprovados x contratados" — IDs preenchidos pelo HTML:
+    //   conversao-contratados = nº de "aprovados" (= passaram da triagem = c.total)
+    //   conversao-total       = nº de "contratados" (= c.contratados)
+    const elAprov = document.getElementById('conversao-contratados');
+    const elContr = document.getElementById('conversao-total');
+    if (elAprov) elAprov.textContent = (c.total ?? 0);
+    if (elContr) elContr.textContent = (c.contratados ?? 0);
     
     // === Próximas Entrevistas ===
     const entrevistas = data.proximas_entrevistas || [];
