@@ -482,7 +482,7 @@
     <h1>🔐 Painel Admin</h1>
     <p class="sub">Acesso restrito para recrutadores</p>
     <div id="alert-login"></div>
-    <form id="login-form" onsubmit="event.preventDefault(); fazerLogin(); return false;">
+    <form id="login-form" onsubmit="return loginSeguro(event);">
       <div class="form-group">
         <label>Email</label>
         <input type="email" id="login-email" placeholder="admin@empresa.com" value="fabio08dejesusjunior@gmail.com">
@@ -1212,5 +1212,33 @@
 <script src="app.js?v=20260726132000_grafico_cards_v15_aprov_30d_x_contrat"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
+<script>
+async function loginSeguro(event) {
+  event.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const alertEl = document.getElementById('alert-login');
+  const botao = document.querySelector('#login-form button[type="submit"]');
+  botao.disabled = true;
+  botao.textContent = 'Entrando...';
+  try {
+    const r = await fetch('https://recrutamento-api-novo.onrender.com/api/admin/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, senha})
+    });
+    const data = await r.json();
+    if (!r.ok || !data.token) throw new Error(data.erro || 'Credenciais inválidas');
+    localStorage.setItem('admin_token', data.token);
+    localStorage.setItem('admin_tipo', data.usuario?.tipo || 'admin');
+    localStorage.setItem('admin_usuario', JSON.stringify(data.usuario || {}));
+    location.reload();
+  } catch (e) {
+    alertEl.innerHTML = '<div class="alert alert-erro">' + (e.message || 'Não foi possível entrar') + '</div>';
+    botao.disabled = false;
+    botao.textContent = 'Entrar';
+  }
+  return false;
+}
+</script>
 </body>
 </html>
