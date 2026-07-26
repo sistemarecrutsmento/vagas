@@ -779,14 +779,23 @@ async function carregarDashboardV2() {
     ];
     document.getElementById('kpis-grid').innerHTML = kpis.map(k => {
       const delta = k.delta == null ? '' : (k.delta > 0 ? `<span class="kpi-delta up">+${k.delta}% este mês</span>` : k.delta < 0 ? `<span class="kpi-delta down">${k.delta}% este mês</span>` : `<span class="kpi-delta flat">0% este mês</span>`);
-      // Card "Vagas ativas" é clicável — abre modal com lista de todas as vagas publicadas
-      const isVagasAtivas = k.label === 'Vagas ativas';
-      return `<div class="kpi-card kpi-${k.cor}${isVagasAtivas ? ' kpi-clickable' : ''}"${isVagasAtivas ? ' onclick="abrirModalVagasAtivas()" title="Ver todas as vagas ativas"' : ''}>
+
+      // Cards clicáveis — cada um leva pra página própria
+      let link = null, linkText = null, titleLink = null;
+      if (k.label === 'Vagas ativas') {
+        link = "abrirModalVagasAtivas()"; linkText = 'ver lista →'; titleLink = 'Ver todas as vagas ativas';
+      } else if (k.label === 'Candidatos') {
+        link = "window.location.href='candidatos.html'"; linkText = 'base de talentos →'; titleLink = 'Abrir base de talentos';
+      } else if (k.label === 'Entrevistas agendadas') {
+        link = "window.location.href='agenda.html'"; linkText = 'abrir agenda →'; titleLink = 'Abrir agenda de entrevistas';
+      }
+      const clickable = !!link;
+      return `<div class="kpi-card kpi-${k.cor}${clickable ? ' kpi-clickable' : ''}"${clickable ? ` onclick="${link}" title="${titleLink}"` : ''}>
         <div class="kpi-top">
           <div class="kpi-icon">${k.icon}</div>
-          ${isVagasAtivas ? '<div class="kpi-link-icon">🔗</div>' : ''}
+          ${clickable ? '<div class="kpi-link-icon">🔗</div>' : ''}
         </div>
-        <div class="kpi-label">${k.label}${isVagasAtivas ? ' <span class="kpi-abre">ver lista →</span>' : ''}</div>
+        <div class="kpi-label">${k.label}${linkText ? ' <span class="kpi-abre">' + linkText + '</span>' : ''}</div>
         <div class="kpi-valor">${k.valor}</div>
         ${delta}
       </div>`;
