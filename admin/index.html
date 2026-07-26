@@ -344,7 +344,12 @@
       font-size: 14px; background: var(--branco); min-width: 200px;
     }
     .talentos-select:focus { outline: none; border-color: var(--vinho); }
-    .talentos-btn-aplicar, .talentos-btn-limpar { padding: 10px 18px; }
+    .talentos-btn-aplicar, .talentos-btn-limpar { 
+      width: auto !important; 
+      padding: 8px 14px !important; 
+      font-size: 13px !important;
+      white-space: nowrap;
+    }
     .talentos-btn-filtros-mobile { display: none; }
 
     /* Tabs dinâmicas */
@@ -1334,14 +1339,18 @@
             <select id="candidatos-filtro-area" class="talentos-select">
               <option value="">📂 Todas as áreas</option>
             </select>
-            <select id="candidatos-filtro-status" class="talentos-select" style="display:none">
-              <option value="">Todos os status</option>
-                <option value="em_processo">🟡 Em processo</option>
+            <select id="candidatos-filtro-cidade" class="talentos-select">
+              <option value="">🏙 Todas as cidades</option>
+            </select>
+            <select id="candidatos-filtro-status" class="talentos-select">
+              <option value="">🎯 Todos os status</option>
+              <option value="em_processo">🟡 Em processo</option>
               <option value="contratado">🔵 Contratado</option>
+              <option value="disponivel">🟢 Disponível</option>
             </select>
             <button id="talentos-btn-filtros-mobile" class="talentos-btn-filtros-mobile" onclick="abrirPainelFiltrosCandidatos()" type="button">⚙ Filtros</button>
-            <button class="btn btn-primary talentos-btn-aplicar" onclick="carregarCandidatos()">Aplicar</button>
-            <button class="btn btn-sec talentos-btn-limpar" onclick="limparFiltrosCandidatos()">Limpar</button>
+            <button type="button" class="btn btn-primary talentos-btn-aplicar" style="width:auto;padding:8px 14px;font-size:13px" onclick="carregarCandidatos()">Aplicar</button>
+            <button type="button" class="btn btn-sec talentos-btn-limpar" style="width:auto;padding:8px 14px;font-size:13px" onclick="limparFiltrosCandidatos()">Limpar</button>
           </div>
         </div>
       </div>
