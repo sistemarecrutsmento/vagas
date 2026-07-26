@@ -560,16 +560,16 @@
     }
     .vagas-lista-cabecalho {
       display: grid;
-      grid-template-columns: 56px 2.4fr 1.4fr 1.2fr 0.9fr 1fr 0.9fr 48px;
-      gap: 14px; padding: 14px 18px; background: #FAFAFA;
+      grid-template-columns: 56px minmax(220px, 2.4fr) minmax(140px, 1.4fr) minmax(120px, 1.2fr) 90px 100px minmax(100px, 1fr) 48px;
+      gap: 12px; padding: 14px 18px; background: #FAFAFA;
       border-bottom: 1px solid var(--borda);
       font-size: 11px; font-weight: 600; color: #888;
       text-transform: uppercase; letter-spacing: 0.6px;
     }
     .vaga-linha {
       display: grid;
-      grid-template-columns: 56px 2.4fr 1.4fr 1.2fr 0.9fr 1fr 0.9fr 48px;
-      gap: 14px; padding: 14px 18px; align-items: center;
+      grid-template-columns: 56px minmax(220px, 2.4fr) minmax(140px, 1.4fr) minmax(120px, 1.2fr) 90px 100px minmax(100px, 1fr) 48px;
+      gap: 12px; padding: 14px 18px; align-items: center;
       border-bottom: 1px solid #F0F0F0;
       transition: background .12s;
     }
@@ -624,12 +624,12 @@
     .vaga-linha-tag.tag-encerrada { background: #F3F4F6; color: #6B7280; }
 
     .vaga-linha-empresa {
-      color: #444; font-size: 14px; line-height: 1.4;
-      word-break: break-word;
+      color: #444; font-size: 13px; line-height: 1.4;
+      word-break: break-word; overflow-wrap: anywhere;
     }
     .vaga-linha-categoria {
-      color: #555; font-size: 13px; line-height: 1.4;
-      word-break: break-word;
+      color: #555; font-size: 12px; line-height: 1.4;
+      word-break: break-word; overflow-wrap: anywhere;
     }
 
     /* Coluna Candidatos (número grande colorido + "candidatos") */
@@ -655,8 +655,9 @@
 
     /* Coluna PUBLICADA HÁ */
     .vaga-linha-tempo {
-      color: #555; font-size: 13px; line-height: 1.4;
+      color: #555; font-size: 12px; line-height: 1.4;
       display: inline-flex; align-items: center; gap: 4px;
+      white-space: nowrap;
     }
     .vaga-linha-tempo.vazio { color: #BBB; }
 
