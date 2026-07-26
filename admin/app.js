@@ -1211,107 +1211,59 @@ async function carregarDashboardV2() {
 
 const chartH = 220; // deve bater com CSS
       // Cores vivas (mesmas do funil de etapas e KPIs)
+      // Cores vivas (estilo escada)
       const coresVivas = [
-        { gradient: 'linear-gradient(180deg, #F472B6 0%, #EC4899 100%)', stroke: '#EC4899' },
-        { gradient: 'linear-gradient(180deg, #A78BFA 0%, #8B5CF6 100%)', stroke: '#8B5CF6' },
-        { gradient: 'linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%)', stroke: '#3B82F6' },
-        { gradient: 'linear-gradient(180deg, #22D3EE 0%, #06B6D4 100%)', stroke: '#06B6D4' },
-        { gradient: 'linear-gradient(180deg, #34D399 0%, #10B981 100%)', stroke: '#10B981' }
+        { fill: '#EC4899', stroke: '#F472B6', label: 'rosa' },
+        { fill: '#FACC15', stroke: '#FDE047', label: 'amarelo' },
+        { fill: '#374151', stroke: '#4B5563', label: 'cinza' },
+        { fill: '#22D3EE', stroke: '#67E8F9', label: 'ciano' },
+        { fill: '#FACC15', stroke: '#FDE047', label: 'amarelo2' },
+        { fill: '#60A5FA', stroke: '#93C5FD', label: 'azul' },
+        { fill: '#34D399', stroke: '#6EE7B7', label: 'verde' }
       ];
       containerRanking.innerHTML = `
-        <div class="grafico-ranking-chart" style="position:relative;">
-          <svg class="curva-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="curva-grad" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.22"/>
-                <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-            <path d="${curvaFill}" fill="url(#curva-grad)"/>
-            <path d="${curvaPath}" fill="none" stroke="#8B5CF6" stroke-width="0.7" stroke-opacity="0.65"/>
+        <div class="grafico-ranking-chart">
+          <svg class="ranking-stair-svg" viewBox="0 0 600 320" preserveAspectRatio="none">
+            <line class="ranking-base-line" x1="20" y1="280" x2="580" y2="280"/>
+            ${vRanking.map((v, i) => {
+              const total = v.total_candidatos || 0;
+              const contrat = v.contratados || 0;
+              const n = vRanking.length;
+              const maxC = Math.max(...vRanking.map(r => r.total_candidatos || 0), 1);
+              const barW = 60;
+              const spanTotal = 560;
+              const span = n === 1 ? 0 : (spanTotal - barW) / (n - 1);
+              const x = n === 1 ? 270 : (20 + i * span);
+              const hTotal = (total / maxC) * 170;
+              const hContrat = total > 0 ? (contrat / total) * hTotal : 0;
+              const cor = coresVivas[i % coresVivas.length];
+              const topY = 280 - hTotal;
+              const cx = x + barW / 2;
+              const lineY2 = Math.max(topY - 70, 20);
+              const lineY1 = topY;
+              const pct = maxC > 0 ? Math.round((total / maxC) * 100) : 0;
+              const dotR = 9;
+              const tituloCurto = (v.titulo || '—').length > 20 ? (v.titulo || '—').slice(0, 18) + '…' : (v.titulo || '—');
+              const empresaCurta = (v.empresa || '').slice(0, 22);
+              return `
+                <line x1="${cx}" y1="${lineY1}" x2="${cx}" y2="${lineY2}" stroke="${cor.fill}" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+                <circle class="ranking-stair-dot" cx="${cx}" cy="${lineY2}" r="${dotR}" fill="${cor.fill}" stroke="#FFFFFF" stroke-width="2"/>
+                <text class="ranking-stair-pct" x="${cx}" y="${lineY2 - 22}" fill="${cor.fill}">${pct}%</text>
+                <text class="ranking-stair-pct-sub" x="${cx}" y="295" style="font-size:11px;fill:#1A1A1A;font-weight:700;">${tituloCurto}</text>
+                <text class="ranking-stair-pct-sub" x="${cx}" y="309" style="font-size:9px;fill:#888;font-weight:500;">${empresaCurta}</text>
+                <polygon class="ranking-stair-shadow" points="${x + barW},${topY} ${x + barW + 6},${topY - 3} ${x + barW + 6},${280} ${x + barW},${280}" fill="rgba(0,0,0,0.25)"/>
+                <rect class="ranking-stair-bar" x="${x}" y="${topY}" width="${barW}" height="${hTotal}" fill="${cor.fill}" onclick="irParaCandidatosDaVaga(${v.id})">
+                  <title>${v.titulo} — ${total} candidatos${contrat > 0 ? ' (' + contrat + ' contratado' + (contrat === 1 ? '' : 's') + ')' : ''}</title>
+                </rect>
+                ${hContrat > 0 ? `<rect x="${x}" y="${topY}" width="${barW}" height="${hContrat}" fill="#7B2330" opacity="0.92"/>` : ''}
+              `;
+            }).join('')}
           </svg>
-          ${vRanking.map((v, i) => {
-            const total = v.total_candidatos || 0;
-            const contrat = v.contratados || 0;
-            const hTotal = (total / maxCands) * (chartH - 8);
-            const cor = coresVivas[i % coresVivas.length];
-            const styleBar = hTotal > 0
-              ? `height:${hTotal.toFixed(1)}px;background:${cor.gradient};`
-              : `height:6px;background:#D4A857;`;
-            return `<div class="ranking-col" onclick="irParaCandidatosDaVaga(${v.id})" title="${(v.titulo || '').replace(/"/g, '&quot;')}">
-              <div class="ranking-num-top">${total}<small>${contrat} contrat.</small></div>
-              <div class="ranking-bar" style="${styleBar}"></div>
-              <div class="ranking-label">
-                <div class="vaga-titulo">${v.titulo || '—'}</div>
-                <div class="vaga-empresa">${v.empresa || ''}</div>
-              </div>
-            </div>`;
-          }).join('')}
         </div>`;
 
-      // Bolinhas de porcentagem sobre a curva
-      const chartEl = containerRanking.querySelector('.grafico-ranking-chart');
-      if (chartEl && colPts.length > 0) {
-        const w = chartEl.clientWidth;
-        const hArea = chartEl.clientHeight - 28; // desconta altura do label
-        const svgNs = 'http://www.w3.org/2000/svg';
-        const overlay = document.createElementNS(svgNs, 'svg');
-        overlay.setAttribute('class', 'curva-bolhas');
-        overlay.setAttribute('viewBox', `0 0 ${w} ${hArea}`);
-        overlay.setAttribute('width', w);
-        overlay.setAttribute('height', hArea);
-        overlay.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:2;overflow:visible;';
-        colPts.forEach((p, i) => {
-          const cx = (p.xPct / 100) * w;
-          // Altura real da barra (não 100% do gráfico) — bolinha sobre a curva que é a tendência
-          const cy = hArea - (p.yPct / 100) * hArea;
-          const pctVaga = maxCands > 0 ? ((vRanking[i].total_candidatos || 0) / maxCands * 100).toFixed(0) : 0;
-          const cor = coresVivas[i % coresVivas.length].stroke;
-          const group = document.createElementNS(svgNs, 'g');
-          group.setAttribute('class', 'ranking-bolha-group');
-          group.style.pointerEvents = 'auto';
-          group.style.cursor = 'pointer';
-          group.setAttribute('onclick', `irParaCandidatosDaVaga(${vRanking[i].id})`);
-          // Sombra leve abaixo da bolinha
-          const shadow = document.createElementNS(svgNs, 'ellipse');
-          shadow.setAttribute('cx', cx);
-          shadow.setAttribute('cy', cy + 26);
-          shadow.setAttribute('rx', 20);
-          shadow.setAttribute('ry', 3);
-          shadow.setAttribute('fill', 'rgba(0,0,0,0.18)');
-          group.appendChild(shadow);
-          // Bolinha com borda colorida viva
-          const circle = document.createElementNS(svgNs, 'circle');
-          circle.setAttribute('cx', cx);
-          circle.setAttribute('cy', cy);
-          circle.setAttribute('r', 26);
-          circle.setAttribute('class', 'ranking-bolha-bg');
-          circle.setAttribute('stroke', cor);
-          group.appendChild(circle);
-          // % grande (texto principal)
-          const txt1 = document.createElementNS(svgNs, 'text');
-          txt1.setAttribute('x', cx);
-          txt1.setAttribute('y', cy - 3);
-          txt1.setAttribute('class', 'ranking-bolha-texto');
-          txt1.textContent = pctVaga + '%';
-          group.appendChild(txt1);
-          // Sub: total cand
-          const txt2 = document.createElementNS(svgNs, 'text');
-          txt2.setAttribute('x', cx);
-          txt2.setAttribute('y', cy + 9);
-          txt2.setAttribute('class', 'ranking-bolha-texto-sub');
-          txt2.textContent = vRanking[i].total_candidatos + ' cand';
-          group.appendChild(txt2);
-          overlay.appendChild(group);
-        });
-        chartEl.appendChild(overlay);
-      }
-
       containerLegend.innerHTML = `
-        <div><span class="leg-dot" style="background:linear-gradient(180deg, #F472B6, #EC4899)"></span>Volume por vaga</div>
-        <div><span class="leg-dot" style="background:#8B5CF6"></span>Curva de tendência</div>
+        <div><span class="leg-dot" style="background:#7B2330"></span>Contratados</div>
         <div style="color:#888;font-size:11px;margin-left:auto;">💡 Clique nas barras para ver os candidatos</div>`;
-    } else {
       containerRanking.innerHTML = '<div class="empty">Nenhuma vaga ativa com candidatos</div>';
       containerLegend.innerHTML = '';
     }
