@@ -1221,46 +1221,41 @@ const chartH = 220; // deve bater com CSS
         { fill: '#60A5FA', stroke: '#93C5FD', label: 'azul' },
         { fill: '#34D399', stroke: '#6EE7B7', label: 'verde' }
       ];
-      // Gráfico em rampa: segmentos coloridos, linha vertical e bolinha de percentual
+      // Estilo de Cards Modernos (Vagas em Destaque)
       containerRanking.innerHTML = `
-        <div class="grafico-ranking-chart">
-          <svg class="ranking-stair-svg" viewBox="0 0 600 320" preserveAspectRatio="none">
-            <line class="ranking-base-line" x1="0" y1="270" x2="600" y2="270"/>
-            ${(() => {
-              const n = vRanking.length;
-              const maxC = Math.max(...vRanking.map(r => r.total_candidatos || 0), 1);
-              const segW = 560 / n;
-              const x0 = 20;
-              const rampLow = 238;
-              const rampHigh = 72;
-              let svg = '';
-              vRanking.forEach((v, i) => {
-                const cor = coresVivas[i % coresVivas.length];
-                const total = v.total_candidatos || 0;
-                const contrat = v.contratados || 0;
-                const left = x0 + i * segW;
-                const right = left + segW;
-                const yLeft = rampLow - (i / n) * (rampLow - rampHigh);
-                const yRight = rampLow - ((i + 1) / n) * (rampLow - rampHigh);
-                const pct = Math.round((total / maxC) * 100);
-                const dotX = right - 5;
-                const dotY = yRight;
-                const title = (v.titulo || '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                const short = title.length > 15 ? title.slice(0, 14) + '…' : title;
-                svg += `
-                  <polygon class="ranking-stair-bar" points="${left},270 ${left},${yLeft} ${right},${yRight} ${right},270" fill="${cor.fill}" onclick="irParaCandidatosDaVaga(${v.id})">
-                    <title>${title} — ${total} candidatos</title>
-                  </polygon>
-                  <line x1="${dotX}" y1="${dotY}" x2="${dotX}" y2="${Math.max(dotY - 62, 24)}" stroke="${cor.fill}" stroke-width="4" stroke-linecap="round"/>
-                  <circle class="ranking-stair-dot" cx="${dotX}" cy="${Math.max(dotY - 62, 24)}" r="10" fill="${cor.fill}" stroke="#fff" stroke-width="2"/>
-                  <text class="ranking-stair-pct" x="${dotX}" y="${Math.max(dotY - 85, 18)}" fill="${cor.fill}">${pct}%</text>
-                  <text class="ranking-stair-pct-sub" x="${left + segW / 2}" y="291">${short}</text>
-                  ${contrat ? `<text class="ranking-stair-pct-sub" x="${left + segW / 2}" y="306" fill="#7B2330">${contrat} contratado${contrat > 1 ? 's' : ''}</text>` : ''}
-                `;
-              });
-              return svg;
-            })()}
-          </svg>
+        <div class="ranking-cards-grid">
+          ${vRanking.map((v, i) => {
+            const total = v.total_candidatos || 0;
+            const contrat = v.contratados || 0;
+            const maxC = Math.max(...vRanking.map(r => r.total_candidatos || 0), 1);
+            const pct = Math.round((total / maxC) * 100);
+            const cor = coresVivas[i % coresVivas.length].fill;
+            return `
+              <div class="vaga-destaque-card" onclick="irParaCandidatosDaVaga(${v.id})">
+                <div class="card-bg-icon">💼</div>
+                <div class="vaga-card-header">
+                  <div class="vaga-card-info">
+                    <div class="vaga-card-title">${v.titulo || '—'}</div>
+                    <div class="vaga-card-empresa">${v.empresa || ''}</div>
+                  </div>
+                  <div class="vaga-card-pct-badge" style="color:${cor};background:${cor}15">${pct}% do topo</div>
+                </div>
+                <div class="vaga-card-stats">
+                  <div class="vaga-stat-item">
+                    <div class="vaga-stat-val">${total}</div>
+                    <div class="vaga-stat-label">Candidatos</div>
+                  </div>
+                  ${contrat > 0 ? `
+                  <div class="vaga-stat-item">
+                    <div class="vaga-stat-val" style="color:#7B2330">${contrat}</div>
+                    <div class="vaga-stat-label">Contratados</div>
+                  </div>` : ''}
+                </div>
+                <div class="vaga-card-progress">
+                  <div class="vaga-card-progress-fill" style="width:${pct}%; background:${cor}"></div>
+                </div>
+              </div>`;
+          }).join('')}
         </div>`;
 
       containerLegend.innerHTML = `
