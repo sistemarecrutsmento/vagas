@@ -48,6 +48,7 @@
     var form = document.getElementById('login-form');
     if (btn) btn.addEventListener('click', function(e){ e.preventDefault(); tentarLogin(); });
     if (form) form.addEventListener('submit', function(e){ e.preventDefault(); tentarLogin(); });
+    var senhaEl = document.getElementById('login-senha');
     if (senhaEl) senhaEl.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); tentarLogin(); }});
   }
   if (document.readyState === 'loading') {
