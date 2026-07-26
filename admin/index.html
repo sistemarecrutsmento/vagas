@@ -474,47 +474,72 @@
 
     /* ===== PÁGINA DE VAGAS (melhorada) ===== */
     .vagas-toolbar {
-      display: flex; gap: 10px; align-items: center;
-      background: var(--branco); padding: 12px;
-      border-radius: 8px; border: 1px solid var(--borda);
-      margin-bottom: 14px; flex-wrap: wrap;
+      display: flex; gap: 12px; align-items: center;
+      background: var(--branco); padding: 14px 16px;
+      border-radius: 10px; border: 1px solid var(--borda);
+      margin-bottom: 18px; flex-wrap: wrap;
     }
     .vagas-toolbar-busca {
-      flex: 1 1 240px; min-width: 200px;
+      flex: 1 1 280px; min-width: 240px;
       display: flex; align-items: center; gap: 8px;
-      padding: 0 12px; border: 1px solid var(--borda);
-      border-radius: 6px; background: #FAFAFA;
+      padding: 0 14px; border: 1px solid var(--borda);
+      border-radius: 8px; background: #FAFAFA;
+      transition: border-color .12s, background .12s;
     }
     .vagas-toolbar-busca:focus-within { border-color: var(--vinho); background: var(--branco); }
-    .vagas-toolbar-icone-busca { color: #999; font-size: 14px; }
+    .vagas-toolbar-icone-busca { color: #999; font-size: 15px; }
     .vagas-toolbar-busca input {
       flex: 1; border: 0; background: transparent; outline: none;
-      padding: 10px 0; font-size: 14px; color: #1A1A1A;
+      padding: 11px 0; font-size: 14px; color: #1A1A1A;
     }
     .vagas-toolbar-select {
-      padding: 10px 12px; border: 1px solid var(--borda); border-radius: 6px;
-      background: var(--branco); font-size: 14px; min-width: 160px;
+      padding: 11px 14px; border: 1px solid var(--borda); border-radius: 8px;
+      background: var(--branco); font-size: 14px; min-width: 170px;
       color: #1A1A1A; cursor: pointer;
+      transition: border-color .12s;
     }
-    .vagas-toolbar-select:focus { outline: none; border-color: var(--vinho); }
+    .vagas-toolbar-select:focus, .vagas-toolbar-select:hover { outline: none; border-color: var(--vinho); }
     .vagas-toolbar-btn-sec {
-      padding: 10px 16px; background: var(--cinza-escuro); color: var(--branco);
-      border: 0; border-radius: 6px; cursor: pointer; font-size: 14px;
-      white-space: nowrap;
+      padding: 11px 18px; background: var(--cinza-escuro); color: var(--branco);
+      border: 0; border-radius: 8px; cursor: pointer; font-size: 14px;
+      font-weight: 500; white-space: nowrap;
+      transition: background .12s;
     }
     .vagas-toolbar-btn-sec:hover { background: #555; }
 
-    /* Abas */
-    .vagas-abas {
-      display: flex; gap: 4px;
-      border-bottom: 1px solid var(--borda); margin-bottom: 14px;
-      overflow-x: auto;
+    /* Botão "+ Nova vaga" (pílula vinho) */
+    .btn-vaga-nova {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px; padding: 11px 22px; border: 0; border-radius: 8px;
+      background: var(--vinho); color: #FFFFFF;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 1px 2px rgba(114, 47, 55, 0.18);
+      transition: background .15s, transform .05s;
+      white-space: nowrap;
     }
+    .btn-vaga-nova:hover { background: #5C242B; }
+    .btn-vaga-nova:active { transform: translateY(1px); }
+
+    /* Abas (estilo referência: contador entre parênteses) */
+    .vagas-abas-wrap {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px; flex-wrap: wrap; gap: 12px;
+    }
+    .vagas-abas {
+      display: flex; gap: 22px;
+      border-bottom: 1px solid var(--borda);
+      overflow-x: auto; flex: 1; min-width: 0;
+    }
+    .vagas-abas-total {
+      color: #666; font-size: 13px; padding: 10px 0;
+      white-space: nowrap;
+    }
+    .vagas-abas-total strong { color: #1A1A1A; font-weight: 600; }
     .vaga-aba {
-      padding: 10px 16px; background: transparent; border: 0;
+      padding: 10px 4px; background: transparent; border: 0;
       border-bottom: 2px solid transparent; cursor: pointer;
       font-size: 14px; color: #666; font-weight: 500;
-      display: inline-flex; align-items: center; gap: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
       white-space: nowrap; transition: all .15s;
     }
     .vaga-aba:hover { color: var(--vinho); }
@@ -523,67 +548,151 @@
       font-weight: 600;
     }
     .vaga-aba-count {
-      display: inline-block; min-width: 22px; padding: 1px 6px;
-      background: #EEE; color: #555; border-radius: 10px;
-      font-size: 12px; font-weight: 600; text-align: center;
+      font-weight: 500; color: inherit;
+      font-size: 13px; opacity: .7;
     }
-    .vaga-aba.ativa .vaga-aba-count { background: var(--vinho); color: var(--branco); }
+    .vaga-aba.ativa .vaga-aba-count { opacity: 1; font-weight: 600; }
 
     /* Lista de vagas */
     .vagas-lista-wrap {
-      background: var(--branco); border-radius: 8px;
+      background: var(--branco); border-radius: 10px;
       border: 1px solid var(--borda); overflow: hidden;
     }
     .vagas-lista-cabecalho {
       display: grid;
-      grid-template-columns: 2fr 1.5fr 1.2fr 0.8fr 0.9fr 0.9fr 50px;
-      gap: 12px; padding: 12px 16px; background: #FAFAFA;
+      grid-template-columns: 56px 2.4fr 1.4fr 1.2fr 0.9fr 1fr 0.9fr 48px;
+      gap: 14px; padding: 14px 18px; background: #FAFAFA;
       border-bottom: 1px solid var(--borda);
-      font-size: 12px; font-weight: 600; color: #666;
-      text-transform: uppercase; letter-spacing: 0.5px;
+      font-size: 11px; font-weight: 600; color: #888;
+      text-transform: uppercase; letter-spacing: 0.6px;
     }
     .vaga-linha {
       display: grid;
-      grid-template-columns: 2fr 1.5fr 1.2fr 0.8fr 0.9fr 0.9fr 50px;
-      gap: 12px; padding: 14px 16px; align-items: center;
+      grid-template-columns: 56px 2.4fr 1.4fr 1.2fr 0.9fr 1fr 0.9fr 48px;
+      gap: 14px; padding: 14px 18px; align-items: center;
       border-bottom: 1px solid #F0F0F0;
       transition: background .12s;
     }
     .vaga-linha:last-child { border-bottom: 0; }
     .vaga-linha:hover { background: #FAFAFA; }
-    .vaga-linha-titulo { font-weight: 600; color: #1A1A1A; font-size: 14px; line-height: 1.3; }
-    .vaga-linha-id { font-size: 11px; color: #999; margin-top: 2px; }
-    .vaga-linha-empresa { color: #444; font-size: 14px; }
-    .vaga-linha-categoria { color: #555; font-size: 13px; }
-    .vaga-linha-candidatos {
-      text-align: center;
+
+    /* Coluna do ícone (esquerda) — colorido por área */
+    .vaga-linha-icone {
+      display: flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px;
+      border-radius: 10px; font-size: 22px;
+      background: #FEEBEE; color: var(--vinho);
     }
-    .vaga-linha-candidatos-num {
-      display: inline-block; padding: 4px 10px; border-radius: 6px;
-      background: var(--vinho-claro); color: var(--branco);
-      font-weight: 700; font-size: 15px; cursor: pointer;
-      min-width: 32px;
+    .vaga-linha-icone.icone-administracao { background: #FEF3C7; color: #B45309; }
+    .vaga-linha-icone.icone-atendimento { background: #FFF0F1; color: #BE185D; }
+    .vaga-linha-icone.icone-saude { background: #D1FAE5; color: #047857; }
+    .vaga-linha-icone.icone-educacao { background: #DBEAFE; color: #1D4ED8; }
+    .vaga-linha-icone.icone-tecnologia { background: #EDE9FE; color: #7C3AED; }
+    .vaga-linha-icone.icone-engenharia { background: #F1F5F9; color: #334155; }
+    .vaga-linha-icone.icone-financeiro { background: #DCFCE7; color: #15803D; }
+    .vaga-linha-icone.icone-marketing { background: #FCE7F3; color: #9F1239; }
+    .vaga-linha-icone.icone-logistica { background: #E0F2FE; color: #075985; }
+    .vaga-linha-icone.icone-default { background: #F3F4F6; color: #6B7280; }
+
+    /* Mantém wrapper antigo (vazio) só pra não quebrar referências */
+    .vaga-linha-icone-wrap { display: none; }
+
+    /* Coluna VAGA (título + ID + tag de status inline) */
+    .vaga-linha-vaga { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .vaga-linha-titulo-row {
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
     }
-    .vaga-linha-candidatos-num:hover { background: var(--vinho); }
-    .vaga-linha-candidatos-num.zero { background: #EEE; color: #999; cursor: default; }
-    .vaga-linha-candidatos-num.zero:hover { background: #EEE; }
-    .vaga-linha-candidatos-label {
-      display: block; font-size: 10px; color: #888;
-      text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
+    .vaga-linha-titulo {
+      font-weight: 600; color: #1A1A1A; font-size: 14px;
+      line-height: 1.35; word-break: break-word;
     }
-    .vaga-linha-tempo { color: #555; font-size: 13px; }
+    .vaga-linha-meta {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: #888;
+    }
+    .vaga-linha-id-row {
+      display: flex; align-items: center; gap: 6px; margin-top: 3px;
+    }
+    .vaga-linha-id { font-size: 11px; color: #888; font-weight: 500; }
+    .vaga-linha-tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; font-weight: 600;
+    }
+    .vaga-linha-tag.tag-publicada { background: #E8F5E9; color: #15803D; }
+    .vaga-linha-tag.tag-rascunho { background: #DBEAFE; color: #1D4ED8; }
+    .vaga-linha-tag.tag-encerrada { background: #F3F4F6; color: #6B7280; }
+
+    .vaga-linha-empresa {
+      color: #444; font-size: 14px; line-height: 1.4;
+      word-break: break-word;
+    }
+    .vaga-linha-categoria {
+      color: #555; font-size: 13px; line-height: 1.4;
+      word-break: break-word;
+    }
+
+    /* Coluna Candidatos (número grande colorido + "candidatos") */
+    .vaga-linha-cand-wrap {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 1px; text-align: center;
+      cursor: pointer; padding: 4px 6px; border-radius: 6px;
+      transition: background .12s;
+    }
+    .vaga-linha-cand-wrap:hover { background: #FAFAFA; }
+    .vaga-linha-cand-wrap.zero { cursor: default; }
+    .vaga-linha-cand-wrap.zero:hover { background: transparent; }
+    .vaga-linha-cand-num {
+      font-weight: 700; font-size: 22px; line-height: 1.1;
+      color: var(--vinho);
+    }
+    .vaga-linha-cand-wrap.zero .vaga-linha-cand-num { color: #BBB; }
+    .vaga-linha-cand-label {
+      font-size: 10px; color: #888;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* Coluna PUBLICADA HÁ */
+    .vaga-linha-tempo {
+      color: #555; font-size: 13px; line-height: 1.4;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
     .vaga-linha-tempo.vazio { color: #BBB; }
-    .vaga-linha-status .badge {
-      display: inline-block; padding: 4px 10px; border-radius: 12px;
+
+    /* Coluna STATUS (pílula bem visível) */
+    .vaga-linha-status {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+    }
+    .vaga-linha-status-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 12px;
       font-size: 12px; font-weight: 600;
     }
+    .vaga-linha-status-pill.publicada { background: #E8F5E9; color: #166534; }
+    .vaga-linha-status-pill.fechada { background: #F3F4F6; color: #4B5563; }
+    .vaga-linha-status-pill.pausada { background: #DBEAFE; color: #1D4ED8; }
+    .vaga-linha-status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .vaga-linha-status-pill.publicada .vaga-linha-status-dot { background: #22C55E; }
+    .vaga-linha-status-pill.fechada .vaga-linha-status-dot { background: #9CA3AF; }
+    .vaga-linha-status-pill.pausada .vaga-linha-status-dot { background: #3B82F6; }
+    .vaga-linha-status-extra {
+      font-size: 11px; color: #888; padding-left: 4px;
+      line-height: 1.3;
+    }
+
+    /* Coluna AÇÕES (botão ⋮) */
     .vaga-linha-acoes { text-align: right; }
     .vaga-linha-acoes-btn {
-      width: 32px; height: 32px; border: 0; background: transparent;
+      width: 34px; height: 34px; border: 0; background: transparent;
       color: #555; cursor: pointer; border-radius: 6px; font-size: 18px;
-      transition: all .12s;
+      transition: all .12s; display: inline-flex;
+      align-items: center; justify-content: center;
     }
-    .vaga-linha-acoes-btn:hover { background: #EEE; color: var(--vinho); }
+    .vaga-linha-acoes-btn:hover {
+      background: #EEE; color: var(--vinho);
+    }
 
     /* Menu flutuante de ações */
     .vaga-menu-acoes {
@@ -658,20 +767,53 @@
     .vagas-pag-num:hover { background: #FAFAFA; }
     .vagas-pag-num.ativa { background: var(--vinho); color: var(--branco); border-color: var(--vinho); }
 
-    /* Mobile: transforma tabela em cards */
-    @media (max-width: 900px) {
+    /* Mobile: transforma linhas em cards verticais */
+    @media (max-width: 800px) {
+      .vagas-lista-wrap { border-radius: 8px; }
       .vagas-lista-cabecalho { display: none; }
+      .vagas-lista-wrap > div:not(.vagas-lista-cabecalho) {
+        padding: 0;
+      }
       .vaga-linha {
-        grid-template-columns: 1fr;
-        gap: 8px; padding: 16px;
+        grid-template-columns: 56px 1fr 36px;
+        grid-template-areas:
+          "icone titulo acoes"
+          "icone meta  acoes"
+          "empresa   empresa empresa"
+          "categoria categoria categoria"
+          "cand  cand cand"
+          "tempo status status";
+        gap: 6px 12px; padding: 16px 14px;
+        border-bottom: 1px solid #F0F0F0;
       }
-      .vaga-linha > div { font-size: 13px; }
-      .vaga-linha > div::before {
-        content: attr(data-label); font-weight: 600;
-        color: #888; font-size: 11px; text-transform: uppercase;
-        display: block; margin-bottom: 2px;
+      .vaga-linha-icone { grid-area: icone; align-self: start; }
+      .vaga-linha [data-label="Vaga"] { grid-area: titulo; }
+      .vaga-linha-id-row { grid-area: meta; }
+      .vaga-linha-acoes { grid-area: acoes; text-align: right; }
+      .vaga-linha-empresa { grid-area: empresa; padding-top: 8px; border-top: 1px dashed #EEE; margin-top: 4px; }
+      .vaga-linha-categoria { grid-area: categoria; }
+      .vaga-linha-candidatos { grid-area: cand; }
+      .vaga-linha-tempo { grid-area: tempo; }
+      .vaga-linha-status { grid-area: status; }
+      /* labels visíveis */
+      .vaga-linha-empresa,
+      .vaga-linha-categoria,
+      .vaga-linha-candidatos,
+      .vaga-linha-tempo,
+      .vaga-linha-status {
+        font-size: 13px;
       }
-      .vaga-linha-acoes { text-align: left; }
+      .vaga-linha-empresa::before { content: "Empresa: "; font-weight: 600; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+      .vaga-linha-categoria::before { content: "Categoria: "; font-weight: 600; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+      /* Candidatos: número grande centralizado */
+      .vaga-linha-cand-wrap {
+        flex-direction: row; gap: 8px;
+        background: #FAFAFA; padding: 8px 12px; border-radius: 8px;
+        margin-top: 4px;
+      }
+      .vaga-linha-cand-label::after { content: ""; }
+      .vaga-linha-tempo { color: #555; font-size: 13px; }
+      .vaga-linha-status { align-items: flex-start; }
     }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
@@ -861,7 +1003,7 @@
           <h2>Vagas</h2>
           <p>Gerencie suas oportunidades de recrutamento</p>
         </div>
-        <button class="btn btn-primary" style="width:auto;" onclick="abrirModalVaga()">+ Nova vaga</button>
+        <button class="btn-vaga-nova" style="width:auto;" onclick="abrirModalVaga()">+ Nova vaga</button>
       </div>
 
       <!-- Barra de busca + filtros -->
@@ -870,27 +1012,37 @@
           <span class="vagas-toolbar-icone-busca">🔎</span>
           <input type="text" id="vagas-busca" placeholder="Buscar vaga..." autocomplete="off" />
         </div>
+        <select id="vagas-filtro-status" class="vagas-toolbar-select">
+          <option value="">Status: Todos</option>
+          <option value="publicada">Publicadas</option>
+          <option value="fechada">Encerradas</option>
+          <option value="pausada">Rascunhos</option>
+        </select>
         <select id="vagas-filtro-empresa" class="vagas-toolbar-select">
-          <option value="">Todas as empresas</option>
+          <option value="">Empresa: Todas</option>
         </select>
         <select id="vagas-filtro-area" class="vagas-toolbar-select">
-          <option value="">Todas as categorias</option>
+          <option value="">Categoria: Todas</option>
         </select>
-        <button id="vagas-filtros-toggle" class="vagas-toolbar-btn-sec">⚙ Filtros</button>
+        <button id="vagas-filtros-toggle" class="vagas-toolbar-btn-sec">▽ Filtros</button>
       </div>
 
       <!-- Abas de status (com contagem) -->
-      <div class="vagas-abas" id="vagas-abas">
-        <button class="vaga-aba ativa" data-status="">Todas <span class="vaga-aba-count" id="vagas-aba-count-todas">0</span></button>
-        <button class="vaga-aba" data-status="publicada">Publicadas <span class="vaga-aba-count" id="vagas-aba-count-publicadas">0</span></button>
-        <button class="vaga-aba" data-status="fechada">Encerradas <span class="vaga-aba-count" id="vagas-aba-count-fechadas">0</span></button>
-        <button class="vaga-aba" data-status="pausada">Rascunhos <span class="vaga-aba-count" id="vagas-aba-count-pausadas">0</span></button>
+      <div class="vagas-abas-wrap">
+        <div class="vagas-abas" id="vagas-abas">
+          <button class="vaga-aba ativa" data-status="">Todas <span class="vaga-aba-count" id="vagas-aba-count-todas">(0)</span></button>
+          <button class="vaga-aba" data-status="publicada">Publicadas <span class="vaga-aba-count" id="vagas-aba-count-publicadas">(0)</span></button>
+          <button class="vaga-aba" data-status="fechada">Encerradas <span class="vaga-aba-count" id="vagas-aba-count-fechadas">(0)</span></button>
+          <button class="vaga-aba" data-status="pausada">Rascunhos <span class="vaga-aba-count" id="vagas-aba-count-pausadas">(0)</span></button>
+        </div>
+        <div class="vagas-abas-total">Total: <strong id="vagas-aba-count-total-novo">0 vagas</strong></div>
       </div>
 
       <!-- Lista de vagas -->
       <div class="vagas-lista-wrap">
         <!-- Cabeçalho da lista (vira card no mobile) -->
         <div class="vagas-lista-cabecalho">
+          <div></div>
           <div>Vaga</div>
           <div>Empresa</div>
           <div>Categoria</div>
