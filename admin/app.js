@@ -1222,10 +1222,12 @@ const chartH = 220; // deve bater com CSS
         { fill: '#34D399', stroke: '#6EE7B7', label: 'verde' }
       ];
       // Estilo de Cards Modernos (Vagas em Destaque) — % em relação ao TOTAL do sistema
-      const totalGeral = vRanking.reduce((s, v) => s + (v.total_candidatos || 0), 0) || 1;
+      // Mostrar só as top 4 vagas com mais candidatos
+      const topRanking = vRanking.slice(0, 4);
+      const totalGeral = topRanking.reduce((s, v) => s + (v.total_candidatos || 0), 0) || 1;
       containerRanking.innerHTML = `
         <div class="ranking-cards-grid">
-          ${vRanking.map((v, i) => {
+          ${topRanking.map((v, i) => {
             const total = v.total_candidatos || 0;
             const contrat = v.contratados || 0;
             const pct = Math.round((total / totalGeral) * 100);
