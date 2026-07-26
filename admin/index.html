@@ -482,7 +482,7 @@
     <h1>🔐 Painel Admin</h1>
     <p class="sub">Acesso restrito para recrutadores</p>
     <div id="alert-login"></div>
-    <form id="login-form" onsubmit="return loginSeguro(event);">
+    <form id="login-form">
       <div class="form-group">
         <label>Email</label>
         <input type="email" id="login-email" placeholder="admin@empresa.com" value="fabio08dejesusjunior@gmail.com">
@@ -491,7 +491,7 @@
         <label>Senha</label>
         <input type="password" id="login-senha" placeholder="••••••">
       </div>
-      <button type="submit" class="btn btn-primary">Entrar</button>
+      <button type="button" id="btn-entrar" class="btn btn-primary">Entrar</button>
     </form>
   </div>
 </div>
@@ -1213,32 +1213,64 @@
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 <script>
-async function loginSeguro(event) {
-  event.preventDefault();
-  const email = document.getElementById('login-email').value.trim();
-  const senha = document.getElementById('login-senha').value;
-  const alertEl = document.getElementById('alert-login');
-  const botao = document.querySelector('#login-form button[type="submit"]');
-  botao.disabled = true;
-  botao.textContent = 'Entrando...';
-  try {
-    const r = await fetch('https://recrutamento-api-novo.onrender.com/api/admin/login', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({email, senha})
-    });
-    const data = await r.json();
-    if (!r.ok || !data.token) throw new Error(data.erro || 'Credenciais inválidas');
-    localStorage.setItem('admin_token', data.token);
-    localStorage.setItem('admin_tipo', data.usuario?.tipo || 'admin');
-    localStorage.setItem('admin_usuario', JSON.stringify(data.usuario || {}));
-    location.reload();
-  } catch (e) {
-    alertEl.innerHTML = '<div class="alert alert-erro">' + (e.message || 'Não foi possível entrar') + '</div>';
-    botao.disabled = false;
-    botao.textContent = 'Entrar';
+(function(){
+  // Logs que o Fabio pode ver abrindo F12 → Console
+  console.log('[login] script de login carregou');
+  function mostrarStatus(msg, erro) {
+    var el = document.getElementById('alert-login');
+    if (!el) return;
+    el.innerHTML = '<div class="alert ' + (erro?'alert-erro':'alert-ok') + '">' + msg + '</div>';
   }
-  return false;
-}
+  async function tentarLogin() {
+    console.log('[login] botão clicado');
+    var emailEl = document.getElementById('login-email');
+    var senhaEl = document.getElementById('login-senha');
+    var botao = document.getElementById('btn-entrar');
+    if (!emailEl || !senhaEl) { mostrarStatus('Campos não encontrados', true); return; }
+    var email = emailEl.value.trim();
+    var senha = senhaEl.value;
+    if (!senha) { mostrarStatus('Digite a senha', true); return; }
+    botao.disabled = true;
+    botao.textContent = 'Entrando...';
+    try {
+      console.log('[login] chamando API...');
+      var r = await fetch('https://recrutamento-api-novo.onrender.com/api/admin/login', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email: email, senha: senha})
+      });
+      console.log('[login] resposta status', r.status);
+      var data = await r.json();
+      if (!r.ok || !data.token) {
+        mostrarStatus('Erro: ' + (data.erro || 'credenciais inválidas'), true);
+        botao.disabled = false; botao.textContent = 'Entrar';
+        return;
+      }
+      console.log('[login] token recebido, salvando...');
+      localStorage.setItem('admin_token', data.token);
+      localStorage.setItem('admin_tipo', data.usuario && data.usuario.tipo || 'admin');
+      localStorage.setItem('admin_usuario', JSON.stringify(data.usuario || {}));
+      mostrarStatus('Logado! Entrando...', false);
+      setTimeout(function(){ location.reload(); }, 200);
+    } catch (e) {
+      console.error('[login] erro', e);
+      mostrarStatus('Erro: ' + (e.message || 'sem conexão'), true);
+      botao.disabled = false; botao.textContent = 'Entrar';
+    }
+  }
+  function init() {
+    console.log('[login] init() rodou');
+    var btn = document.getElementById('btn-entrar');
+    var form = document.getElementById('login-form');
+    if (btn) btn.addEventListener('click', function(e){ e.preventDefault(); tentarLogin(); });
+    if (form) form.addEventListener('submit', function(e){ e.preventDefault(); tentarLogin(); });
+    if (senhaEl) senhaEl.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); tentarLogin(); }});
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
 </script>
 </body>
 </html>
