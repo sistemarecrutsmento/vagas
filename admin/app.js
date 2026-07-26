@@ -1146,7 +1146,34 @@ async function carregarDashboardV2() {
     } else {
       document.getElementById('proximas-entrevistas').innerHTML = '<div class="empty-msg">Nenhuma entrevista agendada</div>';
     }
-    
+
+    // === Atividades Recentes ===
+    const atividades = data.atividades_recentes || [];
+    const atvCount = document.getElementById('atividades-count');
+    if (atvCount) atvCount.textContent = atividades.length;
+    if (atividades.length > 0) {
+      document.getElementById('atividades-recentes').innerHTML = atividades.map(a => {
+        const icones = { inscricao: '📝', avancar: '⬆️', reprovar: '✖️', proposta: '📨', documento: '📎', entrevista: '📅', sistema: '🔔' };
+        const icone = icones[a.tipo] || '🔔';
+        const cls = `tipo-${a.tipo}` + (a.alerta_parado ? ' alerta-parado' : '');
+        const quando = a.quando ? new Date(a.quando).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '';
+        const alerta = a.alerta_parado ? `<span style="background:#FEE2E2;color:#B91C1C;padding:2px 8px;border-radius:6px;font-size:10px;margin-left:6px">⚠️ Parado ${a.dias_parado || 0}d</span>` : '';
+        return `<div class="atividade-item ${cls}" onclick="irParaCandidatura(${a.candidatura_id})" style="cursor:pointer">
+          <div class="atividade-icone">${icone}</div>
+          <div class="atividade-corpo">
+            <div class="atividade-topo">
+              <span class="atividade-tipo">${a.texto || 'Atualização'}${alerta}</span>
+              <span class="atividade-tempo">${quando}</span>
+            </div>
+            <div class="atividade-candidato">${a.candidato || '—'}</div>
+            <div class="atividade-vaga">${a.vaga || ''}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      document.getElementById('atividades-recentes').innerHTML = '<div class="empty-msg">Nenhuma atividade recente</div>';
+    }
+
     // === Documentação (taxa de aprovação) ===
     const taxaDoc = data.kpis_secundarios?.taxa_documentacao || 0;
     const totalDocs = 16;
@@ -1734,6 +1761,38 @@ function irParaPagina(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('ativo'));
   const el = document.getElementById('page-' + page);
   if (el) el.classList.add('ativo');
+}
+
+// Abre a lista de vagas fechadas sem contratação
+async function abrirVagasFechadasSemContratacao() {
+  irParaPagina('vagas-fechadas-sem-contrato');
+  const tb = document.querySelector('#vagas-fechadas-sem-contrato-table tbody');
+  tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
+  try {
+    const r = await fetch(API + '/api/admin/vagas-fechadas-sem-contratacao', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!r.ok) { tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + r.status + '</td></tr>'; return; }
+    const data = await r.json();
+    const vagas = data.vagas || [];
+    if (vagas.length === 0) {
+      tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhuma vaga fechada sem contratação. Bom trabalho! 🎉</td></tr>';
+      return;
+    }
+    tb.innerHTML = vagas.map(v => {
+      const local = (v.cidade || '') + (v.estado ? ' / ' + v.estado : '');
+      const fechadaEm = v.fechada_em ? new Date(v.fechada_em).toLocaleDateString('pt-BR') : '—';
+      return `<tr>
+        <td><strong>${v.titulo}</strong></td>
+        <td>${v.empresa || '—'}</td>
+        <td>${local || '—'}</td>
+        <td>${v.total_candidatos || 0}</td>
+        <td><span class="status-badge status-fechada">Fechada</span></td>
+        <td>${fechadaEm}</td>
+        <td><button class="btn-mini" onclick="irParaCandidatosDaVaga(${v.id})">👁 Ver candidatos</button></td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + e.message + '</td></tr>';
+  }
 }
 
 async function abrirVagaCands(vagaId) {
