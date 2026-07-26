@@ -1432,6 +1432,16 @@ function inicializarUIVagas() {
     });
   }
   // Filtros select
+  const statusEl = document.getElementById('vagas-filtro-status');
+  if (statusEl) statusEl.addEventListener('change', () => {
+    _vagasState.status = statusEl.value;
+    _vagasState.page = 1;
+    // Sincroniza visualmente com a aba ativa
+    document.querySelectorAll('#vagas-abas .vaga-aba').forEach(b => {
+      b.classList.toggle('ativa', (b.getAttribute('data-status') || '') === statusEl.value);
+    });
+    carregarVagasAdminNovo();
+  });
   const empEl = document.getElementById('vagas-filtro-empresa');
   if (empEl) empEl.addEventListener('change', () => {
     _vagasState.empresa = empEl.value;
