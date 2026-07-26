@@ -1650,9 +1650,16 @@ function abrirMenuAcoesVaga(event, vagaId) {
   if (!v) return;
   const menu = document.getElementById('vaga-menu-acoes');
   // Define ações baseado no status
+  // Estrutura: { icon, label, onclick, divisor?: true (separa visualmente), perigo?: true (vermelho) }
   const acoes = [];
+  // === Grupo 1: Ações de visualização ===
   acoes.push({ icon: '✏️', label: 'Editar vaga', onclick: `editarVaga(${v.id}); fecharMenuAcoesVaga();` });
   acoes.push({ icon: '👥', label: 'Ver candidatos', onclick: `abrirVagaCands(${v.id}); fecharMenuAcoesVaga();` });
+  // Divisor antes do próximo grupo
+  if (v.status === 'publicada' || v.status === 'pausada') {
+    acoes.push({ divisor: true });
+  }
+  // === Grupo 2: Ações de ciclo de vida ===
   if (v.status === 'publicada' || v.status === 'pausada') {
     acoes.push({ icon: '📋', label: 'Duplicar vaga', onclick: `duplicarVagaAdmin(${v.id}); fecharMenuAcoesVaga();` });
   }
@@ -1665,13 +1672,18 @@ function abrirMenuAcoesVaga(event, vagaId) {
   if (v.status !== 'fechada') {
     acoes.push({ icon: '🚩', label: 'Encerrar vaga', onclick: `encerrarVagaAdmin(${v.id}); fecharMenuAcoesVaga();` });
   }
+  // === Grupo 3: Ações destrutivas (separadas por divisor) ===
+  if (v.status !== 'publicada' || v.status === 'publicada') {
+    acoes.push({ divisor: true });
+  }
   acoes.push({ icon: '🗑', label: 'Excluir vaga', perigo: true, onclick: `confirmarExcluirVaga(${v.id}); fecharMenuAcoesVaga();` });
-  menu.innerHTML = acoes.map(a =>
-    `<button class="vaga-menu-item ${a.perigo ? 'perigo' : ''}" onclick="${a.onclick}">
+  menu.innerHTML = acoes.map(a => {
+    if (a.divisor) return '<div class="vaga-menu-divisor"></div>';
+    return `<button class="vaga-menu-item ${a.perigo ? 'perigo' : ''}" onclick="${a.onclick}">
        <span class="vaga-menu-item-icone">${a.icon}</span>
        <span>${a.label}</span>
-     </button>`
-  ).join('');
+     </button>`;
+  }).join('');
   // Posiciona o menu perto do botão
   const rect = event.target.getBoundingClientRect();
   menu.style.top = (rect.bottom + 4) + 'px';
@@ -1689,8 +1701,17 @@ function confirmarExcluirVaga(id) {
   if (!v) return;
   const modal = document.getElementById('vaga-modal-confirmar');
   const nomeEl = document.getElementById('vaga-modal-confirmar-nome');
+  const detalhesEl = document.getElementById('vaga-modal-confirmar-detalhes');
   const btn = document.getElementById('vaga-modal-confirmar-btn');
   nomeEl.textContent = v.titulo || ('Vaga #' + id);
+  // Mostra detalhes da vaga pra contextualizar
+  const totalCands = v._totalCands ?? v.total_candidatos ?? 0;
+  const statusLabel = { publicada: '🟢 Publicada', pausada: '⏸ Pausada', fechada: '🚩 Encerrada' }[v.status] || v.status;
+  detalhesEl.innerHTML = `
+    <div class="vaga-modal-chip">${statusLabel}</div>
+    <div class="vaga-modal-chip">👥 ${totalCands} candidato(s)</div>
+    ${v.empresa ? `<div class="vaga-modal-chip">🏢 ${escapeHtml(v.empresa)}</div>` : ''}
+  `;
   // Substitui o onclick pra evitar handlers antigos
   btn.onclick = () => { fecharModalConfirmarVaga(); deletarVaga(id); };
   modal.style.display = 'flex';
@@ -1797,6 +1818,9 @@ function popularFiltrosVagas(vagas) {
 
 // Ações da vaga (mantêm compatibilidade com o backend existente)
 async function duplicarVagaAdmin(id) {
+  const vOrig = _vagasState.vagas.find(x => x.id === id);
+  const nome = vOrig?.titulo ? `"${vOrig.titulo}"` : 'esta vaga';
+  if (!confirm(`📋 Duplicar ${nome}?\n\nSerá criada uma cópia como rascunho (status "pausada") que você poderá editar e publicar depois.`)) return;
   try {
     // Busca dados da vaga
     const r1 = await fetch(API + '/api/admin/vagas/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
@@ -1819,6 +1843,7 @@ async function duplicarVagaAdmin(id) {
     });
     const d2 = await r2.json();
     if (r2.ok) {
+      alert('✓ Vaga duplicada como rascunho!');
       carregarVagasAdminNovo();
     } else {
       alert('Erro ao duplicar: ' + (d2.erro || r2.status));
@@ -1829,13 +1854,22 @@ async function duplicarVagaAdmin(id) {
 }
 
 async function pausarVagaAdmin(id) {
+  const v = _vagasState.vagas.find(x => x.id === id);
+  const nome = v?.titulo ? `"${v.titulo}"` : 'esta vaga';
+  if (!confirm(`⏸ Pausar ${nome}?\n\nEla deixará de aparecer para novos candidatos, mas os processos em andamento continuam normalmente.`)) return;
   await atualizarStatusVagaAdmin(id, 'pausada', 'Vaga pausada');
 }
 async function reativarVagaAdmin(id) {
+  const v = _vagasState.vagas.find(x => x.id === id);
+  const nome = v?.titulo ? `"${v.titulo}"` : 'esta vaga';
+  if (!confirm(`▶ Reativar ${nome}?\n\nEla voltará a aparecer para novos candidatos.`)) return;
   await atualizarStatusVagaAdmin(id, 'publicada', 'Vaga reativada');
 }
 async function encerrarVagaAdmin(id) {
-  if (!confirm('Encerrar esta vaga? Ela deixará de receber novos candidatos.')) return;
+  const v = _vagasState.vagas.find(x => x.id === id);
+  const nome = v?.titulo ? `"${v.titulo}"` : 'esta vaga';
+  const totalCands = v?._totalCands ?? v?.total_candidatos ?? '?';
+  if (!confirm(`🚩 Encerrar ${nome}?\n\nEla deixará de receber novos candidatos e será movida para "Encerradas".\n\n📊 ${totalCands} candidato(s) já inscrito(s) — o histórico será preservado.`)) return;
   await atualizarStatusVagaAdmin(id, 'fechada', 'Vaga encerrada');
 }
 async function atualizarStatusVagaAdmin(id, novoStatus, msg) {
