@@ -16,24 +16,43 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== AUTH =====
+// Tenta login como admin primeiro, depois como recrutador (fallback)
+// O backend tem DUAS tabelas: admins (acesso total) e recrutadores (limitado)
+// e DUAS rotas: /api/admin/login e /api/auth/login-recrutador
+// Aqui a gente tenta as duas automaticamente pra não dar erro esquisito.
 async function fazerLogin() {
   const email = document.getElementById('login-email').value;
   const senha = document.getElementById('login-senha').value;
-  try {
-    const r = await fetch(API + '/api/admin/login', {
+  const alertEl = document.getElementById('alert-login');
+
+  // 1ª tentativa: admin
+  let r = await fetch(API + '/api/admin/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, senha })
+  });
+  let data = await r.json();
+
+  // 2ª tentativa: recrutador (se admin falhou com 401 "credenciais inválidas")
+  if (!r.ok && (r.status === 401 || r.status === 400)) {
+    const r2 = await fetch(API + '/api/auth/login-recrutador', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha })
     });
-    const data = await r.json();
-    if (r.ok) {
-      token = data.token;
-      localStorage.setItem('admin_token', token);
-      mostrarApp();
-    } else {
-      document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao entrar'}</div>`;
-    }
-  } catch (e) {
-    document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">Erro de conexão</div>`;
+    if (r2.ok) { r = r2; data = await r2.json(); }
+  }
+
+  if (r.ok) {
+    token = data.token;
+    // Salva tipo do usuário pra usar nas chamadas autenticadas
+    const tipoUsuario = data.usuario?.tipo || 'admin';
+    const userId = data.usuario?.id || null;
+    localStorage.setItem('admin_token', token);
+    localStorage.setItem('admin_tipo', tipoUsuario);
+    localStorage.setItem('admin_user_id', userId);
+    localStorage.setItem('admin_usuario', JSON.stringify(data.usuario || {}));
+    mostrarApp();
+  } else {
+    alertEl.innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao entrar'}</div>`;
   }
 }
 
