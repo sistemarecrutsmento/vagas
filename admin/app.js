@@ -1776,7 +1776,7 @@ async function atualizarStatusVagaAdmin(id, novoStatus, msg) {
     if (r.ok) {
       carregarVagasAdminNovo();
     } else {
-      alert('Erro: ' + (d.erro || r2 ? '' : r.status));
+      alert('Erro: ' + (d.erro || r.status));
     }
   } catch (e) {
     alert('Erro: ' + e.message);
