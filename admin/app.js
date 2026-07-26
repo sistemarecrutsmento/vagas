@@ -1555,7 +1555,7 @@ function renderizarVagaLinha(v) {
   const cand = v.candidatos_count || 0;
   const candPlural = cand === 1 ? 'candidato' : 'candidatos';
   const candHtml = cand > 0
-    ? `<a href="#" class="vaga-linha-cand" onclick="irParaCandidatosDaVaga(${v.id}); return false;" title="Ver candidatos">${cand}<span>${candPlural}</span></a>`
+    ? `<a href="#" class="vaga-linha-cand" onclick="abrirVagaCands(${v.id}); return false;" title="Ver candidatos">${cand}<span>${candPlural}</span></a>`
     : `<span class="vaga-linha-cand zero">${cand}<span>${candPlural}</span></span>`;
 
   return `
@@ -1583,7 +1583,7 @@ function abrirMenuAcoesVaga(event, vagaId) {
   // Define ações baseado no status
   const acoes = [];
   acoes.push({ icon: '✏️', label: 'Editar vaga', onclick: `editarVaga(${v.id}); fecharMenuAcoesVaga();` });
-  acoes.push({ icon: '👥', label: 'Ver candidatos', onclick: `irParaCandidatosDaVaga(${v.id}); fecharMenuAcoesVaga();` });
+  acoes.push({ icon: '👥', label: 'Ver candidatos', onclick: `abrirVagaCands(${v.id}); fecharMenuAcoesVaga();` });
   if (v.status === 'publicada' || v.status === 'pausada') {
     acoes.push({ icon: '📋', label: 'Duplicar vaga', onclick: `duplicarVagaAdmin(${v.id}); fecharMenuAcoesVaga();` });
   }
