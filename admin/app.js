@@ -1221,88 +1221,54 @@ const chartH = 220; // deve bater com CSS
         { fill: '#60A5FA', stroke: '#93C5FD', label: 'azul' },
         { fill: '#34D399', stroke: '#6EE7B7', label: 'verde' }
       ];
+      // Gráfico em rampa: segmentos coloridos, linha vertical e bolinha de percentual
       containerRanking.innerHTML = `
         <div class="grafico-ranking-chart">
           <svg class="ranking-stair-svg" viewBox="0 0 600 320" preserveAspectRatio="none">
-            <line class="ranking-base-line" x1="20" y1="280" x2="580" y2="280"/>
-            ${vRanking.map((v, i) => {
-              const total = v.total_candidatos || 0;
-              const contrat = v.contratados || 0;
+            <line class="ranking-base-line" x1="0" y1="270" x2="600" y2="270"/>
+            ${(() => {
               const n = vRanking.length;
               const maxC = Math.max(...vRanking.map(r => r.total_candidatos || 0), 1);
-              const barW = 60;
-              const spanTotal = 560;
-              const span = n === 1 ? 0 : (spanTotal - barW) / (n - 1);
-              const x = n === 1 ? 270 : (20 + i * span);
-              const hTotal = (total / maxC) * 170;
-              const hContrat = total > 0 ? (contrat / total) * hTotal : 0;
-              const cor = coresVivas[i % coresVivas.length];
-              const topY = 280 - hTotal;
-              const cx = x + barW / 2;
-              const lineY2 = Math.max(topY - 70, 20);
-              const lineY1 = topY;
-              const pct = maxC > 0 ? Math.round((total / maxC) * 100) : 0;
-              const dotR = 9;
-              const tituloCurto = (v.titulo || '—').length > 20 ? (v.titulo || '—').slice(0, 18) + '…' : (v.titulo || '—');
-              const empresaCurta = (v.empresa || '').slice(0, 22);
-              return `
-                <line x1="${cx}" y1="${lineY1}" x2="${cx}" y2="${lineY2}" stroke="${cor.fill}" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
-                <circle class="ranking-stair-dot" cx="${cx}" cy="${lineY2}" r="${dotR}" fill="${cor.fill}" stroke="#FFFFFF" stroke-width="2"/>
-                <text class="ranking-stair-pct" x="${cx}" y="${lineY2 - 22}" fill="${cor.fill}">${pct}%</text>
-                <text class="ranking-stair-pct-sub" x="${cx}" y="295" style="font-size:11px;fill:#1A1A1A;font-weight:700;">${tituloCurto}</text>
-                <text class="ranking-stair-pct-sub" x="${cx}" y="309" style="font-size:9px;fill:#888;font-weight:500;">${empresaCurta}</text>
-                <polygon class="ranking-stair-shadow" points="${x + barW},${topY} ${x + barW + 6},${topY - 3} ${x + barW + 6},${280} ${x + barW},${280}" fill="rgba(0,0,0,0.25)"/>
-                <rect class="ranking-stair-bar" x="${x}" y="${topY}" width="${barW}" height="${hTotal}" fill="${cor.fill}" onclick="irParaCandidatosDaVaga(${v.id})">
-                  <title>${v.titulo} — ${total} candidatos${contrat > 0 ? ' (' + contrat + ' contratado' + (contrat === 1 ? '' : 's') + ')' : ''}</title>
-                </rect>
-                ${hContrat > 0 ? `<rect x="${x}" y="${topY}" width="${barW}" height="${hContrat}" fill="#7B2330" opacity="0.92"/>` : ''}
-              `;
-            }).join('')}
+              const segW = 560 / n;
+              const x0 = 20;
+              const rampLow = 238;
+              const rampHigh = 72;
+              let svg = '';
+              vRanking.forEach((v, i) => {
+                const cor = coresVivas[i % coresVivas.length];
+                const total = v.total_candidatos || 0;
+                const contrat = v.contratados || 0;
+                const left = x0 + i * segW;
+                const right = left + segW;
+                const yLeft = rampLow - (i / n) * (rampLow - rampHigh);
+                const yRight = rampLow - ((i + 1) / n) * (rampLow - rampHigh);
+                const pct = Math.round((total / maxC) * 100);
+                const dotX = right - 5;
+                const dotY = yRight;
+                const title = (v.titulo || '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const short = title.length > 15 ? title.slice(0, 14) + '…' : title;
+                svg += `
+                  <polygon class="ranking-stair-bar" points="${left},270 ${left},${yLeft} ${right},${yRight} ${right},270" fill="${cor.fill}" onclick="irParaCandidatosDaVaga(${v.id})">
+                    <title>${title} — ${total} candidatos</title>
+                  </polygon>
+                  <line x1="${dotX}" y1="${dotY}" x2="${dotX}" y2="${Math.max(dotY - 62, 24)}" stroke="${cor.fill}" stroke-width="4" stroke-linecap="round"/>
+                  <circle class="ranking-stair-dot" cx="${dotX}" cy="${Math.max(dotY - 62, 24)}" r="10" fill="${cor.fill}" stroke="#fff" stroke-width="2"/>
+                  <text class="ranking-stair-pct" x="${dotX}" y="${Math.max(dotY - 85, 18)}" fill="${cor.fill}">${pct}%</text>
+                  <text class="ranking-stair-pct-sub" x="${left + segW / 2}" y="291">${short}</text>
+                  ${contrat ? `<text class="ranking-stair-pct-sub" x="${left + segW / 2}" y="306" fill="#7B2330">${contrat} contratado${contrat > 1 ? 's' : ''}</text>` : ''}
+                `;
+              });
+              return svg;
+            })()}
           </svg>
         </div>`;
 
       containerLegend.innerHTML = `
-        <div><span class="leg-dot" style="background:#7B2330"></span>Contratados</div>
-        <div style="color:#888;font-size:11px;margin-left:auto;">💡 Clique nas barras para ver os candidatos</div>`;
+        <div><span class="leg-dot" style="background:#EC4899"></span>Volume por vaga</div>
+        <div style="color:#888;font-size:11px;margin-left:auto;">💡 Clique em uma área para ver os candidatos</div>`;
+    } else {
       containerRanking.innerHTML = '<div class="empty">Nenhuma vaga ativa com candidatos</div>';
       containerLegend.innerHTML = '';
-    }
-    
-    // === Atividades recentes ===
-    const ats = data.atividades_recentes || [];
-    if (ats.length > 0) {
-      const tipoMap = {
-        'inscricao':        { icone: '✨', label: 'Nova inscrição',  tipo: 'inscricao' },
-        'avancar':          { icone: '▶️', label: 'Avançou etapa',   tipo: 'avancar' },
-        'reprovar':         { icone: '✖', label: 'Reprovado',       tipo: 'reprovar' },
-        'reabrir':          { icone: '↩', label: 'Reaberto',        tipo: 'reabrir' },
-        'recusar_proposta': { icone: '✖', label: 'Proposta recusada', tipo: 'proposta' },
-        'aceitar_proposta': { icone: '✓', label: 'Proposta aceita',  tipo: 'proposta' },
-        'enviar_proposta':  { icone: '📨', label: 'Proposta enviada', tipo: 'proposta' },
-        'entrevista':       { icone: '📅', label: 'Entrevista agendada', tipo: 'entrevista' }
-      };
-      document.getElementById('atividades-recentes').innerHTML = ats.slice(0, 8).map(a => {
-        const t = tipoMap[a.texto] || { icone: '•', label: a.texto, tipo: 'reabrir' };
-        const quando = tempoRelativo(a.quando);
-        const alerta = a.alerta_parado
-          ? `<span class="badge-alerta-parado" title="Candidato parado há ${a.dias_parado || 3}+ dias nessa etapa">⚠️ Parado ${a.dias_parado || 3}d</span>`
-          : '';
-        return `<div class="atividade-item tipo-${t.tipo}${a.alerta_parado ? ' alerta-parado' : ''}">
-          <div class="atividade-icone">${t.icone}</div>
-          <div class="atividade-corpo">
-            <div class="atividade-topo">
-              <span class="atividade-tipo">${t.label}</span>
-              <span class="atividade-tempo">${quando}</span>
-            </div>
-            <div class="atividade-candidato">${a.candidato || '—'} ${alerta}</div>
-            <div class="atividade-vaga">${a.vaga || '—'}</div>
-          </div>
-        </div>`;
-      }).join('');
-      const countEl = document.getElementById('atividades-count');
-      if (countEl) countEl.textContent = ats.length;
-    } else {
-      document.getElementById('atividades-recentes').innerHTML = '<div class="atividade-empty">Nenhuma atividade recente</div>';
     }
     
     // === KPIs secundários ===
