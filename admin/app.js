@@ -1782,14 +1782,14 @@ function popularFiltrosVagas(vagas) {
   const areaEl = document.getElementById('vagas-filtro-area');
   if (empEl) {
     const atual = empEl.value;
-    empEl.innerHTML = '<option value="">Todas as empresas</option>' +
+    empEl.innerHTML = '<option value="">Empresa: Todas</option>' +
       empresas.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
     // Mantém o valor selecionado se ainda existir
     if (empresas.includes(atual)) empEl.value = atual;
   }
   if (areaEl) {
     const atual = areaEl.value;
-    areaEl.innerHTML = '<option value="">Todas as categorias</option>' +
+    areaEl.innerHTML = '<option value="">Categoria: Todas</option>' +
       areas.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
     if (areas.includes(atual)) areaEl.value = atual;
   }
