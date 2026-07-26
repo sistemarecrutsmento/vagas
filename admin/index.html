@@ -226,6 +226,21 @@
     .gravidade-critica { border-left: 4px solid #b71c1c; }
     .gravidade-alta { border-left: 4px solid #bf360c; }
     .gravidade-media { border-left: 4px solid #e65100; }
+
+    /* Etapa clicável */
+    .etapa-clickable { cursor: pointer; transition: background 0.15s; }
+    .etapa-clickable:hover { background: #fafafa; }
+
+    /* Modal Candidatos por Etapa */
+    .candidatos-etapa-resumo { margin-bottom: 14px; font-size: 14px; color: var(--cinza-medio); padding: 10px 14px; background: #fafafa; border-radius: 6px; }
+    .candidatos-etapa-lista { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; padding-right: 4px; }
+    .candidatos-etapa-header { display: grid; grid-template-columns: 2fr 2fr 0.9fr 0.9fr 0.7fr; gap: 12px; padding: 10px 12px; background: #f5f5f5; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
+    .candidatos-etapa-row { display: grid; grid-template-columns: 2fr 2fr 0.9fr 0.9fr 0.7fr; gap: 12px; padding: 12px; border: 1px solid var(--borda); border-radius: 8px; align-items: center; transition: background 0.12s; }
+    .candidatos-etapa-row:hover { background: #fafafa; }
+
+    /* Alerta de parado (Atividades Recentes) */
+    .badge-alerta-parado { display: inline-block; background: #ffcdd2; color: #b71c1c; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; margin-left: 6px; vertical-align: middle; }
+    .atividade-item.alerta-parado { border-left: 3px solid #b71c1c; }
     .modal { background: var(--branco); border-radius: 8px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
     .modal-lg { max-width: 800px; }
     .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; }
@@ -552,7 +567,7 @@
         <div class="dash-card">
           <div class="dash-card-header">
             <h3>📅 Próximas Entrevistas</h3>
-            <a href="#" class="dash-link" onclick="irPara('vagas')">Ver todas →</a>
+            <a href="#" class="dash-link" onclick="irPara('agenda')">Ver todas →</a>
           </div>
           <div id="proximas-entrevistas" class="lista-entrevistas">
             <div class="empty">Carregando...</div>
@@ -810,6 +825,22 @@
     </div>
     <div class="modal-footer" style="text-align:right;padding:0 20px 16px;">
       <button class="btn-secundario" onclick="fecharModal('vagas-antigas')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CANDIDATOS POR ETAPA (clicado no gráfico) -->
+<div class="modal-overlay" id="modal-candidatos-etapa">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3 id="candidatos-etapa-titulo">🎯 Candidatos na etapa</h3>
+      <button class="modal-close" onclick="fecharModal('candidatos-etapa')">&times;</button>
+    </div>
+    <div class="modal-body" id="candidatos-etapa-body">
+      <div class="spinner"></div>
+    </div>
+    <div class="modal-footer" style="text-align:right;padding:0 20px 16px;">
+      <button class="btn-secundario" onclick="fecharModal('candidatos-etapa')">Fechar</button>
     </div>
   </div>
 </div>
@@ -1142,7 +1173,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260726110700_contratacoes"></script>
+<script src="app.js?v=20260726113000_etapas_alerta"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
