@@ -1166,38 +1166,86 @@ async function carregarDashboardV2() {
       docProg.textContent = taxaDoc > 10 ? `${aprovados}/${totalDocs} aprovados` : '';
     }
     
-    // === Gráfico: Vagas com mais candidatos (barras empilhadas: contratados vs demais) ===
+    // === Gráfico: Vagas ATIVAS com mais candidatos (barras verticais + curva) ===
     const vRanking = data.vagas_mais_candidatos || [];
     const containerRanking = document.getElementById('grafico-ranking');
     const containerLegend = document.getElementById('grafico-ranking-legend');
     if (vRanking.length > 0) {
       const maxCands = Math.max(1, ...vRanking.map(v => v.total_candidatos || 0));
-      containerRanking.innerHTML = vRanking.map(v => {
+      // Gera os pontos da curva (pontos no topo de cada barra) — interpolação suave (Catmull-Rom -> cubic Bézier)
+      const n = vRanking.length;
+      const colPts = []; // {xPct, yPct} em % do gráfico
+      vRanking.forEach((v, i) => {
         const total = v.total_candidatos || 0;
-        const contrat = v.contratados || 0;
-        const demais = Math.max(0, total - contrat);
-        const pctContrat = (contrat / maxCands) * 100;
-        const pctDemais = (demais / maxCands) * 100;
-        const statusBadge = v.status === 'publicada'
-          ? '<span class="ranking-status ativa">Ativa</span>'
-          : '<span class="ranking-status fechada">Encerrada</span>';
-        return `<div class="ranking-row" onclick="irParaCandidatosDaVaga(${v.id})" title="Ver candidatos de ${(v.titulo || '').replace(/"/g, '&quot;')}">
-          <div class="ranking-info">
-            <div class="ranking-titulo">${v.titulo || '—'} ${statusBadge}</div>
-            <div class="ranking-empresa">${v.empresa || '—'}</div>
-          </div>
-          <div class="ranking-bar-stack">
-            <div class="ranking-bar-contratados" style="width:${pctContrat}%" title="${contrat} contratado(s)"></div>
-            <div class="ranking-bar-candidatos" style="width:${pctDemais}%" title="${demais} candidato(s)"></div>
-          </div>
-          <div class="ranking-num">${total}<small>${contrat} contrat.</small></div>
+        const yPct = (total / maxCands) * 100; // 0 (base) → 100 (topo)
+        const xPct = n === 1 ? 50 : (i / (n - 1)) * 100;
+        colPts.push({ xPct, yPct });
+      });
+      // Constrói path suave (Catmull-Rom -> Bézier)
+      let curvaPath = '';
+      if (colPts.length > 0) {
+        // Substitui y por 100-y (porque y SVG cresce pra baixo, e aqui queremos top→0)
+        const pts = colPts.map(p => ({ x: p.xPct, y: 100 - p.yPct }));
+        if (pts.length === 1) {
+          curvaPath = `M ${pts[0].x},${pts[0].y}`;
+        } else {
+          let d = `M ${pts[0].x},${pts[0].y}`;
+          for (let i = 0; i < pts.length - 1; i++) {
+            const p0 = i === 0 ? pts[0] : pts[i - 1];
+            const p1 = pts[i];
+            const p2 = pts[i + 1];
+            const p3 = i + 2 < pts.length ? pts[i + 2] : p2;
+            // Pontos de controle Bézier (Catmull-Rom simplificado, tension 0.5)
+            const c1x = p1.x + (p2.x - p0.x) / 6;
+            const c1y = p1.y + (p2.y - p0.y) / 6;
+            const c2x = p2.x - (p3.x - p1.x) / 6;
+            const c2y = p2.y - (p3.y - p1.y) / 6;
+            d += ` C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2.x},${p2.y}`;
+          }
+          curvaPath = d;
+        }
+      }
+      const curvaFill = curvaPath
+        ? curvaPath + ` L ${colPts[colPts.length - 1].xPct},100 L ${colPts[0].xPct},100 Z`
+        : '';
+
+      const chartH = 220; // deve bater com CSS
+      containerRanking.innerHTML = `
+        <div class="grafico-ranking-chart" style="position:relative;">
+          <svg class="curva-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="curva-grad" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#722F37" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#722F37" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="${curvaFill}" fill="url(#curva-grad)"/>
+            <path d="${curvaPath}" fill="none" stroke="#722F37" stroke-width="0.6" stroke-opacity="0.55"/>
+          </svg>
+          ${vRanking.map((v, i) => {
+            const total = v.total_candidatos || 0;
+            const contrat = v.contratados || 0;
+            const hTotal = (total / maxCands) * (chartH - 8);
+            const hContrat = total > 0 ? (contrat / total) * hTotal : 0;
+            // Bar com gradiente: contratado (vinho) no topo absoluto + restante dourado
+            const styleBar = hTotal > 0
+              ? `height:${hTotal.toFixed(1)}px;background:linear-gradient(180deg, #8B3A47 0%, #5A1F2A ${(hContrat / hTotal * 100).toFixed(1)}%, #F0C870 ${(hContrat / hTotal * 100).toFixed(1)}%, #B88C2F 100%);`
+              : `height:6px;background:#D4A857;`;
+            return `<div class="ranking-col" onclick="irParaCandidatosDaVaga(${v.id})" title="${(v.titulo || '').replace(/"/g, '&quot;')}">
+              <div class="ranking-num-top">${total}<small>${contrat} contrat.</small></div>
+              <div class="ranking-bar" style="${styleBar}"></div>
+              <div class="ranking-label">
+                <div class="vaga-titulo">${v.titulo || '—'}</div>
+                <div class="vaga-empresa">${v.empresa || ''}</div>
+              </div>
+            </div>`;
+          }).join('')}
         </div>`;
-      }).join('');
       containerLegend.innerHTML = `
         <div><span class="leg-dot" style="background:#722F37"></span>Contratados</div>
         <div><span class="leg-dot" style="background:#D4A857"></span>Outros candidatos</div>`;
     } else {
-      containerRanking.innerHTML = '<div class="empty">Nenhuma vaga com candidatos</div>';
+      containerRanking.innerHTML = '<div class="empty">Nenhuma vaga ativa com candidatos</div>';
       containerLegend.innerHTML = '';
     }
     
