@@ -55,7 +55,7 @@
       aside.aberto { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
       aside.aberto .menu-close { display: block; }
       .aside-logo { padding: 12px 24px 24px; }
-      main { width: 100%; padding: 20px 16px; padding-top: 64px; }
+      main { width: 100%; padding: 20px 16px; padding-top: 72px; }
       .btn.btn-sec { padding: 8px 14px; background: var(--cinza-escuro); color: var(--branco); border: 0; border-radius: 6px; cursor: pointer; font-size: 13px; }
       .page-header { flex-direction: column; align-items: flex-start; }
       .page-header h2 { font-size: 20px; }
@@ -309,6 +309,179 @@
       #candidatos-table tr { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
       #candidatos-table td { padding: 4px 0; border: 0; text-align: left; box-sizing: border-box; word-break: normal; }
       #candidatos-table td::before { content: attr(data-label); display: block; font-size: 11px; color: var(--cinza-medio); text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
+    }
+
+    /* === Base de Talentos — layout novo === */
+    .talentos-header {
+      display: block;
+      margin-bottom: 16px;
+    }
+    .talentos-titulo-area {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .talentos-titulo-area h2 { margin: 0 0 4px 0; font-size: 24px; font-weight: 700; color: var(--preto); }
+    .talentos-titulo-area p { margin: 0; color: #888; font-size: 14px; }
+    .talentos-contador {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--branco); border: 1px solid var(--borda);
+      border-radius: 10px; padding: 10px 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .talentos-contador::before { content: "👥"; font-size: 22px; }
+    .talentos-contador-num { font-size: 22px; font-weight: 700; color: var(--vinho); line-height: 1; }
+    .talentos-contador-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: .5px; }
+
+    .talentos-filtros { display: flex; flex-direction: column; gap: 10px; }
+    .talentos-busca {
+      padding: 10px 14px; border: 1px solid var(--borda); border-radius: 8px;
+      font-size: 14px; background: var(--branco); width: 100%;
+    }
+    .talentos-busca:focus { outline: none; border-color: var(--vinho); box-shadow: 0 0 0 3px rgba(114,47,55,0.08); }
+    .talentos-filtros-linha { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .talentos-select {
+      padding: 10px 14px; border: 1px solid var(--borda); border-radius: 8px;
+      font-size: 14px; background: var(--branco); min-width: 200px;
+    }
+    .talentos-select:focus { outline: none; border-color: var(--vinho); }
+    .talentos-btn-aplicar, .talentos-btn-limpar { padding: 10px 18px; }
+    .talentos-btn-filtros-mobile { display: none; }
+
+    /* Tabs dinâmicas */
+    .talentos-abas {
+      display: flex; gap: 4px; border-bottom: 1px solid var(--borda);
+      margin-bottom: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    .talentos-aba {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; background: transparent; border: 0;
+      border-bottom: 2px solid transparent; cursor: pointer;
+      font-size: 14px; color: #666; white-space: nowrap;
+      transition: all .15s;
+    }
+    .talentos-aba:hover { color: var(--vinho); }
+    .talentos-aba.ativa { color: var(--vinho); border-bottom-color: var(--vinho); font-weight: 600; }
+    .talentos-aba-num {
+      background: #F5F5F5; padding: 2px 8px; border-radius: 10px;
+      font-size: 12px; font-weight: 600; color: #555;
+    }
+    .talentos-aba.ativa .talentos-aba-num { background: #fdf2f4; color: var(--vinho); }
+
+    /* Tabela desktop */
+    .talentos-tabela { width: 100%; border-collapse: collapse; }
+    .talentos-tabela th { text-align: left; padding: 12px 14px; background: #FAFAFA; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; font-weight: 600; border-bottom: 1px solid var(--borda); }
+    .talentos-tabela td { padding: 14px; border-bottom: 1px solid #F0F0F0; font-size: 14px; color: #333; }
+    .talentos-tabela tbody tr:hover { background: #FAFAFA; }
+    .talentos-tabela .cand-foto { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 10px; background: #f0e8ea; }
+    .talentos-tabela .cand-iniciais { width: 36px; height: 36px; border-radius: 50%; background: var(--vinho); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; margin-right: 10px; vertical-align: middle; }
+    .cand-nome-cell { display: flex; align-items: center; }
+
+    /* Cards mobile */
+    .talentos-cards { display: none; flex-direction: column; gap: 12px; }
+    .cand-card {
+      background: var(--branco); border: 1px solid var(--borda);
+      border-radius: 12px; padding: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .cand-card-topo { display: flex; align-items: center; gap: 12px; }
+    .cand-card-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--vinho); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px; flex-shrink: 0;
+      object-fit: cover; overflow: hidden;
+    }
+    .cand-card-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cand-card-nome { font-size: 16px; font-weight: 600; color: var(--preto); flex: 1; min-width: 0; word-break: break-word; }
+    .cand-card-info { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #555; }
+    .cand-card-info-linha { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .cand-card-info-linha .ico { width: 16px; text-align: center; opacity: .8; flex-shrink: 0; }
+    .cand-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .cand-card-rodape { display: flex; gap: 8px; align-items: center; padding-top: 8px; border-top: 1px solid #F0F0F0; }
+    .cand-status {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 600;
+    }
+    .cand-status.disponivel { background: #E8F5E9; color: #2E7D32; }
+    .cand-status.em_processo { background: #FFF8E1; color: #F57C00; }
+    .cand-status.contratado { background: #E3F2FD; color: #1565C0; }
+    .cand-card-btn-ver {
+      flex: 1; padding: 10px 14px; border: 0; border-radius: 8px;
+      background: var(--vinho); color: #fff; font-weight: 600;
+      font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .cand-card-btn-ver:hover { background: var(--vinho-escuro); }
+
+    /* Vazio */
+    .talentos-vazio {
+      padding: 60px 20px; text-align: center; color: #888;
+      background: var(--branco); border: 1px dashed var(--borda);
+      border-radius: 12px;
+    }
+    .talentos-vazio-icone { font-size: 40px; margin-bottom: 12px; opacity: .5; }
+    .talentos-vazio-titulo { font-size: 16px; font-weight: 600; color: #555; margin-bottom: 4px; }
+    .talentos-vazio-texto { font-size: 13px; color: #888; margin-bottom: 16px; }
+    .talentos-vazio-btn {
+      padding: 8px 16px; background: var(--vinho); color: var(--branco);
+      border: 0; border-radius: 6px; cursor: pointer; font-size: 14px;
+    }
+
+    /* Paginação */
+    .talentos-paginacao {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0; flex-wrap: wrap; gap: 12px;
+      border-top: 1px solid var(--borda); margin-top: 16px;
+    }
+    .talentos-paginacao-info { color: #666; font-size: 13px; }
+    .talentos-paginacao-btns { display: flex; align-items: center; gap: 6px; }
+    .talentos-pag-btn {
+      min-width: 36px; height: 36px; padding: 0 10px;
+      border: 1px solid var(--borda); background: var(--branco);
+      cursor: pointer; border-radius: 6px; color: #555; font-size: 14px;
+    }
+    .talentos-pag-btn:hover:not(:disabled) { background: #FAFAFA; border-color: var(--vinho); color: var(--vinho); }
+    .talentos-pag-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .talentos-pag-btn.ativa { background: var(--vinho); color: var(--branco); border-color: var(--vinho); }
+
+    /* Responsivo */
+    @media (max-width: 900px) {
+      #candidatos-table { display: none !important; }
+      .talentos-cards { display: flex !important; }
+      .talentos-select { min-width: 0; flex: 1; }
+    }
+    @media (max-width: 600px) {
+      .talentos-titulo-area { flex-direction: column; align-items: stretch; }
+      .talentos-contador { align-self: flex-start; }
+      .talentos-filtros-linha { flex-wrap: wrap; }
+      .talentos-btn-filtros-mobile { display: inline-flex !important; align-items: center; gap: 6px; padding: 10px 14px; border: 1px solid var(--borda); background: var(--branco); border-radius: 8px; font-size: 14px; cursor: pointer; }
+      .talentos-btn-aplicar, .talentos-btn-limpar { flex: 1; }
+    }
+
+    /* Cabeçalho do currículo (foto + dados básicos) */
+    .curriculo-header {
+      display: flex; gap: 16px; align-items: center;
+      padding-bottom: 16px; margin-bottom: 16px;
+      border-bottom: 1px solid var(--borda);
+    }
+    .curriculo-foto, .curriculo-foto-iniciais {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: var(--vinho); color: #fff; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 26px;
+      object-fit: cover; overflow: hidden;
+    }
+    .curriculo-foto { object-fit: cover; }
+    .curriculo-header-info { flex: 1; min-width: 0; }
+    .curriculo-nome { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: var(--preto); }
+    .curriculo-sub { font-size: 13px; color: #555; margin-top: 2px; }
+    .curriculo-badges { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .curriculo-meta-inline { font-size: 12px; color: #888; }
+    @media (max-width: 600px) {
+      .curriculo-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .curriculo-foto, .curriculo-foto-iniciais { width: 72px; height: 72px; font-size: 22px; }
     }
 
     /* Cards de vagas com candidatos */
@@ -1143,22 +1316,72 @@
 
     <!-- CANDIDATOS -->
     <div class="page" id="page-candidatos">
-      <div class="page-header">
-        <div><h2>Base de Talentos</h2><p>Todos os candidatos cadastrados na plataforma</p></div>
-        <div class="base-filtros" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <select id="candidatos-filtro-area" class="filtro-area" style="padding:8px 12px;border:1px solid var(--borda);border-radius:6px;font-size:14px;min-width:200px">
-            <option value="">📂 Todas as áreas</option>
-          </select>
-          <input type="text" id="candidatos-filtro-busca" placeholder="🔍 Buscar nome/email..." style="padding:8px 12px;border:1px solid var(--borda);border-radius:6px;font-size:14px;min-width:200px">
-          <button class="btn btn-primary" style="width:auto" onclick="carregarCandidatos()">Aplicar</button>
-          <button class="btn btn-sec" style="width:auto" onclick="limparFiltrosCandidatos()">Limpar</button>
+      <div class="page-header talentos-header">
+        <div class="talentos-titulo-area">
+          <div>
+            <h2>Base de Talentos</h2>
+            <p>Todos os candidatos cadastrados na plataforma</p>
+          </div>
+          <div class="talentos-contador" id="talentos-contador">
+            <div class="talentos-contador-num">0</div>
+            <div class="talentos-contador-label">candidatos</div>
+          </div>
+        </div>
+
+        <div class="talentos-filtros">
+          <input type="text" id="candidatos-filtro-busca" placeholder="🔎 Buscar por nome, e-mail ou telefone..." class="talentos-busca" />
+          <div class="talentos-filtros-linha">
+            <select id="candidatos-filtro-area" class="talentos-select">
+              <option value="">📂 Todas as áreas</option>
+            </select>
+            <select id="candidatos-filtro-status" class="talentos-select" style="display:none">
+              <option value="">Todos os status</option>
+              <option value="disponivel">🟢 Disponível</option>
+              <option value="em_processo">🟡 Em processo</option>
+              <option value="contratado">🔵 Contratado</option>
+            </select>
+            <button id="talentos-btn-filtros-mobile" class="talentos-btn-filtros-mobile" onclick="abrirPainelFiltrosCandidatos()" type="button">⚙ Filtros</button>
+            <button class="btn btn-primary talentos-btn-aplicar" onclick="carregarCandidatos()">Aplicar</button>
+            <button class="btn btn-sec talentos-btn-limpar" onclick="limparFiltrosCandidatos()">Limpar</button>
+          </div>
         </div>
       </div>
+
+      <!-- Tabs dinâmicas (só aparecem se houver dados suficientes) -->
+      <div class="talentos-abas" id="talentos-abas" style="display:none">
+        <button class="talentos-aba ativa" data-aba="todos" onclick="filtrarCandidatosPorAba('todos')">
+          <span class="talentos-aba-num" id="talentos-aba-todos-num">0</span>
+          <span>Todos</span>
+        </button>
+        <button class="talentos-aba" data-aba="em_processo" onclick="filtrarCandidatosPorAba('em_processo')">
+          <span class="talentos-aba-num" id="talentos-aba-em_processo-num">0</span>
+          <span>Em processo</span>
+        </button>
+        <button class="talentos-aba" data-aba="contratado" onclick="filtrarCandidatosPorAba('contratado')">
+          <span class="talentos-aba-num" id="talentos-aba-contratado-num">0</span>
+          <span>Contratados</span>
+        </button>
+        <button class="talentos-aba" data-aba="disponivel" onclick="filtrarCandidatosPorAba('disponivel')">
+          <span class="talentos-aba-num" id="talentos-aba-disponivel-num">0</span>
+          <span>Disponíveis</span>
+        </button>
+      </div>
+
+      <!-- Lista (tabela desktop + cards mobile) -->
       <div class="tabela-wrap">
-        <table id="candidatos-table">
+        <table id="candidatos-table" class="talentos-tabela">
           <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Cidade</th><th>Cadastro</th><th>Ações</th></tr></thead>
-          <tbody><tr><td colspan="6" class="empty">Carregando...</td></tr></tbody>
+          <tbody><tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr></tbody>
         </table>
+      </div>
+
+      <!-- Container separado para cards mobile -->
+      <div id="candidatos-cards" class="talentos-cards"></div>
+
+      <!-- Paginação -->
+      <div id="candidatos-paginacao" class="talentos-paginacao" style="display:none">
+        <div class="talentos-paginacao-info" id="candidatos-paginacao-info"></div>
+        <div class="talentos-paginacao-btns" id="candidatos-paginacao-btns"></div>
       </div>
     </div>
 
@@ -1680,8 +1903,7 @@
     </div>
   </div>
 </div>
-
-<script src="app.js?v=vagas_v3_2026"></script>
+<script src="app.js?v=vagas_talentos_2026_07"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
