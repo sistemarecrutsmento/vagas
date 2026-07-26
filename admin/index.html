@@ -170,6 +170,27 @@
     /* Modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
     .modal-overlay.aberto { display: flex; }
+
+    /* === KPI Vagas Ativas (clicável) === */
+    .kpi-card.kpi-clickable { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+    .kpi-card.kpi-clickable:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); border-color: var(--vinho); }
+    .kpi-link-icon { position: absolute; top: 10px; right: 12px; opacity: 0.45; font-size: 14px; }
+    .kpi-card .kpi-top { position: relative; }
+    .kpi-abre { font-size: 11px; color: var(--vinho); font-weight: 600; margin-left: 4px; }
+
+    /* === Modal Vagas Ativas (tabela) === */
+    .vagas-ativas-tabela { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; padding-right: 4px; }
+    .vagas-ativas-header { display: grid; grid-template-columns: 2.5fr 1.3fr 1fr 1.4fr; gap: 12px; padding: 10px 12px; background: #f5f5f5; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
+    .vagas-ativas-row { display: grid; grid-template-columns: 2.5fr 1.3fr 1fr 1.4fr; gap: 12px; padding: 12px; border: 1px solid var(--borda); border-radius: 8px; align-items: center; transition: background 0.12s; }
+    .vagas-ativas-row:hover { background: #fafafa; }
+    .vagas-ativas-titulo strong { color: var(--vinho); display: block; margin-bottom: 2px; }
+    .vagas-ativas-local { font-size: 12px; color: var(--cinza-medio); }
+    .vagas-ativas-data { font-size: 13px; color: var(--cinza-medio); }
+    .vagas-ativas-acoes { display: flex; gap: 6px; }
+    .btn-modal { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; transition: opacity 0.15s; }
+    .btn-modal:hover { opacity: 0.85; }
+    .btn-modal-ver { background: #5B9BD5; color: white; }
+    .btn-modal-editar { background: var(--vinho); color: white; }
     .modal { background: var(--branco); border-radius: 8px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
     .modal-lg { max-width: 800px; }
     .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; }
@@ -703,6 +724,22 @@
   </div>
 </div>
 
+<!-- MODAL LISTA DE VAGAS ATIVAS (clicado no KPI "Vagas Ativas") -->
+<div class="modal-overlay" id="modal-vagas-ativas">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3>💼 Vagas Ativas <span style="font-size:13px;color:var(--cinza-medio);font-weight:400;">— publicadas e visíveis aos candidatos</span></h3>
+      <button class="modal-close" onclick="fecharModal('vagas-ativas')">&times;</button>
+    </div>
+    <div class="modal-body" id="vagas-ativas-lista">
+      <div class="spinner"></div>
+    </div>
+    <div class="modal-footer" style="text-align:right;padding:0 20px 16px;">
+      <button class="btn-secundario" onclick="fecharModal('vagas-ativas')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL VAGA -->
 <div class="modal-overlay" id="modal-vaga">
   <div class="modal modal-lg">
@@ -1031,7 +1068,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260725230000_login_recrutador"></script>
+<script src="app.js?v=20260726103000_vagas_ativas_modal"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
