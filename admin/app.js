@@ -752,6 +752,162 @@ function abrirModalNovaEntrevista() {
 
 // ===== DASHBOARD =====
 
+// === Modal: Contratações (lista + comparação mensal) ===
+async function abrirModalContratacoes(event) {
+  if (event) { event.stopPropagation(); event.preventDefault(); }
+  const body = document.getElementById('contratacoes-body');
+  const grafico = document.getElementById('contratacoes-grafico');
+  if (!body) return;
+  body.innerHTML = '<div class="spinner"></div>';
+  if (grafico) grafico.innerHTML = '';
+  abrirModal('contratacoes');
+  const _token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || sessionStorage.getItem('recrutador_token') || '';
+  try {
+    const r = await fetch(API + '/api/admin/contratacoes', {
+      headers: { 'Authorization': 'Bearer ' + _token }
+    });
+    const data = await r.json();
+    const lista = data.contratacoes || [];
+    const mensal = data.comparacao_mensal || [];
+
+    // Renderiza gráfico de barras (comparação mensal)
+    if (grafico && mensal.length) {
+      const max = Math.max(...mensal.map(m => m.total), 1);
+      grafico.innerHTML = `
+        <div class="contratacoes-grafico">
+          <div class="contratacoes-grafico-titulo">📊 Contratações por mês (últimos 6 meses)</div>
+          <div class="contratacoes-bars">
+            ${mensal.map(m => `
+              <div class="contratacoes-bar-col">
+                <div class="contratacoes-bar-valor">${m.total}</div>
+                <div class="contratacoes-bar" style="height: ${(m.total / max) * 100}%;">
+                </div>
+                <div class="contratacoes-bar-label">${m.mes_label}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (grafico) {
+      grafico.innerHTML = '<div class="empty">Sem contratações nos últimos 6 meses ainda.</div>';
+    }
+
+    // Renderiza lista de contratações
+    if (lista.length === 0) {
+      body.innerHTML = '<div class="empty">Nenhuma contratação registrada ainda.</div>';
+      return;
+    }
+    body.innerHTML = `
+      <div class="contratacoes-lista">
+        <div class="contratacoes-lista-header">
+          <div>Candidato</div>
+          <div>Vaga</div>
+          <div>Empresa</div>
+          <div>Dias</div>
+          <div>Ações</div>
+        </div>
+        ${lista.map(c => `
+          <div class="contratacoes-row">
+            <div class="contratacoes-candidato">
+              <strong>${escapeHtml(c.candidato_nome)}</strong>
+              <span class="contratacoes-email">${escapeHtml(c.candidato_email)}</span>
+            </div>
+            <div>${escapeHtml(c.vaga_titulo || '—')}</div>
+            <div>${escapeHtml(c.vaga_empresa || '—')}</div>
+            <div><span class="badge-dias">${c.dias_processo ?? '—'}d</span></div>
+            <div>
+              <button class="btn-modal btn-modal-ver" onclick="irParaCandidatura(${c.candidatura_id})" title="Abrir análise do candidato">
+                👁 Ver
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (e) {
+    body.innerHTML = '<div class="alert-erro">Erro ao carregar contratações: ' + e.message + '</div>';
+  }
+}
+
+// === Modal: Vagas Abertas há mais de 30 dias sem contratação ===
+async function abrirModalVagasAntigas(event) {
+  if (event) { event.stopPropagation(); event.preventDefault(); }
+  const body = document.getElementById('vagas-antigas-body');
+  if (!body) return;
+  body.innerHTML = '<div class="spinner"></div>';
+  abrirModal('vagas-antigas');
+  const _token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || sessionStorage.getItem('recrutador_token') || '';
+  try {
+    const r = await fetch(API + '/api/admin/vagas-abertas-antigas', {
+      headers: { 'Authorization': 'Bearer ' + _token }
+    });
+    const data = await r.json();
+    const vagas = data.vagas || [];
+    if (vagas.length === 0) {
+      body.innerHTML = `
+        <div class="vagas-antigas-resumo">
+          <div class="alert alert-info">✅ Nenhuma vaga aberta há mais de 30 dias sem contratação. Tudo em dia!</div>
+        </div>
+      `;
+      return;
+    }
+    body.innerHTML = `
+      <div class="vagas-antigas-resumo">
+        <div class="alert alert-warn">
+          ⚠️ <strong>${vagas.length}</strong> vaga(s) publicada(s) há mais de 30 dias ainda sem contratação.
+        </div>
+      </div>
+      <div class="vagas-antigas-lista">
+        <div class="vagas-antigas-header">
+          <div>Título</div>
+          <div>Empresa</div>
+          <div>Aberta há</div>
+          <div>Candidatos</div>
+          <div>Ativos</div>
+          <div>Ações</div>
+        </div>
+        ${vagas.map(v => {
+          const gravidade = v.dias_aberta > 90 ? 'critica' : v.dias_aberta > 60 ? 'alta' : 'media';
+          return `
+            <div class="vagas-antigas-row gravidade-${gravidade}">
+              <div class="vagas-antigas-titulo">
+                <strong>${escapeHtml(v.titulo)}</strong>
+                ${v.cidade || v.estado ? `<span class="vagas-antigas-local">${escapeHtml(v.cidade || '')}${v.cidade && v.estado ? '/' : ''}${escapeHtml(v.estado || '')}</span>` : ''}
+              </div>
+              <div>${escapeHtml(v.empresa || '—')}</div>
+              <div><span class="badge-dias badge-${gravidade}">${v.dias_aberta}d</span></div>
+              <div>${v.total_candidatos}</div>
+              <div>${v.processos_ativos}</div>
+              <div class="vagas-antigas-acoes">
+                <a href="../candidato/vaga.html?id=${v.id}" target="_blank" class="btn-modal btn-modal-ver" title="Ver como candidato">
+                  👁 Ver
+                </a>
+                <button class="btn-modal btn-modal-editar" onclick="editarVaga(${v.id});fecharModal('vagas-antigas');" title="Editar vaga">
+                  ✏️ Editar
+                </button>
+                <button class="btn-modal btn-modal-ver-cand" onclick="irParaCandidatosDaVaga(${v.id});fecharModal('vagas-antigas');" title="Ver candidatos dessa vaga">
+                  👥 Candidatos
+                </button>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    `;
+  } catch (e) {
+    body.innerHTML = '<div class="alert-erro">Erro ao carregar vagas: ' + e.message + '</div>';
+  }
+}
+
+// Helper: navegar para análise do candidato
+function irParaCandidatura(candidaturaId) {
+  window.location.href = 'analisar.html?id=' + candidaturaId;
+}
+
+// Helper: navegar para candidatos da vaga
+function irParaCandidatosDaVaga(vagaId) {
+  window.location.href = 'candidatos.html?vaga=' + vagaId;
+}
+
 // === Modal: lista de vagas ativas (ESCOPO GLOBAL pra onclick funcionar) ===
 async function abrirModalVagasAtivas(event) {
   if (event) { event.stopPropagation(); event.preventDefault(); }
@@ -830,7 +986,9 @@ async function carregarDashboardV2() {
       { label: 'Vagas ativas', valor: k.vagas_ativas || 0, delta: k.deltas?.vagas, icon: '💼', cor: 'rosa' },
       { label: 'Candidatos', valor: k.total_candidatos || 0, delta: k.deltas?.candidatos, icon: '👥', cor: 'azul' },
       { label: 'Processos ativos', valor: k.processos_ativos || 0, delta: k.deltas?.processos, icon: '📋', cor: 'roxo' },
-      { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: k.deltas?.entrevistas, icon: '📅', cor: 'verde' }
+      { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: k.deltas?.entrevistas, icon: '📅', cor: 'verde' },
+      { label: 'Contratações (30d)', valor: k.contratacoes_30d || 0, delta: k.deltas?.contratacoes, icon: '🎉', cor: 'verde-escuro' },
+      { label: 'Abertas +30d', valor: k.vagas_abertas_mais_30d || 0, delta: null, icon: '⏳', cor: 'amarelo' }
     ];
     document.getElementById('kpis-grid').innerHTML = kpis.map(k => {
       const delta = k.delta == null ? '' : (k.delta > 0 ? `<span class="kpi-delta up">+${k.delta}% este mês</span>` : k.delta < 0 ? `<span class="kpi-delta down">${k.delta}% este mês</span>` : `<span class="kpi-delta flat">0% este mês</span>`);
@@ -845,6 +1003,10 @@ async function carregarDashboardV2() {
         link = "irPara('candidaturas')"; linkText = 'ver processos →'; titleLink = 'Abrir lista de processos/candidaturas';
       } else if (k.label === 'Entrevistas agendadas') {
         link = "irPara('agenda')"; linkText = 'abrir agenda →'; titleLink = 'Abrir agenda de entrevistas';
+      } else if (k.label === 'Contratações (30d)') {
+        link = "abrirModalContratacoes(event)"; linkText = 'ver lista →'; titleLink = 'Ver contratações com comparação mensal';
+      } else if (k.label === 'Abertas +30d') {
+        link = "abrirModalVagasAntigas(event)"; linkText = 'ver vagas →'; titleLink = 'Ver vagas abertas há mais de 30 dias sem contratação';
       }
       const clickable = !!link;
       return `<div class="kpi-card kpi-${k.cor}${clickable ? ' kpi-clickable' : ''}"${clickable ? ` onclick="${link}" title="${titleLink}" style="cursor:pointer;"` : ''}>
