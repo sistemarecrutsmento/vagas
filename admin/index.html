@@ -471,6 +471,208 @@
     .kpi-sec { padding: 12px; background: #FAFAFA; border-radius: 8px; }
     .kpi-sec-label { font-size: 12px; color: #666; margin-bottom: 4px; }
     .kpi-sec-valor { font-size: 20px; font-weight: 700; color: #1A1A1A; }
+
+    /* ===== PÁGINA DE VAGAS (melhorada) ===== */
+    .vagas-toolbar {
+      display: flex; gap: 10px; align-items: center;
+      background: var(--branco); padding: 12px;
+      border-radius: 8px; border: 1px solid var(--borda);
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .vagas-toolbar-busca {
+      flex: 1 1 240px; min-width: 200px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 12px; border: 1px solid var(--borda);
+      border-radius: 6px; background: #FAFAFA;
+    }
+    .vagas-toolbar-busca:focus-within { border-color: var(--vinho); background: var(--branco); }
+    .vagas-toolbar-icone-busca { color: #999; font-size: 14px; }
+    .vagas-toolbar-busca input {
+      flex: 1; border: 0; background: transparent; outline: none;
+      padding: 10px 0; font-size: 14px; color: #1A1A1A;
+    }
+    .vagas-toolbar-select {
+      padding: 10px 12px; border: 1px solid var(--borda); border-radius: 6px;
+      background: var(--branco); font-size: 14px; min-width: 160px;
+      color: #1A1A1A; cursor: pointer;
+    }
+    .vagas-toolbar-select:focus { outline: none; border-color: var(--vinho); }
+    .vagas-toolbar-btn-sec {
+      padding: 10px 16px; background: var(--cinza-escuro); color: var(--branco);
+      border: 0; border-radius: 6px; cursor: pointer; font-size: 14px;
+      white-space: nowrap;
+    }
+    .vagas-toolbar-btn-sec:hover { background: #555; }
+
+    /* Abas */
+    .vagas-abas {
+      display: flex; gap: 4px;
+      border-bottom: 1px solid var(--borda); margin-bottom: 14px;
+      overflow-x: auto;
+    }
+    .vaga-aba {
+      padding: 10px 16px; background: transparent; border: 0;
+      border-bottom: 2px solid transparent; cursor: pointer;
+      font-size: 14px; color: #666; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 8px;
+      white-space: nowrap; transition: all .15s;
+    }
+    .vaga-aba:hover { color: var(--vinho); }
+    .vaga-aba.ativa {
+      color: var(--vinho); border-bottom-color: var(--vinho);
+      font-weight: 600;
+    }
+    .vaga-aba-count {
+      display: inline-block; min-width: 22px; padding: 1px 6px;
+      background: #EEE; color: #555; border-radius: 10px;
+      font-size: 12px; font-weight: 600; text-align: center;
+    }
+    .vaga-aba.ativa .vaga-aba-count { background: var(--vinho); color: var(--branco); }
+
+    /* Lista de vagas */
+    .vagas-lista-wrap {
+      background: var(--branco); border-radius: 8px;
+      border: 1px solid var(--borda); overflow: hidden;
+    }
+    .vagas-lista-cabecalho {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1.2fr 0.8fr 0.9fr 0.9fr 50px;
+      gap: 12px; padding: 12px 16px; background: #FAFAFA;
+      border-bottom: 1px solid var(--borda);
+      font-size: 12px; font-weight: 600; color: #666;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .vaga-linha {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1.2fr 0.8fr 0.9fr 0.9fr 50px;
+      gap: 12px; padding: 14px 16px; align-items: center;
+      border-bottom: 1px solid #F0F0F0;
+      transition: background .12s;
+    }
+    .vaga-linha:last-child { border-bottom: 0; }
+    .vaga-linha:hover { background: #FAFAFA; }
+    .vaga-linha-titulo { font-weight: 600; color: #1A1A1A; font-size: 14px; line-height: 1.3; }
+    .vaga-linha-id { font-size: 11px; color: #999; margin-top: 2px; }
+    .vaga-linha-empresa { color: #444; font-size: 14px; }
+    .vaga-linha-categoria { color: #555; font-size: 13px; }
+    .vaga-linha-candidatos {
+      text-align: center;
+    }
+    .vaga-linha-candidatos-num {
+      display: inline-block; padding: 4px 10px; border-radius: 6px;
+      background: var(--vinho-claro); color: var(--branco);
+      font-weight: 700; font-size: 15px; cursor: pointer;
+      min-width: 32px;
+    }
+    .vaga-linha-candidatos-num:hover { background: var(--vinho); }
+    .vaga-linha-candidatos-num.zero { background: #EEE; color: #999; cursor: default; }
+    .vaga-linha-candidatos-num.zero:hover { background: #EEE; }
+    .vaga-linha-candidatos-label {
+      display: block; font-size: 10px; color: #888;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
+    }
+    .vaga-linha-tempo { color: #555; font-size: 13px; }
+    .vaga-linha-tempo.vazio { color: #BBB; }
+    .vaga-linha-status .badge {
+      display: inline-block; padding: 4px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 600;
+    }
+    .vaga-linha-acoes { text-align: right; }
+    .vaga-linha-acoes-btn {
+      width: 32px; height: 32px; border: 0; background: transparent;
+      color: #555; cursor: pointer; border-radius: 6px; font-size: 18px;
+      transition: all .12s;
+    }
+    .vaga-linha-acoes-btn:hover { background: #EEE; color: var(--vinho); }
+
+    /* Menu flutuante de ações */
+    .vaga-menu-acoes {
+      position: fixed; background: var(--branco); border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15); border: 1px solid var(--borda);
+      min-width: 200px; z-index: 1000; overflow: hidden;
+    }
+    .vaga-menu-item {
+      display: flex; align-items: center; gap: 10px; width: 100%;
+      padding: 10px 14px; background: transparent; border: 0;
+      text-align: left; cursor: pointer; font-size: 14px; color: #1A1A1A;
+    }
+    .vaga-menu-item:hover { background: #FAFAFA; }
+    .vaga-menu-item.perigo { color: var(--vermelho); }
+    .vaga-menu-item.perigo:hover { background: #FFEBEE; }
+    .vaga-menu-item:disabled { color: #BBB; cursor: not-allowed; }
+    .vaga-menu-item:disabled:hover { background: transparent; }
+
+    /* Modal de confirmação */
+    .vaga-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2000;
+    }
+    .vaga-modal {
+      background: var(--branco); padding: 28px; border-radius: 12px;
+      max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .vaga-modal-titulo { margin: 0 0 12px 0; font-size: 18px; color: #1A1A1A; }
+    .vaga-modal-texto { margin: 0 0 12px 0; color: #555; font-size: 14px; line-height: 1.5; }
+    .vaga-modal-vaga-info {
+      margin: 0 0 20px 0; padding: 10px 12px; background: #FAFAFA;
+      border-radius: 6px; color: #333; font-size: 13px; font-weight: 500;
+    }
+    .vaga-modal-btns {
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+    .vaga-modal-btn-cancelar { padding: 10px 18px; }
+    .vaga-modal-btn-confirmar { padding: 10px 18px; }
+
+    /* Estado vazio */
+    .vagas-lista-vazia {
+      padding: 60px 20px; text-align: center; color: #888;
+    }
+    .vagas-lista-vazia .vazio-icone { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
+    .vagas-lista-vazia .vazio-titulo { font-size: 16px; font-weight: 600; color: #555; margin-bottom: 4px; }
+    .vagas-lista-vazia .vazio-texto { font-size: 13px; color: #888; margin-bottom: 16px; }
+    .vagas-lista-vazia .vazio-btn {
+      padding: 8px 16px; background: var(--vinho); color: var(--branco);
+      border: 0; border-radius: 6px; cursor: pointer; font-size: 14px;
+    }
+
+    /* Paginação */
+    .vagas-paginacao {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0; flex-wrap: wrap; gap: 12px;
+    }
+    .vagas-paginacao-info { color: #666; font-size: 13px; }
+    .vagas-paginacao-btns { display: flex; align-items: center; gap: 6px; }
+    .vagas-pag-btn {
+      width: 32px; height: 32px; border: 1px solid var(--borda);
+      background: var(--branco); cursor: pointer; border-radius: 6px;
+      color: #555; font-size: 14px;
+    }
+    .vagas-pag-btn:hover:not(:disabled) { background: #FAFAFA; border-color: var(--vinho); color: var(--vinho); }
+    .vagas-pag-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .vagas-pag-num {
+      width: 32px; height: 32px; border: 1px solid transparent;
+      background: transparent; cursor: pointer; border-radius: 6px;
+      color: #555; font-size: 13px; font-weight: 500;
+    }
+    .vagas-pag-num:hover { background: #FAFAFA; }
+    .vagas-pag-num.ativa { background: var(--vinho); color: var(--branco); border-color: var(--vinho); }
+
+    /* Mobile: transforma tabela em cards */
+    @media (max-width: 900px) {
+      .vagas-lista-cabecalho { display: none; }
+      .vaga-linha {
+        grid-template-columns: 1fr;
+        gap: 8px; padding: 16px;
+      }
+      .vaga-linha > div { font-size: 13px; }
+      .vaga-linha > div::before {
+        content: attr(data-label); font-weight: 600;
+        color: #888; font-size: 11px; text-transform: uppercase;
+        display: block; margin-bottom: 2px;
+      }
+      .vaga-linha-acoes { text-align: left; }
+    }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
 </head>
@@ -657,17 +859,75 @@
       <div class="page-header">
         <div>
           <h2>Vagas</h2>
-          <p>Gerencie as vagas publicadas</p>
+          <p>Gerencie suas oportunidades de recrutamento</p>
         </div>
         <button class="btn btn-primary" style="width:auto;" onclick="abrirModalVaga()">+ Nova vaga</button>
       </div>
-      <div class="tabela-wrap">
-        <table id="vagas-table">
-          <thead><tr><th>Título</th><th>Empresa</th><th>Categoria</th><th>Status</th><th></th></tr></thead>
-          <tbody><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
-        </table>
+
+      <!-- Barra de busca + filtros -->
+      <div class="vagas-toolbar">
+        <div class="vagas-toolbar-busca">
+          <span class="vagas-toolbar-icone-busca">🔎</span>
+          <input type="text" id="vagas-busca" placeholder="Buscar vaga..." autocomplete="off" />
+        </div>
+        <select id="vagas-filtro-empresa" class="vagas-toolbar-select">
+          <option value="">Todas as empresas</option>
+        </select>
+        <select id="vagas-filtro-area" class="vagas-toolbar-select">
+          <option value="">Todas as categorias</option>
+        </select>
+        <button id="vagas-filtros-toggle" class="vagas-toolbar-btn-sec">⚙ Filtros</button>
+      </div>
+
+      <!-- Abas de status (com contagem) -->
+      <div class="vagas-abas" id="vagas-abas">
+        <button class="vaga-aba ativa" data-status="">Todas <span class="vaga-aba-count" id="vagas-aba-count-todas">0</span></button>
+        <button class="vaga-aba" data-status="publicada">Publicadas <span class="vaga-aba-count" id="vagas-aba-count-publicadas">0</span></button>
+        <button class="vaga-aba" data-status="fechada">Encerradas <span class="vaga-aba-count" id="vagas-aba-count-fechadas">0</span></button>
+        <button class="vaga-aba" data-status="pausada">Rascunhos <span class="vaga-aba-count" id="vagas-aba-count-pausadas">0</span></button>
+      </div>
+
+      <!-- Lista de vagas -->
+      <div class="vagas-lista-wrap">
+        <!-- Cabeçalho da lista (vira card no mobile) -->
+        <div class="vagas-lista-cabecalho">
+          <div>Vaga</div>
+          <div>Empresa</div>
+          <div>Categoria</div>
+          <div>Candidatos</div>
+          <div>Publicada há</div>
+          <div>Status</div>
+          <div></div>
+        </div>
+        <div id="vagas-lista"><div class="vagas-lista-vazia"><div class="spinner"></div></div></div>
+      </div>
+
+      <!-- Paginação -->
+      <div class="vagas-paginacao" id="vagas-paginacao">
+        <span class="vagas-paginacao-info" id="vagas-paginacao-info"></span>
+        <div class="vagas-paginacao-btns">
+          <button id="vagas-pag-ant" class="vagas-pag-btn">←</button>
+          <div id="vagas-pag-nums" class="vagas-pag-nums"></div>
+          <button id="vagas-pag-prox" class="vagas-pag-btn">→</button>
+        </div>
       </div>
     </div>
+
+    <!-- Modal de confirmação de exclusão -->
+    <div id="vaga-modal-confirmar" class="vaga-modal-overlay" style="display:none">
+      <div class="vaga-modal">
+        <h3 class="vaga-modal-titulo">🗑 Excluir vaga?</h3>
+        <p class="vaga-modal-texto">Tem certeza que deseja excluir esta vaga? Essa ação não poderá ser desfeita.</p>
+        <p class="vaga-modal-vaga-info" id="vaga-modal-confirmar-nome"></p>
+        <div class="vaga-modal-btns">
+          <button class="btn btn-sec vaga-modal-btn-cancelar" onclick="fecharModalConfirmarVaga()">Cancelar</button>
+          <button class="btn btn-perigo vaga-modal-btn-confirmar" id="vaga-modal-confirmar-btn">Excluir vaga</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu flutuante de ações da vaga -->
+    <div id="vaga-menu-acoes" class="vaga-menu-acoes" style="display:none"></div>
 
     <!-- CANDIDATOS -->
     <div class="page" id="page-candidatos">
