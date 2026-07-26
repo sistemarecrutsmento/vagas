@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html><body>
+<h1>Teste</h1>
+<div id="r">JS NÃO RODOU</div>
+<script>
+  document.getElementById('r').innerHTML = 'JS RODOU às ' + new Date().toISOString();
+  console.log('[TEST] script inline executou');
+  console.error('[TEST-ERRO] erro proposital pra aparecer no console');
+</script>
+<script src="test-js.js"></script>
+</body></html>
