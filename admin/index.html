@@ -10,14 +10,10 @@
       --vinho: #722F37;
       --vinho-escuro: #4A1F25;
       --vinho-claro: #8B3A45;
-      --dourado: #D4A857;
-      --dourado-claro: #E8C57F;
-      --dourado-escuro: #B88C2F;
       --branco: #FFFFFF;
       --preto: #1A1A1A;
       --preto-suave: #2A2A2A;
       --cinza-escuro: #3A3A3A;
-      --cinza-medio: #777777;
       --borda: #E5E5E5;
       --borda-escura: #444;
       --verde: #2E7D32;
@@ -235,28 +231,31 @@
     .etapa-clickable { cursor: pointer; transition: background 0.15s; }
     .etapa-clickable:hover { background: #fafafa; }
 
-    /* Gráfico Ranking de Vagas - Estilo "lollipop" + área ascendente */
-    .grafico-ranking { position: relative; margin-top: 18px; padding: 8px 12px 0; }
-    .grafico-ranking-chart { position: relative; height: 200px; margin-bottom: 8px; }
-    .grafico-ranking svg.area-bg { position: absolute; left: 0; right: 0; top: 0; bottom: 0; width: 100%; height: 100%; pointer-events: none; }
-    .ranking-lollipops { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; align-items: flex-end; justify-content: space-around; pointer-events: none; }
-    .ranking-col { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; pointer-events: auto; cursor: pointer; max-width: 130px; }
-    .ranking-stick { width: 3px; border-radius: 2px; transition: background 0.18s; }
-    .ranking-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.18); margin-bottom: 4px; }
-    .ranking-col:hover .ranking-dot { transform: scale(1.25); }
-    .ranking-dot-dourado { background: var(--dourado); }
-    .ranking-dot-vinho { background: var(--vinho); }
-    .ranking-dot-preto { background: var(--preto); }
-    .ranking-stick-dourado { background: var(--dourado); }
-    .ranking-stick-vinho { background: var(--vinho); }
-    .ranking-stick-preto { background: var(--preto); }
-    .ranking-pct { font-size: 16px; font-weight: 700; color: var(--preto); margin-bottom: 6px; }
-    .ranking-labels { display: flex; justify-content: space-around; gap: 12px; padding: 8px 4px 4px; border-top: 1px solid var(--borda); }
-    .ranking-labels .ranking-label-col { flex: 1; text-align: center; max-width: 130px; }
-    .ranking-label-col .vaga-titulo { font-size: 11px; font-weight: 600; color: var(--preto); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ranking-label-col .vaga-empresa { font-size: 10px; color: var(--cinza-medio); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .grafico-ranking-legend { display: flex; gap: 18px; font-size: 12px; color: var(--cinza-medio); margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--borda); }
+    /* Gráfico Ranking de Vagas - Barras verticais + curva */
+    .grafico-ranking { position: relative; margin-top: 18px; padding: 16px 12px 36px; min-height: 260px; }
+    .grafico-ranking-chart { position: relative; height: 220px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px; }
+    .grafico-ranking svg.curva-bg { position: absolute; left: 0; right: 0; top: 0; bottom: 28px; width: 100%; height: calc(100% - 28px); pointer-events: none; z-index: 0; }
+    .ranking-col { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.18s; max-width: 110px; }
+    .ranking-col:hover { transform: translateY(-4px); }
+    .ranking-num-top { font-size: 13px; font-weight: 700; color: var(--preto); margin-bottom: 4px; }
+    .ranking-num-top small { display: block; font-size: 10px; color: var(--cinza-medio); font-weight: 500; margin-top: 1px; }
+    .ranking-bar { width: 100%; max-width: 56px; border-radius: 6px 6px 0 0; position: relative; transition: filter 0.18s, transform 0.2s; min-height: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+    .ranking-bar:hover { transform: scaleY(1.03); transform-origin: bottom; }
+    .ranking-col:hover .ranking-bar { filter: brightness(1.1); }
+    .ranking-bar-stack-top { position: absolute; top: 0; left: 0; right: 0; border-radius: 6px 6px 0 0; overflow: hidden; }
+    .ranking-bar-contratados { background: linear-gradient(180deg, #8B3A47 0%, #5A1F2A 100%); }
+    .ranking-bar-candidatos { background: linear-gradient(180deg, #F0C870 0%, #B88C2F 100%); }
+    .ranking-label { position: absolute; top: 100%; left: 0; right: 0; margin-top: 6px; font-size: 11px; color: var(--cinza-medio); text-align: center; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; }
+    .ranking-label .vaga-titulo { font-weight: 600; color: var(--preto); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .ranking-label .vaga-empresa { font-size: 10px; margin-top: 2px; }
+    .grafico-ranking-legend { display: flex; gap: 18px; font-size: 12px; color: var(--cinza-medio); margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--borda); }
     .grafico-ranking-legend .leg-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+    /* Bolinha de porcentagem sobre a curva */
+    .ranking-bolha-group { cursor: pointer; }
+    .ranking-bolha-bg { fill: #fff; stroke-width: 2.5; }
+    .ranking-bolha-texto { font-family: var(--fonte-principal, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); font-size: 5.5px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #1A1A1A; }
+    .ranking-bolha-texto-sub { font-size: 3px; font-weight: 600; fill: #6B6B6B; }
+    .ranking-col:hover .ranking-bolha-bg { stroke-width: 3.5; }
 
     /* Modal Candidatos por Etapa */
     .candidatos-etapa-resumo { margin-bottom: 14px; font-size: 14px; color: var(--cinza-medio); padding: 10px 14px; background: #fafafa; border-radius: 6px; }
@@ -1197,7 +1196,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260726120000_lollipop"></script>
+<script src="app.js?v=20260726123000_bolhas_cores_vivas"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
