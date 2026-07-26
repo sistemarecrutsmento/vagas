@@ -191,6 +191,41 @@
     .btn-modal:hover { opacity: 0.85; }
     .btn-modal-ver { background: #5B9BD5; color: white; }
     .btn-modal-editar { background: var(--vinho); color: white; }
+    .btn-modal-ver-cand { background: #6f42c1; color: white; }
+
+    /* === Modal Contratações: gráfico mensal === */
+    .contratacoes-grafico { background: #fafafa; border: 1px solid var(--borda); border-radius: 8px; padding: 16px; margin-bottom: 18px; }
+    .contratacoes-grafico-titulo { font-size: 13px; font-weight: 600; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+    .contratacoes-bars { display: flex; align-items: flex-end; gap: 16px; height: 140px; padding-bottom: 4px; }
+    .contratacoes-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-width: 40px; }
+    .contratacoes-bar { width: 100%; background: linear-gradient(180deg, #4caf50, #2e7d32); border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.4s; }
+    .contratacoes-bar-valor { font-size: 13px; font-weight: 700; color: #2e7d32; margin-bottom: 4px; }
+    .contratacoes-bar-label { font-size: 11px; color: var(--cinza-medio); margin-top: 6px; font-weight: 500; }
+
+    /* === Modal Contratações: lista === */
+    .contratacoes-lista { display: flex; flex-direction: column; gap: 6px; max-height: 50vh; overflow-y: auto; padding-right: 4px; }
+    .contratacoes-lista-header { display: grid; grid-template-columns: 2.4fr 2fr 1.6fr 0.7fr 0.8fr; gap: 12px; padding: 10px 12px; background: #f5f5f5; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
+    .contratacoes-row { display: grid; grid-template-columns: 2.4fr 2fr 1.6fr 0.7fr 0.8fr; gap: 12px; padding: 12px; border: 1px solid var(--borda); border-radius: 8px; align-items: center; transition: background 0.12s; }
+    .contratacoes-row:hover { background: #fafafa; }
+    .contratacoes-candidato strong { color: var(--vinho); display: block; margin-bottom: 2px; }
+    .contratacoes-email { font-size: 11px; color: var(--cinza-medio); }
+    .badge-dias { background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+
+    /* === Modal Vagas Antigas === */
+    .vagas-antigas-resumo { margin-bottom: 16px; }
+    .vagas-antigas-lista { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; padding-right: 4px; }
+    .vagas-antigas-header { display: grid; grid-template-columns: 2.5fr 1.5fr 0.8fr 0.8fr 0.8fr 1.8fr; gap: 12px; padding: 10px 12px; background: #f5f5f5; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
+    .vagas-antigas-row { display: grid; grid-template-columns: 2.5fr 1.5fr 0.8fr 0.8fr 0.8fr 1.8fr; gap: 12px; padding: 12px; border: 1px solid var(--borda); border-radius: 8px; align-items: center; transition: background 0.12s; }
+    .vagas-antigas-row:hover { background: #fafafa; }
+    .vagas-antigas-titulo strong { color: var(--vinho); display: block; margin-bottom: 2px; }
+    .vagas-antigas-local { font-size: 12px; color: var(--cinza-medio); }
+    .vagas-antigas-acoes { display: flex; gap: 4px; flex-wrap: wrap; }
+    .badge-dias.badge-media { background: #fff3e0; color: #e65100; }
+    .badge-dias.badge-alta { background: #ffe0b2; color: #bf360c; }
+    .badge-dias.badge-critica { background: #ffcdd2; color: #b71c1c; }
+    .gravidade-critica { border-left: 4px solid #b71c1c; }
+    .gravidade-alta { border-left: 4px solid #bf360c; }
+    .gravidade-media { border-left: 4px solid #e65100; }
     .modal { background: var(--branco); border-radius: 8px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
     .modal-lg { max-width: 800px; }
     .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; }
@@ -287,8 +322,8 @@
     @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(123, 31, 31, 0.5); } 50% { box-shadow: 0 0 0 8px rgba(123, 31, 31, 0); } }
 
     /* ==== DASHBOARD v2 (jul/2026) ==== */
-    .kpis-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
-    @media (max-width: 1100px) { .kpis-grid { grid-template-columns: repeat(3, 1fr); } }
+    .kpis-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 24px; }
+    @media (max-width: 1300px) { .kpis-grid { grid-template-columns: repeat(4, 1fr); } } @media (max-width: 1100px) { .kpis-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 700px)  { .kpis-grid { grid-template-columns: repeat(2, 1fr); } }
     .kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
     .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
@@ -309,6 +344,10 @@
     .kpi-verde .kpi-icon { color: #10B981; }
     .kpi-laranja  { border-left: 4px solid #F59E0B; }
     .kpi-laranja .kpi-icon { color: #F59E0B; }
+    .kpi-verde-escuro { border-left: 4px solid #15803D; }
+    .kpi-verde-escuro .kpi-icon { color: #15803D; }
+    .kpi-amarelo  { border-left: 4px solid #FBBF24; }
+    .kpi-amarelo .kpi-icon { color: #FBBF24; }
 
     .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     @media (max-width: 900px) { .dash-row { grid-template-columns: 1fr; } }
@@ -740,6 +779,41 @@
   </div>
 </div>
 
+<!-- MODAL CONTRATAÇÕES (lista + comparação mensal) -->
+<div class="modal-overlay" id="modal-contratacoes">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3>🎉 Contratações <span style="font-size:13px;color:var(--cinza-medio);font-weight:400;">— últimos 6 meses</span></h3>
+      <button class="modal-close" onclick="fecharModal('contratacoes')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="contratacoes-grafico"></div>
+      <div id="contratacoes-body">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <div class="modal-footer" style="text-align:right;padding:0 20px 16px;">
+      <button class="btn-secundario" onclick="fecharModal('contratacoes')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VAGAS ABERTAS +30 DIAS -->
+<div class="modal-overlay" id="modal-vagas-antigas">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3>⏳ Vagas abertas há +30 dias <span style="font-size:13px;color:var(--cinza-medio);font-weight:400;">— sem contratação ainda</span></h3>
+      <button class="modal-close" onclick="fecharModal('vagas-antigas')">&times;</button>
+    </div>
+    <div class="modal-body" id="vagas-antigas-body">
+      <div class="spinner"></div>
+    </div>
+    <div class="modal-footer" style="text-align:right;padding:0 20px 16px;">
+      <button class="btn-secundario" onclick="fecharModal('vagas-antigas')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL VAGA -->
 <div class="modal-overlay" id="modal-vaga">
   <div class="modal modal-lg">
@@ -1068,7 +1142,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260726110000_kpis_spa"></script>
+<script src="app.js?v=20260726110700_contratacoes"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
