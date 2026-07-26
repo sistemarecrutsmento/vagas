@@ -1481,7 +1481,7 @@ function inicializarUIVagas() {
   // Fecha menu de ações ao clicar fora
   document.addEventListener('click', (e) => {
     const menu = document.getElementById('vaga-menu-acoes');
-    if (menu && menu.style.display !== 'none' && !menu.contains(e.target) && !e.target.closest('.vaga-linha-btn-acoes')) {
+    if (menu && menu.style.display !== 'none' && !menu.contains(e.target) && !e.target.closest('.vaga-linha-acoes-btn')) {
       menu.style.display = 'none';
     }
   });
@@ -1615,7 +1615,7 @@ function renderizarVagaLinha(v) {
         ${statusExtra}
       </div>
       <div class="vaga-linha-acoes" data-label="">
-        <button class="vaga-linha-btn-acoes" onclick="abrirMenuAcoesVaga(event, ${v.id})" title="Ações">⋮</button>
+        <button class="vaga-linha-acoes-btn" onclick="abrirMenuAcoesVaga(event, ${v.id})" title="Ações" aria-label="Ações da vaga">⋮</button>
       </div>
     </div>`;
 }
