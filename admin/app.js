@@ -898,6 +898,58 @@ async function abrirModalVagasAntigas(event) {
   }
 }
 
+// === Modal: Candidatos em uma etapa específica (clicado no gráfico de etapas) ===
+async function abrirModalCandidatosEtapa(etapaNum, etapaNome) {
+  const body = document.getElementById('candidatos-etapa-body');
+  if (!body) return;
+  body.innerHTML = '<div class="spinner"></div>';
+  document.getElementById('candidatos-etapa-titulo').textContent = '🎯 Candidatos na etapa ' + etapaNome;
+  abrirModal('candidatos-etapa');
+  try {
+    const _token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || sessionStorage.getItem('recrutador_token') || sessionStorage.getItem('token');
+    const r = await fetch(API + '/api/admin/candidaturas-por-etapa?etapa=' + etapaNum, {
+      headers: { 'Authorization': 'Bearer ' + _token }
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      body.innerHTML = '<div class="alert-erro">' + (data.erro || 'Erro ao carregar') + '</div>';
+      return;
+    }
+    if (!data.candidaturas || data.candidaturas.length === 0) {
+      body.innerHTML = '<div class="empty-msg" style="padding:32px 16px;">Nenhum candidato nessa etapa no momento.</div>';
+      return;
+    }
+    body.innerHTML = `
+      <div class="candidatos-etapa-resumo">${data.total} candidato(s) na etapa <strong>${data.etapa_nome}</strong></div>
+      <div class="candidatos-etapa-lista">
+        <div class="candidatos-etapa-header">
+          <div>Candidato</div>
+          <div>Vaga</div>
+          <div>Entrou em</div>
+          <div>Parado há</div>
+          <div>Ações</div>
+        </div>
+        ${data.candidaturas.map(c => {
+          const entrou = c.entrou_na_etapa_em ? new Date(c.entrou_na_etapa_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—';
+          const d = c.dias_parado || 0;
+          let badgeClass = 'badge-dias';
+          if (d >= 7) badgeClass += ' badge-alta';
+          else if (d >= 3) badgeClass += ' badge-media';
+          return `
+            <div class="candidatos-etapa-row${c.alerta_parado ? ' gravidade-alta' : ''}">
+              <div class="candidatos-etapa-candidato"><strong>${c.candidato_nome || '—'}</strong><br><span style="font-size:11px;color:var(--cinza-medio)">${c.candidato_email || ''}</span></div>
+              <div class="candidatos-etapa-vaga"><strong>${c.vaga_titulo || '—'}</strong><br><span style="font-size:11px;color:var(--cinza-medio)">${c.vaga_empresa || ''}</span></div>
+              <div class="candidatos-etapa-data">${entrou}</div>
+              <div><span class="${badgeClass}">${d}d</span></div>
+              <div><button class="btn-modal btn-modal-ver-cand" onclick="irParaCandidatura(${c.candidatura_id});fecharModal('candidatos-etapa');" title="Ver análise do candidato">Ver</button></div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  } catch (e) {
+    body.innerHTML = '<div class="alert-erro">Erro de conexão: ' + e.message + '</div>';
+  }
+}
+
 // Helper: navegar para análise do candidato
 function irParaCandidatura(candidaturaId) {
   window.location.href = 'analisar.html?id=' + candidaturaId;
@@ -1031,7 +1083,7 @@ async function carregarDashboardV2() {
       const etapaNum = i + 1;
       const val = parseInt(etapasObj[etapaNum] || 0);
       const pct = (val / maxEtapa) * 100;
-      return `<div class="etapa-row">
+      return `<div class="etapa-row etapa-clickable" onclick="abrirModalCandidatosEtapa(${etapaNum}, '${label.replace(/'/g, "\\'")}')" title="Ver candidatos em ${label}">
         <div class="etapa-label">${label}</div>
         <div class="etapa-bar-bg">
           <div class="etapa-bar" style="width:${pct}%;background:${cores[i]}">
@@ -1147,14 +1199,17 @@ async function carregarDashboardV2() {
       document.getElementById('atividades-recentes').innerHTML = ats.slice(0, 8).map(a => {
         const t = tipoMap[a.texto] || { icone: '•', label: a.texto, tipo: 'reabrir' };
         const quando = tempoRelativo(a.quando);
-        return `<div class="atividade-item tipo-${t.tipo}">
+        const alerta = a.alerta_parado
+          ? `<span class="badge-alerta-parado" title="Candidato parado há ${a.dias_parado || 3}+ dias nessa etapa">⚠️ Parado ${a.dias_parado || 3}d</span>`
+          : '';
+        return `<div class="atividade-item tipo-${t.tipo}${a.alerta_parado ? ' alerta-parado' : ''}">
           <div class="atividade-icone">${t.icone}</div>
           <div class="atividade-corpo">
             <div class="atividade-topo">
               <span class="atividade-tipo">${t.label}</span>
               <span class="atividade-tempo">${quando}</span>
             </div>
-            <div class="atividade-candidato">${a.candidato || '—'}</div>
+            <div class="atividade-candidato">${a.candidato || '—'} ${alerta}</div>
             <div class="atividade-vaga">${a.vaga || '—'}</div>
           </div>
         </div>`;
