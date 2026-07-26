@@ -231,6 +231,24 @@
     .etapa-clickable { cursor: pointer; transition: background 0.15s; }
     .etapa-clickable:hover { background: #fafafa; }
 
+    /* Gráfico Ranking de Vagas */
+    .grafico-ranking { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+    .ranking-row { display: grid; grid-template-columns: 1.5fr 2.5fr auto; gap: 14px; align-items: center; cursor: pointer; padding: 8px 10px; border-radius: 8px; transition: background 0.15s; }
+    .ranking-row:hover { background: #fafafa; }
+    .ranking-info { min-width: 0; }
+    .ranking-titulo { font-weight: 600; color: var(--preto); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ranking-empresa { font-size: 12px; color: var(--cinza-medio); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ranking-bar-stack { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: #f0f0f0; min-width: 0; }
+    .ranking-bar-contratados { background: #722F37; }
+    .ranking-bar-candidatos { background: #D4A857; }
+    .ranking-num { font-weight: 700; color: var(--preto); font-size: 14px; min-width: 70px; text-align: right; }
+    .ranking-num small { display: block; font-size: 11px; color: var(--cinza-medio); font-weight: 500; }
+    .ranking-status { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+    .ranking-status.ativa { background: #d1fae5; color: #065f46; }
+    .ranking-status.fechada { background: #fee2e2; color: #991b1b; }
+    .grafico-ranking-legend { display: flex; gap: 18px; font-size: 12px; color: var(--cinza-medio); margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--borda); }
+    .grafico-ranking-legend .leg-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+
     /* Modal Candidatos por Etapa */
     .candidatos-etapa-resumo { margin-bottom: 14px; font-size: 14px; color: var(--cinza-medio); padding: 10px 14px; background: #fafafa; border-radius: 6px; }
     .candidatos-etapa-lista { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; padding-right: 4px; }
@@ -584,18 +602,16 @@
         </div>
       </div>
 
-      <!-- Tabela Vagas com mais volume -->
+      <!-- GRÁFICO Vagas com maior volume -->
       <div class="dash-card" style="margin-top:24px;">
         <div class="dash-card-header">
-          <h3>🏆 Vagas com maior volume</h3>
+          <h3>🏆 Vagas com maior volume de candidatos</h3>
           <a href="#" class="dash-link" onclick="irPara('candidatos')">Ver detalhes →</a>
         </div>
-        <div class="tabela-wrap" style="margin-top:12px;">
-          <table id="ranking-table">
-            <thead><tr><th>Vaga</th><th>Empresa</th><th>Status</th><th style="text-align:right;">Candidatos</th><th style="text-align:right;">Contratados</th></tr></thead>
-            <tbody id="ranking-table-body"><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
-          </table>
+        <div id="grafico-ranking" class="grafico-ranking">
+          <div class="empty"><div class="spinner"></div></div>
         </div>
+        <div id="grafico-ranking-legend" class="grafico-ranking-legend"></div>
       </div>
 
       <!-- Documentação + KPIs secundários -->
@@ -1173,7 +1189,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260726113000_etapas_alerta"></script>
+<script src="app.js?v=20260726114500_ranking_chart"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
