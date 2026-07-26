@@ -1221,24 +1221,24 @@ const chartH = 220; // deve bater com CSS
         { fill: '#60A5FA', stroke: '#93C5FD', label: 'azul' },
         { fill: '#34D399', stroke: '#6EE7B7', label: 'verde' }
       ];
-      // Estilo de Cards Modernos (Vagas em Destaque)
+      // Estilo de Cards Modernos (Vagas em Destaque) — % em relação ao TOTAL do sistema
+      const totalGeral = vRanking.reduce((s, v) => s + (v.total_candidatos || 0), 0) || 1;
       containerRanking.innerHTML = `
         <div class="ranking-cards-grid">
           ${vRanking.map((v, i) => {
             const total = v.total_candidatos || 0;
             const contrat = v.contratados || 0;
-            const maxC = Math.max(...vRanking.map(r => r.total_candidatos || 0), 1);
-            const pct = Math.round((total / maxC) * 100);
+            const pct = Math.round((total / totalGeral) * 100);
             const cor = coresVivas[i % coresVivas.length].fill;
             return `
-              <div class="vaga-destaque-card" onclick="irParaCandidatosDaVaga(${v.id})">
+              <div class="vaga-destaque-card" onclick="abrirModalCandidatosVaga(${v.id}, '${(v.titulo || '').replace(/'/g, "&#39;")}', '${(v.empresa || '').replace(/'/g, "&#39;")}')">
                 <div class="card-bg-icon">💼</div>
                 <div class="vaga-card-header">
                   <div class="vaga-card-info">
                     <div class="vaga-card-title">${v.titulo || '—'}</div>
                     <div class="vaga-card-empresa">${v.empresa || ''}</div>
                   </div>
-                  <div class="vaga-card-pct-badge" style="color:${cor};background:${cor}15">${pct}% do topo</div>
+                  <div class="vaga-card-pct-badge" style="color:${cor};background:${cor}15">${pct}% do total</div>
                 </div>
                 <div class="vaga-card-stats">
                   <div class="vaga-stat-item">
@@ -1277,6 +1277,44 @@ const chartH = 220; // deve bater com CSS
     console.error('[DASHBOARD V2] ERRO:', e.message, e.stack);
     const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
     if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
+  }
+}
+
+// Abre modal inline na Dashboard com a lista de candidatos da vaga
+async function abrirModalCandidatosVaga(vagaId, vagaTitulo, vagaEmpresa) {
+  const lista = document.getElementById('cand-vaga-lista');
+  document.getElementById('cand-vaga-titulo').textContent = vagaTitulo || 'Candidatos da vaga';
+  document.getElementById('cand-vaga-subtitulo').textContent = (vagaEmpresa || '') + ' — ' + (vagaId ? 'ID #' + vagaId : '');
+  lista.innerHTML = '<div class="cand-vaga-loading"><div class="spinner"></div></div>';
+  abrirModal('cand-vaga');
+  const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || '';
+  try {
+    const r = await fetch(API + '/api/admin/candidaturas?vaga=' + vagaId, { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await r.json();
+    const cands = Array.isArray(data) ? data : (data.candidaturas || []);
+    if (!cands.length) {
+      lista.innerHTML = '<div class="cand-vaga-empty">Nenhum candidato inscrito nessa vaga ainda.</div>';
+      return;
+    }
+    lista.innerHTML = cands.map(c => {
+      const nome = c.candidato_nome || c.nome || '—';
+      const initials = nome.split(' ').filter(Boolean).slice(0,2).map(s => s[0]).join('').toUpperCase();
+      const etapa = c.etapa_atual || 0;
+      const status = c.status || 'em_andamento';
+      const etapaNome = (c.etapa_nome || (etapa === 0 ? 'Inscrição' : 'Etapa ' + (etapa + 1)));
+      const etapaClass = status === 'rejeitado' ? 'etapa-rejeitado' : (status === 'contratado' ? 'etapa-contratado' : 'etapa-em-andamento');
+      return `
+        <div class="cand-vaga-item" onclick="window.location.href='analisar.html?id=${c.id || c.candidatura_id}'">
+          <div class="cand-vaga-avatar">${initials}</div>
+          <div class="cand-vaga-info">
+            <div class="cand-vaga-nome">${nome}</div>
+            <div class="cand-vaga-meta">${c.candidato_email || c.email || ''}</div>
+          </div>
+          <div class="cand-vaga-etapa ${etapaClass}">${etapaNome}</div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    lista.innerHTML = '<div class="cand-vaga-empty">Erro ao carregar candidatos: ' + (e.message || '') + '</div>';
   }
 }
 
