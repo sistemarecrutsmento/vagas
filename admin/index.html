@@ -231,21 +231,22 @@
     .etapa-clickable { cursor: pointer; transition: background 0.15s; }
     .etapa-clickable:hover { background: #fafafa; }
 
-    /* Gráfico Ranking de Vagas */
-    .grafico-ranking { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
-    .ranking-row { display: grid; grid-template-columns: 1.5fr 2.5fr auto; gap: 14px; align-items: center; cursor: pointer; padding: 8px 10px; border-radius: 8px; transition: background 0.15s; }
-    .ranking-row:hover { background: #fafafa; }
-    .ranking-info { min-width: 0; }
-    .ranking-titulo { font-weight: 600; color: var(--preto); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ranking-empresa { font-size: 12px; color: var(--cinza-medio); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ranking-bar-stack { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: #f0f0f0; min-width: 0; }
-    .ranking-bar-contratados { background: #722F37; }
-    .ranking-bar-candidatos { background: #D4A857; }
-    .ranking-num { font-weight: 700; color: var(--preto); font-size: 14px; min-width: 70px; text-align: right; }
-    .ranking-num small { display: block; font-size: 11px; color: var(--cinza-medio); font-weight: 500; }
-    .ranking-status { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-    .ranking-status.ativa { background: #d1fae5; color: #065f46; }
-    .ranking-status.fechada { background: #fee2e2; color: #991b1b; }
+    /* Gráfico Ranking de Vagas - Barras verticais + curva */
+    .grafico-ranking { position: relative; margin-top: 18px; padding: 16px 12px 36px; min-height: 260px; }
+    .grafico-ranking-chart { position: relative; height: 220px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px; }
+    .grafico-ranking svg.curva-bg { position: absolute; left: 0; right: 0; top: 0; bottom: 28px; width: 100%; height: calc(100% - 28px); pointer-events: none; z-index: 0; }
+    .ranking-col { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.18s; max-width: 110px; }
+    .ranking-col:hover { transform: translateY(-4px); }
+    .ranking-num-top { font-size: 13px; font-weight: 700; color: var(--preto); margin-bottom: 4px; }
+    .ranking-num-top small { display: block; font-size: 10px; color: var(--cinza-medio); font-weight: 500; margin-top: 1px; }
+    .ranking-bar { width: 100%; max-width: 56px; border-radius: 6px 6px 0 0; position: relative; transition: filter 0.18s; min-height: 6px; }
+    .ranking-col:hover .ranking-bar { filter: brightness(1.1); }
+    .ranking-bar-stack-top { position: absolute; top: 0; left: 0; right: 0; border-radius: 6px 6px 0 0; overflow: hidden; }
+    .ranking-bar-contratados { background: linear-gradient(180deg, #8B3A47 0%, #5A1F2A 100%); }
+    .ranking-bar-candidatos { background: linear-gradient(180deg, #F0C870 0%, #B88C2F 100%); }
+    .ranking-label { position: absolute; top: 100%; left: 0; right: 0; margin-top: 6px; font-size: 11px; color: var(--cinza-medio); text-align: center; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; }
+    .ranking-label .vaga-titulo { font-weight: 600; color: var(--preto); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .ranking-label .vaga-empresa { font-size: 10px; margin-top: 2px; }
     .grafico-ranking-legend { display: flex; gap: 18px; font-size: 12px; color: var(--cinza-medio); margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--borda); }
     .grafico-ranking-legend .leg-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
 
@@ -606,7 +607,6 @@
       <div class="dash-card" style="margin-top:24px;">
         <div class="dash-card-header">
           <h3>🏆 Vagas com maior volume de candidatos</h3>
-          <a href="#" class="dash-link" onclick="irPara('candidatos')">Ver detalhes →</a>
         </div>
         <div id="grafico-ranking" class="grafico-ranking">
           <div class="empty"><div class="spinner"></div></div>
@@ -1189,7 +1189,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260726114500_ranking_chart"></script>
+<script src="app.js?v=20260726115200_vagas_ativas_curva"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
