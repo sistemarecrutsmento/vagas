@@ -603,7 +603,7 @@
       display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
     }
     .vaga-linha-titulo {
-      font-weight: 600; color: #1A1A1A; font-size: 14px;
+      font-weight: 600; color: #1A1A1A; font-size: 15px;
       line-height: 1.35; word-break: break-word;
     }
     .vaga-linha-meta {
@@ -634,16 +634,17 @@
 
     /* Coluna Candidatos (número grande colorido + "candidatos") */
     .vaga-linha-cand-wrap {
-      display: flex; flex-direction: column;
-      align-items: center; gap: 1px; text-align: center;
-      cursor: pointer; padding: 4px 6px; border-radius: 6px;
-      transition: background .12s;
+      display: inline-flex; flex-direction: column;
+      align-items: center; gap: 2px; text-align: center;
+      cursor: pointer; padding: 6px 12px; border-radius: 8px;
+      background: #FAFAFA;
+      transition: background .12s, transform .12s;
     }
-    .vaga-linha-cand-wrap:hover { background: #FAFAFA; }
+    .vaga-linha-cand-wrap:hover { background: #FEEBEE; transform: translateY(-1px); }
     .vaga-linha-cand-wrap.zero { cursor: default; }
-    .vaga-linha-cand-wrap.zero:hover { background: transparent; }
+    .vaga-linha-cand-wrap.zero:hover { background: #FAFAFA; transform: none; }
     .vaga-linha-cand-num {
-      font-weight: 700; font-size: 22px; line-height: 1.1;
+      font-weight: 700; font-size: 20px; line-height: 1.1;
       color: var(--vinho);
     }
     .vaga-linha-cand-wrap.zero .vaga-linha-cand-num { color: #BBB; }
