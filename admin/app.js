@@ -21,38 +21,94 @@ window.addEventListener('DOMContentLoaded', () => {
 // e DUAS rotas: /api/admin/login e /api/auth/login-recrutador
 // Aqui a gente tenta as duas automaticamente pra não dar erro esquisito.
 async function fazerLogin() {
-  const email = document.getElementById('login-email').value;
-  const senha = document.getElementById('login-senha').value;
+  console.log('[login] fazerLogin() chamado');
+  const emailEl = document.getElementById('login-email');
+  const senhaEl = document.getElementById('login-senha');
+  const btn = document.getElementById('btn-entrar');
   const alertEl = document.getElementById('alert-login');
 
-  // 1ª tentativa: admin
-  let r = await fetch(API + '/api/admin/login', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, senha })
-  });
-  let data = await r.json();
+  if (!emailEl || !senhaEl || !btn) {
+    console.error('[login] Elementos não encontrados', {emailEl: !!emailEl, senhaEl: !!senhaEl, btn: !!btn});
+    return;
+  }
 
-  // 2ª tentativa: recrutador (se admin falhou com 401 "credenciais inválidas")
-  if (!r.ok && (r.status === 401 || r.status === 400)) {
-    const r2 = await fetch(API + '/api/auth/login-recrutador', {
+  const email = emailEl.value.trim();
+  const senha = senhaEl.value;
+
+  if (!email || !senha) {
+    if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">Digite email e senha</div>';
+    return;
+  }
+
+  // Feedback visual
+  btn.disabled = true;
+  const textoOriginal = btn.textContent;
+  btn.textContent = 'Entrando...';
+  if (alertEl) alertEl.innerHTML = '';
+
+  // Helper: fetch com timeout de 15s (pra não travar se Render tiver hibernando)
+  const fetchComTimeout = (url, opts) => {
+    return new Promise((resolve, reject) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => { ctrl.abort(); reject(new Error('timeout')); }, 15000);
+      fetch(url, { ...opts, signal: ctrl.signal })
+        .then(r => { clearTimeout(t); resolve(r); })
+        .catch(e => { clearTimeout(t); reject(e); });
+    });
+  };
+
+  try {
+    console.log('[login] chamando API admin...');
+    // 1ª tentativa: admin
+    let r = await fetchComTimeout(API + '/api/admin/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha })
     });
-    if (r2.ok) { r = r2; data = await r2.json(); }
-  }
+    let data = await r.json().catch(() => ({}));
 
-  if (r.ok) {
-    token = data.token;
-    // Salva tipo do usuário pra usar nas chamadas autenticadas
-    const tipoUsuario = data.usuario?.tipo || 'admin';
-    const userId = data.usuario?.id || null;
-    localStorage.setItem('admin_token', token);
-    localStorage.setItem('admin_tipo', tipoUsuario);
-    localStorage.setItem('admin_user_id', userId);
-    localStorage.setItem('admin_usuario', JSON.stringify(data.usuario || {}));
-    mostrarApp();
-  } else {
-    alertEl.innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao entrar'}</div>`;
+    // 2ª tentativa: recrutador (se admin falhou com 401 "credenciais inválidas")
+    if (!r.ok && (r.status === 401 || r.status === 400)) {
+      console.log('[login] tentando rota recrutador...');
+      try {
+        const r2 = await fetchComTimeout(API + '/api/auth/login-recrutador', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha })
+        });
+        if (r2.ok) { r = r2; data = await r2.json().catch(() => ({})); }
+      } catch (e2) { console.warn('[login] recrutador timeout:', e2); }
+    }
+
+    if (r.ok) {
+      console.log('[login] sucesso, salvando token');
+      token = data.token;
+      const tipoUsuario = data.usuario?.tipo || 'admin';
+      const userId = data.usuario?.id || null;
+      localStorage.setItem('admin_token', token);
+      localStorage.setItem('admin_tipo', tipoUsuario);
+      localStorage.setItem('admin_user_id', userId);
+      localStorage.setItem('admin_usuario', JSON.stringify(data.usuario || {}));
+      if (alertEl) alertEl.innerHTML = '<div class="alert alert-ok">Logado! Entrando...</div>';
+      btn.textContent = '✓ Logado!';
+      // Mostra app sem reload pra evitar problemas de cache
+      setTimeout(() => mostrarApp(), 200);
+      return;
+    } else {
+      console.warn('[login] falhou:', r.status, data);
+      if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + (data.erro || ('Erro ' + r.status)) + '</div>';
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+      return;
+    }
+  } catch (e) {
+    console.error('[login] ERRO:', e);
+    let msg = 'Erro: ' + (e.message || 'sem conexão');
+    if (e.message === 'timeout' || e.name === 'AbortError') {
+      msg = '⏱️ Servidor demorou mais de 15s. Render está "dormindo" — clique Entrar de novo em 30s.';
+    }
+    if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + msg + '</div>';
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+    return;
   }
 }
 
