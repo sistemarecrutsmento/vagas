@@ -751,6 +751,62 @@ function abrirModalNovaEntrevista() {
 }
 
 // ===== DASHBOARD =====
+
+// === Modal: lista de vagas ativas (ESCOPO GLOBAL pra onclick funcionar) ===
+async function abrirModalVagasAtivas(event) {
+  if (event) { event.stopPropagation(); event.preventDefault(); }
+  const body = document.getElementById('vagas-ativas-lista');
+  if (!body) { console.warn('Modal vagas-ativas não encontrado no DOM'); return; }
+  body.innerHTML = '<div class="spinner"></div>';
+  abrirModal('vagas-ativas');
+  const _token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || sessionStorage.getItem('recrutador_token') || '';
+  try {
+    const r = await fetch(API + '/api/admin/vagas?status=publicada', {
+      headers: { 'Authorization': 'Bearer ' + _token }
+    });
+    const data = await r.json();
+    const vagas = data.vagas || [];
+    if (vagas.length === 0) {
+      body.innerHTML = '<div class="empty">Nenhuma vaga ativa no momento.</div>';
+      return;
+    }
+    // Ordena: mais recentes primeiro
+    vagas.sort((a, b) => new Date(b.criada_em || 0) - new Date(a.criada_em || 0));
+    body.innerHTML = `
+      <div class="vagas-ativas-tabela">
+        <div class="vagas-ativas-header">
+          <div>Título</div>
+          <div>Empresa</div>
+          <div>Publicada em</div>
+          <div>Ações</div>
+        </div>
+        ${vagas.map(v => {
+          const dataPub = v.criada_em ? new Date(v.criada_em).toLocaleDateString('pt-BR') : '—';
+          return `
+            <div class="vagas-ativas-row">
+              <div class="vagas-ativas-titulo">
+                <strong>${escapeHtml(v.titulo)}</strong>
+                ${v.cidade || v.estado ? `<span class="vagas-ativas-local">${escapeHtml(v.cidade || '')}${v.cidade && v.estado ? '/' : ''}${escapeHtml(v.estado || '')}</span>` : ''}
+              </div>
+              <div>${escapeHtml(v.empresa || '—')}</div>
+              <div class="vagas-ativas-data">${dataPub}</div>
+              <div class="vagas-ativas-acoes">
+                <a href="../candidato/vaga.html?id=${v.id}" target="_blank" class="btn-modal btn-modal-ver" title="Ver como o candidato vê">
+                  👁 Ver
+                </a>
+                <button class="btn-modal btn-modal-editar" onclick="editarVaga(${v.id});fecharModal('vagas-ativas');" title="Editar vaga">
+                  ✏️ Editar
+                </button>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    `;
+  } catch (e) {
+    body.innerHTML = '<div class="alert-erro">Erro ao carregar vagas: ' + e.message + '</div>';
+  }
+}
+
 // ==== DASHBOARD V2 (jul/2026 - profissional) ====
 async function carregarDashboardV2() {
   try {
@@ -779,19 +835,19 @@ async function carregarDashboardV2() {
     document.getElementById('kpis-grid').innerHTML = kpis.map(k => {
       const delta = k.delta == null ? '' : (k.delta > 0 ? `<span class="kpi-delta up">+${k.delta}% este mês</span>` : k.delta < 0 ? `<span class="kpi-delta down">${k.delta}% este mês</span>` : `<span class="kpi-delta flat">0% este mês</span>`);
 
-      // Cards clicáveis — cada um leva pra página própria
+      // Cards clicáveis — cada um leva pra página própria (mesmo SPA, via irPara)
       let link = null, linkText = null, titleLink = null;
       if (k.label === 'Vagas ativas') {
-        link = "abrirModalVagasAtivas()"; linkText = 'ver lista →'; titleLink = 'Ver todas as vagas ativas';
+        link = "abrirModalVagasAtivas(event)"; linkText = 'ver lista →'; titleLink = 'Ver todas as vagas ativas';
       } else if (k.label === 'Candidatos') {
-        link = "window.location.href='candidatos.html'"; linkText = 'base de talentos →'; titleLink = 'Abrir base de talentos';
+        link = "irPara('candidatos')"; linkText = 'base de talentos →'; titleLink = 'Abrir base de talentos';
       } else if (k.label === 'Processos ativos') {
-        link = "window.location.href='candidaturas.html'"; linkText = 'ver processos →'; titleLink = 'Abrir lista de processos/candidaturas';
+        link = "irPara('candidaturas')"; linkText = 'ver processos →'; titleLink = 'Abrir lista de processos/candidaturas';
       } else if (k.label === 'Entrevistas agendadas') {
-        link = "window.location.href='agenda.html'"; linkText = 'abrir agenda →'; titleLink = 'Abrir agenda de entrevistas';
+        link = "irPara('agenda')"; linkText = 'abrir agenda →'; titleLink = 'Abrir agenda de entrevistas';
       }
       const clickable = !!link;
-      return `<div class="kpi-card kpi-${k.cor}${clickable ? ' kpi-clickable' : ''}"${clickable ? ` onclick="${link}" title="${titleLink}"` : ''}>
+      return `<div class="kpi-card kpi-${k.cor}${clickable ? ' kpi-clickable' : ''}"${clickable ? ` onclick="${link}" title="${titleLink}" style="cursor:pointer;"` : ''}>
         <div class="kpi-top">
           <div class="kpi-icon">${k.icon}</div>
           ${clickable ? '<div class="kpi-link-icon">🔗</div>' : ''}
@@ -802,58 +858,8 @@ async function carregarDashboardV2() {
       </div>`;
     }).join('');
 
-    // === Modal: lista de vagas ativas (clicado no KPI "Vagas ativas") ===
-    async function abrirModalVagasAtivas() {
-      const body = document.getElementById('vagas-ativas-lista');
-      body.innerHTML = '<div class="spinner"></div>';
-      abrirModal('vagas-ativas');
-      try {
-        const r = await fetch(API + '/api/admin/vagas?status=publicada', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await r.json();
-        const vagas = data.vagas || [];
-        if (vagas.length === 0) {
-          body.innerHTML = '<div class="empty">Nenhuma vaga ativa no momento.</div>';
-          return;
-        }
-        // Ordena: mais recentes primeiro
-        vagas.sort((a, b) => new Date(b.criada_em || 0) - new Date(a.criada_em || 0));
-        body.innerHTML = `
-          <div class="vagas-ativas-tabela">
-            <div class="vagas-ativas-header">
-              <div>Título</div>
-              <div>Empresa</div>
-              <div>Publicada em</div>
-              <div>Ações</div>
-            </div>
-            ${vagas.map(v => {
-              const dataPub = v.criada_em ? new Date(v.criada_em).toLocaleDateString('pt-BR') : '—';
-              return `
-                <div class="vagas-ativas-row">
-                  <div class="vagas-ativas-titulo">
-                    <strong>${escapeHtml(v.titulo)}</strong>
-                    ${v.cidade || v.estado ? `<span class="vagas-ativas-local">${escapeHtml(v.cidade || '')}${v.cidade && v.estado ? '/' : ''}${escapeHtml(v.estado || '')}</span>` : ''}
-                  </div>
-                  <div>${escapeHtml(v.empresa || '—')}</div>
-                  <div class="vagas-ativas-data">${dataPub}</div>
-                  <div class="vagas-ativas-acoes">
-                    <a href="../candidato/vaga.html?id=${v.id}" target="_blank" class="btn-modal btn-modal-ver" title="Ver como o candidato vê">
-                      👁 Ver
-                    </a>
-                    <button class="btn-modal btn-modal-editar" onclick="editarVaga(${v.id});fecharModal('vagas-ativas');" title="Editar vaga">
-                      ✏️ Editar
-                    </button>
-                  </div>
-                </div>`;
-            }).join('')}
-          </div>
-        `;
-      } catch (e) {
-        body.innerHTML = '<div class="alert-erro">Erro ao carregar vagas: ' + e.message + '</div>';
-      }
-    }
-    
+    // === Modal: lista de vagas ativas (definido globalmente mais acima) ===
+
     // === Gráfico: Candidatos por etapa ===
     const etapasObj = data.etapas || {};
     const labels = data.etapas_labels || ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'];
