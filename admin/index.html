@@ -645,7 +645,7 @@
             <div class="kpi-sec"><div class="kpi-sec-label">Taxa de desistência</div><div class="kpi-sec-valor" id="ks-desistencia">—</div></div>
             <div class="kpi-sec"><div class="kpi-sec-label">Vagas encerradas</div><div class="kpi-sec-valor" id="ks-encerradas">—</div></div>
             <div class="kpi-sec"><div class="kpi-sec-label">Empresas ativas</div><div class="kpi-sec-valor" id="ks-empresas">—</div></div>
-            <div class="kpi-sec" style="background:#FEF2F2;border-color:#FCA5A5"><div class="kpi-sec-label">Vagas fechadas sem contratação</div><div class="kpi-sec-valor" id="ks-fechadas-sem-contrato" style="color:#991B1B">—</div></div>
+            <div class="kpi-sec" style="background:#FEF2F2;border-color:#FCA5A5;cursor:pointer" onclick="abrirVagasFechadasSemContratacao()" title="Ver lista de vagas"><div class="kpi-sec-label">Vagas fechadas sem contratação</div><div class="kpi-sec-valor" id="ks-fechadas-sem-contrato" style="color:#991B1B">—</div></div>
           </div>
         </div>
       </div>
@@ -711,6 +711,23 @@
       <div class="tabela-wrap tabela-scroll">
         <table id="vaga-cands-internal-table">
           <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VAGAS FECHADAS SEM CONTRATACAO -->
+    <div class="page" id="page-vagas-fechadas-sem-contrato">
+      <div class="page-header">
+        <div>
+          <button class="btn btn-sec" onclick="irParaPagina('dashboard')" style="margin-bottom:8px">← Voltar ao Dashboard</button>
+          <h2>🚫 Vagas fechadas sem contratação</h2>
+          <p>Vagas com status <strong>fechada</strong> que não geraram nenhuma contratação</p>
+        </div>
+      </div>
+      <div class="tabela-wrap tabela-scroll">
+        <table id="vagas-fechadas-sem-contrato-table">
+          <thead><tr><th>Vaga</th><th>Empresa</th><th>Local</th><th>Inscritos</th><th>Status</th><th>Fechada em</th><th>Ações</th></tr></thead>
           <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
         </table>
       </div>
@@ -1191,7 +1208,7 @@
   </div>
 </div>
 
-<script src="app.js?v=20260726132000_grafico_cards_v10_desistencia"></script>
+<script src="app.js?v=20260726132000_grafico_cards_v11_atividades_fechadas"></script>
 <script src="chat-flutuante-admin.js?v=20260725acc2"></script>
 <script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
