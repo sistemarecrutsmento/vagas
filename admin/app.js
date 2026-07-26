@@ -1528,51 +1528,110 @@ function renderizarVagas(vagas) {
 }
 
 function renderizarVagaLinha(v) {
-  // Status badge
-  let badgeHtml;
+  // Ícone por área da vaga
+  const { iconeClass, iconeEmoji } = vagaIconePorArea(v.area);
+
+  // Status pílula + extras
+  let statusPillHtml = '';
+  let statusExtra = '';
   if (v.status === 'publicada') {
-    badgeHtml = '<span class="badge badge-ativa">🟢 Publicada</span>';
+    statusPillHtml = '<span class="vaga-linha-status-pill publicada"><span class="vaga-linha-status-dot"></span>Publicada</span>';
   } else if (v.status === 'fechada') {
-    badgeHtml = '<span class="badge badge-fechada">⚪ Encerrada</span>';
+    statusPillHtml = '<span class="vaga-linha-status-pill fechada"><span class="vaga-linha-status-dot"></span>Encerrada</span>';
+    // Mostra "Sem contratação" se não foi contratado nenhum candidato
+    const temContratado = (v.candidatos_count || 0) > 0 && (v.status_contratacao === 'contratado' || v.tem_contratacao === true);
+    if (!temContratado) {
+      statusExtra = '<span class="vaga-linha-status-extra">Sem contratação</span>';
+    }
   } else if (v.status === 'pausada') {
-    badgeHtml = '<span class="badge badge-pendente">📝 Rascunho</span>';
+    statusPillHtml = '<span class="vaga-linha-status-pill pausada"><span class="vaga-linha-status-dot"></span>Rascunho</span>';
   } else {
-    badgeHtml = '<span class="badge">' + escapeHtml(v.status || '—') + '</span>';
+    statusPillHtml = '<span class="vaga-linha-status-pill fechada">' + escapeHtml(v.status || '—') + '</span>';
+  }
+
+  // Tag inline de status (ao lado do ID) — destaca "Publicada" / "Rascunho"
+  let tagInline = '';
+  if (v.status === 'publicada') {
+    tagInline = '<span class="vaga-linha-tag tag-publicada">🟢 Publicada</span>';
+  } else if (v.status === 'pausada') {
+    tagInline = '<span class="vaga-linha-tag tag-rascunho">🔵 Rascunho</span>';
+  } else if (v.status === 'fechada' && (v.candidatos_count || 0) === 0) {
+    tagInline = '<span class="vaga-linha-tag tag-rascunho">Rascunho</span>';
   }
 
   // Publicada há X dias (calcula a partir de criada_em)
   let publicadaHa = '—';
-  if (v.status === 'publicada' && v.criada_em) {
+  if (v.criada_em) {
     const d = new Date(v.criada_em);
     const diff = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24));
-    publicadaHa = diff <= 0 ? 'hoje' : (diff === 1 ? '1 dia' : (diff + ' dias'));
-  } else if (v.status === 'fechada' && v.criada_em) {
-    // Pra fechadas, mostra a data de criação como referência
-    const d = new Date(v.criada_em);
-    publicadaHa = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    if (v.status === 'publicada') {
+      publicadaHa = diff <= 0 ? 'hoje' : (diff === 1 ? '1 dia' : (diff + ' dias'));
+    } else if (v.status === 'fechada' || v.status === 'pausada') {
+      // Pra fechadas/rascunhos, mostra a data de criação
+      publicadaHa = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
   }
 
   const cand = v.candidatos_count || 0;
   const candPlural = cand === 1 ? 'candidato' : 'candidatos';
   const candHtml = cand > 0
-    ? `<a href="#" class="vaga-linha-cand" onclick="abrirVagaCands(${v.id}); return false;" title="Ver candidatos">${cand}<span>${candPlural}</span></a>`
-    : `<span class="vaga-linha-cand zero">${cand}<span>${candPlural}</span></span>`;
+    ? `<a href="#" class="vaga-linha-cand-wrap" onclick="abrirVagaCands(${v.id}); return false;" title="Ver candidatos">
+         <span class="vaga-linha-cand-num">${cand}</span>
+         <span class="vaga-linha-cand-label">${candPlural}</span>
+       </a>`
+    : `<span class="vaga-linha-cand-wrap zero">
+         <span class="vaga-linha-cand-num">${cand}</span>
+         <span class="vaga-linha-cand-label">${candPlural}</span>
+       </span>`;
 
   return `
     <div class="vaga-linha" data-id="${v.id}">
+      <div class="vaga-linha-icone ${iconeClass}" aria-hidden="true">${iconeEmoji}</div>
       <div data-label="Vaga">
-        <strong>${escapeHtml(v.titulo || '(sem título)')}</strong>
-        <div class="vaga-linha-id">ID: ${v.id}</div>
+        <div class="vaga-linha-titulo-row">
+          <strong class="vaga-linha-titulo">${escapeHtml(v.titulo || '(sem título)')}</strong>
+        </div>
+        <div class="vaga-linha-id-row">
+          <span class="vaga-linha-id">ID: ${v.id}</span>
+          ${tagInline}
+        </div>
       </div>
-      <div data-label="Empresa">${escapeHtml(v.empresa || '—')}</div>
-      <div data-label="Categoria">${escapeHtml(v.area || '—')}</div>
-      <div data-label="Candidatos">${candHtml}</div>
-      <div data-label="Publicada há">${publicadaHa}</div>
-      <div data-label="Status">${badgeHtml}</div>
+      <div class="vaga-linha-empresa" data-label="Empresa">${escapeHtml(v.empresa || '—')}</div>
+      <div class="vaga-linha-categoria" data-label="Categoria">${escapeHtml(v.area || '—')}</div>
+      <div class="vaga-linha-candidatos" data-label="Candidatos">${candHtml}</div>
+      <div class="vaga-linha-tempo ${publicadaHa === '—' ? 'vazio' : ''}" data-label="Publicada há"><span class="vaga-linha-tempo-icone">📅</span> ${publicadaHa}</div>
+      <div class="vaga-linha-status" data-label="Status">
+        ${statusPillHtml}
+        ${statusExtra}
+      </div>
       <div class="vaga-linha-acoes" data-label="">
         <button class="vaga-linha-btn-acoes" onclick="abrirMenuAcoesVaga(event, ${v.id})" title="Ações">⋮</button>
       </div>
     </div>`;
+}
+
+// Ícone por área da vaga (escolhe emoji + cor de fundo)
+function vagaIconePorArea(area) {
+  const a = (area || '').toLowerCase();
+  if (a.includes('administ') || a.includes('gestão') || a.includes('gerenc'))
+    return { iconeClass: 'icone-administracao', iconeEmoji: '💼' };
+  if (a.includes('atend') || a.includes('vend') || a.includes('hospital') || a.includes('servi'))
+    return { iconeClass: 'icone-atendimento', iconeEmoji: '🍽' };
+  if (a.includes('saúde') || a.includes('saude') || a.includes('farma') || a.includes('enferm'))
+    return { iconeClass: 'icone-saude', iconeEmoji: '💊' };
+  if (a.includes('tec') || a.includes('ti') || a.includes('inform'))
+    return { iconeClass: 'icone-tecnologia', iconeEmoji: '💻' };
+  if (a.includes('educ') || a.includes('aprender') || a.includes('estagi') || a.includes('profess'))
+    return { iconeClass: 'icone-educacao', iconeEmoji: '🎓' };
+  if (a.includes('engenh') || a.includes('indúst'))
+    return { iconeClass: 'icone-engenharia', iconeEmoji: '🔧' };
+  if (a.includes('financeir') || a.includes('financ') || a.includes('contab') || a.includes('contábil'))
+    return { iconeClass: 'icone-financeiro', iconeEmoji: '📊' };
+  if (a.includes('marketing') || a.includes('design') || a.includes('comunicaç'))
+    return { iconeClass: 'icone-marketing', iconeEmoji: '🎨' };
+  if (a.includes('logist') || a.includes('armaz') || a.includes('transport'))
+    return { iconeClass: 'icone-logistica', iconeEmoji: '🚚' };
+  return { iconeClass: 'icone-default', iconeEmoji: '💼' };
 }
 
 function abrirMenuAcoesVaga(event, vagaId) {
@@ -1653,9 +1712,13 @@ function atualizarAbasVagas() {
       });
       const d = await r.json();
       const el = document.getElementById('vagas-aba-count-' + key);
-      if (el) el.textContent = d.total || 0;
+      if (el) el.textContent = '(' + (d.total || 0) + ')';
     } catch {}
   });
+  // Atualiza o total à direita
+  const totalTodas = _vagasState.total;
+  const elTotal = document.getElementById('vagas-aba-count-total-novo');
+  if (elTotal) elTotal.textContent = totalTodas + (totalTodas === 1 ? ' vaga' : ' vagas');
 }
 
 function atualizarPaginacaoVagas() {
