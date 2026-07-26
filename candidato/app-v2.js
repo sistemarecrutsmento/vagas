@@ -997,11 +997,37 @@ async function carregarCands() {
             <span>📅 Inscrito em ${formatarData(c.criada_em)}</span>
             <span class="ver-mais">Acompanhar processo →</span>
           </div>
+          ${(['cancelado','rejeitado','contratado'].includes(c.status)) ? '' : `
+            <div style="margin-top:12px;padding-top:12px;border-top:1px dashed #e0e0e0;text-align:center">
+              <button class="btn-desistir" onclick="event.stopPropagation();desistirVaga(${c.id}, '${(c.titulo || '').replace(/'/g, '&#39;')}')" style="background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600">
+                🚪 Desistir da vaga
+              </button>
+            </div>
+          `}
         </div>
       `;
     }).join('');
   } catch (e) {
     listaEl.innerHTML = '<div class="empty">Erro ao carregar candidaturas.</div>';
+  }
+}
+
+// Candidato desiste da vaga (qualquer momento, exceto cancelado/rejeitado/contratado)
+async function desistirVaga(candidaturaId, tituloVaga) {
+  if (!confirm('Tem certeza que deseja desistir da vaga "' + tituloVaga + '"?\n\nEssa acao nao pode ser desfeita.')) return;
+  const motivo = prompt('Quer nos contar o motivo? (opcional)') || '';
+  try {
+    const r = await fetch(API + '/api/candidatura/' + candidaturaId + '/desistir', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+      body: JSON.stringify({ motivo })
+    });
+    const data = await r.json();
+    if (!r.ok) { alert(data.erro || 'Erro ao desistir'); return; }
+    alert('Voce desistiu da vaga.');
+    carregarMinhasCandidaturas();
+  } catch (e) {
+    alert('Erro de conexao: ' + e.message);
   }
 }
 
