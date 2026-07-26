@@ -1357,13 +1357,13 @@ const chartH = 220; // deve bater com CSS
     // === KPIs secundários ===
     const ks = data.kpis_secundarios || {};
     document.getElementById('ks-tempo').textContent = (ks.tempo_medio_contratacao || 0) + 'd';
-    const elAprov = document.getElementById('ks-aprovacao');
-    if (elAprov) {
+    const elKsAprov = document.getElementById('ks-aprovacao');
+    if (elKsAprov) {
       const pct = ks.taxa_aprovacao_30d || 0;
       const qtd = ks.taxa_aprovacao_30d_qtd || 0;
       const tot = ks.taxa_aprovacao_30d_total || 0;
-      elAprov.textContent = `${pct}%`;
-      elAprov.title = `${qtd} de ${tot} vagas chegaram em Contratação em até 30 dias`;
+      elKsAprov.textContent = `${pct}%`;
+      elKsAprov.title = `${qtd} de ${tot} vagas chegaram em Contratação em até 30 dias`;
     }
     document.getElementById('ks-desistencia').textContent = (ks.taxa_desistencia || 0) + '%';
     const ksFech = document.getElementById('ks-fechadas-sem-contrato');
