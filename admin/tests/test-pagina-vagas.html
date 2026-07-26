@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Teste Pagina de Vagas</title>
+<style>
+body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+.log { background: white; padding: 10px; margin: 5px 0; border-radius: 4px; font-family: monospace; font-size: 13px; }
+.ok { border-left: 4px solid green; }
+.falha { border-left: 4px solid red; }
+.pendente { border-left: 4px solid orange; }
+h1 { background: #333; color: white; padding: 10px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<h1>Teste automatizado: Pagina de Vagas</h1>
+<div id="resultados"></div>
+<script>
+const API = 'https://recrutamento-api-novo.onrender.com';
+const LOGIN = { email: 'fabio08dejesusjunior@gmail.com', senha: '089339' };
+const R = document.getElementById('resultados');
+let token = null;
+
+function log(msg, status) {
+  const div = document.createElement('div');
+  div.className = 'log ' + status;
+  div.innerHTML = msg;
+  R.appendChild(div);
+  console.log('[' + status.toUpperCase() + ']', msg);
+}
+
+async function main() {
+  log('1) Login...', 'pendente');
+  try {
+    const r = await fetch(API + '/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(LOGIN)
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.erro || r.status);
+    token = d.token;
+    log('OK Login. Token: ' + token.slice(0,20) + '...', 'ok');
+  } catch (e) {
+    log('FALHA Login: ' + e.message, 'falha');
+    return;
+  }
+
+  log('2) GET /api/admin/vagas (todas)', 'pendente');
+  try {
+    const r = await fetch(API + '/api/admin/vagas?page=1&limit=10', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.erro || r.status);
+    log('OK Total: ' + d.total + ' (page=' + d.page + ', limit=' + d.limit + ')', 'ok');
+  } catch (e) {
+    log('FALHA: ' + e.message, 'falha');
+  }
+
+  log('3) Filtro status=publicada', 'pendente');
+  try {
+    const r = await fetch(API + '/api/admin/vagas?status=publicada', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.erro || r.status);
+    log('OK ' + d.total + ' vagas publicadas', 'ok');
+  } catch (e) {
+    log('FALHA: ' + e.message, 'falha');
+  }
+
+  log('4) Busca sem acento: "estagiario"', 'pendente');
+  try {
+    const r = await fetch(API + '/api/admin/vagas?search=estagiario', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.erro || r.status);
+    if (d.total === 1 && d.vagas[0].titulo.includes('Estagiario')) {
+      log('OK Encontrou: ' + d.vagas[0].titulo, 'ok');
+    } else {
+      log('ATENCAO ' + d.total + ' resultados', 'pendente');
+    }
+  } catch (e) {
+    log('FALHA: ' + e.message, 'falha');
+  }
+
+  log('5) Ordenar por mais candidatos (DESC)', 'pendente');
+  try {
+    const r = await fetch(API + '/api/admin/vagas?ordenar=candidatos&ordem_dir=DESC', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.erro || r.status);
+    var top = d.vagas.slice(0,3).map(function(v){return v.titulo + ' (' + v.candidatos_count + ')';}).join(', ');
+    log('OK Top 3: ' + top, 'ok');
+  } catch (e) {
+    log('FALHA: ' + e.message, 'falha');
+  }
+
+  log('6) Paginacao: page=2&limit=3', 'pendente');
+  try {
+    const r = await fetch(API + '/api/admin/vagas?page=2&limit=3', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.erro || r.status);
+    log('OK Retornou ' + d.vagas.length + ' vagas (total=' + d.total + ', page=' + d.page + ')', 'ok');
+  } catch (e) {
+    log('FALHA: ' + e.message, 'falha');
+  }
+
+  log('Testes concluidos!', 'ok');
+}
+
+main();
+</script>
+</body>
+</html>
