@@ -836,6 +836,39 @@
       .vaga-linha-cand-label::after { content: ""; }
       .vaga-linha-tempo { color: #555; font-size: 13px; }
       .vaga-linha-status { align-items: flex-start; }
+
+      /* Menu no mobile vira bottom sheet */
+      .vaga-menu-acoes {
+        position: fixed !important;
+        left: 0 !important; right: 0 !important; top: auto !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        border-radius: 16px 16px 0 0 !important;
+        box-shadow: 0 -8px 24px rgba(0,0,0,0.2) !important;
+        padding-bottom: env(safe-area-inset-bottom, 12px);
+        animation: sheetUp 0.2s ease-out;
+      }
+      .vaga-menu-acoes::before {
+        content: "";
+        display: block;
+        width: 40px; height: 4px;
+        background: #DDD;
+        border-radius: 2px;
+        margin: 8px auto 4px;
+      }
+      .vaga-menu-item {
+        padding: 14px 20px !important;
+        font-size: 15px !important;
+        min-height: 48px;
+      }
+      .vaga-menu-item-icone { font-size: 18px; }
+      .vaga-menu-divisor { margin: 6px 14px !important; }
+      @keyframes sheetUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
     }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
