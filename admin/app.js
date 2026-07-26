@@ -1166,21 +1166,39 @@ async function carregarDashboardV2() {
       docProg.textContent = taxaDoc > 10 ? `${aprovados}/${totalDocs} aprovados` : '';
     }
     
-    // === Vagas com mais candidatos ===
+    // === Gráfico: Vagas com mais candidatos (barras empilhadas: contratados vs demais) ===
     const vRanking = data.vagas_mais_candidatos || [];
+    const containerRanking = document.getElementById('grafico-ranking');
+    const containerLegend = document.getElementById('grafico-ranking-legend');
     if (vRanking.length > 0) {
-      document.getElementById('ranking-table-body').innerHTML = vRanking.map(v => `
-        <tr>
-          <td><strong>${v.titulo || '—'}</strong><br><span style="color:#888;font-size:12px;">${v.empresa || '—'}</span></td>
-          <td><span class="badge ${v.status === 'publicada' ? 'badge-ativa' : 'badge-fechada'}">${v.status === 'publicada' ? 'Ativa' : 'Encerrada'}</span></td>
-          <td style="text-align:right;">
-            <span style="color:#722F37;font-weight:700;">${v.total_candidatos || 0}</span>
-            <span style="color:#888;font-size:12px;"> / ${v.contratados || 0} contrat.</span>
-          </td>
-        </tr>
-      `).join('');
+      const maxCands = Math.max(1, ...vRanking.map(v => v.total_candidatos || 0));
+      containerRanking.innerHTML = vRanking.map(v => {
+        const total = v.total_candidatos || 0;
+        const contrat = v.contratados || 0;
+        const demais = Math.max(0, total - contrat);
+        const pctContrat = (contrat / maxCands) * 100;
+        const pctDemais = (demais / maxCands) * 100;
+        const statusBadge = v.status === 'publicada'
+          ? '<span class="ranking-status ativa">Ativa</span>'
+          : '<span class="ranking-status fechada">Encerrada</span>';
+        return `<div class="ranking-row" onclick="irParaCandidatosDaVaga(${v.id})" title="Ver candidatos de ${(v.titulo || '').replace(/"/g, '&quot;')}">
+          <div class="ranking-info">
+            <div class="ranking-titulo">${v.titulo || '—'} ${statusBadge}</div>
+            <div class="ranking-empresa">${v.empresa || '—'}</div>
+          </div>
+          <div class="ranking-bar-stack">
+            <div class="ranking-bar-contratados" style="width:${pctContrat}%" title="${contrat} contratado(s)"></div>
+            <div class="ranking-bar-candidatos" style="width:${pctDemais}%" title="${demais} candidato(s)"></div>
+          </div>
+          <div class="ranking-num">${total}<small>${contrat} contrat.</small></div>
+        </div>`;
+      }).join('');
+      containerLegend.innerHTML = `
+        <div><span class="leg-dot" style="background:#722F37"></span>Contratados</div>
+        <div><span class="leg-dot" style="background:#D4A857"></span>Outros candidatos</div>`;
     } else {
-      document.getElementById('ranking-table-body').innerHTML = '<tr><td colspan="3" class="empty">Nenhuma vaga com candidatos</td></tr>';
+      containerRanking.innerHTML = '<div class="empty">Nenhuma vaga com candidatos</div>';
+      containerLegend.innerHTML = '';
     }
     
     // === Atividades recentes ===
