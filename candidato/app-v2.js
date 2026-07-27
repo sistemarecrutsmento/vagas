@@ -21,6 +21,17 @@ let cadastroCompleto = false;
 //  - bonus: true        → se preenchido, SOMA na %. Se vazio, NÃO bloqueia
 //                          (foto, experiencias, acessibilidade)
 // =====================================================
+// Helpers de segurança — escapa caracteres HTML perigosos
+// (defesa contra XSS armazenado / refletido em qualquer lugar onde usamos innerHTML)
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+function safeAttr(s) {
+  // Escapa valores de atributos HTML (mesmo escopo, mas mais conservador)
+  return escapeHtml(s);
+}
+
 window.CAMPOS_PERFIL = [
   { key: 'nome',            obrigatorio: true,  label: 'Nome' },
   { key: 'cpf',             obrigatorio: true,  label: 'CPF' },
@@ -192,14 +203,14 @@ async function carregarVagas() {
       const salTexto = (sMin && sMax) ? `R$ ${sMin.toLocaleString('pt-BR')} - R$ ${sMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
       return `
       <a class="vaga-card" href="vaga.html?id=${v.id}" style="text-decoration:none;color:inherit;display:block;">
-        <div class="empresa">${v.empresa || 'Empresa'}</div>
-        <h3>${v.titulo}</h3>
+        <div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div>
+        <h3>${escapeHtml(v.titulo)}</h3>
         <div class="vaga-tags">
-          ${v.area ? `<span class="tag">${v.area}</span>` : ''}
-          ${v.modalidade ? `<span class="tag">${v.modalidade}</span>` : ''}
-          ${v.cidade ? `<span class="tag">📍 ${v.cidade}</span>` : ''}
+          ${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}
+          ${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}
+          ${v.cidade ? `<span class="tag">📍 ${escapeHtml(v.cidade)}</span>` : ''}
         </div>
-        <div class="salario">${salTexto}</div>
+        <div class="salario">${escapeHtml(salTexto)}</div>
         <div class="footer">
           <span class="data">${formatarData(v.criada_em)}</span>
           <span class="cta">Ver detalhes →</span>
@@ -250,7 +261,7 @@ function abrirDetalhes(id) {
           procEl.innerHTML = `<ol class="processo-lista">` + etapas.map((e, i) => {
             const nome = (typeof e === 'string') ? e : (e.nome || e.titulo || `Etapa ${i+1}`);
             const desc = (typeof e === 'string') ? '' : (e.descricao || '');
-            return `<li><span class="proc-numero">${i+1}</span><div><strong>${nome}</strong>${desc ? `<p>${desc}</p>` : ''}</div></li>`;
+            return `<li><span class="proc-numero">${i+1}</span><div><strong>${escapeHtml(nome)}</strong>${desc ? `<p>${escapeHtml(desc)}</p>` : ''}</div></li>`;
           }).join('') + `</ol>`;
         } else {
           procEl.innerHTML = `
@@ -541,8 +552,8 @@ function wizardRenderExps() {
   cont.innerHTML = wizardExps.map((e, i) => `
     <div class="exp-item">
       <div>
-        <strong>${e.cargo}</strong> — ${e.empresa}
-        <div class="muted" style="font-size:12px">${e.inicio || '?'} → ${e.emprego_atual ? 'Atual' : (e.fim || '?')}</div>
+        <strong>${escapeHtml(e.cargo)}</strong> — ${escapeHtml(e.empresa)}
+        <div class="muted" style="font-size:12px">${escapeHtml(e.inicio || '?')} → ${e.emprego_atual ? 'Atual' : escapeHtml(e.fim || '?')}</div>
       </div>
       <button type="button" class="btn-x" onclick="wizardRemoverExp(${i})" title="Remover">×</button>
     </div>
@@ -939,9 +950,9 @@ async function carregarCands() {
           else { cls = 'andamento'; bola = '⏳'; }
         }
         const tooltip = descricao ? `${nome} — ${descricao}` : nome;
-        return `<div class="cand-etapa ${cls}" title="${tooltip.replace(/"/g, '&quot;')}">
+        return `<div class="cand-etapa ${cls}" title="${escapeHtml(tooltip)}">
           <div class="cand-etapa-bola">${bola}</div>
-          <div class="cand-etapa-label">${nome}</div>
+          <div class="cand-etapa-label">${escapeHtml(nome)}</div>
         </div>`;
       }).join('');
       // --- Barra de progresso (% concluído) ---
