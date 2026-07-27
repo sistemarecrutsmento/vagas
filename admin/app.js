@@ -2198,11 +2198,6 @@ function statusCandidato(c) {
 function labelStatus(s) {
   return { em_processo: '🟡 Em processo', contratado: '🔵 Contratado' }[s] || '';
 }
-function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
 
 async function carregarCandidatos() {
   popularSelectAreas();
