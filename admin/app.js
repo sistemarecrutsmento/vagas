@@ -6,6 +6,21 @@
 const API = 'https://recrutamento-api-novo.onrender.com';
 let token = null;
 let vagaEmEdicao = null;
+
+// FIX Etapa 2 (2026-07-27): wrapper de fetch com auto-refresh.
+// Se auth-helper.js está carregado, usa authFetch (com refresh automático).
+// Se não está, fallback pro fetch direto com token.
+async function authedFetch(url, opts = {}) {
+  if (typeof window.authFetch === 'function') {
+    return window.authFetch(url, opts);
+  }
+  // Fallback: adiciona Authorization Bearer manualmente
+  const headers = opts.headers ? { ...opts.headers } : {};
+  if (token && !headers['Authorization'] && !headers['authorization']) {
+    headers['Authorization'] = 'Bearer ' + token;
+  }
+  return fetch(url, { ...opts, headers });
+}
 let loginCodigoId = null;        // id do código 2FA pendente
 let loginEmailEmProgresso = null; // email do login em andamento (2FA)
 let loginCooldownInterval = null; // timer do cooldown do reenviar
@@ -65,7 +80,7 @@ async function fazerLogin() {
   try {
     console.log('[login] chamando API admin...');
     // 1ª tentativa: admin
-    let r = await fetchComTimeout(API + '/api/admin/login', {
+    let r = await authedFetch(API + '/api/admin/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha })
     });
@@ -87,7 +102,7 @@ async function fazerLogin() {
     if (!r.ok && (r.status === 401 || r.status === 400)) {
       console.log('[login] tentando rota recrutador...');
       try {
-        const r2 = await fetchComTimeout(API + '/api/auth/login-recrutador', {
+        const r2 = await authedFetch(API + '/api/auth/login-recrutador', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, senha })
         });
@@ -188,7 +203,7 @@ async function verificar2FA() {
     });
   };
   try {
-    const r = await fetchComTimeout(API + '/api/admin/2fa/verificar', {
+    const r = await authedFetch(API + '/api/admin/2fa/verificar', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ codigo_id: loginCodigoId, codigo })
     });
@@ -258,7 +273,7 @@ async function reenviar2FA() {
     });
   };
   try {
-    const r = await fetchComTimeout(API + '/api/admin/2fa/reenviar', {
+    const r = await authedFetch(API + '/api/admin/2fa/reenviar', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ codigo_id: loginCodigoId })
     });
@@ -359,7 +374,7 @@ function trocarTabEquipe(tab) {
 async function carregarEquipe() {
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/equipe', { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await authedFetch(API + '/api/admin/equipe', { headers: {} });
     const data = await r.json();
 
     // Recrutadores
@@ -459,9 +474,9 @@ async function salvarNovoRecrutador() {
   }
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/recrutadores', {
+    const r = await authedFetch(API + '/api/admin/recrutadores', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nome, email, senha })
     });
     const data = await r.json();
@@ -507,9 +522,9 @@ async function salvarNovaEmpresa() {
   }
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/empresas', {
+    const r = await authedFetch(API + '/api/admin/empresas', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await r.json();
@@ -542,9 +557,9 @@ async function salvarEdicaoRecrutador() {
   if (senha) payload.senha = senha;
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/recrutadores/' + id, {
+    const r = await authedFetch(API + '/api/admin/recrutadores/' + id, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await r.json();
@@ -560,9 +575,9 @@ async function salvarEdicaoRecrutador() {
 
 function excluirRecrutador(id, nome) {
   if (!confirm('Excluir o recrutador "' + nome + '"?\n\nEssa ação não pode ser desfeita.')) return;
-  fetch(API + '/api/admin/recrutadores/' + id, {
+  authedFetch(API + '/api/admin/recrutadores/' + id, {
     method: 'DELETE',
-    headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('admin_token') || localStorage.getItem('token')) }
+    headers: {}
   })
     .then(r => r.json())
     .then(data => {
@@ -591,9 +606,9 @@ async function salvarEdicaoEmpresa() {
   if (!nome) { alert('O nome é obrigatório.'); return; }
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/empresas/' + id, {
+    const r = await authedFetch(API + '/api/admin/empresas/' + id, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nome, cnpj, telefone, email_principal })
     });
     const data = await r.json();
@@ -609,9 +624,9 @@ async function salvarEdicaoEmpresa() {
 
 function excluirEmpresa(id, nome) {
   if (!confirm('Excluir a empresa "' + nome + '"?\n\nEssa ação não pode ser desfeita.')) return;
-  fetch(API + '/api/admin/empresas/' + id, {
+  authedFetch(API + '/api/admin/empresas/' + id, {
     method: 'DELETE',
-    headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('admin_token') || localStorage.getItem('token')) }
+    headers: {}
   })
     .then(r => r.json())
     .then(data => {
@@ -640,8 +655,8 @@ async function carregarVincularVagas() {
   try {
     // Busca todas as vagas + as já liberadas pra essa empresa em paralelo
     const [rVagas, rLiberadas] = await Promise.all([
-      fetch(API + '/api/admin/vagas', { headers: { 'Authorization': 'Bearer ' + token } }),
-      fetch(API + '/api/admin/empresa-vaga/' + vincEmpresaId, { headers: { 'Authorization': 'Bearer ' + token } })
+      authedFetch(API + '/api/admin/vagas', { headers: {} }),
+      authedFetch(API + '/api/admin/empresa-vaga/' + vincEmpresaId, { headers: {} })
     ]);
     const dVagas = await rVagas.json();
     const dLiberadas = await rLiberadas.json();
@@ -694,9 +709,9 @@ function renderVincularVagas() {
 async function vincularVagaEmpresa(vagaId) {
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/empresa-vaga', {
+    const r = await authedFetch(API + '/api/admin/empresa-vaga', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ empresa_id: vincEmpresaId, vaga_id: vagaId })
     });
     const d = await r.json();
@@ -709,9 +724,9 @@ async function desvincularVagaEmpresa(vagaId) {
   if (!confirm('Remover acesso dessa vaga para a empresa?')) return;
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/empresa-vaga', {
+    const r = await authedFetch(API + '/api/admin/empresa-vaga', {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ empresa_id: vincEmpresaId, vaga_id: vagaId })
     });
     const d = await r.json();
@@ -781,16 +796,16 @@ async function salvarUsuarioEmpresa() {
       // Editar
       const body = { nome, cargo, ativo };
       if (senha) body.senha = senha;
-      r = await fetch(API + '/api/admin/empresa-usuarios/' + id, {
+      r = await authedFetch(API + '/api/admin/empresa-usuarios/' + id, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
     } else {
       // Criar
-      r = await fetch(API + '/api/admin/empresas/' + empresaId + '/usuarios', {
+      r = await authedFetch(API + '/api/admin/empresas/' + empresaId + '/usuarios', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nome, email, senha, cargo })
       });
     }
@@ -809,9 +824,9 @@ async function excluirUsuarioEmpresa(id, nome) {
   if (!confirm('Excluir o usuário "' + nome + '"?\n\nEle não conseguirá mais acessar o portal da empresa.')) return;
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/empresa-usuarios/' + id, {
+    const r = await authedFetch(API + '/api/admin/empresa-usuarios/' + id, {
       method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + token }
+      headers: {}
     });
     const d = await r.json();
     if (d.ok) { alert('Usuário excluído!'); carregarEquipe(); }
@@ -832,8 +847,8 @@ async function carregarAgenda(periodo) {
   lista.innerHTML = '<div class="empty">Carregando agenda...</div>';
 
   try {
-    const r = await fetch(API + '/api/admin/entrevistas?periodo=' + agendaPeriodoAtual, {
-      headers: { 'Authorization': 'Bearer ' + token }
+    const r = await authedFetch(API + '/api/admin/entrevistas?periodo=' + agendaPeriodoAtual, {
+      headers: {}
     });
     const data = await r.json();
     const entrevistas = data.entrevistas || [];
@@ -912,9 +927,9 @@ async function carregarAgenda(periodo) {
 async function atualizarEntrevista(id, status) {
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/entrevista/' + id, {
+    const r = await authedFetch(API + '/api/admin/entrevista/' + id, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
     });
     if (r.ok) carregarAgenda();
@@ -928,9 +943,9 @@ async function cancelarEntrevistaFalhou(id) {
   const motivo = prompt('Motivo (opcional):') || '';
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
-    const r = await fetch(API + '/api/admin/entrevista/' + id + '/cancelar', {
+    const r = await authedFetch(API + '/api/admin/entrevista/' + id + '/cancelar', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ motivo })
     });
     const res = await r.json();
@@ -954,9 +969,9 @@ function abrirModalNovaEntrevista() {
   const link = prompt('Link da reunião (opcional):', '');
 
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
-  fetch(API + '/api/admin/entrevista', {
+  authedFetch(API + '/api/admin/entrevista', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       candidatura_id: parseInt(candidaturaId),
       etapa: parseInt(etapa),
@@ -984,8 +999,8 @@ async function abrirModalContratacoes(event) {
   abrirModal('contratacoes');
   const _token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || sessionStorage.getItem('recrutador_token') || '';
   try {
-    const r = await fetch(API + '/api/admin/contratacoes', {
-      headers: { 'Authorization': 'Bearer ' + _token }
+    const r = await authedFetch(API + '/api/admin/contratacoes', {
+      headers: {}
     });
     const data = await r.json();
     const lista = data.contratacoes || [];
@@ -1059,8 +1074,8 @@ async function abrirModalVagasAntigas(event) {
   abrirModal('vagas-antigas');
   const _token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || sessionStorage.getItem('recrutador_token') || '';
   try {
-    const r = await fetch(API + '/api/admin/vagas-abertas-antigas', {
-      headers: { 'Authorization': 'Bearer ' + _token }
+    const r = await authedFetch(API + '/api/admin/vagas-abertas-antigas', {
+      headers: {}
     });
     const data = await r.json();
     const vagas = data.vagas || [];
@@ -1128,8 +1143,8 @@ async function abrirModalCandidatosEtapa(etapaNum, etapaNome) {
   abrirModal('candidatos-etapa');
   try {
     const _token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || sessionStorage.getItem('recrutador_token') || sessionStorage.getItem('token');
-    const r = await fetch(API + '/api/admin/candidaturas-por-etapa?etapa=' + etapaNum, {
-      headers: { 'Authorization': 'Bearer ' + _token }
+    const r = await authedFetch(API + '/api/admin/candidaturas-por-etapa?etapa=' + etapaNum, {
+      headers: {}
     });
     const data = await r.json();
     if (!r.ok) {
@@ -1190,8 +1205,8 @@ async function abrirModalVagasAtivas(event) {
   abrirModal('vagas-ativas');
   const _token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || sessionStorage.getItem('recrutador_token') || '';
   try {
-    const r = await fetch(API + '/api/admin/vagas?status=publicada', {
-      headers: { 'Authorization': 'Bearer ' + _token }
+    const r = await authedFetch(API + '/api/admin/vagas?status=publicada', {
+      headers: {}
     });
     const data = await r.json();
     const vagas = data.vagas || [];
@@ -1239,7 +1254,7 @@ async function abrirModalVagasAtivas(event) {
 // ==== DASHBOARD V2 (jul/2026 - profissional) ====
 async function carregarDashboardV2() {
   try {
-    const r = await fetch(API + '/api/admin/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await authedFetch(API + '/api/admin/dashboard', { headers: {} });
     const data = await r.json();
     if (!r.ok) {
       console.error('[DASHBOARD]', data);
@@ -1669,8 +1684,8 @@ async function carregarVagasAdminNovo() {
   if (_vagasState.area) params.set('area', _vagasState.area);
 
   try {
-    const r = await fetch(API + '/api/admin/vagas?' + params.toString(), {
-      headers: { 'Authorization': 'Bearer ' + token }
+    const r = await authedFetch(API + '/api/admin/vagas?' + params.toString(), {
+      headers: {}
     });
     const data = await r.json();
     _vagasState.vagas = data.vagas || [];
@@ -1903,8 +1918,8 @@ function atualizarAbasVagas() {
   ['todas', 'publicadas', 'fechadas', 'pausadas'].forEach(async (key) => {
     const statusMap = { todas: '', publicadas: 'publicada', fechadas: 'fechada', pausadas: 'pausada' };
     try {
-      const r = await fetch(API + '/api/admin/vagas?status=' + statusMap[key] + '&limit=1', {
-        headers: { 'Authorization': 'Bearer ' + token }
+      const r = await authedFetch(API + '/api/admin/vagas?status=' + statusMap[key] + '&limit=1', {
+        headers: {}
       });
       const d = await r.json();
       const el = document.getElementById('vagas-aba-count-' + key);
@@ -1988,7 +2003,7 @@ async function duplicarVagaAdmin(id) {
   if (!confirm(`📋 Duplicar ${nome}?\n\nSerá criada uma cópia como rascunho (status "pausada") que você poderá editar e publicar depois.`)) return;
   try {
     // Busca dados da vaga
-    const r1 = await fetch(API + '/api/admin/vagas/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+    const r1 = await authedFetch(API + '/api/admin/vagas/' + id, { headers: {} });
     const d1 = await r1.json();
     const v = d1.vaga || d1;
     if (!v || !v.titulo) { alert('Erro ao carregar dados da vaga'); return; }
@@ -2001,9 +2016,9 @@ async function duplicarVagaAdmin(id) {
       descricao: v.descricao, requisitos: v.requisitos, beneficios: v.beneficios,
       etapas: v.etapas, status: 'pausada'
     };
-    const r2 = await fetch(API + '/api/admin/vagas', {
+    const r2 = await authedFetch(API + '/api/admin/vagas', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nova)
     });
     const d2 = await r2.json();
@@ -2039,9 +2054,9 @@ async function encerrarVagaAdmin(id) {
 }
 async function atualizarStatusVagaAdmin(id, novoStatus, msg) {
   try {
-    const r = await fetch(API + '/api/admin/vagas/' + id, {
+    const r = await authedFetch(API + '/api/admin/vagas/' + id, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: novoStatus })
     });
     const d = await r.json();
@@ -2182,7 +2197,7 @@ function escapeHtml(s) {
 
 async function editarVaga(id) {
   try {
-    const r = await fetch(API + '/api/admin/vagas/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await authedFetch(API + '/api/admin/vagas/' + id, { headers: {} });
     if (!r.ok) throw new Error('Vaga não encontrada');
     const data = await r.json();
     abrirModalVaga(data.vaga);
@@ -2223,7 +2238,7 @@ async function salvarVaga() {
     const url = id ? API + '/api/admin/vagas/' + id : API + '/api/admin/vagas';
     const method = id ? 'PUT' : 'POST';
     const r = await fetch(url, {
-      method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      method, headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     const data = await r.json();
@@ -2242,8 +2257,8 @@ async function deletarVaga(id) {
   if (!confirm('⚠️ Excluir (fechar) esta vaga? Ela deixará de aparecer para os candidatos.')) return;
   try {
     // Backend não tem DELETE — usa PUT para mudar status para 'fechada'
-    const r = await fetch(API + '/api/admin/vagas/' + id, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    const r = await authedFetch(API + '/api/admin/vagas/' + id, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'fechada' })
     });
     const data = await r.json();
@@ -2373,7 +2388,7 @@ async function carregarCandidatos() {
   try {
     const area = document.getElementById('candidatos-filtro-area')?.value || '';
     const url = API + '/api/admin/candidatos' + (area ? '?area=' + encodeURIComponent(area) : '');
-    const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await fetch(url, { headers: {} });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
     _candidatosState.todos = data.candidatos || [];
@@ -2575,7 +2590,7 @@ async function abrirCurriculo(id) {
   body.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
   titulo.textContent = '📄 Currículo do Candidato';
   try {
-    const r = await fetch(API + '/api/admin/candidato/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await authedFetch(API + '/api/admin/candidato/' + id, { headers: {} });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
       body.innerHTML = '<div class="alert alert-erro">Erro: ' + (err.erro || r.status) + '</div>';
@@ -2670,7 +2685,7 @@ async function carregarCandidaturas() {
   const grid = document.getElementById('vagas-cands-grid');
   grid.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
   try {
-    const r = await fetch(API + '/api/admin/vagas-com-candidaturas', { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await authedFetch(API + '/api/admin/vagas-com-candidaturas', { headers: {} });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
       grid.innerHTML = '<div class="empty">Erro: ' + (err.erro || r.status) + '</div>';
@@ -2729,7 +2744,7 @@ async function abrirVagasFechadasSemContratacao() {
   const tb = document.querySelector('#vagas-fechadas-sem-contrato-table tbody');
   tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
   try {
-    const r = await fetch(API + '/api/admin/vagas-fechadas-sem-contratacao', { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await authedFetch(API + '/api/admin/vagas-fechadas-sem-contratacao', { headers: {} });
     if (!r.ok) { tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + r.status + '</td></tr>'; return; }
     const data = await r.json();
     const vagas = data.vagas || [];
@@ -2760,7 +2775,7 @@ async function abrirVagaCands(vagaId) {
   const tb = document.querySelector('#vaga-cands-internal-table tbody');
   tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
   try {
-    const r = await fetch(API + '/api/admin/vagas/' + vagaId + '/candidaturas', { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await authedFetch(API + '/api/admin/vagas/' + vagaId + '/candidaturas', { headers: {} });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
       tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + (err.erro || r.status) + '</td></tr>';
@@ -2826,15 +2841,15 @@ async function acaoCandidatura(id, acao) {
   };
   if (!confirm(mensagens[acao])) return;
   try {
-    const r = await fetch(API + '/api/admin/candidatura/' + id + '/status', {
+    const r = await authedFetch(API + '/api/admin/candidatura/' + id + '/status', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ acao })
     });
     const data = await r.json();
     if (!r.ok) { alert('Erro: ' + (data.erro || 'Não foi possível atualizar')); return; }
     if (vagaAtualCands) {
-      const r2 = await fetch(API + '/api/admin/vagas/' + vagaAtualCands.id + '/candidaturas', { headers: { 'Authorization': 'Bearer ' + token } });
+      const r2 = await authedFetch(API + '/api/admin/vagas/' + vagaAtualCands.id + '/candidaturas', { headers: {} });
       if (r2.ok) {
         const d2 = await r2.json();
         candidaturasVagaCache = d2.candidaturas || [];
@@ -2855,7 +2870,7 @@ async function verCandidatura(id) {
   container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
   abrirModal('candidatura');
   try {
-    const r = await fetch(API + '/api/admin/candidatura/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+    const r = await authedFetch(API + '/api/admin/candidatura/' + id, { headers: {} });
     const data = await r.json();
     if (!r.ok) {
       container.innerHTML = `<div class="alert alert-erro">${escapeHtml(data.erro || 'Erro')}</div>`;
@@ -2909,9 +2924,9 @@ async function importarVagasDemo() {
   const token = localStorage.getItem('admin_token');
   if (!token) { alert('Faça login primeiro.'); return; }
   try {
-    const r = await fetch(API + '/api/admin/seed-vagas-demo', {
+    const r = await authedFetch(API + '/api/admin/seed-vagas-demo', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token }
+      headers: {}
     });
     const j = await r.json();
     if (!r.ok) throw new Error(j.erro || 'Erro ao importar');
