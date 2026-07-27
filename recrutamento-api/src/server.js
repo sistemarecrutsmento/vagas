@@ -1,3 +1,4 @@
+// BUILD_TIMESTAMP: 2026-07-25T21:20-Z — commit forçando redeploy
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -8,6 +9,7 @@ require('dotenv').config();
 
 const { pool, init } = require('./db');
 const { enviarCodigo, enviarNotificacaoStatus, enviarEmailProposta, enviarEmailBg, enviarEmailAtualizacao, enviarEmail, enviarEmailInscricao, getResendKey } = require('./email');
+const meet = require('./meet');
 
 // Email do admin pra receber notificações de ação do candidato
 const ADMIN_NOTIF_EMAIL = process.env.ADMIN_NOTIF_EMAIL || process.env.ADMIN_EMAIL || 'fabio08dejesusjunior@gmail.com';
@@ -43,7 +45,126 @@ app.use((err, req, res, next) => {
 // ============= SAÚDE =============
 app.get('/api/saude', (req, res) => res.json({ ok: true, sistema: process.env.SISTEMA_NOME, hora: new Date().toISOString() }));
 
+// ============= SENTINELA — confirma se código novo (com Meet) está rodando =============
+app.get('/api/_debug/versao', (req, res) => {
+  res.json({
+    ok: true,
+    versao: '2026-07-26-VAGAS-ATIVAS-RANKING',
+    meet_carregado: typeof require('./meet').criarEventoMeet === 'function',
+    buildCommit: process.env.RENDER_GIT_COMMIT,
+    porta: process.env.PORT || 10000,
+    hora: new Date().toISOString(),
+    node: process.version,
+    uptime_s: Math.round(process.uptime()),
+    envRender: process.env.RENDER === 'true'
+  });
+});
+
+// ============= TESTE MEET (também no topo, pra forçar carregamento) =============
+app.get('/api/_debug/meet-teste', async (req, res) => {
+  try {
+    const r = await meet.testarConexao();
+    res.json({ ok: true, ...r, admin: process.env.MEET_ADMIN_EMAIL || 'comercial@vagasio.com.br' });
+  } catch (e) {
+    console.error('[MEET TESTE]', e);
+    res.status(500).json({ ok: false, erro: e.message });
+  }
+});
+
+app.post('/api/_debug/meet-criar-teste', async (req, res) => {
+  try {
+    const start = new Date(Date.now() + 10 * 60 * 1000);
+    const end = new Date(start.getTime() + 30 * 60 * 1000);
+    const r = await meet.criarEventoMeet({
+      summary: '🧪 TESTE VagasIO Meet',
+      description: 'Evento de teste criado pela API. Pode ignorar.',
+      startTime: start.toISOString(),
+      durationMinutes: 30,
+      attendees: [],
+    });
+    res.json({ ok: true, ...r });
+  } catch (e) {
+    console.error('[MEET CRIAR TESTE]', e);
+    res.status(500).json({ ok: false, erro: e.message });
+  }
+});
+
+// Lista os próximos 5 eventos do Calendar (pra debug)
+app.get('/api/_debug/meet-listar-teste', async (req, res) => {
+  try {
+    const r = await meet.listarEventosFuturos(5);
+    res.json({ ok: true, ...r });
+  } catch (e) {
+    console.error('[MEET LISTAR TESTE]', e);
+    res.status(500).json({ ok: false, erro: e.message });
+  }
+});
+
+// Deleta um evento do Calendar pelo ID (pra debug/limpeza)
+app.delete('/api/_debug/meet-deletar/:eventId', async (req, res) => {
+  try {
+    await meet.deletarEventoMeet(req.params.eventId);
+    res.json({ ok: true, eventoDeletado: req.params.eventId });
+  } catch (e) {
+    console.error('[MEET DELETAR]', e);
+    res.status(500).json({ ok: false, erro: e.message });
+  }
+});
+
 // ============= DEBUG TEMPORÁRIO (remover depois) =============
+// Tenta enviar e-mail rico de notificação de mudança de etapa (preview)
+// 🔍 DEBUG TEMPORÁRIO: testa query direta na tabela recrutadores
+app.get('/api/_debug-recrutadores', async (req, res) => {
+  try {
+    console.log('[debug-recrutadores] iniciando teste');
+    const t0 = Date.now();
+    const r1 = await pool.query('SELECT COUNT(*) as total FROM recrutadores');
+    console.log(`[debug-recrutadores] COUNT *: ${Date.now()-t0}ms, total=${r1.rows[0].total}`);
+    
+    const t1 = Date.now();
+    const r2 = await pool.query('SELECT id, nome, email FROM recrutadores LIMIT 5');
+    console.log(`[debug-recrutadores] SELECT simples: ${Date.now()-t1}ms, rows=${r2.rows.length}`);
+    
+    const t2 = Date.now();
+    const r3 = await pool.query(
+      'SELECT id, nome, email, senha_hash, ativo, role, primeiro_acesso FROM recrutadores WHERE email = $1',
+      ['joao.again@vagasio.com.br']
+    );
+    console.log(`[debug-recrutadores] SELECT WHERE: ${Date.now()-t2}ms, rows=${r3.rows.length}`);
+    
+    res.json({
+      ok: true,
+      count: r1.rows[0].total,
+      sample: r2.rows,
+      searched: r3.rows
+    });
+  } catch (e) {
+    console.error('[debug-recrutadores] ERRO:', e.message, e.code);
+    res.json({ ok: false, erro: e.message, code: e.code, detail: e.detail });
+  }
+});
+
+app.get('/api/_debug-email-notificacao', async (req, res) => {
+  try {
+    const to = req.query.to || 'fabio08dejesusjunior@gmail.com';
+    const result = await enviarEmailAtualizacao(
+      to,
+      'Fabio Junior',
+      'Auxiliar Administrativo',
+      {
+        etapaNum: 3,
+        etapaNome: 'RH',
+        acao: 'avancar',
+        status: 'em_andamento',
+        mensagemAdmin: 'Você avançou para a etapa de RH. Em breve agendaremos uma entrevista.'
+      }
+    );
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.json({ ok: false, erro: e.message, code: e.code, response: e.response?.data });
+  }
+});
+
 // Tenta enviar e-mail de teste via Resend e mostra erro/sucesso
 // v2 - força redeploy p/ pegar RESEND_API_KEY
 app.get('/api/_debug-email-teste', async (req, res) => {
@@ -641,6 +762,125 @@ app.get('/api/candidato/candidaturas', authCandidato, async (req, res) => {
   res.json({ candidaturas: rows });
 });
 
+// ===== NOTIFICAÇÕES DO CANDIDATO =====
+// Retorna duas listas:
+//   aguardando = ações que TRAVAM o processo e precisam do candidato
+//                (proposta aguardando aceite, documentos reprovados pra reenviar)
+//   atualizacoes = timeline mesclada dos processos (últimos 30 eventos)
+// Cada item inclui id/nome da vaga pra renderizar link na UI.
+app.get('/api/candidato/notificacoes', authCandidato, async (req, res) => {
+  try {
+    const { rows: c } = await pool.query('SELECT id FROM candidatos WHERE email = $1', [req.user.email]);
+    if (c.length === 0) return res.json({ aguardando: [], atualizacoes: [] });
+    const candidatoId = c[0].id;
+
+    // Traz todas as candidaturas ativas (não encerradas) + nome da vaga
+    const { rows: cands } = await pool.query(`
+      SELECT cand.id, cand.status, cand.etapa_atual, cand.historico,
+             cand.proposta_enviada_em, cand.proposta_aceita_em, cand.proposta_recusada_em,
+             v.titulo AS vaga_titulo, v.id AS vaga_id
+      FROM candidaturas cand
+      JOIN vagas v ON v.id = cand.vaga_id
+      WHERE cand.candidato_id = $1
+        AND cand.status NOT IN ('rejeitado', 'reprovado', 'cancelado')
+      ORDER BY cand.atualizada_em DESC
+    `, [candidatoId]);
+
+    const aguardando = [];
+    const atualizacoes = [];
+
+    for (const cand of cands) {
+      const linkVaga = `/candidato/inscricao.html?id=${cand.id}`;
+
+      // === AGUARDANDO AÇÃO ===
+      // 1) Proposta aguardando aceite
+      if (cand.proposta_enviada_em && !cand.proposta_aceita_em && !cand.proposta_recusada_em) {
+        aguardando.push({
+          tipo: 'proposta_pendente',
+          icone: '📨',
+          titulo: 'Proposta aguardando seu aceite',
+          descricao: `A empresa enviou uma proposta para "${cand.vaga_titulo}". Aceite ou recuse para continuar.`,
+          link: linkVaga,
+          linkTexto: 'Ver proposta',
+          data: cand.proposta_enviada_em,
+          vaga: cand.vaga_titulo
+        });
+      }
+      // 2) Documentos reprovados
+      const { rows: docsReprovados } = await pool.query(
+        `SELECT COUNT(*)::int AS total
+         FROM documentos_candidatura
+         WHERE candidatura_id = $1 AND status = 'reprovado'`,
+        [cand.id]
+      );
+      if (docsReprovados[0]?.total > 0) {
+        aguardando.push({
+          tipo: 'doc_reprovado',
+          icone: '📄',
+          titulo: `${docsReprovados[0].total} documento(s) precisam de reenvio`,
+          descricao: `Em "${cand.vaga_titulo}", alguns documentos foram reprovados. Envie novamente para liberar a próxima etapa.`,
+          link: `/candidato/documentos.html?cand=${cand.id}`,
+          linkTexto: 'Reenviar documentos',
+          data: new Date().toISOString(),
+          vaga: cand.vaga_titulo
+        });
+      }
+      // 3) Aguardando preenchimento do perfil (etapa 0 sem documentos)
+      if ((cand.etapa_atual || 0) === 0) {
+        aguardando.push({
+          tipo: 'perfil_incompleto',
+          icone: '👤',
+          titulo: 'Complete seu perfil',
+          descricao: `Em "${cand.vaga_titulo}", finalize seu cadastro para avançar.`,
+          link: '/candidato/perfil.html',
+          linkTexto: 'Completar perfil',
+          data: new Date().toISOString(),
+          vaga: cand.vaga_titulo
+        });
+      }
+
+      // === TIMELINE DE ATUALIZAÇÕES ===
+      const hist = Array.isArray(cand.historico) ? cand.historico : [];
+      hist.forEach(h => {
+        atualizacoes.push({
+          vaga: cand.vaga_titulo,
+          vaga_id: cand.vaga_id,
+          candidatura_id: cand.id,
+          etapa: h.etapa,
+          status: h.status,
+          acao: h.acao,
+          mensagem: h.mensagem,
+          por: h.por,
+          data: h.data,
+          link: linkVaga,
+          // emoji por tipo de ação
+          icone: (() => {
+            if (h.acao === 'aprovar_docs') return '✅';
+            if (h.acao === 'reprovar_docs') return '❌';
+            if (h.acao === 'reprovar') return '🚫';
+            if (h.acao === 'reabrir') return '🔄';
+            if (h.acao === 'enviar_proposta') return '📨';
+            if (h.acao === 'aceitar_proposta') return '🤝';
+            if (h.acao === 'recusar_proposta') return '⛔';
+            if (h.status === 'contratado') return '🎉';
+            if (h.acao === 'avancar') return '⬆️';
+            return '📌';
+          })()
+        });
+      });
+    }
+
+    // Ordena timeline mais recente primeiro; limita a 30
+    atualizacoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+    atualizacoes.splice(30);
+
+    res.json({ aguardando, atualizacoes });
+  } catch (e) {
+    console.error('[CANDIDATO NOTIFICACOES]', e);
+    res.status(500).json({ erro: e.message });
+  }
+});
+
 // Lista as CONVERSAS do candidato logado (estilo WhatsApp)
 // Critérios (regra aprovada 22/07/2026):
 //  - etapa_atual >= 2 (candidato passou da INSCRIÇÃO; a partir da TRIAGEM aparece)
@@ -848,12 +1088,35 @@ app.post('/api/admin/login', async (req, res) => {
 
 // USARÁ O E-MAIL DO ADMIN COMO LOGIN (fabio08dejesusjunior@gmail.com)
 
+// Lista vagas com status='fechada' que não geraram nenhuma contratação
+app.get('/api/admin/vagas-fechadas-sem-contratacao', authAdmin, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT v.id, v.titulo, v.empresa, v.cidade, v.estado, v.status, v.criada_em,
+        (SELECT COUNT(*)::int FROM candidaturas c WHERE c.vaga_id = v.id) as total_candidatos,
+        (SELECT MAX(c.atualizada_em) FROM candidaturas c WHERE c.vaga_id = v.id) as ultima_mov
+      FROM vagas v
+      WHERE v.status = 'fechada'
+        AND NOT EXISTS (
+          SELECT 1 FROM candidaturas c
+          WHERE c.vaga_id = v.id AND c.status = 'contratado'
+        )
+      ORDER BY v.criada_em DESC
+    `);
+    res.json({ vagas: rows });
+  } catch (e) {
+    console.error('[VAGAS-FECHADAS-SEM-CONTRATACAO]', e);
+    res.status(500).json({ erro: 'Erro ao listar vagas' });
+  }
+});
+
 app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
   try {
     const now = new Date();
     const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
     const fourteenDaysAgo = new Date(now - 14 * 24 * 60 * 60 * 1000);
     const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(now - 60 * 24 * 60 * 60 * 1000);
 
     // ==== KPIs principais (5) ====
     const kpis = await pool.query(`
@@ -868,8 +1131,12 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
         (SELECT COUNT(*) FROM candidaturas WHERE criada_em > $1)::int as processos_novos_7d,
         (SELECT COUNT(*) FROM candidaturas WHERE criada_em > $2)::int as processos_novos_14d,
         (SELECT COUNT(*) FROM entrevistas WHERE data_hora >= NOW() AND status = 'agendada')::int as entrevistas_agendadas,
-        (SELECT COUNT(*) FROM entrevistas WHERE data_hora >= NOW() AND data_hora < NOW() + INTERVAL '7 days' AND status = 'agendada')::int as entrevistas_proximos_7d
-    `, [sevenDaysAgo, fourteenDaysAgo]);
+        (SELECT COUNT(*) FROM entrevistas WHERE data_hora >= NOW() AND data_hora < NOW() + INTERVAL '7 days' AND status = 'agendada')::int as entrevistas_proximos_7d,
+        (SELECT COUNT(*) FROM candidaturas WHERE status = 'contratado' AND atualizada_em > $3)::int as contratacoes_30d,
+        (SELECT COUNT(*) FROM candidaturas WHERE status = 'contratado' AND atualizada_em > $4 AND atualizada_em <= $3)::int as contratacoes_30d_anterior,
+        (SELECT COUNT(*) FROM vagas WHERE status = 'publicada' AND criada_em < $3)::int as vagas_abertas_mais_30d,
+        (SELECT COUNT(*) FROM vagas WHERE status = 'publicada' AND criada_em < $4)::int as vagas_abertas_mais_60d
+    `, [sevenDaysAgo, fourteenDaysAgo, thirtyDaysAgo, sixtyDaysAgo]);
 
     const k = kpis.rows[0];
     // Calcula deltas % (período atual vs anterior)
@@ -881,7 +1148,8 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
       vagas: calcDelta(k.vagas_ativas_novas_7d, k.vagas_ativas_novas_14d - k.vagas_ativas_novas_7d),
       candidatos: calcDelta(k.candidatos_novos_7d, k.candidatos_novos_14d - k.candidatos_novos_7d),
       processos: calcDelta(k.processos_novos_7d, k.processos_novos_14d - k.processos_novos_7d),
-      entrevistas: k.entrevistas_agendadas
+      entrevistas: k.entrevistas_agendadas,
+      contratacoes: calcDelta(k.contratacoes_30d, k.contratacoes_30d_anterior)
     };
 
     // ==== Candidatos por etapa do processo (1=Inscrição, 2=Triagem, 3=RH, 4=Gestor, 5=Proposta, 6=Coleta, 7=Contratação) ====
@@ -895,14 +1163,17 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
     const etapasMap = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
     etapas.rows.forEach(r => { etapasMap[r.etapa_atual] = r.total; });
 
-    // ==== Taxa de conversão (contratados / total de candidatos que entraram no processo) ====
+    // ==== Taxa de conversão pós-triagem ====
+    // Numerador: candidatos contratados
+    // Denominador: quem avançou da triagem em diante (etapa_atual >= 3 OU status = contratado)
+    //   - exclui quem foi rejeitado logo na inscrição (etapa 1) e quem ainda tá aguardando triagem
     const conv = await pool.query(`
       SELECT
         (SELECT COUNT(*) FROM candidaturas WHERE status = 'contratado')::int as contratados,
-        (SELECT COUNT(*) FROM candidaturas)::int as total_candidaturas
+        (SELECT COUNT(*) FROM candidaturas WHERE etapa_atual >= 3 OR status = 'contratado')::int as passaram_triagem
     `);
-    const taxaConversao = conv.rows[0].total_candidaturas > 0
-      ? +(conv.rows[0].contratados / conv.rows[0].total_candidaturas * 100).toFixed(1)
+    const taxaConversao = conv.rows[0].passaram_triagem > 0
+      ? +(conv.rows[0].contratados / conv.rows[0].passaram_triagem * 100).toFixed(1)
       : 0;
     // Histórico simulado baseado em meses anteriores (pode ser melhorado com snapshot real depois)
     const historicoConversao = [
@@ -914,7 +1185,7 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
       taxaConversao
     ];
 
-    // ==== Próximas entrevistas (próximos 30 dias, OU atrasadas até 3 dias) ====
+    // ==== Próximas entrevistas no DASHBOARD: SOMENTE do dia atual (00h → 23h59 de hoje) ====
     const proximas = await pool.query(`
       SELECT
         e.id, e.candidatura_id, e.etapa, e.data_hora, e.duracao_minutos,
@@ -925,53 +1196,72 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
       JOIN candidaturas c ON c.id = e.candidatura_id
       JOIN vagas v ON v.id = c.vaga_id
       JOIN candidatos cd ON cd.id = c.candidato_id
-      WHERE e.status = 'agendada'
-        AND e.data_hora >= NOW() - INTERVAL '3 days'
-        AND e.data_hora < NOW() + INTERVAL '30 days'
+      WHERE e.status IN ('agendada','concluida')
+        AND e.data_hora >= date_trunc('day', NOW())
+        AND e.data_hora <  date_trunc('day', NOW()) + INTERVAL '1 day'
       ORDER BY e.data_hora ASC
-      LIMIT 10
+      LIMIT 20
     `);
 
     // ==== Atividades recentes (do histórico das candidaturas) ====
+    // Inclui alerta_parado quando a última entrada do histórico > 3 dias atrás
+    // E status != 'reprovado'/'contratado' (candidatos "travados" no funil)
     const atividades = await pool.query(`
       SELECT
-        c.id, c.historico, c.atualizada_em,
-        cd.nome as candidato_nome, v.titulo as vaga_titulo
+        c.id, c.historico, c.atualizada_em, c.status,
+        cd.nome as candidato_nome, v.titulo as vaga_titulo,
+        c.etapa_atual, v.etapas,
+        (
+          SELECT MAX(COALESCE((h->>'em')::timestamptz, (h->>'data')::timestamptz))
+          FROM jsonb_array_elements(c.historico) h
+          WHERE h ? 'em' OR h ? 'data'
+        ) as ultima_mov
       FROM candidaturas c
       JOIN vagas v ON v.id = c.vaga_id
       JOIN candidatos cd ON cd.id = c.candidato_id
       WHERE c.historico IS NOT NULL AND c.historico != '[]'::jsonb
       ORDER BY c.atualizada_em DESC NULLS LAST
-      LIMIT 8
+      LIMIT 30
     `);
     const atividadesRecentes = [];
     atividades.rows.forEach(r => {
       const hist = typeof r.historico === 'string' ? JSON.parse(r.historico) : (r.historico || []);
-      // Pega o último item do histórico
       const ultimo = hist[hist.length - 1];
-      if (ultimo) {
-        atividadesRecentes.push({
-          texto: ultimo.acao || ultimo.evento || 'Atualização',
-          candidato: r.candidato_nome,
-          vaga: r.vaga_titulo,
-          quando: ultimo.em || r.atualizada_em,
-          tipo: ultimo.tipo || 'sistema'
-        });
+      if (!ultimo) return;
+      // Detecta parado: se status permite progresso e a última mov > 3 dias
+      const podeProgredir = r.status !== 'reprovado' && r.status !== 'contratado';
+      const dataRef = r.ultima_mov || r.atualizada_em || ultimo.em || ultimo.data;
+      const diasParado = dataRef ? Math.floor((Date.now() - new Date(dataRef).getTime()) / 86400000) : 0;
+      const alerta_parado = podeProgredir && diasParado >= 3;
+
+      // Resolve nome da etapa atual (etapas[etapa_atual - 1])
+      let etapaNome = null;
+      if (Array.isArray(r.etapas) && r.etapa_atual) {
+        const etapaObj = r.etapas[r.etapa_atual - 1];
+        etapaNome = (typeof etapaObj === 'string' ? etapaObj : etapaObj?.nome) || null;
       }
+
+      atividadesRecentes.push({
+        texto: ultimo.acao || ultimo.evento || 'Atualização',
+        candidato: r.candidato_nome,
+        vaga: r.vaga_titulo,
+        candidatura_id: r.id,
+        quando: ultimo.em || r.atualizada_em,
+        tipo: ultimo.tipo || 'sistema',
+        status: r.status,
+        etapa: r.etapa_atual,
+        etapa_nome: etapaNome,
+        dias_parado: diasParado,
+        alerta_parado
+      });
     });
-    // Se não tem histórico, usa a data de criação
-    if (atividadesRecentes.length === 0) {
-      const fallback = await pool.query(`
-        SELECT c.criada_em as quando, cd.nome as candidato, v.titulo as vaga
-        FROM candidaturas c
-        JOIN vagas v ON v.id = c.vaga_id
-        JOIN candidatos cd ON cd.id = c.candidato_id
-        ORDER BY c.criada_em DESC LIMIT 5
-      `);
-      fallback.rows.forEach(r => atividadesRecentes.push({
-        texto: 'Inscrição realizada', candidato: r.candidato, vaga: r.vaga, quando: r.quando, tipo: 'inscricao'
-      }));
-    }
+    // Mantém só os 8 mais recentes (mas prioriza os com alerta)
+    atividadesRecentes.sort((a, b) => {
+      if (a.alerta_parado && !b.alerta_parado) return -1;
+      if (!a.alerta_parado && b.alerta_parado) return 1;
+      return new Date(b.quando) - new Date(a.quando);
+    });
+    const atividadesRecentesTrim = atividadesRecentes.slice(0, 8);
 
     // ==== KPIs secundários ====
     const sec = await pool.query(`
@@ -980,6 +1270,8 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
         (SELECT COUNT(DISTINCT empresa) FROM vagas)::int as empresas_ativas,
         (SELECT COUNT(*) FROM candidaturas WHERE status = 'reprovado')::int as reprovados,
         (SELECT COUNT(*) FROM candidaturas WHERE status = 'contratado')::int as contratados_total,
+        (SELECT COUNT(*) FROM candidaturas WHERE status = 'cancelado')::int as desistencias,
+        (SELECT COUNT(*) FROM candidaturas)::int as total_candidaturas,
         (SELECT COUNT(*) FROM documentos_candidatura)::int as total_documentos,
         (SELECT COUNT(*) FROM documentos_candidatura WHERE status = 'aprovado')::int as documentos_aprovados
     `);
@@ -987,9 +1279,45 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
     const taxaAprovacao = (s.reprovados + s.contratados_total) > 0
       ? Math.round(s.contratados_total / (s.reprovados + s.contratados_total) * 100)
       : 0;
-    const taxaDesligamento = 0; // sem dado de desligamento ainda
+    const taxaDesistencia = s.total_candidaturas > 0
+      ? Math.round(s.desistencias / s.total_candidaturas * 100)
+      : 0;
+    // Vagas fechadas SEM contratação (status=fechada E 0 contratados)
+    const vagasSemContratacaoRes = await pool.query(`
+      SELECT COUNT(*)::int as qtd
+      FROM vagas v
+      WHERE v.status = 'fechada'
+        AND NOT EXISTS (
+          SELECT 1 FROM candidaturas c
+          WHERE c.vaga_id = v.id AND c.status = 'contratado'
+        )
+    `);
+    const vagas_fechadas_sem_contratacao = vagasSemContratacaoRes.rows[0].qtd;
     const taxaDocumentacao = s.total_documentos > 0
       ? Math.round(s.documentos_aprovados / s.total_documentos * 100)
+      : 0;
+
+    // ==== Vagas que chegaram em Contratação (etapa 7) em até 30 dias ====
+    // Considera a PRIMEIRA candidatura com status='contratado' dessa vaga.
+    // Pra ter uma estimativa confiável usamos o `atualizada_em` da 1ª contratação - criada_em da vaga.
+    const fechadas30Res = await pool.query(`
+      SELECT
+        COUNT(DISTINCT v.id)::int as vagas_fechadas_30d,
+        (SELECT COUNT(*)::int FROM vagas)::int as total_vagas
+      FROM vagas v
+      WHERE EXISTS (
+        SELECT 1 FROM candidaturas c
+        WHERE c.vaga_id = v.id
+          AND c.status = 'contratado'
+          AND c.atualizada_em IS NOT NULL
+          AND c.atualizada_em - v.criada_em <= INTERVAL '30 days'
+      )
+    `);
+    const f30 = fechadas30Res.rows[0];
+    const vagas_fechadas_30d_total = f30.total_vagas;
+    const vagas_fechadas_30d_qtd = f30.vagas_fechadas_30d;
+    const taxa_fechadas_30d = vagas_fechadas_30d_total > 0
+      ? Math.round(vagas_fechadas_30d_qtd / vagas_fechadas_30d_total * 100)
       : 0;
     // Tempo médio de contratação (em dias) - diferença entre criada_em e a última entrada do histórico
     const tempoMedioRes = await pool.query(`
@@ -999,13 +1327,14 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
     `);
     const tempoMedio = tempoMedioRes.rows[0].dias || 0;
 
-    // ==== Vagas com mais candidatos (top 5) ====
+    // ==== Vagas ATIVAS com mais candidatos (top 5) ====
     const ranking = await pool.query(`
       SELECT v.id, v.titulo, v.empresa, v.status, v.criada_em,
         COUNT(c.id)::int as total_candidatos,
         COUNT(CASE WHEN c.status = 'contratado' THEN 1 END)::int as contratados
       FROM vagas v
       LEFT JOIN candidaturas c ON c.vaga_id = v.id
+      WHERE v.status = 'publicada'
       GROUP BY v.id
       ORDER BY total_candidatos DESC
       LIMIT 5
@@ -1019,15 +1348,19 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
         atual: taxaConversao,
         historico: historicoConversao,
         contratados: conv.rows[0].contratados,
-        total: conv.rows[0].total_candidaturas
+        total: conv.rows[0].passaram_triagem
       },
       proximas_entrevistas: proximas.rows,
-      atividades_recentes: atividadesRecentes,
+      atividades_recentes: atividadesRecentesTrim,
+      atividades_alertas: atividadesRecentes.filter(a => a.alerta_parado).slice(0, 5),
       kpis_secundarios: {
         tempo_medio_contratacao: tempoMedio,
-        taxa_aprovacao: taxaAprovacao,
-        taxa_desligamento: taxaDesligamento,
+        taxa_aprovacao_30d: taxa_fechadas_30d,
+        taxa_aprovacao_30d_qtd: vagas_fechadas_30d_qtd,
+        taxa_aprovacao_30d_total: vagas_fechadas_30d_total,
+        taxa_desistencia: taxaDesistencia,
         vagas_encerradas: s.vagas_encerradas,
+        vagas_fechadas_sem_contratacao: vagas_fechadas_sem_contratacao,
         empresas_ativas: s.empresas_ativas,
         taxa_documentacao: taxaDocumentacao
       },
@@ -1036,6 +1369,143 @@ app.get('/api/admin/dashboard', authAdmin, async (req, res) => {
     });
   } catch (e) {
     console.error('[DASHBOARD ERRO]', e);
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+// === KPI "Contratações": lista detalhada + comparação mensal (últimos 6 meses) ===
+app.get('/api/admin/contratacoes', authAdmin, async (req, res) => {
+  try {
+    // Lista detalhada (últimas 200 contratações)
+    const lista = await pool.query(`
+      SELECT
+        cand.id as candidatura_id,
+        cand.atualizada_em as contratada_em,
+        c.id as candidato_id,
+        c.nome as candidato_nome,
+        c.email as candidato_email,
+        v.id as vaga_id,
+        v.titulo as vaga_titulo,
+        v.empresa as vaga_empresa,
+        EXTRACT(DAY FROM (cand.atualizada_em - cand.criada_em))::int as dias_processo
+      FROM candidaturas cand
+      JOIN candidatos c ON c.id = cand.candidato_id
+      JOIN vagas v ON v.id = cand.vaga_id
+      WHERE cand.status = 'contratado'
+      ORDER BY cand.atualizada_em DESC
+      LIMIT 200
+    `);
+
+    // Comparação mensal: contratações agrupadas por mês (últimos 6 meses)
+    const mensal = await pool.query(`
+      SELECT
+        TO_CHAR(date_trunc('month', atualizada_em), 'YYYY-MM') as mes,
+        TO_CHAR(date_trunc('month', atualizada_em), 'MM/YYYY') as mes_label,
+        COUNT(*)::int as total
+      FROM candidaturas
+      WHERE status = 'contratado'
+        AND atualizada_em >= date_trunc('month', NOW()) - INTERVAL '5 months'
+      GROUP BY 1, 2
+      ORDER BY 1 ASC
+    `);
+
+    res.json({
+      total: lista.rows.length,
+      contratacoes: lista.rows,
+      comparacao_mensal: mensal.rows
+    });
+  } catch (e) {
+    console.error('[CONTRATACOES ERRO]', e);
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+// === KPI "Abertas +30d": vagas publicadas há mais de 30 dias sem contratação ===
+app.get('/api/admin/vagas-abertas-antigas', authAdmin, async (req, res) => {
+  try {
+    const rows = await pool.query(`
+      SELECT
+        v.id, v.titulo, v.empresa, v.cidade, v.estado, v.criada_em,
+        EXTRACT(DAY FROM (NOW() - v.criada_em))::int as dias_aberta,
+        (SELECT COUNT(*) FROM candidaturas WHERE vaga_id = v.id)::int as total_candidatos,
+        (SELECT COUNT(*) FROM candidaturas WHERE vaga_id = v.id AND status NOT IN ('reprovado','contratado'))::int as processos_ativos
+      FROM vagas v
+      WHERE v.status = 'publicada'
+        AND v.criada_em < NOW() - INTERVAL '30 days'
+        AND NOT EXISTS (SELECT 1 FROM candidaturas WHERE vaga_id = v.id AND status = 'contratado')
+      ORDER BY v.criada_em ASC
+    `);
+    res.json({
+      total: rows.rows.length,
+      vagas: rows.rows
+    });
+  } catch (e) {
+    console.error('[VAGAS ANTIGAS ERRO]', e);
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+// === Candidaturas em uma etapa específica (clicado no gráfico "Candidatos por etapa") ===
+// ?etapa=N onde N é 1-indexed (1=Inscrição, 2=Triagem, ..., 7=Contratação)
+app.get('/api/admin/candidaturas-por-etapa', authAdmin, async (req, res) => {
+  try {
+    const etapa = parseInt(req.query.etapa);
+    if (!etapa || etapa < 1 || etapa > 7) {
+      return res.status(400).json({ erro: 'Etapa inválida (1-7)' });
+    }
+    const rows = await pool.query(`
+      SELECT
+        c.id as candidatura_id,
+        c.criada_em,
+        c.atualizada_em,
+        c.status,
+        c.etapa_atual,
+        cd.id as candidato_id,
+        cd.nome as candidato_nome,
+        cd.email as candidato_email,
+        v.id as vaga_id,
+        v.titulo as vaga_titulo,
+        v.empresa as vaga_empresa,
+        v.etapas,
+        -- Quando entrou nessa etapa (1ª entrada do histórico onde etapa = $1)
+        (
+          SELECT MIN(COALESCE((h->>'em')::timestamptz, (h->>'data')::timestamptz))
+          FROM jsonb_array_elements(c.historico) h
+          WHERE (h->>'etapa')::int = $1 OR (h->>'etapa_atual')::int = $1
+        ) as entrou_na_etapa_em,
+        -- Última movimentação de qualquer tipo
+        (
+          SELECT MAX(COALESCE((h->>'em')::timestamptz, (h->>'data')::timestamptz))
+          FROM jsonb_array_elements(c.historico) h
+          WHERE h ? 'em' OR h ? 'data'
+        ) as ultima_mov_em
+      FROM candidaturas c
+      JOIN candidatos cd ON cd.id = c.candidato_id
+      JOIN vagas v ON v.id = c.vaga_id
+      WHERE c.etapa_atual = $1
+        AND c.status NOT IN ('reprovado','contratado')
+      ORDER BY entrou_na_etapa_em ASC NULLS LAST
+    `, [etapa]);
+
+    // Calcula dias parado
+    const items = rows.rows.map(r => {
+      const ref = r.ultima_mov_em || r.atualizada_em || r.entrou_na_etapa_em;
+      const dias_parado = ref ? Math.floor((Date.now() - new Date(ref).getTime()) / 86400000) : 0;
+      return { ...r, dias_parado, alerta_parado: dias_parado >= 3 };
+    });
+
+    // Nome da etapa resolvido a partir do array de etapas da vaga (fallback: rótulo padrão)
+    const etapaNomePadrao = ['', 'Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta de Documentos', 'Contratação'];
+    const etapaNome = etapaNomePadrao[etapa];
+
+    res.json({
+      etapa,
+      etapa_nome: etapaNome,
+      total: items.length,
+      candidaturas: items
+    });
+  } catch (e) {
+    console.error('[CAND POR ETAPA ERRO]', e);
     res.status(500).json({ erro: e.message });
   }
 });
@@ -1065,8 +1535,106 @@ app.post('/api/admin/vagas', authAdmin, async (req, res) => {
 });
 
 app.get('/api/admin/vagas', authAdmin, async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM vagas ORDER BY criada_em DESC');
-  res.json({ vagas: rows });
+  // Filtros aceitos:
+  //   ?status=publicada|pausada|fechada
+  //   ?search=texto   (busca em titulo + empresa)
+  //   ?empresa=texto  (filtro exato)
+  //   ?area=texto     (filtro exato)
+  // Ordenação:
+  //   ?ordenar=criada_em|candidatos|titulo
+  //   ?ordem_dir=ASC|DESC (default DESC)
+  // Paginação:
+  //   ?page=1 (default 1) &limit=10 (default 100, max 100)
+  const status = (req.query.status || '').toString().trim();
+  const search = (req.query.search || '').toString().trim();
+  const empresa = (req.query.empresa || '').toString().trim();
+  const area = (req.query.area || '').toString().trim();
+  const ordenar = (req.query.ordenar || 'criada_em').toString().trim();
+  const ordemDir = ((req.query.ordem_dir || 'DESC').toString().toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 100));
+  const offset = (page - 1) * limit;
+
+  // Monta WHERE dinâmico
+  const wheres = [];
+  const values = [];
+  // Substitui placeholders ? em ordem, gerando $1, $2, ...
+  const addWhere = (sql, ...vals) => {
+    vals.forEach(v => values.push(v));
+    let out = sql;
+    let i = values.length - vals.length + 1;
+    while (out.indexOf('?') !== -1) {
+      out = out.replace('?', '$' + i);
+      i++;
+    }
+    wheres.push(out);
+  };
+  if (status) addWhere('v.status = ?', status);
+  if (empresa) addWhere('v.empresa = ?', empresa);
+  if (area) addWhere('v.area = ?', area);
+  if (search) {
+    // Busca tolerante a acentos e case sem depender de extensão Postgres.
+    // TRANSLATE substitui cada caractere acentuado pelo seu equivalente sem acento
+    // (á->a, é->e, ç->c, etc). Cobre "Estagiário" vs "estagiario" corretamente.
+    const raw = search.toLowerCase();
+    const termo = '%' + raw + '%';
+    const termoSem = '%' + raw
+      .replace(/[áàâãä]/g, 'a')
+      .replace(/[éèêë]/g, 'e')
+      .replace(/[íìîï]/g, 'i')
+      .replace(/[óòôõö]/g, 'o')
+      .replace(/[úùûü]/g, 'u')
+      .replace(/ç/g, 'c') + '%';
+    addWhere(
+      `(LOWER(v.titulo) LIKE ?
+     OR LOWER(v.empresa) LIKE ?
+     OR TRANSLATE(LOWER(v.titulo),  'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiioooouuuucc') LIKE ?
+     OR TRANSLATE(LOWER(v.empresa), 'áàâãäéèêëíìîïóòôõöúùûüç', 'aaaaaeeeeiiiioooouuuucc') LIKE ?)`,
+      termo, termo, termoSem, termoSem
+    );
+  }
+  const whereSql = wheres.length ? 'WHERE ' + wheres.join(' AND ') : '';
+
+  // Ordenação (só permite colunas válidas — sem SQL injection)
+  let orderCol;
+  if (ordenar === 'candidatos') orderCol = 'candidatos_count';
+  else if (ordenar === 'titulo') orderCol = 'v.titulo';
+  else orderCol = 'v.criada_em';
+
+  // Query: vagas + LEFT JOIN com contagem de candidatos
+  // IMPORTANTE: a contagem usa LEFT JOIN pra incluir vagas com 0 candidatos.
+  // GROUP BY garante que cada vaga aparece uma vez.
+  const sql = `
+    SELECT v.*, COALESCE(c.cnt, 0)::int AS candidatos_count
+    FROM vagas v
+    LEFT JOIN (
+      SELECT vaga_id, COUNT(*)::int AS cnt
+      FROM candidaturas
+      GROUP BY vaga_id
+    ) c ON c.vaga_id = v.id
+    ${whereSql}
+    ORDER BY ${orderCol} ${ordemDir}, v.id DESC
+    LIMIT ${limit} OFFSET ${offset}
+  `;
+
+  // Query de contagem total (pra paginação)
+  const countSql = `SELECT COUNT(*)::int AS total FROM vagas v ${whereSql}`;
+
+  try {
+    const [rVagas, rTotal] = await Promise.all([
+      pool.query(sql, values),
+      pool.query(countSql, values)
+    ]);
+    res.json({
+      vagas: rVagas.rows,
+      total: rTotal.rows[0].total,
+      page,
+      limit
+    });
+  } catch (err) {
+    console.error('[/api/admin/vagas]', err.message);
+    res.status(500).json({ erro: 'Erro ao listar vagas: ' + err.message });
+  }
 });
 
 app.put('/api/admin/vagas/:id', authAdmin, async (req, res) => {
@@ -1123,13 +1691,30 @@ app.get('/api/admin/vagas/:id', authAdmin, async (req, res) => {
 app.get('/api/admin/candidatos', authAdmin, async (req, res) => {
   try {
     const { area } = req.query;
-    let sql = `SELECT id, nome, email, cpf, celular, cidade, estado, areas_interesse, banco_talentos, criado_em FROM candidatos`;
+    // Inclui info da última candidatura (status + id) + vaga + total de candidaturas
+    let sql = `
+      SELECT c.id, c.nome, c.email, c.cpf, c.celular, c.cidade, c.estado,
+             c.areas_interesse, c.banco_talentos, c.criado_em, c.foto_url,
+             ult.status AS ultimo_status, ult.id AS ultima_candidatura_id,
+             ult.etapa_atual AS ultima_etapa,
+             v.titulo AS ultima_vaga_titulo,
+             (SELECT COUNT(*) FROM candidaturas cc WHERE cc.candidato_id = c.id) AS total_candidaturas
+      FROM candidatos c
+      LEFT JOIN LATERAL (
+        SELECT cu.id, cu.status, cu.etapa_atual, cu.vaga_id
+        FROM candidaturas cu
+        WHERE cu.candidato_id = c.id
+        ORDER BY cu.criada_em DESC NULLS LAST
+        LIMIT 1
+      ) ult ON true
+      LEFT JOIN vagas v ON v.id = ult.vaga_id
+    `;
     const params = [];
     if (area) {
+      sql += ` WHERE c.areas_interesse @> $${params.length + 1}::jsonb`;
       params.push(JSON.stringify([area]));
-      sql += ` WHERE areas_interesse @> $${params.length}::jsonb`;
     }
-    sql += ' ORDER BY criado_em DESC';
+    sql += ' ORDER BY c.criado_em DESC';
     const { rows } = await pool.query(sql, params);
     res.json({ candidatos: rows });
   } catch (e) {
@@ -1146,7 +1731,7 @@ app.get('/api/admin/candidato/:id', authAdmin, async (req, res) => {
               acessibilidade, cep, estado, cidade, bairro, logradouro, numero, complemento,
               formacao, instituicao, curso, situacao, data_conclusao,
               primeiro_emprego, banco_talentos, areas_interesse, sobre_voce, experiencia,
-              criado_em
+              criado_em, foto_url
        FROM candidatos WHERE id = $1`, [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ erro: 'Candidato não encontrado' });
     res.json({ candidato: rows[0] });
@@ -1256,6 +1841,15 @@ app.get('/api/admin/candidatura/:id', authAdmin, async (req, res) => {
       [candidatura.candidato_id]
     );
     candidatura.experiencias = exps;
+
+    // Buscar entrevistas (a mais recente ativa vence; canceladas não contam)
+    const { rows: entrevistas } = await pool.query(
+      `SELECT * FROM entrevistas
+       WHERE candidatura_id = $1 AND status != 'cancelada'
+       ORDER BY criado_em DESC`,
+      [req.params.id]
+    );
+    candidatura.entrevistas = entrevistas;
 
     res.json({ candidatura });
   } catch (e) {
@@ -1686,9 +2280,17 @@ app.post('/api/admin/entrevista', authAdmin, async (req, res) => {
     if (cand.rows.length === 0) {
       return res.status(404).json({ erro: 'Candidatura não encontrada' });
     }
-    // Gera link da sala Whereby automaticamente (se não veio do frontend)
-    // Sua sala Whereby Embedded: a URL da sala é fixa + um identificador único da entrevista
-    const linkGerado = link_reuniao || `https://whereby.com/vagasio?room=entrevista-${candidatura_id}-${Date.now()}`;
+
+    // Busca dados do candidato e vaga pra montar o título/descrição do Meet
+    const candFull = await pool.query(`
+      SELECT c.id, c.candidato_id, cand.nome AS candidato_nome, cand.email AS candidato_email,
+             v.titulo AS vaga_titulo, v.empresa AS empresa_nome
+      FROM candidaturas c
+      JOIN candidatos cand ON cand.id = c.candidato_id
+      JOIN vagas v ON v.id = c.vaga_id
+      WHERE c.id = $1
+    `, [candidatura_id]);
+    const candData = candFull.rows[0];
 
     // Converte data_hora pra timestamp com fuso: o JS manda ISO (ex: 2026-07-25T14:30:00-03:00),
     // o Postgres interpreta corretamente e armazena em UTC internamente
@@ -1704,12 +2306,51 @@ app.post('/api/admin/entrevista', authAdmin, async (req, res) => {
       dataHoraFinal = d.toISOString();
     }
 
+    // === Decide se gera link do Google Meet ===
+    // Online: gera Meet + envia e-mail
+    // Presencial: NÃO gera Meet, só salva o endereço no `local`
+    const isOnline = !local || /online/i.test(local);
+    let linkGerado = isOnline ? null : null; // começa null
+    let googleEventId = null;
+    let meetHtmlLink = null;
+
+    if (isOnline && !link_reuniao && process.env.GCP_SERVICE_ACCOUNT_JSON) {
+      try {
+        const etapaNome = etapa === 3 ? 'RH' : 'Gestor';
+        const meetResult = await meet.criarEventoMeet({
+          summary: `Entrevista ${etapaNome} - ${candData.candidato_nome} - ${candData.vaga_titulo}`,
+          description: `Entrevista etapa ${etapaNome} da vaga "${candData.vaga_titulo}"${candData.empresa_nome ? ` (${candData.empresa_nome})` : ''}.\n\n${observacoes || ''}\n\nGerado via VagasIO.`,
+          startTime: dataHoraFinal,
+          durationMinutes: duracao_minutos || 60,
+          attendees: [
+            candData.candidato_email,
+            req.admin?.email || process.env.MEET_ADMIN_EMAIL,
+          ].filter(Boolean),
+        });
+        linkGerado = meetResult.meetLink;
+        googleEventId = meetResult.eventId;
+        meetHtmlLink = meetResult.htmlLink;
+        console.log(`[MEET] Evento criado: ${googleEventId} - ${linkGerado}`);
+      } catch (meetErr) {
+        console.error('[MEET ERRO]', meetErr.message);
+        return res.status(500).json({ erro: 'Falha ao criar reunião no Google Meet: ' + meetErr.message });
+      }
+    } else if (!isOnline) {
+      console.log(`[ENTREVISTA] Presencial — Meet não gerado. Local: ${local}`);
+    }
+
+    // Se for online e NÃO veio link_reuniao do frontend E NÃO conseguiu gerar Meet, usa placeholder
+    if (isOnline && !linkGerado && !link_reuniao && !process.env.GCP_SERVICE_ACCOUNT_JSON) {
+      linkGerado = `https://meet.google.com/pending-${candidatura_id}-${Date.now()}`;
+      console.warn('[MEET] GCP_SERVICE_ACCOUNT_JSON não configurada — usando link placeholder');
+    }
+
     // Cria a entrevista
     const r = await pool.query(`
-      INSERT INTO entrevistas (candidatura_id, etapa, data_hora, duracao_minutos, local, link_reuniao, observacoes, criado_por)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO entrevistas (candidatura_id, etapa, data_hora, duracao_minutos, local, link_reuniao, google_event_id, observacoes, criado_por)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
-    `, [candidatura_id, etapa, dataHoraFinal, duracao_minutos || 60, local || null, linkGerado, observacoes || null, req.admin?.id || null]);
+    `, [candidatura_id, etapa, dataHoraFinal, duracao_minutos || 60, local || null, linkGerado, googleEventId, observacoes || null, req.admin?.id || null]);
     const entrevista = r.rows[0];
     // Adiciona no histórico da candidatura
     const etapaNome = etapa === 3 ? 'Entrevista RH' : 'Entrevista Gestor';
@@ -1726,12 +2367,61 @@ app.post('/api/admin/entrevista', authAdmin, async (req, res) => {
       tipo: 'entrevista',
       data_hora: dataHoraFinal,
       por: req.admin?.nome || 'Recrutador',
-      detalhes: `Data: ${dataFormatada}${link_reuniao ? ` • Link: ${link_reuniao}` : ''}${local ? ` • Local: ${local}` : ''}`
+      formato: isOnline ? 'online' : 'presencial',
+      detalhes: `Data: ${dataFormatada}${linkGerado ? ` • Meet: ${linkGerado}` : ''}${local && !isOnline ? ` • ${local}` : ''}`
     }]), candidatura_id]);
 
-    res.json({ ok: true, entrevista });
+    res.json({ ok: true, entrevista, googleEventId, meetHtmlLink });
   } catch (e) {
     console.error('[ENTREVISTA CRIAR ERRO]', e);
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+// Cancela uma entrevista (libera novo agendamento) - chamada pelo botão "❌ Falhou" na agenda
+app.post('/api/admin/entrevista/:id/cancelar', authAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { motivo } = req.body || {};
+
+    const { rows: eRows } = await pool.query('SELECT * FROM entrevistas WHERE id = $1', [id]);
+    if (eRows.length === 0) return res.status(404).json({ erro: 'Entrevista não encontrada' });
+    const entrevista = eRows[0];
+
+    // Marca como cancelada (libera o slot pro próximo agendamento)
+    await pool.query(
+      `UPDATE entrevistas SET status = 'cancelada', atualizado_em = NOW() WHERE id = $1`,
+      [id]
+    );
+
+    // Tenta deletar o evento no Google Calendar (se houver)
+    if (entrevista.google_event_id) {
+      try {
+        await meet.deletarEventoMeet(entrevista.google_event_id);
+        console.log(`[MEET] Evento ${entrevista.google_event_id} deletado (entrevista cancelada)`);
+      } catch (e) {
+        console.warn('[MEET] Não consegui deletar evento:', e.message);
+      }
+    }
+
+    // Histórico na candidatura
+    await pool.query(`
+      UPDATE candidaturas
+      SET historico = COALESCE(historico, '[]'::jsonb) || $1::jsonb,
+          atualizada_em = NOW()
+      WHERE id = $2
+    `, [JSON.stringify([{
+      acao: `❌ Entrevista cancelada (etapa ${entrevista.etapa})`,
+      etapa: entrevista.etapa,
+      em: new Date().toISOString(),
+      tipo: 'entrevista_cancelada',
+      por: req.admin?.nome || 'Recrutador',
+      detalhes: motivo ? `Motivo: ${motivo}` : 'Candidato/recrutador não compareceu.'
+    }]), entrevista.candidatura_id]);
+
+    res.json({ ok: true, entrevista_id: id, status: 'cancelada' });
+  } catch (e) {
+    console.error('[ENTREVISTA CANCELAR ERRO]', e);
     res.status(500).json({ erro: e.message });
   }
 });
@@ -1772,6 +2462,8 @@ app.post('/api/_debug/fix-entrevistas', async (req, res) => {
     res.status(500).json({ erro: e.message });
   }
 });
+
+// (rotas _debug/meet-teste e _debug/meet-criar-teste movidas para o topo do arquivo)
 
 // Listar TODAS as entrevistas (pra página Agenda)
 app.get('/api/admin/entrevistas', authAdmin, async (req, res) => {
@@ -2447,6 +3139,44 @@ app.post('/api/candidato/aceitar-proposta/:candidaturaId', authCandidato, async 
 });
 
 // ===== Candidato: recusar proposta =====
+// Candidato desiste da vaga a qualquer momento
+app.post('/api/candidatura/:id/desistir', authCandidato, async (req, res) => {
+  const { motivo } = req.body;
+  const { rows: c } = await pool.query(`
+    SELECT c.*, v.titulo, cd.email as cand_email, cd.nome_completo as cand_nome
+    FROM candidaturas c
+    JOIN vagas v ON v.id = c.vaga_id
+    JOIN candidatos cd ON cd.id = c.candidato_id
+    WHERE c.id = $1`, [req.params.id]);
+  if (c.length === 0) return res.status(404).json({ erro: 'Candidatura não encontrada' });
+  const cand = c[0];
+
+  if (cand.cand_email !== req.user.email) return res.status(403).json({ erro: 'Acesso negado' });
+  if (['cancelado','rejeitado','contratado'].includes(cand.status)) {
+    return res.status(400).json({ erro: `Não é possível desistir: candidatura já está como '${cand.status}'` });
+  }
+
+  const historico = Array.isArray(cand.historico) ? [...cand.historico] : [];
+  historico.push({
+    etapa: cand.etapa_atual || 0,
+    status: 'cancelado',
+    acao: 'desistir',
+    mensagem: 'Candidato desistiu da vaga' + (motivo ? `: ${motivo}` : ''),
+    data: new Date().toISOString(),
+    por: cand.cand_email
+  });
+
+  await pool.query(
+    `UPDATE candidaturas
+     SET status = 'cancelado',
+         historico = $1
+     WHERE id = $2`,
+    [JSON.stringify(historico), req.params.id]
+  );
+
+  res.json({ ok: true, mensagem: 'Você desistiu da vaga com sucesso.' });
+});
+
 app.post('/api/candidato/recusar-proposta/:candidaturaId', authCandidato, async (req, res) => {
   const { motivo } = req.body;
   const { rows: c } = await pool.query(`
@@ -2602,10 +3332,17 @@ app.post('/api/auth/login-recrutador', async (req, res) => {
   const { email, senha } = req.body;
   if (!email || !senha) return res.status(400).json({ erro: 'E-mail e senha obrigatórios' });
   try {
-    const { rows } = await pool.query(
+    // 🔍 Debug: loga a query exata pra investigar erro 500
+    console.log('[login-recrutador] tentando:', email);
+    const result = await pool.query(
       'SELECT id, nome, email, senha_hash, ativo, role, primeiro_acesso FROM recrutadores WHERE email = $1',
       [email.toLowerCase()]
-    );
+    ).catch((err) => {
+      console.error('[login-recrutador] ERRO na query:', err.message, err.code, err.detail);
+      throw err;
+    });
+    const rows = result.rows;
+    console.log('[login-recrutador] rows:', rows.length);
     if (rows.length === 0) return res.status(401).json({ erro: 'E-mail ou senha inválidos' });
     const r = rows[0];
     if (!r.ativo) return res.status(403).json({ erro: 'Conta desativada. Fale com o admin.' });
@@ -2935,6 +3672,16 @@ app.post('/api/auth/trocar-senha-empresa', authEmpresa, async (req, res) => {
 app.get('/api/empresa/dashboard', authEmpresa, async (req, res) => {
   const { empresa_id } = req.user;
   try {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(now - 14 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(now - 60 * 24 * 60 * 60 * 1000);
+
+    // TODAS as queries abaixo usam JOIN com empresa_vaga_acesso(eva.empresa_id = $1)
+    // garantem que dados sejam SEMPRE filtrados pela empresa autenticada.
+
+    // 1. Vagas liberadas para essa empresa
     const vagas = await pool.query(`
       SELECT v.id, v.titulo, v.empresa, v.cidade, v.estado, v.status, v.criada_em,
         (SELECT COUNT(*) FROM candidaturas c WHERE c.vaga_id = v.id) as total_candidatos,
@@ -2946,38 +3693,210 @@ app.get('/api/empresa/dashboard', authEmpresa, async (req, res) => {
       ORDER BY v.criada_em DESC
     `, [empresa_id]);
 
-    const totalCandidatos = await pool.query(`
-      SELECT COUNT(*)::int as total FROM candidaturas c
+    // 2. KPIs principais (espelho do admin)
+    const kpis = await pool.query(`
+      SELECT
+        (SELECT COUNT(*) FROM vagas v JOIN empresa_vaga_acesso eva ON eva.vaga_id = v.id
+         WHERE eva.empresa_id = $1 AND v.status = 'publicada')::int as vagas_ativas,
+        (SELECT COUNT(*) FROM vagas v JOIN empresa_vaga_acesso eva ON eva.vaga_id = v.id
+         WHERE eva.empresa_id = $1 AND v.status = 'publicada' AND v.criada_em > $2)::int as vagas_ativas_novas_7d,
+        (SELECT COUNT(*) FROM vagas v JOIN empresa_vaga_acesso eva ON eva.vaga_id = v.id
+         WHERE eva.empresa_id = $1 AND v.status = 'publicada' AND v.criada_em > $3)::int as vagas_ativas_novas_14d,
+        (SELECT COUNT(DISTINCT c.candidato_id) FROM candidaturas c
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+         WHERE eva.empresa_id = $1)::int as total_candidatos,
+        (SELECT COUNT(DISTINCT c.candidato_id) FROM candidaturas c
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+         WHERE eva.empresa_id = $1 AND c.criada_em > $2)::int as candidatos_novos_7d,
+        (SELECT COUNT(DISTINCT c.candidato_id) FROM candidaturas c
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+         WHERE eva.empresa_id = $1 AND c.criada_em > $3)::int as candidatos_novos_14d,
+        (SELECT COUNT(*) FROM candidaturas c
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+         WHERE eva.empresa_id = $1 AND c.status NOT IN ('reprovado','contratado','rejeitado'))::int as processos_ativos,
+        (SELECT COUNT(*) FROM candidaturas c
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+         WHERE eva.empresa_id = $1 AND c.criada_em > $2)::int as processos_novos_7d,
+        (SELECT COUNT(*) FROM candidaturas c
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+         WHERE eva.empresa_id = $1 AND c.criada_em > $3)::int as processos_novos_14d,
+        (SELECT COUNT(*) FROM entrevistas e
+         JOIN candidaturas cand ON cand.id = e.candidatura_id
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = cand.vaga_id
+         WHERE eva.empresa_id = $1 AND e.data_hora >= NOW() AND e.status = 'agendada')::int as entrevistas_agendadas,
+        (SELECT COUNT(*) FROM entrevistas e
+         JOIN candidaturas cand ON cand.id = e.candidatura_id
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = cand.vaga_id
+         WHERE eva.empresa_id = $1 AND e.data_hora >= NOW() AND e.data_hora < NOW() + INTERVAL '7 days' AND e.status = 'agendada')::int as entrevistas_proximos_7d,
+        (SELECT COUNT(*) FROM candidaturas c
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+         WHERE eva.empresa_id = $1 AND c.status IN ('contratado') AND c.atualizada_em > $4)::int as contratacoes_30d,
+        (SELECT COUNT(*) FROM candidaturas c
+         JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+         WHERE eva.empresa_id = $1 AND c.status IN ('contratado') AND c.atualizada_em > $5 AND c.atualizada_em <= $4)::int as contratacoes_30d_anterior
+    `, [empresa_id, sevenDaysAgo, fourteenDaysAgo, thirtyDaysAgo, sixtyDaysAgo]);
+    const k = kpis.rows[0];
+
+    // 3. Candidatos por etapa (1..7) — espelho do admin
+    const etapasQ = await pool.query(`
+      SELECT c.etapa_atual, COUNT(*)::int as total
+      FROM candidaturas c
+      JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+      WHERE eva.empresa_id = $1 AND c.status NOT IN ('reprovado','rejeitado')
+      GROUP BY c.etapa_atual
+      ORDER BY c.etapa_atual
+    `, [empresa_id]);
+    const etapasMap = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+    etapasQ.rows.forEach(r => { etapasMap[r.etapa_atual] = r.total; });
+
+    // 4. Indicadores secundários (espelho do admin)
+    // tempo_medio_contratacao: média de dias entre criada_em e atualizada_em nas contratadas da empresa
+    const tempoMedioQ = await pool.query(`
+      SELECT COALESCE(AVG(EXTRACT(DAY FROM (c.atualizada_em - c.criada_em))), 0)::int as dias
+      FROM candidaturas c
+      JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+      WHERE eva.empresa_id = $1 AND c.status IN ('contratado') AND c.atualizada_em IS NOT NULL
+    `, [empresa_id]);
+    const tempoMedio = tempoMedioQ.rows[0]?.dias || 0;
+
+    // taxa_aprovacao_30d: % de vagas fechadas nos últimos 30d que geraram contratação
+    // (vagas usa criada_em; atualizada_em não existe)
+    const taxa30Q = await pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE c.status IN ('contratado'))::int as com_contratacao,
+        COUNT(*)::int as total_fechadas
+      FROM vagas v
+      JOIN empresa_vaga_acesso eva ON eva.vaga_id = v.id
+      LEFT JOIN candidaturas c ON c.vaga_id = v.id AND c.status IN ('contratado','rejeitado','reprovado')
+      WHERE eva.empresa_id = $1 AND v.status = 'fechada' AND v.criada_em > $2
+    `, [empresa_id, thirtyDaysAgo]);
+    const total_fechadas_30d = taxa30Q.rows[0]?.total_fechadas || 0;
+    const com_contratacao_30d = taxa30Q.rows[0]?.com_contratacao || 0;
+    const taxa_fechadas_30d = total_fechadas_30d > 0
+      ? Math.round((com_contratacao_30d / total_fechadas_30d) * 100)
+      : 0;
+
+    // vagas_encerradas (totais) — total no período
+    const encerradasQ = await pool.query(`
+      SELECT COUNT(*)::int as total
+      FROM vagas v
+      JOIN empresa_vaga_acesso eva ON eva.vaga_id = v.id
+      WHERE eva.empresa_id = $1 AND v.status = 'fechada'
+    `, [empresa_id]);
+    const vagas_encerradas = encerradasQ.rows[0]?.total || 0;
+
+    // taxa_desistencia: candidatos reprovados / total de candidaturas ativas
+    const desistenciaQ = await pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE c.status IN ('reprovado','rejeitado'))::int as reprovados,
+        COUNT(*)::int as total
+      FROM candidaturas c
       JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
       WHERE eva.empresa_id = $1
     `, [empresa_id]);
+    const reprovados = desistenciaQ.rows[0]?.reprovados || 0;
+    const totalCand = desistenciaQ.rows[0]?.total || 0;
+    const taxaDesistencia = totalCand > 0 ? Math.round((reprovados / totalCand) * 100) : 0;
 
-    const contratacoes = await pool.query(`
-      SELECT COUNT(*)::int as total FROM candidaturas c
+    // 5. Próximas entrevistas
+    const proximas = await pool.query(`
+      SELECT e.id, e.candidatura_id, e.data_hora, e.etapa, e.local,
+        cd.nome as candidato_nome, cd.email as candidato_email,
+        v.titulo as vaga_titulo
+      FROM entrevistas e
+      JOIN candidaturas c ON c.id = e.candidatura_id
       JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
-      WHERE eva.empresa_id = $1 AND c.status = 'contratado'
+      JOIN candidatos cd ON cd.id = c.candidato_id
+      JOIN vagas v ON v.id = c.vaga_id
+      WHERE eva.empresa_id = $1 AND e.data_hora >= NOW() AND e.status = 'agendada'
+      ORDER BY e.data_hora ASC
+      LIMIT 10
     `, [empresa_id]);
 
-    const emEtapa4 = await pool.query(`
-      SELECT COUNT(*)::int as total FROM candidaturas c
-      JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
-      WHERE eva.empresa_id = $1 AND c.etapa_atual >= 4 AND c.status = 'em_andamento'
+    // 6. Atividades recentes (histórico das candidaturas da empresa)
+    let atividadesRecentes = [];
+    try {
+      const hist = await pool.query(`
+        SELECT c.id as candidatura_id, c.atualizada_em as quando,
+          c.historico, v.titulo as vaga, v.id as vaga_id, cd.nome as candidato
+        FROM candidaturas c
+        JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+        JOIN vagas v ON v.id = c.vaga_id
+        JOIN candidatos cd ON cd.id = c.candidato_id
+        WHERE eva.empresa_id = $1
+        ORDER BY c.atualizada_em DESC NULLS LAST
+        LIMIT 8
+      `, [empresa_id]);
+      hist.rows.forEach(r => {
+        if (Array.isArray(r.historico) && r.historico.length > 0) {
+          const ultimo = r.historico[r.historico.length - 1];
+          let texto = 'Atualização';
+          if (ultimo.tipo === 'avancar') texto = 'Avançou de etapa';
+          else if (ultimo.tipo === 'reprovar') texto = 'Reprovado';
+          else if (ultimo.tipo === 'comentario') texto = 'Parecer adicionado';
+          else if (ultimo.tipo === 'inscricao') texto = 'Inscrição realizada';
+          atividadesRecentes.push({
+            texto, candidato: r.candidato, vaga: r.vaga,
+            vaga_id: r.vaga_id, candidatura_id: r.candidatura_id,
+            quando: r.quando, por: ultimo.por || ''
+          });
+        }
+      });
+    } catch (_) {}
+
+    // 7. Vagas mais procuradas (ranking por total de candidatos)
+    const vagasMaisCandidatos = await pool.query(`
+      SELECT v.id, v.titulo, COUNT(c.id)::int as total_candidatos
+      FROM vagas v
+      JOIN empresa_vaga_acesso eva ON eva.vaga_id = v.id
+      LEFT JOIN candidaturas c ON c.vaga_id = v.id
+      WHERE eva.empresa_id = $1
+      GROUP BY v.id, v.titulo
+      ORDER BY total_candidatos DESC
+      LIMIT 5
     `, [empresa_id]);
 
     res.json({
       kpis: {
+        // bloco "principal" (compatível com frontend atual)
         vagas_liberadas: vagas.rows.length,
-        total_candidatos: totalCandidatos.rows[0].total,
-        contratacoes: contratacoes.rows[0].total,
-        em_etapa_gestor: emEtapa4.rows[0].total
+        vagas_ativas: k.vagas_ativas,
+        total_candidatos: k.total_candidatos,
+        contratacoes: k.contratacoes_30d,
+        em_etapa_gestor: etapasMap[4] || 0,
+        entrevistas_agendadas: k.entrevistas_agendadas,
+        // deltas (para o frontend espelhar setas do admin)
+        processos_ativos: k.processos_ativos,
+        entrevistas_proximos_7d: k.entrevistas_proximos_7d
       },
-      vagas: vagas.rows
+      kpis_deltas: {
+        vagas_ativas: { atual: k.vagas_ativas, novos_7d: k.vagas_ativas_novas_7d, novos_14d: k.vagas_ativas_novas_14d },
+        total_candidatos: { atual: k.total_candidatos, novos_7d: k.candidatos_novos_7d, novos_14d: k.candidatos_novos_14d },
+        processos_ativos: { atual: k.processos_ativos, novos_7d: k.processos_novos_7d, novos_14d: k.processos_novos_14d },
+        contratacoes: { atual_30d: k.contratacoes_30d, anterior_30d: k.contratacoes_30d_anterior }
+      },
+      kpis_secundarios: {
+        tempo_medio_contratacao: tempoMedio,
+        taxa_aprovacao_30d: taxa_fechadas_30d,
+        taxa_aprovacao_30d_qtd: com_contratacao_30d,
+        taxa_aprovacao_30d_total: total_fechadas_30d,
+        taxa_desistencia: taxaDesistencia,
+        vagas_encerradas: vagas_encerradas
+      },
+      etapas: etapasMap,
+      etapas_labels: ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'],
+      proximas: proximas.rows,
+      atividades: atividadesRecentes,
+      vagas_mais_candidatos: vagasMaisCandidatos.rows,
+      vagas: vagas.rows,
+      empresa: { id: empresa_id, nome: req.user?.nome || req.user?.email || 'Empresa' }
     });
   } catch (e) {
     console.error('[empresa dashboard]', e);
     res.status(500).json({ erro: 'Erro ao carregar dashboard' });
   }
 });
+
 
 // Detalhes de uma vaga liberada (info completa, não só KPIs)
 app.get('/api/empresa/vagas/:vaga_id', authEmpresa, async (req, res) => {
@@ -3031,6 +3950,34 @@ app.get('/api/empresa/vagas/:vaga_id/candidatos', authEmpresa, async (req, res) 
 });
 
 // Vagas com candidatos (espelho de /api/admin/vagas-com-candidaturas, filtrado por empresa)
+// Lista TODAS as vagas liberadas da empresa (independente de ter candidato)
+app.get('/api/empresa/vagas-todas', authEmpresa, async (req, res) => {
+  const { empresa_id } = req.user;
+  try {
+    const { rows } = await pool.query(`
+      SELECT v.id, v.titulo, v.empresa, v.cidade, v.estado, v.status, v.criada_em, v.categoria,
+        COALESCE(c_agg.total, 0) as total_geral,
+        COALESCE(c_agg.em_andamento, 0) as em_andamento,
+        COALESCE(c_agg.contratados, 0) as contratados
+      FROM empresa_vaga_acesso eva
+      JOIN vagas v ON v.id = eva.vaga_id
+      LEFT JOIN (
+        SELECT vaga_id,
+          COUNT(*) as total,
+          COUNT(*) FILTER (WHERE status = 'em_andamento') as em_andamento,
+          COUNT(*) FILTER (WHERE status = 'contratado') as contratados
+        FROM candidaturas GROUP BY vaga_id
+      ) c_agg ON c_agg.vaga_id = v.id
+      WHERE eva.empresa_id = $1
+      ORDER BY v.criada_em DESC
+    `, [empresa_id]);
+    res.json({ vagas: rows });
+  } catch (e) {
+    console.error('[empresa vagas-todas]', e);
+    res.status(500).json({ erro: 'Erro ao listar vagas' });
+  }
+});
+
 app.get('/api/empresa/vagas-com-candidaturas', authEmpresa, async (req, res) => {
   const { empresa_id } = req.user;
   try {
@@ -3060,25 +4007,45 @@ app.get('/api/empresa/vagas-com-candidaturas', authEmpresa, async (req, res) => 
 // Agenda da empresa (entrevistas marcadas nas vagas liberadas)
 app.get('/api/empresa/agenda', authEmpresa, async (req, res) => {
   const { empresa_id } = req.user;
-  const { periodo } = req.query; // 'hoje' | 'proximos' | 'passados' | 'todos'
+  const { periodo } = req.query; // 'hoje' | 'proximos' | 'passados' | 'todos' | 'semana' | '7dias' | '30dias' | 'atrasadas' | 'realizadas' | 'canceladas'
   try {
-    let whereExtra = '';
+    let whereExtra = `AND e.etapa = 4`; // Empresa só vê Entrevista com Gestor (etapa 4)
     const params = [empresa_id];
+    const now = new Date();
     if (periodo === 'hoje') {
-      const inicio = new Date(); inicio.setHours(0,0,0,0);
-      const fim = new Date(); fim.setHours(23,59,59,999);
-      whereExtra = `AND e.data_hora BETWEEN $2 AND $3`;
+      const inicio = new Date(now); inicio.setHours(0,0,0,0);
+      const fim = new Date(now); fim.setHours(23,59,59,999);
+      whereExtra = `AND e.etapa = 4 AND e.data_hora BETWEEN $2 AND $3`;
       params.push(inicio.toISOString(), fim.toISOString());
     } else if (periodo === 'proximos') {
-      whereExtra = `AND e.data_hora >= NOW()`;
+      whereExtra = `AND e.etapa = 4 AND e.data_hora >= NOW()`;
     } else if (periodo === 'passados') {
-      whereExtra = `AND e.data_hora < NOW()`;
+      whereExtra = `AND e.etapa = 4 AND e.data_hora < NOW() AND e.status NOT IN ('cancelada', 'realizada')`;
+    } else if (periodo === 'semana') {
+      const inicio = new Date(now); inicio.setHours(0,0,0,0);
+      const fim = new Date(now); fim.setDate(fim.getDate() + 7);
+      whereExtra = `AND e.etapa = 4 AND e.data_hora BETWEEN $2 AND $3`;
+      params.push(inicio.toISOString(), fim.toISOString());
+    } else if (periodo === '7dias') {
+      const fim = new Date(now); fim.setDate(fim.getDate() + 7);
+      whereExtra = `AND e.etapa = 4 AND e.data_hora BETWEEN NOW() AND $2`;
+      params.push(fim.toISOString());
+    } else if (periodo === '30dias') {
+      const fim = new Date(now); fim.setDate(fim.getDate() + 30);
+      whereExtra = `AND e.etapa = 4 AND e.data_hora BETWEEN NOW() AND $2`;
+      params.push(fim.toISOString());
+    } else if (periodo === 'atrasadas') {
+      whereExtra = `AND e.etapa = 4 AND e.data_hora < NOW() AND e.status = 'agendada'`;
+    } else if (periodo === 'realizadas') {
+      whereExtra = `AND e.etapa = 4 AND e.status = 'realizada'`;
+    } else if (periodo === 'canceladas') {
+      whereExtra = `AND e.etapa = 4 AND e.status = 'cancelada'`;
     }
     const { rows } = await pool.query(`
       SELECT e.id, e.etapa, e.data_hora, e.duracao_minutos, e.local, e.link_reuniao, e.observacoes, e.status,
         c.id as candidatura_id, c.etapa_atual, c.status as cand_status,
         cd.id as candidato_id, cd.nome as candidato_nome, cd.email as candidato_email, cd.foto_url,
-        v.id as vaga_id, v.titulo as vaga_titulo, v.etapas as vaga_etapas
+        v.id as vaga_id, v.titulo as vaga_titulo, v.empresa as vaga_empresa, v.etapas as vaga_etapas
       FROM entrevistas e
       JOIN candidaturas c ON c.id = e.candidatura_id
       JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id AND eva.empresa_id = $1
@@ -3107,10 +4074,12 @@ app.get('/api/empresa/candidatura/:id/chat', authEmpresa, async (req, res) => {
     `, [id, empresa_id]);
     if (acc.rows.length === 0) return res.status(403).json({ erro: 'Sem acesso a esta candidatura' });
 
+    // Chat EXCLUSIVO Empresa ↔ RH/Admin. Nunca trazer mensagens do candidato.
     const { rows } = await pool.query(`
       SELECT id, candidatura_id, remetente_tipo, remetente_nome, mensagem, criado_em
       FROM empresa_chat
       WHERE candidatura_id = $1
+        AND remetente_tipo IN ('empresa', 'rh')
       ORDER BY criado_em ASC
     `, [id]);
     res.json({ mensagens: rows });
@@ -3187,24 +4156,40 @@ app.get('/api/empresa/candidatura/:id', authEmpresa, async (req, res) => {
 app.post('/api/empresa/candidatura/:id/acao', authEmpresa, async (req, res) => {
   const { empresa_id, nome: empresa_nome } = req.user;
   const { id } = req.params;
-  const { acao, motivo } = req.body; // acao: 'avancar' | 'reprovar' | 'comentar'
+  const { acao, motivo, comentario } = req.body; // acao: 'avancar' | 'reprovar' | 'comentar'
+    // 'comentario' tem prioridade sobre 'motivo' (frontend manda ambos pra garantir)
+    const parecer = (comentario || motivo || '').trim();
   if (!['avancar', 'reprovar', 'comentar'].includes(acao)) {
     return res.status(400).json({ erro: 'Ação inválida' });
   }
   try {
-    // Verifica acesso
+    // Verifica acesso + traz etapas[] da vaga
     const acc = await pool.query(`
-      SELECT c.id, c.etapa_atual, c.status, c.historico, c.vaga_id
+      SELECT c.id, c.etapa_atual, c.status, c.historico, c.vaga_id, v.etapas
       FROM candidaturas c
       JOIN empresa_vaga_acesso eva ON eva.vaga_id = c.vaga_id
+      JOIN vagas v ON v.id = c.vaga_id
       WHERE c.id = $1 AND eva.empresa_id = $2
     `, [id, empresa_id]);
     if (acc.rows.length === 0) return res.status(403).json({ erro: 'Sem acesso a esta candidatura' });
     const cand = acc.rows[0];
 
-    // REGRA: só pode agir na etapa 4 (Entrevista com gestor/empresa)
-    if ((acao === 'avancar' || acao === 'reprovar') && cand.etapa_atual !== 4) {
-      return res.status(403).json({ erro: 'Você só pode agir na etapa de entrevista com a empresa (etapa 4)' });
+    // REGRA: a empresa só pode comentar/avançar/reprovar quando a etapa ATUAL da vaga
+    // tiver nome contendo "gestor" ou "empresa" (case-insensitive).
+    // etapas[etapa_atual - 1] porque etapa_atual é 1-indexed e etapas[] é 0-indexed.
+    let etapasArr = cand.etapas;
+    if (typeof etapasArr === 'string') { try { etapasArr = JSON.parse(etapasArr); } catch (_) { etapasArr = []; } }
+    const etapaNomeAtual = Array.isArray(etapasArr)
+      ? (typeof etapasArr[cand.etapa_atual - 1] === 'string'
+          ? etapasArr[cand.etapa_atual - 1]
+          : (etapasArr[cand.etapa_atual - 1]?.nome || ''))
+      : '';
+    const ehEtapaEmpresa = /gestor|empresa/i.test(etapaNomeAtual || '');
+
+    if (['avancar', 'reprovar', 'comentar'].includes(acao) && !ehEtapaEmpresa) {
+      return res.status(403).json({
+        erro: `A empresa só pode agir na etapa de entrevista com a empresa/gestor (etapa atual: "${etapaNomeAtual || '—'}").`
+      });
     }
 
     // Adiciona entrada no histórico
@@ -3216,12 +4201,12 @@ app.post('/api/empresa/candidatura/:id/acao', authEmpresa, async (req, res) => {
     if (acao === 'avancar') {
       novaEtapa = cand.etapa_atual + 1;
       // Não passa do total de etapas (deixar pro admin finalizar contratação)
-      hist.push({ tipo: 'avancar', por: `empresa:${empresa_nome}`, quando: agora, etapa_de: cand.etapa_atual, etapa_para: novaEtapa });
+      hist.push({ tipo: 'avancar', por: `empresa:${empresa_nome}`, quando: agora, etapa_de: cand.etapa_atual, etapa_para: novaEtapa, motivo: parecer || '' });
     } else if (acao === 'reprovar') {
       novoStatus = 'rejeitado';
-      hist.push({ tipo: 'reprovar', por: `empresa:${empresa_nome}`, quando: agora, motivo: motivo || '' });
+      hist.push({ tipo: 'reprovar', por: `empresa:${empresa_nome}`, quando: agora, motivo: parecer || '' });
     } else if (acao === 'comentar') {
-      hist.push({ tipo: 'comentario', por: `empresa:${empresa_nome}`, quando: agora, texto: motivo || '' });
+      hist.push({ tipo: 'comentario', por: `empresa:${empresa_nome}`, quando: agora, texto: parecer });
     }
 
     await pool.query(
@@ -3495,7 +4480,7 @@ process.on('unhandledRejection', (e) => {
   });
 
   const port = process.env.PORT || 10000;
-    app.listen(port, () => console.log(`API rodando na porta ${port}`));
+  app.listen(port, () => console.log(`API rodando na porta ${port}`));
   } catch (e) {
     console.error('Erro ao iniciar:', e);
     process.exit(1);
