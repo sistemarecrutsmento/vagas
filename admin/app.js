@@ -6,10 +6,13 @@
 const API = 'https://recrutamento-api-novo.onrender.com';
 let token = null;
 let vagaEmEdicao = null;
+let loginCodigoId = null;        // id do código 2FA pendente
+let loginEmailEmProgresso = null; // email do login em andamento (2FA)
+let loginCooldownInterval = null; // timer do cooldown do reenviar
 
 window.addEventListener('DOMContentLoaded', () => {
   const saved = localStorage.getItem('admin_token');
-  if (saved) {
+  if (saved && saved !== 'undefined' && saved !== 'null') {
     token = saved;
     mostrarApp();
   }
@@ -20,6 +23,8 @@ window.addEventListener('DOMContentLoaded', () => {
 // O backend tem DUAS tabelas: admins (acesso total) e recrutadores (limitado)
 // e DUAS rotas: /api/admin/login e /api/auth/login-recrutador
 // Aqui a gente tenta as duas automaticamente pra não dar erro esquisito.
+// NOVIDADE: agora o login admin exige 2FA. A função abaixo cuida do 2-step.
+// Primeiro passo: descobrir se 2FA foi exigido; se sim, mostra tela de código.
 async function fazerLogin() {
   console.log('[login] fazerLogin() chamado');
   const emailEl = document.getElementById('login-email');
@@ -66,6 +71,18 @@ async function fazerLogin() {
     });
     let data = await r.json().catch(() => ({}));
 
+    // 2FA: se o backend exigiu verificação de 2 etapas, mostra tela de código
+    if (r.ok && data.requer_2fa && data.codigo_id) {
+      console.log('[login] 2FA requerido, codigo_id=', data.codigo_id);
+      loginCodigoId = data.codigo_id;
+      loginEmailEmProgresso = data.email || email;
+      if (alertEl) alertEl.innerHTML = '';
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+      mostrarStep2FA();
+      return;
+    }
+
     // 2ª tentativa: recrutador (se admin falhou com 401 "credenciais inválidas")
     if (!r.ok && (r.status === 401 || r.status === 400)) {
       console.log('[login] tentando rota recrutador...');
@@ -78,7 +95,7 @@ async function fazerLogin() {
       } catch (e2) { console.warn('[login] recrutador timeout:', e2); }
     }
 
-    if (r.ok) {
+    if (r.ok && data.token) {
       console.log('[login] sucesso, salvando token');
       token = data.token;
       const tipoUsuario = data.usuario?.tipo || 'admin';
@@ -109,6 +126,154 @@ async function fazerLogin() {
     btn.disabled = false;
     btn.textContent = textoOriginal;
     return;
+  }
+}
+
+// ===== 2FA =====
+function mostrarStep2FA() {
+  const s1 = document.getElementById('login-step-1');
+  const s2 = document.getElementById('login-step-2');
+  if (s1) s1.style.display = 'none';
+  if (s2) s2.style.display = 'block';
+  const emailEl = document.getElementById('login-2fa-email');
+  if (emailEl) emailEl.textContent = loginEmailEmProgresso;
+  const alertEl = document.getElementById('alert-2fa');
+  if (alertEl) alertEl.innerHTML = '<div class="alert alert-ok">📩 Código enviado para seu e-mail</div>';
+  const input = document.getElementById('login-2fa-codigo');
+  if (input) { input.value = ''; input.focus(); }
+  iniciarCooldownReenviar();
+}
+
+function voltarLogin() {
+  const s1 = document.getElementById('login-step-1');
+  const s2 = document.getElementById('login-step-2');
+  if (s1) s1.style.display = 'block';
+  if (s2) s2.style.display = 'none';
+  if (loginCooldownInterval) clearInterval(loginCooldownInterval);
+  loginCodigoId = null;
+  loginEmailEmProgresso = null;
+  const alertEl = document.getElementById('alert-2fa');
+  if (alertEl) alertEl.innerHTML = '';
+  const alertEl1 = document.getElementById('alert-login');
+  if (alertEl1) alertEl1.innerHTML = '';
+  const sBtn = document.getElementById('login-senha');
+  if (sBtn) { sBtn.value = ''; sBtn.focus(); }
+}
+
+async function verificar2FA() {
+  const inp = document.getElementById('login-2fa-codigo');
+  const btn = document.getElementById('btn-verificar-2fa');
+  const alertEl = document.getElementById('alert-2fa');
+  if (!inp || !btn) return;
+  const codigo = inp.value.trim().replace(/\D/g, '');
+  if (codigo.length !== 6) {
+    if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">Digite os 6 dígitos do código</div>';
+    return;
+  }
+  if (!loginCodigoId) {
+    if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">Sessão 2FA expirou. Volte ao login.</div>';
+    return;
+  }
+  btn.disabled = true;
+  const txtOriginal = btn.textContent;
+  btn.textContent = 'Verificando...';
+  if (alertEl) alertEl.innerHTML = '';
+  const fetchComTimeout = (url, opts) => {
+    return new Promise((resolve, reject) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => { ctrl.abort(); reject(new Error('timeout')); }, 15000);
+      fetch(url, { ...opts, signal: ctrl.signal })
+        .then(r => { clearTimeout(t); resolve(r); })
+        .catch(e => { clearTimeout(t); reject(e); });
+    });
+  };
+  try {
+    const r = await fetchComTimeout(API + '/api/admin/2fa/verificar', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codigo_id: loginCodigoId, codigo })
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && data.token) {
+      console.log('[2FA] verificado, salvando token');
+      token = data.token;
+      const tipoUsuario = data.usuario?.tipo || 'admin';
+      const userId = data.usuario?.id || null;
+      localStorage.setItem('admin_token', token);
+      localStorage.setItem('admin_tipo', tipoUsuario);
+      localStorage.setItem('admin_user_id', userId);
+      localStorage.setItem('admin_usuario', JSON.stringify(data.usuario || {}));
+      if (alertEl) alertEl.innerHTML = '<div class="alert alert-ok">✓ Verificado! Entrando...</div>';
+      btn.textContent = '✓ Logado!';
+      setTimeout(() => mostrarApp(), 200);
+      return;
+    }
+    if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + (data.erro || 'Código inválido') + '</div>';
+    btn.disabled = false;
+    btn.textContent = txtOriginal;
+  } catch (e) {
+    if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">Erro: ' + (e.message || 'sem conexão') + '</div>';
+    btn.disabled = false;
+    btn.textContent = txtOriginal;
+  }
+}
+
+function iniciarCooldownReenviar() {
+  const cooldownEl = document.getElementById('reenviar-cooldown');
+  const segEl = document.getElementById('cooldown-seg');
+  const btn = document.getElementById('btn-reenviar-2fa');
+  if (!cooldownEl || !segEl || !btn) return;
+  let seg = 60;
+  cooldownEl.style.display = 'inline';
+  btn.style.pointerEvents = 'none';
+  btn.style.opacity = '0.5';
+  segEl.textContent = seg;
+  if (loginCooldownInterval) clearInterval(loginCooldownInterval);
+  loginCooldownInterval = setInterval(() => {
+    seg--;
+    if (seg <= 0) {
+      clearInterval(loginCooldownInterval);
+      btn.style.pointerEvents = 'auto';
+      btn.style.opacity = '1';
+      cooldownEl.style.display = 'none';
+    } else {
+      segEl.textContent = seg;
+    }
+  }, 1000);
+}
+
+async function reenviar2FA() {
+  if (!loginCodigoId) return;
+  const btn = document.getElementById('btn-reenviar-2fa');
+  const alertEl = document.getElementById('alert-2fa');
+  if (!btn) return;
+  btn.style.pointerEvents = 'none';
+  btn.style.opacity = '0.5';
+  const fetchComTimeout = (url, opts) => {
+    return new Promise((resolve, reject) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => { ctrl.abort(); reject(new Error('timeout')); }, 15000);
+      fetch(url, { ...opts, signal: ctrl.signal })
+        .then(r => { clearTimeout(t); resolve(r); })
+        .catch(e => { clearTimeout(t); reject(e); });
+    });
+  };
+  try {
+    const r = await fetchComTimeout(API + '/api/admin/2fa/reenviar', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codigo_id: loginCodigoId })
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok) {
+      if (alertEl) alertEl.innerHTML = '<div class="alert alert-ok">📩 Código reenviado</div>';
+      iniciarCooldownReenviar();
+    } else {
+      if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + (data.erro || 'Erro ao reenviar') + '</div>';
+      btn.style.pointerEvents = 'auto';
+      btn.style.opacity = '1';
+    }
+  } catch (e) {
+    btn.style.pointerEvents = 'auto';
+    btn.style.opacity = '1';
   }
 }
 
