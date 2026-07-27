@@ -206,6 +206,10 @@
           return false;
         }
         localStorage.setItem('empresa_token', data.token);
+        // ETAPA 2: salva refresh token para auto-refresh
+        if (data.refreshToken) {
+          localStorage.setItem('empresa_refresh', data.refreshToken);
+        }
         localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
         window.location.href = 'index.html';
         return false;
