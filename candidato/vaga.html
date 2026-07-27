@@ -184,6 +184,12 @@
 <script src="app-v2.js?v=1784700000_FOOTER"></script>
 <script src="modals.js?v=NOTIF_994902"></script>
 <script>
+// ===== HELPERS DE SEGURANÇA =====
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
 // ===== PEGAR ID DA VAGA =====
 const params = new URLSearchParams(window.location.search);
 const vagaId = params.get('id');
@@ -237,7 +243,7 @@ function renderVaga(v) {
     processoHTML = `<ol class="processo-lista">` + etapas.map((e, i) => {
       const nome = (typeof e === 'string') ? e : (e.nome || e.titulo || `Etapa ${i+1}`);
       const desc = (typeof e === 'string') ? '' : (e.descricao || '');
-      return `<li><span class="proc-numero">${i+1}</span><div><strong>${nome}</strong>${desc ? `<p>${desc}</p>` : ''}</div></li>`;
+      return `<li><span class="proc-numero">${i+1}</span><div><strong>${escapeHtml(nome)}</strong>${desc ? `<p>${escapeHtml(desc)}</p>` : ''}</div></li>`;
     }).join('') + `</ol>`;
   } else {
     processoHTML = `<ol class="processo-lista">
@@ -254,30 +260,30 @@ function renderVaga(v) {
     <a href="javascript:history.back()" class="det-voltar">← Voltar</a>
     <div class="det-card">
       <div class="det-cabecalho">
-        <div class="det-empresa">${v.empresa || 'Confidencial'}</div>
-        <h1 class="det-titulo">${v.titulo || 'Vaga'}</h1>
+        <div class="det-empresa">${escapeHtml(v.empresa || 'Confidencial')}</div>
+        <h1 class="det-titulo">${escapeHtml(v.titulo || 'Vaga')}</h1>
         <div class="det-tags">
-          ${v.area ? `<span class="det-tag">${v.area}</span>` : ''}
-          ${v.modalidade ? `<span class="det-tag">${v.modalidade}</span>` : ''}
-          ${v.cidade ? `<span class="det-tag">📍 ${v.cidade}${v.estado ? '/' + v.estado : ''}</span>` : ''}
-          ${v.tipo_contrato ? `<span class="det-tag">📄 ${v.tipo_contrato}</span>` : ''}
-          ${v.nivel ? `<span class="det-tag">📊 ${v.nivel}</span>` : ''}
-          <span class="det-tag salario">💰 ${salTexto}</span>
+          ${v.area ? `<span class="det-tag">${escapeHtml(v.area)}</span>` : ''}
+          ${v.modalidade ? `<span class="det-tag">${escapeHtml(v.modalidade)}</span>` : ''}
+          ${v.cidade ? `<span class="det-tag">📍 ${escapeHtml(v.cidade)}${v.estado ? '/' + escapeHtml(v.estado) : ''}</span>` : ''}
+          ${v.tipo_contrato ? `<span class="det-tag">📄 ${escapeHtml(v.tipo_contrato)}</span>` : ''}
+          ${v.nivel ? `<span class="det-tag">📊 ${escapeHtml(v.nivel)}</span>` : ''}
+          <span class="det-tag salario">💰 ${escapeHtml(salTexto)}</span>
         </div>
       </div>
 
       <div class="det-corpo">
         <div class="det-section">
           <h3>Descrição</h3>
-          <p>${v.descricao || 'Sem descrição'}</p>
+          <p>${escapeHtml(v.descricao || 'Sem descrição')}</p>
         </div>
         <div class="det-section">
           <h3>Requisitos</h3>
-          <p>${v.requisitos || '—'}</p>
+          <p>${escapeHtml(v.requisitos || '—')}</p>
         </div>
         <div class="det-section">
           <h3>Benefícios</h3>
-          <p>${v.beneficios || '—'}</p>
+          <p>${escapeHtml(v.beneficios || '—')}</p>
         </div>
         <div class="det-section">
           <h3>Processo seletivo</h3>
