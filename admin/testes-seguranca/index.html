@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Testes de Segurança — Etapa 2</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; padding: 20px; background: #0a0a0a; color: #eee; }
+    h1 { color: #d4af37; }
+    .teste { margin: 10px 0; padding: 10px; border-left: 3px solid #555; }
+    .teste.ok { border-color: #28a745; }
+    .teste.fail { border-color: #dc3545; }
+    .teste.pending { border-color: #ffc107; }
+    button { background: #d4af37; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; margin-right: 10px; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .summary { margin-top: 20px; padding: 15px; background: #1a1a1a; border-radius: 8px; }
+    .summary .ok { color: #28a745; font-size: 24px; }
+    .summary .fail { color: #dc3545; font-size: 24px; }
+  </style>
+</head>
+<body>
+  <h1>🛡️ Testes de Segurança — Etapa 2</h1>
+  <p>Backend: <code>https://recrutamento-api-novo.onrender.com</code></p>
+  <button id="rodar" onclick="rodarTodos()">▶️ Rodar Bateria</button>
+  <button onclick="loginCandidato()">👤 Login Candidato</button>
+  <button onclick="limpar()">🗑️ Limpar</button>
+  <div id="resultados"></div>
+  <script>
+    const API = 'https://recrutamento-api-novo.onrender.com';
+    const results = [];
+    let candToken = null;
+    let candRefresh = null;
+
+    function log(nome, status, msg) {
+      results.push({ nome, status, msg });
+      const el = document.createElement('div');
+      el.className = 'teste ' + (status === 'ok' ? 'ok' : status === 'fail' ? 'fail' : 'pending');
+      el.innerHTML = (status === 'ok' ? '✅' : '❌') + ' <b>' + nome + '</b><br><small>' + (msg || '') + '</small>';
+      document.getElementById('resultados').appendChild(el);
+    }
+
+    async function fetchR(url, opts) {
+      opts = opts || {};
+      const r = await fetch(API + url, opts);
+      const text = await r.text();
+      let body; try { body = JSON.parse(text); } catch (e) { body = text; }
+      return { status: r.status, body: body, headers: r.headers, text: text };
+    }
+
+    async function rodarTodos() {
+      document.getElementById('resultados').innerHTML = '';
+      results.length = 0;
+      document.getElementById('rodar').disabled = true;
+
+      // HEADERS
+      let r = await fetchR('/api/saude');
+      log('H1 X-Powered-By ausente', r.headers.get('x-powered-by') ? 'fail' : 'ok', 'header: ' + (r.headers.get('x-powered-by') || 'ausente'));
+      log('H2 Server header ausente', r.headers.get('server') ? 'fail' : 'ok', 'header: ' + (r.headers.get('server') || 'ausente'));
+      log('H3 CSP presente', r.headers.get('content-security-policy') ? 'ok' : 'fail', '');
+      log('H4 X-Content-Type-Options', r.headers.get('x-content-type-options') ? 'ok' : 'fail', '');
+      log('H5 X-Frame-Options', r.headers.get('x-frame-options') ? 'ok' : 'fail', '');
+      log('H6 Strict-Transport-Security', r.headers.get('strict-transport-security') ? 'ok' : 'fail', '');
+
+      // 404/500 JSON
+      r = await fetchR('/api/rota-inexistente');
+      log('R1 404 retorna JSON', (r.headers.get('content-type') || '').includes('json') ? 'ok' : 'fail', 'Content-Type: ' + r.headers.get('content-type'));
+
+      // AUTH
+      r = await fetchR('/api/admin/candidaturas');
+      log('A1 Sem token → 401', (r.status === 401 || r.status === 403) ? 'ok' : 'fail', 'status ' + r.status);
+      r = await fetchR('/api/admin/candidaturas', { headers: { Authorization: 'Bearer xxxxx' } });
+      log('A2 Token inválido → 401', r.status === 401 ? 'ok' : 'fail', 'status ' + r.status);
+      const fake = 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ0aXBvIjoiYWRtaW4ifQ.';
+      r = await fetchR('/api/admin/candidaturas', { headers: { Authorization: 'Bearer ' + fake } });
+      log('A3 alg=none bypass', r.status === 401 ? 'ok' : 'fail', 'status ' + r.status);
+
+      if (candRefresh) {
+        r = await fetchR('/api/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: candRefresh }) });
+        log('A4 Refresh válido → novo access', (r.status === 200 && r.body.accessToken) ? 'ok' : 'fail', 'status ' + r.status);
+        const oldR = candRefresh;
+        const r2 = await fetchR('/api/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: oldR }) });
+        candRefresh = r2.body && r2.body.refreshToken;
+        const r3 = await fetchR('/api/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: oldR }) });
+        log('A5 Reutilização rejeitada', (r3.status === 401 || r3.status === 400) ? 'ok' : 'fail', 'status ' + r3.status);
+      } else {
+        log('A4 Refresh', 'fail', 'faça login candidato primeiro');
+        log('A5 Reuse', 'fail', 'faça login candidato primeiro');
+      }
+
+      // IDOR
+      r = await fetchR('/api/chat/99999/mensagens', { headers: { Authorization: 'Bearer ' + (candToken || 'x') } });
+      log('I1 /api/chat/99999/mensagens → 404/403', (r.body.erro || r.status === 404) ? 'ok' : 'fail', 'status ' + r.status);
+      r = await fetchR('/api/chat/arquivo/1', { headers: { Authorization: 'Bearer ' + (candToken || 'x') } });
+      log('I2 /api/chat/arquivo/1 cross', (r.status === 403 || r.status === 404 || r.status === 401) ? 'ok' : 'fail', 'status ' + r.status);
+
+      // VAZAMENTO
+      if (candToken) {
+        r = await fetchR('/api/candidato/perfil', { headers: { Authorization: 'Bearer ' + candToken } });
+        log('D1 senha_hash não vaza em /perfil', r.text.includes('senha_hash') ? 'fail' : 'ok', '');
+        r = await fetchR('/api/candidato/candidaturas', { headers: { Authorization: 'Bearer ' + candToken } });
+        log('D2 senha_hash não vaza em /candidaturas', r.text.includes('senha_hash') ? 'fail' : 'ok', '');
+      } else {
+        log('D1', 'fail', 'faça login candidato');
+        log('D2', 'fail', 'faça login candidato');
+      }
+
+      // RATE LIMIT
+      let lastStatus = 0;
+      for (let i = 0; i < 7; i++) {
+        r = await fetchR('/api/candidato/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'ratelimit@teste.com', senha: 'errado' + i }) });
+        lastStatus = r.status;
+      }
+      log('RL1 Login >5 → 429', lastStatus === 429 ? 'ok' : 'fail', 'último status ' + lastStatus);
+      r = await fetchR('/api/candidato/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'ratelimit@teste.com', senha: 'errado' }) });
+      log('RL2 Retry-After header', r.headers.get('retry-after') ? 'ok' : 'fail', '');
+
+      // RESUMO
+      const ok = results.filter(function (x) { return x.status === 'ok'; }).length;
+      const fail = results.filter(function (x) { return x.status === 'fail'; }).length;
+      const s = document.createElement('div');
+      s.className = 'summary';
+      s.innerHTML = '<div class="ok">✅ ' + ok + ' passaram</div><div class="fail">❌ ' + fail + ' falharam</div><div style="margin-top:10px;color:#888">Total: ' + results.length + ' testes</div>';
+      document.getElementById('resultados').appendChild(s);
+      document.getElementById('rodar').disabled = false;
+    }
+
+    async function loginCandidato() {
+      const email = 'aud.1785153788@teste.com';
+      let r = await fetchR('/api/candidato/iniciar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) });
+      const codigo = r.body && r.body.codigo_debug;
+      if (!codigo) { alert('Sem codigo_debug. Resposta: ' + r.text.substring(0, 200)); return; }
+      r = await fetchR('/api/candidato/verificar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, codigo: codigo }) });
+      candToken = r.body && r.body.token;
+      candRefresh = r.body && r.body.refreshToken;
+      alert('Token: ' + (candToken ? 'OK' : 'FALHOU') + '\nRefresh: ' + (candRefresh ? 'OK' : 'FALHOU'));
+    }
+
+    function limpar() {
+      document.getElementById('resultados').innerHTML = '';
+      results.length = 0;
+    }
+  </script>
+</body>
+</html>
