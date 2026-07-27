@@ -116,6 +116,10 @@ async function fazerLogin() {
       const tipoUsuario = data.usuario?.tipo || 'admin';
       const userId = data.usuario?.id || null;
       localStorage.setItem('admin_token', token);
+      // ETAPA 2: salva refresh token para auto-refresh
+      if (data.refreshToken) {
+        localStorage.setItem('admin_refresh', data.refreshToken);
+      }
       localStorage.setItem('admin_tipo', tipoUsuario);
       localStorage.setItem('admin_user_id', userId);
       localStorage.setItem('admin_usuario', JSON.stringify(data.usuario || {}));
@@ -214,6 +218,10 @@ async function verificar2FA() {
       const tipoUsuario = data.usuario?.tipo || 'admin';
       const userId = data.usuario?.id || null;
       localStorage.setItem('admin_token', token);
+      // ETAPA 2: salva refresh token para auto-refresh
+      if (data.refreshToken) {
+        localStorage.setItem('admin_refresh', data.refreshToken);
+      }
       localStorage.setItem('admin_tipo', tipoUsuario);
       localStorage.setItem('admin_user_id', userId);
       localStorage.setItem('admin_usuario', JSON.stringify(data.usuario || {}));
@@ -293,7 +301,17 @@ async function reenviar2FA() {
 }
 
 function sair() {
+  // ETAPA 2: revoga refresh token no backend (best-effort)
+  const refresh = localStorage.getItem('admin_refresh');
+  if (refresh) {
+    fetch(API + '/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: refresh })
+    }).catch(() => {}); // ignora erro de rede
+  }
   localStorage.removeItem('admin_token');
+  localStorage.removeItem('admin_refresh');
   location.reload();
 }
 
