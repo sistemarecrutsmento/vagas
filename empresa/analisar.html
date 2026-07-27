@@ -194,18 +194,23 @@
       if (!Array.isArray(etapas)) etapas = [];
       etapas = etapas.map(e => typeof e === 'string' ? e : (e.nome || e.titulo || ''));
       const totalEtapas = etapas.length || 7;
-      const etapaAtual = Number(c.etapa_atual || 1);
+      // etapa_atual vindo do backend é 0-indexed (aponta a etapa em que o candidato está).
+      // A timeline exibe 1-indexed (1/7, 2/7...), mas pra checar permissão precisamos
+      // olhar o NOME em 0-indexed: etapas[etapa_atual].
+      const etapaAtual0 = Number(c.etapa_atual || 0);
       const status = c.status || 'em_andamento';
       // Empresa só age quando a etapa ATUAL contiver "gestor" ou "empresa" no nome
-      const etapaNomeAtual = etapas[etapaAtual - 1] || '';
+      const etapaNomeAtual = etapas[etapaAtual0] || '';
       const ehEtapaGestor = /gestor|empresa/i.test(etapaNomeAtual);
+      // Pra timeline (1-indexed) usamos etapaAtual0 + 1
+      const etapaAtual1 = etapaAtual0 + 1;
 
       // timeline
       const timeline = etapas.map((nome, i) => {
         const idx = i + 1;
         let cls = '';
-        if (idx < etapaAtual) cls = 'concluida';
-        else if (idx === etapaAtual) cls = 'atual';
+        if (idx < etapaAtual1) cls = 'concluida';
+        else if (idx === etapaAtual1) cls = 'atual';
         return '<div class="etapa ' + cls + '"><div class="num">' + idx + '/' + totalEtapas + '</div>' + (nome || '—') + '</div>';
       }).join('');
 
@@ -278,7 +283,8 @@
 
       // histórico
       const hist = Array.isArray(c.historico) ? c.historico : [];
-      const histFiltrado = hist.filter(h => (h.etapa == null) || ((h.etapa + 1) <= etapaAtual));
+      // h.etapa é 0-indexed no DB; compara com etapaAtual0 (0-indexed) pra ficar consistente
+      const histFiltrado = hist.filter(h => (h.etapa == null) || (h.etapa <= etapaAtual0));
       let histHtml;
       if (histFiltrado.length === 0) {
         histHtml = '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma movimentação registrada ainda.</p>';
@@ -411,7 +417,7 @@
         // 1) Status do Processo (timeline)
         '<div class="card" id="card-timeline">' +
           '<h2>📋 Status do Processo</h2>' +
-          '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual + '/' + totalEtapas + ' — ' + (etapas[etapaAtual - 1] || '—') + '</span></div>' +
+          '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual1 + '/' + totalEtapas + ' — ' + (etapas[etapaAtual0] || '—') + '</span></div>' +
           '<div style="font-size:12px;color:var(--cinza-medio);margin-bottom:6px">💡 Clique em uma etapa para ver detalhes.</div>' +
           '<div class="timeline">' + timeline + '</div>' +
         '</div>' +
@@ -554,7 +560,7 @@
     // Inicia polling de chat (a cada 10s)
     setInterval(carregarChat, 10000);
   </script>
-  <script src="chat-rh-flutuante.js?v=20260726b"></script>
+  <script src="chat-rh-flutuante.js?v=20260726c"></script>
 </body>
 </html>
 
