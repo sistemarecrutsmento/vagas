@@ -196,7 +196,9 @@
       const totalEtapas = etapas.length || 7;
       const etapaAtual = Number(c.etapa_atual || 1);
       const status = c.status || 'em_andamento';
-      const ehEtapaGestor = etapaAtual === 4; // Empresa só age na etapa 4
+      // Empresa só age quando a etapa ATUAL contiver "gestor" ou "empresa" no nome
+      const etapaNomeAtual = etapas[etapaAtual - 1] || '';
+      const ehEtapaGestor = /gestor|empresa/i.test(etapaNomeAtual);
 
       // timeline
       const timeline = etapas.map((nome, i) => {
@@ -552,7 +554,7 @@
     // Inicia polling de chat (a cada 10s)
     setInterval(carregarChat, 10000);
   </script>
-  <script src="chat-rh-flutuante.js?v=20260722a"></script>
+  <script src="chat-rh-flutuante.js?v=20260726b"></script>
 </body>
 </html>
 
