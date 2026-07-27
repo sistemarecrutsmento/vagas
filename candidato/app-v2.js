@@ -323,9 +323,8 @@ async function candidatar(vagaId) {
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
-    const r = await fetch(API + '/api/candidato/candidatar/' + vagaId, {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    const r = await fetchAuth(API + '/api/candidato/candidatar/' + vagaId, {
+      method: 'POST'
     });
     const data = await r.json();
     if (r.ok) {
@@ -599,9 +598,9 @@ async function wizardFinalizar() {
     }
 
     // 2) Salva o resto do perfil (endereço, escolaridade, experiências)
-    const rp = await fetch(API + '/api/candidato/cadastrar', {
+    const rp = await fetchAuth(API + '/api/candidato/cadastrar', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dados)
     });
     const dp = await rp.json();
@@ -696,10 +695,8 @@ async function loginEntrar(btn) {
 async function checarPerfil() {
   if (!tokenCandidato) return;
   try {
-    const r = await fetch(API + '/api/candidato/perfil', {
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
-    if (r.status === 401) { logout(); return; }
+    const r = await fetchAuth(API + '/api/candidato/perfil');
+    // fetchAuth já desloga se 401
     const data = await r.json();
     if (data.candidato) {
       const c = data.candidato;
@@ -718,9 +715,7 @@ async function checarPerfil() {
 async function carregarDadosPerfil() {
   if (!tokenCandidato) return;
   try {
-    const r = await fetch(API + '/api/candidato/perfil', {
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
+    const r = await fetchAuth(API + '/api/candidato/perfil');
     if (!r.ok) return;
     const data = await r.json();
     if (!data.candidato) return;
@@ -771,6 +766,25 @@ function atualizarHeaderUsuario() {
   garantirBotaoMenu();
 }
 
+// fetchAuth: wrapper sobre fetch() que adiciona Authorization automaticamente
+// e desloga se o backend retornar 401 (token inválido/expirado).
+// Uso: const r = await fetchAuth(API + '/api/candidato/perfil');
+async function fetchAuth(url, options = {}) {
+  const headers = Object.assign(
+    {},
+    options.headers || {},
+    tokenCandidato ? { 'Authorization': 'Bearer ' + tokenCandidato } : {}
+  );
+  const r = await fetch(url, Object.assign({}, options, { headers }));
+  if (r.status === 401 && tokenCandidato) {
+    // Token inválido ou expirado — desloga e recarrega pra mostrar a tela de login
+    logout();
+    return r;
+  }
+  return r;
+}
+window.fetchAuth = fetchAuth;
+
 function garantirBotaoMenu() {
   const existe = document.getElementById('btn-menu-logo');
   // Qualquer usuário logado deve ter acesso ao menu (inclusive antes de
@@ -808,10 +822,8 @@ async function carregarPainel() {
   // 1) Perfil
   let perfil = null;
   try {
-    const r = await fetch(API + '/api/candidato/perfil', {
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
-    if (r.status === 401) { logout(); return; }
+    const r = await fetchAuth(API + '/api/candidato/perfil');
+    // fetchAuth já desloga se 401
     const dp = await r.json();
     perfil = dp.candidato;
   } catch (e) {}
@@ -867,10 +879,8 @@ async function carregarCands() {
   if (!listaEl) return;
   listaEl.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
   try {
-    const r = await fetch(API + '/api/candidato/candidaturas', {
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
-    if (r.status === 401) { logout(); return; }
+    const r = await fetchAuth(API + '/api/candidato/candidaturas');
+    // fetchAuth já desloga se 401
     const data = await r.json();
     const lista = data.candidaturas || [];
 
@@ -1028,9 +1038,9 @@ async function desistirVaga(candidaturaId, tituloVaga) {
   if (!confirm('Tem certeza que deseja desistir da vaga "' + tituloVaga + '"?\n\nEssa acao nao pode ser desfeita.')) return;
   const motivo = prompt('Quer nos contar o motivo? (opcional)') || '';
   try {
-    const r = await fetch(API + '/api/candidatura/' + candidaturaId + '/desistir', {
+    const r = await fetchAuth(API + '/api/candidatura/' + candidaturaId + '/desistir', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ motivo })
     });
     const data = await r.json();
@@ -1122,9 +1132,9 @@ async function salvarPerfilCompleto(target) {
   }
 
   try {
-    const r = await fetch(API + '/api/candidato/perfil', {
+    const r = await fetchAuth(API + '/api/candidato/perfil', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await r.json();
@@ -1201,9 +1211,9 @@ function perfilFotoEscolher(input) {
     const btnRemover = document.getElementById('perfil-foto-remover');
     if (btnRemover) btnRemover.style.display = 'inline-block';
     try {
-      const r = await fetch(API + '/api/candidato/foto', {
+      const r = await fetchAuth(API + '/api/candidato/foto', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ foto_url: dataUrl })
       });
       const data = await r.json();
@@ -1228,10 +1238,7 @@ function perfilFotoEscolher(input) {
 async function perfilFotoRemover() {
   if (!confirm('Remover sua foto de perfil?')) return;
   try {
-    const r = await fetch(API + '/api/candidato/foto', {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
+    const r = await fetchAuth(API + '/api/candidato/foto', { method: 'DELETE' });
     if (!r.ok) {
       const data = await r.json();
       throw new Error(data.erro || 'Erro ao remover');
@@ -1298,9 +1305,9 @@ async function trocarSenha(btn) {
   if (nova !== conf) { alert('A confirmação não confere com a nova senha'); return; }
   if (btn) { btn.disabled = true; btn.textContent = 'Atualizando...'; }
   try {
-    const r = await fetch(API + '/api/candidato/trocar-senha', {
+    const r = await fetchAuth(API + '/api/candidato/trocar-senha', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenCandidato },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ senhaAtual: atual, novaSenha: nova })
     });
     const data = await r.json();
