@@ -593,6 +593,10 @@ async function wizardFinalizar() {
       tokenCandidato = dc.token;
       emailLogado = dc.candidato.email;
       localStorage.setItem('candidato_token', tokenCandidato);
+      // ETAPA 2: salva refresh token para auto-refresh
+      if (dc.refreshToken) {
+        localStorage.setItem('candidato_refresh', dc.refreshToken);
+      }
       localStorage.setItem('candidato_email', emailLogado);
       localStorage.setItem('candidato_nome', dados.nome);
     }
@@ -674,6 +678,10 @@ async function loginEntrar(btn) {
       tokenCandidato = data.token;
       emailLogado = data.candidato.email;
       localStorage.setItem('candidato_token', tokenCandidato);
+      // ETAPA 2: salva refresh token para auto-refresh
+      if (data.refreshToken) {
+        localStorage.setItem('candidato_refresh', data.refreshToken);
+      }
       localStorage.setItem('candidato_email', emailLogado);
       await checarPerfil();
       fecharModal('login');
@@ -768,8 +776,14 @@ function atualizarHeaderUsuario() {
 
 // fetchAuth: wrapper sobre fetch() que adiciona Authorization automaticamente
 // e desloga se o backend retornar 401 (token inválido/expirado).
-// Uso: const r = await fetchAuth(API + '/api/candidato/perfil');
+// ETAPA 2 (2026-07-27): se window.authFetch está disponível (auth-helper.js),
+// usa ele com auto-refresh automático antes de deslogar.
 async function fetchAuth(url, options = {}) {
+  // FIX Etapa 2: usa authFetch (com auto-refresh) se disponível
+  if (typeof window.authFetch === 'function') {
+    return window.authFetch(url, options);
+  }
+  // Fallback (sem auto-refresh)
   const headers = Object.assign(
     {},
     options.headers || {},
@@ -777,7 +791,6 @@ async function fetchAuth(url, options = {}) {
   );
   const r = await fetch(url, Object.assign({}, options, { headers }));
   if (r.status === 401 && tokenCandidato) {
-    // Token inválido ou expirado — desloga e recarrega pra mostrar a tela de login
     logout();
     return r;
   }
@@ -1339,7 +1352,17 @@ function statusLabel(s) {
 
 function logout() {
   if (!confirm('Tem certeza que deseja sair da sua conta?')) return;
+  // ETAPA 2: revoga refresh token no backend (best-effort)
+  const refresh = localStorage.getItem('candidato_refresh');
+  if (refresh) {
+    fetch(API + '/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: refresh })
+    }).catch(() => {}); // ignora erro de rede
+  }
   localStorage.removeItem('candidato_token');
+  localStorage.removeItem('candidato_refresh');
   localStorage.removeItem('candidato_email');
   localStorage.removeItem('candidato_nome');
   tokenCandidato = null;
