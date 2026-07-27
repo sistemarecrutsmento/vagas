@@ -102,21 +102,8 @@
     document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
 
     function sair() {
-      if (confirm('Sair do portal?')) {
-        // ETAPA 2: revoga refresh token no backend (best-effort)
-        const refresh = localStorage.getItem('empresa_refresh');
-        if (refresh) {
-          fetch(API + '/api/auth/logout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refreshToken: refresh })
-          }).catch(() => {}); // ignora erro de rede
-        }
-        localStorage.removeItem('empresa_token');
-        localStorage.removeItem('empresa_refresh');
-        localStorage.removeItem('empresa_usuario');
-        window.location.href = 'login.html';
-      }
+      if (confirm('Sair do portal?')) empresaSair();
+    }
     }
 
     function mostrarErro(msg) {
@@ -173,6 +160,7 @@
     }
   </script>
 <script src="auth-helper.js?v=etapa2_2026_07_27"></script>
+  <script src="empresa-auth-init.js?v=etapa2_2026_07_27"></script>
 <script src="chat-rh-flutuante.js?v=20260726b"></script>
 </body>
 </html>
