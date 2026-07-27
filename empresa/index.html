@@ -77,9 +77,12 @@
     @media (max-width: 1100px) { .kpis-grid-secondary { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 600px)  { .kpis-grid-secondary { grid-template-columns: 1fr; } }
 
-    .kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    .kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: block; cursor: pointer; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--vinho); }
     .kpi-card-sec { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); }
-    .kpi-card:hover, .kpi-card-sec:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .kpi-card-sec:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .kpi-card::after { content: '→'; position: absolute; top: 14px; right: 14px; color: #bbb; font-size: 14px; opacity: 0; transition: opacity .2s; }
+    .kpi-card:hover::after { opacity: 1; color: var(--vinho); }
     .kpi-icon { font-size: 24px; margin-bottom: 8px; display: inline-block; }
     .kpi-label { font-size: 13px; color: #666; font-weight: 500; }
     .kpi-card-sec .kpi-label { font-size: 12px; }
@@ -183,6 +186,7 @@
       </div>
 
       <a class="nav-item ativo" href="index.html">📊 Dashboard</a>
+      <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
       <a class="nav-item" href="vagas.html">📋 Vagas com Candidatos</a>
       <a class="nav-item" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
@@ -313,12 +317,12 @@
         // === 6 KPIs principais (mesmo padrão visual do Admin) ===
         const k = data.kpis || {};
         const kpisList = [
-          { label: 'Vagas liberadas',  valor: k.vagas_ativas      || 0, delta: data.kpis_deltas?.vagas_ativas,  icon: '💼', cor: 'rosa' },
-          { label: 'Candidatos',       valor: k.total_candidatos   || 0, delta: data.kpis_deltas?.total_candidatos, icon: '👥', cor: 'azul' },
-          { label: 'Processos ativos', valor: k.processos_ativos   || 0, delta: data.kpis_deltas?.processos_ativos, icon: '📋', cor: 'roxo' },
-          { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: null, icon: '📅', cor: 'laranja' },
-          { label: 'Contratações (30d)', valor: data.kpis?.contratacoes || 0, delta: data.kpis_deltas?.contratacoes, icon: '🎉', cor: 'verde' },
-          { label: 'Aguardando sua avaliação', valor: data.kpis?.em_etapa_gestor || 0, delta: null, icon: '⏳', cor: 'dourado' }
+          { label: 'Vagas liberadas',  valor: k.vagas_ativas      || 0, delta: data.kpis_deltas?.vagas_ativas,  icon: '💼', cor: 'rosa', link: 'vagas-todas.html' },
+          { label: 'Candidatos',       valor: k.total_candidatos   || 0, delta: data.kpis_deltas?.total_candidatos, icon: '👥', cor: 'azul', link: 'vagas.html' },
+          { label: 'Processos ativos', valor: k.processos_ativos   || 0, delta: data.kpis_deltas?.processos_ativos, icon: '📋', cor: 'roxo', link: 'vagas.html' },
+          { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: null, icon: '📅', cor: 'laranja', link: 'agenda.html' },
+          { label: 'Contratações (30d)', valor: data.kpis?.contratacoes || 0, delta: data.kpis_deltas?.contratacoes, icon: '🎉', cor: 'verde', link: 'vagas.html?status=fechada' },
+          { label: 'Aguardando sua avaliação', valor: data.kpis?.em_etapa_gestor || 0, delta: null, icon: '⏳', cor: 'dourado', link: 'candidatos.html?etapa=4' }
         ];
         document.getElementById('kpis-grid').innerHTML = kpisList.map(kpi => {
           let deltaHtml = '';
@@ -331,12 +335,12 @@
               deltaHtml = `<div class="kpi-delta">${simb} ${kpi.delta.atual_30d} (anterior: ${comp})</div>`;
             }
           }
-          return `<div class="kpi-card kpi-${kpi.cor}">
+          return `<a class="kpi-card kpi-${kpi.cor}" href="${kpi.link}" title="Ver detalhes: ${kpi.label}">
             <div class="kpi-top"><div class="kpi-icon">${kpi.icon}</div></div>
             <div class="kpi-label">${kpi.label}</div>
             <div class="kpi-valor">${kpi.valor}</div>
             ${deltaHtml}
-          </div>`;
+          </a>`;
         }).join('');
 
         // === Indicadores Estratégicos (Secundários - espelho Admin) ===
