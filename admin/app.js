@@ -203,17 +203,17 @@ async function carregarEquipe() {
       recDiv.innerHTML = data.recrutadores.map(u => `
         <div class="vaga-card">
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-            <div style="width:48px; height:48px; border-radius:50%; background:var(--vinho); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;">${(u.nome||'?').charAt(0).toUpperCase()}</div>
+            <div style="width:48px; height:48px; border-radius:50%; background:var(--vinho); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;">${escapeHtml((u.nome||'?').charAt(0).toUpperCase())}</div>
             <div style="flex:1;">
-              <div style="font-weight:700; font-size:16px;">${u.nome}</div>
-              <div style="color:#888; font-size:13px;">${u.email}</div>
+              <div style="font-weight:700; font-size:16px;">${escapeHtml(u.nome)}</div>
+              <div style="color:#888; font-size:13px;">${escapeHtml(u.email)}</div>
             </div>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; gap:8px; flex-wrap:wrap;">
             <span style="background:${u.ativo === false ? '#fee2e2' : '#dcfce7'}; color:${u.ativo === false ? '#b91c1c' : '#16a34a'}; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">${u.ativo === false ? 'Inativo' : 'Recrutador'}</span>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-sec btn-sm" onclick="editarRecrutador(${u.id}, '${(u.nome||'').replace(/'/g, "\\'")}', ${u.ativo === false})">✏️ Editar</button>
-              <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirRecrutador(${u.id}, '${(u.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
+              <button class="btn btn-sec btn-sm" onclick="editarRecrutador(${u.id}, '${escapeHtml((u.nome||'').replace(/'/g, "\\'"))}', ${u.ativo === false})">✏️ Editar</button>
+              <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirRecrutador(${u.id}, '${escapeHtml((u.nome||'').replace(/'/g, "\\'"))}')">🗑️</button>
             </div>
           </div>
         </div>
@@ -231,13 +231,13 @@ async function carregarEquipe() {
         const usuariosHtml = usuariosEmp.length > 0
           ? usuariosEmp.map(u => `
               <div style="display:flex; align-items:center; gap:8px; padding:8px; background:#f8fafc; border-radius:6px; margin-top:6px;">
-                <div style="width:32px; height:32px; border-radius:50%; background:#1e40af; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">${(u.nome||'?').charAt(0).toUpperCase()}</div>
+                <div style="width:32px; height:32px; border-radius:50%; background:#1e40af; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">${escapeHtml((u.nome||'?').charAt(0).toUpperCase())}</div>
                 <div style="flex:1; min-width:0;">
-                  <div style="font-size:13px; font-weight:600; color:#333; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.nome}</div>
-                  <div style="font-size:11px; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.email}${u.cargo ? ' • ' + u.cargo : ''}</div>
+                  <div style="font-size:13px; font-weight:600; color:#333; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(u.nome)}</div>
+                  <div style="font-size:11px; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(u.email)}${u.cargo ? ' • ' + escapeHtml(u.cargo) : ''}</div>
                 </div>
-                <button class="btn btn-sec btn-sm" title="Editar" onclick="editarUsuarioEmpresa(${u.id}, ${e.id}, '${(u.nome||'').replace(/'/g, "\\'")}', '${(u.email||'').replace(/'/g, "\\'")}', '${(u.cargo||'').replace(/'/g, "\\'")}', ${u.ativo === false})">✏️</button>
-                <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" title="Excluir" onclick="excluirUsuarioEmpresa(${u.id}, '${(u.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
+                <button class="btn btn-sec btn-sm" title="Editar" onclick="editarUsuarioEmpresa(${u.id}, ${e.id}, '${escapeHtml((u.nome||'').replace(/'/g, "\\'"))}', '${escapeHtml((u.email||'').replace(/'/g, "\\'"))}', '${escapeHtml((u.cargo||'').replace(/'/g, "\\'"))}', ${u.ativo === false})">✏️</button>
+                <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" title="Excluir" onclick="excluirUsuarioEmpresa(${u.id}, '${escapeHtml((u.nome||'').replace(/'/g, "\\'"))}')">🗑️</button>
               </div>
             `).join('')
           : '<div style="font-size:12px; color:#999; font-style:italic; padding:6px 0;">Nenhum usuário cadastrado</div>';
@@ -245,22 +245,22 @@ async function carregarEquipe() {
         return `
         <div class="vaga-card">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
-            <div style="font-weight:700; font-size:16px;">🏢 ${e.nome}</div>
+            <div style="font-weight:700; font-size:16px;">🏢 ${escapeHtml(e.nome)}</div>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-sec btn-sm" onclick="abrirModalVincularVagas(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}')">🔗 Vagas (${e.qtd_vagas || 0})</button>
-              <button class="btn btn-sec btn-sm" onclick="editarEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}', '${(e.cnpj||'').replace(/'/g, "\\'")}', '${(e.email_principal||'').replace(/'/g, "\\'")}', '${(e.telefone||'').replace(/'/g, "\\'")}')">✏️ Editar</button>
-              <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
+              <button class="btn btn-sec btn-sm" onclick="abrirModalVincularVagas(${e.id}, '${escapeHtml((e.nome||'').replace(/'/g, "\\'"))}')">🔗 Vagas (${e.qtd_vagas || 0})</button>
+              <button class="btn btn-sec btn-sm" onclick="editarEmpresa(${e.id}, '${escapeHtml((e.nome||'').replace(/'/g, "\\'"))}', '${escapeHtml((e.cnpj||'').replace(/'/g, "\\'"))}', '${escapeHtml((e.email_principal||'').replace(/'/g, "\\'"))}', '${escapeHtml((e.telefone||'').replace(/'/g, "\\'"))}')">✏️ Editar</button>
+              <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirEmpresa(${e.id}, '${escapeHtml((e.nome||'').replace(/'/g, "\\'"))}')">🗑️</button>
             </div>
           </div>
-          <div style="color:#888; font-size:13px;">${e.email_principal || '—'}</div>
-          ${e.cnpj ? `<div style="color:#888; font-size:12px; margin-top:4px;">CNPJ: ${e.cnpj}</div>` : ''}
-          ${e.telefone ? `<div style="color:#888; font-size:12px;">Tel: ${e.telefone}</div>` : ''}
+          <div style="color:#888; font-size:13px;">${escapeHtml(e.email_principal || '—')}</div>
+          ${e.cnpj ? `<div style="color:#888; font-size:12px; margin-top:4px;">CNPJ: ${escapeHtml(e.cnpj)}</div>` : ''}
+          ${e.telefone ? `<div style="color:#888; font-size:12px;">Tel: ${escapeHtml(e.telefone)}</div>` : ''}
           <div style="margin-top:10px;"><span style="background:#dbeafe; color:#1e40af; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Empresa</span></div>
 
           <div style="margin-top:12px; padding-top:10px; border-top:1px solid #eee;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <div style="font-size:12px; font-weight:700; color:#555;">👥 Usuários (${usuariosEmp.length})</div>
-              <button class="btn btn-sec btn-sm" onclick="abrirModalNovoUsuarioEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")})">+ Usuário</button>
+              <button class="btn btn-sec btn-sm" onclick="abrirModalNovoUsuarioEmpresa(${e.id}, '${escapeHtml((e.nome||'').replace(/'/g, "\\'"))}')">+ Usuário</button>
             </div>
             ${usuariosHtml}
           </div>
@@ -1079,7 +1079,7 @@ async function carregarDashboardV2() {
     if (!r.ok) {
       console.error('[DASHBOARD]', data);
       const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
-      if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro: ${data.erro || 'desconhecido'}</div>`;
+      if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro: ${escapeHtml(data.erro || 'desconhecido')}</div>`;
       return;
     }
     // === Saudação dinâmica (bom dia / boa tarde / boa noite) ===
@@ -1373,7 +1373,7 @@ const chartH = 220; // deve bater com CSS
   } catch (e) {
     console.error('[DASHBOARD V2] ERRO:', e.message, e.stack);
     const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
-    if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
+    if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${escapeHtml(e.message)}</div>`;
   }
 }
 
@@ -2066,7 +2066,7 @@ async function salvarVaga() {
       fecharModal('vaga');
       carregarVagasAdmin();
     } else {
-      document.getElementById('alert-vaga').innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao salvar'}</div>`;
+      document.getElementById('alert-vaga').innerHTML = `<div class="alert alert-erro">${escapeHtml(data.erro || 'Erro ao salvar')}</div>`;
     }
   } catch {
     document.getElementById('alert-vaga').innerHTML = '<div class="alert alert-erro">Erro de conexão</div>';
@@ -2698,7 +2698,7 @@ async function verCandidatura(id) {
     const r = await fetch(API + '/api/admin/candidatura/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
     const data = await r.json();
     if (!r.ok) {
-      container.innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro'}</div>`;
+      container.innerHTML = `<div class="alert alert-erro">${escapeHtml(data.erro || 'Erro')}</div>`;
       return;
     }
     const c = data.candidatura;
@@ -2726,7 +2726,7 @@ async function verCandidatura(id) {
       </div>
     `;
   } catch (e) {
-    container.innerHTML = `<div class="alert alert-erro">Erro: ${e.message}</div>`;
+    container.innerHTML = `<div class="alert alert-erro">Erro: ${escapeHtml(e.message)}</div>`;
   }
 }
 
