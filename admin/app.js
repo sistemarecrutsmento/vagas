@@ -21,11 +21,32 @@ async function authedFetch(url, opts = {}) {
   }
   return fetch(url, { ...opts, headers });
 }
+
+// FIX Etapa 2 (2026-07-27): sessão durável via refresh token.
+// auth-helper.js cuida do refresh automático; aqui só inicializamos.
+if (typeof window.setStorageKeys === 'function') {
+  setStorageKeys('admin_token', 'admin_refresh');
+}
+
 let loginCodigoId = null;        // id do código 2FA pendente
 let loginEmailEmProgresso = null; // email do login em andamento (2FA)
 let loginCooldownInterval = null; // timer do cooldown do reenviar
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+  // Sessão durável: tenta refresh silencioso antes de mostrar login.
+  // Se conseguir, vai ter token novo no localStorage.
+  if (typeof window.authInit === 'function') {
+    const refreshed = await window.authInit();
+    if (refreshed) {
+      // Token renovado com sucesso — atualiza variável local
+      token = localStorage.getItem('admin_token');
+      // Continua fluxo normal: mostrar app
+      if (token) mostrarApp();
+      return;
+    }
+  }
+
+  // Sem refresh disponível ou falhou: checa se já tem access token
   const saved = localStorage.getItem('admin_token');
   if (saved && saved !== 'undefined' && saved !== 'null') {
     token = saved;
