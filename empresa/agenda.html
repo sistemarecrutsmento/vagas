@@ -182,7 +182,17 @@
 
     function sair() {
       if (confirm('Sair do portal?')) {
+        // ETAPA 2: revoga refresh token no backend (best-effort)
+        const refresh = localStorage.getItem('empresa_refresh');
+        if (refresh) {
+          fetch(API + '/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken: refresh })
+          }).catch(() => {}); // ignora erro de rede
+        }
         localStorage.removeItem('empresa_token');
+        localStorage.removeItem('empresa_refresh');
         localStorage.removeItem('empresa_usuario');
         window.location.href = 'login.html';
       }
