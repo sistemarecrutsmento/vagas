@@ -136,7 +136,23 @@ function atualizarContadorAreas() {
   if (el) el.textContent = areasSelecionadas.length + ' de ' + AREAS_MAX + ' selecionadas';
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+// ETAPA 2 (2026-07-27): inicializa auth-helper (chaves do localStorage).
+// auth-helper.js cuida do auto-refresh + sessão durável.
+if (typeof window.setStorageKeys === 'function') {
+  setStorageKeys('candidato_token', 'candidato_refresh');
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  // FIX Etapa 2 (27/07): tenta refresh silencioso ANTES de mostrar login.
+  // Se o usuário tem refresh token válido, renova o access sem precisar logar.
+  if (typeof window.authInit === 'function') {
+    const refreshed = await window.authInit();
+    if (refreshed) {
+      // Atualiza variável local com token novo (renovado em background)
+      tokenCandidato = localStorage.getItem('candidato_token');
+    }
+  }
+
   carregarVagas();
   checarAuth();
   // Garante o ☰ no logo (mesmo deslogado)
@@ -1352,7 +1368,12 @@ function statusLabel(s) {
 
 function logout() {
   if (!confirm('Tem certeza que deseja sair da sua conta?')) return;
-  // ETAPA 2: revoga refresh token no backend (best-effort)
+  // ETAPA 2: usa helper (authLogout) se disponível — chama /api/auth/logout + limpa tokens
+  if (typeof window.authLogout === 'function') {
+    window.authLogout();
+    return; // authLogout já faz reload
+  }
+  // Fallback (se helper não carregou): revoga refresh token no backend (best-effort)
   const refresh = localStorage.getItem('candidato_refresh');
   if (refresh) {
     fetch(API + '/api/auth/logout', {
