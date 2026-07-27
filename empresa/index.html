@@ -68,15 +68,24 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ==== DASHBOARD v2 (mesmo visual admin) ==== */
-    .kpis-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-    @media (max-width: 1100px) { .kpis-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 600px)  { .kpis-grid { grid-template-columns: 1fr; } }
+    .kpis-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 1300px) { .kpis-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 1100px) { .kpis-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 700px)  { .kpis-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .kpis-grid-secondary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    @media (max-width: 1100px) { .kpis-grid-secondary { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .kpis-grid-secondary { grid-template-columns: 1fr; } }
+
     .kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
-    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .kpi-card-sec { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); }
+    .kpi-card:hover, .kpi-card-sec:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     .kpi-icon { font-size: 24px; margin-bottom: 8px; display: inline-block; }
     .kpi-label { font-size: 13px; color: #666; font-weight: 500; }
+    .kpi-card-sec .kpi-label { font-size: 12px; }
     .kpi-valor { font-size: 32px; font-weight: 700; color: #1A1A1A; line-height: 1.1; margin-top: 4px; }
     .kpi-sub { font-size: 12px; color: #999; font-weight: 500; margin-top: 6px; }
+    .kpi-delta { font-size: 11px; color: #10B981; font-weight: 600; margin-top: 8px; padding: 2px 6px; background: rgba(16,185,129,0.08); border-radius: 4px; display: inline-block; }
     /* Acento colorido lateral */
     .kpi-rosa     { border-left: 4px solid #EC4899; }
     .kpi-rosa .kpi-icon { color: #EC4899; }
@@ -88,6 +97,10 @@
     .kpi-verde .kpi-icon { color: #10B981; }
     .kpi-laranja  { border-left: 4px solid #F59E0B; }
     .kpi-laranja .kpi-icon { color: #F59E0B; }
+    .kpi-dourado  { border-left: 4px solid #D4A155; }
+    .kpi-dourado .kpi-icon { color: #D4A155; }
+    .kpi-vermelho { border-left: 4px solid #C62828; }
+    .kpi-vermelho .kpi-icon { color: #C62828; }
 
     .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     @media (max-width: 900px) { .dash-row { grid-template-columns: 1fr; } }
@@ -196,13 +209,11 @@
         </div>
       </div>
 
-      <!-- 4 KPIs coloridos (mesmo padrão do admin) -->
-      <div class="kpis-grid" id="kpis-grid">
-        <div class="kpi-card kpi-rosa"><div class="kpi-icon">💼</div><div class="kpi-label">Vagas ativas</div><div class="kpi-valor" id="kpi-vagas">—</div><div class="kpi-sub" id="kpi-vagas-sub"></div></div>
-        <div class="kpi-card kpi-azul"><div class="kpi-icon">📅</div><div class="kpi-label">Entrevistas agendadas</div><div class="kpi-valor" id="kpi-entrevistas">—</div><div class="kpi-sub" id="kpi-entrevistas-sub"></div></div>
-        <div class="kpi-card kpi-roxo"><div class="kpi-icon">⏳</div><div class="kpi-label">Aguardando sua avaliação</div><div class="kpi-valor" id="kpi-aguardando">—</div><div class="kpi-sub" id="kpi-aguardando-sub"></div></div>
-        <div class="kpi-card kpi-verde"><div class="kpi-icon">🎉</div><div class="kpi-label">Contratações</div><div class="kpi-valor" id="kpi-contratacoes">—</div><div class="kpi-sub" id="kpi-contratacoes-sub"></div></div>
-      </div>
+      <!-- 6 KPIs principais (espelho Admin) -->
+      <div class="kpis-grid" id="kpis-grid"></div>
+
+      <!-- Indicadores Estratégicos (Espelho Admin) -->
+      <div class="kpis-grid-secondary" id="kpis-secundarios-grid"></div>
 
       <!-- Funil por etapa + Entrevistas -->
       <div class="dash-row">
@@ -299,24 +310,55 @@
           return;
         }
 
-        // === 4 KPIs (Vagas / Entrevistas / Aguardando / Contratações) ===
+        // === 6 KPIs principais (mesmo padrão visual do Admin) ===
         const k = data.kpis || {};
-        const kpiVagas = k.vagas_liberadas || 0;
-        const kpiEntrevistas = k.entrevistas_agendadas || 0;
-        const kpiAguardando = k.em_etapa_gestor || 0;
-        const kpiContratacoes = k.contratacoes || 0;
-        document.getElementById('kpi-vagas').textContent = kpiVagas;
-        document.getElementById('kpi-entrevistas').textContent = kpiEntrevistas;
-        document.getElementById('kpi-aguardando').textContent = kpiAguardando;
-        document.getElementById('kpi-contratacoes').textContent = kpiContratacoes;
-        document.getElementById('kpi-vagas-sub').textContent = kpiVagas === 1 ? '1 vaga liberada' : `${kpiVagas} vagas liberadas`;
-        document.getElementById('kpi-entrevistas-sub').textContent = kpiEntrevistas === 0 ? 'Nenhuma' : kpiEntrevistas === 1 ? '1 agendada' : `${kpiEntrevistas} agendadas`;
-        document.getElementById('kpi-aguardando-sub').textContent = 'Candidatos em etapa do gestor';
-        document.getElementById('kpi-contratacoes-sub').textContent = kpiContratacoes === 0 ? 'Nenhuma ainda' : kpiContratacoes === 1 ? '1 contratado(a)' : `${kpiContratacoes} contratados(as)`;
+        const kpisList = [
+          { label: 'Vagas liberadas',  valor: k.vagas_ativas      || 0, delta: data.kpis_deltas?.vagas_ativas,  icon: '💼', cor: 'rosa' },
+          { label: 'Candidatos',       valor: k.total_candidatos   || 0, delta: data.kpis_deltas?.total_candidatos, icon: '👥', cor: 'azul' },
+          { label: 'Processos ativos', valor: k.processos_ativos   || 0, delta: data.kpis_deltas?.processos_ativos, icon: '📋', cor: 'roxo' },
+          { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: null, icon: '📅', cor: 'laranja' },
+          { label: 'Contratações (30d)', valor: data.kpis?.contratacoes || 0, delta: data.kpis_deltas?.contratacoes, icon: '🎉', cor: 'verde' },
+          { label: 'Aguardando sua avaliação', valor: data.kpis?.em_etapa_gestor || 0, delta: null, icon: '⏳', cor: 'dourado' }
+        ];
+        document.getElementById('kpis-grid').innerHTML = kpisList.map(kpi => {
+          let deltaHtml = '';
+          if (kpi.delta) {
+            if (kpi.delta.novos_7d != null) {
+              deltaHtml = `<div class="kpi-delta">+${kpi.delta.novos_7d} nos últimos 7d</div>`;
+            } else if (kpi.delta.atual_30d != null) {
+              const comp = kpi.delta.anterior_30d || 0;
+              const simb = kpi.delta.atual_30d >= comp ? '↑' : '↓';
+              deltaHtml = `<div class="kpi-delta">${simb} ${kpi.delta.atual_30d} (anterior: ${comp})</div>`;
+            }
+          }
+          return `<div class="kpi-card kpi-${kpi.cor}">
+            <div class="kpi-top"><div class="kpi-icon">${kpi.icon}</div></div>
+            <div class="kpi-label">${kpi.label}</div>
+            <div class="kpi-valor">${kpi.valor}</div>
+            ${deltaHtml}
+          </div>`;
+        }).join('');
 
-        // === Funil por etapa ===
+        // === Indicadores Estratégicos (Secundários - espelho Admin) ===
+        const ks = data.kpis_secundarios || {};
+        const secundarios = [
+          { label: 'Tempo médio de contratação', valor: (ks.tempo_medio_contratacao || 0) + 'd', icon: '⏱️', cor: 'azul' },
+          { label: 'Taxa de aprovação (30d)', valor: (ks.taxa_aprovacao_30d || 0) + '%', sub: `${ks.taxa_aprovacao_30d_qtd || 0}/${ks.taxa_aprovacao_30d_total || 0} vagas`, icon: '✅', cor: 'verde' },
+          { label: 'Taxa de desistência', valor: (ks.taxa_desistencia || 0) + '%', sub: 'reprovados / total', icon: '🚪', cor: 'vermelho' },
+          { label: 'Vagas encerradas', valor: ks.vagas_encerradas || 0, sub: 'Status fechada', icon: '🏁', cor: 'roxo' }
+        ];
+        document.getElementById('kpis-secundarios-grid').innerHTML = secundarios.map(k => `
+          <div class="kpi-card-sec kpi-${k.cor}">
+            <div class="kpi-icon">${k.icon}</div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-valor">${k.valor}</div>
+            ${k.sub ? `<div class="kpi-sub">${k.sub}</div>` : ''}
+          </div>
+        `).join('');
+
+        // === Funil por etapa (mesmo visual Admin) ===
         const etapasObj = data.etapas || {};
-        const labels = ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'];
+        const labels = data.etapas_labels || ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'];
         const etapasTotal = Object.values(etapasObj).reduce((s, v) => s + (parseInt(v) || 0), 0);
         const maxEtapa = Math.max(1, ...Object.values(etapasObj).map(v => parseInt(v) || 0));
         document.getElementById('grafico-etapas').innerHTML = labels.map((label, i) => {
@@ -398,6 +440,6 @@
 
     carregarDashboard();
   </script>
-<script src="chat-rh-flutuante.js?v=20260725a"></script>
+<script src="chat-rh-flutuante.js?v=20260726b"></script>
 </body>
 </html>
