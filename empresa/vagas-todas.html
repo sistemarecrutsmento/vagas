@@ -19,8 +19,9 @@
       aside.aberto .menu-close { display:block; }
       main { padding:20px 16px; padding-top:64px; }
       .page-header { flex-direction:column; align-items:flex-start; }
-      .vagas-lista-cabecalho { display:none; }
+      .vagas-lista-cabecalho, .vagas-lista-cabecalho-2 { display:none; }
       .vaga-card { grid-template-columns:1fr !important; }
+      .vaga-card-acoes { justify-content:flex-start; }
     }
     aside { width:240px; background:var(--vinho); color:#fff; padding:24px 0; flex-shrink:0; display:flex; flex-direction:column; min-height:100vh; }
     .aside-logo { padding:0 24px 24px; border-bottom:1px solid rgba(255,255,255,.1); margin-bottom:16px; }
@@ -53,22 +54,34 @@
     .vagas-toolbar-select { padding:10px 14px; border:1px solid var(--borda); border-radius:8px; font-size:14px; font-family:inherit; background:#fff; cursor:pointer; }
     /* Lista */
     .vagas-lista-wrap { background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06); overflow:hidden; }
-    .vagas-lista-cabecalho { display:grid; grid-template-columns:1fr 110px 80px; padding:14px 18px; background:#FAFAFA; border-bottom:1px solid var(--borda); font-size:11px; text-transform:uppercase; letter-spacing:.5px; font-weight:600; color:#888; }
-    .vaga-card { display:grid; grid-template-columns:1fr 110px 80px; padding:16px 18px; border-bottom:1px solid #F0F0F0; align-items:center; gap:12px; transition:background .15s; text-decoration:none; color:inherit; }
+    .vagas-lista-cabecalho, .vagas-lista-cabecalho-2 { display:grid; grid-template-columns:1fr 110px 110px 200px; padding:14px 18px; background:#FAFAFA; border-bottom:1px solid var(--borda); font-size:11px; text-transform:uppercase; letter-spacing:.5px; font-weight:600; color:#888; }
+    .vagas-lista-cabecalho > div:nth-child(2), .vagas-lista-cabecalho > div:nth-child(3),
+    .vagas-lista-cabecalho-2 > div:nth-child(2), .vagas-lista-cabecalho-2 > div:nth-child(3) { text-align:center; }
+    .vaga-card { display:grid; grid-template-columns:1fr 110px 110px 200px; padding:14px 18px; border-bottom:1px solid #F0F0F0; align-items:center; gap:12px; transition:background .15s; }
     .vaga-card:hover { background:#FAFAFA; }
     .vaga-card:last-child { border-bottom:0; }
     .vaga-info { min-width:0; }
     .vaga-titulo { font-size:15px; font-weight:600; color:#1A1A1A; margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .vaga-titulo a { color:inherit; text-decoration:none; }
+    .vaga-titulo a:hover { color:var(--vinho); }
     .vaga-local { font-size:12px; color:#666; }
     .vaga-meta { display:flex; gap:12px; margin-top:4px; font-size:12px; color:#666; }
     .vaga-candidatos { text-align:center; }
     .vaga-candidatos-num { font-size:20px; font-weight:700; color:var(--vinho); line-height:1; }
     .vaga-candidatos-label { font-size:11px; color:#888; margin-top:2px; }
-    .vaga-status { display:inline-block; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; text-align:center; }
+    .vaga-status { display:inline-block; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; text-align:center; min-width:90px; }
     .vaga-status.publicada { background:#FDF2F4; color:var(--vinho); }
-    .vaga-status.fechada { background:#F5F5F5; color:#888; }
+    .vaga-status.encerrada { background:#F5F5F5; color:#888; }
     .vaga-status.pausada { background:#FEF3C7; color:#92400E; }
-    .vaga-status.rascunho { background:#FEF3C7; color:#92400E; }
+    .vaga-status.rascunho { background:#E0E7FF; color:#3730A3; }
+    .vaga-card-acoes { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+    .acao-btn { padding:6px 10px; font-size:12px; font-weight:600; border-radius:6px; cursor:pointer; border:1px solid var(--borda); background:#fff; color:#444; transition:background .15s, border-color .15s; }
+    .acao-btn:hover { background:#FAFAFA; border-color:var(--vinho); color:var(--vinho); }
+    .acao-btn.primary { background:var(--vinho); color:#fff; border-color:var(--vinho); }
+    .acao-btn.primary:hover { background:var(--vinho-escuro); }
+    .acao-btn.danger { color:var(--vermelho); }
+    .acao-btn.danger:hover { background:#FEE; border-color:var(--vermelho); color:var(--vermelho); }
+    .acao-btn:disabled { opacity:.4; cursor:not-allowed; }
     /* Paginação */
     .vagas-paginacao { display:flex; justify-content:space-between; align-items:center; padding:16px 18px; margin-top:12px; font-size:13px; color:#666; }
     .vagas-pag-btns { display:flex; gap:4px; }
@@ -76,6 +89,23 @@
     .vagas-pag-btn:hover { background:#FAFAFA; }
     .vagas-pag-btn.ativo { background:var(--vinho); color:#fff; border-color:var(--vinho); }
     .vagas-pag-btn:disabled { opacity:.4; cursor:not-allowed; }
+    /* Modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:flex-start; justify-content:center; z-index:1500; padding:24px; overflow-y:auto; }
+    .modal-box { background:#fff; border-radius:12px; max-width:680px; width:100%; padding:24px; box-shadow:0 10px 40px rgba(0,0,0,.3); }
+    .modal-box h2 { font-size:20px; font-weight:700; margin-bottom:18px; color:var(--vinho); }
+    .modal-box label { display:block; font-size:13px; font-weight:600; color:#444; margin-bottom:4px; }
+    .modal-box input, .modal-box textarea, .modal-box select { width:100%; padding:10px 12px; border:1px solid var(--borda); border-radius:6px; font-family:inherit; font-size:14px; background:#fff; }
+    .modal-box input:focus, .modal-box textarea:focus, .modal-box select:focus { outline:0; border-color:var(--vinho); }
+    .modal-box textarea { resize:vertical; min-height:80px; }
+    .modal-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+    .modal-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px; }
+    .modal-row-full { margin-bottom:14px; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; padding-top:16px; border-top:1px solid var(--borda); }
+    .modal-actions button { padding:10px 18px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; border:1px solid var(--borda); background:#fff; color:#444; }
+    .modal-actions .btn-primary { background:var(--vinho); color:#fff; border-color:var(--vinho); }
+    .modal-actions .btn-primary:hover { background:var(--vinho-escuro); }
+    .modal-erro { background:#FEE; color:var(--vermelho); padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:14px; display:none; }
+    .modal-erro.visivel { display:block; }
   </style>
 </head>
 <body>
@@ -120,16 +150,18 @@
         <select id="vagas-filtro-status" class="vagas-toolbar-select">
           <option value="">Status: Todos</option>
           <option value="publicada">Publicadas</option>
-          <option value="fechada">Encerradas</option>
-          <option value="pausada">Rascunhos</option>
+          <option value="pausada">Pausadas</option>
+          <option value="rascunho">Rascunhos</option>
+          <option value="encerrada">Encerradas</option>
         </select>
       </div>
 
       <div class="vagas-lista-wrap">
-        <div class="vagas-lista-cabecalho">
+        <div class="vagas-lista-cabecalho-2">
           <div>Vaga</div>
           <div style="text-align:center">Candidatos</div>
           <div style="text-align:center">Status</div>
+          <div style="text-align:right">Ações</div>
         </div>
         <div id="vagas-lista">
           <div class="empty"><div class="spinner"></div></div>
@@ -145,19 +177,85 @@
 
   <div class="toast" id="toast" style="position:fixed;bottom:24px;right:24px;background:#1A1A1A;color:#fff;padding:12px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;"></div>
 
+  <!-- Modal: Nova Vaga / Editar Vaga (FASE 4) -->
+  <div id="modal-vaga" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <h2 id="modal-titulo">+ Criar nova vaga</h2>
+      <div id="modal-erro" class="modal-erro"></div>
+      <form id="form-vaga" onsubmit="return false;">
+        <input type="hidden" id="mv-id" />
+        <div class="modal-row-full">
+          <label>Título*</label>
+          <input type="text" id="mv-titulo" required maxlength="160" placeholder="Ex: Analista de RH Júnior" />
+        </div>
+        <div class="modal-row">
+          <div><label>Cidade</label><input type="text" id="mv-cidade" maxlength="80" /></div>
+          <div><label>UF</label><input type="text" id="mv-estado" maxlength="2" placeholder="BA" /></div>
+        </div>
+        <div class="modal-row-3">
+          <div>
+            <label>Tipo contrato</label>
+            <select id="mv-tipo-contrato">
+              <option value="">—</option>
+              <option value="clt">CLT</option>
+              <option value="pj">PJ</option>
+              <option value="estagio">Estágio</option>
+              <option value="temporario">Temporário</option>
+              <option value="freelancer">Freelancer</option>
+            </select>
+          </div>
+          <div><label>Salário mín.</label><input type="number" id="mv-salario-min" min="0" step="100" /></div>
+          <div><label>Salário máx.</label><input type="number" id="mv-salario-max" min="0" step="100" /></div>
+        </div>
+        <div class="modal-row">
+          <div>
+            <label>Nível</label>
+            <select id="mv-nivel">
+              <option value="">—</option>
+              <option value="junior">Júnior</option>
+              <option value="pleno">Pleno</option>
+              <option value="senior">Sênior</option>
+              <option value="especialista">Especialista</option>
+            </select>
+          </div>
+          <div>
+            <label>Área</label>
+            <input type="text" id="mv-area" maxlength="80" placeholder="Ex: TI, Comercial..." />
+          </div>
+        </div>
+        <div class="modal-row-full">
+          <label>Descrição</label>
+          <textarea id="mv-descricao" placeholder="Atividades e responsabilidades..."></textarea>
+        </div>
+        <div class="modal-row-full">
+          <label>Requisitos</label>
+          <textarea id="mv-requisitos" placeholder="Requisitos obrigatórios..."></textarea>
+        </div>
+        <div class="modal-row-full">
+          <label>Benefícios</label>
+          <textarea id="mv-beneficios" placeholder="VA, VR, plano de saúde..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" onclick="fecharModalVaga()">Cancelar</button>
+          <button type="button" class="btn-primary" id="btn-modal-salvar" onclick="salvarVaga()">Criar vaga</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="auth-helper.js?v=fase4_2026_07_28"></script>
+  <script src="empresa-auth-init.js?v=fase4_2026_07_28"></script>
+  <script src="empresa-auth-patch.js?v=fase4_2026_07_28"></script>
+
   <script>
     const API = 'https://recrutamento-api-v2.onrender.com';
-    const token = localStorage.getItem('empresa_token');
-    if (!token) window.location.href = 'login.html';
-    const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
+    let usuario = {};
+    let podeEditar = false; // admin + recrutador
 
     function iniciais(n) { return (n || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join(''); }
-    function sair() { if (confirm('Sair do portal?')) { localStorage.removeItem('empresa_token'); localStorage.removeItem('empresa_usuario'); window.location.href = 'login.html'; } }
-    function toast(msg, tipo='') { const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1'; t.style.background = tipo === 'erro' ? '#C62828' : '#1A1A1A'; setTimeout(() => t.style.opacity = '0', 3000); }
-
-    document.getElementById('avatar').textContent = iniciais(usuario.nome);
-    document.getElementById('user-nome').textContent = usuario.nome || '--';
-    document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
+    function sair() { if (confirm('Sair do portal?')) { localStorage.removeItem('empresa_token'); localStorage.removeItem('empresa_refresh'); localStorage.removeItem('empresa_usuario'); window.location.href = 'login.html'; } }
+    function toast(msg, tipo='') { const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1'; t.style.background = tipo === 'erro' ? '#C62828' : tipo === 'sucesso' ? '#2E7D32' : '#1A1A1A'; setTimeout(() => t.style.opacity = '0', 3000); }
+    function statusLabel(s) { return ({publicada:'Publicada',pausada:'Pausada',rascunho:'Rascunho',encerrada:'Encerrada',fechada:'Encerrada'})[s] || (s || '—'); }
 
     let vagasCache = [];
     let paginaAtual = 1;
@@ -187,29 +285,38 @@
       lista.innerHTML = pagina.map(v => {
         const totalCand = parseInt(v.total_geral) || 0;
         const statusClass = v.status || 'pausada';
-        const statusLabel = v.status === 'publicada' ? 'Publicada' : v.status === 'fechada' ? 'Encerrada' : 'Rascunho';
-        const link = totalCand > 0 ? `vagas.html?vaga=${v.id}` : `candidatos.html?vaga=${v.id}`;
-        return `<a class="vaga-card" href="${link}">
+        const label = statusLabel(statusClass);
+        const acoes = [];
+        if (podeEditar) {
+          acoes.push(`<button class="acao-btn" onclick="abrirModalEditar(${v.id})" title="Editar vaga">✏️ Editar</button>`);
+        }
+        acoes.push(`<a class="acao-btn" href="candidatos.html?vaga=${v.id}" title="Ver candidatos">👥 Candidatos</a>`);
+        if (podeEditar) {
+          if (statusClass === 'rascunho') acoes.push(`<button class="acao-btn primary" onclick="mudarStatus(${v.id},'publicada')" title="Publicar vaga">🚀 Publicar</button>`);
+          else if (statusClass === 'publicada') acoes.push(`<button class="acao-btn" onclick="mudarStatus(${v.id},'pausada')" title="Pausar vaga">⏸ Pausar</button>`);
+          else if (statusClass === 'pausada') acoes.push(`<button class="acao-btn primary" onclick="mudarStatus(${v.id},'publicada')" title="Reabrir vaga">▶️ Reabrir</button>`);
+          else if (statusClass === 'encerrada') acoes.push(`<button class="acao-btn" onclick="mudarStatus(${v.id},'publicada')" title="Reabrir vaga">↩️ Reabrir</button>`);
+          if (statusClass !== 'encerrada') acoes.push(`<button class="acao-btn danger" onclick="confirmarEncerrar(${v.id},'${(v.titulo||'').replace(/'/g,'\\\'')}')" title="Encerrar vaga">⏹ Encerrar</button>`);
+        }
+        return `<div class="vaga-card">
           <div class="vaga-info">
-            <div class="vaga-titulo">${v.titulo || '—'}</div>
+            <div class="vaga-titulo"><a href="candidatos.html?vaga=${v.id}">${v.titulo || '—'}</a></div>
             <div class="vaga-local">${v.empresa || ''} • ${[v.cidade, v.estado].filter(Boolean).join(' / ') || '—'}</div>
           </div>
           <div class="vaga-candidatos">
             <div class="vaga-candidatos-num">${totalCand}</div>
             <div class="vaga-candidatos-label">${totalCand === 1 ? 'candidato' : 'candidatos'}</div>
           </div>
-          <div style="text-align:center"><span class="vaga-status ${statusClass}">${statusLabel}</span></div>
-        </a>`;
+          <div style="text-align:center"><span class="vaga-status ${statusClass}">${label}</span></div>
+          <div class="vaga-card-acoes">${acoes.join('')}</div>
+        </div>`;
       }).join('');
 
-      // Paginação
       document.getElementById('vagas-paginacao').style.display = 'flex';
       document.getElementById('vagas-pag-info').textContent = `${inicio + 1}–${Math.min(inicio + POR_PAGINA, total)} de ${total}`;
       const btns = document.getElementById('vagas-pag-btns');
       let html = `<button class="vagas-pag-btn" onclick="irPagina(${paginaAtual - 1})" ${paginaAtual === 1 ? 'disabled' : ''}>←</button>`;
-      for (let i = 1; i <= totalPaginas; i++) {
-        html += `<button class="vagas-pag-btn ${i === paginaAtual ? 'ativo' : ''}" onclick="irPagina(${i})">${i}</button>`;
-      }
+      for (let i = 1; i <= totalPaginas; i++) html += `<button class="vagas-pag-btn ${i === paginaAtual ? 'ativo' : ''}" onclick="irPagina(${i})">${i}</button>`;
       html += `<button class="vagas-pag-btn" onclick="irPagina(${paginaAtual + 1})" ${paginaAtual === totalPaginas ? 'disabled' : ''}>→</button>`;
       btns.innerHTML = html;
     }
@@ -218,178 +325,150 @@
 
     async function carregar() {
       try {
-        const r = await fetch(API + '/api/empresa/vagas-todas', { headers: { 'Authorization': 'Bearer ' + token } });
+        const r = await authFetch(API + '/api/empresa/vagas-todas');
         const data = await r.json();
-        if (!r.ok) { if (r.status === 401 || r.status === 403) { sair(); return; } toast(data.erro || 'Erro', 'erro'); return; }
+        if (!r.ok) { if (r.status === 401 || r.status === 403) { window.location.href = 'login.html'; return; } toast(data.erro || 'Erro', 'erro'); return; }
         vagasCache = data.vagas || [];
         render();
-      } catch (e) { toast('Erro de conexão', 'erro'); }
+      } catch (e) { console.error(e); toast('Erro de conexão', 'erro'); }
+    }
+
+    // ===== MODAL =====
+    function abrirModalNovaVaga() {
+      document.getElementById('mv-id').value = '';
+      document.getElementById('modal-titulo').textContent = '+ Criar nova vaga';
+      document.getElementById('btn-modal-salvar').textContent = 'Criar vaga';
+      ['mv-titulo','mv-cidade','mv-estado','mv-descricao','mv-requisitos','mv-beneficios','mv-area','mv-salario-min','mv-salario-max'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('mv-tipo-contrato').value = '';
+      document.getElementById('mv-nivel').value = '';
+      document.getElementById('modal-erro').classList.remove('visivel');
+      document.getElementById('modal-vaga').style.display = 'flex';
+      setTimeout(() => document.getElementById('mv-titulo').focus(), 50);
+    }
+
+    async function abrirModalEditar(id) {
+      try {
+        const r = await authFetch(API + '/api/empresa/vagas/' + id);
+        const data = await r.json();
+        if (!r.ok) { toast(data.erro || 'Erro ao carregar vaga', 'erro'); return; }
+        const v = data.vaga || data;
+        document.getElementById('mv-id').value = v.id;
+        document.getElementById('modal-titulo').textContent = '✏️ Editar vaga';
+        document.getElementById('btn-modal-salvar').textContent = 'Salvar alterações';
+        document.getElementById('mv-titulo').value = v.titulo || '';
+        document.getElementById('mv-cidade').value = v.cidade || '';
+        document.getElementById('mv-estado').value = v.estado || '';
+        document.getElementById('mv-tipo-contrato').value = v.tipo_contrato || '';
+        document.getElementById('mv-nivel').value = v.nivel || '';
+        document.getElementById('mv-area').value = v.area || '';
+        document.getElementById('mv-salario-min').value = v.salario_min || '';
+        document.getElementById('mv-salario-max').value = v.salario_max || '';
+        document.getElementById('mv-descricao').value = v.descricao || '';
+        document.getElementById('mv-requisitos').value = v.requisitos || '';
+        document.getElementById('mv-beneficios').value = v.beneficios || '';
+        document.getElementById('modal-erro').classList.remove('visivel');
+        document.getElementById('modal-vaga').style.display = 'flex';
+      } catch (e) { console.error(e); toast('Erro ao carregar vaga', 'erro'); }
+    }
+
+    function fecharModalVaga() {
+      document.getElementById('modal-vaga').style.display = 'none';
+    }
+
+    async function salvarVaga() {
+      const id = document.getElementById('mv-id').value;
+      const payload = {
+        titulo: document.getElementById('mv-titulo').value.trim(),
+        cidade: document.getElementById('mv-cidade').value.trim() || null,
+        estado: document.getElementById('mv-estado').value.trim().toUpperCase() || null,
+        tipo_contrato: document.getElementById('mv-tipo-contrato').value || null,
+        nivel: document.getElementById('mv-nivel').value || null,
+        area: document.getElementById('mv-area').value.trim() || null,
+        salario_min: document.getElementById('mv-salario-min').value ? Number(document.getElementById('mv-salario-min').value) : null,
+        salario_max: document.getElementById('mv-salario-max').value ? Number(document.getElementById('mv-salario-max').value) : null,
+        descricao: document.getElementById('mv-descricao').value.trim() || null,
+        requisitos: document.getElementById('mv-requisitos').value.trim() || null,
+        beneficios: document.getElementById('mv-beneficios').value.trim() || null
+      };
+      if (!payload.titulo) {
+        const err = document.getElementById('modal-erro');
+        err.textContent = 'Título é obrigatório';
+        err.classList.add('visivel');
+        return;
+      }
+      const btn = document.getElementById('btn-modal-salvar');
+      btn.disabled = true; btn.textContent = id ? 'Salvando...' : 'Criando...';
+      try {
+        const url = id ? (API + '/api/empresa/vagas/' + id) : (API + '/api/empresa/vagas');
+        const method = id ? 'PUT' : 'POST';
+        const r = await authFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await r.json();
+        if (!r.ok) {
+          const err = document.getElementById('modal-erro');
+          err.textContent = data.erro || 'Erro ao salvar vaga';
+          err.classList.add('visivel');
+          btn.disabled = false; btn.textContent = id ? 'Salvar alterações' : 'Criar vaga';
+          return;
+        }
+        toast(id ? 'Vaga atualizada' : 'Vaga criada', 'sucesso');
+        fecharModalVaga();
+        carregar();
+      } catch (e) {
+        console.error(e);
+        const err = document.getElementById('modal-erro');
+        err.textContent = 'Erro de conexão';
+        err.classList.add('visivel');
+        btn.disabled = false; btn.textContent = id ? 'Salvar alterações' : 'Criar vaga';
+      }
+    }
+
+    async function mudarStatus(id, novoStatus) {
+      try {
+        const r = await authFetch(API + '/api/empresa/vagas/' + id + '/status', {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: novoStatus })
+        });
+        const data = await r.json();
+        if (!r.ok) { toast(data.erro || 'Erro', 'erro'); return; }
+        toast(`Status atualizado: ${statusLabel(novoStatus)}`, 'sucesso');
+        carregar();
+      } catch (e) { console.error(e); toast('Erro de conexão', 'erro'); }
+    }
+
+    function confirmarEncerrar(id, titulo) {
+      if (!confirm(`Encerrar a vaga "${titulo}"?\n\nCandidatos continuam registrados, mas a vaga não receberá novas inscrições.\nVocê pode reabrir depois.`)) return;
+      mudarStatus(id, 'encerrada');
     }
 
     document.getElementById('vagas-busca').addEventListener('input', () => { paginaAtual = 1; render(); });
     document.getElementById('vagas-filtro-status').addEventListener('change', () => { paginaAtual = 1; render(); });
 
-    carregar();
-  </script>
-<script src="auth-helper.js?v=fase3_2026_07_28"></script>
-  <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
-  <script src="empresa-auth-patch.js?v=fase3_2026_07_28"></script>
-
-  <script>
-    // ===== INIT COMUM FASE 3 — RBAC frontend =====
-    (async function() {
-      setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
-
-      // tenta refresh silencioso antes de qualquer coisa
+    (async function init() {
       try { await authInit(); } catch (e) { console.warn('refresh falhou', e); }
+      const tok = localStorage.getItem('empresa_token');
+      if (!tok) { window.location.href = 'login.html'; return; }
+      usuario = authRBAC.currentUser() || {};
+      podeEditar = authRBAC.hasRole('admin_empresa', 'recrutador');
 
-      // guard: sem token -> vai pro login
-      if (!localStorage.getItem('empresa_token')) {
-        const path = window.location.pathname;
-        if (!path.endsWith('login.html')) {
-          window.location.href = 'login.html';
-          return;
-        }
+      // Sidebar
+      const avatar = document.getElementById('avatar');
+      const nome = document.getElementById('user-nome');
+      const empresa = document.getElementById('user-empresa');
+      if (avatar && usuario.nome) avatar.textContent = iniciais(usuario.nome);
+      if (nome) nome.textContent = usuario.nome || '—';
+      if (empresa) empresa.textContent = (usuario.role ? '[' + usuario.role + '] ' : '') + (usuario.empresa_nome || usuario.email || '—');
+
+      if (authRBAC.hasRole('admin_empresa')) {
+        const navEq = document.getElementById('nav-equipe');
+        if (navEq) navEq.style.display = '';
+      }
+      if (podeEditar) {
+        const btn = document.getElementById('btn-nova-vaga');
+        if (btn) btn.style.display = '';
       }
 
-      // aguarda DOM
-      const onReady = () => {
-        // mostra link Equipe se for admin
-        if (authRBAC.hasRole('admin_empresa')) {
-          const navEq = document.getElementById('nav-equipe');
-          if (navEq) navEq.style.display = '';
-        }
-
-        // preenche sidebar com dados do JWT
-        const u = authRBAC.currentUser() || {};
-        const avatar = document.getElementById('avatar');
-        const nome = document.getElementById('user-nome');
-        const empresa = document.getElementById('user-empresa');
-        if (avatar && u.nome) avatar.textContent = u.nome.split(' ').filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join('');
-        if (nome) nome.textContent = u.nome || '—';
-        if (empresa) empresa.textContent = (u.role ? '[' + u.role + '] ' : '') + (u.empresa_nome || u.email || '—');
-
-        // mostra botao +Nova vaga so para admin/recrutador (viewer nao pode)
-        const btnNova = document.getElementById('btn-nova-vaga');
-        if (btnNova && authRBAC.hasRole('admin_empresa', 'recrutador')) {
-          btnNova.style.display = '';
-        }
-
-        // guarda de role por pagina: se existe um atributo data-roles exigido,
-        // fazemos o guard UX (apenas visual; backend é autoridade)
-        const required = document.querySelector('main')?.dataset?.roles;
-        if (required && !authRBAC.hasRole.apply(null, required.split(','))) {
-          // redireciona com aviso
-          const main = document.querySelector('main');
-          if (main) main.innerHTML = '<div style="text-align:center; padding:80px 20px;"><h2 style="color:#999;">🚫 Acesso restrito</h2><p style="color:#666; margin-top:12px;">Você não tem permissão para acessar esta página.</p><p style="margin-top:24px;"><a href="index.html" style="color:#722F37;">← Voltar ao Dashboard</a></p></div>';
-        }
-      };
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', onReady);
-      } else {
-        onReady();
-      }
+      carregar();
     })();
-  </script>
-<script src="chat-rh-flutuante.js?v=20260726c"></script>
-
-
-  <!-- MODAL DE NOVA VAGA (FASE 3) -->
-  <div id="modal-nova-vaga" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; overflow:auto;">
-    <div style="background:#fff; max-width:600px; margin:60px auto; padding:32px; border-radius:12px;">
-      <h2 style="color:var(--vinho); margin-bottom:24px;">+ Criar nova vaga</h2>
-      <div id="nova-vaga-msg" style="color:#C62828; margin-bottom:12px;"></div>
-      <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Título*</label>
-      <input type="text" id="nv-titulo" placeholder="Ex: Analista de RH Júnior" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px; margin-bottom:16px;">
-      <div style="display:flex; gap:12px;">
-        <div style="flex:1;">
-          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Cidade</label>
-          <input type="text" id="nv-cidade" placeholder="Cidade" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
-        </div>
-        <div style="flex:1;">
-          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">UF</label>
-          <input type="text" id="nv-estado" maxlength="2" placeholder="UF" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
-        </div>
-      </div>
-      <div style="display:flex; gap:12px; margin-top:16px;">
-        <div style="flex:1;">
-          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Tipo contrato</label>
-          <select id="nv-tipo" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
-            <option value="clt">CLT</option>
-            <option value="pj">PJ</option>
-            <option value="estagio">Estágio</option>
-            <option value="temporario">Temporário</option>
-          </select>
-        </div>
-        <div style="flex:1;">
-          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Salário mín.</label>
-          <input type="number" id="nv-smin" placeholder="0" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
-        </div>
-        <div style="flex:1;">
-          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Salário máx.</label>
-          <input type="number" id="nv-smax" placeholder="0" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
-        </div>
-      </div>
-      <label style="display:block; margin-top:16px; margin-bottom:8px; font-weight:600; font-size:13px;">Descrição</label>
-      <textarea id="nv-desc" rows="3" placeholder="Atividades e responsabilidades..." style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;"></textarea>
-      <label style="display:block; margin-top:16px; margin-bottom:8px; font-weight:600; font-size:13px;">Requisitos</label>
-      <textarea id="nv-req" rows="2" placeholder="Requisitos obrigatórios..." style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;"></textarea>
-      <label style="display:block; margin-top:16px; margin-bottom:8px; font-weight:600; font-size:13px;">Benefícios</label>
-      <textarea id="nv-benef" rows="2" placeholder="VA, VR, plano de saúde..." style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;"></textarea>
-      <div style="display:flex; gap:12px; margin-top:24px; justify-content:flex-end;">
-        <button onclick="fecharNovaVaga()" style="padding:10px 20px; border:1px solid var(--borda); background:#fff; border-radius:6px; cursor:pointer;">Cancelar</button>
-        <button id="btn-criar-vaga" onclick="submitNovaVaga()" style="padding:10px 24px; background:var(--vinho); color:#fff; border:0; border-radius:6px; cursor:pointer;">Criar vaga</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // ===== NOVA VAGA (FASE 3) =====
-    function abrirModalNovaVaga() {
-      if (!authRBAC.hasRole('admin_empresa', 'recrutador')) {
-        toast('Você não tem permissão para criar vagas.', 'erro');
-        return;
-      }
-      document.getElementById('modal-nova-vaga').style.display = 'block';
-    }
-    function fecharNovaVaga() { document.getElementById('modal-nova-vaga').style.display = 'none'; }
-    async function submitNovaVaga() {
-      const msg = document.getElementById('nova-vaga-msg');
-      msg.textContent = '';
-      const titulo = document.getElementById('nv-titulo').value.trim();
-      if (titulo.length < 2) { msg.textContent = 'Título é obrigatório (mín. 2 caracteres).'; return; }
-
-      const body = {
-        titulo,
-        cidade: document.getElementById('nv-cidade').value.trim() || '—',
-        estado: document.getElementById('nv-estado').value.trim() || 'SP',
-        tipo_contrato: document.getElementById('nv-tipo').value,
-        salario_min: Number(document.getElementById('nv-smin').value) || 0,
-        salario_max: Number(document.getElementById('nv-smax').value) || 0,
-        descricao: document.getElementById('nv-desc').value.trim() || '—',
-        requisitos: document.getElementById('nv-req').value.trim() || '—',
-        beneficios: document.getElementById('nv-benef').value.trim() || '—'
-      };
-
-      const btn = document.getElementById('btn-criar-vaga');
-      btn.disabled = true; btn.textContent = 'Criando...';
-      try {
-        const r = await authFetch(API + '/api/empresa/vagas', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await r.json();
-        if (!r.ok) { msg.textContent = data.erro || 'Erro ao criar vaga.'; btn.disabled = false; btn.textContent = 'Criar vaga'; return; }
-        toast('Vaga criada com sucesso!', 'ok');
-        fecharNovaVaga();
-        // limpa form
-        ['nv-titulo','nv-cidade','nv-estado','nv-smin','nv-smax','nv-desc','nv-req','nv-benef'].forEach(id => document.getElementById(id).value = '');
-        btn.disabled = false; btn.textContent = 'Criar vaga';
-        if (typeof carregar === 'function') carregar();
-      } catch (e) { msg.textContent = 'Erro de conexão.'; btn.disabled = false; btn.textContent = 'Criar vaga'; }
-    }
   </script>
 </body>
 </html>
