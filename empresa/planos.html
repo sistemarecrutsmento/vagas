@@ -52,7 +52,7 @@
   <div style="display:flex;gap:4px">
     <a href="landing.html">Home</a>
     <a href="login.html">Entrar</a>
-    <a href="cadastro.html" style="background:var(--vinho);color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;">Começar</a>
+    <a href="onboarding.html" style="background:var(--vinho);color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;">Começar</a>
   </div>
 </nav>
 
@@ -127,7 +127,7 @@ async function load(){
         <ul class="pfeat">
           ${(FEATURES[p.slug]||[]).map(f=>`<li>${f}</li>`).join('')}
         </ul>
-        <a href="cadastro.html?plano=${p.slug}" class="pcta ${p.slug==='gratuito'?'outline':''}">
+        <a href="onboarding.html?plano=${p.slug}" class="pcta ${p.slug==='gratuito'?'outline':''}">
           ${p.slug==='gratuito'?'Começar grátis':'Escolher '+p.nome}
         </a>
       </div>
