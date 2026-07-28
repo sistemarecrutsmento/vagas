@@ -18,15 +18,26 @@
     return;
   }
 
-  // Configura chaves do localStorage (empresa_*)
+  // Configura chaves do localStorage (empresa_*) — v3 tem USER_KEY
   if (typeof window.setStorageKeys === 'function') {
-    setStorageKeys('empresa_token', 'empresa_refresh');
+    setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
   }
 
-  const originalFetch = window.fetch;
+  // Salva a fetch original SOMENTE uma vez
+  if (window.__enterpriseFetchPatched) return;
+  window.__enterpriseFetchPatched = true;
+
+  const originalFetch = window.fetch.bind(window);
 
   window.fetch = async function(url, opts = {}) {
     const apiUrl = typeof url === 'string' && url.startsWith('http') ? url : url;
+
+    // Se a request tem Authorization manual ou é uma chamada recursiva
+    // (authFetch já vai chamar originalFetch via __nativeFetch)
+    if (opts && opts.__native) {
+      // chamada interna do auth-helper
+      return originalFetch(url, opts);
+    }
 
     // Se a request tem Authorization manual, deixa o authFetch cuidar
     // (ele já adiciona + faz auto-refresh)
