@@ -1,26 +1,27 @@
 // =========================================================================
-// EMPRESA AUTH INIT v1.0 (Etapa 2 - 27/07/2026)
+// EMPRESA AUTH INIT v2.0 (FASE 3 - 28/07/2026)
 // =========================================================================
 // Inicializa sessão durável ANTES do redirect de "sem token".
+//
 // Adiciona:
 //   1. authInit() silencioso no carregamento (renova se possível)
 //   2. Sai limpa via helper (revoga refresh no backend)
+//   3. USER_KEY = 'empresa_usuario' para que authRBAC.currentUser() funcione
 //
 // Uso:
-//   <script src="auth-helper.js?v=etapa2_2026_07_27"></script>
-//   <script src="empresa-auth-init.js?v=etapa2_2026_07_27"></script>
+//   <script src="auth-helper.js?v=fase3_2026_07_28"></script>
+//   <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
 //   <script>
 //     // SEU CÓDIGO AQUI
-//     if (!localStorage.getItem('empresa_token')) window.location.href = 'login.html';
+//     if (!authRBAC.currentUser()) window.location.href = 'login.html';
+//     authRBAC.requireRole('admin_empresa');   // guard UX
 //     // ...
 //   </script>
-//
-// O redirect só acontece DEPOIS do authInit tentar renovar.
 // =========================================================================
 
 (async function() {
   if (typeof window.setStorageKeys === 'function') {
-    setStorageKeys('empresa_token', 'empresa_refresh');
+    setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
   }
 
   // Tenta refresh silencioso antes de qualquer coisa
@@ -40,16 +41,19 @@
     }
     // Fallback manual
     const refresh = localStorage.getItem('empresa_refresh');
-    if (refresh && typeof window.API !== 'undefined') {
-      fetch(API + '/api/auth/logout', {
+    if (refresh) {
+      fetch('https://recrutamento-api-v2.onrender.com/api/auth/logout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: refresh })
       }).catch(() => {});
     }
-    localStorage.removeItem('empresa_token');
-    localStorage.removeItem('empresa_refresh');
-    localStorage.removeItem('empresa_usuario');
+    if (window.authTokens?.clearSessionAll) window.authTokens.clearSessionAll();
+    else {
+      localStorage.removeItem('empresa_token');
+      localStorage.removeItem('empresa_refresh');
+      localStorage.removeItem('empresa_usuario');
+    }
     window.location.href = 'login.html';
   };
 
@@ -61,5 +65,5 @@
     return fetch(url, opts);
   };
 
-  console.log('[empresa-auth-init] pronto — sessão durável ativa');
+  console.log('[empresa-auth-init] pronto — sessão durável ativa (FASE 3)');
 })();
