@@ -218,7 +218,9 @@
           localStorage.setItem('empresa_refresh', data.refreshToken);
         }
         localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
-        window.location.href = 'index.html';
+        // Fase 9: primeiro_acesso → onboarding
+        const dest = data.usuario?.primeiro_acesso ? 'onboarding.html' : 'index.html';
+        window.location.href = dest;
         return false;
       } catch (err) {
         mostrarErro('Erro de conexão. Tente novamente.');
