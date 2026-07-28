@@ -26,6 +26,13 @@ main { max-width: 800px; margin: 24px auto; padding: 0 24px; }
 .notif .badge { background: var(--primary); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
 .vazio { text-align: center; color: var(--text-soft); padding: 40px; }
 </style>
+  <link rel="manifest" href="/candidato/manifest.json">
+  <meta name="theme-color" content="#722F37">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vagas.io">
+  <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
 </head>
 <body>
 <header>
@@ -117,5 +124,14 @@ if (!getToken()) {
 }
 setInterval(atualizar, 60_000);
 </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/candidato/sw.js', { scope: '/candidato/' })
+          .then(r => console.log('[PWA] SW registrado:', r.scope))
+          .catch(e => console.warn('[PWA] SW falhou:', e.message));
+      });
+    }
+  </script>
 </body>
 </html>
