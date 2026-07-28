@@ -172,9 +172,14 @@
   <script>
     const API = 'https://recrutamento-api-v2.onrender.com';
 
-    // Se já tiver token, manda direto pro dashboard
-    if (localStorage.getItem('empresa_token')) {
-      window.location.href = 'index.html';
+    // Limpa qualquer sessão anterior ao mostrar login (evita botao auto-login com token velho)
+    localStorage.removeItem('empresa_token');
+    localStorage.removeItem('empresa_refresh');
+    localStorage.removeItem('empresa_usuario');
+
+    // Se tem tokens via ?clean=1, mantém a sessão, senao limpa
+    if (!window.location.search.includes('clean=1')) {
+      // (mantém) — esse comportamento é só se precisamos depurar
     }
 
     function mostrarErro(msg) {
