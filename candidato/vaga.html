@@ -2,162 +2,23 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#722F37">
-<title>Carregando... · VagasIO</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="0; url=/candidato/?vaga=__VAGA__&slug=__SLUG__">
+<title>Vaga · VagasIO</title>
 <style>
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f5f5f7; color: #1a1a1a; }
-  a { color: inherit; text-decoration: none; }
-  .header { background: #fff; border-bottom: 1px solid #e5e5e7; padding: 12px 16px; }
-  .header .container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .brand { font-weight: 800; color: #722F37; font-size: 22px; }
-  .container { max-width: 900px; margin: 0 auto; padding: 0 16px; }
-  .breadcrumb { font-size: 14px; color: #666; padding: 14px 0; }
-  .breadcrumb a { color: #722F37; }
-  .breadcrumb a:hover { text-decoration: underline; }
-  .vaga { background: #fff; border: 1px solid #e5e5e7; border-radius: 12px; padding: 24px; }
-  .vaga h1 { margin: 0 0 6px; font-size: 26px; color: #111; }
-  .empresa-link { color: #722F37; font-weight: 600; font-size: 16px; }
-  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin: 18px 0; padding: 16px; background: #fafafa; border-radius: 8px; }
-  .meta-grid div div:first-child { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-  .meta-grid div div:last-child { font-weight: 600; color: #222; margin-top: 2px; }
-  .salario { padding: 14px 16px; background: #fef7e8; border: 1px solid #f5d76e; border-radius: 8px; margin: 14px 0; }
-  .salario .valor { font-size: 20px; font-weight: 700; color: #8a5a00; }
-  .salario .obs { font-size: 12px; color: #8a5a00; margin-top: 4px; }
-  .descricao { margin: 18px 0; }
-  .descricao h2 { font-size: 16px; text-transform: uppercase; color: #888; margin-bottom: 8px; letter-spacing: 0.5px; }
-  .descricao p { line-height: 1.6; white-space: pre-wrap; color: #2a2a2a; }
-  .btn-candidatar { display: block; width: 100%; max-width: 400px; margin: 24px auto 0; padding: 16px; background: #722F37; color: #fff; border: 0; border-radius: 8px; font-size: 17px; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.15s; }
-  .btn-candidatar:hover { background: #5e262d; }
-  .btn-candidatar:disabled { background: #aaa; cursor: not-allowed; }
-  .footer { padding: 24px 16px; text-align: center; font-size: 13px; color: #888; border-top: 1px solid #e5e5e7; margin-top: 40px; }
-  .footer a { color: #722F37; }
-  .erro { padding: 40px 20px; text-align: center; }
-  .erro h2 { color: #c33; margin-bottom: 8px; }
-  .loading { padding: 40px 20px; text-align: center; color: #888; }
-  @media (max-width: 600px) {
-    .vaga { padding: 16px; }
-    .vaga h1 { font-size: 22px; }
-    .header .container { flex-direction: column; align-items: flex-start; }
-  }
+  body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#f5f5f7;display:flex;align-items:center;justify-content:center;height:100vh;color:#666;}
 </style>
 </head>
 <body>
-<div id="app"><div class="loading">Carregando vaga…</div></div>
-
+<p>Carregando…</p>
 <script>
-const API = 'https://recrutamento-api-v2.onrender.com';
-
-function escapeHtml(s) {
-  if (s == null) return '';
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function escapeAttr(s) { return escapeHtml(s); }
-function fmtNum(n) {
-  const num = Number(n);
-  if (!Number.isFinite(num)) return String(n);
-  return num.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-}
-function fmtMoney(n) {
-  const num = Number(n);
-  if (!Number.isFinite(num)) return String(n);
-  return num.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-}
-function getParams() {
-  const p = new URLSearchParams(window.location.search);
-  return { slug: p.get('slug') || '', id: parseInt(p.get('id') || '0', 10) };
-}
-
-async function carregar() {
-  const { slug, id } = getParams();
-  if (!slug || !id) return mostrarErro('Link inválido', 'Verifique o link e tente novamente.');
-  let empresa = null, vaga = null;
-  try {
-    const re = await fetch(API + '/api/public/empresa/' + encodeURIComponent(slug));
-    if (!re.ok) return mostrarErro('Vaga não encontrada', 'Esta vaga pode ter sido encerrada ou o link está incorreto.');
-    const de = await re.json();
-    empresa = de.empresa;
-  } catch (e) { return mostrarErro('Sem conexão', 'Verifique sua internet e tente novamente.'); }
-  try {
-    const rv = await fetch(API + '/api/public/empresa/' + encodeURIComponent(slug) + '/vagas/' + id);
-    if (!rv.ok) return mostrarErro('Vaga não disponível', 'Esta vaga pode ter sido pausada, encerrada ou o link está incorreto.');
-    const dv = await rv.json();
-    vaga = dv.vaga;
-  } catch (e) { return mostrarErro('Sem conexão', 'Verifique sua internet e tente novamente.'); }
-  render(empresa, vaga);
-}
-
-function render(e, v) {
-  document.title = v.titulo + ' · ' + e.nome + ' · VagasIO';
-  const loc = [v.cidade, v.estado].filter(Boolean).join(' / ');
-  const meta = [
-    loc && ['Localização', escapeHtml(loc)],
-    v.tipo_contrato && ['Contrato', escapeHtml(v.tipo_contrato)],
-    v.nivel && ['Nível', escapeHtml(v.nivel)],
-    v.area && ['Área', escapeHtml(v.area)]
-  ].filter(Boolean);
-  const salMin = v.salario_min != null && v.salario_min !== '' ? Number(v.salario_min) : null;
-  const salMax = v.salario_max != null && v.salario_max !== '' ? Number(v.salario_max) : null;
-  const temSalario = salMin != null || salMax != null;
-
-  const html = `
-    <header class="header">
-      <div class="container">
-        <a href="/" class="brand">VagasIO</a>
-        <div><a href="/candidato/">Sou candidato →</a></div>
-      </div>
-    </header>
-    <main class="container">
-      <nav class="breadcrumb">
-        <a href="/candidato/">Vagas</a> › <a href="/empresa/p/?slug=${encodeURIComponent(e.slug)}">${escapeHtml(e.nome)}</a> › ${escapeHtml(v.titulo)}
-      </nav>
-      <article class="vaga">
-        <h1>${escapeHtml(v.titulo)}</h1>
-        <a class="empresa-link" href="/empresa/p/?slug=${encodeURIComponent(e.slug)}">${escapeHtml(e.nome)}</a>
-        <div class="meta-grid">
-          ${meta.map(m => `<div><div>${m[0]}</div><div>${m[1]}</div></div>`).join('')}
-        </div>
-        ${temSalario ? `
-        <div class="salario">
-          <div class="valor">💰 R$ ${fmtMoney(salMin ?? 0)}${salMax != null ? ` — R$ ${fmtMoney(salMax)}` : ''}</div>
-          <div class="obs">Faixa salarial informada pela empresa</div>
-        </div>` : ''}
-        ${v.descricao ? `<section class="descricao"><h2>Descrição da vaga</h2><p>${escapeHtml(v.descricao)}</p></section>` : ''}
-        ${v.requisitos ? `<section class="descricao"><h2>Requisitos</h2><p>${escapeHtml(v.requisitos)}</p></section>` : ''}
-        ${v.beneficios ? `<section class="descricao"><h2>Benefícios</h2><p>${escapeHtml(v.beneficios)}</p></section>` : ''}
-      </article>
-      <a class="btn-candidatar" href="/candidato/?vaga=${encodeURIComponent(v.id)}&slug=${encodeURIComponent(e.slug)}">Candidatar-se →</a>
-    </main>
-    <footer class="footer">
-      <div class="container">
-        <a href="/" class="brand">VagasIO</a>
-        <div>Plataforma de recrutamento</div>
-      </div>
-    </footer>
-  `;
-  document.getElementById('app').innerHTML = html;
-}
-
-function mostrarErro(titulo, msg) {
-  document.title = 'Vaga não disponível · VagasIO';
-  document.getElementById('app').innerHTML = `
-    <header class="header"><div class="container">
-      <a href="/" class="brand">VagasIO</a>
-      <div><a href="/candidato/">Vagas →</a></div>
-    </div></header>
-    <main class="container"><div class="erro">
-      <h2>${escapeHtml(titulo)}</h2>
-      <p>${escapeHtml(msg)}</p>
-      <p style="margin-top:18px"><a href="/candidato/">Ver outras vagas</a></p>
-    </div></main>
-    <footer class="footer"><div class="container"><a href="/" class="brand">VagasIO</a></div></footer>
-  `;
-}
-
-carregar();
+  const qs = new URLSearchParams(location.search);
+  const v = qs.get('vaga');
+  const s = qs.get('slug');
+  if (v) {
+    const u = '/candidato/?vaga=' + encodeURIComponent(v) + (s ? '&slug=' + encodeURIComponent(s) : '');
+    location.replace(u);
+  }
 </script>
 </body>
 </html>
