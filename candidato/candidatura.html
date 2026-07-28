@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detalhes da Candidatura — Vagas.io</title>
+<link rel="stylesheet" href="/_shared/global.css">
+<style>
+  :root { --gold: #c8a96a; --dark: #1a1a1a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%); color: #fff; min-height: 100vh; }
+
+  .header { background: #000; border-bottom: 2px solid var(--gold); padding: 16px 24px;
+            display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { margin: 0; font-size: 20px; color: var(--gold); font-weight: 700; }
+  .header-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold);
+                border-radius: 6px; padding: 6px 14px; cursor: pointer; text-decoration: none;
+                font-size: 13px; transition: all 0.2s; }
+  .header-btn:hover { background: var(--gold); color: #000; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+
+  .card { background: #222; border: 1px solid #333; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+
+  .vaga-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .empresa-logo { width: 70px; height: 70px; border-radius: 50%; background: #444;
+                  display: flex; align-items: center; justify-content: center;
+                  font-size: 28px; color: var(--gold); font-weight: bold; overflow: hidden;
+                  border: 2px solid var(--gold); }
+  .empresa-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+  .vaga-info h2 { margin: 0; color: #fff; }
+  .vaga-info .empresa { color: var(--gold); margin: 4px 0; }
+
+  .status-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 16px 0; }
+  .status-pill { padding: 6px 16px; border-radius: 14px; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+  .status-em_andamento { background: #1f4d7a; color: #cce4ff; }
+  .status-em_analise { background: #4a4a1f; color: #fff3a3; }
+  .status-contratado { background: #1f5c2e; color: #b8e6c4; }
+  .status-rejeitado { background: #5c1f1f; color: #f8b8b8; }
+
+  .progress-bar { background: #333; border-radius: 10px; height: 12px; overflow: hidden; margin: 12px 0; }
+  .progress-bar-fill { background: linear-gradient(90deg, var(--gold), #ffd700); height: 100%; transition: width 0.3s; }
+
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; }
+  .info-cell { background: #1a1a1a; padding: 12px; border-radius: 8px; }
+  .info-cell .label { color: #888; font-size: 12px; text-transform: uppercase; }
+  .info-cell .value { color: #fff; margin-top: 4px; font-weight: 600; }
+
+  .vaga-section { margin-top: 20px; }
+  .vaga-section h3 { color: var(--gold); font-size: 16px; margin-bottom: 8px; }
+  .vaga-section p { color: #ccc; line-height: 1.6; white-space: pre-wrap; }
+
+  .timeline { position: relative; padding-left: 30px; margin-top: 16px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #333; }
+  .timeline-event { position: relative; padding: 12px 0; }
+  .timeline-event::before { content: ''; position: absolute; left: -22px; top: 18px;
+                              width: 12px; height: 12px; border-radius: 50%;
+                              background: var(--gold); border: 3px solid #1a1a1a; }
+  .timeline-event .quando { color: #888; font-size: 12px; }
+  .timeline-event .oque { color: #fff; margin-top: 4px; }
+  .timeline-event .quem { color: #aaa; font-size: 13px; margin-top: 4px; }
+  .timeline-event .msg { color: #ccc; font-style: italic; margin-top: 4px; }
+
+  .empty { text-align: center; padding: 40px; color: #888; }
+
+  .loading { text-align: center; padding: 60px; }
+  .spinner { border: 3px solid #333; border-top: 3px solid var(--gold); border-radius: 50%;
+             width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .erro { background: #5c1f1f; color: #f8b8b8; padding: 16px; border-radius: 8px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 id="titulo">Candidatura</h1>
+  <div>
+    <a href="candidaturas.html" class="header-btn">← Minhas Candidaturas</a>
+  </div>
+</div>
+
+<div class="container">
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p style="color:#888;">Carregando…</p>
+  </div>
+  <div id="content" style="display:none;"></div>
+</div>
+
+<script src="/_shared/auth-helper.js"></script>
+<script>
+setStorageKeys('candidato_token', 'candidato_refresh');
+
+const API = 'https://recrutamento-api-novo.onrender.com';
+const cid = new URLSearchParams(location.search).get('id');
+
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+function statusLabel(s) {
+  const map = {
+    em_andamento: 'Em andamento',
+    em_analise: 'Em análise',
+    contratado: 'Contratado ✅',
+    rejeitado: 'Não foi dessa vez'
+  };
+  return map[s] || s;
+}
+
+function formatDataHora(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric',
+                                       hour: '2-digit', minute: '2-digit' });
+}
+
+function renderEvento(ev) {
+  const mudouEtapa = ev.de_etapa !== ev.para_etapa;
+  const mudouStatus = ev.de_status !== ev.para_status;
+
+  let desc = '';
+  if (mudouEtapa) desc += `<strong>Etapa:</strong> ${escapeHtml(ev.de_etapa || '—')} → ${escapeHtml(ev.para_etapa || '—')}`;
+  if (mudouStatus) {
+    if (desc) desc += '<br>';
+    desc += `<strong>Status:</strong> ${escapeHtml(ev.de_status || '—')} → ${escapeHtml(ev.para_status || '—')}`;
+  }
+  if (!desc) desc = 'Atualização';
+
+  return `
+    <div class="timeline-event">
+      <div class="quando">${formatDataHora(ev.data)}</div>
+      <div class="oque">${desc}</div>
+      <div class="quem">por ${escapeHtml(ev.autor_nome || ev.autor_tipo || 'Sistema')}</div>
+      ${ev.mensagem ? `<div class="msg">"${escapeHtml(ev.mensagem)}"</div>` : ''}
+    </div>
+  `;
+}
+
+async function carregar() {
+  const tk = authTokens.getAccess();
+  if (!tk) { window.location.href = 'login.html'; return; }
+  if (!cid) { document.getElementById('loading').innerHTML = '<p>ID inválido</p>'; return; }
+
+  try {
+    const [rDet, rHist] = await Promise.all([
+      authFetch(`${API}/api/candidato/candidaturas/${cid}`),
+      authFetch(`${API}/api/candidato/candidaturas/${cid}/historico`)
+    ]);
+
+    if (rDet.status === 404) {
+      document.getElementById('loading').innerHTML = `
+        <div class="erro">
+          <h2>Candidatura não encontrada</h2>
+          <p>Verifique se ela ainda existe ou se pertence à sua conta.</p>
+          <a href="candidaturas.html" class="header-btn">Voltar</a>
+        </div>`;
+      return;
+    }
+    if (!rDet.ok) throw new Error('Falha ao carregar');
+
+    const det = (await rDet.json()).candidatura;
+    const hist = rHist.ok ? (await rHist.json()).eventos : [];
+
+    const iniciais = (det.empresa_nome || 'E').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    const logo = det.empresa_logo_url
+      ? `<img src="${escapeHtml(det.empresa_logo_url)}" alt="${escapeHtml(det.empresa_nome)}">`
+      : iniciais;
+
+    const prog = Math.round((det.progresso || 0) * 100);
+
+    document.getElementById('titulo').textContent = det.vaga_titulo || 'Candidatura';
+
+    let html = `
+      <div class="card">
+        <div class="vaga-header">
+          <div class="empresa-logo">${logo}</div>
+          <div class="vaga-info">
+            <h2>${escapeHtml(det.vaga_titulo)}</h2>
+            <div class="empresa">${escapeHtml(det.empresa_nome || '—')}</div>
+          </div>
+        </div>
+
+        <div class="status-bar">
+          <span class="status-pill status-${escapeHtml(det.status)}">${escapeHtml(statusLabel(det.status))}</span>
+          ${det.etapa_nome ? `<span style="color:#ccc;">Etapa: <strong>${escapeHtml(det.etapa_nome)}</strong> (${escapeHtml(det.etapa_label)})</span>` : ''}
+        </div>
+
+        <div class="progress-bar">
+          <div class="progress-bar-fill" style="width:${prog}%;"></div>
+        </div>
+        <div style="color:#888;font-size:13px;margin-top:4px;">${prog}% do processo seletivo</div>
+
+        <div class="info-grid">
+          <div class="info-cell"><div class="label">Candidatura</div><div class="value">${formatDataHora(det.data_candidatura)}</div></div>
+          ${det.vaga_cidade ? `<div class="info-cell"><div class="label">Local</div><div class="value">${escapeHtml(det.vaga_cidade)}/${escapeHtml(det.vaga_estado || '')}</div></div>` : ''}
+          ${det.vaga_tipo_contrato ? `<div class="info-cell"><div class="label">Tipo</div><div class="value">${escapeHtml(det.vaga_tipo_contrato)}</div></div>` : ''}
+          ${det.vaga_nivel ? `<div class="info-cell"><div class="label">Nível</div><div class="value">${escapeHtml(det.vaga_nivel)}</div></div>` : ''}
+        </div>
+      </div>
+
+      ${det.vaga_descricao ? `
+        <div class="card">
+          <h3 style="color:var(--gold);margin:0 0 12px 0;">Sobre a vaga</h3>
+          <p>${escapeHtml(det.vaga_descricao)}</p>
+        </div>
+      ` : ''}
+
+      <div class="card">
+        <h3 style="color:var(--gold);margin:0 0 16px 0;">📜 Histórico do Processo</h3>
+        ${hist.length === 0
+          ? '<div class="empty">Nenhuma movimentação registrada ainda.</div>'
+          : `<div class="timeline">${hist.map(renderEvento).join('')}</div>`
+        }
+      </div>
+    `;
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').innerHTML = html;
+    document.getElementById('content').style.display = 'block';
+  } catch (e) {
+    document.getElementById('loading').innerHTML = `
+      <div class="erro"><p>${escapeHtml(e.message)}</p></div>
+    `;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await authInit();
+  await carregar();
+});
+</script>
+</body>
+</html>
