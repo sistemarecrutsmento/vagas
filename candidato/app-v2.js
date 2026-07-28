@@ -317,6 +317,20 @@ function abrirDetalhes(id) {
         }
       }
       atualizarBotaoCandidatar(v.id);
+      // Fase 11 — Tags
+      renderTagsVaga(v.tags || []);
+      // Fase 11 — Favorito e Match (apenas para candidatos logados)
+      if (tokenCandidato) {
+        carregarFavoritoStatus(v.id);
+        carregarMatchCandidato(v.id);
+        const btnFav = document.getElementById('btn-favoritar');
+        if (btnFav) btnFav.style.display = '';
+      } else {
+        const btnFav = document.getElementById('btn-favoritar');
+        if (btnFav) btnFav.style.display = 'none';
+        const bm = document.getElementById('bloco-match');
+        if (bm) bm.style.display = 'none';
+      }
       document.getElementById('modal-detalhes').classList.add('aberto');
     })
     .catch(() => alert('Erro ao carregar detalhes da vaga'));
@@ -1540,3 +1554,89 @@ window.aplicarPrimeiroEmprego = aplicarPrimeiroEmprego;
 Object.defineProperty(window, 'tokenCandidato', { get: () => tokenCandidato });
 Object.defineProperty(window, 'emailLogado', { get: () => emailLogado });
 Object.defineProperty(window, 'cadastroCompleto', { get: () => cadastroCompleto });
+
+// FASE 11 — Favoritos, Match e Tags (candidato)
+let _vagaFavoritaId = null;
+let _isFavorito = false;
+
+function renderTagsVaga(tags) {
+  const blocoTags = document.getElementById('bloco-tags');
+  const cont = document.getElementById('tags-container');
+  if (!blocoTags || !cont) return;
+  if (!Array.isArray(tags) || tags.length === 0) { blocoTags.style.display = 'none'; return; }
+  blocoTags.style.display = '';
+  cont.innerHTML = tags.map(t =>
+    `<span style="background:#f3e8ff;color:#722F37;border:1px solid #d9b8f0;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;">${escapeHtml(String(t))}</span>`
+  ).join('');
+}
+
+async function carregarFavoritoStatus(vagaId) {
+  _vagaFavoritaId = vagaId;
+  const btn = document.getElementById('btn-favoritar');
+  if (!btn || !tokenCandidato) return;
+  try {
+    const r = await fetch(API + '/api/candidato/favoritos', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    const d = await r.json();
+    const favs = d.favoritos || [];
+    _isFavorito = favs.some(f => f.vaga_id === vagaId || f.id === vagaId);
+    atualizarBtnFavoritar();
+  } catch (e) {}
+}
+
+function atualizarBtnFavoritar() {
+  const btn = document.getElementById('btn-favoritar');
+  if (!btn) return;
+  if (_isFavorito) {
+    btn.textContent = '\u2605 Favoritado';
+    btn.style.background = '#fef9c3';
+    btn.style.borderColor = '#d4a017';
+    btn.style.color = '#92400e';
+  } else {
+    btn.textContent = '\u2606 Favoritar';
+    btn.style.background = '#fff';
+    btn.style.borderColor = '#ddd';
+    btn.style.color = '#555';
+  }
+}
+
+async function toggleFavoritar() {
+  if (!tokenCandidato || !_vagaFavoritaId) { abrirModal('login'); return; }
+  const method = _isFavorito ? 'DELETE' : 'POST';
+  try {
+    const r = await fetch(API + '/api/candidato/favoritos/' + _vagaFavoritaId, {
+      method,
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (r.ok) { _isFavorito = !_isFavorito; atualizarBtnFavoritar(); }
+  } catch (e) {}
+}
+
+async function carregarMatchCandidato(vagaId) {
+  const bloco = document.getElementById('bloco-match');
+  const pct = document.getElementById('match-pct');
+  const det = document.getElementById('match-detalhes');
+  if (!bloco || !tokenCandidato) return;
+  try {
+    const r = await fetch(API + '/api/candidato/vagas/' + vagaId + '/match', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (!r.ok) { bloco.style.display = 'none'; return; }
+    const d = await r.json();
+    const score = d.score || 0;
+    bloco.style.display = '';
+    if (pct) pct.textContent = score + '%';
+    if (det && d.detalhes) {
+      const items = d.detalhes.filter(x => x.pontos > 0);
+      det.innerHTML = items.length
+        ? items.map(x => `<span>+${escapeHtml(x.criterio)}: ${x.pontos}pts</span>`).join(' &nbsp;|&nbsp; ')
+        : '<span style="color:#999">Perfil incompleto para calcular</span>';
+    }
+    const cor = score >= 70 ? '#16a34a' : score >= 40 ? '#d97706' : '#dc2626';
+    bloco.style.borderLeftColor = cor;
+    if (pct) pct.style.color = cor;
+  } catch (e) { if (bloco) bloco.style.display = 'none'; }
+}
+
+window.toggleFavoritar = toggleFavoritar;
