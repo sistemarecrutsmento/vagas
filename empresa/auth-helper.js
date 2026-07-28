@@ -187,7 +187,8 @@
         const r = await fetch(API + '/api/auth/refresh', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken: refresh })
+          body: JSON.stringify({ refreshToken: refresh }),
+          __native: true
         });
 
         if (!r.ok) {
@@ -232,7 +233,8 @@
 
     let r;
     try {
-      r = await fetch(fullUrl, { ...opts, headers });
+      // usa __native pra BURLAR o auth-patch (evita loop de reescrita)
+      r = await fetch(fullUrl, { ...opts, headers, __native: true });
     } catch (e) {
       throw e;
     }
@@ -242,7 +244,7 @@
       const ok = await tryRefresh();
       if (ok) {
         headers['Authorization'] = 'Bearer ' + getAccess();
-        r = await fetch(fullUrl, { ...opts, headers });
+        r = await fetch(fullUrl, { ...opts, headers, __native: true });
       } else {
         // refresh falhou -> sessão inválida, limpa e redireciona
         console.warn('[auth] refresh falhou — limpando sessão');
@@ -281,7 +283,8 @@
         await fetch(API + '/api/auth/logout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken: refresh })
+          body: JSON.stringify({ refreshToken: refresh }),
+          __native: true
         });
       } catch (e) { /* ignora erro no logout */ }
     }
