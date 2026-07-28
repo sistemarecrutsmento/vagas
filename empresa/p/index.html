@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#722F37">
+<title>Carregando... · VagasIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f5f5f7; color: #1a1a1a; }
+  a { color: inherit; text-decoration: none; }
+
+  .topbar {
+    background: #fff; border-bottom: 1px solid #eee;
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .topbar .logo { font-weight: 800; color: #722F37; font-size: 20px; letter-spacing: -0.02em; }
+  .topbar .links a { color: #666; font-size: 14px; margin-left: 16px; }
+  .topbar .links a:hover { color: #722F37; }
+
+  .hero {
+    background: linear-gradient(135deg, #722F37 0%, #8d3a44 100%);
+    color: #fff; padding: 48px 20px 64px;
+    text-align: center;
+  }
+  .hero .logo-img {
+    width: 96px; height: 96px; border-radius: 16px; object-fit: cover;
+    background: #fff; margin: 0 auto 16px; display: block;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  }
+  .hero .logo-placeholder {
+    width: 96px; height: 96px; border-radius: 16px;
+    background: rgba(255,255,255,.2); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 800;
+    margin: 0 auto 16px;
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+  .hero .meta { opacity: .9; font-size: 15px; margin-bottom: 24px; }
+  .hero .cta {
+    display: inline-block; background: #fff; color: #722F37;
+    padding: 14px 28px; border-radius: 8px; font-weight: 700;
+    font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    transition: transform .15s;
+  }
+  .hero .cta:hover { transform: translateY(-2px); }
+  .hero .cta-count {
+    display: inline-block; background: rgba(255,255,255,.15); color: #fff;
+    padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+  .section-title {
+    font-size: 22px; font-weight: 700; margin: 0 0 16px; color: #1a1a1a;
+    letter-spacing: -0.01em;
+  }
+  .about {
+    background: #fff; border-radius: 12px; padding: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    margin-bottom: 32px;
+  }
+  .about p { margin: 0 0 12px; line-height: 1.6; color: #333; }
+  .about p:last-child { margin-bottom: 0; }
+  .info-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px; margin-top: 16px;
+  }
+  .info-item {
+    padding: 12px; background: #f5f5f7; border-radius: 8px;
+  }
+  .info-item .label { font-size: 12px; color: #888; margin-bottom: 4px; font-weight: 500; }
+  .info-item .value { font-size: 14px; color: #1a1a1a; font-weight: 600; }
+
+  .job-card {
+    background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    display: flex; gap: 16px; align-items: center;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .job-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+  .job-card .job-info { flex: 1; }
+  .job-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 700; }
+  .job-card .job-meta { color: #666; font-size: 13px; }
+  .job-card .job-meta span { margin-right: 12px; }
+  .job-card .job-meta .dot { color: #ccc; }
+  .job-card .ver-btn {
+    background: #722F37; color: #fff; padding: 10px 20px;
+    border-radius: 8px; font-weight: 600; font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .empty {
+    background: #fff; border-radius: 12px; padding: 48px 20px;
+    text-align: center; color: #888;
+  }
+
+  .error-box {
+    background: #fee; border: 1px solid #fcc; color: #c33;
+    padding: 24px; border-radius: 12px; text-align: center;
+  }
+
+  .footer {
+    background: #1a1a1a; color: #aaa; padding: 32px 20px;
+    text-align: center; font-size: 13px; margin-top: 48px;
+  }
+  .footer .brand { color: #fff; font-weight: 700; margin-bottom: 4px; }
+  .footer a { color: #722F37; }
+
+  /* Spinner */
+  .spinner {
+    display: inline-block; width: 32px; height: 32px;
+    border: 3px solid #eee; border-top-color: #722F37;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading {
+    text-align: center; padding: 64px 20px;
+  }
+
+  @media (max-width: 600px) {
+    .hero { padding: 32px 16px 48px; }
+    .hero h1 { font-size: 24px; }
+    .job-card { flex-direction: column; align-items: stretch; gap: 12px; }
+    .job-card .ver-btn { text-align: center; }
+    .topbar { padding: 12px 16px; }
+    .topbar .links a { font-size: 13px; margin-left: 12px; }
+  }
+</style>
+</head>
+<body>
+  <div id="app">
+    <div class="loading">
+      <div class="spinner"></div>
+      <div style="margin-top: 12px; color: #888;">Carregando...</div>
+    </div>
+  </div>
+
+<script>
+const API = 'https://recrutamento-api-v2.onrender.com';
+const params = new URLSearchParams(location.search);
+const slug = (params.get('slug') || '').toLowerCase().trim();
+
+if (!slug) {
+  document.getElementById('app').innerHTML = `
+    <div class="container">
+      <div class="error-box">
+        <strong>Link inválido</strong>
+        <p>Esta página precisa de um identificador de empresa.</p>
+        <p><a href="/empresa/login.html" style="color:#722F37;font-weight:600;">Acessar como empresa →</a></p>
+      </div>
+    </div>
+  `;
+  throw new Error('slug ausente');
+}
+
+document.title = 'Carregando... · VagasIO';
+
+async function carregar() {
+  try {
+    const r = await fetch(`${API}/api/public/empresa/${encodeURIComponent(slug)}`);
+    if (r.status === 404) {
+      render404();
+      return;
+    }
+    if (!r.ok) throw new Error('status ' + r.status);
+    const data = await r.json();
+    render(data);
+    // Pré-carrega as vagas em paralelo
+    carregarVagas();
+  } catch (e) {
+    console.error(e);
+    renderError('Não foi possível carregar o portal desta empresa. Tente novamente em alguns instantes.');
+  }
+}
+
+async function carregarVagas() {
+  try {
+    const r = await fetch(`${API}/api/public/empresa/${encodeURIComponent(slug)}/vagas`);
+    if (!r.ok) return;
+    const data = await r.json();
+    renderVagas(data.vagas || []);
+  } catch (e) {
+    console.error('vagas erro:', e);
+  }
+}
+
+function render404() {
+  document.title = 'Empresa não encontrada · VagasIO';
+  document.getElementById('app').innerHTML = `
+    <div class="container" style="padding-top:64px;">
+      <div class="error-box">
+        <h2 style="margin:0 0 12px;font-size:22px;">Empresa não encontrada</h2>
+        <p>O link acessado pode estar desatualizado ou a empresa não está mais ativa.</p>
+        <p><a href="/" style="color:#722F37;font-weight:600;">← Voltar ao VagasIO</a></p>
+      </div>
+    </div>
+  `;
+}
+
+function renderError(msg) {
+  document.title = 'Erro · VagasIO';
+  document.getElementById('app').innerHTML = `
+    <div class="container" style="padding-top:64px;">
+      <div class="error-box">
+        <h2 style="margin:0 0 12px;font-size:22px;">Algo deu errado</h2>
+        <p>${msg}</p>
+        <p><a href="javascript:location.reload()" style="color:#722F37;font-weight:600;">Tentar novamente →</a></p>
+      </div>
+    </div>
+  `;
+}
+
+function render(data) {
+  const e = data.empresa;
+  document.title = `${e.nome} · VagasIO`;
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', e.cor_destaque || '#722F37');
+
+  const logo = e.logo_url
+    ? `<img class="logo-img" src="${escapeAttr(e.logo_url)}" alt="${escapeAttr(e.nome)}" onerror="this.outerHTML='<div class=&quot;logo-placeholder&quot;>${escapeHtml(e.nome.charAt(0).toUpperCase())}</div>'">`
+    : `<div class="logo-placeholder">${escapeHtml(e.nome.charAt(0).toUpperCase())}</div>`;
+
+  const cidade = [e.cidade, e.estado].filter(Boolean).join(' / ');
+  const setor = e.setor || '';
+  const tamanho = e.tamanho || '';
+  const site = e.site || '';
+  const meta = [cidade, setor, tamanho].filter(Boolean).join(' • ') || 'Equipe talentosa. Vagas abertas.';
+
+  const descricao = (e.descricao && e.descricao.trim())
+    ? `<div class="about"><h2 class="section-title">Sobre a empresa</h2><p>${escapeHtml(e.descricao)}</p></div>`
+    : '';
+
+  const infoItems = [];
+  if (cidade) infoItems.push({ l: 'Localização', v: cidade });
+  if (setor) infoItems.push({ l: 'Setor', v: setor });
+  if (tamanho) infoItems.push({ l: 'Porte', v: tamanho });
+  if (site) infoItems.push({ l: 'Site', v: site });
+
+  const info = infoItems.length
+    ? `<div class="info-grid">${infoItems.map(i => `<div class="info-item"><div class="label">${escapeHtml(i.l)}</div><div class="value">${escapeHtml(i.v)}</div></div>`).join('')}</div>`
+    : '';
+
+  const totalLabel = data.vagas_publicadas === 1 ? '1 vaga aberta' : `${data.vagas_publicadas} vagas abertas`;
+
+  document.getElementById('app').innerHTML = `
+    <div class="topbar">
+      <a href="/" class="logo">VagasIO</a>
+      <div class="links">
+        <a href="vagas.html?slug=${encodeURIComponent(slug)}">Vagas</a>
+        <a href="sobre.html?slug=${encodeURIComponent(slug)}">Sobre</a>
+        <a href="/candidato/" style="color:#722F37;font-weight:600;">Sou candidato →</a>
+      </div>
+    </div>
+
+    <section class="hero" style="background:linear-gradient(135deg, ${e.cor_destaque || '#722F37'} 0%, ${shadeColor(e.cor_destaque || '#722F37', 15)} 100%);">
+      ${logo}
+      <h1>${escapeHtml(e.nome)}</h1>
+      <div class="meta">${escapeHtml(meta)}</div>
+      <div class="cta-count">📢 ${totalLabel}</div>
+      <br>
+      <a href="vagas.html?slug=${encodeURIComponent(slug)}" class="cta">Ver vagas abertas →</a>
+    </section>
+
+    <div class="container">
+      ${descricao}
+      ${info ? `<div class="about"><h2 class="section-title">Informações</h2>${info}</div>` : ''}
+      <h2 class="section-title">Vagas abertas</h2>
+      <div id="lista-vagas">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="brand">VagasIO</div>
+      <div>Plataforma de recrutamento · <a href="/candidato/">Sou candidato →</a></div>
+    </footer>
+  `;
+}
+
+function renderVagas(vagas) {
+  const container = document.getElementById('lista-vagas');
+  if (!container) return;
+  if (!vagas.length) {
+    container.innerHTML = `<div class="empty">Nenhuma vaga aberta no momento.<br><span style="font-size:13px;">Volte mais tarde!</span></div>`;
+    return;
+  }
+  container.innerHTML = vagas.map(v => {
+    const local = [v.cidade, v.estado].filter(Boolean).join(' / ') || '—';
+    const meta = [
+      v.tipo_contrato,
+      v.nivel
+    ].filter(Boolean).join(' · ');
+    return `
+      <a class="job-card" href="vaga.html?slug=${encodeURIComponent(slug)}&id=${v.id}">
+        <div class="job-info">
+          <h3>${escapeHtml(v.titulo)}</h3>
+          <div class="job-meta">
+            <span>📍 ${escapeHtml(local)}</span>
+            ${meta ? `<span class="dot">•</span><span>${escapeHtml(meta)}</span>` : ''}
+          </div>
+        </div>
+        <div class="ver-btn">Ver vaga →</div>
+      </a>
+    `;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+function shadeColor(hex, percent) {
+  // Aceita #rrggbb; clareia (+) ou escurece (-) por percent
+  let f = parseInt(hex.slice(1), 16),
+    t = percent < 0 ? 0 : 255,
+    p = Math.abs(percent) / 100,
+    R = f >> 16, G = f >> 8 & 0x00FF, B = f & 0x0000FF;
+  return '#' + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 +
+    (Math.round((t - G) * p) + G) * 0x100 +
+    (Math.round((t - B) * p) + B)).toString(16).slice(1);
+}
+
+carregar();
+</script>
+</body>
+</html>
