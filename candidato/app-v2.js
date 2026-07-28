@@ -169,6 +169,32 @@ window.addEventListener('DOMContentLoaded', async () => {
       carregarVagas();
     });
   });
+
+  // FIX FASE 5 (28/07): se veio de um portal público com ?vaga=ID&slug=X,
+  // mostra modal de detalhes da vaga automaticamente (após carregar)
+  const qs = new URLSearchParams(location.search);
+  const vagaQS = parseInt(qs.get('vaga'), 10);
+  if (Number.isInteger(vagaQS) && vagaQS > 0) {
+    // Espera carregar vagas e tenta abrir detalhe
+    setTimeout(() => {
+      const v = (typeof vagas !== 'undefined' ? vagas : window.vagas || []).find(x => x.id === vagaQS);
+      if (v && typeof abrirDetalhes === 'function') {
+        abrirDetalhes(vagaQS);
+      } else {
+        // Busca direta via API
+        fetch((typeof API !== 'undefined' ? API : '') + '/api/vagas/' + vagaQS)
+          .then(r => r.json())
+          .then(d => {
+            if (d && d.ok && typeof abrirDetalhes === 'function') {
+              // injeta em window.vagas pra abrirDetalhes funcionar
+              window.vagas = window.vagas || [];
+              if (!window.vagas.find(x => x.id === vagaQS)) window.vagas.push(d.vaga);
+              abrirDetalhes(vagaQS);
+            }
+          }).catch(() => {});
+      }
+    }, 1500);
+  }
 });
 
 function toggleFiltroDropdown() {
