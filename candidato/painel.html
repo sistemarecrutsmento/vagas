@@ -82,6 +82,14 @@
   /* Container principal */
   .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
 
+/* KPIs mini (FASE 7) */
+.kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0 24px; }
+.kpi-mini { background: #fff; border-radius: 10px; padding: 14px 12px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
+.kpi-mini-num { display: block; font-size: 22px; font-weight: 700; color: #7B1F1F; line-height: 1; }
+.kpi-mini-lbl { display: block; font-size: 11px; color: #888; margin-top: 4px; }
+.kpi-nao-lidas { color: #D4AF37; }
+@media (max-width: 700px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+
   /* Card de perfil */
   .perfil-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px; margin-bottom: 24px; }
   .perfil-card-top { display: flex; align-items: center; gap: 24px; }
@@ -296,6 +304,15 @@
     <div class="perfil-card-acao">
       <button class="btn-gerenciar" onclick="abrirEdicaoPerfil()">Gerenciar perfil</button>
     </div>
+  </div>
+
+  <!-- KPIs do candidato (FASE 7) -->
+  <div class="kpi-row" id="painel-kpis">
+    <div class="kpi-mini"><span class="kpi-mini-num" id="kpi-c-total">—</span><span class="kpi-mini-lbl">Candidaturas</span></div>
+    <div class="kpi-mini"><span class="kpi-mini-num" id="kpi-c-andamento">—</span><span class="kpi-mini-lbl">Em andamento</span></div>
+    <div class="kpi-mini"><span class="kpi-mini-num" id="kpi-c-entrevistas">—</span><span class="kpi-mini-lbl">Entrevistas</span></div>
+    <div class="kpi-mini"><span class="kpi-mini-num" id="kpi-c-contratadas">—</span><span class="kpi-mini-lbl">Contratadas</span></div>
+    <div class="kpi-mini"><span class="kpi-mini-num kpi-nao-lidas" id="kpi-c-notif">—</span><span class="kpi-mini-lbl">Não lidas</span></div>
   </div>
 
   <!-- Card de candidaturas -->
@@ -537,6 +554,26 @@ async function carregarPaginaCandidato() {
 
   // Candidaturas
   carregarCands();
+  // KPIs (FASE 7)
+  carregarKPIsCandidato();
+}
+
+async function carregarKPIsCandidato() {
+  try {
+    const r = await fetch(API + '/api/candidato/dashboard/kpis', {
+      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+    const c = d.candidaturas || {};
+    document.getElementById('kpi-c-total').textContent = c.total ?? 0;
+    document.getElementById('kpi-c-andamento').textContent = c.em_andamento ?? 0;
+    document.getElementById('kpi-c-entrevistas').textContent = c.entrevistas ?? 0;
+    document.getElementById('kpi-c-contratadas').textContent = c.contratadas ?? 0;
+    document.getElementById('kpi-c-notif').textContent = d.notificacoes_nao_lidas ?? 0;
+  } catch (e) {
+    console.error('[KPIs candidato]', e);
+  }
 }
 
 window.abrirDetalhesCandidato = function(vagaId) {
