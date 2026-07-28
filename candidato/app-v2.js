@@ -332,6 +332,8 @@ function abrirDetalhes(id) {
         if (bm) bm.style.display = 'none';
       }
       document.getElementById('modal-detalhes').classList.add('aberto');
+      // Analytics: vaga visualizada
+      if (window.vagiasTrack) window.vagiasTrack('vaga_visualizada', { vaga_id: id, metadata: { origem: 'portal' } });
     })
     .catch(() => alert('Erro ao carregar detalhes da vaga'));
 }
@@ -1609,7 +1611,12 @@ async function toggleFavoritar() {
       method,
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
-    if (r.ok) { _isFavorito = !_isFavorito; atualizarBtnFavoritar(); }
+    if (r.ok) {
+      _isFavorito = !_isFavorito;
+      atualizarBtnFavoritar();
+      // Analytics: favoritar/desfavoritar
+      if (window.vagiasTrack) window.vagiasTrack(_isFavorito ? 'vaga_favoritada' : 'vaga_desfavoritada', { vaga_id: _vagaFavoritaId });
+    }
   } catch (e) {}
 }
 
