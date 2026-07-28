@@ -163,8 +163,25 @@
       <button type="submit" class="btn-entrar" id="btn-entrar">Entrar</button>
     </form>
 
+    <!-- Fase 10: formulário de 2FA (oculto até ser necessário) -->
+    <form id="form-2fa" style="display:none" onsubmit="return verificar2FA(event)">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:32px;margin-bottom:8px;">🔐</div>
+        <p style="font-weight:600;font-size:16px;margin-bottom:4px;">Verificação em duas etapas</p>
+        <p style="font-size:13px;color:#666;">Digite o código do seu app autenticador (6 dígitos)<br>ou um código de recuperação (8 caracteres)</p>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label for="cod-2fa">Código</label>
+        <input type="text" id="cod-2fa" maxlength="8" inputmode="numeric" autocomplete="one-time-code"
+               placeholder="000000" style="font-size:22px;letter-spacing:6px;text-align:center;" required>
+      </div>
+      <p id="err-2fa" style="color:#C62828;font-size:13px;min-height:18px;margin-bottom:8px;"></p>
+      <button type="submit" class="btn-entrar" id="btn-2fa">Verificar</button>
+      <button type="button" onclick="voltar2FA()" style="display:block;width:100%;margin-top:8px;background:none;border:1px solid var(--borda);color:#555;padding:10px;border-radius:6px;cursor:pointer;font-size:14px;">← Voltar</button>
+    </form>
+
     <div class="rodape">
-      Esqueceu a senha? Fale com seu recrutador.<br>
+      <a href="esqueci-senha.html" style="color:var(--vinho)">Esqueci minha senha</a> ·
       <a href="https://vagasio.com.br">← Voltar para o site</a>
     </div>
   </div>
@@ -212,13 +229,22 @@
           btn.textContent = 'Entrar';
           return false;
         }
-        localStorage.setItem('empresa_token', data.token);
-        // ETAPA 2: salva refresh token para auto-refresh
-        if (data.refreshToken) {
-          localStorage.setItem('empresa_refresh', data.refreshToken);
+
+        // Fase 10: 2FA ativo → pede código TOTP
+        if (data.requer_2fa && data.pending_token) {
+          sessionStorage.setItem('empresa_pending_token', data.pending_token);
+          sessionStorage.setItem('empresa_pending_email', email);
+          // Exibe campo de código 2FA
+          document.getElementById('form-login').style.display = 'none';
+          document.getElementById('form-2fa').style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Entrar';
+          return false;
         }
+
+        localStorage.setItem('empresa_token', data.token);
+        if (data.refreshToken) localStorage.setItem('empresa_refresh', data.refreshToken);
         localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
-        // Fase 9: primeiro_acesso → onboarding
         const dest = data.usuario?.primeiro_acesso ? 'onboarding.html' : 'index.html';
         window.location.href = dest;
         return false;
@@ -228,6 +254,46 @@
         btn.textContent = 'Entrar';
         return false;
       }
+    }
+
+    async function verificar2FA(e) {
+      e && e.preventDefault();
+      const codigo = document.getElementById('cod-2fa').value.trim();
+      const pending_token = sessionStorage.getItem('empresa_pending_token');
+      if (!pending_token || !/^\d{6}$/.test(codigo) && codigo.length !== 8) {
+        document.getElementById('err-2fa').textContent = 'Código inválido.';
+        return;
+      }
+      const btn2 = document.getElementById('btn-2fa');
+      btn2.disabled = true; btn2.textContent = 'Verificando...';
+      try {
+        const r = await fetch(API + '/api/empresa/2fa/verificar', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pending_token, codigo })
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          document.getElementById('err-2fa').textContent = data.erro || 'Código incorreto.';
+          btn2.disabled = false; btn2.textContent = 'Verificar';
+          return;
+        }
+        sessionStorage.removeItem('empresa_pending_token');
+        sessionStorage.removeItem('empresa_pending_email');
+        localStorage.setItem('empresa_token', data.token);
+        if (data.refreshToken) localStorage.setItem('empresa_refresh', data.refreshToken);
+        localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
+        const dest = data.usuario?.primeiro_acesso ? 'onboarding.html' : 'index.html';
+        window.location.href = dest;
+      } catch {
+        document.getElementById('err-2fa').textContent = 'Erro de conexão.';
+        btn2.disabled = false; btn2.textContent = 'Verificar';
+      }
+    }
+
+    function voltar2FA() {
+      sessionStorage.removeItem('empresa_pending_token');
+      document.getElementById('form-login').style.display = 'block';
+      document.getElementById('form-2fa').style.display = 'none';
     }
   </script>
 </body>
