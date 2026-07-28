@@ -132,6 +132,13 @@
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
     .toast.show { opacity: 1; }
   </style>
+  <link rel="manifest" href="/candidato/manifest.json">
+  <meta name="theme-color" content="#722F37">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vagas.io">
+  <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
 </head>
 <body>
 
@@ -403,5 +410,15 @@
 
 })();
 </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/candidato/sw.js', { scope: '/candidato/' })
+          .then(r => console.log('[PWA] SW registrado:', r.scope))
+          .catch(e => console.warn('[PWA] SW falhou:', e.message));
+      });
+    }
+  </script>
+<script src="../_shared/analytics.js"></script>
 </body>
 </html>
