@@ -293,5 +293,103 @@
     })();
   </script>
 <script src="chat-rh-flutuante.js?v=20260726c"></script>
+
+
+  <!-- MODAL DE NOVA VAGA (FASE 3) -->
+  <div id="modal-nova-vaga" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; overflow:auto;">
+    <div style="background:#fff; max-width:600px; margin:60px auto; padding:32px; border-radius:12px;">
+      <h2 style="color:var(--vinho); margin-bottom:24px;">+ Criar nova vaga</h2>
+      <div id="nova-vaga-msg" style="color:#C62828; margin-bottom:12px;"></div>
+      <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Título*</label>
+      <input type="text" id="nv-titulo" placeholder="Ex: Analista de RH Júnior" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px; margin-bottom:16px;">
+      <div style="display:flex; gap:12px;">
+        <div style="flex:1;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Cidade</label>
+          <input type="text" id="nv-cidade" placeholder="Cidade" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
+        </div>
+        <div style="flex:1;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">UF</label>
+          <input type="text" id="nv-estado" maxlength="2" placeholder="UF" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; margin-top:16px;">
+        <div style="flex:1;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Tipo contrato</label>
+          <select id="nv-tipo" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
+            <option value="clt">CLT</option>
+            <option value="pj">PJ</option>
+            <option value="estagio">Estágio</option>
+            <option value="temporario">Temporário</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Salário mín.</label>
+          <input type="number" id="nv-smin" placeholder="0" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
+        </div>
+        <div style="flex:1;">
+          <label style="display:block; margin-bottom:8px; font-weight:600; font-size:13px;">Salário máx.</label>
+          <input type="number" id="nv-smax" placeholder="0" style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;">
+        </div>
+      </div>
+      <label style="display:block; margin-top:16px; margin-bottom:8px; font-weight:600; font-size:13px;">Descrição</label>
+      <textarea id="nv-desc" rows="3" placeholder="Atividades e responsabilidades..." style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;"></textarea>
+      <label style="display:block; margin-top:16px; margin-bottom:8px; font-weight:600; font-size:13px;">Requisitos</label>
+      <textarea id="nv-req" rows="2" placeholder="Requisitos obrigatórios..." style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;"></textarea>
+      <label style="display:block; margin-top:16px; margin-bottom:8px; font-weight:600; font-size:13px;">Benefícios</label>
+      <textarea id="nv-benef" rows="2" placeholder="VA, VR, plano de saúde..." style="width:100%; padding:10px; border:1px solid var(--borda); border-radius:6px;"></textarea>
+      <div style="display:flex; gap:12px; margin-top:24px; justify-content:flex-end;">
+        <button onclick="fecharNovaVaga()" style="padding:10px 20px; border:1px solid var(--borda); background:#fff; border-radius:6px; cursor:pointer;">Cancelar</button>
+        <button id="btn-criar-vaga" onclick="submitNovaVaga()" style="padding:10px 24px; background:var(--vinho); color:#fff; border:0; border-radius:6px; cursor:pointer;">Criar vaga</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== NOVA VAGA (FASE 3) =====
+    function abrirModalNovaVaga() {
+      if (!authRBAC.hasRole('admin_empresa', 'recrutador')) {
+        toast('Você não tem permissão para criar vagas.', 'erro');
+        return;
+      }
+      document.getElementById('modal-nova-vaga').style.display = 'block';
+    }
+    function fecharNovaVaga() { document.getElementById('modal-nova-vaga').style.display = 'none'; }
+    async function submitNovaVaga() {
+      const msg = document.getElementById('nova-vaga-msg');
+      msg.textContent = '';
+      const titulo = document.getElementById('nv-titulo').value.trim();
+      if (titulo.length < 2) { msg.textContent = 'Título é obrigatório (mín. 2 caracteres).'; return; }
+
+      const body = {
+        titulo,
+        cidade: document.getElementById('nv-cidade').value.trim() || '—',
+        estado: document.getElementById('nv-estado').value.trim() || 'SP',
+        tipo_contrato: document.getElementById('nv-tipo').value,
+        salario_min: Number(document.getElementById('nv-smin').value) || 0,
+        salario_max: Number(document.getElementById('nv-smax').value) || 0,
+        descricao: document.getElementById('nv-desc').value.trim() || '—',
+        requisitos: document.getElementById('nv-req').value.trim() || '—',
+        beneficios: document.getElementById('nv-benef').value.trim() || '—'
+      };
+
+      const btn = document.getElementById('btn-criar-vaga');
+      btn.disabled = true; btn.textContent = 'Criando...';
+      try {
+        const r = await authFetch(API + '/api/empresa/vagas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await r.json();
+        if (!r.ok) { msg.textContent = data.erro || 'Erro ao criar vaga.'; btn.disabled = false; btn.textContent = 'Criar vaga'; return; }
+        toast('Vaga criada com sucesso!', 'ok');
+        fecharNovaVaga();
+        // limpa form
+        ['nv-titulo','nv-cidade','nv-estado','nv-smin','nv-smax','nv-desc','nv-req','nv-benef'].forEach(id => document.getElementById(id).value = '');
+        btn.disabled = false; btn.textContent = 'Criar vaga';
+        if (typeof carregar === 'function') carregar();
+      } catch (e) { msg.textContent = 'Erro de conexão.'; btn.disabled = false; btn.textContent = 'Criar vaga'; }
+    }
+  </script>
 </body>
 </html>
