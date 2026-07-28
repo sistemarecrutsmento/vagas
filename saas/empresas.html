@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Empresas · SaaS · Vagas.io</title>
+  <style>
+    :root{--vinho:#722F37;--vinho-claro:#8B3A45;--bg:#f7f5f2;--borda:#e8e4df;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;}
+    header{background:var(--vinho);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:56px;}
+    .logo{color:#fff;font-size:18px;font-weight:800;text-decoration:none;}
+    .logo span{color:#e8b86d;}
+    nav a{color:rgba(255,255,255,0.8);text-decoration:none;margin-left:20px;font-size:14px;padding:6px 10px;border-radius:6px;}
+    nav a:hover,nav a.ativo{background:rgba(255,255,255,0.15);color:#fff;}
+    .hright{display:flex;align-items:center;gap:12px;}
+    .avatar{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.25);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;}
+    main{max-width:1200px;margin:0 auto;padding:28px 24px;}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+    .page-header h1{font-size:22px;font-weight:700;}
+    .page-header p{color:#666;font-size:14px;margin-top:2px;}
+    .btn{padding:8px 18px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--vinho);color:#fff;}
+    .btn-primary:hover{background:var(--vinho-claro);}
+    .btn-ghost{background:transparent;color:#555;border:1px solid var(--borda);}
+    .btn-ghost:hover{background:#f0ece8;}
+    .toolbar{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+    .toolbar input,.toolbar select{padding:8px 12px;border:1px solid var(--borda);border-radius:8px;font-size:14px;color:#1a1a1a;background:#faf9f7;}
+    .toolbar input{flex:1;min-width:200px;}
+    .card{background:#fff;border:1px solid var(--borda);border-radius:12px;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;}
+    thead{background:#faf9f7;}
+    th{padding:12px 16px;text-align:left;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--borda);}
+    td{padding:12px 16px;border-bottom:1px solid #f5f5f5;font-size:14px;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#faf9f7;}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+    .badge-ativo{background:#e8f5e9;color:#2e7d32;}
+    .badge-inativo{background:#fce4ec;color:#c62828;}
+    .badge-gratuito{background:#f5f5f5;color:#666;}
+    .badge-essencial{background:#e3f2fd;color:#1565c0;}
+    .badge-profissional{background:#f3e5f5;color:#6a1b9a;}
+    .badge-enterprise{background:#fff8e1;color:#e65100;}
+    .empresa-nome{font-weight:600;color:#1a1a1a;}
+    .empresa-slug{font-size:12px;color:#999;}
+    .action-btns{display:flex;gap:6px;}
+    .btn-sm{padding:5px 10px;font-size:12px;border-radius:6px;}
+    .empty{text-align:center;padding:48px;color:#aaa;}
+    .empty-icon{font-size:40px;margin-bottom:12px;}
+    .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+    .stat{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:16px 20px;}
+    .stat-val{font-size:24px;font-weight:700;color:var(--vinho);}
+    .stat-lbl{font-size:12px;color:#888;margin-top:2px;}
+    .pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;}
+    .pagination button{padding:6px 12px;border:1px solid var(--borda);background:#fff;border-radius:6px;cursor:pointer;font-size:13px;}
+    .pagination button.ativo{background:var(--vinho);color:#fff;border-color:var(--vinho);}
+    .pagination button:disabled{opacity:.4;cursor:default;}
+    @media(max-width:768px){.stats-bar{grid-template-columns:repeat(2,1fr);} nav{display:none;} table{font-size:12px;}}
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">Vagas<span>.io</span> <span style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:400;">SaaS</span></a>
+  <nav>
+    <a href="equipe.html">👥 Equipe</a>
+    <a href="empresas.html" class="ativo">🏢 Empresas</a>
+  </nav>
+  <div class="hright">
+    <div class="avatar" id="avatar">A</div>
+    <button class="btn btn-ghost btn-sm" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<main>
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-lbl">Total de empresas</div></div>
+    <div class="stat"><div class="stat-val" id="s-ativas">—</div><div class="stat-lbl">Ativas</div></div>
+    <div class="stat"><div class="stat-val" id="s-vagas">—</div><div class="stat-lbl">Vagas publicadas</div></div>
+    <div class="stat"><div class="stat-val" id="s-cands">—</div><div class="stat-lbl">Candidaturas</div></div>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <h1>Empresas</h1>
+      <p id="sub">Gestão global de tenants da plataforma</p>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input id="busca" type="text" placeholder="Buscar por nome, slug ou e-mail…" oninput="filtrar()"/>
+    <select id="fil-plano" onchange="filtrar()">
+      <option value="">Todos os planos</option>
+      <option value="gratuito">Gratuito</option>
+      <option value="essencial">Essencial</option>
+      <option value="profissional">Profissional</option>
+      <option value="enterprise">Enterprise</option>
+    </select>
+    <select id="fil-status" onchange="filtrar()">
+      <option value="">Todos status</option>
+      <option value="ativo">Ativas</option>
+      <option value="inativo">Inativas</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" onclick="carregar()">🔄 Atualizar</button>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Plano</th>
+          <th>Status</th>
+          <th>Vagas</th>
+          <th>Candidaturas</th>
+          <th>Criado em</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="7" class="empty"><div class="empty-icon">⏳</div><div>Carregando…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination" id="pagination"></div>
+</main>
+
+<script>
+  const API = 'https://recrutamento-api-novo.onrender.com';
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('saas_token');
+
+  if (!token) { window.location.href = 'index.html'; }
+
+  let todasEmpresas = [];
+  let paginaAtual = 1;
+  const POR_PAGINA = 20;
+
+  function iniciais(nome) {
+    return (nome||'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('') || '?';
+  }
+
+  function badgePlano(plano) {
+    const p = (plano||'essencial').toLowerCase();
+    const cls = {gratuito:'gratuito',essencial:'essencial',profissional:'profissional',enterprise:'enterprise'}[p] || 'essencial';
+    const label = {gratuito:'Gratuito',essencial:'Essencial',profissional:'Profissional',enterprise:'Enterprise'}[p] || plano;
+    return `<span class="badge badge-${cls}">${label}</span>`;
+  }
+
+  function fmt(data) {
+    if (!data) return '—';
+    return new Date(data).toLocaleDateString('pt-BR');
+  }
+
+  async function carregar() {
+    try {
+      const r = await fetch(`${API}/api/saas/empresas`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (r.status === 401 || r.status === 403) { window.location.href = 'index.html'; return; }
+      const data = await r.json();
+      todasEmpresas = data.empresas || [];
+
+      // Stats
+      document.getElementById('s-total').textContent = todasEmpresas.length;
+      document.getElementById('s-ativas').textContent = todasEmpresas.filter(e=>e.ativo).length;
+      const totalVagas = todasEmpresas.reduce((a,e)=>a+(e.total_vagas||0),0);
+      const totalCands = todasEmpresas.reduce((a,e)=>a+(e.total_candidaturas||0),0);
+      document.getElementById('s-vagas').textContent = totalVagas;
+      document.getElementById('s-cands').textContent = totalCands;
+      document.getElementById('sub').textContent = `${todasEmpresas.length} empresa(s) cadastrada(s)`;
+
+      filtrar();
+    } catch (e) {
+      document.getElementById('tbody').innerHTML = `<tr><td colspan="7" class="empty"><div class="empty-icon">⚠️</div><div>Erro ao carregar. Verifique sua conexão.</div></td></tr>`;
+    }
+  }
+
+  function filtrar() {
+    const busca = document.getElementById('busca').value.trim().toLowerCase();
+    const filPlano = document.getElementById('fil-plano').value;
+    const filStatus = document.getElementById('fil-status').value;
+
+    let lista = todasEmpresas.filter(e => {
+      if (busca && !`${e.nome||''} ${e.slug||''} ${e.email_principal||''}`.toLowerCase().includes(busca)) return false;
+      if (filPlano && (e.plano||'essencial') !== filPlano) return false;
+      if (filStatus === 'ativo' && !e.ativo) return false;
+      if (filStatus === 'inativo' && e.ativo) return false;
+      return true;
+    });
+
+    paginaAtual = 1;
+    renderTabela(lista);
+  }
+
+  function renderTabela(lista) {
+    const inicio = (paginaAtual - 1) * POR_PAGINA;
+    const pagina = lista.slice(inicio, inicio + POR_PAGINA);
+    const tbody = document.getElementById('tbody');
+
+    if (pagina.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty"><div class="empty-icon">🔍</div><div>Nenhuma empresa encontrada</div></td></tr>`;
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = pagina.map(e => `
+      <tr>
+        <td>
+          <div class="empresa-nome">${e.nome||'—'}</div>
+          <div class="empresa-slug">${e.slug ? '/'+e.slug : ''} · ${e.email_principal||''}</div>
+        </td>
+        <td>${badgePlano(e.plano)}</td>
+        <td><span class="badge badge-${e.ativo?'ativo':'inativo'}">${e.ativo?'✅ Ativa':'⛔ Inativa'}</span></td>
+        <td>${e.total_vagas||0}</td>
+        <td>${e.total_candidaturas||0}</td>
+        <td>${fmt(e.criado_em)}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-ghost btn-sm" onclick="toggleAtivo(${e.id}, ${!e.ativo})" title="${e.ativo?'Desativar':'Ativar'}">
+              ${e.ativo?'⛔':'✅'}
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    // Paginação
+    const totalPages = Math.ceil(lista.length / POR_PAGINA);
+    const pag = document.getElementById('pagination');
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+    let html = `<button onclick="irPagina(${paginaAtual-1})" ${paginaAtual===1?'disabled':''}>‹</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button onclick="irPagina(${i})" class="${i===paginaAtual?'ativo':''}">${i}</button>`;
+    }
+    html += `<button onclick="irPagina(${paginaAtual+1})" ${paginaAtual===totalPages?'disabled':''}>›</button>`;
+    pag.innerHTML = html;
+  }
+
+  function irPagina(p) {
+    paginaAtual = p;
+    const busca = document.getElementById('busca').value.trim().toLowerCase();
+    const filPlano = document.getElementById('fil-plano').value;
+    const filStatus = document.getElementById('fil-status').value;
+    let lista = todasEmpresas.filter(e => {
+      if (busca && !`${e.nome||''} ${e.slug||''} ${e.email_principal||''}`.toLowerCase().includes(busca)) return false;
+      if (filPlano && (e.plano||'essencial') !== filPlano) return false;
+      if (filStatus === 'ativo' && !e.ativo) return false;
+      if (filStatus === 'inativo' && e.ativo) return false;
+      return true;
+    });
+    renderTabela(lista);
+    window.scrollTo(0,0);
+  }
+
+  async function toggleAtivo(id, novoEstado) {
+    if (!confirm(`${novoEstado ? 'Ativar' : 'Desativar'} esta empresa?`)) return;
+    try {
+      const r = await fetch(`${API}/api/saas/empresas/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ ativo: novoEstado })
+      });
+      if (r.ok) {
+        const emp = todasEmpresas.find(e=>e.id===id);
+        if (emp) { emp.ativo = novoEstado; filtrar(); }
+      } else {
+        alert('Erro ao atualizar empresa');
+      }
+    } catch(e) { alert('Erro de conexão'); }
+  }
+
+  function sair() {
+    ['admin_token','saas_token','admin_usuario'].forEach(k=>localStorage.removeItem(k));
+    window.location.href = 'index.html';
+  }
+
+  // Init
+  const usr = JSON.parse(localStorage.getItem('admin_usuario')||'{}');
+  document.getElementById('avatar').textContent = iniciais(usr.nome||'A');
+  carregar();
+</script>
+
+</body>
+</html>
