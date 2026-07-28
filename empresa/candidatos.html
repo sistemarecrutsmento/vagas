@@ -40,6 +40,8 @@
       <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
 
 
+            <a class="nav-item" id="nav-equipe" href="usuarios.html" style="display:none;">👥 Equipe</a>
+
       <div class="nav-divisor">Links</div>
       <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
       <div class="aside-user">
@@ -81,7 +83,7 @@
   </div>
 
   <script>
-    const API = 'https://recrutamento-api-novo.onrender.com';
+    const API = 'https://recrutamento-api-v2.onrender.com';
     const token = localStorage.getItem('empresa_token');
     if (!token) window.location.href = 'login.html';
 
@@ -175,8 +177,61 @@
 
     carregar();
   </script>
-<script src="auth-helper.js?v=etapa2_2026_07_27"></script>
-  <script src="empresa-auth-init.js?v=etapa2_2026_07_27"></script>
+<script src="auth-helper.js?v=fase3_2026_07_28"></script>
+  <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
+  <script src="empresa-auth-patch.js?v=fase3_2026_07_28"></script>
+
+  <script>
+    // ===== INIT COMUM FASE 3 — RBAC frontend =====
+    (async function() {
+      setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
+
+      // tenta refresh silencioso antes de qualquer coisa
+      try { await authInit(); } catch (e) { console.warn('refresh falhou', e); }
+
+      // guard: sem token -> vai pro login
+      if (!localStorage.getItem('empresa_token')) {
+        const path = window.location.pathname;
+        if (!path.endsWith('login.html')) {
+          window.location.href = 'login.html';
+          return;
+        }
+      }
+
+      // aguarda DOM
+      const onReady = () => {
+        // mostra link Equipe se for admin
+        if (authRBAC.hasRole('admin_empresa')) {
+          const navEq = document.getElementById('nav-equipe');
+          if (navEq) navEq.style.display = '';
+        }
+
+        // preenche sidebar com dados do JWT
+        const u = authRBAC.currentUser() || {};
+        const avatar = document.getElementById('avatar');
+        const nome = document.getElementById('user-nome');
+        const empresa = document.getElementById('user-empresa');
+        if (avatar && u.nome) avatar.textContent = u.nome.split(' ').filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join('');
+        if (nome) nome.textContent = u.nome || '—';
+        if (empresa) empresa.textContent = (u.role ? '[' + u.role + '] ' : '') + (u.empresa_nome || u.email || '—');
+
+        // guarda de role por pagina: se existe um atributo data-roles exigido,
+        // fazemos o guard UX (apenas visual; backend é autoridade)
+        const required = document.querySelector('main')?.dataset?.roles;
+        if (required && !authRBAC.hasRole.apply(null, required.split(','))) {
+          // redireciona com aviso
+          const main = document.querySelector('main');
+          if (main) main.innerHTML = '<div style="text-align:center; padding:80px 20px;"><h2 style="color:#999;">🚫 Acesso restrito</h2><p style="color:#666; margin-top:12px;">Você não tem permissão para acessar esta página.</p><p style="margin-top:24px;"><a href="index.html" style="color:#722F37;">← Voltar ao Dashboard</a></p></div>';
+        }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', onReady);
+      } else {
+        onReady();
+      }
+    })();
+  </script>
 <script src="chat-rh-flutuante.js?v=20260726b"></script>
 </body>
 </html>
