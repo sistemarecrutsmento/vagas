@@ -103,6 +103,7 @@
       <a class="nav-item" href="index.html">📊 Dashboard</a>
       <a class="nav-item" href="vagas.html">📋 Vagas com Candidatos</a>
       <a class="nav-item" href="agenda.html">📅 Agenda</a>
+      <a class="nav-item" href="chat.html">💬 Chat</a>
       <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
 
 
@@ -467,6 +468,9 @@
         // 9) Ações (read-only ou Avançar/Reprovar)
         '<div class="card" id="card-acoes">' +
           '<h2>⚡ Ações</h2>' + acoesHtml +
+          '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--borda)">' +
+            '<a href="chat.html?cid=' + c.id + '" class="btn" style="background:var(--vinho);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;">💬 Chat com candidato</a>' +
+          '</div>' +
         '</div>';
 
       // carrega chat
