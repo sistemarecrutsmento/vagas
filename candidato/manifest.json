@@ -1,0 +1,46 @@
+{
+  "name": "Vagas.io — Portal do Candidato",
+  "short_name": "Vagas.io",
+  "description": "Encontre vagas, acompanhe candidaturas e avance na sua carreira.",
+  "start_url": "/candidato/painel.html",
+  "scope": "/candidato/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#722F37",
+  "theme_color": "#722F37",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/candidato/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/candidato/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/candidato/icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Minhas Candidaturas",
+      "url": "/candidato/candidaturas.html",
+      "icons": [{"src": "/candidato/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Buscar Vagas",
+      "url": "/candidato/index.html",
+      "icons": [{"src": "/candidato/icons/icon-192.png", "sizes": "192x192"}]
+    }
+  ]
+}
