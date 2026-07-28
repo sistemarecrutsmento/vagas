@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Analytics Global · SaaS · Vagas.io</title>
+  <style>
+    :root{--vinho:#722F37;--vinho-claro:#8B3A45;--bg:#f7f5f2;--borda:#e8e4df;--dourado:#C9A961;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;}
+    header{background:var(--vinho);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:56px;}
+    .logo{color:#fff;font-size:18px;font-weight:800;text-decoration:none;}
+    .logo span{color:var(--dourado);}
+    nav a{color:rgba(255,255,255,0.8);text-decoration:none;margin-left:20px;font-size:14px;padding:6px 10px;border-radius:6px;}
+    nav a:hover,nav a.ativo{background:rgba(255,255,255,0.15);color:#fff;}
+    .hright{display:flex;align-items:center;gap:12px;}
+    .btn-sair{background:rgba(255,255,255,.15);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;}
+    main{max-width:1200px;margin:0 auto;padding:28px 24px;}
+    .page-header{margin-bottom:24px;}
+    .page-header h1{font-size:22px;font-weight:700;}
+    .page-header p{color:#666;font-size:14px;margin-top:2px;}
+    /* filtros */
+    .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;align-items:center;}
+    .filters select,.filters input{padding:8px 12px;border:1.5px solid var(--borda);border-radius:8px;font-size:13px;background:#fff;}
+    .filters select:focus,.filters input:focus{border-color:var(--vinho);outline:none;}
+    .btn{padding:8px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:var(--vinho);color:#fff;}
+    .btn:hover{opacity:.9;}
+    /* KPIs */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;}
+    .kpi{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:18px 20px;}
+    .kpi-val{font-size:28px;font-weight:800;color:var(--vinho);}
+    .kpi-lbl{font-size:12px;color:#888;margin-top:3px;}
+    .kpi-sub{font-size:11px;color:#aaa;margin-top:4px;}
+    /* cards / tabelas */
+    .section{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:20px;margin-bottom:20px;}
+    .section h2{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{text-align:left;padding:8px 10px;color:#888;font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--borda);}
+    td{padding:9px 10px;border-bottom:1px solid #f0ede8;color:#333;}
+    tr:last-child td{border:none;}
+    tr:hover td{background:#faf8f5;}
+    /* funil */
+    .funil{display:flex;flex-direction:column;gap:6px;}
+    .funil-item{display:flex;align-items:center;gap:12px;}
+    .funil-label{font-size:13px;color:#555;width:180px;flex-shrink:0;}
+    .funil-bar-wrap{flex:1;background:#f0ede8;border-radius:6px;height:22px;overflow:hidden;}
+    .funil-bar{height:100%;background:var(--vinho);border-radius:6px;transition:width .4s;}
+    .funil-val{font-size:13px;font-weight:700;color:var(--vinho);width:60px;text-align:right;}
+    /* evolução */
+    .evol-table{overflow-x:auto;}
+    .loading{text-align:center;padding:40px;color:#aaa;font-size:14px;}
+    .erro-msg{text-align:center;padding:30px;color:#c00;font-size:14px;}
+    @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr);}nav{display:none;}main{padding:16px;}}
+  </style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">Vagas<span>.io</span> <span style="font-size:11px;opacity:.7;font-weight:400;margin-left:8px;">SaaS</span></a>
+  <nav>
+    <a href="equipe.html">👥 Equipe</a>
+    <a href="empresas.html">🏢 Empresas</a>
+    <a href="analytics.html" class="ativo">📊 Analytics</a>
+    <a href="auditoria.html">🔍 Auditoria</a>
+  </nav>
+  <div class="hright">
+    <span id="hd-nome" style="color:rgba(255,255,255,.8);font-size:13px;"></span>
+    <button class="btn-sair" id="btn-sair">Sair</button>
+  </div>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>📊 Analytics Global</h1>
+    <p>Métricas de uso e conversão da plataforma</p>
+  </div>
+
+  <div class="filters">
+    <select id="f-periodo">
+      <option value="7">Últimos 7 dias</option>
+      <option value="30" selected>Últimos 30 dias</option>
+      <option value="90">Últimos 90 dias</option>
+    </select>
+    <button class="btn" id="btn-atualizar">🔄 Atualizar</button>
+  </div>
+
+  <div id="kpi-grid" class="kpi-grid">
+    <div class="kpi"><div class="kpi-val" id="k-visualizacoes">—</div><div class="kpi-lbl">Visualizações de vagas</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-candidaturas">—</div><div class="kpi-lbl">Candidaturas enviadas</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-conversao">—</div><div class="kpi-lbl">Conversão vis.→cand.</div><div class="kpi-sub">visualização → candidatura</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-cadastros">—</div><div class="kpi-lbl">Cadastros candidatos</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-logins">—</div><div class="kpi-lbl">Logins de candidatos</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-empresas-login">—</div><div class="kpi-lbl">Logins de empresas</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-entrevistas">—</div><div class="kpi-lbl">Entrevistas agendadas</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-propostas">—</div><div class="kpi-lbl">Propostas enviadas</div></div>
+  </div>
+
+  <div class="section">
+    <h2>🔽 Funil de Recrutamento</h2>
+    <div class="funil" id="funil-container">
+      <div class="loading">Carregando...</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div class="section">
+      <h2>🏆 Vagas mais visualizadas</h2>
+      <table id="tbl-vagas">
+        <thead><tr><th>Vaga</th><th>Visualizações</th></tr></thead>
+        <tbody><tr><td colspan="2" class="loading">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="section">
+      <h2>📈 Vagas com maior conversão</h2>
+      <table id="tbl-conversao">
+        <thead><tr><th>Vaga</th><th>Vis.</th><th>Cand.</th><th>Taxa</th></tr></thead>
+        <tbody><tr><td colspan="4" class="loading">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📅 Evolução por período</h2>
+    <div id="evol-container" class="evol-table">
+      <div class="loading">Carregando...</div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = 'https://recrutamento-api-novo.onrender.com';
+const tok = localStorage.getItem('admin_token');
+if (!tok) location.href = 'index.html';
+
+document.getElementById('btn-sair').onclick = () => {
+  localStorage.removeItem('admin_token');
+  location.href = 'index.html';
+};
+
+const $ = id => document.getElementById(id);
+
+function fmt(n) {
+  if (n === undefined || n === null) return '—';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+  return String(n);
+}
+
+async function carregar() {
+  const dias = $('f-periodo').value;
+  $('btn-atualizar').disabled = true;
+  $('btn-atualizar').textContent = '⏳';
+  try {
+    const r = await fetch(`${API}/api/saas/analytics?periodo=${dias}`, {
+      headers: { Authorization: 'Bearer ' + tok }
+    });
+    if (r.status === 401 || r.status === 403) { location.href = 'index.html'; return; }
+    const d = await r.json();
+    if (!d.ok) { throw new Error(d.erro || 'Erro'); }
+    const m = d.metricas;
+
+    // KPIs
+    $('k-visualizacoes').textContent  = fmt(m.visualizacoes_vagas);
+    $('k-candidaturas').textContent   = fmt(m.candidaturas_enviadas);
+    const conv = m.visualizacoes_vagas > 0
+      ? ((m.candidaturas_enviadas / m.visualizacoes_vagas) * 100).toFixed(1) + '%'
+      : '—';
+    $('k-conversao').textContent      = conv;
+    $('k-cadastros').textContent      = fmt(m.cadastros_candidatos);
+    $('k-logins').textContent         = fmt(m.logins_candidatos);
+    $('k-empresas-login').textContent = fmt(m.logins_empresas);
+    $('k-entrevistas').textContent    = fmt(m.entrevistas_agendadas);
+    $('k-propostas').textContent      = fmt(m.propostas_enviadas);
+
+    // Funil
+    const funil = m.funil || {};
+    const etapas = [
+      { label: '👁 Visualizações',   val: funil.vaga_visualizada     || 0 },
+      { label: '📝 Candidaturas',    val: funil.candidatura_enviada   || 0 },
+      { label: '📅 Entrevistas',     val: funil.entrevista_agendada   || 0 },
+      { label: '📨 Propostas',       val: funil.proposta_enviada      || 0 },
+      { label: '✅ Aceitas',          val: funil.proposta_aceita       || 0 },
+    ];
+    const max = Math.max(...etapas.map(e => e.val), 1);
+    $('funil-container').innerHTML = etapas.map(e => `
+      <div class="funil-item">
+        <div class="funil-label">${e.label}</div>
+        <div class="funil-bar-wrap"><div class="funil-bar" style="width:${(e.val/max*100).toFixed(1)}%"></div></div>
+        <div class="funil-val">${fmt(e.val)}</div>
+      </div>
+    `).join('');
+
+    // Vagas mais visualizadas
+    const top = m.vagas_mais_visualizadas || [];
+    $('tbl-vagas').querySelector('tbody').innerHTML = top.length
+      ? top.map(v => `<tr><td>${v.titulo || 'Vaga #'+v.vaga_id}</td><td><b>${fmt(v.total)}</b></td></tr>`).join('')
+      : '<tr><td colspan="2" style="color:#aaa;text-align:center">Sem dados</td></tr>';
+
+    // Vagas conversão
+    const conv2 = m.vagas_maior_conversao || [];
+    $('tbl-conversao').querySelector('tbody').innerHTML = conv2.length
+      ? conv2.map(v => `<tr>
+          <td>${v.titulo || 'Vaga #'+v.vaga_id}</td>
+          <td>${fmt(v.visualizacoes)}</td>
+          <td>${fmt(v.candidaturas)}</td>
+          <td><b>${v.taxa}%</b></td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" style="color:#aaa;text-align:center">Sem dados</td></tr>';
+
+    // Evolução
+    const ev = m.evolucao || [];
+    if (ev.length) {
+      // Agrupar por dia
+      const dias_map = {};
+      ev.forEach(e => {
+        if (!dias_map[e.dia]) dias_map[e.dia] = {};
+        dias_map[e.dia][e.evento] = parseInt(e.cnt);
+      });
+      const eventos_key = ['vaga_visualizada','candidatura_enviada','login_candidato','empresa_login'];
+      const headers = ['Data','Vis. Vagas','Candidaturas','Logins Cand.','Logins Emp.'];
+      const rows = Object.keys(dias_map).sort().reverse().slice(0,14).map(dia => {
+        const d2 = dias_map[dia];
+        return `<tr>
+          <td>${new Date(dia+'T12:00:00').toLocaleDateString('pt-BR')}</td>
+          ${eventos_key.map(k => `<td>${fmt(d2[k] || 0)}</td>`).join('')}
+        </tr>`;
+      });
+      $('evol-container').innerHTML = `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
+    } else {
+      $('evol-container').innerHTML = '<p style="color:#aaa;text-align:center;padding:20px">Sem dados no período selecionado</p>';
+    }
+
+  } catch(e) {
+    console.error(e);
+    document.querySelectorAll('.loading').forEach(el => {
+      el.className = 'erro-msg';
+      el.textContent = '⚠️ Erro ao carregar: ' + e.message;
+    });
+  } finally {
+    $('btn-atualizar').disabled = false;
+    $('btn-atualizar').textContent = '🔄 Atualizar';
+  }
+}
+
+$('btn-atualizar').onclick = carregar;
+$('f-periodo').onchange = carregar;
+
+// Nome do admin
+fetch(API + '/api/admin/me', { headers: { Authorization: 'Bearer ' + tok } })
+  .then(r => r.ok ? r.json() : null)
+  .then(d => { if (d?.nome) $('hd-nome').textContent = d.nome; })
+  .catch(() => {});
+
+carregar();
+</script>
+</body>
+</html>
