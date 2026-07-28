@@ -1,0 +1,7 @@
+<!DOCTYPE html><html><head><title>setup</title></head><body>
+<script>
+  const u = new URL(location.href);
+  localStorage.setItem('candidato_token', u.searchParams.get('tok'));
+  location.replace('painel.html');
+</script>
+</body></html>
