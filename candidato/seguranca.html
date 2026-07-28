@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Segurança · Candidato · Vagas.io</title>
+  <style>
+    :root{--vinho:#722F37;--vinho-claro:#8B3A45;--bg:#f7f5f2;--borda:#e8e4df;--verde:#28A745;--verm:#C62828;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;}
+    header{background:var(--vinho);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+    .logo{color:#fff;font-weight:800;font-size:18px;text-decoration:none;}
+    .hdr-right{display:flex;align-items:center;gap:12px;}
+    .avatar{width:32px;height:32px;border-radius:50%;background:#fff3;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+    .main{max-width:660px;margin:32px auto;padding:0 20px;}
+    h1{font-size:22px;font-weight:700;margin-bottom:6px;}
+    .sub{color:#666;font-size:14px;margin-bottom:28px;}
+    .card{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:24px;margin-bottom:20px;}
+    .card h2{font-size:16px;font-weight:700;margin-bottom:4px;}
+    .card p{font-size:14px;color:#666;margin-bottom:16px;}
+    label{display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:6px;}
+    input[type=password]{width:100%;padding:10px 12px;border:1px solid var(--borda);border-radius:8px;font-size:14px;outline:none;}
+    input:focus{border-color:var(--vinho);}
+    .row{display:flex;gap:12px;flex-wrap:wrap;}
+    .row .f{flex:1;min-width:200px;}
+    .btn{cursor:pointer;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;transition:.15s;}
+    .btn-p{background:var(--vinho);color:#fff;}
+    .btn-p:hover{background:var(--vinho-claro);}
+    .btn-s{background:#f0ede9;color:#333;}
+    .btn-s:hover{background:#e0ddd8;}
+    .btn-d{background:#fce4ec;color:#b71c1c;}
+    .btn-d:hover{background:#f8bbd0;}
+    .msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-top:12px;display:none;}
+    .msg.ok{background:#e8f5e9;color:#2e7d32;display:block;}
+    .msg.err{background:#fce4ec;color:#b71c1c;display:block;}
+    .sessao-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--borda);}
+    .sessao-item:last-child{border-bottom:none;}
+    .sessao-info{font-size:13px;}
+    .sessao-info strong{display:block;font-size:14px;}
+    .sessao-info span{color:#888;}
+    .back-link{color:var(--vinho);text-decoration:none;font-size:14px;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+    .back-link:hover{text-decoration:underline;}
+    @media(max-width:480px){.row{flex-direction:column;}}
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="painel.html">Vagas.io</a>
+  <div class="hdr-right">
+    <div class="avatar" id="avatar">?</div>
+    <button class="btn btn-s" style="padding:6px 14px;font-size:13px;" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<div class="main">
+  <a class="back-link" href="painel.html">← Voltar ao painel</a>
+  <h1>🔒 Segurança</h1>
+  <p class="sub">Altere sua senha e gerencie as sessões da sua conta.</p>
+
+  <!-- ── ALTERAR SENHA ── -->
+  <div class="card">
+    <h2>🔑 Alterar senha</h2>
+    <p>Sua nova senha deve ter no mínimo 8 caracteres.</p>
+    <div class="row">
+      <div class="f">
+        <label>Senha atual</label>
+        <input type="password" id="senha-atual" placeholder="••••••••"/>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <div class="f">
+        <label>Nova senha</label>
+        <input type="password" id="senha-nova" placeholder="••••••••"/>
+      </div>
+      <div class="f">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="senha-conf" placeholder="••••••••"/>
+      </div>
+    </div>
+    <div style="margin-top:14px;">
+      <button class="btn btn-p" onclick="trocarSenha()">Alterar senha</button>
+    </div>
+    <div class="msg" id="msg-senha"></div>
+  </div>
+
+  <!-- ── SESSÕES ── -->
+  <div class="card">
+    <h2>📱 Sessões ativas</h2>
+    <p>Dispositivos onde sua conta está conectada.</p>
+    <div id="lista-sessoes"><p style="font-size:14px;color:#888;">Carregando...</p></div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-s" onclick="encerrarOutras()">Encerrar outras sessões</button>
+      <button class="btn btn-d" onclick="encerrarTodas()">Encerrar todas as sessões</button>
+    </div>
+    <div class="msg" id="msg-sessoes"></div>
+  </div>
+
+  <!-- ── ESQUECEU A SENHA ── -->
+  <div class="card">
+    <h2>🔓 Redefinir senha por e-mail</h2>
+    <p>Se quiser redefinir sua senha sem precisar da senha atual, enviamos um link para seu e-mail cadastrado.</p>
+    <button class="btn btn-s" onclick="pedirReset()">Enviar link de recuperação</button>
+    <div class="msg" id="msg-reset"></div>
+  </div>
+</div>
+
+<script>
+const API = 'https://recrutamento-api-novo.onrender.com';
+let TOKEN = localStorage.getItem('candidato_token') || '';
+let REFRESH = localStorage.getItem('candidato_refresh') || '';
+let refreshPendente = null;
+
+async function req(method, path, body) {
+  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` };
+  const r = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  if (r.status === 401 && REFRESH && !refreshPendente) {
+    refreshPendente = fetch(API + '/api/auth/refresh', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: REFRESH })
+    }).then(rr => rr.json()).then(d => {
+      if (d.token) {
+        TOKEN = d.token; REFRESH = d.refreshToken;
+        localStorage.setItem('candidato_token', TOKEN);
+        localStorage.setItem('candidato_refresh', REFRESH);
+      }
+      refreshPendente = null;
+    });
+    await refreshPendente;
+    return req(method, path, body);
+  }
+  return r;
+}
+
+function showMsg(id, text, tipo) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = 'msg ' + tipo;
+}
+function iniciais(n) { return (n||'?').split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase(); }
+
+// ── Alterar senha ──
+async function trocarSenha() {
+  const atual = document.getElementById('senha-atual').value.trim();
+  const nova  = document.getElementById('senha-nova').value.trim();
+  const conf  = document.getElementById('senha-conf').value.trim();
+  if (!atual || !nova || !conf) return showMsg('msg-senha','Preencha todos os campos.','err');
+  if (nova !== conf) return showMsg('msg-senha','As senhas novas não coincidem.','err');
+  if (nova.length < 8) return showMsg('msg-senha','Mínimo 8 caracteres.','err');
+  const r = await req('POST', '/api/candidato/trocar-senha', { senha_atual: atual, senha_nova: nova });
+  const d = await r.json();
+  if (d.ok) {
+    showMsg('msg-senha','✅ Senha alterada! Suas outras sessões foram encerradas.','ok');
+    ['senha-atual','senha-nova','senha-conf'].forEach(id => document.getElementById(id).value = '');
+  } else {
+    showMsg('msg-senha','❌ ' + (d.erro || 'Erro ao alterar senha.'),'err');
+  }
+}
+
+// ── Sessões ──
+async function carregarSessoes() {
+  const r = await req('GET', '/api/auth/sessoes');
+  if (!r.ok) return;
+  const d = await r.json();
+  const el = document.getElementById('lista-sessoes');
+  if (!d.sessoes?.length) { el.innerHTML = '<p style="font-size:14px;color:#888;">Nenhuma sessão ativa.</p>'; return; }
+  el.innerHTML = d.sessoes.map(s => {
+    const dt = new Date(s.criado_em).toLocaleString('pt-BR');
+    const ua = s.user_agent || 'Dispositivo desconhecido';
+    const ip = s.ip || '';
+    return `<div class="sessao-item">
+      <div class="sessao-info">
+        <strong>${ua.length>60?ua.slice(0,60)+'…':ua}</strong>
+        <span>${ip ? ip + ' · ' : ''}${dt}</span>
+      </div>
+      <button class="btn btn-s" style="font-size:12px;padding:6px 12px;" onclick="encerrarSessao(${s.id})">Encerrar</button>
+    </div>`;
+  }).join('');
+}
+
+async function encerrarSessao(id) {
+  const r = await req('DELETE', `/api/auth/sessoes/${id}`);
+  const d = await r.json();
+  if (d.ok) carregarSessoes();
+  else showMsg('msg-sessoes','❌ ' + (d.erro||'Erro'),'err');
+}
+
+async function encerrarOutras() {
+  if (!REFRESH) return showMsg('msg-sessoes','❌ Refresh token não encontrado.','err');
+  const r = await req('POST', '/api/auth/sessoes/encerrar-outras', { refreshToken: REFRESH });
+  const d = await r.json();
+  if (d.ok) { showMsg('msg-sessoes','✅ Outras sessões encerradas.','ok'); carregarSessoes(); }
+  else showMsg('msg-sessoes','❌ ' + (d.erro||'Erro'),'err');
+}
+
+async function encerrarTodas() {
+  if (!confirm('Isso vai desconectar todos os dispositivos, incluindo este. Continuar?')) return;
+  const r = await req('POST', '/api/auth/sessoes/encerrar-todas');
+  const d = await r.json();
+  if (d.ok) {
+    showMsg('msg-sessoes','✅ Todas as sessões encerradas. Redirecionando...','ok');
+    setTimeout(() => { localStorage.removeItem('candidato_token'); localStorage.removeItem('candidato_refresh'); location.href = 'index.html'; }, 1500);
+  } else showMsg('msg-sessoes','❌ ' + (d.erro||'Erro'),'err');
+}
+
+// ── Reset de senha ──
+async function pedirReset() {
+  const usr = JSON.parse(localStorage.getItem('candidato_usuario') || '{}');
+  if (!usr.email) return showMsg('msg-reset','❌ E-mail não encontrado. Faça login novamente.','err');
+  const btn = document.querySelector('[onclick="pedirReset()"]');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const r = await fetch(API + '/api/auth/esqueci-senha', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: usr.email, frontendUrl: location.origin + '/candidato/redefinir-senha.html', _user_tipo_hint: 'candidato' })
+    });
+    showMsg('msg-reset','✅ Se o e-mail estiver cadastrado, você receberá o link em instantes.','ok');
+  } catch {
+    showMsg('msg-reset','❌ Erro de conexão. Tente novamente.','err');
+  }
+  btn.disabled = false; btn.textContent = 'Enviar link de recuperação';
+}
+
+function sair() {
+  if (REFRESH) fetch(API + '/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` }, body: JSON.stringify({ refreshToken: REFRESH }) }).catch(()=>{});
+  ['candidato_token','candidato_refresh','candidato_usuario'].forEach(k => localStorage.removeItem(k));
+  location.href = 'index.html';
+}
+
+// ── Init ──
+if (!TOKEN) { location.href = 'index.html'; }
+const usr = JSON.parse(localStorage.getItem('candidato_usuario') || '{}');
+document.getElementById('avatar').textContent = iniciais(usr.nome || '');
+carregarSessoes();
+</script>
+</body>
+</html>
