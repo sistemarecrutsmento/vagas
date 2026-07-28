@@ -318,7 +318,8 @@
     <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
     <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
     <a href="entrevistas.html" class="drawer-link ativo"><span class="icon">📅</span> Entrevistas</a>
-    <a href="chat.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">💬</span> Chat</a>
+    <a href="favoritos.html" class="drawer-link"><span class="icon">⭐</span> Favoritos</a>
+    <a href="conversas.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">💬</span> Chat</a>
   </div>
   <div class="drawer-footer" id="drawer-footer-logado" style="display:none">
     <button class="drawer-logout" onclick="logout()">🚪 Sair</button>
@@ -329,6 +330,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
+    const API = "https://recrutamento-api-novo.onrender.com";
   // === UTILITÁRIOS ===
   const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
   const DIAS = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
@@ -379,7 +381,7 @@
       return;
     }
     try {
-      const r = await fetch('https://recrutamento-api-novo.onrender.com/api/candidato/perfil', {
+      const r = await fetch(API + '/api/candidato/perfil', {
         headers: { 'Authorization': 'Bearer ' + tokenCandidato }
       });
       if (r.status === 401 || r.status === 403) { logout(); return; }
@@ -398,7 +400,7 @@
   async function carregarEntrevistas() {
     if (!tokenCandidato) return;
     try {
-      const r = await fetch('https://recrutamento-api-novo.onrender.com/api/candidato/entrevistas', {
+      const r = await fetch(API + '/api/candidato/entrevistas', {
         headers: { 'Authorization': 'Bearer ' + tokenCandidato }
       });
       if (r.status === 401 || r.status === 403) { logout(); return; }
