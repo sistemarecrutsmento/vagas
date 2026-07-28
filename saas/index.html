@@ -61,7 +61,7 @@
         if (data.requer_2fa) {
           localStorage.setItem('admin_login_email', email);
           localStorage.setItem('admin_login_2fa_id', data.codigo_id || '');
-          window.location.href = '../admin/index.html?login=2fa';
+          window.location.href = '2fa.html';
           return;
         }
         if (!data.token) throw new Error(data.erro || 'Falha no login');
