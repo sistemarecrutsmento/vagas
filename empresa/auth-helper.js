@@ -34,7 +34,7 @@
 
 (function() {
   const VERSION = '3.0';
-  const API = 'https://recrutamento-api-v2.onrender.com';
+  const API = 'https://recrutamento-api-novo.onrender.com';
 
   // Defaults (admin). Candidato/empresa sobrescrevem com setStorageKeys()
   let ACCESS_KEY = 'admin_token';
