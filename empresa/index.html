@@ -208,6 +208,8 @@
 
     <!-- MAIN -->
     <main>
+      <!-- Fase 9: banner de plano -->
+      <div id="banner-plano" style="display:none;background:#fff;border:1px solid #e8e4df;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:13px;color:#555;"></div>
       <div class="page-header">
         <div>
           <h2 id="saudacao">Olá! 👋</h2>
@@ -302,6 +304,27 @@
       const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
       const primeiroNome = (usuario.nome || '').split(' ')[0] || 'Empresa';
       document.getElementById('saudacao').textContent = `${saudacao}, ${primeiroNome}! 👋`;
+
+      // Fase 9: exibe plano da empresa
+      try {
+        const rme = await fetch(API + '/api/empresa/minha-empresa', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (rme.ok) {
+          const dme = await rme.json();
+          const e = dme.empresa || {};
+          const bannerEl = document.getElementById('banner-plano');
+          if (bannerEl) {
+            const planoNome = e.plano_nome || e.plano_slug || 'Essencial';
+            const limVagas = e.limite_vagas >= 999 ? '∞' : e.limite_vagas;
+            bannerEl.innerHTML = `<span>📦 Plano: <strong>${planoNome}</strong> &nbsp;·&nbsp; Até ${limVagas} vaga(s) ativa(s)</span> <a href="planos.html" style="color:var(--vinho);font-size:12px;margin-left:12px;">Ver planos</a>`;
+            bannerEl.style.display = 'block';
+          }
+          // Se onboarding_step < 3, redireciona
+          if ((e.onboarding_step || 0) < 3) {
+            window.location.href = 'onboarding.html';
+            return;
+          }
+        }
+      } catch (e) { /* não bloquear dashboard */ }
 
       try {
         const r = await fetch(API + '/api/empresa/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
