@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redefinir senha — Vagas.io</title>
+  <style>
+    :root{--vinho:#722F37;--vinho-claro:#8B3A45;--bg:#F5F5F5;--borda:#E5E5E5;--verde:#28A745;--vermelho:#C62828;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;color:#1a1a1a;}
+    .container{max-width:420px;width:100%;background:#fff;border-radius:12px;padding:40px 32px;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+    .logo{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:28px;}
+    .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--vinho),#4A1F25);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:18px;}
+    .logo span{font-size:22px;font-weight:800;}
+    .logo strong{color:var(--vinho);}
+    h1{font-size:22px;font-weight:800;text-align:center;margin-bottom:8px;}
+    .sub{text-align:center;color:#6b6b6b;font-size:14px;margin-bottom:28px;line-height:1.5;}
+    label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+    input{width:100%;padding:12px 14px;border:1px solid var(--borda);border-radius:8px;font-size:15px;font-family:inherit;color:#1a1a1a;background:#fff;transition:border-color .2s;}
+    input:focus{outline:none;border-color:var(--vinho);}
+    .btn{width:100%;padding:13px;background:var(--vinho);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;transition:background .2s;}
+    .btn:hover:not(:disabled){background:var(--vinho-claro);}
+    .btn:disabled{background:#ccc;cursor:not-allowed;}
+    .msg{padding:12px 14px;border-radius:8px;font-size:14px;margin-top:16px;display:none;line-height:1.5;}
+    .msg.ok{background:#d4edda;color:#155724;border:1px solid #c3e6cb;display:block;}
+    .msg.err{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;display:block;}
+    .back{display:block;text-align:center;margin-top:20px;font-size:14px;color:var(--vinho);text-decoration:none;}
+    .back:hover{text-decoration:underline;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">
+    <div class="logo-icon">V</div>
+    <span>Vagas<strong>.io</strong></span>
+  </div>
+  <h1>Redefinir senha</h1>
+  <p class="sub" id="sub">Digite sua nova senha abaixo.</p>
+  <div id="msg" class="msg"></div>
+  <form id="form" style="display:none">
+    <label>Nova senha</label>
+    <input type="password" id="senha" minlength="8" required placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+    <label style="margin-top:14px">Confirmar nova senha</label>
+    <input type="password" id="confirma" minlength="8" required placeholder="Repita a senha" autocomplete="new-password" />
+    <button class="btn" id="btn">Redefinir senha</button>
+  </form>
+  <a href="login.html" class="back">← Voltar para o login</a>
+</div>
+
+<script>
+const API = 'https://recrutamento-api-novo.onrender.com';
+const p = new URLSearchParams(location.search);
+const token = p.get('token');
+const msg = document.getElementById('msg');
+const sub = document.getElementById('sub');
+const form = document.getElementById('form');
+const btn = document.getElementById('btn');
+
+function showMsg(txt, tipo) {
+  msg.className = 'msg ' + tipo;
+  msg.textContent = txt;
+}
+
+if (!token) {
+  showMsg('❌ Link inválido. Solicite um novo link de redefinição.', 'err');
+  sub.textContent = '';
+} else {
+  (async () => {
+    try {
+      const r = await fetch(`${API}/api/auth/validar-token?token=${encodeURIComponent(token)}`);
+      const d = await r.json();
+      if (d.valido) {
+        form.style.display = 'block';
+        if (d.nome) sub.textContent = `Olá, ${d.nome}! Escolha uma nova senha para sua conta.`;
+      } else {
+        showMsg('❌ ' + (d.erro || 'Link expirado ou já usado.'), 'err');
+        sub.textContent = 'Solicite um novo link de recuperação.';
+      }
+    } catch {
+      showMsg('❌ Erro de conexão. Tente novamente.', 'err');
+    }
+  })();
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const senha = document.getElementById('senha').value;
+  const confirma = document.getElementById('confirma').value;
+  if (senha !== confirma) return showMsg('❌ As senhas não coincidem.', 'err');
+  if (senha.length < 8) return showMsg('❌ A senha deve ter ao menos 8 caracteres.', 'err');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+  try {
+    const r = await fetch(`${API}/api/auth/redefinir-senha`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, novaSenha: senha })
+    });
+    const d = await r.json();
+    if (d.sucesso) {
+      showMsg('✅ Senha redefinida! Você já pode fazer login com a nova senha.', 'ok');
+      form.style.display = 'none';
+      sub.textContent = 'Redirecionando para o login...';
+      setTimeout(() => location.href = 'login.html', 3000);
+    } else {
+      showMsg('❌ ' + (d.erro || 'Erro ao redefinir senha.'), 'err');
+      btn.disabled = false;
+      btn.textContent = 'Redefinir senha';
+    }
+  } catch {
+    showMsg('❌ Erro de conexão. Tente novamente.', 'err');
+    btn.disabled = false;
+    btn.textContent = 'Redefinir senha';
+  }
+});
+</script>
+</body>
+</html>
