@@ -2827,13 +2827,30 @@ async function abrirVagaCands(vagaId) {
     document.getElementById('cands-vaga-titulo').textContent = '👥 ' + data.vaga.titulo + ' — Candidatos';
     document.getElementById('cands-vaga-voltar').onclick = () => irParaPagina('candidaturas');
     const info = document.getElementById('cands-vaga-info');
+    // FASE 6 — contadores por etapa (somente etapas que têm >= 1 candidato)
+    const etapasArr2 = (() => {
+      try { return typeof data.vaga.etapas === 'string' ? JSON.parse(data.vaga.etapas) : data.vaga.etapas; }
+      catch (_) { return []; }
+    })() || [];
+    const contadores = {};
+    candidaturasVagaCache.forEach(c => {
+      const e = c.etapa_atual || 0;
+      contadores[e] = (contadores[e] || 0) + 1;
+    });
+    const etapaChips = Object.keys(contadores)
+      .sort((a, b) => Number(a) - Number(b))
+      .map(e => {
+        const nome = etapasArr2[e] ? (typeof etapasArr2[e] === 'string' ? etapasArr2[e] : etapasArr2[e].nome) : `Etapa ${Number(e) + 1}`;
+        return `<span style="display:inline-block;padding:4px 10px;background:#fff;border:1px solid #e0e0e0;border-radius:999px;font-size:12px;color:#7B1F1F;margin-right:6px"><strong>${contadores[e]}</strong> · ${escapeHtml(nome)}</span>`;
+      }).join('');
     info.innerHTML = `
       <div style="display:flex;gap:24px;flex-wrap:wrap">
         <div><strong>Empresa:</strong> ${data.vaga.empresa || '—'}</div>
         <div><strong>Local:</strong> ${data.vaga.cidade || '—'}${data.vaga.estado ? '/' + data.vaga.estado : ''}</div>
         <div><strong>Total de candidatos:</strong> ${candidaturasVagaCache.length}</div>
         <div><strong>Criada em:</strong> ${formatarData(data.vaga.criada_em)}</div>
-      </div>`;
+      </div>
+      <div style="margin-top:10px"><strong>📊 Por etapa:</strong> ${etapaChips || '<em>nenhum candidato</em>'}</div>`;
 
     if (candidaturasVagaCache.length === 0) {
       tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum candidato para esta vaga.</td></tr>';
@@ -2859,6 +2876,7 @@ async function abrirVagaCands(vagaId) {
         <td>${formatarData(c.criada_em)}</td>
         <td>
           <a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a>
+          <a class="btn-ver" style="background:#D4AF37;color:#222;margin-left:4px" href="javascript:void(0)" onclick="abrirHistorico(${c.id})" title="Ver histórico de etapas">📜 Histórico</a>
         </td>
       </tr>`;
     }).join('');
@@ -2980,4 +2998,55 @@ async function importarVagasDemo() {
   } catch (e) {
     alert('❌ Erro: ' + e.message);
   }
+}
+
+// =====================================================
+// FASE 6 — Histórico da candidatura (modal)
+// =====================================================
+async function abrirHistorico(candidaturaId) {
+  const cand = candidaturasVagaCache.find(c => c.id === candidaturaId);
+  if (!cand) {
+    alert('Candidatura não encontrada no cache');
+    return;
+  }
+  // Modal genérico via dialog nativo
+  const html = `
+    <html><head><title>Histórico — ${escapeHtml(cand.nome || '')}</title>
+    <style>body{font-family:Arial;padding:20px;background:#f5f5f5}
+      h1{color:#7B1F1F}
+      .ev{border-left:3px solid #D4AF37;background:#fff;padding:10px 14px;margin:10px 0;border-radius:4px}
+      .ev small{color:#888}
+      .vazio{color:#888;font-style:italic}</style></head>
+    <body><h1>📜 Histórico</h1>
+      <p><strong>Candidato:</strong> ${escapeHtml(cand.nome || '')}</p>
+      <p><strong>Status atual:</strong> ${escapeHtml(cand.status || '')}</p>
+      <div id="lista">Carregando…</div>
+      <script>
+        const cid = ${candidaturaId};
+        const API = 'https://recrutamento-api-novo.onrender.com';
+        const t = localStorage.getItem('admin_token');
+        fetch(API + '/api/empresa/candidaturas/' + cid + '/historico', { headers: { 'Authorization': 'Bearer ' + t }})
+          .then(r => r.json())
+          .then(d => {
+            const el = document.getElementById('lista');
+            if (!d.eventos || d.eventos.length === 0) {
+              el.innerHTML = '<p class="vazio">Nenhuma movimentação registrada ainda.</p>';
+              return;
+            }
+            el.innerHTML = d.eventos.map(e => \`
+              <div class="ev">
+                <strong>\${e.de_etapa || 'início'} → \${e.para_etapa || 'final'}</strong>
+                <small> · status: \${e.de_status || '?'} → \${e.para_status || '?'}</small><br>
+                <small>\${new Date(e.data).toLocaleString('pt-BR')}</small>
+                \${e.autor_nome ? '<br><small>por: ' + e.autor_nome + ' (' + (e.autor_role || e.autor_tipo) + ')</small>' : ''}
+                \${e.mensagem ? '<br><em>' + e.mensagem + '</em>' : ''}
+              </div>
+            \`).join('');
+          })
+          .catch(err => document.getElementById('lista').innerHTML = '<p style="color:#c00">Erro: ' + err.message + '</p>');
+      <\/script>
+    </body></html>`;
+  const w = window.open('', '_blank', 'width=600,height=700');
+  w.document.write(html);
+  w.document.close();
 }
