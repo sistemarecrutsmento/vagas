@@ -617,9 +617,8 @@ document.addEventListener('click', (e) => {
 // Quando modal abre, sincroniza abas
 window.addEventListener('DOMContentLoaded', () => {
   // Espera checarAuth rodar (também no DOMContentLoaded)
-  setTimeout(() => {
+  setTimeout(async () => {
     if (!tokenCandidato && localStorage.getItem('candidato_token')) {
-      // checarAuth ainda não rodou — popula direto
       tokenCandidato = localStorage.getItem('candidato_token');
       emailLogado = localStorage.getItem('candidato_email');
     }
@@ -627,6 +626,19 @@ window.addEventListener('DOMContentLoaded', () => {
       location.href = 'index.html';
       return;
     }
+    // Fase 9: verifica se onboarding foi concluído
+    try {
+      const ro = await fetch(API + '/api/candidato/onboarding', {
+        headers: { 'Authorization': 'Bearer ' + tokenCandidato }
+      });
+      if (ro.ok) {
+        const od = await ro.json();
+        if ((od.step || 0) < 3) {
+          location.href = 'onboarding.html';
+          return;
+        }
+      }
+    } catch (e) { /* não bloquear se onboarding falhar */ }
     carregarPaginaCandidato();
     if (typeof window.atualizarHeaderUsuario === 'function') window.atualizarHeaderUsuario();
   }, 200);
