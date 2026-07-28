@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Planos — Vagas.io</title>
+  <style>
+    :root { --vinho:#722F37;--dourado:#C9A961;--bg:#f7f5f2; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,sans-serif;background:var(--bg);color:#1a1a1a;}
+    nav{background:#fff;border-bottom:1px solid #e8e4df;padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:60px;}
+    .logo{font-size:20px;font-weight:800;color:var(--vinho);text-decoration:none;}
+    .logo span{color:var(--dourado);}
+    nav a{color:#555;text-decoration:none;font-size:14px;padding:8px 12px;border-radius:8px;}
+    nav a:hover{background:#f5f0eb;}
+    .hero{text-align:center;padding:64px 5% 40px;max-width:700px;margin:0 auto;}
+    .hero h1{font-size:36px;font-weight:800;margin-bottom:12px;}
+    .hero h1 em{color:var(--vinho);font-style:normal;}
+    .hero p{color:#666;font-size:16px;line-height:1.6;}
+    .plans-wrap{max-width:1100px;margin:0 auto;padding:0 5% 80px;}
+    .plans-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+    .plan-card{background:#fff;border:2px solid #e8e4df;border-radius:16px;padding:28px;position:relative;transition:.2s;}
+    .plan-card.destaque{border-color:var(--vinho);box-shadow:0 8px 32px rgba(114,47,55,.15);}
+    .plan-card:hover{transform:translateY(-2px);}
+    .badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--vinho);color:#fff;font-size:11px;font-weight:700;padding:3px 14px;border-radius:99px;white-space:nowrap;}
+    .pname{font-size:18px;font-weight:800;margin-bottom:6px;}
+    .pdesc{font-size:13px;color:#777;min-height:44px;margin-bottom:12px;line-height:1.5;}
+    .ppreco{font-size:34px;font-weight:800;color:var(--vinho);}
+    .ppreco small{font-size:14px;font-weight:400;color:#999;}
+    .ppreco .gratuito-txt{font-size:24px;}
+    .plimites{margin:16px 0;display:flex;flex-direction:column;gap:8px;}
+    .plim-row{font-size:13px;color:#555;display:flex;align-items:center;gap:8px;}
+    .plim-row span{background:#f5f0eb;color:var(--vinho);font-weight:700;border-radius:6px;padding:2px 8px;font-size:12px;min-width:52px;text-align:center;}
+    .pfeat{list-style:none;border-top:1px solid #f0ece7;margin-top:16px;padding-top:12px;}
+    .pfeat li{font-size:13px;padding:5px 0;color:#444;display:flex;gap:8px;align-items:flex-start;}
+    .pfeat li::before{content:'✓';color:var(--vinho);font-weight:700;flex-shrink:0;}
+    .pcta{display:block;margin-top:20px;text-align:center;padding:12px;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none;background:var(--vinho);color:#fff;}
+    .pcta:hover{opacity:.88;}
+    .pcta.outline{background:transparent;border:2px solid var(--vinho);color:var(--vinho);}
+    .faq-section{max-width:760px;margin:0 auto;padding:0 5% 80px;}
+    .faq-section h2{font-size:24px;font-weight:800;margin-bottom:24px;}
+    .faq-item{background:#fff;border-radius:10px;padding:20px 24px;margin-bottom:10px;}
+    .faq-item h3{font-size:15px;font-weight:700;margin-bottom:6px;}
+    .faq-item p{font-size:14px;color:#666;line-height:1.5;}
+    .loading{text-align:center;padding:60px;color:#999;}
+    @media(max-width:768px){.plans-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="landing.html">Vagas<span>.io</span></a>
+  <div style="display:flex;gap:4px">
+    <a href="landing.html">Home</a>
+    <a href="login.html">Entrar</a>
+    <a href="cadastro.html" style="background:var(--vinho);color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;">Começar</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Planos para <em>todo tamanho</em> de empresa</h1>
+  <p>Comece grátis, escale quando precisar. Sem contrato de fidelidade. Sem taxas ocultas.</p>
+</div>
+
+<div class="plans-wrap">
+  <div class="plans-grid" id="plans-grid">
+    <div class="loading">Carregando planos…</div>
+  </div>
+</div>
+
+<div class="faq-section">
+  <h2>Perguntas frequentes</h2>
+  <div class="faq-item">
+    <h3>Preciso de cartão de crédito para começar?</h3>
+    <p>Não. O plano Gratuito não exige nenhuma forma de pagamento. Você cria a conta, publica uma vaga e começa a receber candidatos imediatamente.</p>
+  </div>
+  <div class="faq-item">
+    <h3>Posso trocar de plano a qualquer momento?</h3>
+    <p>Sim. Upgrade ou downgrade podem ser feitos a qualquer momento pelo painel da empresa. A cobrança é proporcional ao período restante.</p>
+  </div>
+  <div class="faq-item">
+    <h3>O que acontece se eu exceder o limite do plano?</h3>
+    <p>Você será notificado antes de atingir o limite. Nenhum processo ativo é interrompido — só o cadastro de novos itens acima do limite fica bloqueado.</p>
+  </div>
+  <div class="faq-item">
+    <h3>Meus dados ficam seguros?</h3>
+    <p>Sim. Cada empresa tem isolamento total de dados (multi-tenant). Nenhuma empresa acessa informações de outra. Dados armazenados com criptografia em repouso.</p>
+  </div>
+  <div class="faq-item">
+    <h3>O sistema de cobrança está ativo agora?</h3>
+    <p>Estamos em fase beta. Todos os planos estão disponíveis gratuitamente durante o período de lançamento. A cobrança será ativada com aviso prévio.</p>
+  </div>
+</div>
+
+<script>
+const API = 'https://recrutamento-api-novo.onrender.com';
+
+function fmtLim(n){ return n >= 999 ? 'Ilimitado' : n; }
+function fmtPreco(c){
+  if(c===0) return '<span class="gratuito-txt">Grátis</span>';
+  const v = (c/100).toFixed(2).replace('.',',');
+  return `R$ ${v} <small>/mês</small>`;
+}
+
+const FEATURES = {
+  gratuito:    ['1 vaga ativa','Portal público da empresa','Kanban de candidatos','Histórico de candidaturas','Notificações'],
+  essencial:   ['5 vagas simultâneas','Agenda de entrevistas','Equipe com 3 usuários','Portal público da empresa','Notificações + feed de eventos'],
+  profissional:['20 vagas simultâneas','10 usuários da equipe','Envio de propostas e docs','Chat no processo','Relatórios e KPIs avançados','Suporte via e-mail'],
+  enterprise:  ['Vagas ilimitadas','Usuários ilimitados','Onboarding dedicado','SLA de suporte prioritário','Customização de domínio','Acesso à API REST'],
+};
+
+async function load(){
+  const grid = document.getElementById('plans-grid');
+  try {
+    const r = await fetch(API+'/api/planos');
+    const {planos} = await r.json();
+    grid.innerHTML = planos.map(p=>`
+      <div class="plan-card ${p.destaque?'destaque':''}">
+        ${p.destaque?'<div class="badge">⭐ Mais popular</div>':''}
+        <div class="pname">${p.nome}</div>
+        <div class="pdesc">${p.descricao}</div>
+        <div class="ppreco">${fmtPreco(p.preco_mensal)}</div>
+        <div class="plimites">
+          <div class="plim-row"><span>${fmtLim(p.limite_vagas)}</span> vagas simultâneas</div>
+          <div class="plim-row"><span>${fmtLim(p.limite_usuarios)}</span> usuários da equipe</div>
+          <div class="plim-row"><span>${fmtLim(p.limite_candidaturas_mes)}</span> candidaturas/mês</div>
+        </div>
+        <ul class="pfeat">
+          ${(FEATURES[p.slug]||[]).map(f=>`<li>${f}</li>`).join('')}
+        </ul>
+        <a href="cadastro.html?plano=${p.slug}" class="pcta ${p.slug==='gratuito'?'outline':''}">
+          ${p.slug==='gratuito'?'Começar grátis':'Escolher '+p.nome}
+        </a>
+      </div>
+    `).join('');
+  } catch(e) {
+    grid.innerHTML='<div class="loading">Erro ao carregar planos. <a href="login.html">Tente entrar</a></div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
