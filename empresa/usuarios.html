@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Equipe · Portal Empresa · Vagas.io</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="empresa.css">
+  <style>
+    /* Estilos específicos desta página */
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+    .toolbar h2 { margin: 0; font-size: 22px; font-weight: 700; color: var(--preto); }
+    .toolbar .sub { font-size: 13px; color: var(--cinza-medio); margin-top: 4px; }
+
+    .btn-novo { background: var(--vinho); color: #fff; border: 0; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn-novo:hover { background: var(--vinho-claro); }
+    .btn-novo:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .tabela-wrap { background: #fff; border-radius: 12px; border: 1px solid var(--borda); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--borda); font-size: 14px; }
+    th { background: #fafafa; font-weight: 600; color: var(--cinza-medio); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    tr:last-child td { border-bottom: 0; }
+    tr:hover td { background: #fafafa; }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-admin { background: var(--vinho); color: #fff; }
+    .badge-recrutador { background: #fde7c5; color: #8a5a00; }
+    .badge-viewer { background: #e3f2fd; color: #0d47a1; }
+    .badge-ativo { background: #e8f5e9; color: var(--verde); }
+    .badge-inativo { background: #f5f5f5; color: #999; }
+
+    .acoes { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-acao { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--borda); background: #fff; color: var(--preto); cursor: pointer; font-size: 12px; }
+    .btn-acao:hover { background: #fafafa; }
+    .btn-acao.editar { color: var(--vinho); border-color: var(--vinho); }
+    .btn-acao.excluir { color: var(--vermelho); border-color: var(--vermelho); }
+    .btn-acao.reset { color: var(--azul); border-color: var(--azul); }
+
+    /* Modal */
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
+    .modal-bg.ativo { display: flex; }
+    .modal { background: #fff; border-radius: 12px; width: 100%; max-width: 460px; padding: 24px; }
+    .modal h3 { margin: 0 0 16px; font-size: 18px; font-weight: 700; }
+    .modal label { display: block; margin: 12px 0 6px; font-size: 13px; font-weight: 600; color: var(--cinza-medio); }
+    .modal input, .modal select { width: 100%; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+    .btn-modal { padding: 10px 18px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; font-size: 14px; }
+    .btn-modal.cancelar { background: #f5f5f5; color: var(--preto); }
+    .btn-modal.salvar { background: var(--vinho); color: #fff; }
+
+    .acesso-negado { text-align: center; padding: 60px 20px; }
+    .acesso-negado h2 { color: var(--cinza-medio); }
+  </style>
+</head>
+<body>
+  <button class="menu-toggle" onclick="document.querySelector('aside').classList.add('aberto'); document.querySelector('.app').classList.add('aside-aberto');" aria-label="Abrir menu">☰</button>
+
+  <div class="app">
+    <aside>
+      <button class="menu-close" onclick="document.querySelector('aside').classList.add('aside-fechada'); document.querySelector('.app').classList.remove('aside-aberto');" aria-label="Fechar menu">✕</button>
+      <div class="aside-logo">
+        <h1>VagasIO</h1>
+        <small>Portal da Empresa</small>
+      </div>
+
+      <a class="nav-item" href="index.html">📊 Dashboard</a>
+      <a class="nav-item" href="vagas.html">📋 Vagas com Candidatos</a>
+      <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
+      <a class="nav-item" href="agenda.html">📅 Agenda</a>
+      <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
+
+      <!-- FASE 3: link visível apenas para admin_empresa -->
+      <a class="nav-item" id="nav-equipe" href="usuarios.html" style="display:none;">👥 Equipe</a>
+
+      <div class="nav-divisor">Links</div>
+      <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
+
+      <div class="aside-user">
+        <div class="aside-user-avatar" id="avatar">--</div>
+        <div class="aside-user-info">
+          <div class="nome" id="user-nome">--</div>
+          <div class="empresa" id="user-empresa">--</div>
+          <div class="empresa" id="user-role" style="text-transform:uppercase; font-size:10px;"></div>
+        </div>
+        <button class="btn-logout" onclick="sair()" title="Sair">↪</button>
+      </div>
+    </aside>
+
+    <main data-roles="admin_empresa">
+      <!-- Bloco principal (visível só admin_empresa) -->
+      <div id="bloco-admin" style="display:none;">
+        <div class="toolbar">
+          <div>
+            <h2>👥 Gestão de Equipe</h2>
+            <div class="sub">Gerencie os usuários que acessam este portal da empresa</div>
+          </div>
+          <button class="btn-novo" onclick="abrirModalNovo()">+ Adicionar usuário</button>
+        </div>
+
+        <div class="tabela-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Cargo</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="lista-usuarios">
+              <tr><td colspan="6" style="text-align:center; color:var(--cinza-medio);">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bloco de acesso negado -->
+      <div id="bloco-bloqueado" class="acesso-negado" style="display:none;">
+        <h2>🚫 Acesso restrito</h2>
+        <p style="color:var(--cinza-medio); margin-top:8px;">A gestão de equipe é exclusiva do administrador da empresa.</p>
+        <p style="color:var(--cinza-claro); margin-top:20px; font-size:12px;">Se você precisa de acesso, fale com o admin da sua empresa.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: novo/editar usuário -->
+  <div class="modal-bg" id="modal">
+    <div class="modal">
+      <h3 id="modal-titulo">Adicionar usuário</h3>
+      <form id="form-usuario" onsubmit="return salvarUsuario(event)">
+        <input type="hidden" id="user-id">
+        <label>Nome*</label>
+        <input type="text" id="user-nome-input" required maxlength="80">
+        <label>E-mail*</label>
+        <input type="email" id="user-email" required maxlength="120">
+        <label>Cargo</label>
+        <input type="text" id="user-cargo" placeholder="Ex: Recrutador(a)" maxlength="80">
+        <label>Senha <span id="senha-info" style="color:var(--cinza-claro); font-weight:400;">(mín. 8 caracteres)</span></label>
+        <input type="password" id="user-senha" minlength="8" placeholder="Se vazio, gera automática">
+        <label>Role*</label>
+        <select id="user-role-input" required>
+          <option value="recrutador">Recrutador</option>
+          <option value="viewer">Viewer (somente leitura)</option>
+          <option value="admin_empresa">Administrador</option>
+        </select>
+        <div class="modal-actions">
+          <button type="button" class="btn-modal cancelar" onclick="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-modal salvar" id="btn-salvar">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast (feedback) -->
+  <div id="toast" style="position:fixed; bottom:20px; right:20px; padding:12px 18px; border-radius:8px; color:#fff; font-weight:600; z-index:1000; display:none;"></div>
+
+  <!-- ============================================================
+       SCRIPTS — auth-helper + empresa-auth-init (FASE 3)
+       ============================================================ -->
+  <script src="auth-helper.js?v=fase3_2026_07_28"></script>
+  <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
+  <script src="empresa-auth-patch.js?v=fase3_2026_07_28"></script>
+
+  <script>
+    const API = 'https://recrutamento-api-v2.onrender.com';
+
+    // ---------- helpers de UI ----------
+    function toast(msg, tipo) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.background = tipo === 'erro' ? '#C62828' : (tipo === 'aviso' ? '#F57C00' : '#2E7D32');
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 3500);
+    }
+
+    function sair() {
+      if (confirm('Sair do portal?')) {
+        if (typeof window.authLogout === 'function') window.authLogout();
+        else window.location.href = 'login.html';
+      }
+    }
+
+    // ---------- inicialização ----------
+    async function init() {
+      setStorageKeys('empresa_token', 'empresa_refresh');
+
+      // tenta refresh silencioso
+      await authInit();
+
+      // guard: sem token, vai pro login
+      if (!localStorage.getItem('empresa_token')) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // pega role do JWT (backend é autoridade)
+      const role = authRBAC.currentRole();
+      const empresaId = authRBAC.currentEmpresaId();
+      const nome = authRBAC.currentUser()?.nome || '?';
+      const empresaNome = authRBAC.currentEmpresaNome() || '—';
+
+      // sidebar
+      const userObj = (() => { try { return JSON.parse(localStorage.getItem('empresa_usuario') || '{}'); } catch { return {}; } })();
+      document.getElementById('avatar').textContent = (nome || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+      document.getElementById('user-nome').textContent = nome;
+      document.getElementById('user-empresa').textContent = empresaNome;
+      document.getElementById('user-role').textContent = role || '';
+
+      // FASE 3: link no menu só pra admin_empresa
+      if (role === 'admin_empresa') {
+        document.getElementById('nav-equipe').style.display = '';
+        document.getElementById('bloco-admin').style.display = '';
+        carregarUsuarios();
+      } else {
+        // recrutador / viewer NÃO têm acesso à gestão de equipe
+        document.getElementById('nav-equipe').style.display = 'none';
+        document.getElementById('bloco-bloqueado').style.display = '';
+      }
+    }
+
+    // ---------- carregar usuários ----------
+    async function carregarUsuarios() {
+      const tbody = document.getElementById('lista-usuarios');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--cinza-medio);">Carregando...</td></tr>';
+      try {
+        const r = await authFetch(API + '/api/empresa/usuarios');
+        if (r.status === 403) {
+          toast('Você não tem permissão para gerenciar usuários.', 'erro');
+          document.getElementById('bloco-bloqueado').style.display = '';
+          document.getElementById('bloco-admin').style.display = 'none';
+          return;
+        }
+        const data = await r.json();
+        if (!r.ok) { toast(data.erro || 'Erro ao carregar', 'erro'); return; }
+        renderUsuarios(data.usuarios || []);
+      } catch (e) {
+        toast('Erro de conexão ao carregar usuários', 'erro');
+      }
+    }
+
+    function renderUsuarios(usuarios) {
+      const tbody = document.getElementById('lista-usuarios');
+      if (!usuarios.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--cinza-medio); padding:32px;">Nenhum usuário cadastrado ainda.</td></tr>';
+        return;
+      }
+      const meId = authRBAC.currentUsuarioId();
+      tbody.innerHTML = usuarios.map(u => {
+        const ehEu = u.id === meId;
+        const roleBadge = `<span class="badge badge-${u.role}">${roleLabel(u.role)}</span>`;
+        const statusBadge = `<span class="badge badge-${u.ativo ? 'ativo' : 'inativo'}">${u.ativo ? 'Ativo' : 'Inativo'}</span>`;
+        const acoes = `
+          <div class="acoes">
+            <button class="btn-acao editar" onclick="editarUsuario(${u.id})" title="Editar">✎</button>
+            <button class="btn-acao reset" onclick="resetarSenha(${u.id}, '${(u.nome || '').replace(/'/g, '')}')" title="Resetar senha">🔑</button>
+            ${ehEu ? '' : `<button class="btn-acao excluir" onclick="excluirUsuario(${u.id}, '${(u.nome || '').replace(/'/g, '')}')" title="Excluir">🗑</button>`}
+          </div>`;
+        return `<tr>
+          <td><strong>${escapeHtml(u.nome || '—')}</strong>${ehEu ? ' <span style="color:var(--cinza-claro); font-size:11px;">(você)</span>' : ''}</td>
+          <td>${escapeHtml(u.email || '—')}</td>
+          <td>${escapeHtml(u.cargo || '—')}</td>
+          <td>${roleBadge}</td>
+          <td>${statusBadge}</td>
+          <td>${acoes}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function roleLabel(r) {
+      return r === 'admin_empresa' ? 'Admin' : r === 'recrutador' ? 'Recrutador' : 'Viewer';
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // ---------- modal novo/editar ----------
+    function abrirModalNovo() {
+      document.getElementById('modal-titulo').textContent = 'Adicionar usuário';
+      document.getElementById('user-id').value = '';
+      document.getElementById('user-nome-input').value = '';
+      document.getElementById('user-email').value = '';
+      document.getElementById('user-email').disabled = false;
+      document.getElementById('user-cargo').value = '';
+      document.getElementById('user-senha').value = '';
+      document.getElementById('user-senha').required = true;
+      document.getElementById('senha-info').textContent = '(obrigatória — mín. 8 caracteres)';
+      document.getElementById('user-role-input').value = 'recrutador';
+      document.getElementById('modal').classList.add('ativo');
+    }
+
+    function fecharModal() {
+      document.getElementById('modal').classList.remove('ativo');
+    }
+
+    async function editarUsuario(id) {
+      try {
+        const r = await authFetch(API + '/api/empresa/usuarios');
+        const data = await r.json();
+        const u = (data.usuarios || []).find(x => x.id === id);
+        if (!u) { toast('Usuário não encontrado', 'erro'); return; }
+        const isMe = u.id === authRBAC.currentUsuarioId();
+
+        document.getElementById('modal-titulo').textContent = 'Editar usuário';
+        document.getElementById('user-id').value = u.id;
+        document.getElementById('user-nome-input').value = u.nome || '';
+        document.getElementById('user-email').value = u.email || '';
+        document.getElementById('user-email').disabled = true;
+        document.getElementById('user-cargo').value = u.cargo || '';
+        document.getElementById('user-senha').value = '';
+        document.getElementById('user-senha').required = false;
+        document.getElementById('senha-info').textContent = '(deixe vazio para manter)';
+        document.getElementById('user-role-input').value = u.role || 'recrutador';
+        // não deixa admin se rebaixar a si mesmo
+        if (isMe && u.role === 'admin_empresa') {
+          document.getElementById('user-role-input').disabled = true;
+          document.getElementById('senha-info').textContent = '(você não pode alterar seu próprio role de admin)';
+        } else {
+          document.getElementById('user-role-input').disabled = false;
+        }
+        document.getElementById('modal').classList.add('ativo');
+      } catch (e) {
+        toast('Erro ao carregar usuário', 'erro');
+      }
+    }
+
+    async function salvarUsuario(e) {
+      e.preventDefault();
+      const id = document.getElementById('user-id').value;
+      const nome = document.getElementById('user-nome-input').value.trim();
+      const email = document.getElementById('user-email').value.trim();
+      const cargo = document.getElementById('user-cargo').value.trim();
+      const senha = document.getElementById('user-senha').value;
+      const role = document.getElementById('user-role-input').value;
+      const btn = document.getElementById('btn-salvar');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+      try {
+        const body = { nome, cargo, role };
+        if (id) {
+          // edição: email não muda
+          if (senha) body.senha = senha;
+        } else {
+          // criação: email + senha obrigatórios
+          body.email = email;
+          if (senha) body.senha = senha;
+          else body.senha = gerarSenhaTemporaria();
+        }
+        const url = id ? `${API}/api/empresa/usuarios/${id}` : `${API}/api/empresa/usuarios`;
+        const method = id ? 'PUT' : 'POST';
+        const r = await authFetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          toast(data.erro || 'Erro ao salvar', 'erro');
+          btn.disabled = false; btn.textContent = 'Salvar';
+          return false;
+        }
+        if (!id && data.senha_temp) {
+          // mostra senha temporária (gerada pelo backend ou frontend)
+          toast('Usuário criado! Senha temp: ' + data.senha_temp, 'aviso');
+        } else {
+          toast(id ? 'Usuário atualizado' : 'Usuário criado', 'ok');
+        }
+        fecharModal();
+        carregarUsuarios();
+      } catch (e) {
+        toast('Erro de conexão', 'erro');
+      }
+      btn.disabled = false; btn.textContent = 'Salvar';
+      return false;
+    }
+
+    function gerarSenhaTemporaria() {
+      const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789abcdefghjkmnpqrstuvwxyz';
+      let s = '';
+      for (let i = 0; i < 12; i++) s += chars[Math.floor(Math.random() * chars.length)];
+      return s;
+    }
+
+    async function resetarSenha(id, nome) {
+      if (!confirm(`Resetar a senha de "${nome}"? Uma senha temporária será gerada.`)) return;
+      try {
+        const r = await authFetch(`${API}/api/empresa/usuarios/${id}/reset-senha`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({})
+        });
+        const data = await r.json();
+        if (!r.ok) { toast(data.erro || 'Erro ao resetar', 'erro'); return; }
+        const novaSenha = data.senha_temp || data.nova_senha || data.senha || '(não retornada)';
+        prompt(`Nova senha para ${nome}:`, novaSenha);
+      } catch (e) {
+        toast('Erro de conexão', 'erro');
+      }
+    }
+
+    async function excluirUsuario(id, nome) {
+      if (!confirm(`Excluir "${nome}"? Esta ação não pode ser desfeita.`)) return;
+      try {
+        const r = await authFetch(`${API}/api/empresa/usuarios/${id}`, { method: 'DELETE' });
+        const data = await r.json();
+        if (!r.ok) { toast(data.erro || 'Erro ao excluir', 'erro'); return; }
+        toast('Usuário excluído', 'ok');
+        carregarUsuarios();
+      } catch (e) {
+        toast('Erro de conexão', 'erro');
+      }
+    }
+
+    // ---------- start ----------
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
