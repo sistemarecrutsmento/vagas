@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minhas Candidaturas — Vagas.io</title>
+<link rel="stylesheet" href="/_shared/global.css">
+<style>
+  :root { --gold: #c8a96a; --dark: #1a1a1a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%); color: #fff; min-height: 100vh; }
+
+  .header { background: #000; border-bottom: 2px solid var(--gold); padding: 16px 24px;
+            display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { margin: 0; font-size: 20px; color: var(--gold); font-weight: 700; }
+  .header .user { color: #ccc; font-size: 14px; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+  .empty { text-align: center; padding: 80px 24px; color: #888; }
+  .empty h2 { color: var(--gold); margin-bottom: 12px; }
+
+  .cand-card { background: #222; border: 1px solid #333; border-radius: 12px; padding: 20px;
+               margin-bottom: 16px; display: grid; grid-template-columns: 1fr auto; gap: 16px;
+               transition: all 0.2s; cursor: pointer; }
+  .cand-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+
+  .empresa-logo { width: 60px; height: 60px; border-radius: 50%; background: #444;
+                  display: flex; align-items: center; justify-content: center;
+                  font-size: 24px; color: var(--gold); font-weight: bold; overflow: hidden; }
+  .empresa-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+  .cand-info h3 { margin: 0 0 4px 0; color: #fff; font-size: 18px; }
+  .cand-info .empresa { color: var(--gold); font-size: 14px; margin-bottom: 8px; }
+  .cand-info .meta { color: #aaa; font-size: 13px; }
+
+  .status-pill { display: inline-block; padding: 4px 12px; border-radius: 12px;
+                  font-size: 12px; font-weight: 600; text-transform: uppercase; }
+  .status-em_andamento { background: #1f4d7a; color: #cce4ff; }
+  .status-em_analise { background: #4a4a1f; color: #fff3a3; }
+  .status-contratado { background: #1f5c2e; color: #b8e6c4; }
+  .status-rejeitado { background: #5c1f1f; color: #f8b8b8; }
+
+  .progress-bar { background: #333; border-radius: 8px; height: 8px; margin-top: 12px;
+                  overflow: hidden; position: relative; }
+  .progress-bar-fill { background: linear-gradient(90deg, var(--gold), #ffd700); height: 100%;
+                       border-radius: 8px; transition: width 0.3s; }
+  .progress-label { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+  .etapa-info { color: #ccc; font-size: 13px; margin-top: 8px; }
+  .etapa-info strong { color: #fff; }
+
+  .btn-ver { background: var(--gold); color: #000; border: 0; border-radius: 8px;
+             padding: 10px 20px; font-weight: 600; cursor: pointer; text-decoration: none;
+             display: inline-block; transition: all 0.2s; }
+  .btn-ver:hover { background: #ffd700; }
+
+  .loading { text-align: center; padding: 60px; color: #888; }
+  .loading .spinner { border: 3px solid #333; border-top: 3px solid var(--gold);
+                      border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+                      margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .header-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold);
+                border-radius: 6px; padding: 6px 14px; cursor: pointer; text-decoration: none;
+                font-size: 13px; transition: all 0.2s; }
+  .header-btn:hover { background: var(--gold); color: #000; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 Minhas Candidaturas</h1>
+  <div>
+    <span class="user" id="user-name"></span>
+    <a href="painel.html" class="header-btn">← Painel</a>
+  </div>
+</div>
+
+<div class="container">
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    Carregando suas candidaturas…
+  </div>
+
+  <div id="lista-container" style="display:none;"></div>
+
+  <div id="empty-state" class="empty" style="display:none;">
+    <h2>Você ainda não se candidatou a nenhuma vaga</h2>
+    <p>Explore vagas abertas no <a href="index.html" style="color: var(--gold);">painel principal</a>.</p>
+  </div>
+</div>
+
+<script src="/_shared/auth-helper.js"></script>
+<script>
+setStorageKeys('candidato_token', 'candidato_refresh');
+
+const API = 'https://recrutamento-api-novo.onrender.com';
+
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+function statusLabel(s) {
+  const map = {
+    em_andamento: 'Em andamento',
+    em_analise: 'Em análise',
+    contratado: 'Contratado',
+    rejeitado: 'Reprovado'
+  };
+  return map[s] || s;
+}
+
+function formatData(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function renderCard(c) {
+  const iniciais = (c.empresa_nome || 'E').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  const logo = c.empresa_logo_url
+    ? `<img src="${escapeHtml(c.empresa_logo_url)}" alt="${escapeHtml(c.empresa_nome)}">`
+    : iniciais;
+
+  const cor = c.empresa_cor || '#c8a96a';
+  const statusClass = `status-${escapeHtml(c.status)}`;
+  const prog = Math.round((c.progresso || 0) * 100);
+
+  return `
+    <a href="candidatura.html?id=${c.id}" class="cand-card" style="text-decoration:none;color:inherit;display:grid;grid-template-columns:1fr auto;gap:16px;">
+      <div style="display:flex;gap:16px;align-items:center;">
+        <div class="empresa-logo" style="border-color:${cor};border:2px solid;">
+          ${logo}
+        </div>
+        <div class="cand-info">
+          <h3>${escapeHtml(c.vaga_titulo)}</h3>
+          <div class="empresa">${escapeHtml(c.empresa_nome || '—')}</div>
+          <div class="meta">
+            📅 Candidatura em ${formatData(c.data_candidatura)}
+            ${c.vaga_cidade ? ` • ${escapeHtml(c.vaga_cidade)}/${escapeHtml(c.vaga_estado || '')}` : ''}
+          </div>
+          <div class="etapa-info">
+            <strong>Etapa atual:</strong> ${escapeHtml(c.etapa_label || `Etapa ${(c.etapa_atual || 0) + 1}`)}
+            ${c.etapa_nome ? ` — ${escapeHtml(c.etapa_nome)}` : ''}
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width:${prog}%;"></div>
+          </div>
+          <div class="progress-label">${prog}% do processo seletivo</div>
+        </div>
+      </div>
+      <div style="text-align:right;display:flex;flex-direction:column;gap:8px;justify-content:center;">
+        <span class="status-pill ${statusClass}">${escapeHtml(statusLabel(c.status))}</span>
+        <span class="btn-ver">Ver detalhes →</span>
+      </div>
+    </a>
+  `;
+}
+
+async function carregar() {
+  const tk = authTokens.getAccess();
+  if (!tk) { window.location.href = 'login.html'; return; }
+
+  try {
+    const r = await authFetch(`${API}/api/candidato/candidaturas`);
+    if (!r.ok) {
+      if (r.status === 401) { window.location.href = 'login.html'; return; }
+      throw new Error('Falha ao carregar');
+    }
+    const data = await r.json();
+
+    // Header
+    try {
+      const perfil = await authFetch(`${API}/api/candidato/perfil`);
+      if (perfil.ok) {
+        const p = await perfil.json();
+        document.getElementById('user-name').textContent = p.nome ? `Olá, ${p.nome.split(' ')[0]}` : '';
+      }
+    } catch (_) {}
+
+    document.getElementById('loading').style.display = 'none';
+
+    const lista = data.candidaturas || [];
+    if (lista.length === 0) {
+      document.getElementById('empty-state').style.display = 'block';
+      return;
+    }
+
+    const html = lista.map(renderCard).join('');
+    document.getElementById('lista-container').innerHTML = html;
+    document.getElementById('lista-container').style.display = 'block';
+  } catch (e) {
+    document.getElementById('loading').innerHTML = `
+      <h2 style="color:#f88">Erro ao carregar</h2>
+      <p>${escapeHtml(e.message)}</p>
+      <a href="index.html" class="header-btn">Voltar</a>
+    `;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await authInit();
+  await carregar();
+});
+</script>
+</body>
+</html>
