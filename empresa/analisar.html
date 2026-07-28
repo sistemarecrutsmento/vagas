@@ -127,7 +127,7 @@
   </div>
 
   <script>
-    const API = 'https://recrutamento-api-v2.onrender.com';
+    const API = 'https://recrutamento-api-novo.onrender.com';
     const token = localStorage.getItem('empresa_token');
     if (!token) window.location.href = 'login.html';
     const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
@@ -428,6 +428,20 @@
         // 2) Histórico do Processo (colapsável)
         historicoCard +
 
+        // 10) Documentos da candidatura
+        '<div class="card card-colapsavel" id="card-docs">' +
+          '<div class="card-header" onclick="toggleCard('card-docs')">' +
+            '<h2>📎 Documentos</h2>' +
+            '<span class="card-toggle-icon">▼</span>' +
+          '</div>' +
+          '<div class="card-body" id="card-docs-body">' +
+            '<div id="docs-area">Carregando documentos...</div>' +
+            '<div style="margin-top:12px;">' +
+              '<button class="btn" style="background:var(--cinza-escuro);color:#fff;font-size:13px;" onclick="aprovarTodosDocumentos(' + c.id + ')">✅ Aprovar todos</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
         // 3) Dados Pessoais + Foto
         '<div class="card" id="card-dados-pessoais">' +
           '<div class="dados-pessoais-header">' +
@@ -469,12 +483,23 @@
         '<div class="card" id="card-acoes">' +
           '<h2>⚡ Ações</h2>' + acoesHtml +
           '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--borda)">' +
-            '<a href="chat.html?cid=' + c.id + '" class="btn" style="background:var(--vinho);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;">💬 Chat com candidato</a>' +
+            '<a href="conversas.html?cid=' + c.id + '" class="btn" style="background:var(--vinho);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;">💬 Chat com candidato</a>' +
+          (status !== 'contratado' && status !== 'rejeitado' && status !== 'reprovado' ?
+            '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">' +
+            '<button class="btn" style="background:#1565C0;color:#fff;" onclick="abrirModalEntrevista(' + c.id + ')">📅 Agendar entrevista</button>' +
+            (!c.proposta_enviada_em ?
+              '<button class="btn" style="background:#2E7D32;color:#fff;" onclick="abrirModalProposta(' + c.id + ')">📨 Enviar proposta</button>' :
+              '<span style="font-size:13px;color:#666;align-self:center">✅ Proposta enviada</span>'
+            ) +
+            '</div>'
+          : '') +
           '</div>' +
         '</div>';
 
       // carrega chat
       carregarChat();
+      // carrega documentos
+      carregarDocumentos(c.id);
       // restaura cards colapsáveis
       setTimeout(restaurarEstadoCards, 50);
     }
@@ -565,6 +590,207 @@
 
     // Inicia polling de chat (a cada 10s)
     setInterval(carregarChat, 10000);
+
+    // ═══════════════════════════════════════════════════════
+    // FECHAMENTO FUNCIONAL — Entrevista, Proposta, Documentos
+    // ═══════════════════════════════════════════════════════
+
+
+    // == Documentos da Candidatura ==
+    async function carregarDocumentos(candId) {
+      const area = document.getElementById('docs-area');
+      if (!area) return;
+      try {
+        const r = await fetch(API + '/api/empresa/candidatura/' + candId + '/documentos', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!r.ok) { area.innerHTML = '<p style="color:#888">Sem documentos ou sem acesso.</p>'; return; }
+        const d = await r.json();
+        const docs = d.documentos || [];
+        if (docs.length === 0) {
+          area.innerHTML = '<p style="color:#888;font-size:14px;">Nenhum documento enviado ainda.</p>';
+          return;
+        }
+        const corMap = { aprovado:'#2E7D32', reprovado:'#C62828', retornado:'#E65100', pendente:'#888' };
+        area.innerHTML = docs.map(function(doc) {
+          const cor = corMap[doc.status] || '#888';
+          return '<div style="border:1px solid #EEE;border-radius:8px;padding:12px;margin-bottom:8px;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">' +
+              '<div><div style="font-size:14px;font-weight:600;">' + escapeHtml(doc.tipo||'Doc') + '</div>' +
+              '<div style="font-size:12px;color:' + cor + ';">' + (doc.status||'pendente') + '</div>' +
+              (doc.justificativa_admin ? '<div style="font-size:12px;color:#666;font-style:italic;">' + escapeHtml(doc.justificativa_admin) + '</div>' : '') + '</div>' +
+              '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+                (doc.arquivo_url ? '<a href="' + doc.arquivo_url + '" target="_blank" style="font-size:12px;color:#1565C0;padding:4px 8px;border:1px solid #1565C0;border-radius:4px;text-decoration:none;">Ver</a>' : '') +
+                (doc.status !== 'aprovado' ? '<button onclick="revisarDoc(' + doc.id + `,aprovado,${candId})"` + ' style="font-size:12px;padding:4px 8px;background:#2E7D32;color:#fff;border:none;border-radius:4px;cursor:pointer;">Aprovar</button>' : '') +
+                (doc.status !== 'reprovado' ? '<button onclick="revisarDoc(' + doc.id + `,reprovado,${candId})"` + ' style="font-size:12px;padding:4px 8px;background:#C62828;color:#fff;border:none;border-radius:4px;cursor:pointer;">Reprovar</button>' : '') +
+                '<button onclick="revisarDoc(' + doc.id + `,retornado,${candId})"` + ' style="font-size:12px;padding:4px 8px;background:#E65100;color:#fff;border:none;border-radius:4px;cursor:pointer;">Devolver</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      } catch(e) { area.innerHTML = '<p style="color:red">Erro: ' + e.message + '</p>'; }
+    }
+
+    async function revisarDoc(docId, status, candId) {
+      let motivo = '';
+      if (status === 'reprovado' || status === 'retornado') {
+        const m = prompt('Motivo (opcional):');
+        if (m === null) return;
+        motivo = m || '';
+      }
+      try {
+        const r = await fetch(API + '/api/empresa/documento/' + docId + '/revisar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ status: status, justificativa: motivo || undefined })
+        });
+        const d = await r.json();
+        if (!r.ok) { alert(d.erro || 'Erro ao revisar'); return; }
+        _toast('Documento ' + status + '!', 'sucesso');
+        carregarDocumentos(candId);
+      } catch(e) { alert('Erro de conexao'); }
+    }
+
+    async function aprovarTodosDocumentos(candId) {
+      if (!confirm('Aprovar todos os documentos e avançar a etapa?')) return;
+      try {
+        const r = await fetch(API + '/api/empresa/candidatura/' + candId + '/aprovar-documentos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({})
+        });
+        const d = await r.json();
+        if (!r.ok) { alert(d.erro || 'Erro'); return; }
+        _toast('Documentos aprovados!', 'sucesso');
+        setTimeout(function(){ location.reload(); }, 1500);
+      } catch(e) { alert('Erro de conexao'); }
+    }
+
+    function abrirModalEntrevista(candId) {
+      const id = candId || new URLSearchParams(location.search).get('id');
+      if (!document.getElementById('modal-entrevista')) _criarModais();
+      document.getElementById('ent-cand-id').value = id;
+      document.getElementById('modal-entrevista').style.display = 'flex';
+      document.getElementById('ent-erro').style.display = 'none';
+    }
+
+    async function agendarEntrevista() {
+      const candId = document.getElementById('ent-cand-id').value;
+      const data_hora = document.getElementById('ent-data').value;
+      const tipo = document.getElementById('ent-tipo').value;
+      const link = document.getElementById('ent-link').value.trim();
+      const local = document.getElementById('ent-local').value.trim();
+      const obs = document.getElementById('ent-obs').value.trim();
+      const duracao = document.getElementById('ent-duracao').value;
+      const erroEl = document.getElementById('ent-erro');
+      erroEl.style.display = 'none';
+      if (!data_hora) { erroEl.textContent = 'Informe a data e hora da entrevista.'; erroEl.style.display = 'block'; return; }
+      const btn = document.getElementById('btn-agendar-ent');
+      btn.disabled = true; btn.textContent = 'Agendando…';
+      try {
+        const r = await fetch(API + '/api/empresa/entrevista', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ candidatura_id: Number(candId), data_hora, tipo, link_reuniao: link || null, local: local || null, observacoes: obs || null, duracao_minutos: Number(duracao) || 60 })
+        });
+        const d = await r.json();
+        if (!r.ok) { erroEl.textContent = d.erro || 'Erro ao agendar.'; erroEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Agendar'; return; }
+        document.getElementById('modal-entrevista').style.display = 'none';
+        _toastFC('Entrevista agendada! O candidato sera notificado.', 'sucesso');
+        setTimeout(() => location.reload(), 1600);
+      } catch (e) { erroEl.textContent = 'Erro de conexao.'; erroEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Agendar'; }
+    }
+
+    function abrirModalProposta(candId) {
+      const id = candId || new URLSearchParams(location.search).get('id');
+      if (!document.getElementById('modal-proposta')) _criarModais();
+      document.getElementById('prop-cand-id').value = id;
+      document.getElementById('modal-proposta').style.display = 'flex';
+      document.getElementById('prop-erro').style.display = 'none';
+    }
+
+    async function enviarProposta() {
+      const candId = document.getElementById('prop-cand-id').value;
+      const texto = document.getElementById('prop-texto').value.trim();
+      const erroEl = document.getElementById('prop-erro');
+      erroEl.style.display = 'none';
+      if (!texto) { erroEl.textContent = 'Descreva os termos da proposta.'; erroEl.style.display = 'block'; return; }
+      if (!confirm('Confirmar envio da proposta? Esta acao nao pode ser desfeita.')) return;
+      const btn = document.getElementById('btn-enviar-prop');
+      btn.disabled = true; btn.textContent = 'Enviando…';
+      try {
+        const r = await fetch(API + '/api/empresa/candidatura/' + candId + '/proposta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ texto })
+        });
+        const d = await r.json();
+        if (!r.ok) { erroEl.textContent = d.erro || 'Erro ao enviar.'; erroEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Enviar proposta'; return; }
+        document.getElementById('modal-proposta').style.display = 'none';
+        _toastFC('Proposta enviada! O candidato recebera um e-mail.', 'sucesso');
+        setTimeout(() => location.reload(), 1600);
+      } catch (e) { erroEl.textContent = 'Erro de conexao.'; erroEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Enviar proposta'; }
+    }
+
+    function _toastFC(msg, tipo) {
+      let t = document.getElementById('_toast_fc');
+      if (!t) { t = document.createElement('div'); t.id = '_toast_fc'; Object.assign(t.style, { position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)', padding:'12px 24px', borderRadius:'8px', fontSize:'14px', fontWeight:'600', color:'#fff', zIndex:'9999', transition:'opacity .3s', pointerEvents:'none' }); document.body.appendChild(t); }
+      t.textContent = msg;
+      t.style.background = tipo === 'sucesso' ? '#2E7D32' : '#C62828';
+      t.style.opacity = '1';
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+    }
+
+    function _criarModais() {
+      if (document.getElementById('modal-entrevista')) return;
+      const div = document.createElement('div');
+      div.innerHTML = [
+        '<div id="modal-entrevista" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:16px;">',
+        '<div style="background:#fff;border-radius:12px;padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;">',
+        '<h3 style="margin:0 0 16px;font-size:17px;">Agendar entrevista</h3>',
+        '<input type="hidden" id="ent-cand-id" />',
+        '<div style="display:grid;gap:12px;">',
+        '<div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Data e hora *</label>',
+        '<input type="datetime-local" id="ent-data" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;" /></div>',
+        '<div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Tipo</label>',
+        '<select id="ent-tipo" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;">',
+        '<option value="video">Video / Online</option><option value="presencial">Presencial</option><option value="telefone">Telefone</option>',
+        '</select></div>',
+        '<div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Link da reuniao</label>',
+        '<input type="url" id="ent-link" placeholder="https://meet.google.com/..." style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;" /></div>',
+        '<div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Local (presencial)</label>',
+        '<input type="text" id="ent-local" placeholder="Endereco ou sala" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;" /></div>',
+        '<div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Duracao</label>',
+        '<select id="ent-duracao" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;">',
+        '<option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>60 min</option><option value="90">90 min</option>',
+        '</select></div>',
+        '<div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Observacoes</label>',
+        '<textarea id="ent-obs" rows="2" placeholder="Instrucoes para o candidato..." style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;resize:vertical;"></textarea></div>',
+        '</div>',
+        '<div id="ent-erro" style="display:none;color:#C62828;font-size:13px;margin-top:8px;"></div>',
+        '<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">',
+        '<button onclick="document.getElementById('modal-entrevista').style.display='none'" style="padding:9px 18px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">Cancelar</button>',
+        '<button id="btn-agendar-ent" onclick="agendarEntrevista()" style="padding:9px 18px;background:#1565C0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Agendar</button>',
+        '</div></div></div>',
+        '<div id="modal-proposta" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:16px;">',
+        '<div style="background:#fff;border-radius:12px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;">',
+        '<h3 style="margin:0 0 8px;font-size:17px;">Enviar proposta</h3>',
+        '<p style="font-size:13px;color:#666;margin-bottom:16px;">O candidato podera aceitar ou recusar. Esta acao nao pode ser desfeita.</p>',
+        '<input type="hidden" id="prop-cand-id" />',
+        '<label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Texto da proposta *</label>',
+        '<textarea id="prop-texto" rows="8" placeholder="Descreva cargo, salario, beneficios, data de inicio, regime de trabalho..." style="width:100%;padding:10px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;resize:vertical;font-family:inherit;"></textarea>',
+        '<div id="prop-erro" style="display:none;color:#C62828;font-size:13px;margin-top:8px;"></div>',
+        '<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">',
+        '<button onclick="document.getElementById('modal-proposta').style.display='none'" style="padding:9px 18px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">Cancelar</button>',
+        '<button id="btn-enviar-prop" onclick="enviarProposta()" style="padding:9px 18px;background:#2E7D32;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Enviar proposta</button>',
+        '</div></div></div>'
+      ].join('');
+      document.body.appendChild(div);
+    }
+
+    document.addEventListener('DOMContentLoaded', _criarModais);
+
   </script>
   <script src="auth-helper.js?v=fase3_2026_07_28"></script>
   <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
