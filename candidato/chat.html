@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!-- Fase FC: redirecionando para a versão moderna do chat -->
+<script>
+  // Preserva parâmetros da URL (ex: ?cid=123)
+  const params = window.location.search;
+  window.location.replace('conversas.html' + params);
+</script>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
