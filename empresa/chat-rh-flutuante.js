@@ -325,3 +325,45 @@
     if (aberto && conversaAtiva) carregarMensagens();
   }, 10000);
 })();
+
+// ── FAB de atalho para Chat com Candidatos (Fase 12) ─────────────────────────
+(function() {
+  const tok = localStorage.getItem('empresa_token');
+  if (!tok) return;
+  // Só injeta se não estiver na página chat.html
+  if (window.location.pathname.includes('chat.html')) return;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .chat-cand-fab {
+      position: fixed; bottom: 88px; right: 20px; z-index: 9997;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: #7B1F1F; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      cursor: pointer; border: 2px solid white;
+      text-decoration: none; transition: transform 0.15s;
+    }
+    .chat-cand-fab:hover { transform: scale(1.08); }
+    .chat-cand-fab-tip {
+      position: fixed; bottom: 100px; right: 80px; z-index: 9997;
+      background: #222; color: #fff; font-size: 12px; padding: 5px 10px;
+      border-radius: 6px; white-space: nowrap; pointer-events: none;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .chat-cand-fab:hover + .chat-cand-fab-tip { opacity: 1; }
+  `;
+  document.head.appendChild(style);
+
+  const fab = document.createElement('a');
+  fab.href = 'chat.html';
+  fab.className = 'chat-cand-fab';
+  fab.title = 'Chat com candidatos';
+  fab.innerHTML = '💬';
+  document.body.appendChild(fab);
+
+  const tip = document.createElement('div');
+  tip.className = 'chat-cand-fab-tip';
+  tip.textContent = 'Chat com candidatos';
+  document.body.appendChild(tip);
+})();
