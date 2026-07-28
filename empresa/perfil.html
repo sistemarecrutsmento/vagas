@@ -86,6 +86,57 @@
         </form>
       </div>
 
+
+      <div class="card" style="max-width: 520px; margin-top: 20px;" id="card-empresa">
+        <h2>🏢 Dados da Empresa</h2>
+        <p style="color:var(--cinza-medio);font-size:14px;margin:8px 0 16px;">Atualize as informações da sua empresa visíveis no portal.</p>
+        <div id="empresa-form" style="display:grid;gap:14px;">
+          <div class="form-group">
+            <label for="emp-nome">Nome da empresa</label>
+            <input type="text" id="emp-nome" placeholder="Nome da empresa" />
+          </div>
+          <div class="form-group">
+            <label for="emp-descricao">Descrição</label>
+            <textarea id="emp-descricao" rows="3" placeholder="Descreva sua empresa..." style="width:100%;padding:10px 12px;border:1.5px solid var(--borda);border-radius:6px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+              <label for="emp-cidade">Cidade</label>
+              <input type="text" id="emp-cidade" placeholder="Cidade" />
+            </div>
+            <div class="form-group">
+              <label for="emp-estado">Estado</label>
+              <input type="text" id="emp-estado" placeholder="UF" maxlength="2" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="emp-site">Site</label>
+            <input type="url" id="emp-site" placeholder="https://suaempresa.com.br" />
+          </div>
+          <div class="form-group">
+            <label for="emp-telefone">Telefone</label>
+            <input type="tel" id="emp-telefone" placeholder="(11) 9 9999-9999" />
+          </div>
+          <div class="form-group">
+            <label for="emp-setor">Setor / Segmento</label>
+            <input type="text" id="emp-setor" placeholder="ex: Tecnologia, Saúde, Finanças..." />
+          </div>
+          <div class="form-group">
+            <label for="emp-tamanho">Tamanho</label>
+            <select id="emp-tamanho" style="width:100%;padding:10px 12px;border:1.5px solid var(--borda);border-radius:6px;font-size:14px;">
+              <option value="">Selecione...</option>
+              <option value="1-10">1–10 funcionários</option>
+              <option value="11-50">11–50 funcionários</option>
+              <option value="51-200">51–200 funcionários</option>
+              <option value="201-500">201–500 funcionários</option>
+              <option value="500+">500+ funcionários</option>
+            </select>
+          </div>
+          <div id="erro-empresa" class="erro" style="display:none;"></div>
+          <button class="btn-salvar" id="btn-salvar-empresa" onclick="salvarEmpresa()">Salvar dados da empresa</button>
+        </div>
+      </div>
+
       <div class="card" style="max-width: 520px; margin-top: 20px;">
         <h2>✉️ Preferências de E-mail</h2>
         <p style="color:var(--cinza-medio);font-size:14px;margin:8px 0 16px;">Controle quais notificações por e-mail você deseja receber.</p>
@@ -97,7 +148,7 @@
   <div class="toast" id="toast" style="position:fixed; bottom:24px; right:24px; background:#1A1A1A; color:#fff; padding:12px 18px; border-radius:8px; font-size:14px; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:200;"></div>
 
   <script>
-    const API = 'https://recrutamento-api-v2.onrender.com';
+    const API = 'https://recrutamento-api-novo.onrender.com';
     const token = localStorage.getItem('empresa_token');
     if (!token) window.location.href = 'login.html';
 
@@ -167,6 +218,72 @@
         return false;
       }
     }
+
+    // ── Dados da Empresa ──
+    async function carregarDadosEmpresa() {
+      try {
+        const r = await fetch(API + '/api/empresa/minha-empresa', {
+          headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('empresa_token') || '') }
+        });
+        if (!r.ok) return;
+        const d = await r.json();
+        const e = d.empresa || {};
+        const set = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.value = v; };
+        set('emp-nome', e.nome);
+        set('emp-descricao', e.descricao);
+        set('emp-cidade', e.cidade);
+        set('emp-estado', e.estado);
+        set('emp-site', e.site);
+        set('emp-telefone', e.telefone);
+        set('emp-setor', e.setor);
+        set('emp-tamanho', e.tamanho);
+      } catch (e) { console.warn('[perfil empresa]', e); }
+    }
+
+    async function salvarEmpresa() {
+      const btn = document.getElementById('btn-salvar-empresa');
+      const erroEl = document.getElementById('erro-empresa');
+      erroEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Salvando…';
+
+      const body = {
+        nome:      (document.getElementById('emp-nome')?.value || '').trim() || undefined,
+        descricao: (document.getElementById('emp-descricao')?.value || '').trim() || undefined,
+        cidade:    (document.getElementById('emp-cidade')?.value || '').trim() || undefined,
+        estado:    (document.getElementById('emp-estado')?.value || '').trim().toUpperCase() || undefined,
+        site:      (document.getElementById('emp-site')?.value || '').trim() || undefined,
+        telefone:  (document.getElementById('emp-telefone')?.value || '').trim() || undefined,
+        setor:     (document.getElementById('emp-setor')?.value || '').trim() || undefined,
+        tamanho:   (document.getElementById('emp-tamanho')?.value || '') || undefined,
+      };
+
+      try {
+        const r = await fetch(API + '/api/empresa/minha-empresa', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('empresa_token') || '') },
+          body: JSON.stringify(body)
+        });
+        const d = await r.json();
+        if (!r.ok) {
+          erroEl.textContent = d.erro || 'Erro ao salvar';
+          erroEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Salvar dados da empresa';
+          return;
+        }
+        toast('Dados da empresa atualizados!', 'sucesso');
+        btn.textContent = 'Salvar dados da empresa';
+        btn.disabled = false;
+      } catch (e) {
+        erroEl.textContent = 'Erro de conexão.';
+        erroEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Salvar dados da empresa';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', carregarDadosEmpresa);
   </script>
 <script src="auth-helper.js?v=fase3_2026_07_28"></script>
   <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
