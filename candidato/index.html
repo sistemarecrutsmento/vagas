@@ -394,8 +394,18 @@
       <div class="det-section"><h3>Requisitos</h3><p id="det-requisitos"></p></div>
       <div class="det-section"><h3>Benefícios</h3><p id="det-beneficios"></p></div>
     </div>
+    <!-- Fase 11: Score de Match -->
+    <div id="bloco-match" style="display:none;margin:0 0 12px 0;padding:12px 16px;background:#f8f4ff;border-radius:8px;border-left:4px solid #722F37;">
+      <div style="font-size:13px;font-weight:600;color:#722F37;margin-bottom:6px;">🎯 Seu nível de compatibilidade: <span id="match-pct">—</span></div>
+      <div id="match-detalhes" style="font-size:12px;color:#555;line-height:1.7;"></div>
+    </div>
+    <!-- Fase 11: Tags da vaga -->
+    <div id="bloco-tags" style="display:none;margin:0 0 12px 0;">
+      <div id="tags-container" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-primary" id="btn-candidatar" style="width:auto;">Candidatar-se</button>
+      <button class="btn" id="btn-favoritar" style="width:auto;background:#fff;border:1.5px solid #ddd;color:#555;display:none;" onclick="toggleFavoritar()">⭐ Favoritar</button>
     </div>
   </div>
 </div>
