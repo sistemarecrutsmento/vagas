@@ -185,7 +185,7 @@
 
     // ---------- inicialização ----------
     async function init() {
-      setStorageKeys('empresa_token', 'empresa_refresh');
+      setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
 
       // tenta refresh silencioso
       await authInit();
