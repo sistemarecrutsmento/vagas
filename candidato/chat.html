@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Chat · Vagas.io</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vinho: #7B1F1F; --vinho-dark: #5a1515;
+      --dourado: #D4AF37; --preto: #111; --cinza: #f5f5f5;
+      --borda: #e0e0e0; --cinza-medio: #666; --verde: #22c55e;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--cinza); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Header ── */
+    .page-header {
+      background: var(--vinho); color: #fff;
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0; height: 56px;
+    }
+    .page-header .btn-back { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 4px; display: none; }
+    @media(max-width:640px) { .page-header .btn-back { display: block; } }
+    .page-header h1 { font-size: 18px; font-weight: 700; flex: 1; }
+    .page-header .nav-link { color: rgba(255,255,255,0.8); font-size: 13px; text-decoration: none; }
+    .page-header .nav-link:hover { color: #fff; }
+
+    /* ── Shell ── */
+    .chat-shell { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Lista esquerda ── */
+    .conv-list {
+      width: 320px; flex-shrink: 0; background: #fff;
+      border-right: 1px solid var(--borda); display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    @media(max-width:640px) {
+      .conv-list { width: 100%; }
+      .conv-list.oculta { display: none; }
+      .conv-panel.vazia { display: none; }
+    }
+    .conv-list-head { padding: 14px 16px; border-bottom: 1px solid var(--borda); }
+    .conv-list-head h2 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--preto); }
+    .conv-search { width: 100%; padding: 8px 12px; border: 1px solid var(--borda); border-radius: 8px; font-size: 13px; outline: none; }
+    .conv-search:focus { border-color: var(--vinho); }
+    .conv-items { flex: 1; overflow-y: auto; }
+    .conv-item {
+      display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px;
+      cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.15s;
+    }
+    .conv-item:hover { background: #fafafa; }
+    .conv-item.ativa { background: #fdf2f3; border-left: 3px solid var(--vinho); }
+    .conv-item.nao-lida { background: #fff8f8; }
+    .conv-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--vinho); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+    .conv-item-body { flex: 1; min-width: 0; }
+    .conv-item-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .conv-empresa { font-size: 14px; font-weight: 700; color: var(--preto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+    .conv-hora { font-size: 11px; color: var(--cinza-medio); flex-shrink: 0; }
+    .conv-vaga { font-size: 12px; color: var(--vinho); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv-preview { font-size: 12px; color: var(--cinza-medio); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .badge-nao-lida { background: var(--vinho); color: #fff; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 2px 6px; margin-left: 6px; flex-shrink: 0; }
+    .conv-vazio { text-align: center; padding: 40px 20px; color: var(--cinza-medio); }
+    .conv-vazio .icon { font-size: 36px; margin-bottom: 12px; }
+
+    /* ── Painel direita ── */
+    .conv-panel {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f0f0f0;
+    }
+    .panel-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--cinza-medio); gap: 12px; }
+    .panel-empty .icon { font-size: 48px; }
+    .panel-empty h3 { font-size: 16px; font-weight: 600; color: var(--preto); }
+
+    /* ── Cabeçalho da conversa ── */
+    .conv-header {
+      background: #fff; border-bottom: 1px solid var(--borda);
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .btn-voltar { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--vinho); display: none; }
+    @media(max-width:640px) { .btn-voltar { display: block; } }
+    .conv-header-info { flex: 1; min-width: 0; }
+    .conv-header-empresa { font-size: 15px; font-weight: 700; color: var(--preto); }
+    .conv-header-vaga { font-size: 12px; color: var(--cinza-medio); margin-top: 2px; }
+    .conv-header-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; background: var(--dourado); color: var(--vinho); margin-left: 6px; }
+    .btn-encerrar { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .btn-encerrar:hover { background: #fecaca; }
+
+    /* ── Mensagens ── */
+    .conv-msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .msg-grupo-data { text-align: center; font-size: 11px; color: var(--cinza-medio); margin: 8px 0; }
+    .msg-row { display: flex; }
+    .msg-row.eu { justify-content: flex-end; }
+    .msg-row.outro { justify-content: flex-start; }
+    .msg-bubble {
+      max-width: 72%; padding: 10px 14px; border-radius: 18px;
+      font-size: 14px; line-height: 1.5; word-break: break-word; position: relative;
+    }
+    .msg-row.eu .msg-bubble { background: var(--vinho); color: #fff; border-bottom-right-radius: 4px; }
+    .msg-row.outro .msg-bubble { background: #fff; color: var(--preto); border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+    .msg-meta { font-size: 10px; margin-top: 4px; display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+    .msg-row.eu .msg-meta { color: rgba(255,255,255,0.7); }
+    .msg-row.outro .msg-meta { color: var(--cinza-medio); }
+    .msg-check { font-size: 12px; }
+    .msg-check.lida { color: var(--dourado); }
+    .msg-autor { font-size: 11px; font-weight: 700; color: var(--vinho); margin-bottom: 2px; }
+
+    /* ── Input ── */
+    .conv-input-area {
+      background: #fff; border-top: 1px solid var(--borda);
+      padding: 12px 16px; display: flex; gap: 10px; align-items: flex-end;
+    }
+    .conv-input-area textarea {
+      flex: 1; border: 1px solid var(--borda); border-radius: 22px;
+      padding: 10px 16px; font-size: 14px; resize: none; max-height: 120px;
+      outline: none; font-family: inherit; line-height: 1.5;
+    }
+    .conv-input-area textarea:focus { border-color: var(--vinho); }
+    .btn-send {
+      background: var(--vinho); color: #fff; border: none;
+      width: 42px; height: 42px; border-radius: 50%; font-size: 18px;
+      cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.2s;
+    }
+    .btn-send:hover { opacity: 0.85; }
+    .btn-send:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Loading ── */
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #ccc; border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="page-header">
+  <button class="btn-back" id="btn-back" onclick="voltarLista()" title="Voltar">←</button>
+  <h1>💬 Chat com Empresa</h1>
+  <a class="nav-link" href="candidaturas.html">📋 Candidaturas</a>
+  &nbsp;
+  <a class="nav-link" href="painel.html">👤 Perfil</a>
+</header>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Shell -->
+<div class="chat-shell" id="chat-shell">
+
+  <!-- Lista esquerda -->
+  <aside class="conv-list" id="conv-list">
+    <div class="conv-list-head">
+      <h2>Conversas</h2>
+      <input class="conv-search" type="search" id="conv-search" placeholder="🔎 Buscar empresa ou vaga..." />
+    </div>
+    <div class="conv-items" id="conv-items">
+      <div class="conv-vazio"><div class="icon"><span class="spinner"></span></div><p>Carregando…</p></div>
+    </div>
+  </aside>
+
+  <!-- Painel direito -->
+  <section class="conv-panel" id="conv-panel">
+    <div class="panel-empty" id="panel-empty">
+      <div class="icon">💬</div>
+      <h3>Selecione uma conversa</h3>
+      <p style="font-size:13px;max-width:260px;text-align:center;">Escolha uma empresa na lista para visualizar o chat.</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+  const API = 'https://recrutamento-api-novo.onrender.com';
+
+  function tok() { return localStorage.getItem('candidato_token') || ''; }
+  if (!tok()) { window.location.href = 'index.html'; return; }
+
+  let conversas = [];
+  let cidAtiva = null;
+  let pollMsg = null;
+  let pollList = null;
+  let candidatoNome = '';
+
+  /* ── Auth fetch ── */
+  async function apiFetch(method, path, body) {
+    const opts = { method, headers: { Authorization: 'Bearer ' + tok(), 'Content-Type': 'application/json' } };
+    if (body !== undefined) opts.body = JSON.stringify(body);
+    const r = await fetch(API + path, opts);
+    if (r.status === 401) { window.location.href = 'index.html'; throw new Error('401'); }
+    return r;
+  }
+
+  /* ── Toast ── */
+  function toast(msg, dur = 3000) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
+  }
+
+  /* ── Formatar data/hora ── */
+  function fmtHora(iso) {
+    if (!iso) return '';
+    const d = new Date(iso), now = new Date();
+    const diff = (now - d) / 36e5;
+    if (diff < 24) return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    if (diff < 168) return d.toLocaleDateString('pt-BR', { weekday: 'short' });
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  }
+  function fmtData(iso) {
+    const d = new Date(iso);
+    const hoje = new Date(); const ontem = new Date(hoje); ontem.setDate(hoje.getDate() - 1);
+    if (d.toDateString() === hoje.toDateString()) return 'Hoje';
+    if (d.toDateString() === ontem.toDateString()) return 'Ontem';
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+  function fmtCompleto(iso) {
+    return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+  function initials(name) {
+    return (name || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
+  }
+
+  /* ── Lista ── */
+  async function carregarLista() {
+    try {
+      const r = await apiFetch('GET', '/api/candidato/chat');
+      const { conversas: data } = await r.json();
+      conversas = data || [];
+      renderLista();
+    } catch (e) { if (e.message !== '401') console.warn('[chat]', e); }
+  }
+
+  function renderLista() {
+    const q = (document.getElementById('conv-search')?.value || '').toLowerCase();
+    const lista = q ? conversas.filter(c =>
+      (c.empresa || '').toLowerCase().includes(q) ||
+      (c.vaga_titulo || '').toLowerCase().includes(q)
+    ) : conversas;
+
+    const el = document.getElementById('conv-items');
+    if (!lista.length) {
+      el.innerHTML = `<div class="conv-vazio"><div class="icon">💬</div><p>${q ? 'Nenhuma conversa encontrada.' : 'Nenhuma conversa ativa.<br><small>Você verá conversas depois de avançar nas candidaturas.</small>'}</p></div>`;
+      return;
+    }
+    el.innerHTML = lista.map(c => {
+      const naoLida = Number(c.nao_lidas) > 0;
+      const ativa = c.candidatura_id == cidAtiva;
+      return `<div class="conv-item${ativa ? ' ativa' : ''}${naoLida && !ativa ? ' nao-lida' : ''}" onclick="abrirConversa(${c.candidatura_id})">
+        <div class="conv-avatar">${initials(c.empresa)}</div>
+        <div class="conv-item-body">
+          <div class="conv-item-top">
+            <span class="conv-empresa">${esc(c.empresa || 'Empresa')}</span>
+            <span class="conv-hora">${fmtHora(c.ultima_msg_em)}</span>
+          </div>
+          <div class="conv-vaga">${esc(c.vaga_titulo || '')}</div>
+          <div class="conv-preview">
+            ${naoLida ? `<span class="badge-nao-lida">${c.nao_lidas}</span> ` : ''}${esc(c.ultima_msg || 'Sem mensagens ainda')}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ── Abrir conversa ── */
+  window.abrirConversa = async function(cid) {
+    cidAtiva = cid;
+    renderLista();
+    // mobile: esconde lista
+    document.getElementById('conv-list').classList.add('oculta');
+    const panel = document.getElementById('conv-panel');
+    panel.classList.remove('vazia');
+
+    // Cabeçalho skeleton
+    panel.innerHTML = `<div class="conv-header"><button class="btn-voltar" onclick="voltarLista()">←</button><div class="conv-header-info"><div class="conv-header-empresa">Carregando…</div></div></div><div class="conv-msgs" id="conv-msgs"><div style="text-align:center;padding:40px;color:#999;"><span class="spinner"></span></div></div><div class="conv-input-area"><textarea id="conv-ta" placeholder="Digite uma mensagem…" rows="1"></textarea><button class="btn-send" id="btn-send" onclick="enviarMensagem()">➤</button></div>`;
+
+    // Configura textarea auto-resize + Enter
+    const ta = document.getElementById('conv-ta');
+    ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; });
+    ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensagem(); } });
+
+    await carregarMensagens(cid, true);
+    // Marcar como lidas
+    try { await apiFetch('PATCH', `/api/candidato/chat/${cid}/lidas`); } catch (_) {}
+    await carregarLista();
+
+    if (pollMsg) clearInterval(pollMsg);
+    pollMsg = setInterval(() => carregarMensagens(cid), 5000);
+  };
+
+  /* ── Carregar mensagens ── */
+  async function carregarMensagens(cid, primeiro = false) {
+    if (cid != cidAtiva) return;
+    try {
+      const r = await apiFetch('GET', `/api/candidato/chat/${cid}`);
+      if (!r.ok) return;
+      const data = await r.json();
+      renderConversa(data, primeiro);
+    } catch (e) { if (e.message !== '401') console.warn('[msgs]', e); }
+  }
+
+  function renderConversa(data, rolar) {
+    const { conversa, mensagens } = data;
+    if (!conversa) return;
+
+    const header = document.querySelector('.conv-header');
+    if (header) {
+      const encerrado = conversa.chat_encerrado_candidato_em;
+      header.innerHTML = `
+        <button class="btn-voltar" onclick="voltarLista()">←</button>
+        <div class="conv-header-info">
+          <div class="conv-header-empresa">${esc(conversa.empresa || 'Empresa')}</div>
+          <div class="conv-header-vaga">💼 ${esc(conversa.vaga_titulo || '')} <span class="conv-header-badge">${esc(conversa.status || '')}</span></div>
+        </div>
+        ${!encerrado ? `<button class="btn-encerrar" onclick="encerrarConversa(${conversa.candidatura_id})">Encerrar</button>` : '<span style="font-size:12px;color:#999;">Encerrado</span>'}
+      `;
+    }
+
+    const el = document.getElementById('conv-msgs');
+    if (!el) return;
+
+    // Renderizar mensagens agrupadas por dia
+    let html = '', diaAtual = '';
+    for (const m of (mensagens || [])) {
+      const dia = fmtData(m.criado_em);
+      if (dia !== diaAtual) { html += `<div class="msg-grupo-data">${dia}</div>`; diaAtual = dia; }
+      const eu = m.autor_tipo === 'candidato';
+      const lida = eu && m.lida_por_empresa_em;
+      html += `<div class="msg-row ${eu ? 'eu' : 'outro'}">
+        <div class="msg-bubble">
+          ${!eu ? `<div class="msg-autor">${esc(m.autor_nome || 'Empresa')}</div>` : ''}
+          ${esc(m.texto)}
+          <div class="msg-meta">
+            <span>${fmtCompleto(m.criado_em)}</span>
+            ${eu ? `<span class="msg-check${lida ? ' lida' : ''}">✓${lida ? '✓' : ''}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }
+    if (!html) html = `<div class="panel-empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#999;"><div style="font-size:32px;">💬</div><p>Nenhuma mensagem ainda. Diga olá!</p></div>`;
+    el.innerHTML = html;
+    if (rolar) el.scrollTop = el.scrollHeight;
+  }
+
+  /* ── Enviar mensagem ── */
+  window.enviarMensagem = async function() {
+    const ta = document.getElementById('conv-ta');
+    const btn = document.getElementById('btn-send');
+    if (!ta || !cidAtiva) return;
+    const txt = ta.value.trim();
+    if (!txt) return;
+    ta.disabled = true; btn.disabled = true;
+    try {
+      const r = await apiFetch('POST', `/api/candidato/chat/${cidAtiva}/mensagens`, { texto: txt });
+      if (!r.ok) { const e = await r.json(); toast(e.erro || 'Erro ao enviar'); return; }
+      ta.value = ''; ta.style.height = 'auto';
+      await carregarMensagens(cidAtiva, true);
+      await apiFetch('PATCH', `/api/candidato/chat/${cidAtiva}/lidas`);
+      await carregarLista();
+    } catch (e) { toast('Erro de conexão'); } finally {
+      ta.disabled = false; btn.disabled = false; ta.focus();
+    }
+  };
+
+  /* ── Encerrar ── */
+  window.encerrarConversa = async function(cid) {
+    if (!confirm('Encerrar esta conversa?')) return;
+    try {
+      await apiFetch('PATCH', `/api/candidato/chat/${cid}/encerrar`);
+      toast('Conversa encerrada.');
+      await carregarMensagens(cid, false);
+    } catch (e) { toast('Erro ao encerrar'); }
+  };
+
+  /* ── Mobile: voltar ── */
+  window.voltarLista = function() {
+    cidAtiva = null;
+    if (pollMsg) { clearInterval(pollMsg); pollMsg = null; }
+    document.getElementById('conv-list').classList.remove('oculta');
+    document.getElementById('conv-panel').innerHTML = `<div class="panel-empty"><div class="icon">💬</div><h3>Selecione uma conversa</h3></div>`;
+    renderLista();
+  };
+
+  /* ── Escape XSS ── */
+  function esc(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+  /* ── Init ── */
+  // Buscar nome do candidato
+  apiFetch('GET', '/api/candidato/perfil').then(r => r.json()).then(d => { candidatoNome = d.nome || ''; }).catch(() => {});
+
+  document.getElementById('conv-search').addEventListener('input', renderLista);
+
+  // Query param ?cid=...
+  const params = new URLSearchParams(window.location.search);
+  const cidParam = params.get('cid');
+
+  carregarLista().then(() => { if (cidParam) abrirConversa(cidParam); });
+  pollList = setInterval(carregarLista, 15000);
+
+})();
+</script>
+</body>
+</html>
