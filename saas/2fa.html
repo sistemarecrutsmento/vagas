@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verificação 2FA — Vagas.io Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           background: #f5f5f5; display: flex; align-items: center; justify-content: center;
+           min-height: 100vh; }
+    .card { background: #fff; border-radius: 12px; padding: 40px 36px; width: 100%; max-width: 420px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.10); }
+    .logo { text-align: center; margin-bottom: 28px; }
+    .logo span { font-size: 28px; font-weight: 800; color: #7a1f3d; letter-spacing: -1px; }
+    h2 { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; text-align: center; }
+    .sub { font-size: 14px; color: #666; text-align: center; margin-bottom: 28px; line-height: 1.5; }
+    .sub strong { color: #1a1a1a; }
+    .field { margin-bottom: 20px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
+    .field input { width: 100%; padding: 12px 14px; border: 1.5px solid #DDD; border-radius: 8px;
+                   font-size: 22px; text-align: center; letter-spacing: 8px; font-weight: 700;
+                   color: #1a1a1a; outline: none; transition: border-color .2s; }
+    .field input:focus { border-color: #7a1f3d; }
+    .btn { width: 100%; padding: 13px; background: #7a1f3d; color: #fff; border: none; border-radius: 8px;
+           font-size: 15px; font-weight: 700; cursor: pointer; transition: background .2s; }
+    .btn:hover:not(:disabled) { background: #5c1730; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+    .erro { color: #d32f2f; font-size: 13px; margin-top: 12px; text-align: center; display: none; }
+    .reenviar { text-align: center; margin-top: 16px; font-size: 13px; color: #666; }
+    .reenviar a { color: #7a1f3d; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .reenviar a:hover { text-decoration: underline; }
+    .voltar { text-align: center; margin-top: 14px; }
+    .voltar a { font-size: 13px; color: #999; text-decoration: none; }
+    .voltar a:hover { color: #7a1f3d; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo"><span>Vagas.io</span></div>
+    <h2>🔐 Verificação em duas etapas</h2>
+    <p class="sub">Enviamos um código de 6 dígitos para <strong id="email-display">seu e-mail</strong>. Insira-o abaixo para entrar.</p>
+    <div class="field">
+      <label for="codigo">Código de verificação</label>
+      <input type="text" id="codigo" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" autocomplete="one-time-code" autofocus />
+    </div>
+    <button class="btn" id="btn-verificar">Verificar e entrar</button>
+    <div class="erro" id="erro"></div>
+    <div class="reenviar">
+      <span id="reenviar-msg">Não recebeu? <a onclick="reenviar()">Reenviar código</a></span>
+      <div id="cooldown-msg" style="display:none">Aguarde <span id="countdown">60</span>s para reenviar</div>
+    </div>
+    <div class="voltar"><a href="index.html">← Voltar ao login</a></div>
+  </div>
+
+  <script>
+    const API = 'https://recrutamento-api-novo.onrender.com';
+
+    const codigoId = localStorage.getItem('admin_login_2fa_id');
+    const email    = localStorage.getItem('admin_login_email');
+
+    if (!codigoId) window.location.replace('index.html');
+    if (email) document.getElementById('email-display').textContent = email;
+
+    document.getElementById('btn-verificar').addEventListener('click', verificar);
+    document.getElementById('codigo').addEventListener('keydown', e => { if (e.key === 'Enter') verificar(); });
+    document.getElementById('codigo').addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    });
+
+    async function verificar() {
+      const codigo = document.getElementById('codigo').value.trim();
+      const erroEl = document.getElementById('erro');
+      erroEl.style.display = 'none';
+      if (codigo.length < 6) {
+        erroEl.textContent = 'Digite os 6 dígitos do código.';
+        erroEl.style.display = 'block';
+        return;
+      }
+      const btn = document.getElementById('btn-verificar');
+      btn.disabled = true; btn.textContent = 'Verificando…';
+      try {
+        const r = await fetch(API + '/api/admin/2fa/verificar', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo_id: codigoId, codigo })
+        });
+        const data = await r.json();
+        if (!r.ok || !data.token) {
+          erroEl.textContent = data.erro || 'Código inválido. Tente novamente.';
+          erroEl.style.display = 'block';
+          document.getElementById('codigo').value = '';
+          document.getElementById('codigo').focus();
+          btn.disabled = false; btn.textContent = 'Verificar e entrar';
+          return;
+        }
+        localStorage.setItem('admin_token', data.token);
+        if (data.refreshToken) localStorage.setItem('admin_refresh', data.refreshToken);
+        localStorage.removeItem('admin_login_2fa_id');
+        localStorage.removeItem('admin_login_email');
+        window.location.replace('equipe.html');
+      } catch (e) {
+        erroEl.textContent = 'Erro de conexão. Tente novamente.';
+        erroEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Verificar e entrar';
+      }
+    }
+
+    let cooldownTimer = null;
+    async function reenviar() {
+      const erroEl = document.getElementById('erro');
+      erroEl.style.display = 'none';
+      try {
+        const r = await fetch(API + '/api/admin/2fa/reenviar', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo_id: codigoId })
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          erroEl.textContent = data.erro || 'Não foi possível reenviar.';
+          erroEl.style.display = 'block';
+          if (data.cooldown) iniciarCooldown(data.cooldown);
+          return;
+        }
+        iniciarCooldown(60);
+        document.getElementById('codigo').value = '';
+        document.getElementById('codigo').focus();
+      } catch (e) {
+        erroEl.textContent = 'Erro de conexão.';
+        erroEl.style.display = 'block';
+      }
+    }
+
+    function iniciarCooldown(seg) {
+      document.getElementById('reenviar-msg').style.display = 'none';
+      document.getElementById('cooldown-msg').style.display = 'block';
+      let r = seg;
+      document.getElementById('countdown').textContent = r;
+      clearInterval(cooldownTimer);
+      cooldownTimer = setInterval(() => {
+        r--;
+        document.getElementById('countdown').textContent = r;
+        if (r <= 0) {
+          clearInterval(cooldownTimer);
+          document.getElementById('reenviar-msg').style.display = 'block';
+          document.getElementById('cooldown-msg').style.display = 'none';
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
