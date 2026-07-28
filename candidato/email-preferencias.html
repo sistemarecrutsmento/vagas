@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Preferências de E-mail · Vagas.io</title>
+  <style>
+    :root { --vinho:#7B1F1F; --dourado:#C8973A; --borda:#e0e0e0; --cinza-medio:#666; --preto:#111; }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f5f5f7; color:var(--preto); }
+    /* Header mobile */
+    .header {
+      background: var(--vinho); color: #fff; padding: 14px 20px;
+      display: flex; align-items: center; gap: 12px; position: sticky; top:0; z-index:10;
+    }
+    .header-back { background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding:0 8px 0 0; }
+    .header h1 { font-size:17px; font-weight:700; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px 16px 80px; }
+    .card { background:#fff; border:1px solid var(--borda); border-radius:12px; padding:20px; margin-bottom:16px; }
+    .card h3 { font-size:15px; font-weight:700; margin:0 0 4px; color:var(--vinho); }
+    .card .desc { font-size:12px; color:var(--cinza-medio); margin-bottom:14px; }
+    .pref-item {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 0; border-bottom:1px solid #f0f0f0;
+    }
+    .pref-item:last-child { border-bottom:none; padding-bottom:0; }
+    .pref-label { font-size:14px; font-weight:500; }
+    .pref-desc { font-size:12px; color:var(--cinza-medio); margin-top:2px; }
+    .toggle { position:relative; width:44px; height:24px; flex-shrink:0; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .toggle-slider {
+      position:absolute; inset:0; background:#ccc; border-radius:24px;
+      cursor:pointer; transition:background 0.2s;
+    }
+    .toggle-slider::before {
+      content:''; position:absolute; width:18px; height:18px;
+      background:white; border-radius:50%; left:3px; top:3px;
+      transition:transform 0.2s; box-shadow:0 1px 4px rgba(0,0,0,0.15);
+    }
+    .toggle input:checked + .toggle-slider { background:var(--vinho); }
+    .toggle input:checked + .toggle-slider::before { transform:translateX(20px); }
+    .toggle input:disabled + .toggle-slider { opacity:0.5; cursor:not-allowed; }
+    .badge-obrig {
+      font-size:10px; font-weight:700; background:#e8f5e9; color:#2E7D32;
+      padding:2px 8px; border-radius:10px; margin-left:6px;
+    }
+    .btn-salvar {
+      width:100%; background:var(--vinho); color:white; border:none;
+      padding:14px; border-radius:10px; font-size:16px; font-weight:700;
+      cursor:pointer; margin-top:8px; font-family:inherit;
+    }
+    .btn-salvar:disabled { opacity:0.6; }
+    .toast {
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+      background:#222; color:#fff; padding:12px 24px; border-radius:8px;
+      font-size:14px; z-index:9999; opacity:0; transition:opacity 0.3s; pointer-events:none;
+      white-space:nowrap;
+    }
+    .toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <button class="header-back" onclick="history.back()">‹</button>
+  <h1>✉️ Preferências de E-mail</h1>
+</div>
+
+<div class="container">
+  <div id="loading" style="text-align:center;padding:60px;color:#999;">Carregando…</div>
+  <div id="conteudo" style="display:none;">
+
+    <div class="card">
+      <h3>📋 Candidaturas</h3>
+      <div class="desc">Notificações sobre o status das suas candidaturas.</div>
+      <div class="pref-item">
+        <div><div class="pref-label">Atualização de candidatura</div><div class="pref-desc">Confirmação ao se candidatar a uma vaga.</div></div>
+        <label class="toggle"><input type="checkbox" data-cat="candidatura" id="pref-candidatura"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📊 Etapas do processo</h3>
+      <div class="desc">Avanços e mudanças de status no seu processo seletivo.</div>
+      <div class="pref-item">
+        <div><div class="pref-label">Mudança de etapa ou status</div><div class="pref-desc">Quando sua candidatura avança ou é encerrada.</div></div>
+        <label class="toggle"><input type="checkbox" data-cat="etapa" id="pref-etapa"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📅 Entrevistas</h3>
+      <div class="desc">Confirmações e atualizações de entrevistas marcadas.</div>
+      <div class="pref-item">
+        <div><div class="pref-label">Entrevista agendada ou cancelada</div><div class="pref-desc">Aviso quando uma entrevista for marcada ou cancelada para você.</div></div>
+        <label class="toggle"><input type="checkbox" data-cat="entrevista" id="pref-entrevista"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📨 Propostas</h3>
+      <div class="desc">Avisos quando você receber uma proposta de emprego.</div>
+      <div class="pref-item">
+        <div><div class="pref-label">Nova proposta recebida</div><div class="pref-desc">Quando a empresa enviar uma proposta para você avaliar.</div></div>
+        <label class="toggle"><input type="checkbox" data-cat="proposta" id="pref-proposta"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>💬 Chat</h3>
+      <div class="desc">Notificações de mensagens recebidas no chat.</div>
+      <div class="pref-item">
+        <div><div class="pref-label">Novas mensagens</div><div class="pref-desc">E-mail quando a empresa enviar uma mensagem (máximo 1 por 30 min por conversa).</div></div>
+        <label class="toggle"><input type="checkbox" data-cat="chat" id="pref-chat"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card" style="border-color:#e8f5e9;background:#f9fff9;">
+      <h3 style="color:#2E7D32;">🔒 Segurança</h3>
+      <div class="desc">Obrigatórios — não podem ser desativados.</div>
+      <div class="pref-item">
+        <div><div class="pref-label">Recuperação de senha <span class="badge-obrig">OBRIGATÓRIO</span></div><div class="pref-desc">Links de redefinição de senha e alertas de segurança.</div></div>
+        <label class="toggle"><input type="checkbox" checked disabled><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card" style="border-color:#f3e5f5;background:#fdf7ff;">
+      <h3 style="color:#7B1FA2;">📣 Marketing</h3>
+      <div class="desc">Conteúdo promocional. Desativado por padrão.</div>
+      <div class="pref-item">
+        <div><div class="pref-label">Novidades e promoções</div><div class="pref-desc">Comunicados gerais da plataforma Vagas.io.</div></div>
+        <label class="toggle"><input type="checkbox" data-cat="marketing" id="pref-marketing"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <button class="btn-salvar" id="btn-salvar" onclick="salvar()">💾 Salvar preferências</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'https://recrutamento-api-novo.onrender.com';
+  const CATS = ['candidatura','etapa','entrevista','proposta','chat','marketing'];
+
+  function toast(msg, ok = true) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = ok ? '#222' : '#c62828';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  async function init() {
+    const token = localStorage.getItem('candidato_token');
+    if (!token) { window.location.href = 'index.html'; return; }
+    try {
+      const r = await fetch(API + '/api/email/preferencias', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (r.status === 401) { window.location.href = 'index.html'; return; }
+      const d = await r.json();
+      const prefs = d.preferencias || {};
+      CATS.forEach(cat => {
+        const el = document.getElementById('pref-' + cat);
+        if (!el) return;
+        // Marketing padrão = false; resto padrão = true
+        const def = cat === 'marketing' ? false : true;
+        el.checked = cat in prefs ? prefs[cat] : def;
+      });
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('conteudo').style.display = '';
+    } catch (e) {
+      document.getElementById('loading').textContent = 'Erro ao carregar. Tente novamente.';
+    }
+  }
+
+  async function salvar() {
+    const token = localStorage.getItem('candidato_token');
+    const btn = document.getElementById('btn-salvar');
+    btn.disabled = true; btn.textContent = 'Salvando…';
+    const prefs = {};
+    CATS.forEach(cat => {
+      const el = document.getElementById('pref-' + cat);
+      if (el) prefs[cat] = el.checked;
+    });
+    try {
+      const r = await fetch(API + '/api/email/preferencias', {
+        method: 'PATCH',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ preferencias: prefs })
+      });
+      if (r.ok) toast('✅ Preferências salvas!');
+      else { const d = await r.json(); toast(d.erro || 'Erro ao salvar', false); }
+    } catch (e) { toast('Erro de conexão', false); }
+    btn.disabled = false; btn.textContent = '💾 Salvar preferências';
+  }
+
+  init();
+</script>
+</body>
+</html>
