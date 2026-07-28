@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#722F37">
+<title>Vaga · VagasIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f5f5f7; color: #1a1a1a; }
+  a { color: inherit; text-decoration: none; }
+
+  .topbar { background: #fff; border-bottom: 1px solid #eee; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .topbar .logo { font-weight: 800; color: #722F37; font-size: 20px; letter-spacing: -0.02em; }
+  .topbar .links a { color: #666; font-size: 14px; margin-left: 16px; }
+  .topbar .links a:hover { color: #722F37; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 32px 20px; }
+
+  .breadcrumb { font-size: 13px; color: #888; margin-bottom: 16px; }
+  .breadcrumb a { color: #722F37; }
+  .breadcrumb span { margin: 0 6px; color: #ccc; }
+
+  .job {
+    background: #fff; border-radius: 12px; padding: 32px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    margin-bottom: 24px;
+  }
+  .job h1 { margin: 0 0 8px; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+  .job .empresa { color: #888; font-size: 14px; margin-bottom: 16px; }
+  .job .empresa a { color: #722F37; font-weight: 600; }
+
+  .job-meta {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin-bottom: 24px;
+  }
+  .job-meta .item {
+    padding: 12px 14px; background: #f5f5f7; border-radius: 8px;
+  }
+  .job-meta .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; font-weight: 600; }
+  .job-meta .value { font-size: 14px; color: #1a1a1a; font-weight: 600; }
+
+  .job-section { margin-bottom: 24px; }
+  .job-section h2 {
+    font-size: 18px; font-weight: 700; margin: 0 0 12px;
+    color: #1a1a1a; letter-spacing: -0.01em;
+  }
+  .job-section p { line-height: 1.7; color: #333; margin: 0 0 12px; white-space: pre-wrap; }
+  .job-section ul { line-height: 1.7; color: #333; margin: 0; padding-left: 20px; }
+
+  .salary {
+    background: #f5f5f7; padding: 16px; border-radius: 8px; margin-bottom: 24px;
+    font-size: 16px; font-weight: 600; color: #1a1a1a;
+  }
+  .salary small { display: block; font-size: 12px; color: #888; font-weight: 500; margin-top: 4px; }
+
+  .cta-bar {
+    position: sticky; bottom: 0;
+    background: #fff; border-top: 1px solid #eee;
+    padding: 16px 20px;
+    display: flex; gap: 12px; align-items: center; justify-content: center;
+    z-index: 9;
+    margin: 24px -20px -32px;
+  }
+  .cta-btn {
+    display: inline-block; background: #722F37; color: #fff;
+    padding: 14px 32px; border-radius: 8px; font-weight: 700;
+    font-size: 16px; box-shadow: 0 4px 12px rgba(114,47,55,.3);
+    transition: transform .15s;
+    max-width: 400px; width: 100%; text-align: center;
+  }
+  .cta-btn:hover { transform: translateY(-2px); }
+  .cta-btn.secondary { background: #fff; color: #722F37; border: 2px solid #722F37; box-shadow: none; }
+
+  .empty { background: #fff; border-radius: 12px; padding: 48px 20px; text-align: center; color: #888; }
+  .error-box { background: #fee; border: 1px solid #fcc; color: #c33; padding: 24px; border-radius: 12px; text-align: center; }
+
+  .footer { background: #1a1a1a; color: #aaa; padding: 32px 20px; text-align: center; font-size: 13px; margin-top: 48px; }
+  .footer .brand { color: #fff; font-weight: 700; margin-bottom: 4px; }
+  .footer a { color: #722F37; }
+
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #eee; border-top-color: #722F37; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading { text-align: center; padding: 64px 20px; }
+
+  @media (max-width: 600px) {
+    .job { padding: 20px; }
+    .job h1 { font-size: 22px; }
+    .cta-btn { padding: 12px 20px; font-size: 14px; }
+    .topbar { padding: 12px 16px; }
+    .topbar .links a { font-size: 13px; margin-left: 12px; }
+  }
+</style>
+</head>
+<body>
+  <div id="app">
+    <div class="loading">
+      <div class="spinner"></div>
+      <div style="margin-top: 12px; color: #888;">Carregando vaga...</div>
+    </div>
+  </div>
+
+<script>
+const API = 'https://recrutamento-api-v2.onrender.com';
+const params = new URLSearchParams(location.search);
+const slug = (params.get('slug') || '').toLowerCase().trim();
+const vagaId = parseInt(params.get('id'), 10);
+
+if (!slug || !Number.isInteger(vagaId) || vagaId <= 0) {
+  document.getElementById('app').innerHTML = `
+    <div class="container">
+      <div class="error-box"><strong>Link inválido</strong><p>Esta vaga não pôde ser carregada.</p></div>
+    </div>
+  `;
+  throw new Error('parametros invalidos');
+}
+
+async function carregar() {
+  try {
+    const r = await fetch(`${API}/api/public/empresa/${encodeURIComponent(slug)}/vagas/${vagaId}`);
+    if (r.status === 404) { render404(); return; }
+    if (!r.ok) throw new Error('status ' + r.status);
+    const data = await r.json();
+    render(data.vaga);
+  } catch (e) {
+    console.error(e);
+    renderError('Não foi possível carregar esta vaga.');
+  }
+}
+
+function render404() {
+  document.title = 'Vaga não encontrada · VagasIO';
+  document.getElementById('app').innerHTML = `
+    <div class="container" style="padding-top:64px;">
+      <div class="error-box">
+        <h2 style="margin:0 0 12px;font-size:22px;">Vaga não encontrada</h2>
+        <p>Esta vaga pode ter sido pausada, encerrada ou não está mais disponível.</p>
+        <p><a href="vagas.html?slug=${encodeURIComponent(slug)}" style="color:#722F37;font-weight:600;">← Ver outras vagas</a></p>
+      </div>
+    </div>
+  `;
+}
+
+function renderError(msg) {
+  document.getElementById('app').innerHTML = `
+    <div class="container" style="padding-top:64px;">
+      <div class="error-box">
+        <h2 style="margin:0 0 12px;font-size:22px;">Algo deu errado</h2>
+        <p>${escapeHtml(msg)}</p>
+        <p><a href="javascript:location.reload()" style="color:#722F37;font-weight:600;">Tentar novamente →</a></p>
+      </div>
+    </div>
+  `;
+}
+
+function render(v) {
+  document.title = `${v.titulo} · ${v.empresa_nome} · VagasIO`;
+
+  const local = [v.cidade, v.estado].filter(Boolean).join(' / ') || '—';
+  const meta = [];
+  if (v.tipo_contrato) meta.push({ l: 'Contrato', v: v.tipo_contrato });
+  if (v.nivel) meta.push({ l: 'Nível', v: v.nivel });
+  if (v.area) meta.push({ l: 'Área', v: v.area });
+  meta.unshift({ l: 'Localização', v: local });
+
+  // Salário: se ambos, range; se um, mostra esse; se nenhum, não mostra
+  let salary = null;
+  if (v.salario_min && v.salario_max) {
+    salary = `R$ ${fmtNum(v.salario_min)} — R$ ${fmtNum(v.salario_max)}`;
+  } else if (v.salario_min) {
+    salary = `A partir de R$ ${fmtNum(v.salario_min)}`;
+  } else if (v.salario_max) {
+    salary = `Até R$ ${fmtNum(v.salario_max)}`;
+  }
+
+  const requisitos = v.requisitos ? `<div class="job-section"><h2>Requisitos</h2><p>${escapeHtml(v.requisitos)}</p></div>` : '';
+  const beneficios = v.beneficios ? `<div class="job-section"><h2>Benefícios</h2><p>${escapeHtml(v.beneficios)}</p></div>` : '';
+  const descricao = v.descricao ? `<div class="job-section"><h2>Descrição da vaga</h2><p>${escapeHtml(v.descricao)}</p></div>` : '';
+  const salaryHtml = salary ? `<div class="salary">💰 ${escapeHtml(salary)}<small>Faixa salarial informada pela empresa</small></div>` : '';
+
+  document.getElementById('app').innerHTML = `
+    <div class="topbar">
+      <a href="index.html?slug=${encodeURIComponent(slug)}" class="logo">VagasIO</a>
+      <div class="links">
+        <a href="vagas.html?slug=${encodeURIComponent(slug)}">Vagas</a>
+        <a href="sobre.html?slug=${encodeURIComponent(slug)}">Sobre</a>
+        <a href="/candidato/" style="color:#722F37;font-weight:600;">Sou candidato →</a>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html?slug=${encodeURIComponent(slug)}">${escapeHtml(v.empresa_nome)}</a>
+        <span>›</span>
+        <a href="vagas.html?slug=${encodeURIComponent(slug)}">Vagas</a>
+        <span>›</span>
+        ${escapeHtml(v.titulo)}
+      </div>
+
+      <article class="job">
+        <h1>${escapeHtml(v.titulo)}</h1>
+        <div class="empresa">
+          <a href="index.html?slug=${encodeURIComponent(slug)}">${escapeHtml(v.empresa_nome)}</a>
+        </div>
+
+        <div class="job-meta">
+          ${meta.map(m => `<div class="item"><div class="label">${escapeHtml(m.l)}</div><div class="value">${escapeHtml(m.v)}</div></div>`).join('')}
+        </div>
+
+        ${salaryHtml}
+        ${descricao}
+        ${requisitos}
+        ${beneficios}
+      </article>
+
+      <div class="cta-bar">
+        <a href="/candidato/?vaga=${vagaId}&slug=${encodeURIComponent(slug)}" class="cta-btn">Candidatar-se →</a>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="brand">VagasIO</div>
+      <div>Plataforma de recrutamento · <a href="/candidato/">Sou candidato →</a></div>
+    </footer>
+  `;
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function fmtNum(n) {
+  const num = Number(n);
+  if (!Number.isFinite(num)) return String(n);
+  return num.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+carregar();
+</script>
+</body>
+</html>
