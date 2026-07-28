@@ -90,6 +90,8 @@
       <a class="nav-item" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
       <div class="nav-divisor" style="padding:12px 24px; color:rgba(255,255,255,.4); font-size:11px; text-transform:uppercase; letter-spacing:.5px;">Links</div>
+      <a class="nav-item" id="nav-equipe" href="usuarios.html" style="display:none;">👥 Equipe</a>
+
       <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
       <div class="aside-user">
         <div class="aside-user-avatar" id="avatar">--</div>
@@ -107,6 +109,7 @@
           <h2>Minhas Vagas</h2>
           <p>Todas as vagas liberadas para sua empresa</p>
         </div>
+        <button id="btn-nova-vaga" class="btn-nova-vaga" onclick="abrirModalNovaVaga()" style="background:var(--vinho);color:#fff;border:0;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:none;">+ Nova vaga</button>
       </div>
 
       <div class="vagas-toolbar">
@@ -143,7 +146,7 @@
   <div class="toast" id="toast" style="position:fixed;bottom:24px;right:24px;background:#1A1A1A;color:#fff;padding:12px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;"></div>
 
   <script>
-    const API = 'https://recrutamento-api-novo.onrender.com';
+    const API = 'https://recrutamento-api-v2.onrender.com';
     const token = localStorage.getItem('empresa_token');
     if (!token) window.location.href = 'login.html';
     const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
@@ -228,8 +231,67 @@
 
     carregar();
   </script>
-<script src="auth-helper.js?v=etapa2_2026_07_27"></script>
-  <script src="empresa-auth-init.js?v=etapa2_2026_07_27"></script>
+<script src="auth-helper.js?v=fase3_2026_07_28"></script>
+  <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
+  <script src="empresa-auth-patch.js?v=fase3_2026_07_28"></script>
+
+  <script>
+    // ===== INIT COMUM FASE 3 — RBAC frontend =====
+    (async function() {
+      setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
+
+      // tenta refresh silencioso antes de qualquer coisa
+      try { await authInit(); } catch (e) { console.warn('refresh falhou', e); }
+
+      // guard: sem token -> vai pro login
+      if (!localStorage.getItem('empresa_token')) {
+        const path = window.location.pathname;
+        if (!path.endsWith('login.html')) {
+          window.location.href = 'login.html';
+          return;
+        }
+      }
+
+      // aguarda DOM
+      const onReady = () => {
+        // mostra link Equipe se for admin
+        if (authRBAC.hasRole('admin_empresa')) {
+          const navEq = document.getElementById('nav-equipe');
+          if (navEq) navEq.style.display = '';
+        }
+
+        // preenche sidebar com dados do JWT
+        const u = authRBAC.currentUser() || {};
+        const avatar = document.getElementById('avatar');
+        const nome = document.getElementById('user-nome');
+        const empresa = document.getElementById('user-empresa');
+        if (avatar && u.nome) avatar.textContent = u.nome.split(' ').filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join('');
+        if (nome) nome.textContent = u.nome || '—';
+        if (empresa) empresa.textContent = (u.role ? '[' + u.role + '] ' : '') + (u.empresa_nome || u.email || '—');
+
+        // mostra botao +Nova vaga so para admin/recrutador (viewer nao pode)
+        const btnNova = document.getElementById('btn-nova-vaga');
+        if (btnNova && authRBAC.hasRole('admin_empresa', 'recrutador')) {
+          btnNova.style.display = '';
+        }
+
+        // guarda de role por pagina: se existe um atributo data-roles exigido,
+        // fazemos o guard UX (apenas visual; backend é autoridade)
+        const required = document.querySelector('main')?.dataset?.roles;
+        if (required && !authRBAC.hasRole.apply(null, required.split(','))) {
+          // redireciona com aviso
+          const main = document.querySelector('main');
+          if (main) main.innerHTML = '<div style="text-align:center; padding:80px 20px;"><h2 style="color:#999;">🚫 Acesso restrito</h2><p style="color:#666; margin-top:12px;">Você não tem permissão para acessar esta página.</p><p style="margin-top:24px;"><a href="index.html" style="color:#722F37;">← Voltar ao Dashboard</a></p></div>';
+        }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', onReady);
+      } else {
+        onReady();
+      }
+    })();
+  </script>
 <script src="chat-rh-flutuante.js?v=20260726c"></script>
 </body>
 </html>
