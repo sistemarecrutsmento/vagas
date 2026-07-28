@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Bem-vindo — Vagas.io</title>
+  <style>
+    :root{--vinho:#722F37;--dourado:#C9A961;--bg:#f7f5f2;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;}
+    header{background:#fff;border-bottom:1px solid #e8e4df;padding:0 5%;display:flex;align-items:center;height:60px;}
+    .logo{font-size:20px;font-weight:800;color:var(--vinho);text-decoration:none;}
+    .logo span{color:var(--dourado);}
+    .progress-bar{height:4px;background:#e8e4df;position:sticky;top:0;z-index:10;}
+    .progress-fill{height:100%;background:var(--vinho);transition:width .4s;}
+    .container{max-width:640px;margin:0 auto;padding:40px 20px 80px;}
+    .step-label{font-size:12px;font-weight:700;color:var(--vinho);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+    h1{font-size:26px;font-weight:800;margin-bottom:6px;}
+    .subtitle{color:#666;font-size:15px;margin-bottom:28px;line-height:1.5;}
+    .card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:20px;}
+    .step-dots{display:flex;gap:8px;justify-content:center;margin-bottom:28px;}
+    .dot{width:10px;height:10px;border-radius:50%;background:#ddd;transition:.3s;}
+    .dot.active{background:var(--vinho);}
+    .dot.done{background:var(--dourado);}
+    .step-content{display:none;}
+    .step-content.active{display:block;}
+    .btn{display:inline-block;padding:12px 24px;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:.2s;}
+    .btn-primary{background:var(--vinho);color:#fff;}
+    .btn-primary:hover{opacity:.9;}
+    .btn-secondary{background:#f0ece7;color:#333;}
+    .btn-row{display:flex;gap:12px;justify-content:flex-end;margin-top:16px;}
+    .vaga-card{border:1.5px solid #e8e4df;border-radius:10px;padding:16px;margin-bottom:12px;cursor:pointer;transition:.2s;}
+    .vaga-card:hover,.vaga-card.selected{border-color:var(--vinho);background:#fdf9f5;}
+    .vaga-card h3{font-size:15px;font-weight:700;margin-bottom:4px;}
+    .vaga-card p{font-size:13px;color:#666;}
+    .vaga-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+    .tag{background:#f0ece7;color:#555;font-size:11px;padding:3px 8px;border-radius:6px;font-weight:600;}
+    .search-input{width:100%;padding:10px 13px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:16px;}
+    .search-input:focus{border-color:var(--vinho);outline:none;}
+    .success-icon{font-size:64px;text-align:center;margin-bottom:16px;}
+    .success-title{font-size:24px;font-weight:800;text-align:center;margin-bottom:8px;}
+    .success-sub{color:#666;text-align:center;line-height:1.6;margin-bottom:28px;}
+    .quick-links{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+    .qlink{background:#fff;border:1.5px solid #e8e4df;border-radius:10px;padding:16px;text-align:center;text-decoration:none;color:#333;transition:.2s;}
+    .qlink:hover{border-color:var(--vinho);color:var(--vinho);}
+    .qlink .qicon{font-size:24px;margin-bottom:6px;}
+    .qlink .qtext{font-size:13px;font-weight:600;}
+    .check-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f0ece7;}
+    .check-item:last-child{border-bottom:none;}
+    .check-icon{font-size:20px;flex-shrink:0;width:32px;text-align:center;}
+    .check-text h3{font-size:14px;font-weight:700;margin-bottom:3px;}
+    .check-text p{font-size:13px;color:#666;line-height:1.4;}
+    .loading{text-align:center;padding:40px;color:#999;}
+    .erro{color:#c00;font-size:13px;margin-top:6px;}
+  </style>
+</head>
+<body>
+<header><a class="logo" href="painel.html">Vagas<span>.io</span></a></header>
+<div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:25%"></div></div>
+
+<div class="container">
+  <div class="step-dots">
+    <div class="dot active" id="dot-0"></div>
+    <div class="dot" id="dot-1"></div>
+    <div class="dot" id="dot-2"></div>
+    <div class="dot" id="dot-3"></div>
+  </div>
+
+  <!-- ETAPA 1 — Complete seu perfil -->
+  <div class="step-content active" id="step-0">
+    <div class="step-label">Etapa 1 de 3</div>
+    <h1>Complete seu perfil</h1>
+    <p class="subtitle">Empresas que recebem seu currículo consultam essas informações. Quanto mais completo, melhor.</p>
+    <div class="card">
+      <div class="check-item">
+        <div class="check-icon" id="chk-perfil">⏳</div>
+        <div class="check-text">
+          <h3>Dados pessoais e contato</h3>
+          <p>Nome, celular, cidade, estado</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon" id="chk-formacao">⏳</div>
+        <div class="check-text">
+          <h3>Formação acadêmica</h3>
+          <p>Nível de escolaridade, curso, instituição</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon" id="chk-sobre">⏳</div>
+        <div class="check-text">
+          <h3>Sobre você</h3>
+          <p>Uma breve descrição profissional</p>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-secondary" href="perfil.html?ret=onboarding">Ir para meu perfil →</a>
+      <button class="btn btn-primary" onclick="avancarDepoisPerfil()">Já está completo →</button>
+    </div>
+  </div>
+
+  <!-- ETAPA 2 — Encontrar vaga -->
+  <div class="step-content" id="step-1">
+    <div class="step-label">Etapa 2 de 3</div>
+    <h1>Encontre uma vaga</h1>
+    <p class="subtitle">Explore as vagas disponíveis e se candidate na que fizer sentido pra você.</p>
+    <div class="card">
+      <input class="search-input" id="busca" type="text" placeholder="Buscar por cargo, cidade ou empresa..." oninput="filtrarVagas()" />
+      <div id="vagas-lista"><div class="loading">Carregando vagas…</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(0)">← Voltar</button>
+      <button class="btn btn-primary" onclick="irParaVagas()">Ver todas as vagas →</button>
+    </div>
+  </div>
+
+  <!-- ETAPA 3 — Se candidatou? Acompanhe -->
+  <div class="step-content" id="step-2">
+    <div class="step-label">Etapa 3 de 3</div>
+    <h1>Acompanhe sua candidatura</h1>
+    <p class="subtitle">Depois de se candidatar, você acompanha todo o processo aqui no portal.</p>
+    <div class="card">
+      <div class="check-item">
+        <div class="check-icon">📋</div>
+        <div class="check-text">
+          <h3>Minhas candidaturas</h3>
+          <p>Veja o status de cada processo seletivo que você entrou</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">🔔</div>
+        <div class="check-text">
+          <h3>Notificações</h3>
+          <p>Alertas quando a empresa avançar sua candidatura ou enviar mensagens</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">📅</div>
+        <div class="check-text">
+          <h3>Entrevistas</h3>
+          <p>Agenda com datas e horários de entrevistas marcadas pelas empresas</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">📨</div>
+        <div class="check-text">
+          <h3>Propostas</h3>
+          <p>Quando uma empresa enviar proposta, você aceita ou recusa aqui</p>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">← Voltar</button>
+      <button class="btn btn-primary" onclick="concluir()">Entrar no meu painel →</button>
+    </div>
+  </div>
+
+  <!-- CONCLUSÃO -->
+  <div class="step-content" id="step-3">
+    <div class="success-icon">🎯</div>
+    <div class="success-title">Tudo pronto!</div>
+    <div class="success-sub">Você sabe como funciona o Vagas.io. Agora é hora de se candidatar e acompanhar seu processo.</div>
+    <div class="quick-links">
+      <a class="qlink" href="painel.html"><div class="qicon">🏠</div><div class="qtext">Meu painel</div></a>
+      <a class="qlink" href="candidaturas.html"><div class="qicon">📋</div><div class="qtext">Candidaturas</div></a>
+      <a class="qlink" href="notificacoes.html"><div class="qicon">🔔</div><div class="qtext">Notificações</div></a>
+      <a class="qlink" href="entrevistas.html"><div class="qicon">📅</div><div class="qtext">Entrevistas</div></a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://recrutamento-api-novo.onrender.com';
+  let currentStep = 0;
+  let todasVagas = [];
+  let vagaSelecionada = null;
+
+  const token = localStorage.getItem('candidato_token');
+  if (!token) window.location.href = 'index.html';
+
+  const PROGRESS = [25,50,75,100];
+
+  function goStep(n) {
+    document.getElementById('step-'+currentStep).classList.remove('active');
+    document.getElementById('dot-'+currentStep).classList.remove('active');
+    document.getElementById('dot-'+currentStep).classList.add('done');
+    currentStep = n;
+    document.getElementById('step-'+n).classList.add('active');
+    document.getElementById('dot-'+n).classList.add('active');
+    document.getElementById('progress-fill').style.width = PROGRESS[n]+'%';
+    window.scrollTo({top:0,behavior:'smooth'});
+    if (n === 1 && todasVagas.length === 0) carregarVagas();
+  }
+
+  // Etapa 1 — verifica se perfil tem dados básicos
+  async function checarPerfil() {
+    try {
+      const r = await fetch(API+'/api/candidato/perfil', {headers:{'Authorization':'Bearer '+token}});
+      const d = await r.json();
+      const p = d.candidato || d;
+      const temDados = p.nome && p.celular && p.cidade;
+      const temFormacao = p.formacao;
+      const temSobre = p.sobre_voce;
+      document.getElementById('chk-perfil').textContent = temDados ? '✅' : '⏳';
+      document.getElementById('chk-formacao').textContent = temFormacao ? '✅' : '⏳';
+      document.getElementById('chk-sobre').textContent = temSobre ? '✅' : '⏳';
+    } catch(e) {}
+  }
+
+  async function avancarDepoisPerfil() {
+    await fetch(API+'/api/candidato/onboarding/step', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({step:1})
+    });
+    goStep(1);
+  }
+
+  // Etapa 2 — carrega vagas
+  async function carregarVagas() {
+    document.getElementById('vagas-lista').innerHTML = '<div class="loading">Carregando vagas…</div>';
+    try {
+      const r = await fetch(API+'/api/vagas');
+      const d = await r.json();
+      todasVagas = (d.vagas || []).slice(0,20);
+      renderVagas(todasVagas);
+    } catch(e) {
+      document.getElementById('vagas-lista').innerHTML = '<div class="loading">Não foi possível carregar vagas.</div>';
+    }
+  }
+
+  function renderVagas(lista) {
+    const el = document.getElementById('vagas-lista');
+    if (!lista.length) { el.innerHTML = '<div class="loading">Nenhuma vaga encontrada.</div>'; return; }
+    el.innerHTML = lista.slice(0,8).map(v => `
+      <div class="vaga-card ${vagaSelecionada===v.id?'selected':''}" onclick="selecionarVaga(${v.id}, this)">
+        <h3>${v.titulo}</h3>
+        <p>${v.empresa||v.empresa_nome||''} ${v.cidade?'· '+v.cidade:''}${v.estado?' / '+v.estado:''}</p>
+        <div class="vaga-tags">
+          ${v.tipo_contrato?`<span class="tag">${v.tipo_contrato}</span>`:''}
+          ${v.nivel?`<span class="tag">${v.nivel}</span>`:''}
+          ${v.area?`<span class="tag">${v.area}</span>`:''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filtrarVagas() {
+    const q = document.getElementById('busca').value.toLowerCase();
+    const filtradas = q ? todasVagas.filter(v =>
+      (v.titulo||'').toLowerCase().includes(q) ||
+      (v.empresa||v.empresa_nome||'').toLowerCase().includes(q) ||
+      (v.cidade||'').toLowerCase().includes(q)
+    ) : todasVagas;
+    renderVagas(filtradas);
+  }
+
+  function selecionarVaga(id, el) {
+    vagaSelecionada = id;
+    document.querySelectorAll('.vaga-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    // Redireciona direto para a vaga
+    window.location.href = `vaga.html?vaga=${id}&ret=onboarding`;
+  }
+
+  function irParaVagas() {
+    window.location.href = 'vaga.html';
+  }
+
+  async function concluir() {
+    await fetch(API+'/api/candidato/onboarding/step', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({step:3})
+    });
+    window.location.href = 'painel.html';
+  }
+
+  // Checa se onboarding já foi concluído
+  async function init() {
+    try {
+      const r = await fetch(API+'/api/candidato/onboarding', {headers:{'Authorization':'Bearer '+token}});
+      const d = await r.json();
+      if ((d.step||0) >= 3) { window.location.href = 'painel.html'; return; }
+      if ((d.step||0) >= 2) goStep(2);
+      else if ((d.step||0) >= 1) goStep(1);
+    } catch(e) {}
+    checarPerfil();
+  }
+  init();
+</script>
+</body>
+</html>
