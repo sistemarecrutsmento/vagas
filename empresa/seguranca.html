@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Segurança da Conta · Vagas.io</title>
+  <style>
+    :root{--vinho:#722F37;--vinho-claro:#8B3A45;--bg:#f7f5f2;--borda:#e8e4df;--verde:#28A745;--verm:#C62828;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;}
+    header{background:var(--vinho);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+    .logo{color:#fff;font-weight:800;font-size:18px;text-decoration:none;}
+    .hdr-right{display:flex;align-items:center;gap:12px;}
+    .avatar{width:32px;height:32px;border-radius:50%;background:#fff3;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+    .main{max-width:720px;margin:32px auto;padding:0 20px;}
+    h1{font-size:22px;font-weight:700;margin-bottom:6px;}
+    .sub{color:#666;font-size:14px;margin-bottom:28px;}
+    .card{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:24px;margin-bottom:20px;}
+    .card h2{font-size:16px;font-weight:700;margin-bottom:4px;}
+    .card p{font-size:14px;color:#666;margin-bottom:16px;}
+    .badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;}
+    .badge.on{background:#e8f5e9;color:#2e7d32;}
+    .badge.off{background:#fce4ec;color:#b71c1c;}
+    label{display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:6px;}
+    input[type=password],input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--borda);border-radius:8px;font-size:14px;outline:none;}
+    input:focus{border-color:var(--vinho);}
+    .row{display:flex;gap:12px;flex-wrap:wrap;}
+    .row .f{flex:1;min-width:200px;}
+    btn,button,.btn{cursor:pointer;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;transition:.15s;}
+    .btn-p{background:var(--vinho);color:#fff;}
+    .btn-p:hover{background:var(--vinho-claro);}
+    .btn-s{background:#f0ede9;color:#333;}
+    .btn-s:hover{background:#e0ddd8;}
+    .btn-d{background:#fce4ec;color:#b71c1c;}
+    .btn-d:hover{background:#f8bbd0;}
+    .msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-top:12px;display:none;}
+    .msg.ok{background:#e8f5e9;color:#2e7d32;display:block;}
+    .msg.err{background:#fce4ec;color:#b71c1c;display:block;}
+    .sessao-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--borda);}
+    .sessao-item:last-child{border-bottom:none;}
+    .sessao-info{font-size:13px;}
+    .sessao-info strong{display:block;font-size:14px;}
+    .sessao-info span{color:#888;}
+    .qr-area{text-align:center;padding:16px;}
+    .qr-area img{max-width:200px;border:1px solid var(--borda);border-radius:8px;}
+    .codes-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0;}
+    .code-item{background:#f7f5f2;border:1px solid var(--borda);border-radius:6px;padding:6px 10px;font-family:monospace;font-size:13px;text-align:center;}
+    .back-link{color:var(--vinho);text-decoration:none;font-size:14px;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+    .back-link:hover{text-decoration:underline;}
+    .sep{height:1px;background:var(--borda);margin:12px 0;}
+    @media(max-width:480px){.row{flex-direction:column;} .codes-grid{grid-template-columns:repeat(2,1fr);}}
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">Vagas.io</a>
+  <div class="hdr-right">
+    <div class="avatar" id="avatar">?</div>
+    <button class="btn btn-s" style="padding:6px 14px;font-size:13px;" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<div class="main">
+  <a class="back-link" href="index.html">← Voltar ao painel</a>
+  <h1>🔒 Segurança da Conta</h1>
+  <p class="sub">Gerencie senha, autenticação em dois fatores e sessões ativas.</p>
+
+  <!-- ── ALTERAR SENHA ── -->
+  <div class="card">
+    <h2>🔑 Alterar senha</h2>
+    <p>Sua nova senha deve ter no mínimo 8 caracteres.</p>
+    <div class="row">
+      <div class="f">
+        <label>Senha atual</label>
+        <input type="password" id="senha-atual" placeholder="••••••••"/>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <div class="f">
+        <label>Nova senha</label>
+        <input type="password" id="senha-nova" placeholder="••••••••"/>
+      </div>
+      <div class="f">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="senha-conf" placeholder="••••••••"/>
+      </div>
+    </div>
+    <div style="margin-top:14px;">
+      <button class="btn btn-p" onclick="trocarSenha()">Alterar senha</button>
+    </div>
+    <div class="msg" id="msg-senha"></div>
+  </div>
+
+  <!-- ── 2FA ── -->
+  <div class="card" id="card-2fa">
+    <h2>🛡️ Autenticação em dois fatores (2FA)</h2>
+    <p>Adiciona uma camada extra de segurança — um código do app autenticador é exigido no login.</p>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <span>Status:</span>
+      <span class="badge off" id="badge-2fa">Inativo</span>
+    </div>
+
+    <!-- Estado: 2FA desativo -->
+    <div id="area-ativar">
+      <button class="btn btn-p" onclick="iniciar2FA()">Ativar 2FA</button>
+    </div>
+
+    <!-- Estado: QR Code gerado, aguardando confirmação -->
+    <div id="area-qr" style="display:none;">
+      <p style="font-size:14px;margin-bottom:8px;">Escaneie o QR Code com Google Authenticator, Authy ou similar:</p>
+      <div class="qr-area">
+        <img id="qr-img" src="" alt="QR Code 2FA"/>
+        <p style="margin-top:8px;font-size:12px;color:#888;">Ou insira manualmente: <code id="secret-manual" style="user-select:all;cursor:text;"></code></p>
+      </div>
+      <label style="margin-top:16px;">Código de confirmação (6 dígitos)</label>
+      <input type="text" id="cod-confirmar" placeholder="000000" maxlength="6" style="max-width:180px;text-align:center;font-size:20px;letter-spacing:6px;"/>
+      <div style="margin-top:12px;display:flex;gap:10px;">
+        <button class="btn btn-p" onclick="confirmar2FA()">Confirmar e ativar</button>
+        <button class="btn btn-s" onclick="cancelarQR()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Estado: 2FA ativo -->
+    <div id="area-ativo" style="display:none;">
+      <div style="margin-bottom:14px;">
+        <p style="font-size:13px;color:#2e7d32;margin-bottom:6px;">✅ 2FA ativo — o código do aplicativo é exigido no login.</p>
+        <p style="font-size:13px;color:#666;" id="txt-ativado-em"></p>
+      </div>
+      <div id="area-backup-codes" style="display:none;margin-bottom:16px;">
+        <p style="font-size:13px;font-weight:600;margin-bottom:6px;">📋 Códigos de recuperação (use se perder o app):</p>
+        <div class="codes-grid" id="grid-backup"></div>
+        <p style="font-size:12px;color:#888;">Guarde estes códigos em local seguro — cada um só pode ser usado uma vez.</p>
+      </div>
+      <label>Confirme sua senha para desativar o 2FA</label>
+      <input type="password" id="senha-desativar" placeholder="••••••••" style="max-width:260px;margin-bottom:12px;"/>
+      <div>
+        <button class="btn btn-d" onclick="desativar2FA()">Desativar 2FA</button>
+      </div>
+    </div>
+    <div class="msg" id="msg-2fa"></div>
+  </div>
+
+  <!-- ── SESSÕES ── -->
+  <div class="card">
+    <h2>📱 Sessões ativas</h2>
+    <p>Dispositivos onde sua conta está conectada.</p>
+    <div id="lista-sessoes"><p style="font-size:14px;color:#888;">Carregando...</p></div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-s" onclick="encerrarOutras()">Encerrar outras sessões</button>
+      <button class="btn btn-d" onclick="encerrarTodas()">Encerrar todas as sessões</button>
+    </div>
+    <div class="msg" id="msg-sessoes"></div>
+  </div>
+</div>
+
+<script>
+const API = 'https://recrutamento-api-novo.onrender.com';
+let TOKEN = localStorage.getItem('empresa_token') || '';
+let REFRESH = localStorage.getItem('empresa_refresh') || '';
+let refreshPendente = null;
+
+async function req(method, path, body) {
+  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` };
+  const r = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  if (r.status === 401 && REFRESH && !refreshPendente) {
+    refreshPendente = fetch(API + '/api/auth/refresh', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: REFRESH })
+    }).then(rr => rr.json()).then(d => {
+      if (d.token) {
+        TOKEN = d.token; REFRESH = d.refreshToken;
+        localStorage.setItem('empresa_token', TOKEN);
+        localStorage.setItem('empresa_refresh', REFRESH);
+      }
+      refreshPendente = null;
+    });
+    await refreshPendente;
+    return req(method, path, body);
+  }
+  return r;
+}
+
+function showMsg(id, text, tipo) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = 'msg ' + tipo;
+}
+
+function iniciais(n) { return (n||'?').split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase(); }
+
+// ── Alterar senha ──
+async function trocarSenha() {
+  const atual = document.getElementById('senha-atual').value.trim();
+  const nova  = document.getElementById('senha-nova').value.trim();
+  const conf  = document.getElementById('senha-conf').value.trim();
+  if (!atual || !nova || !conf) return showMsg('msg-senha','Preencha todos os campos.','err');
+  if (nova !== conf) return showMsg('msg-senha','As senhas novas não coincidem.','err');
+  if (nova.length < 8) return showMsg('msg-senha','Mínimo 8 caracteres.','err');
+  const r = await req('POST', '/api/empresa/trocar-senha', { senha_atual: atual, senha_nova: nova });
+  const d = await r.json();
+  if (d.ok) {
+    showMsg('msg-senha','✅ Senha alterada! Suas outras sessões foram encerradas.','ok');
+    ['senha-atual','senha-nova','senha-conf'].forEach(id => document.getElementById(id).value = '');
+  } else {
+    showMsg('msg-senha','❌ ' + (d.erro || 'Erro ao alterar senha.'),'err');
+  }
+}
+
+// ── 2FA ──
+let secretAtual = '';
+async function carregar2FA() {
+  const r = await req('GET', '/api/empresa/2fa/status');
+  if (!r.ok) return;
+  const d = await r.json();
+  document.getElementById('badge-2fa').textContent = d.ativo ? 'Ativo' : 'Inativo';
+  document.getElementById('badge-2fa').className = 'badge ' + (d.ativo ? 'on' : 'off');
+  document.getElementById('area-ativar').style.display = d.ativo ? 'none' : 'block';
+  document.getElementById('area-ativo').style.display = d.ativo ? 'block' : 'none';
+  document.getElementById('area-qr').style.display = 'none';
+  if (d.ativo && d.ativado_em) {
+    document.getElementById('txt-ativado-em').textContent = 'Ativado em: ' + new Date(d.ativado_em).toLocaleString('pt-BR');
+  }
+}
+
+async function iniciar2FA() {
+  const r = await req('POST', '/api/empresa/2fa/iniciar');
+  const d = await r.json();
+  if (!r.ok) return showMsg('msg-2fa','❌ ' + (d.erro||'Erro'),'err');
+  secretAtual = d.secret;
+  document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(d.otpauth_url)}`;
+  document.getElementById('secret-manual').textContent = d.secret;
+  document.getElementById('area-ativar').style.display = 'none';
+  document.getElementById('area-qr').style.display = 'block';
+  document.getElementById('area-ativo').style.display = 'none';
+}
+
+function cancelarQR() {
+  document.getElementById('area-ativar').style.display = 'block';
+  document.getElementById('area-qr').style.display = 'none';
+}
+
+async function confirmar2FA() {
+  const codigo = document.getElementById('cod-confirmar').value.trim();
+  if (!/^\d{6}$/.test(codigo)) return showMsg('msg-2fa','❌ Código deve ter 6 dígitos.','err');
+  const r = await req('POST', '/api/empresa/2fa/confirmar', { codigo });
+  const d = await r.json();
+  if (!r.ok) return showMsg('msg-2fa','❌ ' + (d.erro||'Código inválido.'),'err');
+  showMsg('msg-2fa','✅ 2FA ativado com sucesso!','ok');
+  // Exibir backup codes
+  if (d.backup_codes?.length) {
+    document.getElementById('area-backup-codes').style.display = 'block';
+    document.getElementById('grid-backup').innerHTML = d.backup_codes.map(c => `<div class="code-item">${c}</div>`).join('');
+  }
+  setTimeout(() => carregar2FA(), 300);
+}
+
+async function desativar2FA() {
+  const senha = document.getElementById('senha-desativar').value.trim();
+  if (!senha) return showMsg('msg-2fa','❌ Informe sua senha para confirmar.','err');
+  const r = await req('POST', '/api/empresa/2fa/desativar', { senha });
+  const d = await r.json();
+  if (!r.ok) return showMsg('msg-2fa','❌ ' + (d.erro||'Erro ao desativar.'),'err');
+  showMsg('msg-2fa','✅ 2FA desativado.','ok');
+  document.getElementById('senha-desativar').value = '';
+  setTimeout(() => carregar2FA(), 300);
+}
+
+// ── Sessões ──
+async function carregarSessoes() {
+  const r = await req('GET', '/api/auth/sessoes');
+  if (!r.ok) return;
+  const d = await r.json();
+  const el = document.getElementById('lista-sessoes');
+  if (!d.sessoes?.length) { el.innerHTML = '<p style="font-size:14px;color:#888;">Nenhuma sessão ativa.</p>'; return; }
+  el.innerHTML = d.sessoes.map(s => {
+    const dt = new Date(s.criado_em).toLocaleString('pt-BR');
+    const ua = s.user_agent || 'Dispositivo desconhecido';
+    const ip = s.ip || '';
+    return `<div class="sessao-item">
+      <div class="sessao-info">
+        <strong>${ua.length>60?ua.slice(0,60)+'…':ua}</strong>
+        <span>${ip ? ip + ' · ' : ''}${dt}</span>
+      </div>
+      <button class="btn btn-s" style="font-size:12px;padding:6px 12px;" onclick="encerrarSessao(${s.id})">Encerrar</button>
+    </div>`;
+  }).join('');
+}
+
+async function encerrarSessao(id) {
+  const r = await req('DELETE', `/api/auth/sessoes/${id}`);
+  const d = await r.json();
+  if (d.ok) carregarSessoes();
+  else showMsg('msg-sessoes','❌ ' + (d.erro||'Erro'),'err');
+}
+
+async function encerrarOutras() {
+  if (!REFRESH) return showMsg('msg-sessoes','❌ Refresh token não encontrado.','err');
+  const r = await req('POST', '/api/auth/sessoes/encerrar-outras', { refreshToken: REFRESH });
+  const d = await r.json();
+  if (d.ok) { showMsg('msg-sessoes','✅ Outras sessões encerradas.','ok'); carregarSessoes(); }
+  else showMsg('msg-sessoes','❌ ' + (d.erro||'Erro'),'err');
+}
+
+async function encerrarTodas() {
+  if (!confirm('Isso vai desconectar todos os dispositivos, incluindo este. Continuar?')) return;
+  const r = await req('POST', '/api/auth/sessoes/encerrar-todas');
+  const d = await r.json();
+  if (d.ok) {
+    showMsg('msg-sessoes','✅ Todas as sessões encerradas. Redirecionando...','ok');
+    setTimeout(() => { localStorage.removeItem('empresa_token'); localStorage.removeItem('empresa_refresh'); location.href = 'login.html'; }, 1500);
+  } else showMsg('msg-sessoes','❌ ' + (d.erro||'Erro'),'err');
+}
+
+function sair() {
+  if (REFRESH) fetch(API + '/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` }, body: JSON.stringify({ refreshToken: REFRESH }) }).catch(()=>{});
+  ['empresa_token','empresa_refresh','empresa_usuario'].forEach(k => localStorage.removeItem(k));
+  location.href = 'login.html';
+}
+
+// ── Init ──
+if (!TOKEN) { location.href = 'login.html'; }
+const usr = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
+document.getElementById('avatar').textContent = iniciais(usr.nome || '');
+carregar2FA();
+carregarSessoes();
+</script>
+</body>
+</html>
