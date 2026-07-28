@@ -5,22 +5,109 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Candidatos da Vaga — Portal Empresa</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="empresa.css">
   <style>
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 14px 18px; background: #fafafa; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--cinza-medio); border-bottom: 1px solid var(--borda); font-weight: 700; }
-    td { padding: 16px 18px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fafafa; }
-    .cand-cell { display: flex; align-items: center; gap: 10px; }
-    .cand-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--vinho); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
-    .cand-nome { font-weight: 600; color: var(--preto); }
-    .cand-email { font-size: 12px; color: var(--cinza-medio); margin-top: 2px; }
-    .etapa { display: inline-block; padding: 3px 8px; background: #f0f0f0; border-radius: 4px; font-size: 11px; color: var(--preto); }
-    .acoes-cell { display: flex; gap: 6px; }
-    .btn-analisar { display: inline-block; padding: 6px 12px; background: var(--vinho); color: white !important; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; }
-    .btn-analisar:hover { background: var(--vinho-escuro); }
-    .voltar { color: var(--vinho); text-decoration: none; font-size: 13px; font-weight: 600; }
+    :root { --vinho:#722F37; --vinho-escuro:#4A1F25; --vinho-claro:#8B3A45; --branco:#FFF; --preto:#1A1A1A; --cinza-escuro:#3A3A3A; --cinza:#F5F5F5; --cinza-medio:#666; --borda:#E5E5E5; --dourado:#D4A155; --verde:#2E7D32; --amarelo:#F57C00; --vermelho:#C62828; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:#FAFAFA; color:var(--preto); }
+    .menu-toggle { display:none; position:fixed; top:12px; left:12px; z-index:1100; background:var(--vinho); color:#fff; border:0; border-radius:8px; width:40px; height:40px; font-size:20px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+    .menu-close { display:none; position:absolute; top:12px; right:12px; background:transparent; color:#fff; border:0; font-size:22px; cursor:pointer; padding:4px 8px; }
+    @media (max-width:700px) {
+      .menu-toggle { display:block; }
+      .app.aside-aberto .menu-toggle { display:none; }
+      aside { position:fixed; top:0; left:0; height:100vh; z-index:1000; transform:translateX(-100%); transition:transform .25s ease; }
+      aside.aberto { transform:translateX(0); box-shadow:4px 0 24px rgba(0,0,0,.4); }
+      aside.aberto .menu-close { display:block; }
+      main { padding:20px 16px; padding-top:64px; }
+      .page-header { flex-direction:column; align-items:flex-start; }
+      .toolbar { flex-direction:column; align-items:stretch; }
+      .kanban-board { grid-template-columns:1fr; }
+      table { font-size:12px; }
+      th, td { padding:10px 8px; }
+    }
+    aside { width:240px; background:var(--vinho); color:#fff; padding:24px 0; flex-shrink:0; display:flex; flex-direction:column; min-height:100vh; }
+    .aside-logo { padding:0 24px 24px; border-bottom:1px solid rgba(255,255,255,.1); margin-bottom:16px; }
+    .aside-logo h1 { font-size:20px; font-weight:800; color:#fff; }
+    .aside-logo small { color:rgba(255,255,255,.6); font-size:12px; }
+    .nav-item { display:block; padding:12px 24px; color:rgba(255,255,255,.8); text-decoration:none; font-size:14px; font-weight:500; border-left:3px solid transparent; cursor:pointer; }
+    .nav-item:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .nav-item.ativo { background:rgba(255,255,255,.15); color:#fff; border-left-color:#fff; }
+    .aside-user { margin-top:auto; padding:16px 24px; border-top:1px solid rgba(255,255,255,.1); display:flex; align-items:center; gap:10px; }
+    .aside-user-avatar { width:36px; height:36px; border-radius:50%; background:var(--dourado); color:var(--preto); font-weight:700; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .aside-user-info { flex:1; min-width:0; }
+    .aside-user-info .nome { font-size:13px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .aside-user-info .empresa { font-size:11px; color:rgba(255,255,255,.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .btn-logout { background:rgba(255,255,255,.1); color:#fff; border:0; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:14px; }
+    .btn-logout:hover { background:rgba(255,255,255,.2); }
+    .app { display:flex; min-height:100vh; }
+    main { flex:1; padding:32px; overflow-y:auto; }
+    .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; gap:12px; flex-wrap:wrap; }
+    .page-header h2 { font-size:24px; font-weight:700; }
+    .page-header p { color:#888; font-size:14px; margin-top:2px; }
+    .voltar { color:var(--vinho); text-decoration:none; font-size:13px; font-weight:600; display:inline-block; margin-bottom:8px; }
+    .voltar:hover { color:var(--vinho-escuro); }
+    .sub { color:#666; font-size:13px; margin-top:6px; }
+    .empty { text-align:center; padding:40px; color:#888; }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid var(--borda); border-top-color:var(--vinho); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .toast { position:fixed; bottom:24px; right:24px; background:#1A1A1A; color:#fff; padding:12px 18px; border-radius:8px; font-size:14px; opacity:0; transition:opacity .3s; pointer-events:none; z-index:200; }
+    /* Toolbar */
+    .toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; align-items:center; background:#fff; padding:14px; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+    .toolbar-busca { position:relative; flex:1; min-width:180px; }
+    .toolbar-busca input { width:100%; padding:9px 12px 9px 36px; border:1px solid var(--borda); border-radius:8px; font-size:13px; font-family:inherit; background:#fff; }
+    .toolbar-busca input:focus { outline:0; border-color:var(--vinho); }
+    .toolbar-busca-icone { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#999; font-size:13px; }
+    .toolbar select { padding:9px 12px; border:1px solid var(--borda); border-radius:8px; font-size:13px; font-family:inherit; background:#fff; cursor:pointer; }
+    .toolbar-toggle { display:flex; gap:4px; border:1px solid var(--borda); border-radius:8px; overflow:hidden; }
+    .toolbar-toggle button { padding:9px 14px; background:#fff; border:0; cursor:pointer; font-size:13px; color:#666; font-weight:500; }
+    .toolbar-toggle button.ativo { background:var(--vinho); color:#fff; }
+    .toolbar-toggle button:not(.ativo):hover { background:#F5F5F5; }
+    .toolbar-stats { font-size:13px; color:#666; }
+    .toolbar-stats strong { color:var(--vinho); font-weight:700; }
+    /* Tabela */
+    .tabela-wrap { background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06); overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    th { text-align:left; padding:14px 18px; background:#FAFAFA; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:#888; border-bottom:1px solid var(--borda); font-weight:700; }
+    td { padding:14px 18px; border-bottom:1px solid #F0F0F0; font-size:14px; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#FAFAFA; }
+    .cand-cell { display:flex; align-items:center; gap:10px; }
+    .cand-avatar { width:36px; height:36px; border-radius:50%; background:var(--vinho); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+    .cand-nome { font-weight:600; color:#1A1A1A; }
+    .cand-email { font-size:12px; color:#888; margin-top:2px; }
+    .etapa-pill, .status-pill { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+    .etapa-pill { background:#F0F0F0; color:#444; }
+    .status-em_analise { background:#E0E7FF; color:#3730A3; }
+    .status-em_andamento { background:#DBEAFE; color:#1E40AF; }
+    .status-aprovado { background:#D1FAE5; color:#065F46; }
+    .status-rejeitado, .status-reprovado { background:#FEE2E2; color:#991B1B; }
+    .status-contratado { background:#D1FAE5; color:#065F46; }
+    .acoes-cell { display:flex; gap:6px; flex-wrap:wrap; }
+    .btn-acao { padding:6px 12px; background:#fff; color:var(--preto); border:1px solid var(--borda); border-radius:6px; text-decoration:none; font-size:12px; font-weight:600; cursor:pointer; }
+    .btn-acao:hover { background:#FAFAFA; border-color:var(--vinho); color:var(--vinho); }
+    .btn-acao.primary { background:var(--vinho); color:#fff; border-color:var(--vinho); }
+    .btn-acao.primary:hover { background:var(--vinho-escuro); color:#fff; }
+    .btn-acao:disabled { opacity:.4; cursor:not-allowed; }
+    /* Kanban */
+    .kanban-board { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+    .kanban-col { background:#F5F5F5; border-radius:12px; padding:12px; min-height:200px; }
+    .kanban-col-titulo { font-size:12px; font-weight:700; color:#444; text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+    .kanban-col-num { background:var(--vinho); color:#fff; border-radius:10px; padding:2px 8px; font-size:11px; }
+    .kanban-card { background:#fff; padding:12px; border-radius:8px; box-shadow:0 1px 2px rgba(0,0,0,.06); margin-bottom:8px; cursor:pointer; transition:transform .15s, box-shadow .15s; }
+    .kanban-card:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.08); }
+    .kanban-card-nome { font-weight:600; font-size:14px; color:#1A1A1A; margin-bottom:4px; }
+    .kanban-card-email { font-size:11px; color:#888; margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .kanban-card-meta { font-size:11px; color:#666; display:flex; justify-content:space-between; align-items:center; }
+    /* Modal mudar etapa */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:1500; padding:24px; }
+    .modal-box { background:#fff; border-radius:12px; max-width:480px; width:100%; padding:24px; box-shadow:0 10px 40px rgba(0,0,0,.3); }
+    .modal-box h2 { font-size:18px; font-weight:700; margin-bottom:18px; color:var(--vinho); }
+    .modal-box label { display:block; font-size:13px; font-weight:600; color:#444; margin-bottom:6px; margin-top:12px; }
+    .modal-box select, .modal-box textarea { width:100%; padding:10px 12px; border:1px solid var(--borda); border-radius:6px; font-family:inherit; font-size:14px; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; padding-top:16px; border-top:1px solid var(--borda); }
+    .modal-actions button { padding:10px 18px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; border:1px solid var(--borda); background:#fff; color:#444; }
+    .modal-actions .btn-primary { background:var(--vinho); color:#fff; border-color:var(--vinho); }
+    .modal-erro { background:#FEE; color:var(--vermelho); padding:10px 14px; border-radius:6px; font-size:13px; margin-top:12px; display:none; }
+    .modal-erro.visivel { display:block; }
   </style>
 </head>
 <body>
@@ -33,16 +120,13 @@
         <h1>VagasIO</h1>
         <small>Portal da Empresa</small>
       </div>
-
       <a class="nav-item" href="index.html">📊 Dashboard</a>
+      <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
       <a class="nav-item ativo" href="vagas.html">📋 Vagas com Candidatos</a>
       <a class="nav-item" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
-
-
-            <a class="nav-item" id="nav-equipe" href="usuarios.html" style="display:none;">👥 Equipe</a>
-
-      <div class="nav-divisor">Links</div>
+      <a class="nav-item" id="nav-equipe" href="usuarios.html" style="display:none;">👥 Equipe</a>
+      <div class="nav-divisor" style="padding:12px 24px; color:rgba(255,255,255,.4); font-size:11px; text-transform:uppercase; letter-spacing:.5px;">Links</div>
       <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
       <div class="aside-user">
         <div class="aside-user-avatar" id="avatar">--</div>
@@ -57,44 +141,199 @@
     <main>
       <div class="page-header">
         <div>
-          <a class="voltar" href="vagas.html">← Voltar para Vagas</a>
-          <h2 id="titulo-vaga" style="margin-top:8px;">Carregando...</h2>
+          <a class="voltar" href="vagas-todas.html">← Voltar para Vagas</a>
+          <h2 id="titulo-vaga">Carregando...</h2>
           <div class="sub" id="info-vaga"></div>
+        </div>
+        <div class="toolbar-stats" id="stats-cands">--</div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-busca">
+          <span class="toolbar-busca-icone">🔎</span>
+          <input type="text" id="cand-busca" placeholder="Buscar por nome ou e-mail..." />
+        </div>
+        <select id="filtro-etapa">
+          <option value="">Todas as etapas</option>
+        </select>
+        <select id="filtro-status">
+          <option value="">Todos os status</option>
+          <option value="em_analise">Em análise</option>
+          <option value="em_andamento">Em andamento</option>
+          <option value="contratado">Contratado</option>
+          <option value="rejeitado">Reprovado</option>
+        </select>
+        <div class="toolbar-toggle">
+          <button id="toggle-lista" class="ativo" onclick="setVisualizacao('lista')">📋 Lista</button>
+          <button id="toggle-kanban" onclick="setVisualizacao('kanban')">📊 Kanban</button>
         </div>
       </div>
 
-      <div class="card" style="padding:0; overflow:hidden;">
-        <table>
-          <thead>
-            <tr>
-              <th>Candidato</th>
-              <th>Etapa</th>
-              <th>Status</th>
-              <th>Data</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="cands-tbody">
-            <tr><td colspan="5" class="empty">Carregando...</td></tr>
-          </tbody>
-        </table>
+      <div id="conteudo">
+        <div class="empty"><div class="spinner"></div></div>
       </div>
     </main>
   </div>
 
+  <!-- Modal: Mudar etapa/status -->
+  <div id="modal-etapa" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <h2>🔄 Mover candidato</h2>
+      <div id="modal-etapa-info" style="font-size:14px;color:#666;"></div>
+      <input type="hidden" id="me-id" />
+      <label>Etapa do processo</label>
+      <select id="me-etapa"></select>
+      <label>Status da candidatura</label>
+      <select id="me-status">
+        <option value="em_analise">Em análise</option>
+        <option value="em_andamento">Em andamento</option>
+        <option value="rejeitado">Reprovado</option>
+        <option value="contratado">Contratado</option>
+      </select>
+      <label>Motivo / Observação (opcional)</label>
+      <textarea id="me-motivo" placeholder="Comentário ou justificativa..."></textarea>
+      <div id="modal-etapa-erro" class="modal-erro"></div>
+      <div class="modal-actions">
+        <button type="button" onclick="fecharModalEtapa()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="salvarMudancaEtapa()">💾 Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="auth-helper.js?v=fase4_2026_07_28"></script>
+  <script src="empresa-auth-init.js?v=fase4_2026_07_28"></script>
+  <script src="empresa-auth-patch.js?v=fase4_2026_07_28"></script>
+
   <script>
     const API = 'https://recrutamento-api-v2.onrender.com';
-    const token = localStorage.getItem('empresa_token');
-    if (!token) window.location.href = 'login.html';
+    let vaga = null;
+    let candidatos = [];
+    let etapas = []; // array de strings (já normalizado)
+    let visualizacao = 'lista';
+    let podeEditar = false;
 
-    const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
-    document.getElementById('avatar').textContent = (usuario.nome || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
-    document.getElementById('user-nome').textContent = usuario.nome || '--';
-    document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
+    function iniciais(n) { return (n || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join(''); }
+    function sair() { if (confirm('Sair do portal?')) { localStorage.removeItem('empresa_token'); localStorage.removeItem('empresa_refresh'); localStorage.removeItem('empresa_usuario'); window.location.href = 'login.html'; } }
+    function toast(msg, tipo='') { const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1'; t.style.background = tipo === 'erro' ? '#C62828' : tipo === 'sucesso' ? '#2E7D32' : '#1A1A1A'; setTimeout(() => t.style.opacity = '0', 3000); }
 
-    function sair() {
-      if (confirm('Sair do portal?')) empresaSair();
+    function labelStatus(s) {
+      const map = { 'em_analise': 'Em análise', 'em_andamento': 'Em andamento', 'aprovado': 'Aprovado', 'reprovado': 'Reprovado', 'rejeitado': 'Reprovado', 'contratado': 'Contratado' };
+      return map[s] || s;
     }
+    function formatarData(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleDateString('pt-BR');
+    }
+    function normalizarEtapas(etapasRaw) {
+      if (!Array.isArray(etapasRaw)) return [];
+      return etapasRaw.map(e => typeof e === 'string' ? e : (e.nome || e.titulo || ''));
+    }
+
+    function render() {
+      const busca = (document.getElementById('cand-busca').value || '').toLowerCase();
+      const fEtapa = document.getElementById('filtro-etapa').value;
+      const fStatus = document.getElementById('filtro-status').value;
+      const filtrados = candidatos.filter(c => {
+        if (busca && !((c.nome || '').toLowerCase().includes(busca) || (c.email || '').toLowerCase().includes(busca))) return false;
+        if (fEtapa !== '' && String(c.etapa_atual) !== String(fEtapa)) return false;
+        if (fStatus && c.status !== fStatus) return false;
+        return true;
+      });
+
+      document.getElementById('stats-cands').innerHTML = `<strong>${filtrados.length}</strong> de ${candidatos.length} candidato${candidatos.length === 1 ? '' : 's'}`;
+
+      const container = document.getElementById('conteudo');
+      if (filtrados.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhum candidato encontrado</div>';
+        return;
+      }
+
+      if (visualizacao === 'lista') {
+        container.innerHTML = `<div class="tabela-wrap"><table>
+          <thead><tr>
+            <th>Candidato</th><th>Etapa</th><th>Status</th><th>Data</th><th style="text-align:right">Ações</th>
+          </tr></thead>
+          <tbody>${filtrados.map(c => {
+            const ini = iniciais(c.nome);
+            const etapaIdx = Number(c.etapa_atual || 0);
+            const etapaNome = etapas[etapaIdx] || `Etapa ${etapaIdx + 1}`;
+            const acoes = [];
+            acoes.push(`<a class="btn-acao" href="analisar.html?id=${c.id}">👁 Detalhes</a>`);
+            if (podeEditar && c.status !== 'contratado' && c.status !== 'rejeitado') {
+              acoes.push(`<button class="btn-acao primary" onclick="abrirModalEtapa(${c.id})">🔄 Mover</button>`);
+            }
+            return `<tr>
+              <td><div class="cand-cell">
+                <div class="cand-avatar">${ini}</div>
+                <div><div class="cand-nome">${c.nome || '—'}</div><div class="cand-email">${c.email || ''}</div></div>
+              </div></td>
+              <td><span class="etapa-pill">${etapaIdx + 1}. ${etapaNome}</span></td>
+              <td><span class="status-pill status-${c.status}">${labelStatus(c.status)}</span></td>
+              <td>${formatarData(c.criada_em)}</td>
+              <td style="text-align:right"><div class="acoes-cell">${acoes.join('')}</div></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table></div>`;
+      } else {
+        // Kanban: agrupa por etapa
+        const cols = etapas.map((nome, idx) => {
+          const items = filtrados.filter(c => Number(c.etapa_atual) === idx);
+          return `<div class="kanban-col">
+            <div class="kanban-col-titulo">${idx + 1}. ${nome}<span class="kanban-col-num">${items.length}</span></div>
+            ${items.map(c => {
+              const ini = iniciais(c.nome);
+              return `<div class="kanban-card" onclick="window.location='analisar.html?id=${c.id}'">
+                <div class="cand-cell" style="margin-bottom:6px;">
+                  <div class="cand-avatar">${ini}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div class="kanban-card-nome" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.nome || '—'}</div>
+                  </div>
+                </div>
+                <div class="kanban-card-email">${c.email || ''}</div>
+                <div class="kanban-card-meta">
+                  <span class="status-pill status-${c.status}">${labelStatus(c.status)}</span>
+                  <span>${formatarData(c.criada_em)}</span>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>`;
+        }).join('');
+        // Adiciona coluna para "Reprovado"/"Contratado" (fora do funil)
+        const finalizados = filtrados.filter(c => c.status === 'contratado' || c.status === 'rejeitado');
+        if (finalizados.length > 0) {
+          const colFinal = `<div class="kanban-col">
+            <div class="kanban-col-titulo">Finalizados<span class="kanban-col-num">${finalizados.length}</span></div>
+            ${finalizados.map(c => {
+              const ini = iniciais(c.nome);
+              return `<div class="kanban-card" onclick="window.location='analisar.html?id=${c.id}'">
+                <div class="cand-cell" style="margin-bottom:6px;">
+                  <div class="cand-avatar">${ini}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div class="kanban-card-nome" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.nome || '—'}</div>
+                  </div>
+                </div>
+                <div class="kanban-card-email">${c.email || ''}</div>
+                <div class="kanban-card-meta">
+                  <span class="status-pill status-${c.status}">${labelStatus(c.status)}</span>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>`;
+          container.innerHTML = `<div class="kanban-board">${cols}${colFinal}</div>`;
+        } else {
+          container.innerHTML = `<div class="kanban-board">${cols}</div>`;
+        }
+      }
+    }
+
+    function setVisualizacao(v) {
+      visualizacao = v;
+      document.getElementById('toggle-lista').classList.toggle('ativo', v === 'lista');
+      document.getElementById('toggle-kanban').classList.toggle('ativo', v === 'kanban');
+      render();
     }
 
     async function carregar() {
@@ -102,136 +341,95 @@
       const vagaId = params.get('vaga');
       if (!vagaId) {
         document.getElementById('titulo-vaga').textContent = 'Vaga não informada';
+        document.getElementById('conteudo').innerHTML = '<div class="empty">Acesse esta página a partir da lista de vagas.</div>';
         return;
       }
 
       try {
-        const r = await fetch(API + '/api/vagas/' + vagaId);
+        const r = await authFetch(API + '/api/empresa/vagas/' + vagaId);
         const data = await r.json();
-        if (r.ok && data.vaga) {
-          document.getElementById('titulo-vaga').textContent = data.vaga.titulo || 'Vaga';
-          document.getElementById('info-vaga').textContent = (data.vaga.cidade ? data.vaga.cidade + ' / ' : '') + (data.vaga.estado || '');
-        }
-      } catch (e) {}
+        if (!r.ok) { if (r.status === 401 || r.status === 403) { window.location.href = 'login.html'; return; } toast(data.erro || 'Erro', 'erro'); return; }
+        vaga = data.vaga || data;
+        document.getElementById('titulo-vaga').textContent = vaga.titulo || 'Vaga';
+        const local = [vaga.cidade, vaga.estado].filter(Boolean).join(' / ');
+        document.getElementById('info-vaga').textContent = `${local || '—'} • ${candidatos.length} candidatos`;
+        etapas = normalizarEtapas(vaga.etapas || []);
+        // Popula filtro de etapa
+        const fEtapa = document.getElementById('filtro-etapa');
+        fEtapa.innerHTML = '<option value="">Todas as etapas</option>' + etapas.map((nome, idx) => `<option value="${idx}">${idx + 1}. ${nome}</option>`).join('');
+        // Popula select do modal
+        const meEtapa = document.getElementById('me-etapa');
+        meEtapa.innerHTML = etapas.map((nome, idx) => `<option value="${idx}">${idx + 1}. ${nome}</option>`).join('');
+      } catch (e) { console.error(e); toast('Erro ao carregar vaga', 'erro'); return; }
 
       try {
-        const r = await fetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (r.status === 401 || r.status === 403) { sair(); return; }
+        const r = await authFetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos');
         const data = await r.json();
-        const cands = data.candidatos || [];
+        candidatos = data.candidatos || [];
+        document.getElementById('info-vaga').textContent = `${[vaga.cidade, vaga.estado].filter(Boolean).join(' / ') || '—'} • ${candidatos.length} candidato${candidatos.length === 1 ? '' : 's'}`;
+        render();
+      } catch (e) { console.error(e); toast('Erro ao listar candidatos', 'erro'); }
+    }
 
-        if (cands.length === 0) {
-          document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="5" class="empty">Nenhum candidato ainda.</td></tr>';
+    function abrirModalEtapa(id) {
+      const c = candidatos.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('me-id').value = id;
+      document.getElementById('me-etapa').value = String(c.etapa_atual || 0);
+      document.getElementById('me-status').value = c.status || 'em_andamento';
+      document.getElementById('me-motivo').value = '';
+      document.getElementById('modal-etapa-info').innerHTML = `<strong>${c.nome || '—'}</strong> <span style="color:#888;">(${c.email || ''})</span>`;
+      document.getElementById('modal-etapa-erro').classList.remove('visivel');
+      document.getElementById('modal-etapa').style.display = 'flex';
+    }
+    function fecharModalEtapa() { document.getElementById('modal-etapa').style.display = 'none'; }
+
+    async function salvarMudancaEtapa() {
+      const id = document.getElementById('me-id').value;
+      const etapa = Number(document.getElementById('me-etapa').value);
+      const status = document.getElementById('me-status').value;
+      const motivo = document.getElementById('me-motivo').value.trim();
+      try {
+        const r = await authFetch(API + '/api/empresa/candidaturas/' + id + '/etapa', {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ etapa_atual: etapa, status, motivo })
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          const err = document.getElementById('modal-etapa-erro');
+          err.textContent = data.erro || 'Erro ao atualizar';
+          err.classList.add('visivel');
           return;
         }
-
-        document.getElementById('cands-tbody').innerHTML = cands.map(c => {
-          const iniciais = (c.nome || '?').split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase();
-          const etapaNum = Number(c.etapa_atual || 1);
-          const etapas = Array.isArray(c.etapas) ? c.etapas : [];
-          const etapaNome = etapas[etapaNum - 1]
-            ? (typeof etapas[etapaNum - 1] === 'string' ? etapas[etapaNum - 1] : etapas[etapaNum - 1].nome)
-            : `Etapa ${etapaNum}`;
-          return `<tr>
-            <td>
-              <div class="cand-cell">
-                <div class="cand-avatar">${iniciais}</div>
-                <div>
-                  <div class="cand-nome">${c.nome || '—'}</div>
-                  <div class="cand-email">${c.email || ''}</div>
-                </div>
-              </div>
-            </td>
-            <td><span class="etapa">${etapaNum}. ${etapaNome}</span></td>
-            <td><span class="status-pill status-${c.status}">${labelStatus(c.status)}</span></td>
-            <td>${formatarData(c.criada_em)}</td>
-            <td>
-              <a class="btn-analisar" href="analisar.html?id=${c.id}">👁 Analisar</a>
-            </td>
-          </tr>`;
-        }).join('');
-      } catch (e) {
-        document.getElementById('cands-tbody').innerHTML = '<tr><td colspan="5" class="empty">Erro: ' + e.message + '</td></tr>';
-      }
+        toast('Candidatura atualizada', 'sucesso');
+        fecharModalEtapa();
+        carregar();
+      } catch (e) { console.error(e); toast('Erro de conexão', 'erro'); }
     }
 
-    function labelStatus(s) {
-      const map = {
-        'em_analise': 'Em análise',
-        'em_andamento': 'Em andamento',
-        'aprovado': 'Aprovado',
-        'reprovado': 'Reprovado',
-        'rejeitado': 'Reprovado',
-        'contratado': 'Contratado'
-      };
-      return map[s] || s;
-    }
+    document.getElementById('cand-busca').addEventListener('input', render);
+    document.getElementById('filtro-etapa').addEventListener('change', render);
+    document.getElementById('filtro-status').addEventListener('change', render);
 
-    function formatarData(iso) {
-      if (!iso) return '—';
-      const d = new Date(iso);
-      return d.toLocaleDateString('pt-BR');
-    }
-
-    carregar();
-  </script>
-<script src="auth-helper.js?v=fase3_2026_07_28"></script>
-  <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
-  <script src="empresa-auth-patch.js?v=fase3_2026_07_28"></script>
-
-  <script>
-    // ===== INIT COMUM FASE 3 — RBAC frontend =====
-    (async function() {
-      setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
-
-      // tenta refresh silencioso antes de qualquer coisa
+    (async function init() {
       try { await authInit(); } catch (e) { console.warn('refresh falhou', e); }
+      const tok = localStorage.getItem('empresa_token');
+      if (!tok) { window.location.href = 'login.html'; return; }
+      podeEditar = authRBAC.hasRole('admin_empresa', 'recrutador');
 
-      // guard: sem token -> vai pro login
-      if (!localStorage.getItem('empresa_token')) {
-        const path = window.location.pathname;
-        if (!path.endsWith('login.html')) {
-          window.location.href = 'login.html';
-          return;
-        }
+      const usuario = authRBAC.currentUser() || {};
+      const avatar = document.getElementById('avatar');
+      if (avatar && usuario.nome) avatar.textContent = iniciais(usuario.nome);
+      document.getElementById('user-nome').textContent = usuario.nome || '—';
+      document.getElementById('user-empresa').textContent = (usuario.role ? '[' + usuario.role + '] ' : '') + (usuario.empresa_nome || usuario.email || '—');
+
+      if (authRBAC.hasRole('admin_empresa')) {
+        const navEq = document.getElementById('nav-equipe');
+        if (navEq) navEq.style.display = '';
       }
 
-      // aguarda DOM
-      const onReady = () => {
-        // mostra link Equipe se for admin
-        if (authRBAC.hasRole('admin_empresa')) {
-          const navEq = document.getElementById('nav-equipe');
-          if (navEq) navEq.style.display = '';
-        }
-
-        // preenche sidebar com dados do JWT
-        const u = authRBAC.currentUser() || {};
-        const avatar = document.getElementById('avatar');
-        const nome = document.getElementById('user-nome');
-        const empresa = document.getElementById('user-empresa');
-        if (avatar && u.nome) avatar.textContent = u.nome.split(' ').filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join('');
-        if (nome) nome.textContent = u.nome || '—';
-        if (empresa) empresa.textContent = (u.role ? '[' + u.role + '] ' : '') + (u.empresa_nome || u.email || '—');
-
-        // guarda de role por pagina: se existe um atributo data-roles exigido,
-        // fazemos o guard UX (apenas visual; backend é autoridade)
-        const required = document.querySelector('main')?.dataset?.roles;
-        if (required && !authRBAC.hasRole.apply(null, required.split(','))) {
-          // redireciona com aviso
-          const main = document.querySelector('main');
-          if (main) main.innerHTML = '<div style="text-align:center; padding:80px 20px;"><h2 style="color:#999;">🚫 Acesso restrito</h2><p style="color:#666; margin-top:12px;">Você não tem permissão para acessar esta página.</p><p style="margin-top:24px;"><a href="index.html" style="color:#722F37;">← Voltar ao Dashboard</a></p></div>';
-        }
-      };
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', onReady);
-      } else {
-        onReady();
-      }
+      carregar();
     })();
   </script>
-<script src="chat-rh-flutuante.js?v=20260726b"></script>
 </body>
 </html>
