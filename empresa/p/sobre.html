@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#722F37">
+<title>Sobre · VagasIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f5f5f7; color: #1a1a1a; }
+  a { color: inherit; text-decoration: none; }
+
+  .topbar { background: #fff; border-bottom: 1px solid #eee; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .topbar .logo { font-weight: 800; color: #722F37; font-size: 20px; letter-spacing: -0.02em; }
+  .topbar .links a { color: #666; font-size: 14px; margin-left: 16px; }
+  .topbar .links a:hover { color: #722F37; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 32px 20px; }
+  .breadcrumb { font-size: 13px; color: #888; margin-bottom: 16px; }
+  .breadcrumb a { color: #722F37; }
+  .breadcrumb span { margin: 0 6px; color: #ccc; }
+
+  .hero {
+    background: #fff; border-radius: 12px; padding: 32px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .hero .logo-img {
+    width: 96px; height: 96px; border-radius: 16px; object-fit: cover;
+    background: #f5f5f7; margin: 0 auto 16px; display: block;
+  }
+  .hero .logo-placeholder {
+    width: 96px; height: 96px; border-radius: 16px;
+    background: #722F37; color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 800;
+    margin: 0 auto 16px;
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+  .hero .meta { color: #888; font-size: 14px; margin-bottom: 16px; }
+  .hero .vagas-btn {
+    display: inline-block; background: #722F37; color: #fff;
+    padding: 12px 28px; border-radius: 8px; font-weight: 700;
+    font-size: 14px;
+  }
+
+  .section {
+    background: #fff; border-radius: 12px; padding: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    margin-bottom: 16px;
+  }
+  .section h2 { margin: 0 0 12px; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+  .section p { line-height: 1.7; color: #333; margin: 0; white-space: pre-wrap; }
+  .section .item { padding: 12px; background: #f5f5f7; border-radius: 8px; margin-bottom: 8px; }
+  .section .item:last-child { margin-bottom: 0; }
+  .section .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; font-weight: 600; }
+  .section .value { font-size: 14px; color: #1a1a1a; font-weight: 600; word-break: break-word; }
+  .section .value a { color: #722F37; }
+
+  .empty { background: #fff; border-radius: 12px; padding: 24px; text-align: center; color: #888; }
+  .error-box { background: #fee; border: 1px solid #fcc; color: #c33; padding: 24px; border-radius: 12px; text-align: center; }
+
+  .footer { background: #1a1a1a; color: #aaa; padding: 32px 20px; text-align: center; font-size: 13px; margin-top: 48px; }
+  .footer .brand { color: #fff; font-weight: 700; margin-bottom: 4px; }
+  .footer a { color: #722F37; }
+
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #eee; border-top-color: #722F37; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading { text-align: center; padding: 64px 20px; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 24px 20px; }
+    .hero h1 { font-size: 22px; }
+    .topbar { padding: 12px 16px; }
+    .topbar .links a { font-size: 13px; margin-left: 12px; }
+  }
+</style>
+</head>
+<body>
+  <div id="app">
+    <div class="loading">
+      <div class="spinner"></div>
+      <div style="margin-top: 12px; color: #888;">Carregando...</div>
+    </div>
+  </div>
+
+<script>
+const API = 'https://recrutamento-api-v2.onrender.com';
+const params = new URLSearchParams(location.search);
+const slug = (params.get('slug') || '').toLowerCase().trim();
+
+if (!slug) {
+  document.getElementById('app').innerHTML = `
+    <div class="container">
+      <div class="error-box"><strong>Link inválido</strong><p>Esta página precisa de um identificador de empresa.</p></div>
+    </div>
+  `;
+  throw new Error('slug ausente');
+}
+
+async function carregar() {
+  try {
+    const r = await fetch(`${API}/api/public/empresa/${encodeURIComponent(slug)}`);
+    if (r.status === 404) { render404(); return; }
+    if (!r.ok) throw new Error('status ' + r.status);
+    const data = await r.json();
+    render(data);
+  } catch (e) {
+    console.error(e);
+    renderError('Não foi possível carregar as informações desta empresa.');
+  }
+}
+
+function render404() {
+  document.title = 'Empresa não encontrada · VagasIO';
+  document.getElementById('app').innerHTML = `
+    <div class="container" style="padding-top:64px;">
+      <div class="error-box">
+        <h2 style="margin:0 0 12px;font-size:22px;">Empresa não encontrada</h2>
+        <p>O link acessado pode estar desatualizado.</p>
+        <p><a href="index.html?slug=${encodeURIComponent(slug)}" style="color:#722F37;font-weight:600;">← Voltar</a></p>
+      </div>
+    </div>
+  `;
+}
+
+function renderError(msg) {
+  document.getElementById('app').innerHTML = `
+    <div class="container" style="padding-top:64px;">
+      <div class="error-box">
+        <h2 style="margin:0 0 12px;font-size:22px;">Algo deu errado</h2>
+        <p>${escapeHtml(msg)}</p>
+        <p><a href="javascript:location.reload()" style="color:#722F37;font-weight:600;">Tentar novamente →</a></p>
+      </div>
+    </div>
+  `;
+}
+
+function render(data) {
+  const e = data.empresa;
+  document.title = `Sobre · ${e.nome} · VagasIO`;
+
+  const logo = e.logo_url
+    ? `<img class="logo-img" src="${escapeAttr(e.logo_url)}" alt="${escapeAttr(e.nome)}" onerror="this.outerHTML='<div class=&quot;logo-placeholder&quot;>${escapeHtml(e.nome.charAt(0).toUpperCase())}</div>'">`
+    : `<div class="logo-placeholder">${escapeHtml(e.nome.charAt(0).toUpperCase())}</div>`;
+
+  const cidade = [e.cidade, e.estado].filter(Boolean).join(' / ');
+  const meta = [cidade, e.setor, e.tamanho].filter(Boolean).join(' • ') || 'Equipe em crescimento';
+
+  // Cards de informação
+  const infoItems = [];
+  if (cidade) infoItems.push({ l: 'Localização', v: cidade });
+  if (e.setor) infoItems.push({ l: 'Setor', v: e.setor });
+  if (e.tamanho) infoItems.push({ l: 'Porte', v: e.tamanho });
+  if (e.site) infoItems.push({ l: 'Site', v: `<a href="${escapeAttr(e.site)}" target="_blank" rel="noopener noreferrer">${escapeHtml(e.site)}</a>`, isHtml: true });
+  const infoSection = infoItems.length ? `
+    <div class="section">
+      <h2>Informações</h2>
+      ${infoItems.map(i => `<div class="item"><div class="label">${escapeHtml(i.l)}</div><div class="value">${i.isHtml ? i.v : escapeHtml(i.v)}</div></div>`).join('')}
+    </div>
+  ` : '';
+
+  const descSection = e.descricao ? `
+    <div class="section">
+      <h2>Sobre a empresa</h2>
+      <p>${escapeHtml(e.descricao)}</p>
+    </div>
+  ` : '';
+
+  document.getElementById('app').innerHTML = `
+    <div class="topbar">
+      <a href="index.html?slug=${encodeURIComponent(slug)}" class="logo">VagasIO</a>
+      <div class="links">
+        <a href="index.html?slug=${encodeURIComponent(slug)}">Início</a>
+        <a href="vagas.html?slug=${encodeURIComponent(slug)}">Vagas</a>
+        <a href="/candidato/" style="color:#722F37;font-weight:600;">Sou candidato →</a>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html?slug=${encodeURIComponent(slug)}">${escapeHtml(e.nome)}</a>
+        <span>›</span>
+        Sobre
+      </div>
+
+      <div class="hero" style="background:linear-gradient(135deg, #fff 0%, #fafafa 100%); border: 1px solid ${e.cor_destaque || '#722F37'}33;">
+        ${logo}
+        <h1>${escapeHtml(e.nome)}</h1>
+        <div class="meta">${escapeHtml(meta)}</div>
+        <a href="vagas.html?slug=${encodeURIComponent(slug)}" class="vagas-btn">
+          📢 ${data.vagas_publicadas === 1 ? '1 vaga aberta' : `${data.vagas_publicadas} vagas abertas`}
+        </a>
+      </div>
+
+      ${descSection}
+      ${infoSection}
+
+      ${(!descSection && !infoSection) ? '<div class="empty">Esta empresa ainda não preencheu informações públicas.</div>' : ''}
+    </div>
+
+    <footer class="footer">
+      <div class="brand">VagasIO</div>
+      <div>Plataforma de recrutamento · <a href="/candidato/">Sou candidato →</a></div>
+    </footer>
+  `;
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+carregar();
+</script>
+</body>
+</html>
