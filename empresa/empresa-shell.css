@@ -6,6 +6,21 @@
   --shell-dourado: #D4A155;
   --shell-borda: #E5E5E5;
   --shell-bg: #FAFAFA;
+  /* Paleta pública única do Portal Empresa */
+  --vinho: #722F37 !important;
+  --vinho-escuro: #4A1F25 !important;
+  --vinho-claro: #8B3A45 !important;
+  --dourado: #D4A155 !important;
+  --borda: #E5E5E5 !important;
+  --cinza: #F5F5F5 !important;
+  --cinza-medio: #666 !important;
+  --preto: #1A1A1A !important;
+}
+body.empresa-shell-existing,
+body.empresa-shell-fixed {
+  font-family: 'Inter', Arial, sans-serif !important;
+  background: var(--shell-bg) !important;
+  color: #1A1A1A;
 }
 
 /* Sidebar única */
