@@ -28,7 +28,10 @@
     ['equipe', 'usuarios.html', '👥 Equipe']
   ];
 
-  function buildSidebar() {
+  function buildSidebar(fixedPage) {
+    const ids = fixedPage
+      ? { avatar: 'shell-avatar', nome: 'shell-user-nome', empresa: 'shell-user-empresa', role: 'shell-user-role' }
+      : { avatar: 'avatar', nome: 'user-nome', empresa: 'user-empresa', role: 'user-role' };
     const aside = document.createElement('aside');
     aside.className = 'empresa-shell-sidebar';
     aside.setAttribute('aria-label', 'Navegação do Portal Empresa');
@@ -36,13 +39,13 @@
       <button class="empresa-shell-close" type="button" aria-label="Fechar menu">✕</button>
       <div class="empresa-shell-logo"><h1>VagasIO</h1><small>Portal da Empresa</small></div>
       <nav class="empresa-shell-nav">
-        ${links.map(([key, href, label]) => `<a class="nav-item${active === key ? ' ativo' : ''}${key === 'equipe' ? ' nav-equipe' : ''}" data-shell-key="${key}" href="${href}">${label}</a>`).join('')}
+        ${links.map(([key, href, label]) => `<a class="nav-item${active === key ? ' ativo' : ''}${key === 'equipe' ? ' nav-equipe' : ''}"${key === 'equipe' ? ' id="nav-equipe"' : ''} data-shell-key="${key}" href="${href}">${label}</a>`).join('')}
       </nav>
       <div class="nav-divisor">Links</div>
       <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
       <div class="empresa-shell-user">
-        <div class="empresa-shell-avatar" id="shell-avatar">--</div>
-        <div class="empresa-shell-user-info"><div class="nome" id="shell-user-nome">--</div><div class="empresa" id="shell-user-empresa">--</div></div>
+        <div class="empresa-shell-avatar" id="${ids.avatar}">--</div>
+        <div class="empresa-shell-user-info"><div class="nome" id="${ids.nome}">--</div><div class="empresa" id="${ids.empresa}">--</div><span id="${ids.role}" style="display:none"></span></div>
         <button class="empresa-shell-logout" type="button" title="Sair">↪</button>
       </div>`;
 
@@ -75,12 +78,15 @@
     } catch (_) {}
     const nome = user.nome || user.name || 'Usuário';
     const initials = nome.split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase() || 'U';
-    const avatar = document.getElementById('shell-avatar');
-    const nomeEl = document.getElementById('shell-user-nome');
-    const empresaEl = document.getElementById('shell-user-empresa');
+    const fixed = document.body.classList.contains('empresa-shell-fixed');
+    const avatar = document.getElementById(fixed ? 'shell-avatar' : 'avatar');
+    const nomeEl = document.getElementById(fixed ? 'shell-user-nome' : 'user-nome');
+    const empresaEl = document.getElementById(fixed ? 'shell-user-empresa' : 'user-empresa');
+    const roleEl = document.getElementById(fixed ? 'shell-user-role' : 'user-role');
     if (avatar) avatar.textContent = initials;
     if (nomeEl) nomeEl.textContent = nome;
     if (empresaEl) empresaEl.textContent = user.empresa_nome || user.email || 'Portal Empresa';
+    if (roleEl) roleEl.textContent = user.role || '';
     const canTeam = window.authRBAC && authRBAC.hasRole && authRBAC.hasRole('admin_empresa');
     const team = document.querySelector('[data-shell-key="equipe"]');
     if (team) team.style.display = canTeam ? '' : 'none';
@@ -103,14 +109,14 @@
     });
 
     if (aside) {
-      const canonical = buildSidebar();
+      const canonical = buildSidebar(false);
       aside.replaceWith(canonical);
       aside = canonical;
       const app = document.querySelector('.app');
       if (app) app.classList.add('empresa-shell-existing');
       document.body.classList.add('empresa-shell-existing');
     } else {
-      aside = buildSidebar();
+      aside = buildSidebar(true);
       const content = document.createElement('div');
       content.className = 'empresa-shell-fixed-content';
       [...document.body.children].forEach(el => {
