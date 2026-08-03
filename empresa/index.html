@@ -199,7 +199,7 @@
       <div class="empresa-shell-user aside-user">
         <div class="empresa-shell-avatar aside-user-avatar" id="avatar">--</div>
         <div class="empresa-shell-user-info aside-user-info"><div class="nome" id="user-nome">--</div><div class="empresa" id="user-empresa">--</div><span id="user-role" style="display:none"></span></div>
-        <button class="empresa-shell-logout btn-logout" type="button" onclick="if (typeof empresaSair === 'function') empresaSair(); else { localStorage.clear(); location.href='login.html'; }" title="Sair">↪</button>
+        <button class="empresa-shell-logout btn-logout" type="button" onclick="if (typeof empresaSair === 'function') empresaSair(); else { localStorage.removeItem('empresa_token'); localStorage.removeItem('empresa_refresh'); localStorage.removeItem('empresa_usuario'); location.href='login.html'; }" title="Sair">↪</button>
       </div>
     </aside>
 
@@ -255,7 +255,7 @@
 
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
-    const token = localStorage.getItem('empresa_token');
+    let token = localStorage.getItem('empresa_token');
     if (!token && !localStorage.getItem('empresa_refresh')) window.location.href = 'login.html';
 
     function iniciais(nome) {
@@ -491,6 +491,7 @@
         }
 
         // preenche sidebar com dados do JWT
+        token = localStorage.getItem('empresa_token') || '';
         const u = authRBAC.currentUser() || {};
         const avatar = document.getElementById('avatar');
         const nome = document.getElementById('user-nome');
@@ -519,6 +520,6 @@
     })();
   </script>
 <script src="chat-rh-flutuante.js?v=20260726b"></script>
-<script src="empresa-shell.js?v=20260803shell3"></script>
+<script src="empresa-shell.js?v=20260803shell4"></script>
 </body>
 </html>
