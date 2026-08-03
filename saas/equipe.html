@@ -1,162 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Equipe · SaaS · Vagas.io</title>
-  <!-- CSS é inline (<style>) neste arquivo; link externo removido -->
-  <style>
-    :root { --vinho: #722F37; --dourado: #C9A961; --bg: #f7f5f2; --card: #ffffff; --texto: #1a1a1a; --borda: #e5e0d8; }
-    body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--texto); margin: 0; }
-    .app { display: flex; min-height: 100vh; }
-    aside { width: 260px; background: var(--vinho); color: #fff; padding: 20px; flex-shrink: 0; display: flex; flex-direction: column; }
-    .aside-logo { padding: 0 8px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
-    .aside-logo h1 { font-size: 18px; font-weight: 800; margin: 0; color: #fff; }
-    .aside-logo small { color: rgba(255,255,255,0.6); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
-    .nav-item { display: block; padding: 12px; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; cursor: pointer; margin-bottom: 4px; }
-    .nav-item:hover, .nav-item.ativo { background: rgba(255,255,255,0.1); color: #fff; }
-    .aside-user { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
-    .aside-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-    .aside-user-info { flex: 1; min-width: 0; }
-    .aside-user-info .nome { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .aside-user-info .empresa { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .btn-logout { background: rgba(255,255,255,0.1); color: #fff; border: 0; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none; }
-    .btn-logout:hover { background: rgba(255,255,255,0.2); }
-    main { flex: 1; padding: 32px; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-    .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--borda); }
-    .btn { padding: 10px 20px; border-radius: 8px; border: 0; cursor: pointer; font-weight: bold; }
-    .btn-primary { background: var(--vinho); color: #fff; }
-  </style>
-  <script src="../candidato/chat-uploader.js"></script>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Usuários e equipe | VagasIO</title>
+  <link rel="stylesheet" href="saas-shell.css?v=20260803-1">
 </head>
-<body>
-  <div class="app">
-    <aside>
-      <div class="aside-logo">
-        <h1>Admin</h1>
-        <small>VAGAS.IO</small>
-      </div>
-      <a class="nav-item" href="index.html">📊 Dashboard</a>
-      <a class="nav-item" href="empresas.html">🏢 Empresas</a>
-      <a class="nav-item" href="analytics.html">📊 Analytics</a>
-      <a class="nav-item" href="auditoria.html">🔍 Auditoria</a>
-      <a class="nav-item ativo" href="equipe.html">👥 Equipe</a>
-      <div class="aside-user">
-        <div class="aside-user-avatar" id="aside-user-avatar">--</div>
-        <div class="aside-user-info">
-          <div class="nome" id="aside-user-nome">--</div>
-          <div class="empresa" id="aside-user-empresa">--</div>
-        </div>
-        <a href="index.html" class="btn-logout" title="Sair">↪</a>
-      </div>
-    </aside>
-      <div class="aside-user">
-        <div class="aside-user-avatar" id="aside-user-avatar">--</div>
-        <div class="aside-user-info">
-          <div class="nome" id="aside-user-nome">--</div>
-          <div class="empresa" id="aside-user-empresa">--</div>
-        </div>
-        <a href="index.html" class="btn-logout" title="Sair">↪</a>
-      </div>
-    </aside>
-    <main>
-      <div class="header">
-        <h1>👥 Gestão de Equipe</h1>
-        <button class="btn btn-primary" onclick="alert('Funcionalidade em manutenção para ajustes multi-usuário')">+ Novo Membro</button>
-      </div>
-      <div class="grid" id="lista">
-        <div class="card">
-          <h3>Carregando membros...</h3>
-        </div>
-      </div>
-    </main>
+<body data-page="equipe">
+  <div class="saas-app">
+    <aside class="sidebar" id="saas-sidebar"><div class="brand"><div class="brand-mark">V</div><div><div class="brand-name">Vagas<span>IO</span></div><span class="brand-sub">Controle global</span></div></div><div class="nav-label">Visão geral</div><a class="nav-link" data-nav="dashboard" href="dashboard.html"><span class="nav-icon">▦</span>Dashboard</a><div class="nav-label">Operação</div><a class="nav-link" data-nav="empresas" href="empresas.html"><span class="nav-icon">▣</span>Empresas</a><a class="nav-link" data-nav="equipe" href="equipe.html"><span class="nav-icon">♙</span>Usuários e equipe</a><a class="nav-link" data-nav="analytics" href="analytics.html"><span class="nav-icon">◔</span>Analytics</a><a class="nav-link" data-nav="auditoria" href="auditoria.html"><span class="nav-icon">⌕</span>Auditoria</a><div class="sidebar-footer"><div class="sidebar-user"><div class="user-avatar" data-user-avatar>A</div><div class="user-info"><div class="user-name" data-user-name>Administrador</div><div class="user-role" data-user-role>Administrador global</div></div><button class="logout-link" data-action="logout" title="Sair">↪</button></div></div></aside>
+    <section class="main"><header class="topbar"><div class="topbar-left"><button class="mobile-menu" id="mobile-menu" aria-label="Abrir menu">☰</button><span class="breadcrumb">Controle global / Usuários e equipe</span></div><div class="topbar-right"><div class="topbar-user"><div class="user-avatar" data-user-avatar>A</div><div><div class="user-name" data-user-name>Administrador</div><div class="user-role" data-user-role>Administrador global</div></div></div></div></header>
+      <main class="page"><div class="page-header"><div><h1 class="page-title">Usuários e equipe</h1><p class="page-description">Centralize a equipe interna e os acessos das empresas clientes.</p></div><div class="page-actions"><button class="btn btn-secondary" id="btn-nova-empresa">+ Nova empresa</button><button class="btn btn-primary" id="btn-novo-usuario">+ Novo usuário</button></div></div>
+        <div class="tabs"><button class="tab active" data-tab="internos">Equipe interna</button><button class="tab" data-tab="empresa-users">Usuários das empresas</button><button class="tab" data-tab="empresas">Empresas</button></div>
+        <div class="toolbar"><input class="input" id="busca" placeholder="Buscar por nome, e-mail ou empresa…"><select class="select" id="filtro-status"><option value="">Todos os status</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select><button class="btn btn-light" id="btn-recarregar">↻ Atualizar</button></div>
+        <section class="panel"><div class="panel-head"><div><h2 class="panel-title" id="titulo-tabela">Equipe interna</h2><div class="panel-subtitle" id="sub-tabela">Recrutadores e administradores que operam a plataforma.</div></div><span class="badge badge-neutral" id="contador">—</span></div><div class="table-wrap"><table class="data-table"><thead id="thead"></thead><tbody id="tbody"><tr><td class="loading" colspan="6">Carregando dados…</td></tr></tbody></table></div></section>
+      </main>
+    </section>
   </div>
+  <div class="modal-backdrop" id="modal-usuario"><div class="modal"><div class="modal-head"><div><h2 class="modal-title">Novo usuário</h2><div class="panel-subtitle">Crie um acesso administrativo ou vinculado a uma empresa.</div></div><button class="modal-close" data-close="modal-usuario">×</button></div><form class="modal-body" id="form-usuario"><div class="form-grid"><div class="form-field full"><label for="tipo-usuario">Tipo de acesso</label><select id="tipo-usuario" required><option value="empresa">Usuário de empresa</option><option value="recrutador">Equipe interna / recrutador</option></select></div><div class="form-field full" id="campo-empresa"><label for="usuario-empresa">Empresa</label><select id="usuario-empresa" required><option value="">Selecione a empresa</option></select></div><div class="form-field"><label for="usuario-nome">Nome completo</label><input id="usuario-nome" required></div><div class="form-field"><label for="usuario-email">E-mail</label><input id="usuario-email" type="email" required></div><div class="form-field"><label for="usuario-senha">Senha provisória</label><input id="usuario-senha" type="password" minlength="8" required></div><div class="form-field"><label for="usuario-cargo">Cargo</label><input id="usuario-cargo" placeholder="Ex.: Recrutador"></div></div><div class="modal-foot"><button type="button" class="btn btn-light" data-close="modal-usuario">Cancelar</button><button type="submit" class="btn btn-primary" id="salvar-usuario">Criar usuário</button></div></form></div></div>
+  <div class="modal-backdrop" id="modal-empresa"><div class="modal"><div class="modal-head"><div><h2 class="modal-title">Nova empresa</h2><div class="panel-subtitle">Cadastre a empresa e, se quiser, seu primeiro administrador.</div></div><button class="modal-close" data-close="modal-empresa">×</button></div><form class="modal-body" id="form-empresa"><div class="form-grid"><div class="form-field full"><label for="emp-nome">Nome da empresa</label><input id="emp-nome" required></div><div class="form-field"><label for="emp-cnpj">CNPJ</label><input id="emp-cnpj"></div><div class="form-field"><label for="emp-telefone">Telefone</label><input id="emp-telefone"></div><div class="form-field full"><label for="emp-email">E-mail principal</label><input id="emp-email" type="email"></div><div class="form-field full"><label><input type="checkbox" id="emp-criar-admin"> Criar administrador principal agora</label></div><div class="form-field admin-extra"><label for="emp-admin-nome">Nome do administrador</label><input id="emp-admin-nome"></div><div class="form-field admin-extra"><label for="emp-admin-email">E-mail do administrador</label><input id="emp-admin-email" type="email"></div><div class="form-field admin-extra"><label for="emp-admin-senha">Senha provisória</label><input id="emp-admin-senha" type="password" minlength="8"></div><div class="form-field admin-extra"><label for="emp-admin-cargo">Cargo</label><input id="emp-admin-cargo" value="Administrador"></div></div><div class="modal-foot"><button type="button" class="btn btn-light" data-close="modal-empresa">Cancelar</button><button type="submit" class="btn btn-secondary" id="salvar-empresa">Criar empresa</button></div></form></div></div>
+  <script src="saas-shell.js?v=20260803-1"></script>
   <script>
-    const token = localStorage.getItem('admin_token');
-    if (!token) window.location.href = 'index.html';
-
-    function carregarUsuarioSidebar() {
-      try {
-        if (!token) return;
-        const parts = token.split('.');
-        if (parts.length < 2) return;
-        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-        const nome = payload.nome || 'Admin';
-        const iniciais = nome.split(/\s+/).map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
-        const elAvatar = document.getElementById('aside-user-avatar');
-        const elNome = document.getElementById('aside-user-nome');
-        const elEmpresa = document.getElementById('aside-user-empresa');
-        if (elAvatar) elAvatar.textContent = iniciais || 'A';
-        if (elNome) elNome.textContent = nome;
-        if (elEmpresa) elEmpresa.textContent = payload.email || '';
-      } catch (e) { /* silencioso */ }
+    const $ = id => document.getElementById(id); let dados = { recrutadores: [], empresas: [], empresaUsuarios: [] }; let aba = 'internos';
+    const modal = id => $(id).classList.add('open'); const fechar = id => $(id).classList.remove('open');
+    document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => fechar(b.dataset.close)));
+    document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('[data-tab]').forEach(x => x.classList.remove('active')); b.classList.add('active'); aba = b.dataset.tab; render(); }));
+    $('busca').addEventListener('input', render); $('filtro-status').addEventListener('change', render); $('btn-recarregar').addEventListener('click', carregar);
+    $('btn-novo-usuario').addEventListener('click', () => { preencherEmpresas(); modal('modal-usuario'); }); $('btn-nova-empresa').addEventListener('click', () => modal('modal-empresa'));
+    $('tipo-usuario').addEventListener('change', () => { $('campo-empresa').style.display = $('tipo-usuario').value === 'empresa' ? '' : 'none'; $('usuario-empresa').required = $('tipo-usuario').value === 'empresa'; });
+    $('emp-criar-admin').addEventListener('change', e => document.querySelectorAll('.admin-extra').forEach(x => x.style.display = e.target.checked ? '' : 'none'));
+    document.querySelectorAll('.admin-extra').forEach(x => x.style.display = 'none');
+    function filtered(list) { const q = $('busca').value.trim().toLowerCase(); const st = $('filtro-status').value; return list.filter(x => { const text = JSON.stringify(x).toLowerCase(); if (q && !text.includes(q)) return false; if (st === 'ativo' && !x.ativo) return false; if (st === 'inativo' && x.ativo) return false; return true; }); }
+    function render() {
+      const head = $('thead'), body = $('tbody'); let list = [];
+      if (aba === 'internos') { $('titulo-tabela').textContent = 'Equipe interna'; $('sub-tabela').textContent = 'Recrutadores e administradores que operam a plataforma.'; head.innerHTML = '<tr><th>Usuário</th><th>Perfil</th><th>Status</th><th>Criado em</th><th>Ações</th></tr>'; list = filtered(dados.recrutadores).map(u => ({...u, perfil:'Recrutador', kind:'recrutador'})); }
+      if (aba === 'empresa-users') { $('titulo-tabela').textContent = 'Usuários das empresas'; $('sub-tabela').textContent = 'Acessos vinculados a cada empresa cliente.'; head.innerHTML = '<tr><th>Usuário</th><th>Empresa</th><th>Cargo</th><th>Status</th><th>Ações</th></tr>'; list = filtered(dados.empresaUsuarios).map(u => ({...u, empresa: (dados.empresas.find(e => e.id === u.empresa_id) || {}).nome || 'Empresa não encontrada', kind:'empresa'})); }
+      if (aba === 'empresas') { $('titulo-tabela').textContent = 'Empresas cadastradas'; $('sub-tabela').textContent = 'Resumo de contas e acessos da plataforma.'; head.innerHTML = '<tr><th>Empresa</th><th>Plano</th><th>Usuários</th><th>Vagas</th><th>Status</th><th>Ações</th></tr>'; list = filtered(dados.empresas).map(e => ({...e, kind:'empresa-list'})); }
+      $('contador').textContent = list.length + ' registro(s)';
+      if (!list.length) { body.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⌕</div>Nenhum registro encontrado.</div></td></tr>'; return; }
+      body.innerHTML = list.map(u => {
+        const name = SaaS.escapeHtml(u.nome || 'Sem nome'), email = SaaS.escapeHtml(u.email || u.email_principal || '—');
+        if (u.kind === 'recrutador') return `<tr><td><div class="primary-text">${name}</div><div class="secondary-text">${email}</div></td><td><span class="badge badge-wine">Recrutador</span></td><td>${u.ativo ? '<span class="badge badge-success">Ativo</span>' : '<span class="badge badge-danger">Inativo</span>'}</td><td>${u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—'}</td><td><button class="btn btn-light btn-icon" data-toggle-recrutador="${u.id}" data-ativo="${!u.ativo}" title="Alterar status">↻</button></td></tr>`;
+        if (u.kind === 'empresa') return `<tr><td><div class="primary-text">${name}</div><div class="secondary-text">${email}</div></td><td>${SaaS.escapeHtml(u.empresa)}</td><td>${SaaS.escapeHtml(u.cargo || '—')}</td><td>${u.ativo ? '<span class="badge badge-success">Ativo</span>' : '<span class="badge badge-danger">Inativo</span>'}</td><td><button class="btn btn-light btn-icon" data-toggle-usuario="${u.id}" data-ativo="${!u.ativo}" title="Alterar status">↻</button></td></tr>`;
+        return `<tr><td><div class="primary-text">${name}</div><div class="secondary-text">${SaaS.escapeHtml(u.slug ? '/'+u.slug : u.email_principal || '—')}</div></td><td>${SaaS.escapeHtml(u.plano_nome || u.plano || '—')}</td><td>${u.qtd_usuarios ?? 0}</td><td>${u.qtd_vagas ?? 0}</td><td>${u.ativo ? '<span class="badge badge-success">Ativa</span>' : '<span class="badge badge-danger">Inativa</span>'}</td><td><button class="btn btn-light btn-icon" data-toggle-empresa="${u.id}" data-ativo="${!u.ativo}" title="Alterar status">↻</button></td></tr>`;
+      }).join('');
+      body.querySelectorAll('[data-toggle-recrutador]').forEach(b => b.addEventListener('click', () => toggle('/api/admin/recrutadores/'+b.dataset.toggleRecrutador, {ativo:b.dataset.ativo === 'true'})));
+      body.querySelectorAll('[data-toggle-usuario]').forEach(b => b.addEventListener('click', () => toggle('/api/admin/empresa-usuarios/'+b.dataset.toggleUsuario, {ativo:b.dataset.ativo === 'true'})));
+      body.querySelectorAll('[data-toggle-empresa]').forEach(b => b.addEventListener('click', () => toggle('/api/saas/empresas/'+b.dataset.toggleEmpresa, {ativo:b.dataset.ativo === 'true'})));
     }
-
-    async function carregar() {
-      try {
-        const r = await fetch('https://recrutamento-api-novo.onrender.com/api/admin/equipe', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await r.json();
-        const lista = document.getElementById('lista');
-        const recs = data.recrutadores || [];
-        const emps = data.empresas || [];
-        const usrs = data.empresaUsuarios || [];
-        if (recs.length === 0 && emps.length === 0 && usrs.length === 0) {
-          lista.innerHTML = '<div class="card">Nenhum membro encontrado.</div>';
-          return;
-        }
-        let html = '';
-        if (recs.length) {
-          html += '<h2 style="margin-top:0;">Recrutadores</h2><div class="grid" style="margin-bottom:32px;">';
-          html += recs.map(u => `
-            <div class="card">
-              <div style="font-weight:bold; font-size:18px;">${u.nome}</div>
-              <div style="color:#666;">${u.email}</div>
-              <div style="margin-top:10px;"><span style="background:#dcfce7; color:#16a34a; padding:4px 8px; border-radius:6px; font-size:12px;">Recrutador</span></div>
-            </div>
-          `).join('');
-          html += '</div>';
-        }
-        if (usrs.length) {
-          html += '<h2>Usuários das empresas</h2><div class="grid" style="margin-bottom:32px;">';
-          html += usrs.map(u => {
-            const emp = emps.find(e => e.id === u.empresa_id);
-            return `<div class="card">
-              <div style="font-weight:bold; font-size:18px;">${u.nome}</div>
-              <div style="color:#666;">${u.email}</div>
-              <div style="color:#888; font-size:13px; margin-top:4px;">${u.cargo || '—'}</div>
-              <div style="color:#888; font-size:12px; margin-top:6px;">🏢 ${emp ? emp.nome : '—'}</div>
-            </div>`;
-          }).join('');
-          html += '</div>';
-        }
-        if (emps.length) {
-          html += '<h2>Empresas cadastradas</h2><div class="grid">';
-          html += emps.map(e => `
-            <div class="card">
-              <div style="font-weight:bold; font-size:18px;">${e.nome}</div>
-              <div style="color:#666;">${e.email || '—'}</div>
-              <div style="color:#888; font-size:13px; margin-top:4px;">CNPJ: ${e.cnpj || '—'}</div>
-              <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
-                <span style="background:#e0e7ff; color:#4338ca; padding:4px 8px; border-radius:6px; font-size:12px;">📋 ${e.qtd_vagas} vaga(s)</span>
-                <span style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:6px; font-size:12px;">👥 ${e.qtd_usuarios} usuário(s)</span>
-              </div>
-            </div>
-          `).join('');
-          html += '</div>';
-        }
-        lista.innerHTML = html;
-      } catch (e) {
-        document.getElementById('lista').innerHTML = '<div class="card" style="color:red;">Erro ao carregar equipe. Verifique sua conexão.</div>';
-      }
-    }
+    async function toggle(path, body) { try { const r = await SaaS.authFetch(path,{method:'PUT',body:JSON.stringify(body)}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||'Não foi possível atualizar.'); SaaS.toast('Status atualizado.','success'); carregar(); } catch(e){SaaS.toast(e.message,'error');} }
+    function preencherEmpresas(){ $('usuario-empresa').innerHTML = '<option value="">Selecione a empresa</option>' + dados.empresas.filter(e=>e.ativo).map(e=>`<option value="${e.id}">${SaaS.escapeHtml(e.nome)}</option>`).join(''); }
+    async function carregar(){ try { const r=await SaaS.authFetch('/api/admin/equipe'); const d=await r.json(); dados={recrutadores:d.recrutadores||[],empresas:d.empresas||[],empresaUsuarios:d.empresaUsuarios||[]}; render(); } catch(e){ $('tbody').innerHTML='<tr><td colspan="6"><div class="error-state">Não foi possível carregar os usuários.</div></td></tr>'; SaaS.toast(e.message,'error'); } }
+    $('form-usuario').addEventListener('submit', async e => { e.preventDefault(); const tipo=$('tipo-usuario').value; const body={nome:$('usuario-nome').value.trim(),email:$('usuario-email').value.trim(),senha:$('usuario-senha').value,cargo:$('usuario-cargo').value.trim()}; const path=tipo==='empresa'?'/api/admin/empresas/'+$('usuario-empresa').value+'/usuarios':'/api/admin/recrutadores'; if(tipo==='empresa'&&!$('usuario-empresa').value){SaaS.toast('Selecione a empresa.','error');return;} try { const r=await SaaS.authFetch(path,{method:'POST',body:JSON.stringify(body)}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||'Não foi possível criar o usuário.'); fechar('modal-usuario'); e.target.reset(); $('tipo-usuario').dispatchEvent(new Event('change')); SaaS.toast('Usuário criado com sucesso.','success'); carregar(); } catch(err){SaaS.toast(err.message,'error');} });
+    $('form-empresa').addEventListener('submit', async e => { e.preventDefault(); const criar=$('emp-criar-admin').checked; const body={nome:$('emp-nome').value.trim(),cnpj:$('emp-cnpj').value.trim()||null,telefone:$('emp-telefone').value.trim()||null,email_principal:$('emp-email').value.trim()||null}; if(criar) body.usuario={nome:$('emp-admin-nome').value.trim(),email:$('emp-admin-email').value.trim(),senha:$('emp-admin-senha').value,cargo:$('emp-admin-cargo').value.trim()||'Administrador',role:'admin_empresa'}; try { const r=await SaaS.authFetch('/api/admin/empresas',{method:'POST',body:JSON.stringify(body)}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||'Não foi possível criar a empresa.'); fechar('modal-empresa'); e.target.reset(); document.querySelectorAll('.admin-extra').forEach(x=>x.style.display='none'); SaaS.toast('Empresa criada com sucesso.','success'); carregar(); } catch(err){SaaS.toast(err.message,'error');} });
     carregar();
-    carregarUsuarioSidebar();
   </script>
-<script src="chat-flutuante-admin.js?v=20260725acc2"></script>
-<script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
 </html>
