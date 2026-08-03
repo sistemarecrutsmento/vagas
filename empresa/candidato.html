@@ -134,7 +134,7 @@
 
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
-    const token = localStorage.getItem('empresa_token');
+    let token = localStorage.getItem('empresa_token');
     if (!token && !localStorage.getItem('empresa_refresh')) window.location.href = 'login.html';
 
     const url = new URL(window.location.href);
@@ -356,7 +356,8 @@
     (async function() {
       setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
       try { await authInit(); } catch (_) {}
-      if (!localStorage.getItem('empresa_token')) { window.location.href = 'login.html'; return; }
+      token = localStorage.getItem('empresa_token') || '';
+      if (!token) { window.location.href = 'login.html'; return; }
       const u = authRBAC.currentUser() || {};
       const avatar = document.getElementById('avatar');
       const nome = document.getElementById('user-nome');
@@ -368,6 +369,6 @@
     })();
   </script>
 <script src="chat-rh-flutuante.js?v=20260726b"></script>
-<script src="empresa-shell.js?v=20260803shell3"></script>
+<script src="empresa-shell.js?v=20260803shell4"></script>
 </body>
 </html>
