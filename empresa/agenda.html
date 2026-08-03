@@ -79,6 +79,7 @@
 
       <a class="nav-item" href="index.html">📊 Dashboard</a>
       <a class="nav-item" href="vagas.html">📋 Vagas com Candidatos</a>
+      <a class="nav-item" href="base-candidatos.html">👥 Base de Talentos</a>
       <a class="nav-item ativo" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="chat.html">💬 Chat</a>
       <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
@@ -102,7 +103,7 @@
       <div class="topo">
         <div class="left">
           <h2>📅 Agenda de Entrevistas</h2>
-          <p class="sub">Somente entrevistas com o gestor/empresa das suas vagas liberadas</p>
+          <p class="sub">Entrevistas de RH e Gestor das suas vagas liberadas</p>
         </div>
         <div class="right">
           <button onclick="abrirModalEntrevistaAgenda()" style="padding:9px 16px;background:#1565C0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">📅 + Nova entrevista</button>
@@ -133,6 +134,7 @@
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
     const token = localStorage.getItem('empresa_token');
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
     if (!token && !localStorage.getItem('empresa_refresh')) window.location.href = 'login.html';
 
     const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
@@ -230,17 +232,17 @@
                 <div class="hora">${hora}</div>
               </div>
               <div class="info-cand">
-                <div class="nome">${e.candidato_nome || 'Candidato'}</div>
-                <div class="vaga">${e.vaga_titulo || ''}${e.vaga_empresa ? ' — ' + e.vaga_empresa : ''}</div>
-                <span class="etapa-badge">Entrevista com Gestor</span>
+                <div class="nome">${esc(e.candidato_nome || 'Candidato')}</div>
+                <div class="vaga">${esc(e.vaga_titulo || '')}${e.vaga_empresa ? ' — ' + esc(e.vaga_empresa) : ''}</div>
+                <span class="etapa-badge">Entrevista ${etapaLabel(e.etapa)}</span>
                 <span class="etapa-badge status" style="background:${getStatusColor(e.status)};">${formatarStatus(e.status)}</span>
-                ${e.observacoes ? '<div class="obs">"' + e.observacoes + '"</div>' : ''}
-                ${e.duracao_minutos ? '<div class="obs" style="margin-top:4px;">⏱ ' + e.duracao_minutos + ' min</div>' : ''}
-                ${e.link_reuniao ? '<div class="obs">🔗 ' + e.link_reuniao + '</div>' : ''}
+                ${e.observacoes ? '<div class="obs">"' + esc(e.observacoes) + '"</div>' : ''}
+                ${e.duracao_minutos ? '<div class="obs" style="margin-top:4px;">⏱ ' + esc(e.duracao_minutos) + ' min</div>' : ''}
+                ${e.link_reuniao ? '<div class="obs">🔗 ' + esc(e.link_reuniao) + '</div>' : ''}
               </div>
               <div class="acoes">
-                ${e.link_reuniao ? `<button class="btn-acao copiar" onclick="copiarLink('${e.link_reuniao}')" title="Copiar link">📋 Link</button>` : ''}
-                ${e.link_reuniao ? `<a class="btn-acao" href="${e.link_reuniao}" target="_blank" title="Abrir sala">▶️ Abrir</a>` : ''}
+                ${e.link_reuniao ? `<button class="btn-acao copiar" onclick='copiarLink(${JSON.stringify(e.link_reuniao)})' title="Copiar link">📋 Link</button>` : ''}
+                ${e.link_reuniao ? `<a class="btn-acao" href="${esc(e.link_reuniao)}" target="_blank" rel="noopener" title="Abrir sala">▶️ Abrir</a>` : ''}
                 <a class="btn-acao analisar" href="analisar.html?id=${e.candidatura_id}" title="Ver candidato">👤 Ver candidato</a>
               </div>
             </div>`;
@@ -262,8 +264,11 @@
         });
         if (r.ok) {
           const d = await r.json();
-          (d.candidatos || []).filter(c => c.status !== 'contratado' && c.status !== 'rejeitado').forEach(c => {
-            opcoes += `<option value="${c.id}">${c.candidato_nome || 'Candidato'} — ${c.vaga_titulo || 'Vaga'}</option>`;
+          (d.candidatos || []).filter(c => {
+            const etapa = Number(c.etapa_atual);
+            return [3, 4].includes(etapa) && c.status !== 'contratado' && c.status !== 'rejeitado';
+          }).forEach(c => {
+            opcoes += `<option value="${c.id}">${esc(c.candidato_nome || 'Candidato')} — ${esc(c.vaga_titulo || 'Vaga')} (Etapa ${c.etapa_atual})</option>`;
           });
         }
       } catch(e) {}
@@ -277,6 +282,11 @@
           <div style="display:grid;gap:12px;">
             <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Candidatura *</label>
               <select id="na-cand" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;">${opcoes}</select></div>
+            <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Etapa da entrevista *</label>
+              <select id="na-etapa" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;">
+                <option value="3">Etapa 3 — Entrevista RH</option>
+                <option value="4" selected>Etapa 4 — Entrevista Gestor/Empresa</option>
+              </select></div>
             <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Data e hora *</label>
               <input type="datetime-local" id="na-data" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;" /></div>
             <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Tipo</label>
@@ -301,6 +311,7 @@
 
     async function confirmarNovaEntrevista() {
       const candId = document.getElementById('na-cand').value;
+      const etapa = Number(document.getElementById('na-etapa').value || 4);
       const dataHora = document.getElementById('na-data').value;
       const tipo = document.getElementById('na-tipo').value;
       const link = document.getElementById('na-link').value.trim();
@@ -315,7 +326,7 @@
         const r = await fetch(API + '/api/empresa/entrevista', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ candidatura_id: Number(candId), data_hora: dataHora, tipo, link_reuniao: link || null, observacoes: obs || null })
+          body: JSON.stringify({ candidatura_id: Number(candId), etapa, data_hora: dataHora, tipo, link_reuniao: link || null, observacoes: obs || null })
         });
         const d = await r.json();
         if (!r.ok) { erroEl.textContent = d.erro || 'Erro ao agendar.'; erroEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Agendar'; return; }
