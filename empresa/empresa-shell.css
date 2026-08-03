@@ -1,0 +1,167 @@
+/* VagasIO · Portal Empresa · Shell visual único
+   Mantém a navegação e a barra lateral idênticas em todas as páginas privadas. */
+:root {
+  --shell-vinho: #722F37;
+  --shell-vinho-escuro: #4A1F25;
+  --shell-dourado: #D4A155;
+  --shell-borda: #E5E5E5;
+  --shell-bg: #FAFAFA;
+}
+
+/* Sidebar única */
+.empresa-shell-sidebar {
+  width: 240px !important;
+  min-width: 240px !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  position: sticky !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1100 !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  background: var(--shell-vinho) !important;
+  color: #fff !important;
+  padding: 24px 0 !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.empresa-shell-sidebar .empresa-shell-close {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  color: #fff;
+  border: 0;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.empresa-shell-logo {
+  padding: 0 24px 24px !important;
+  border-bottom: 1px solid rgba(255,255,255,.1) !important;
+  margin-bottom: 16px !important;
+}
+.empresa-shell-logo h1 { color: #fff !important; font-size: 20px !important; font-weight: 800 !important; margin: 0 !important; }
+.empresa-shell-logo small { color: rgba(255,255,255,.6) !important; font-size: 12px !important; }
+.empresa-shell-nav { display: flex; flex-direction: column; gap: 0; }
+.empresa-shell-sidebar .nav-item {
+  display: block !important;
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 12px 24px !important;
+  border: 0 !important;
+  border-left: 3px solid transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+  color: rgba(255,255,255,.8) !important;
+  text-decoration: none !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 20px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+.empresa-shell-sidebar .nav-item:hover {
+  background: rgba(255,255,255,.1) !important;
+  color: #fff !important;
+}
+.empresa-shell-sidebar .nav-item.ativo {
+  background: rgba(255,255,255,.15) !important;
+  color: #fff !important;
+  border-left-color: #fff !important;
+}
+.empresa-shell-sidebar .nav-divisor {
+  margin: 16px 0 0 !important;
+  padding: 12px 24px 6px !important;
+  border-top: 1px solid rgba(255,255,255,.15) !important;
+  color: rgba(255,255,255,.4) !important;
+  font-size: 11px !important;
+  letter-spacing: .5px !important;
+  text-transform: uppercase !important;
+}
+.empresa-shell-user {
+  margin-top: auto !important;
+  padding: 16px 24px !important;
+  border-top: 1px solid rgba(255,255,255,.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+.empresa-shell-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: var(--shell-dourado) !important;
+  color: #1A1A1A !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  flex-shrink: 0 !important;
+}
+.empresa-shell-user-info { flex: 1; min-width: 0; }
+.empresa-shell-user-info .nome,
+.empresa-shell-user-info .empresa {
+  display: block !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.empresa-shell-user-info .nome { color: #fff !important; font-size: 13px !important; font-weight: 600 !important; }
+.empresa-shell-user-info .empresa { color: rgba(255,255,255,.6) !important; font-size: 11px !important; margin-top: 2px !important; }
+.empresa-shell-logout {
+  background: rgba(255,255,255,.1) !important;
+  color: #fff !important;
+  border: 0 !important;
+  padding: 6px 10px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+}
+.empresa-shell-logout:hover { background: rgba(255,255,255,.2) !important; }
+.empresa-shell-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1200;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--shell-vinho);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+
+/* Páginas que antes usavam apenas header: recebem o mesmo recuo da sidebar. */
+.empresa-shell-fixed-content { min-height: 100vh; margin-left: 240px; }
+.empresa-shell-existing .empresa-shell-sidebar { position: sticky !important; }
+
+@media (max-width: 700px) {
+  .empresa-shell-toggle { display: block; }
+  .empresa-shell-existing .empresa-shell-toggle.empresa-shell-open { display: none; }
+  .empresa-shell-existing .empresa-shell-sidebar,
+  body.empresa-shell-fixed .empresa-shell-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    transform: translateX(-100%) !important;
+    transition: transform .25s ease !important;
+  }
+  .empresa-shell-sidebar.empresa-shell-open { transform: translateX(0) !important; box-shadow: 4px 0 24px rgba(0,0,0,.4) !important; }
+  .empresa-shell-sidebar.empresa-shell-open .empresa-shell-close { display: block; }
+  .empresa-shell-existing .empresa-shell-fixed-content { margin-left: 0; }
+  .empresa-shell-fixed-content { margin-left: 0; }
+  body.empresa-shell-fixed .empresa-shell-toggle { display: block; }
+}
