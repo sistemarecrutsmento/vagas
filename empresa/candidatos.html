@@ -122,6 +122,7 @@
       </div>
       <a class="nav-item" href="index.html">📊 Dashboard</a>
       <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
+      <a class="nav-item" href="base-candidatos.html">👥 Base de Talentos</a>
       <a class="nav-item ativo" href="vagas.html">📋 Vagas com Candidatos</a>
       <a class="nav-item" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="chat.html">💬 Chat</a>
@@ -263,6 +264,9 @@
             const etapaNome = etapas[etapaIdx] || `Etapa ${etapaIdx + 1}`;
             const acoes = [];
             acoes.push(`<a class="btn-acao" href="analisar.html?id=${c.id}">👁 Detalhes</a>`);
+            if (/coleta.*document|document.*coleta/i.test(etapaNome)) {
+              acoes.push(`<a class="btn-acao" href="analisar.html?id=${c.id}#card-documentos">📄 Documentos</a>`);
+            }
             if (podeEditar && c.status !== 'contratado' && c.status !== 'rejeitado') {
               acoes.push(`<button class="btn-acao primary" onclick="abrirModalEtapa(${c.id})">🔄 Mover</button>`);
             }
