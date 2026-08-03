@@ -89,8 +89,9 @@
     </main>
   </div>
 
-  <script src="empresa-auth-init.js"></script>
-  <script src="auth-helper.js"></script>
+  <script src="auth-helper.js?v=fase4_2026_07_28"></script>
+  <script src="empresa-auth-init.js?v=fase4_2026_07_28"></script>
+  <script src="empresa-auth-patch.js?v=fase4_2026_07_28"></script>
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
     let todosMatches = [];
@@ -98,11 +99,14 @@
     const qs = new URLSearchParams(location.search);
     const vagaId = parseInt(qs.get('vaga_id') || qs.get('vaga') || '0');
 
-    if (!vagaId) {
-      document.getElementById('lista').innerHTML = '<div class="empty">Vaga não identificada. <a href="vagas.html">Voltar para vagas</a></div>';
-    } else {
-      carregarMatches();
-    }
+    (async function iniciar() {
+      try { await authInit(); } catch (_) {}
+      if (!vagaId) {
+        document.getElementById('lista').innerHTML = '<div class="empty">Vaga não identificada. <a href="vagas.html">Voltar para vagas</a></div>';
+      } else {
+        carregarMatches();
+      }
+    })();
 
     async function carregarMatches() {
       const token = localStorage.getItem('empresa_token');
@@ -178,7 +182,11 @@
     }
 
     function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    function sair() { localStorage.clear(); location.href = 'login.html'; }
+    function sair() {
+      if (typeof empresaSair === 'function') { empresaSair(); return; }
+      ['empresa_token','empresa_refresh','empresa_usuario'].forEach(k => localStorage.removeItem(k));
+      location.href = 'login.html';
+    }
   </script>
 </body>
 </html>
