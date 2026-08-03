@@ -89,6 +89,9 @@
   function init() {
     let aside = document.querySelector('body > aside, .app > aside');
     const hadAside = !!aside;
+    // As páginas antigas já traziam um botão de menu próprio. Removê-lo
+    // evita dois botões sobrepostos no mobile.
+    document.querySelectorAll('.menu-toggle').forEach(el => el.remove());
     const toggle = document.createElement('button');
     toggle.className = 'empresa-shell-toggle';
     toggle.type = 'button';
