@@ -33,7 +33,7 @@
     .filtros select:focus,.filtros input:focus{border-color:var(--vinho);outline:none;}
     @media(max-width:768px){.kpis{grid-template-columns:repeat(2,1fr)}.funil-lbl{min-width:100px;font-size:11px}}
   </style>
-  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell2">
+  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell3">
 </head>
 <body>
 
@@ -123,14 +123,12 @@
 const API = 'https://recrutamento-api-novo.onrender.com';
 let pagAtual = 1;
 
-function tok(){ return localStorage.getItem('empresa_token') || ''; }
 function $(id){ return document.getElementById(id); }
+function esc(v){ return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
 
 async function carregarVagas(){
   try {
-    const r = await fetch(API+'/api/empresa/vagas?status=publicada&limit=50', {
-      headers:{Authorization:'Bearer '+tok()}
-    });
+    const r = await authFetch(API+'/api/empresa/vagas?status=publicada&limit=50');
     if(!r.ok) return;
     const d = await r.json();
     const vagas = d.vagas||d||[];
@@ -150,9 +148,7 @@ async function carregar(){
   const vaga_id = $('f-vaga').value;
   const params  = new URLSearchParams({ periodo, ...(vaga_id && { vaga_id }) });
   try {
-    const r = await fetch(API+'/api/empresa/analytics?'+params, {
-      headers:{ Authorization: 'Bearer '+tok() }
-    });
+    const r = await authFetch(API+'/api/empresa/analytics?'+params);
     if(r.status===401||r.status===403){ return; }
     const d = await r.json();
     renderKpis(d);
@@ -199,7 +195,7 @@ function renderRanking(vagas){
   $('ranking-vagas').innerHTML = vagas.slice(0,8).map((v,i) =>
     `<li>
       <span class="rank-num">${i+1}</span>
-      <span class="rank-nome">${v.titulo||'Vaga #'+v.vaga_id}</span>
+      <span class="rank-nome">${esc(v.titulo||'Vaga #'+v.vaga_id)}</span>
       <span class="rank-cnt">${(v.visualizacoes||v.cnt||0).toLocaleString('pt-BR')} <span style="font-size:11px;font-weight:400;color:#999">vis.</span></span>
     </li>`
   ).join('');
@@ -228,10 +224,14 @@ function renderEvolucao(ev){
   }</tbody>`;
 }
 
-// Init
-carregarVagas();
-carregar();
+// Init: espera a renovação silenciosa antes das primeiras requisições.
+(async function initAnalytics() {
+  try { await authInit(); } catch (_) {}
+  if (!localStorage.getItem('empresa_token')) { window.location.href = 'login.html'; return; }
+  await carregarVagas();
+  carregar();
+})();
 </script>
-<script src="empresa-shell.js?v=20260803shell2"></script>
+<script src="empresa-shell.js?v=20260803shell3"></script>
 </body>
 </html>
