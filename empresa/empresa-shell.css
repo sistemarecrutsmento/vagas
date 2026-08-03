@@ -159,6 +159,13 @@ body.empresa-shell-fixed {
 
 /* Páginas que antes usavam apenas header: recebem o mesmo recuo da sidebar. */
 .empresa-shell-fixed-content { min-height: 100vh; margin-left: 240px; }
+/* Em páginas que não tinham sidebar, ela é um elemento fixo fora do layout.
+   Sem esta regra o recuo de 240px seria aplicado duas vezes. */
+body.empresa-shell-fixed .empresa-shell-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+}
 .empresa-shell-existing .empresa-shell-sidebar { position: sticky !important; }
 
 @media (max-width: 700px) {
