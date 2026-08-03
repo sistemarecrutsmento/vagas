@@ -63,7 +63,7 @@
     <aside>
       <div class="aside-logo">
         <h1>Admin</h1>
-        <small>Vagas.io</small>
+        <small>VagasIO</small>
       </div>
       <a class="nav-item" href="index.html">📊 Dashboard</a>
       <a class="nav-item" href="index.html?page=vagas">💼 Vagas</a>
@@ -79,7 +79,7 @@
           <div class="nome" id="aside-user-nome">--</div>
           <div class="empresa" id="aside-user-empresa">--</div>
         </div>
-        <a href="index.html" class="btn-logout" title="Sair">↪</a>
+        <button class="btn-logout" onclick="empresaSair()" title="Sair">↪</button>
       </div>
     </aside>
     <main>
@@ -93,11 +93,15 @@
     </main>
   </div>
 
+  <script src="auth-helper.js?v=fase4_2026_07_28"></script>
+  <script src="empresa-auth-init.js?v=fase4_2026_07_28"></script>
+  <script src="empresa-auth-patch.js?v=fase4_2026_07_28"></script>
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
     const token = localStorage.getItem('empresa_token');
 
-    if (!token) { window.location.href = 'index.html'; }
+    if (!token && !localStorage.getItem('empresa_refresh')) { window.location.href = 'index.html'; }
 
     function carregarUsuarioSidebar() {
       try {
@@ -120,8 +124,8 @@
     async function carregar() {
       const grid = document.getElementById('vagas-grid');
       try {
-        const r = await fetch(API + '/api/empresa/vagas-com-candidaturas', {
-          headers: { 'Authorization': 'Bearer ' + token }
+        const r = await authFetch(API + '/api/empresa/vagas-com-candidaturas', {
+          headers: { 'Authorization': 'Bearer ' + (authTokens.getAccess() || token) }
         });
         if (r.status === 401 || r.status === 403) {
           localStorage.removeItem('empresa_token');
@@ -139,8 +143,8 @@
         grid.innerHTML = vagas.map(v => {
           const local = [v.cidade, v.estado].filter(Boolean).join(' / ') || '—';
           return `<div class="vaga-card">
-            <h3>${v.titulo || '—'}</h3>
-            <div class="empresa">${v.empresa || '—'} • ${local}</div>
+            <h3>${esc(v.titulo || '—')}</h3>
+            <div class="empresa">${esc(v.empresa || '—')} • ${esc(local)}</div>
             <div class="stats">
               <span class="stat-mini">👥 <strong>${v.total_geral || 0}</strong> total</span>
               <span class="stat-mini">🔍 <strong>${v.em_analise || 0}</strong> em análise</span>
@@ -157,7 +161,6 @@
     carregar();
     carregarUsuarioSidebar();
   </script>
-<script src="chat-flutuante-admin.js?v=20260725acc2"></script>
-<script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
+<script src="chat-rh-flutuante.js?v=20260803"></script>
 </body>
 </html>
