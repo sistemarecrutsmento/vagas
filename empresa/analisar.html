@@ -129,7 +129,7 @@
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
     const token = localStorage.getItem('empresa_token');
-    if (!token) window.location.href = 'login.html';
+    if (!token && !localStorage.getItem('empresa_refresh')) window.location.href = 'login.html';
     const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
     document.getElementById('avatar').textContent = iniciais(usuario.nome);
     document.getElementById('user-nome').textContent = usuario.nome || '--';
@@ -140,8 +140,9 @@
       return n.split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
     }
     function sair() {
-      localStorage.removeItem('empresa_token');
-      localStorage.removeItem('empresa_usuario');
+      if (!confirm('Sair do portal?')) return;
+      if (typeof empresaSair === 'function') { empresaSair(); return; }
+      ['empresa_token','empresa_refresh','empresa_usuario'].forEach(k => localStorage.removeItem(k));
       window.location.href = 'login.html';
     }
     function escapeHtml(s) {
@@ -174,7 +175,6 @@
       'concluido': 'Concluído', 'cursando': 'Cursando', 'trancado': 'Trancado', 'incompleto': 'Incompleto'
     };
 
-    carregar();
     async function carregar() {
       const id = new URLSearchParams(location.search).get('id');
       if (!id) { document.getElementById('content').innerHTML = '<div class="card">ID da candidatura não informado.</div>'; return; }
@@ -412,15 +412,15 @@
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>' +
             'Voltar' +
           '</button>' +
-          '<h1>' + (c.nome || 'Candidato') + '</h1>' +
-          '<div class="sub">' + (c.titulo || c.vaga_titulo || 'Vaga') + (c.v_cidade ? ' • ' + c.v_cidade : '') + '</div>' +
-          '<span class="status-pill status-' + status + '">' + statusLabel + '</span>' +
+          '<h1>' + escapeHtml(c.nome || 'Candidato') + '</h1>' +
+          '<div class="sub">' + escapeHtml(c.titulo || c.vaga_titulo || 'Vaga') + (c.v_cidade ? ' • ' + escapeHtml(c.v_cidade) : '') + '</div>' +
+          '<span class="status-pill status-' + escapeHtml(status) + '">' + escapeHtml(statusLabel) + '</span>' +
         '</div>' +
 
         // 1) Status do Processo (timeline)
         '<div class="card" id="card-timeline">' +
           '<h2>📋 Status do Processo</h2>' +
-          '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual1 + '/' + totalEtapas + ' — ' + (etapas[etapaAtual0] || '—') + '</span></div>' +
+          '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual1 + '/' + totalEtapas + ' — ' + escapeHtml(etapas[etapaAtual0] || '—') + '</span></div>' +
           '<div style="font-size:12px;color:var(--cinza-medio);margin-bottom:6px">💡 Clique em uma etapa para ver detalhes.</div>' +
           '<div class="timeline">' + timeline + '</div>' +
         '</div>' +
@@ -430,7 +430,7 @@
 
         // 10) Documentos da candidatura
         '<div class="card card-colapsavel" id="card-docs">' +
-          '<div class="card-header" onclick="toggleCard('card-docs')">' +
+          '<div class="card-header" onclick="toggleCard(\'card-docs\')">' +
             '<h2>📎 Documentos</h2>' +
             '<span class="card-toggle-icon">▼</span>' +
           '</div>' +
@@ -445,16 +445,16 @@
         // 3) Dados Pessoais + Foto
         '<div class="card" id="card-dados-pessoais">' +
           '<div class="dados-pessoais-header">' +
-            (c.foto_url ? '<img class="dados-foto" src="' + c.foto_url + '" alt="Foto" onerror="this.style.display=\'none\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
+            (c.foto_url ? '<img class="dados-foto" src="' + escapeHtml(c.foto_url) + '" alt="Foto" onerror="this.style.display=\'none\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
             '<h2>👤 Dados Pessoais</h2>' +
           '</div>' +
           '<div class="grid-2">' +
-            '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (c.email || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + (c.celular || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">CPF</div><div class="field-value">' + (c.cpf || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">Data de Nascimento</div><div class="field-value">' + (fmtData(c.data_nascimento) || '—') + '</div></div>' +
-            (c.acessibilidade ? '<div class="field" style="grid-column:1/-1"><div class="field-label">Acessibilidade</div><div class="field-value">' + c.acessibilidade + '</div></div>' : '') +
-            '<div class="field" style="grid-column:1/-1"><div class="field-label">Endereço</div><div class="field-value">' + (endCompleto || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Email</div><div class="field-value">' + escapeHtml(c.email || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + escapeHtml(c.celular || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">CPF</div><div class="field-value">' + escapeHtml(c.cpf || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Data de Nascimento</div><div class="field-value">' + escapeHtml(fmtData(c.data_nascimento) || '—') + '</div></div>' +
+            (c.acessibilidade ? '<div class="field" style="grid-column:1/-1"><div class="field-label">Acessibilidade</div><div class="field-value">' + escapeHtml(c.acessibilidade) + '</div></div>' : '') +
+            '<div class="field" style="grid-column:1/-1"><div class="field-label">Endereço</div><div class="field-value">' + escapeHtml(endCompleto || '—') + '</div></div>' +
           '</div>' +
         '</div>' +
 
@@ -770,7 +770,7 @@
         '</div>',
         '<div id="ent-erro" style="display:none;color:#C62828;font-size:13px;margin-top:8px;"></div>',
         '<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">',
-        '<button onclick="document.getElementById('modal-entrevista').style.display='none'" style="padding:9px 18px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">Cancelar</button>',
+        '<button onclick="document.getElementById(\'modal-entrevista\').style.display=\'none\'" style="padding:9px 18px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">Cancelar</button>',
         '<button id="btn-agendar-ent" onclick="agendarEntrevista()" style="padding:9px 18px;background:#1565C0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Agendar</button>',
         '</div></div></div>',
         '<div id="modal-proposta" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:16px;">',
@@ -782,7 +782,7 @@
         '<textarea id="prop-texto" rows="8" placeholder="Descreva cargo, salario, beneficios, data de inicio, regime de trabalho..." style="width:100%;padding:10px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;resize:vertical;font-family:inherit;"></textarea>',
         '<div id="prop-erro" style="display:none;color:#C62828;font-size:13px;margin-top:8px;"></div>',
         '<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">',
-        '<button onclick="document.getElementById('modal-proposta').style.display='none'" style="padding:9px 18px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">Cancelar</button>',
+        '<button onclick="document.getElementById(\'modal-proposta\').style.display=\'none\'" style="padding:9px 18px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">Cancelar</button>',
         '<button id="btn-enviar-prop" onclick="enviarProposta()" style="padding:9px 18px;background:#2E7D32;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Enviar proposta</button>',
         '</div></div></div>'
       ].join('');
@@ -838,6 +838,7 @@
           const main = document.querySelector('main');
           if (main) main.innerHTML = '<div style="text-align:center; padding:80px 20px;"><h2 style="color:#999;">🚫 Acesso restrito</h2><p style="color:#666; margin-top:12px;">Você não tem permissão para acessar esta página.</p><p style="margin-top:24px;"><a href="index.html" style="color:#722F37;">← Voltar ao Dashboard</a></p></div>';
         }
+        carregar();
       };
 
       if (document.readyState === 'loading') {
