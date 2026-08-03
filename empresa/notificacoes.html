@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Notificações — Admin · Vagas.io</title>
+<title>Notificações — Admin · VagasIO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root {
@@ -74,6 +74,9 @@ main { max-width: 1000px; margin: 24px auto; padding: 0 24px; }
   </div>
   <div class="feed" id="feed">Carregando…</div>
 </main>
+<script src="auth-helper.js?v=fase4_2026_07_28"></script>
+<script src="empresa-auth-init.js?v=fase4_2026_07_28"></script>
+<script src="empresa-auth-patch.js?v=fase4_2026_07_28"></script>
 <script>
 const API = 'https://recrutamento-api-novo.onrender.com';
 let cache = [];
@@ -87,8 +90,8 @@ async function atualizar() {
   if (tipo) qs.set('tipo', tipo);
   if (lida !== 'todas') qs.set('lida', lida);
   qs.set('limit', '50');
-  const r = await fetch(API + '/api/notificacoes?' + qs, {
-    headers: { 'Authorization': 'Bearer ' + getToken() }
+  const r = await authFetch(API + '/api/notificacoes?' + qs, {
+    headers: { 'Authorization': 'Bearer ' + (authTokens.getAccess() || getToken()) }
   });
   const d = await r.json();
   cache = d.notificacoes || [];
@@ -138,8 +141,8 @@ function icone(tipo) {
 
 async function abrir(id, tipo, refId) {
   // Marca como lida (best-effort)
-  await fetch(API + '/api/notificacoes/' + id + '/lida', {
-    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + getToken() }
+  await authFetch(API + '/api/notificacoes/' + id + '/lida', {
+    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + (authTokens.getAccess() || getToken()) }
   });
   if (tipo === 'candidatura' && refId) {
     window.location.href = 'analisar.html?id=' + refId;
@@ -149,8 +152,8 @@ async function abrir(id, tipo, refId) {
 }
 
 async function marcarTodas() {
-  await fetch(API + '/api/notificacoes/marcar-todas-lidas', {
-    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + getToken() }
+  await authFetch(API + '/api/notificacoes/marcar-todas-lidas', {
+    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + (authTokens.getAccess() || getToken()) }
   });
   atualizar();
 }
