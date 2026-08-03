@@ -188,7 +188,8 @@
 
     (async () => {
       const content = document.getElementById('content');
-      await new Promise(resolve => { let n = 0; const t = setInterval(() => { if (localStorage.getItem('empresa_token') || ++n > 25) { clearInterval(t); resolve(); } }, 100); });
+      // Aguarda a renovação real da sessão, em vez de um polling fixo de 2,5s.
+      try { await authInit(); } catch (_) {}
       const token = localStorage.getItem('empresa_token');
       if (!token) {
         content.innerHTML = '<div class="card"><div class="alert alert-erro">Você não está logado. <a href="login.html">Faça login</a> primeiro.</div></div>';
@@ -211,12 +212,12 @@
         }
         const data = await r.json();
         if (!r.ok) {
-          content.innerHTML = '<div class="card"><div class="alert alert-erro">' + (data.erro || 'Erro ao carregar') + '</div></div>';
+          content.innerHTML = '<div class="card"><div class="alert alert-erro">' + escapeHtml(data.erro || 'Erro ao carregar') + '</div></div>';
           return;
         }
         candidatura = data.candidatura || data;
       } catch (e) {
-        content.innerHTML = '<div class="card"><div class="alert alert-erro">Erro: ' + e.message + '</div></div>';
+        content.innerHTML = '<div class="card"><div class="alert alert-erro">Erro ao carregar a candidatura.</div></div>';
         return;
       }
 
