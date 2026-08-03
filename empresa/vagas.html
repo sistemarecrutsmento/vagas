@@ -81,7 +81,7 @@
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
     const token = localStorage.getItem('empresa_token');
-    if (!token) window.location.href = 'login.html';
+    if (!token && !localStorage.getItem('empresa_refresh')) window.location.href = 'login.html';
 
     const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
     document.getElementById('avatar').textContent = (usuario.nome || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
@@ -90,7 +90,6 @@
 
     function sair() {
       if (confirm('Sair do portal?')) empresaSair();
-    }
     }
 
     function statusBadge(status) {
@@ -150,7 +149,6 @@
       }
     }
 
-    carregar();
   </script>
 <script src="auth-helper.js?v=fase3_2026_07_28"></script>
   <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
@@ -198,6 +196,7 @@
           const main = document.querySelector('main');
           if (main) main.innerHTML = '<div style="text-align:center; padding:80px 20px;"><h2 style="color:#999;">🚫 Acesso restrito</h2><p style="color:#666; margin-top:12px;">Você não tem permissão para acessar esta página.</p><p style="margin-top:24px;"><a href="index.html" style="color:#722F37;">← Voltar ao Dashboard</a></p></div>';
         }
+        carregar();
       };
 
       if (document.readyState === 'loading') {
