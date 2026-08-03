@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard | VagasIO</title>
+  <link rel="stylesheet" href="saas-shell.css?v=20260803-1">
+</head>
+<body data-page="dashboard">
+  <div class="saas-app">
+    <aside class="sidebar" id="saas-sidebar">
+      <div class="brand"><div class="brand-mark">V</div><div><div class="brand-name">Vagas<span>IO</span></div><span class="brand-sub">Controle global</span></div></div>
+      <div class="nav-label">Visão geral</div>
+      <a class="nav-link" data-nav="dashboard" href="dashboard.html"><span class="nav-icon">▦</span>Dashboard</a>
+      <div class="nav-label">Operação</div>
+      <a class="nav-link" data-nav="empresas" href="empresas.html"><span class="nav-icon">▣</span>Empresas</a>
+      <a class="nav-link" data-nav="equipe" href="equipe.html"><span class="nav-icon">♙</span>Usuários e equipe</a>
+      <a class="nav-link" data-nav="analytics" href="analytics.html"><span class="nav-icon">◔</span>Analytics</a>
+      <a class="nav-link" data-nav="auditoria" href="auditoria.html"><span class="nav-icon">⌕</span>Auditoria</a>
+      <div class="sidebar-footer"><div class="sidebar-user"><div class="user-avatar" data-user-avatar>A</div><div class="user-info"><div class="user-name" data-user-name>Administrador</div><div class="user-role" data-user-role>Administrador global</div></div><button class="logout-link" data-action="logout" title="Sair">↪</button></div></div>
+    </aside>
+    <section class="main">
+      <header class="topbar"><div class="topbar-left"><button class="mobile-menu" id="mobile-menu" aria-label="Abrir menu">☰</button><span class="breadcrumb">Controle global / Dashboard</span></div><div class="topbar-right"><div class="topbar-user"><div class="user-avatar" data-user-avatar>A</div><div><div class="user-name" data-user-name>Administrador</div><div class="user-role" data-user-role>Administrador global</div></div></div></div></header>
+      <main class="page">
+        <div class="page-header"><div><h1 class="page-title">Dashboard global</h1><p class="page-description">Acompanhe a operação do VagasIO em uma visão única.</p></div><div class="page-actions"><button class="btn btn-light" id="btn-atualizar">↻ Atualizar dados</button><a class="btn btn-primary" href="empresas.html">+ Nova empresa</a></div></div>
+        <section class="kpi-grid" id="kpis">
+          <div class="kpi-card"><div class="kpi-top"><span class="kpi-icon">▣</span></div><div class="kpi-value" id="k-empresas">—</div><div class="kpi-label">Empresas cadastradas</div><div class="kpi-note">Visão global</div></div>
+          <div class="kpi-card"><div class="kpi-top"><span class="kpi-icon">✓</span></div><div class="kpi-value" id="k-ativas">—</div><div class="kpi-label">Empresas ativas</div><div class="kpi-note">Operação atual</div></div>
+          <div class="kpi-card"><div class="kpi-top"><span class="kpi-icon">▤</span></div><div class="kpi-value" id="k-vagas">—</div><div class="kpi-label">Vagas publicadas</div><div class="kpi-note">Catálogo ativo</div></div>
+          <div class="kpi-card"><div class="kpi-top"><span class="kpi-icon">♙</span></div><div class="kpi-value" id="k-candidaturas">—</div><div class="kpi-label">Candidaturas</div><div class="kpi-note">Todos os processos</div></div>
+        </section>
+        <div class="grid-2">
+          <section class="panel"><div class="panel-head"><div><h2 class="panel-title">Empresas recentes</h2><div class="panel-subtitle">Últimas contas cadastradas na plataforma</div></div><a class="btn btn-light" href="empresas.html">Ver todas</a></div><div class="panel-body"><div class="list" id="recentes"><div class="loading">Carregando dados…</div></div></div></section>
+          <section class="panel"><div class="panel-head"><div><h2 class="panel-title">Funil do período</h2><div class="panel-subtitle">Últimos 30 dias</div></div><a class="btn btn-light" href="analytics.html">Detalhar</a></div><div class="panel-body"><div class="progress-list" id="funil"><div class="loading">Carregando dados…</div></div></div></section>
+        </div>
+        <section class="panel"><div class="panel-head"><div><h2 class="panel-title">Status da operação</h2><div class="panel-subtitle">Indicadores calculados a partir dos dados atuais</div></div><span class="badge badge-success" id="status-api">● Conectando</span></div><div class="panel-body"><div class="grid-2 equal"><div><div class="list-row"><div class="list-avatar">◎</div><div class="list-content"><div class="list-title">Empresas ativas</div><div class="list-meta" id="status-empresas">Calculando…</div></div></div><div class="list-row"><div class="list-avatar">↗</div><div class="list-content"><div class="list-title">Conversão de visualização</div><div class="list-meta" id="status-conversao">Calculando…</div></div></div></div><div><div class="list-row"><div class="list-avatar">▣</div><div class="list-content"><div class="list-title">Última atualização</div><div class="list-meta" id="ultima-atualizacao">—</div></div></div><div class="list-row"><div class="list-avatar">✓</div><div class="list-content"><div class="list-title">Ambiente conectado</div><div class="list-meta">API e sessão administrativa disponíveis</div></div></div></div></div></div></section>
+      </main>
+    </section>
+  </div>
+  <script src="saas-shell.js?v=20260803-1"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const fmt = n => Number(n || 0).toLocaleString('pt-BR');
+    const dateFmt = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+    async function carregarDashboard() {
+      const btn = $('btn-atualizar'); btn.disabled = true; btn.textContent = 'Carregando…';
+      try {
+        const [empR, anaR] = await Promise.all([SaaS.authFetch('/api/saas/empresas'), SaaS.authFetch('/api/saas/analytics?periodo=30')]);
+        const empData = await empR.json(); const anaData = await anaR.json();
+        const empresas = empData.empresas || []; const m = anaData.metricas || {};
+        const ativas = empresas.filter(e => e.ativo).length;
+        const vagas = empresas.reduce((sum,e) => sum + Number(e.total_vagas || 0), 0);
+        const cands = empresas.reduce((sum,e) => sum + Number(e.total_candidaturas || 0), 0);
+        $('k-empresas').textContent = fmt(empresas.length); $('k-ativas').textContent = fmt(ativas); $('k-vagas').textContent = fmt(vagas); $('k-candidaturas').textContent = fmt(cands);
+        $('status-api').textContent = '● Dados atualizados'; $('status-api').className = 'badge badge-success';
+        $('status-empresas').textContent = `${fmt(ativas)} de ${fmt(empresas.length)} empresas estão ativas.`;
+        const vis = Number(m.visualizacoes_vagas || 0), cand = Number(m.candidaturas_enviadas || 0);
+        $('status-conversao').textContent = vis ? `${((cand / vis) * 100).toFixed(1)}% de visualizações para candidaturas.` : 'Sem visualizações no período.';
+        $('ultima-atualizacao').textContent = new Date().toLocaleString('pt-BR');
+        const recentes = $('recentes');
+        recentes.innerHTML = empresas.slice(0, 6).map(e => `<div class="list-row"><div class="list-avatar">${SaaS.initials(e.nome)}</div><div class="list-content"><div class="list-title">${SaaS.escapeHtml(e.nome || 'Empresa sem nome')}</div><div class="list-meta">${SaaS.escapeHtml(e.plano_nome || e.plano || 'Plano não definido')} · criada em ${dateFmt(e.criado_em)}</div></div><span class="badge ${e.ativo ? 'badge-success' : 'badge-danger'}">${e.ativo ? 'Ativa' : 'Inativa'}</span></div>`).join('') || '<div class="empty-state">Nenhuma empresa cadastrada.</div>';
+        const funil = m.funil || {}; const items = [['Visualizações', funil.vaga_visualizada || 0], ['Candidaturas', funil.candidatura_enviada || 0], ['Entrevistas', funil.entrevista_agendada || 0], ['Propostas', funil.proposta_enviada || 0], ['Aceitas', funil.proposta_aceita || 0]]; const max = Math.max(...items.map(i => Number(i[1])), 1);
+        $('funil').innerHTML = items.map(([label,val]) => `<div class="progress-row"><div class="progress-label">${label}</div><div class="progress-track"><div class="progress-bar" style="width:${Math.max(2,Number(val)/max*100)}%"></div></div><div class="progress-value">${fmt(val)}</div></div>`).join('');
+      } catch (error) { $('status-api').textContent = '● Falha ao atualizar'; $('status-api').className = 'badge badge-danger'; SaaS.toast(error.message || 'Não foi possível carregar o dashboard.', 'error'); }
+      finally { btn.disabled = false; btn.textContent = '↻ Atualizar dados'; }
+    }
+    $('btn-atualizar').addEventListener('click', carregarDashboard); carregarDashboard();
+  </script>
+</body>
+</html>
