@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Segurança da Conta · Vagas.io</title>
+  <title>Segurança da Conta · VagasIO</title>
   <style>
     :root{--vinho:#722F37;--vinho-claro:#8B3A45;--bg:#f7f5f2;--borda:#e8e4df;--verde:#28A745;--verm:#C62828;}
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -54,7 +54,7 @@
 <body>
 
 <header>
-  <a class="logo" href="index.html">Vagas.io</a>
+  <a class="logo" href="index.html">VagasIO</a>
   <div class="hdr-right">
     <div class="avatar" id="avatar">?</div>
     <button class="btn btn-s" style="padding:6px 14px;font-size:13px;" onclick="sair()">Sair</button>
@@ -167,16 +167,20 @@ async function req(method, path, body) {
     refreshPendente = fetch(API + '/api/auth/refresh', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken: REFRESH })
-    }).then(rr => rr.json()).then(d => {
-      if (d.token) {
-        TOKEN = d.token; REFRESH = d.refreshToken;
+    }).then(rr => rr.ok ? rr.json() : null).then(d => {
+      if (d && (d.token || d.accessToken)) {
+        TOKEN = d.token || d.accessToken; REFRESH = d.refreshToken || REFRESH;
         localStorage.setItem('empresa_token', TOKEN);
         localStorage.setItem('empresa_refresh', REFRESH);
+        return true;
       }
-      refreshPendente = null;
-    });
-    await refreshPendente;
-    return req(method, path, body);
+      return false;
+    }).catch(() => false);
+    const refreshed = await refreshPendente;
+    refreshPendente = null;
+    if (refreshed) return req(method, path, body);
+    ['empresa_token','empresa_refresh','empresa_usuario'].forEach(k => localStorage.removeItem(k));
+    location.href = 'login.html';
   }
   return r;
 }
@@ -318,7 +322,7 @@ function sair() {
 }
 
 // ── Init ──
-if (!TOKEN) { location.href = 'login.html'; }
+if (!TOKEN && !REFRESH) { location.href = 'login.html'; }
 const usr = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
 document.getElementById('avatar').textContent = iniciais(usr.nome || '');
 carregar2FA();
