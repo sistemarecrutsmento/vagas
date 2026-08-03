@@ -38,7 +38,7 @@ main { max-width: 1000px; margin: 24px auto; padding: 0 24px; }
 .notif .badge { background: var(--primary); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
 .vazio { text-align: center; color: var(--text-soft); padding: 40px; }
 </style>
-  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell2">
+  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell3">
 </head>
 <body>
 <header>
@@ -169,14 +169,19 @@ function formatarData(iso) {
   return d.toLocaleDateString('pt-BR');
 }
 
-if (!getToken()) {
-  document.getElementById('feed').innerHTML = '<div class="vazio">Faça login para ver suas notificações. <a href="login.html">Entrar</a></div>';
-} else {
-  atualizar();
-}
-// Polling leve a cada 60s (não agressivo)
-setInterval(atualizar, 60_000);
+let notificacoesAtivas = false;
+(async function initNotificacoes() {
+  try { await authInit(); } catch (_) {}
+  if (!authTokens.getAccess()) {
+    document.getElementById('feed').innerHTML = '<div class="vazio">Sessão expirada. <a href="login.html">Entrar novamente</a></div>';
+    return;
+  }
+  notificacoesAtivas = true;
+  await atualizar();
+})();
+// Polling leve a cada 60s somente depois de uma sessão válida.
+setInterval(() => { if (notificacoesAtivas) atualizar().catch(() => {}); }, 60_000);
 </script>
-<script src="empresa-shell.js?v=20260803shell2"></script>
+<script src="empresa-shell.js?v=20260803shell3"></script>
 </body>
 </html>
