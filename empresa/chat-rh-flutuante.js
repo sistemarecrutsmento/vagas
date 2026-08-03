@@ -7,10 +7,12 @@
 (function() {
   'use strict';
 
-  const token = localStorage.getItem('empresa_token');
-  if (!token) return;
-
   const API = 'https://recrutamento-api-novo.onrender.com';
+  // Pode existir apenas refresh token enquanto a sessão é renovada.
+  if (!localStorage.getItem('empresa_token') && !localStorage.getItem('empresa_refresh')) return;
+  const apiFetch = (url, opts = {}) => typeof window.authFetch === 'function'
+    ? window.authFetch(url, opts)
+    : fetch(url, opts);
   let conversas = [];
   let conversaAtiva = null;
   let aberto = false;
@@ -136,9 +138,7 @@
   // === API ===
   async function carregarConversas() {
     try {
-      const r = await fetch(API + '/api/empresa/chat-rh-lista', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const r = await apiFetch(API + '/api/empresa/chat-rh-lista');
       if (!r.ok) return;
       const data = await r.json();
       conversas = data.conversas || [];
@@ -214,9 +214,7 @@
     document.getElementById('cr-head-titulo').textContent = c.candidato_nome || 'Candidato';
     document.getElementById('cr-head-sub').textContent = c.vaga_titulo || '';
     try {
-      const r = await fetch(API + '/api/empresa/candidatura/' + conversaAtiva + '/chat', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const r = await apiFetch(API + '/api/empresa/candidatura/' + conversaAtiva + '/chat');
       if (!r.ok) return;
       const data = await r.json();
       const msgs = data.mensagens || [];
@@ -248,9 +246,9 @@
     const btn = document.getElementById('cr-send-btn');
     btn.disabled = true;
     try {
-      const r = await fetch(API + '/api/empresa/candidatura/' + conversaAtiva + '/chat', {
+      const r = await apiFetch(API + '/api/empresa/candidatura/' + conversaAtiva + '/chat', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mensagem: txt })
       });
       if (r.ok) {
