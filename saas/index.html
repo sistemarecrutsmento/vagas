@@ -1,82 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SaaS Admin · Vagas.io</title>
-  <style>
-    :root { --vinho: #722F37; --dourado: #C9A961; }
-    body { font-family: -apple-system, sans-serif; background: #f7f5f2; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-    .card { background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,.08); width: 360px; }
-    h1 { color: var(--vinho); font-size: 22px; margin: 0 0 4px; }
-    p { color: #666; font-size: 13px; margin: 0 0 24px; }
-    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #333; }
-    input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
-    input:focus { border-color: var(--vinho); outline: none; }
-    button { width: 100%; padding: 12px; background: var(--vinho); color: #fff; border: 0; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
-    button:hover { opacity: 0.9; }
-    .erro { color: #c00; font-size: 13px; margin-top: 8px; display: none; }
-    .nav-links { margin-top: 20px; text-align: center; font-size: 13px; }
-    .nav-links a { color: var(--vinho); text-decoration: none; margin: 0 8px; }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Controle Global | VagasIO</title>
+  <link rel="stylesheet" href="saas-shell.css?v=20260803-1">
 </head>
-<body>
-  <div class="card">
-    <h1>⚙️ SaaS Admin</h1>
-    <p>Administração global da plataforma Vagas.io</p>
-    <label>E-mail</label>
-    <input type="email" id="email" placeholder="admin@vagasio.com.br" />
-    <label>Senha</label>
-    <input type="password" id="senha" placeholder="••••••••" />
-    <button id="btn-login">Entrar</button>
-    <div class="erro" id="erro"></div>
-    <div class="nav-links">
-      <a href="equipe.html">👥 Equipe</a>
-      <a href="empresas.html">🏢 Empresas</a>
-      <a href="analytics.html">📊 Analytics</a>
-      <a href="auditoria.html">🔍 Auditoria</a>
+<body class="auth-page">
+  <main class="auth-card" aria-labelledby="titulo-login">
+    <div class="auth-brand">
+      <div class="brand-mark">V</div>
+      <div>
+        <div class="brand-name" style="color:var(--wine-800)">Vagas<span>IO</span></div>
+        <span class="brand-sub" style="color:var(--muted)">Controle global</span>
+      </div>
     </div>
-  </div>
+    <h1 class="auth-title" id="titulo-login">Acesso administrativo</h1>
+    <p class="auth-subtitle">Gerencie empresas, usuários e a operação do VagasIO em um único ambiente.</p>
+    <form id="login-form" novalidate>
+      <div class="form-field">
+        <label for="email">E-mail</label>
+        <input class="input" id="email" name="email" type="email" autocomplete="username" placeholder="Digite seu e-mail" required>
+      </div>
+      <div class="form-field">
+        <label for="senha">Senha</label>
+        <input class="input" id="senha" name="senha" type="password" autocomplete="current-password" placeholder="Digite sua senha" required>
+      </div>
+      <button class="btn btn-primary" id="btn-login" type="submit">Entrar no painel</button>
+      <div class="auth-error" id="erro" role="alert"></div>
+    </form>
+    <div class="auth-footer">Área restrita • Acesso protegido por autenticação</div>
+  </main>
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
+    const form = document.getElementById('login-form');
     const btn = document.getElementById('btn-login');
-    const erroEl = document.getElementById('erro');
-
-    if (localStorage.getItem('admin_token')) {
-      window.location.href = 'equipe.html';
+    const erro = document.getElementById('erro');
+    if (localStorage.getItem('admin_token') || localStorage.getItem('saas_token')) {
+      window.location.replace('dashboard.html');
     }
-
-    btn.addEventListener('click', async () => {
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      erro.style.display = 'none';
       const email = document.getElementById('email').value.trim();
       const senha = document.getElementById('senha').value;
-      erroEl.style.display = 'none';
-      btn.disabled = true;
+      if (!email || !senha) { erro.textContent = 'Informe seu e-mail e sua senha.'; erro.style.display = 'block'; return; }
+      btn.disabled = true; btn.textContent = 'Entrando…';
       try {
-        const r = await fetch(API + '/api/admin/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch(API + '/api/admin/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, senha })
         });
-        const data = await r.json();
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.erro || 'Não foi possível entrar.');
         if (data.requer_2fa) {
           localStorage.setItem('admin_login_email', email);
           localStorage.setItem('admin_login_2fa_id', data.codigo_id || '');
-          window.location.href = '2fa.html';
+          window.location.replace('2fa.html');
           return;
         }
-        if (!data.token) throw new Error(data.erro || 'Falha no login');
+        if (!data.token) throw new Error('A API não retornou uma sessão válida.');
         localStorage.setItem('admin_token', data.token);
-        window.location.href = 'equipe.html';
-      } catch (e) {
-        erroEl.textContent = e.message;
-        erroEl.style.display = 'block';
+        if (data.refreshToken) localStorage.setItem('admin_refresh', data.refreshToken);
+        if (data.usuario) localStorage.setItem('admin_usuario', JSON.stringify(data.usuario));
+        window.location.replace('dashboard.html');
+      } catch (error) {
+        erro.textContent = error.message || 'Erro ao entrar.';
+        erro.style.display = 'block';
       } finally {
-        btn.disabled = false;
+        btn.disabled = false; btn.textContent = 'Entrar no painel';
       }
-    });
-
-    document.getElementById('senha').addEventListener('keydown', e => {
-      if (e.key === 'Enter') btn.click();
     });
   </script>
 </body>
