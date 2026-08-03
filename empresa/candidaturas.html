@@ -26,7 +26,7 @@
     .nav-item { display: block; padding: 10px 12px; color: rgba(255,255,255,0.75); text-decoration: none; border-radius: 8px; cursor: pointer; margin-bottom: 4px; font-size: 14px; }
     .nav-item:hover, .nav-item.ativo { background: rgba(255,255,255,0.1); color: #fff; }
     .aside-user { margin-top: auto; padding: 16px 8px 8px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
-    .aside-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
     .aside-user-info { flex: 1; min-width: 0; }
     .aside-user-info .nome { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .aside-user-info .empresa { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -57,31 +57,31 @@
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
-  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell2">
+  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell3">
 </head>
 <body>
   <div class="app">
-    <aside>
-      <div class="aside-logo">
-        <h1>VagasIO</h1>
-        <small>Portal da Empresa</small>
-      </div>
+    <aside class="empresa-shell-sidebar" aria-label="Navegação do Portal Empresa">
+      <button class="empresa-shell-close menu-close" type="button" onclick="this.closest('aside').classList.remove('empresa-shell-open','aberto');" aria-label="Fechar menu">✕</button>
+      <div class="empresa-shell-logo aside-logo"><h1>VagasIO</h1><small>Portal da Empresa</small></div>
+      <nav class="empresa-shell-nav">
       <a class="nav-item" href="index.html">📊 Dashboard</a>
       <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
       <a class="nav-item" href="base-candidatos.html">👥 Base de Talentos</a>
-      <a class="nav-item ativo" href="candidaturas.html">📋 Vagas com Candidatos</a>
+      <a class="nav-item ativo" href="vagas.html">📋 Vagas com Candidatos</a>
       <a class="nav-item" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="chat.html">💬 Chat</a>
+      <a class="nav-item" href="analytics.html">📈 Analytics</a>
+      <a class="nav-item" href="notificacoes.html">🔔 Notificações</a>
       <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
-      <a class="nav-item" href="usuarios.html">👥 Equipe</a>
-      <a class="nav-item" href="../" style="opacity:0.7;">🏡 Voltar pro site</a>
-      <div class="aside-user">
-        <div class="aside-user-avatar" id="aside-user-avatar">--</div>
-        <div class="aside-user-info">
-          <div class="nome" id="aside-user-nome">--</div>
-          <div class="empresa" id="aside-user-empresa">--</div>
-        </div>
-        <button class="btn-logout" onclick="empresaSair()" title="Sair">↪</button>
+      <a class="nav-item" id="nav-equipe" style="display:none;" href="usuarios.html">👥 Equipe</a>
+      </nav>
+      <div class="nav-divisor">Links</div>
+      <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
+      <div class="empresa-shell-user aside-user">
+        <div class="empresa-shell-avatar aside-user-avatar" id="avatar">--</div>
+        <div class="empresa-shell-user-info aside-user-info"><div class="nome" id="user-nome">--</div><div class="empresa" id="user-empresa">--</div><span id="user-role" style="display:none"></span></div>
+        <button class="empresa-shell-logout btn-logout" type="button" onclick="if (typeof empresaSair === 'function') empresaSair(); else { localStorage.clear(); location.href='login.html'; }" title="Sair">↪</button>
       </div>
     </aside>
     <main>
@@ -114,9 +114,9 @@
         const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
         const nome = payload.nome || 'Admin';
         const iniciais = nome.split(/\s+/).map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
-        const elAvatar = document.getElementById('aside-user-avatar');
-        const elNome = document.getElementById('aside-user-nome');
-        const elEmpresa = document.getElementById('aside-user-empresa');
+        const elAvatar = document.getElementById('avatar');
+        const elNome = document.getElementById('user-nome');
+        const elEmpresa = document.getElementById('user-empresa');
         if (elAvatar) elAvatar.textContent = iniciais || 'A';
         if (elNome) elNome.textContent = nome;
         if (elEmpresa) elEmpresa.textContent = payload.email || '';
@@ -168,6 +168,6 @@
     })();
   </script>
 <script src="chat-rh-flutuante.js?v=20260803"></script>
-<script src="empresa-shell.js?v=20260803shell2"></script>
+<script src="empresa-shell.js?v=20260803shell3"></script>
 </body>
 </html>
