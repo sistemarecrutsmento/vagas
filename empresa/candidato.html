@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Candidato · Portal Empresa · Vagas.io</title>
+  <title>Candidato · Portal Empresa · VagasIO</title>
   <!-- CSS é inline (<style>) neste arquivo; link externo removido -->
   <style>
     :root {
@@ -134,7 +134,7 @@
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
     const token = localStorage.getItem('empresa_token');
-    if (!token) window.location.href = 'login.html';
+    if (!token && !localStorage.getItem('empresa_refresh')) window.location.href = 'login.html';
 
     const url = new URL(window.location.href);
     const candId = url.searchParams.get('id');
@@ -147,6 +147,10 @@
       if (!nome) return '?';
       return nome.split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
     }
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+    }
+    function escAttr(s) { return esc(s).replace(/`/g, '&#096;'); }
 
     function formatarData(s) {
       if (!s) return '—';
@@ -158,7 +162,6 @@
 
     function sair() {
       if (confirm('Sair do portal?')) empresaSair();
-    }
     }
 
     function toast(msg, tipo = '') {
@@ -256,8 +259,8 @@
       const podeAgir = c.status === 'em_andamento' && etapaNum >= 4;
 
       const fotoHtml = c.foto_url
-        ? `<div class="cand-foto"><img src="${c.foto_url}" alt=""></div>`
-        : `<div class="cand-foto">${iniciais(c.nome)}</div>`;
+        ? `<div class="cand-foto"><img src="${escAttr(c.foto_url)}" alt=""></div>`
+        : `<div class="cand-foto">${esc(iniciais(c.nome))}</div>`;
 
       // Timeline
       let timelineHtml = '<div class="etapa-linha">';
@@ -267,7 +270,7 @@
         timelineHtml += `
           <div class="etapa-item">
             <div class="bola ${cls}">${i < etapaNum ? '✓' : i}</div>
-            <div class="nome ${cls}">${nome}</div>
+            <div class="nome ${cls}">${esc(nome)}</div>
           </div>
         `;
       }
@@ -283,7 +286,7 @@
         acoesHtml = `
           <div class="acoes">
             <h2>Avaliação da empresa</h2>
-            <p class="aviso">Você está na etapa "${etapasArr[etapaNum-1] || 'atual'}". Como recrutador, decida:</p>
+            <p class="aviso">Você está na etapa "${esc(etapasArr[etapaNum-1] || 'atual')}". Como recrutador, decida:</p>
             <button class="btn-aprovar" onclick="abrirModal('avancar')">✓ Aprovar e avançar</button>
             <button class="btn-reprovar" onclick="abrirModal('reprovar')">✗ Reprovar</button>
           </div>
@@ -294,7 +297,7 @@
             <h2>Avaliação da empresa</h2>
             <div class="etapa-bloqueada">
               🔒 A empresa só pode agir a partir da etapa "Entrevista com Gestor/Empresa".<br>
-              Este candidato está na etapa ${etapaNum} de ${totalEtapas}: <strong>${etapasArr[etapaNum-1] || 'atual'}</strong>.
+              Este candidato está na etapa ${etapaNum} de ${totalEtapas}: <strong>${esc(etapasArr[etapaNum-1] || 'atual')}</strong>.
             </div>
           </div>
         `;
@@ -304,9 +307,9 @@
         <div class="cand-header">
           ${fotoHtml}
           <div class="cand-titulo">
-            <h1>${c.nome}</h1>
-            <div class="vaga">📋 ${c.vaga_titulo || '--'}</div>
-            <div class="contato">${c.email || ''} ${c.celular ? ' · ' + c.celular : ''}</div>
+            <h1>${esc(c.nome || 'Candidato')}</h1>
+            <div class="vaga">📋 ${esc(c.vaga_titulo || '--')}</div>
+            <div class="contato">${esc(c.email || '')} ${c.celular ? ' · ' + esc(c.celular) : ''}</div>
           </div>
         </div>
 
@@ -320,35 +323,49 @@
         <div class="grid-2">
           <div class="bloco">
             <h2>📍 Endereço</h2>
-            ${c.cidade ? `<div class="campo"><span class="lbl">Cidade/UF</span><span class="val">${c.cidade || '--'}${c.estado ? ' / ' + c.estado : ''}</span></div>` : ''}
-            ${c.cep ? `<div class="campo"><span class="lbl">CEP</span><span class="val">${c.cep}</span></div>` : ''}
-            ${c.bairro ? `<div class="campo"><span class="lbl">Bairro</span><span class="val">${c.bairro}</span></div>` : ''}
-            ${c.logradouro ? `<div class="campo"><span class="lbl">Logradouro</span><span class="val">${c.logradouro}${c.numero ? ', ' + c.numero : ''}</span></div>` : ''}
+            ${c.cidade ? `<div class="campo"><span class="lbl">Cidade/UF</span><span class="val">${esc(c.cidade || '--')}${c.estado ? ' / ' + esc(c.estado) : ''}</span></div>` : ''}
+            ${c.cep ? `<div class="campo"><span class="lbl">CEP</span><span class="val">${esc(c.cep)}</span></div>` : ''}
+            ${c.bairro ? `<div class="campo"><span class="lbl">Bairro</span><span class="val">${esc(c.bairro)}</span></div>` : ''}
+            ${c.logradouro ? `<div class="campo"><span class="lbl">Logradouro</span><span class="val">${esc(c.logradouro)}${c.numero ? ', ' + esc(c.numero) : ''}</span></div>` : ''}
             ${(!c.cidade && !c.cep) ? '<div style="color:#999;font-size:13px;">Não informado</div>' : ''}
           </div>
           <div class="bloco">
             <h2>👤 Dados pessoais</h2>
-            ${c.cpf ? `<div class="campo"><span class="lbl">CPF</span><span class="val">${c.cpf}</span></div>` : ''}
-            ${c.data_nascimento ? `<div class="campo"><span class="lbl">Nascimento</span><span class="val">${formatarData(c.data_nascimento)}</span></div>` : ''}
-            ${c.sexo ? `<div class="campo"><span class="lbl">Sexo</span><span class="val">${c.sexo}</span></div>` : ''}
-            ${c.escolaridade ? `<div class="campo"><span class="lbl">Escolaridade</span><span class="val">${c.escolaridade}</span></div>` : ''}
+            ${c.cpf ? `<div class="campo"><span class="lbl">CPF</span><span class="val">${esc(c.cpf)}</span></div>` : ''}
+            ${c.data_nascimento ? `<div class="campo"><span class="lbl">Nascimento</span><span class="val">${esc(formatarData(c.data_nascimento))}</span></div>` : ''}
+            ${c.sexo ? `<div class="campo"><span class="lbl">Sexo</span><span class="val">${esc(c.sexo)}</span></div>` : ''}
+            ${c.escolaridade ? `<div class="campo"><span class="lbl">Escolaridade</span><span class="val">${esc(c.escolaridade)}</span></div>` : ''}
           </div>
         </div>
 
         ${(c.experiencia || c.sobre_voce) ? `
           <div class="bloco" style="margin-bottom:24px;">
-            ${c.experiencia ? `<h2>💼 Experiência</h2><div class="texto-longo" style="margin-bottom:16px;">${c.experiencia}</div>` : ''}
-            ${c.sobre_voce ? `<h2>📝 Sobre o candidato</h2><div class="texto-longo">${c.sobre_voce}</div>` : ''}
+            ${c.experiencia ? `<h2>💼 Experiência</h2><div class="texto-longo" style="margin-bottom:16px;">${esc(c.experiencia)}</div>` : ''}
+            ${c.sobre_voce ? `<h2>📝 Sobre o candidato</h2><div class="texto-longo">${esc(c.sobre_voce)}</div>` : ''}
           </div>
         ` : ''}
       `;
     }
 
-    carregar();
   </script>
 <script src="auth-helper.js?v=fase3_2026_07_28"></script>
   <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
   <script src="empresa-auth-patch.js?v=fase3_2026_07_28"></script>
+  <script>
+    (async function() {
+      setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
+      try { await authInit(); } catch (_) {}
+      if (!localStorage.getItem('empresa_token')) { window.location.href = 'login.html'; return; }
+      const u = authRBAC.currentUser() || {};
+      const avatar = document.getElementById('avatar');
+      const nome = document.getElementById('user-nome');
+      const empresa = document.getElementById('user-empresa');
+      if (avatar && u.nome) avatar.textContent = u.nome.split(' ').filter(Boolean).slice(0,2).map(s => s[0].toUpperCase()).join('');
+      if (nome) nome.textContent = u.nome || '—';
+      if (empresa) empresa.textContent = (u.empresa_nome || u.email || '—');
+      carregar();
+    })();
+  </script>
 <script src="chat-rh-flutuante.js?v=20260726b"></script>
 </body>
 </html>
