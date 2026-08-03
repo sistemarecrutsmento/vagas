@@ -442,14 +442,14 @@
           return '<div class="exp-item-admin">' +
             '<div class="exp-item-num">' + (i + 1) + '</div>' +
             '<div class="exp-item-corpo">' +
-              '<div class="exp-item-titulo"><strong>' + (e.cargo || '—') + '</strong> em ' + (e.empresa || '—') + '</div>' +
+              '<div class="exp-item-titulo"><strong>' + escapeHtml(e.cargo || '—') + '</strong> em ' + escapeHtml(e.empresa || '—') + '</div>' +
               '<div class="exp-item-periodo">' + ini + (fim ? ' — ' + fim : '') + '</div>' +
-              (e.descricao ? '<div class="exp-item-desc">' + e.descricao + '</div>' : '') +
+              (e.descricao ? '<div class="exp-item-desc">' + escapeHtml(e.descricao) + '</div>' : '') +
             '</div>' +
             '</div>';
         }).join('') + '</div>';
       } else if (c.experiencia) {
-        expsHtml = '<div style="padding:10px;border-left:3px solid var(--vinho);background:#FAFAFA;font-size:14px;white-space:pre-wrap">' + c.experiencia + '</div>';
+        expsHtml = '<div style="padding:10px;border-left:3px solid var(--vinho);background:#FAFAFA;font-size:14px;white-space:pre-wrap">' + escapeHtml(c.experiencia) + '</div>';
       } else {
         expsHtml = '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma experiência informada.</p>';
       }
@@ -624,7 +624,7 @@
           ? '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
               '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Link do Google Meet:</div>' +
               '<div style="display:flex; gap:8px; align-items:center;">' +
-                '<a href="' + e.link_reuniao + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + e.link_reuniao + '</a>' +
+                '<a href="' + escapeHtml(e.link_reuniao) + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + escapeHtml(e.link_reuniao) + '</a>' +
                 '<button type="button" onclick="navigator.clipboard.writeText(\'' + e.link_reuniao + '\').then(function(b){b.textContent=\'✅ Copiado!\'; setTimeout(function(){b.textContent=\'📋 Copiar\';}, 2000)})" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
               '</div>' +
             '</div>'
@@ -753,8 +753,8 @@
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>' +
             'Voltar' +
           '</button>' +
-          '<h1><span id="v-build" style="display:none">V2</span> ' + (c.nome || 'Candidato') + '</h1>' +
-          '<div class="sub">' + (c.titulo || 'Vaga') + (c.v_cidade ? ' • ' + c.v_cidade : '') + '</div>' +
+          '<h1><span id="v-build" style="display:none">V2</span> ' + escapeHtml(c.nome || 'Candidato') + '</h1>' +
+          '<div class="sub">' + escapeHtml(c.titulo || 'Vaga') + (c.v_cidade ? ' • ' + escapeHtml(c.v_cidade) : '') + '</div>' +
           '<span class="status-pill status-' + status + '">' + (status === 'em_analise' ? 'Em análise' : status === 'em_andamento' ? 'Em andamento' : status === 'contratado' ? 'Contratado' : status === 'reprovado' ? 'Reprovado' : status === 'rejeitado' ? 'Reprovado' : status === 'aprovado' ? 'Aprovado' : status) + '</span>' +
         '</div>' +
 
@@ -777,16 +777,16 @@
         // 3) Dados Pessoais + Endereço (SEM "sobre você")
         '<div class="card" id="card-dados-pessoais">' +
           '<div class="dados-pessoais-header">' +
-            (c.foto_url ? '<img class="dados-foto" src="' + c.foto_url + '" alt="Foto de ' + (c.nome || 'Candidato') + '" onerror="this.style.display=\'none\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
+            (c.foto_url ? '<img class="dados-foto" src="' + escapeHtml(c.foto_url) + '" alt="Foto de ' + escapeHtml(c.nome || 'Candidato') + '" onerror="this.style.display=\'none\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
             '<h2 style="margin:0">👤 Dados Pessoais</h2>' +
           '</div>' +
           '<div class="grid-2">' +
-            '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (c.email || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + (c.celular || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">CPF</div><div class="field-value">' + (c.cpf || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Email</div><div class="field-value">' + escapeHtml(c.email || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + escapeHtml(c.celular || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">CPF</div><div class="field-value">' + escapeHtml(c.cpf || '—') + '</div></div>' +
             '<div class="field"><div class="field-label">Data de Nascimento</div><div class="field-value">' + (fmtData(c.data_nascimento) || '—') + '</div></div>' +
-            (c.sexo ? '<div class="field"><div class="field-label">Sexo</div><div class="field-value">' + (c.sexo === 'M' ? 'Masculino' : c.sexo === 'F' ? 'Feminino' : c.sexo === 'O' ? 'Outro' : c.sexo) + '</div></div>' : '') +
-            (c.acessibilidade ? '<div class="field"><div class="field-label">Acessibilidade</div><div class="field-value">' + c.acessibilidade + '</div></div>' : '') +
+            (c.sexo ? '<div class="field"><div class="field-label">Sexo</div><div class="field-value">' + escapeHtml(c.sexo === 'M' ? 'Masculino' : c.sexo === 'F' ? 'Feminino' : c.sexo === 'O' ? 'Outro' : c.sexo) + '</div></div>' : '') +
+            (c.acessibilidade ? '<div class="field"><div class="field-label">Acessibilidade</div><div class="field-value">' + escapeHtml(c.acessibilidade) + '</div></div>' : '') +
             '<div class="field" style="grid-column:1 / -1"><div class="field-label">Endereço</div><div class="field-value">' + (endCompleto || '—') + '</div></div>' +
           '</div>' +
         '</div>' +
