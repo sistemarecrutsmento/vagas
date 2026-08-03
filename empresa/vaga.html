@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vaga · Portal Empresa · Vagas.io</title>
+  <title>Vaga · Portal Empresa · VagasIO</title>
   <!-- CSS é inline (<style>) neste arquivo; link externo removido -->
   <style>
     :root {
@@ -120,7 +120,7 @@
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
     const token = localStorage.getItem('empresa_token');
-    if (!token) window.location.href = 'login.html';
+    if (!token && !localStorage.getItem('empresa_refresh')) window.location.href = 'login.html';
 
     const url = new URL(window.location.href);
     const vagaId = url.searchParams.get('id');
@@ -136,7 +136,6 @@
 
     function sair() {
       if (confirm('Sair do portal?')) empresaSair();
-    }
     }
 
     function toast(msg, tipo = '') {
@@ -234,11 +233,25 @@
       }
     }
 
-    carregar();
   </script>
 <script src="auth-helper.js?v=fase3_2026_07_28"></script>
   <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
   <script src="empresa-auth-patch.js?v=fase3_2026_07_28"></script>
+  <script>
+    (async function() {
+      setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
+      try { await authInit(); } catch (_) {}
+      if (!localStorage.getItem('empresa_token')) { window.location.href = 'login.html'; return; }
+      const u = authRBAC.currentUser() || {};
+      const avatar = document.getElementById('avatar');
+      const nome = document.getElementById('user-nome');
+      const empresa = document.getElementById('user-empresa');
+      if (avatar && u.nome) avatar.textContent = u.nome.split(' ').filter(Boolean).slice(0,2).map(s => s[0].toUpperCase()).join('');
+      if (nome) nome.textContent = u.nome || '—';
+      if (empresa) empresa.textContent = (u.empresa_nome || u.email || '—');
+      carregar();
+    })();
+  </script>
 <script src="chat-rh-flutuante.js?v=20260726b"></script>
 </body>
 </html>
