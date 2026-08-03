@@ -243,7 +243,7 @@
   let vagaId = null;
   let completionMode = 'vaga';
 
-  const token = localStorage.getItem('empresa_token');
+  let token = localStorage.getItem('empresa_token');
   if (!token && !localStorage.getItem('empresa_refresh')) { window.location.href = 'login.html'; }
 
   const STEPS = 4;
@@ -404,7 +404,12 @@
       }
     } catch(e) {}
   }
-  precarregar();
+  (async function initOnboarding() {
+    try { await authInit(); } catch (_) {}
+    token = localStorage.getItem('empresa_token') || '';
+    if (!token) { window.location.href = 'login.html'; return; }
+    precarregar();
+  })();
 </script>
 </body>
 </html>
