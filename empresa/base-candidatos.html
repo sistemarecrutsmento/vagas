@@ -43,30 +43,32 @@
     .empty-state { text-align:center; padding:60px 20px; color:#999; }
     .empty-state .ico { font-size:48px; margin-bottom:12px; }
   </style>
-  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell2">
+  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell3">
 </head>
 <body>
   <button class="menu-toggle" onclick="document.querySelector('aside').classList.add('aberto'); document.querySelector('.app').classList.add('aside-aberto');" aria-label="Abrir menu">☰</button>
   <div class="app">
-    <aside>
-      <button class="menu-close" onclick="document.querySelector('aside').classList.remove('aberto'); document.querySelector('.app').classList.remove('aside-aberto');" aria-label="Fechar menu">✕</button>
-      <div class="aside-logo"><h1>VagasIO</h1><small>Portal da Empresa</small></div>
+    <aside class="empresa-shell-sidebar" aria-label="Navegação do Portal Empresa">
+      <button class="empresa-shell-close menu-close" type="button" onclick="this.closest('aside').classList.remove('empresa-shell-open','aberto');" aria-label="Fechar menu">✕</button>
+      <div class="empresa-shell-logo aside-logo"><h1>VagasIO</h1><small>Portal da Empresa</small></div>
+      <nav class="empresa-shell-nav">
       <a class="nav-item" href="index.html">📊 Dashboard</a>
-      <a class="nav-item" href="vagas.html">📋 Vagas</a>
-      <a class="nav-item ativo" href="base-candidatos.html">👥 Base de Candidatos</a>
+      <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
+      <a class="nav-item ativo" href="base-candidatos.html">👥 Base de Talentos</a>
+      <a class="nav-item" href="vagas.html">📋 Vagas com Candidatos</a>
       <a class="nav-item" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="chat.html">💬 Chat</a>
+      <a class="nav-item" href="analytics.html">📈 Analytics</a>
+      <a class="nav-item" href="notificacoes.html">🔔 Notificações</a>
       <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
-      <a class="nav-item" id="nav-equipe" href="usuarios.html" style="display:none;">👤 Equipe</a>
+      <a class="nav-item" id="nav-equipe" style="display:none;" href="usuarios.html">👥 Equipe</a>
+      </nav>
       <div class="nav-divisor">Links</div>
-      <a class="nav-item" href="../candidato/">👤 Portal Candidato</a>
-      <div class="aside-user">
-        <div class="aside-user-avatar" id="avatar">--</div>
-        <div class="aside-user-info">
-          <div class="nome" id="user-nome">--</div>
-          <div class="empresa" id="user-empresa">--</div>
-        </div>
-        <button class="btn-logout" onclick="sair()" title="Sair">↪</button>
+      <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
+      <div class="empresa-shell-user aside-user">
+        <div class="empresa-shell-avatar aside-user-avatar" id="avatar">--</div>
+        <div class="empresa-shell-user-info aside-user-info"><div class="nome" id="user-nome">--</div><div class="empresa" id="user-empresa">--</div><span id="user-role" style="display:none"></span></div>
+        <button class="empresa-shell-logout btn-logout" type="button" onclick="if (typeof empresaSair === 'function') empresaSair(); else { localStorage.clear(); location.href='login.html'; }" title="Sair">↪</button>
       </div>
     </aside>
     <main>
@@ -141,10 +143,7 @@
       document.getElementById('paginacao').innerHTML = '';
 
       try {
-        const token = localStorage.getItem('empresa_token');
-        const r = await fetch(`/api/empresa/candidatos?${params}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const r = await authFetch(API + `/api/empresa/candidatos?${params}`);
         const d = await r.json();
         if (!r.ok) { grid.innerHTML = `<div class="empty-state"><p>Erro: ${d.erro || r.status}</p></div>`; return; }
 
@@ -222,13 +221,18 @@
       if (e.key === 'Enter') buscar(1);
     });
 
-    // Auto-busca ao abrir com ?q= ou ?vaga_id= na URL
-    const url = new URLSearchParams(location.search);
-    if (url.get('q') || url.get('vaga_id')) {
-      if (url.get('q')) document.getElementById('q').value = url.get('q');
-      buscar(1);
-    }
+    // Inicializa depois do refresh silencioso para não disparar a busca
+    // antes de existir um access token válido.
+    (async function initBaseCandidatos() {
+      try { await authInit(); } catch (_) {}
+      if (!localStorage.getItem('empresa_token')) { window.location.href = 'login.html'; return; }
+      const url = new URLSearchParams(location.search);
+      if (url.get('q') || url.get('vaga_id')) {
+        if (url.get('q')) document.getElementById('q').value = url.get('q');
+        buscar(1);
+      }
+    })();
   </script>
-<script src="empresa-shell.js?v=20260803shell2"></script>
+<script src="empresa-shell.js?v=20260803shell3"></script>
 </body>
 </html>
