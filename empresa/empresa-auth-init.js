@@ -33,6 +33,15 @@
     }
   }
 
+  // Todas as páginas que carregam este init são privadas. Depois de tentar
+  // renovar a sessão, impede que uma tela vazia seja exibida sem login.
+  const access = window.authTokens?.getAccess?.();
+  if (!access) {
+    const current = window.location.pathname.split('/').pop() || '';
+    if (current !== 'login.html') window.location.replace('login.html');
+    return;
+  }
+
   // Expõe helper global de logout
   window.empresaSair = function() {
     if (typeof window.authLogout === 'function') {
