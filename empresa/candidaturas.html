@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vagas com Candidatos — Admin</title>
+  <title>Vagas com Candidatos — Portal Empresa</title>
   <style>
     :root {
       --vinho: #7B1F1F;
@@ -62,16 +62,16 @@
   <div class="app">
     <aside>
       <div class="aside-logo">
-        <h1>Admin</h1>
-        <small>VagasIO</small>
+        <h1>VagasIO</h1>
+        <small>Portal da Empresa</small>
       </div>
       <a class="nav-item" href="index.html">📊 Dashboard</a>
-      <a class="nav-item" href="index.html?page=vagas">💼 Vagas</a>
-      <a class="nav-item" href="index.html?page=candidatos">👥 Base de Talentos</a>
+      <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
       <a class="nav-item" href="base-candidatos.html">👥 Base de Talentos</a>
       <a class="nav-item ativo" href="candidaturas.html">📋 Vagas com Candidatos</a>
       <a class="nav-item" href="agenda.html">📅 Agenda</a>
       <a class="nav-item" href="chat.html">💬 Chat</a>
+      <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
       <a class="nav-item" href="usuarios.html">👥 Equipe</a>
       <a class="nav-item" href="../" style="opacity:0.7;">🏡 Voltar pro site</a>
       <div class="aside-user">
@@ -102,7 +102,7 @@
     const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
     const token = localStorage.getItem('empresa_token');
 
-    if (!token && !localStorage.getItem('empresa_refresh')) { window.location.href = 'index.html'; }
+    if (!token && !localStorage.getItem('empresa_refresh')) { window.location.href = 'login.html'; }
 
     function carregarUsuarioSidebar() {
       try {
@@ -130,7 +130,7 @@
         });
         if (r.status === 401 || r.status === 403) {
           localStorage.removeItem('empresa_token');
-          window.location.href = 'index.html';
+          window.location.href = 'login.html';
           return;
         }
         const data = await r.json();
@@ -159,8 +159,12 @@
       }
     }
 
-    carregar();
-    carregarUsuarioSidebar();
+    (async function initEmpresaCandidaturas() {
+      try { await authInit(); } catch (_) {}
+      if (!localStorage.getItem('empresa_token')) { window.location.href = 'login.html'; return; }
+      carregarUsuarioSidebar();
+      carregar();
+    })();
   </script>
 <script src="chat-rh-flutuante.js?v=20260803"></script>
 </body>
