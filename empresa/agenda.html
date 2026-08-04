@@ -3,26 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agenda · Portal Empresa</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="empresa.css">
+  <title>Agenda · Admin Vagas.io</title>
   <style>
-    /* === Mesma tipografia do novo dashboard === */
-    body { font-family: 'Inter', sans-serif; }
-    .topo { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 8px; }
-    .topo .left h2 { font-size: 24px; margin-bottom: 4px; }
-    .topo .left .sub { color: #666; font-size: 14px; }
+    :root {
+      --vinho: #722F37; --vinho-claro: #8a3a44; --dourado: #C9A961;
+      --bg: #f7f5f2; --card: #ffffff; --texto: #1a1a1a; --texto-suave: #666;
+      --borda: #e5e0d8; --cinza-medio: #888;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--texto); margin: 0; }
+    .app { display: flex; min-height: 100vh; }
+    aside {
+      width: 260px; background: var(--vinho); color: #fff;
+      padding: 24px 16px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+    }
+    .nav-item {
+      display: block; padding: 12px 16px; color: rgba(255,255,255,0.75);
+      text-decoration: none; border-radius: 8px; cursor: pointer;
+      margin-bottom: 4px; font-size: 14px; font-weight: 500;
+      transition: background 0.15s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .nav-item.ativo { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
+    .aside-user { margin-top: auto; padding: 16px 16px 12px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+    .aside-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .aside-user-info { flex: 1; min-width: 0; }
+    .aside-user-info .nome { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .aside-user-info .empresa { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-logout { background: rgba(255,255,255,0.1); color: #fff; border: 0; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none; }
+    .btn-logout:hover { background: rgba(255,255,255,0.2); }
+    main { flex: 1; padding: 32px; max-width: 100%; overflow-x: auto; }
+    h1 { font-size: 28px; font-weight: 800; margin: 0 0 8px; }
+    .subtitulo { color: var(--texto-suave); margin: 0 0 28px; font-size: 15px; }
 
-    /* === Filtros horizontais (mesmo estilo admin) === */
-    .filtros { display: flex; gap: 8px; margin: 20px 0 24px; flex-wrap: wrap; }
+    .topo { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+    .btn-novo {
+      background: var(--vinho); color: #fff; border: 0; padding: 12px 20px;
+      border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .btn-novo:hover { background: var(--vinho-claro); }
+
+    .filtros { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
     .filtro {
       padding: 8px 14px; background: white; border: 1px solid var(--borda);
       border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
-      color: var(--cinza-medio); font-family: inherit;
+      color: var(--texto-suave);
     }
     .filtro.ativo { background: var(--vinho); color: white; border-color: var(--vinho); }
 
-    /* === Cards de entrevista (mesmo estilo admin) === */
     .lista { display: grid; gap: 16px; }
     .entrev-card {
       background: white; padding: 20px; border-radius: 12px;
@@ -36,359 +66,573 @@
     .data-bloco .dia { font-size: 28px; font-weight: 800; line-height: 1; }
     .data-bloco .mes { font-size: 12px; opacity: 0.85; text-transform: uppercase; margin-top: 2px; }
     .data-bloco .hora { font-size: 13px; font-weight: 600; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.2); }
-    .info-cand .nome { font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--preto); }
-    .info-cand .vaga { font-size: 13px; color: var(--cinza-medio); }
+    .info-cand .nome { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .info-cand .vaga { font-size: 13px; color: var(--texto-suave); }
     .info-cand .etapa-badge {
       display: inline-block; padding: 3px 10px; border-radius: 12px;
       font-size: 11px; font-weight: 700; margin-top: 6px;
       background: var(--dourado); color: var(--vinho); text-transform: uppercase;
     }
-    .info-cand .etapa-badge.status { color: white; margin-left: 6px; }
-    .info-cand .obs { font-size: 12px; color: var(--cinza-medio); margin-top: 6px; font-style: italic; }
-
-    .acoes { display: flex; gap: 6px; flex-wrap: wrap; }
+    .acoes { display: flex; gap: 6px; }
     .btn-acao {
       background: white; color: var(--vinho); border: 1px solid var(--vinho);
       padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
-      text-decoration: none; font-family: inherit;
     }
     .btn-acao:hover { background: var(--vinho); color: white; }
+    .btn-acao.reprovar { border-color: #dc2626; color: #dc2626; }
+    .btn-acao.reprovar:hover { background: #dc2626; color: white; }
     .btn-acao.copiar { border-color: var(--dourado); color: var(--vinho); }
-    .btn-acao.copiar:hover { background: var(--dourado); color: var(--vinho-escuro); }
-    .btn-acao.analisar { border-color: #2E7D32; color: #2E7D32; }
-    .btn-acao.analisar:hover { background: #2E7D32; color: white; }
 
-    .empty { text-align: center; padding: 60px 20px; color: var(--cinza-medio); }
+    .empty { text-align: center; padding: 60px 20px; color: var(--texto-suave); }
     .empty .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
     .empty p { font-size: 15px; }
 
-    /* Toast (mesmo do admin) */
-    .toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    /* Modal */
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-bg.aberto { display: flex; }
+    .modal { background: white; border-radius: 14px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; background: var(--vinho); color: white; }
+    .modal-header h3 { font-size: 18px; font-weight: 700; margin: 0; }
+    .modal-close { background: rgba(255,255,255,0.15); border: 0; font-size: 22px; cursor: pointer; color: white; padding: 0; width: 32px; height: 32px; border-radius: 6px; }
+    .modal-close:hover { background: rgba(255,255,255,0.25); }
+    .modal-body { padding: 24px; }
+
+    /* Steps do modal */
+    .step { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--borda); }
+    .step:last-of-type { border-bottom: 0; padding-bottom: 0; }
+    .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--dourado); color: var(--vinho); font-weight: 800; font-size: 13px;
+      margin-right: 8px;
+    }
+    .step-titulo { font-size: 15px; font-weight: 700; display: flex; align-items: center; margin-bottom: 12px; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--texto); }
+    .form-group select, .form-group input, .form-group textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--borda);
+      border-radius: 6px; font-size: 14px; font-family: inherit; background: white;
+    }
+    .form-group select:focus, .form-group input:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--vinho); box-shadow: 0 0 0 3px rgba(114,47,55,0.1);
+    }
+    .form-group .hint { font-size: 12px; color: var(--texto-suave); margin-top: 4px; }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 540px) { .row-2 { grid-template-columns: 1fr; } }
+
+    /* Candidato preview card */
+    .cand-preview {
+      background: linear-gradient(135deg, #faf5ed 0%, #f7f5f2 100%);
+      border: 1px solid var(--borda); border-radius: 8px;
+      padding: 14px; margin-top: 8px; display: none;
+    }
+    .cand-preview.show { display: block; }
+    .cand-preview .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--vinho); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 18px; flex-shrink: 0;
+    }
+    .cand-preview .info { display: flex; align-items: center; gap: 12px; }
+    .cand-preview .nome { font-weight: 700; font-size: 14px; }
+    .cand-preview .vaga { font-size: 12px; color: var(--texto-suave); margin-top: 2px; }
+    .cand-preview .etapa { display: inline-block; padding: 2px 8px; background: var(--dourado); color: var(--vinho); border-radius: 10px; font-size: 10px; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
+
+    /* Slots rápidos de horário */
+    .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+    .slot {
+      padding: 8px 4px; background: white; border: 1px solid var(--borda);
+      border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+      text-align: center; color: var(--texto);
+    }
+    .slot:hover { border-color: var(--vinho); color: var(--vinho); }
+    .slot.ativo { background: var(--vinho); color: white; border-color: var(--vinho); }
+
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #fafafa; }
+    .btn { padding: 10px 20px; border: 0; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .btn-primario { background: var(--vinho); color: white; }
+    .btn-primario:hover { background: var(--vinho-claro); }
+    .btn-primario:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secundario { background: white; color: var(--texto); border: 1px solid var(--borda); }
+    .footer-info { font-size: 12px; color: var(--texto-suave); }
+
+    .status-confirmada { background: #10b981; color: white; }
+    .status-cancelada { background: #6b7280; color: white; }
+    .status-realizada { background: #3b82f6; color: white; }
+    .status-faltou { background: #dc2626; color: white; }
+
+    @media (max-width: 768px) {
+      .app { flex-direction: column; }
+      aside { width: 100%; padding: 16px; }
+      main { padding: 20px 16px; }
+      .entrev-card { grid-template-columns: auto 1fr; }
+      .acoes { grid-column: 1 / -1; justify-content: stretch; }
+      .acoes .btn-acao { flex: 1; }
+    }
   </style>
-  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell4">
+  <script src="../candidato/chat-uploader.js"></script>
 </head>
 <body>
-  <button class="menu-toggle" onclick="document.querySelector('aside').classList.add('aberto'); document.querySelector('.app').classList.add('aside-aberto');" aria-label="Abrir menu">☰</button>
-
   <div class="app">
-    <aside class="empresa-shell-sidebar" aria-label="Navegação do Portal Empresa">
-      <button class="empresa-shell-close menu-close" type="button" onclick="this.closest('aside').classList.remove('empresa-shell-open','aberto');" aria-label="Fechar menu">✕</button>
-      <div class="empresa-shell-logo aside-logo"><h1>VagasIO</h1><small>Portal da Empresa</small></div>
-      <nav class="empresa-shell-nav">
+    <aside>
+      <div style="margin-bottom:30px; padding: 0 8px;">
+        <h2 style="margin:0; font-size:18px;">Admin</h2>
+        <small style="opacity:0.7; font-size:11px;">Vagas.io</small>
+      </div>
       <a class="nav-item" href="index.html">📊 Dashboard</a>
-      <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
-      <a class="nav-item" href="base-candidatos.html">👥 Base de Talentos</a>
-      <a class="nav-item" href="vagas.html">📋 Vagas com Candidatos</a>
+      <a class="nav-item" href="index.html?page=vagas">💼 Vagas</a>
+      <a class="nav-item" href="index.html?page=candidatos">👥 Base de Talentos</a>
+      <a class="nav-item" href="index.html?page=candidaturas">📋 Vagas com Candidatos</a>
       <a class="nav-item ativo" href="agenda.html">📅 Agenda</a>
-      <a class="nav-item" href="chat.html">💬 Chat</a>
-      <a class="nav-item" href="analytics.html">📈 Analytics</a>
-      <a class="nav-item" href="notificacoes.html">🔔 Notificações</a>
-      <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
-      <a class="nav-item" id="nav-equipe" style="display:none;" href="usuarios.html">👥 Equipe</a>
-      </nav>
-      <div class="nav-divisor">Links</div>
-      <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
-      <div class="empresa-shell-user aside-user">
-        <div class="empresa-shell-avatar aside-user-avatar" id="avatar">--</div>
-        <div class="empresa-shell-user-info aside-user-info"><div class="nome" id="user-nome">--</div><div class="empresa" id="user-empresa">--</div><span id="user-role" style="display:none"></span></div>
-        <button class="empresa-shell-logout btn-logout" type="button" onclick="if (typeof empresaSair === 'function') empresaSair(); else { localStorage.removeItem('empresa_token'); localStorage.removeItem('empresa_refresh'); localStorage.removeItem('empresa_usuario'); location.href='login.html'; }" title="Sair">↪</button>
+      <a class="nav-item" href="equipe.html">👥 Equipe</a>
+      <a class="nav-item" href="../" style="opacity:0.7;">🏡 Voltar pro site</a>
+      <div class="aside-user">
+        <div class="aside-user-avatar" id="aside-user-avatar">--</div>
+        <div class="aside-user-info">
+          <div class="nome" id="aside-user-nome">--</div>
+          <div class="empresa" id="aside-user-empresa">--</div>
+        </div>
+        <a href="index.html" class="btn-logout" title="Sair">↪</a>
       </div>
     </aside>
 
     <main>
       <div class="topo">
-        <div class="left">
-          <h2>📅 Agenda de Entrevistas</h2>
-          <p class="sub">Entrevistas de RH e Gestor das suas vagas liberadas</p>
+        <div>
+          <h1>📅 Agenda de Entrevistas</h1>
+          <p class="subtitulo">Gerencie as entrevistas com candidatos. Cada agendamento gera uma sala de vídeo automaticamente.</p>
         </div>
-        <div class="right">
-          <button onclick="abrirModalEntrevistaAgenda()" style="padding:9px 16px;background:#1565C0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">📅 + Nova entrevista</button>
-        </div>
+        <button class="btn-novo" onclick="abrirModalNova()">+ Nova entrevista</button>
       </div>
 
-      <div class="filtros" id="filtros">
-        <button class="filtro ativo" data-periodo="proximos" onclick="filtrarPeriodo('proximos', this)">Próximas</button>
+      <div class="filtros">
+        <button class="filtro ativo" data-periodo="proximas" onclick="filtrarPeriodo('proximas', this)">Próximas</button>
         <button class="filtro" data-periodo="hoje" onclick="filtrarPeriodo('hoje', this)">Hoje</button>
-        <button class="filtro" data-periodo="semana" onclick="filtrarPeriodo('semana', this)">Esta semana</button>
-        <button class="filtro" data-periodo="7dias" onclick="filtrarPeriodo('7dias', this)">Próx. 7 dias</button>
-        <button class="filtro" data-periodo="30dias" onclick="filtrarPeriodo('30dias', this)">Próx. 30 dias</button>
-        <button class="filtro" data-periodo="atrasadas" onclick="filtrarPeriodo('atrasadas', this)">Atrasadas</button>
-        <button class="filtro" data-periodo="passados" onclick="filtrarPeriodo('passados', this)">Passadas</button>
-        <button class="filtro" data-periodo="realizadas" onclick="filtrarPeriodo('realizadas', this)">Realizadas</button>
-        <button class="filtro" data-periodo="canceladas" onclick="filtrarPeriodo('canceladas', this)">Canceladas</button>
-        <button class="filtro" data-periodo="" onclick="filtrarPeriodo('', this)">Todas</button>
+        <button class="filtro" data-periodo="passadas" onclick="filtrarPeriodo('passadas', this)">Passadas</button>
+        <button class="filtro" data-periodo="todas" onclick="filtrarPeriodo('todas', this)">Todas</button>
       </div>
 
-      <div style="margin: 4px 0 16px; font-size: 13px; color: var(--texto-suave); font-weight: 500;" id="contador-resultados">…</div>
-
-      <div id="lista" class="lista">
-        <div class="empty"><div class="icon">📅</div><p>Carregando...</p></div>
+      <div id="lista-entrevistas" class="lista">
+        <div class="empty">
+          <div class="icon">⏳</div>
+          <p>Carregando entrevistas...</p>
+        </div>
       </div>
     </main>
   </div>
 
-  <script>
-    const API = 'https://recrutamento-api-novo.onrender.com';
-    let token = localStorage.getItem('empresa_token');
-    const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
-    if (!token && !localStorage.getItem('empresa_refresh')) window.location.href = 'login.html';
+  <!-- Modal: Nova entrevista -->
+  <div class="modal-bg" id="modal-nova">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📅 Agendar nova entrevista</h3>
+        <button class="modal-close" onclick="fecharModalNova()">×</button>
+      </div>
+      <div class="modal-body">
 
-    const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
-    document.getElementById('avatar').textContent = (usuario.nome || '?').split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
-    document.getElementById('user-nome').textContent = usuario.nome || '--';
-    document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
+        <!-- STEP 1: Candidato -->
+        <div class="step">
+          <div class="step-titulo"><span class="step-num">1</span> Candidato e vaga</div>
+          <div class="form-group">
+            <label>Selecione o candidato</label>
+            <select id="nova-candidatura" required onchange="mostrarCandidatoPreview()">
+              <option value="">Escolha um candidato na etapa RH ou Gestor...</option>
+            </select>
+            <div class="hint">Só aparecem candidaturas nas etapas 3 (RH) ou 4 (Gestor).</div>
+          </div>
+          <div id="cand-preview" class="cand-preview"></div>
+        </div>
 
-    let periodoAtual = 'proximos';
+        <!-- STEP 2: Etapa -->
+        <div class="step">
+          <div class="step-titulo"><span class="step-num">2</span> Etapa da entrevista</div>
+          <div class="form-group" style="margin-bottom:0;">
+            <select id="nova-etapa" required>
+              <option value="3">Etapa 3 — Entrevista RH</option>
+              <option value="4">Etapa 4 — Entrevista com Gestor/Empresa</option>
+            </select>
+          </div>
+        </div>
 
-    function etapaLabel(etapa) {
-      const mapa = { 1: 'Inscrição', 2: 'Triagem', 3: 'RH', 4: 'Gestor', 5: 'Proposta', 6: 'Coleta Docs', 7: 'Contratação' };
-      return mapa[etapa] || `Etapa ${etapa}`;
+        <!-- STEP 3: Data e hora -->
+        <div class="step">
+          <div class="step-titulo"><span class="step-num">3</span> Data e horário</div>
+          <div class="row-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Data</label>
+              <input type="date" id="nova-data" required />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Hora</label>
+              <input type="time" id="nova-hora" required value="14:00" />
+            </div>
+          </div>
+          <div class="hint" style="margin-top:10px;">⏰ Horário de Brasília (UTC-3). O candidato verá a sala 15 min antes.</div>
+
+          <div style="margin-top:14px;">
+            <label style="font-size:12px; color:var(--texto-suave); display:block; margin-bottom:6px;">Horários comuns (clique pra preencher):</label>
+            <div class="slots">
+              <div class="slot" onclick="setHora('09:00')">09:00</div>
+              <div class="slot" onclick="setHora('10:00')">10:00</div>
+              <div class="slot" onclick="setHora('11:00')">11:00</div>
+              <div class="slot" onclick="setHora('14:00')">14:00</div>
+              <div class="slot" onclick="setHora('15:00')">15:00</div>
+              <div class="slot" onclick="setHora('16:00')">16:00</div>
+              <div class="slot" onclick="setHora('17:00')">17:00</div>
+              <div class="slot" onclick="setHora('18:00')">18:00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: Detalhes -->
+        <div class="step">
+          <div class="step-titulo"><span class="step-num">4</span> Detalhes</div>
+          <div class="row-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Duração</label>
+              <select id="nova-duracao">
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60" selected>1 hora</option>
+                <option value="90">1h30</option>
+                <option value="120">2 horas</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Local (opcional)</label>
+              <input type="text" id="nova-local" placeholder="Ex: Presencial - Sala 3" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:14px;">
+            <label>Observações (opcional)</label>
+            <textarea id="nova-obs" rows="2" placeholder="Ex: Trazer documento, teste prático, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="hint" style="background:#fef9e7; padding:12px; border-radius:6px; border-left:3px solid var(--dourado); margin-top:8px;">
+          💡 O link da sala de vídeo (Whereby) é gerado automaticamente. O candidato verá o agendamento e poderá entrar na sala 15 minutos antes.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="footer-info">📹 Sala de vídeo será criada</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secundario" onclick="fecharModalNova()">Cancelar</button>
+          <button class="btn btn-primario" id="btn-confirmar-nova" onclick="confirmarNova()">Agendar entrevista</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="auth-helper.js?v=empresa-old-ui1"></script>
+<script src="empresa-auth-init.js?v=empresa-old-ui1"></script>
+<script src="empresa-auth-patch.js?v=empresa-old-ui1"></script>
+<script>
+const API = 'https://recrutamento-api-novo.onrender.com';
+let token = localStorage.getItem('empresa_token') || sessionStorage.getItem('empresa_token');
+let entrevistas = [];
+let filtroAtual = 'proximas';
+
+if (!token) {
+  // Não logado, redireciona pro login
+  window.location.href = 'index.html';
+} else {
+  carregarUsuarioSidebar();
+}
+
+// === Sidebar: avatar + nome do admin logado ===
+function carregarUsuarioSidebar() {
+  try {
+    if (!token) return;
+    const parts = token.split('.');
+    if (parts.length < 2) return;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const nome = payload.nome || 'Admin';
+    const iniciais = nome.split(/\s+/).map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+    const elAvatar = document.getElementById('aside-user-avatar');
+    const elNome = document.getElementById('aside-user-nome');
+    const elEmpresa = document.getElementById('aside-user-empresa');
+    if (elAvatar) elAvatar.textContent = iniciais || 'A';
+    if (elNome) elNome.textContent = nome;
+    if (elEmpresa) elEmpresa.textContent = payload.email || '';
+  } catch (e) { /* silencioso */ }
+}
+
+// ===== Carregar entrevistas =====
+async function carregarEntrevistas() {
+  try {
+    const r = await fetch(`${API}/api/empresa/entrevistas?periodo=${filtroAtual}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!r.ok) {
+      if (r.status === 401 || r.status === 403) {
+        window.location.href = 'index.html';
+        return;
+      }
+      throw new Error('Erro ' + r.status);
     }
+    const data = await r.json();
+    entrevistas = data.entrevistas || [];
+    renderizar();
+  } catch (e) {
+    document.getElementById('lista-entrevistas').innerHTML = `
+      <div class="empty">
+        <div class="icon">❌</div>
+        <p>Erro ao carregar entrevistas: ${e.message}</p>
+      </div>`;
+  }
+}
 
-    function getStatusColor(status) {
-      const cores = {
-        'agendada': '#C9A961',
-        'confirmada': '#10b981',
-        'cancelada': '#6b7280',
-        'realizada': '#3b82f6',
-        'faltou': '#dc2626'
-      };
-      return cores[status] || '#888';
+function renderizar() {
+  const cont = document.getElementById('lista-entrevistas');
+  if (entrevistas.length === 0) {
+    cont.innerHTML = `
+      <div class="empty">
+        <div class="icon">📭</div>
+        <p>Nenhuma entrevista ${filtroAtual === 'proximas' ? 'agendada' : ''} no momento.</p>
+        <button class="btn btn-primario" onclick="abrirModalNova()" style="margin-top:16px;">+ Agendar primeira entrevista</button>
+      </div>`;
+    return;
+  }
+  cont.innerHTML = entrevistas.map(e => {
+    const data = new Date(e.data_hora);
+    const dia = data.getDate();
+    const mes = data.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+    const hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const etapaNome = e.etapa === 3 ? 'RH' : 'Gestor';
+    const statusClass = `status-${e.status}`;
+    return `
+      <div class="entrev-card">
+        <div class="data-bloco">
+          <div class="dia">${dia}</div>
+          <div class="mes">${mes}</div>
+          <div class="hora">${hora}</div>
+        </div>
+        <div class="info-cand">
+          <div class="nome">${e.candidato_nome || 'Candidato'}</div>
+          <div class="vaga">${e.vaga_titulo || ''} — ${e.vaga_empresa || ''}</div>
+          <span class="etapa-badge">Entrevista ${etapaNome}</span>
+          <span class="etapa-badge" style="background:${getStatusColor(e.status)}; color:white; margin-left:6px;">${formatarStatus(e.status)}</span>
+        </div>
+        <div class="acoes">
+          <button class="btn-acao copiar" onclick="copiarLink('${e.link_reuniao}')" title="Copiar link da sala">📋 Copiar link</button>
+          <a class="btn-acao" href="${e.link_reuniao}" target="_blank" title="Abrir sala">▶️ Abrir</a>
+          <button class="btn-acao reprovar" onclick="cancelarEntrevista(${e.id})" title="Cancelar">❌</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function getStatusColor(status) {
+  const cores = {
+    'agendada': '#C9A961',
+    'confirmada': '#10b981',
+    'cancelada': '#6b7280',
+    'realizada': '#3b82f6',
+    'faltou': '#dc2626'
+  };
+  return cores[status] || '#888';
+}
+
+function formatarStatus(status) {
+  return {
+    'agendada': 'AGENDADA',
+    'confirmada': 'CONFIRMADA',
+    'cancelada': 'CANCELADA',
+    'realizada': 'REALIZADA',
+    'faltou': 'FALTOU'
+  }[status] || status.toUpperCase();
+}
+
+function copiarLink(link) {
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('✅ Link copiado!');
+  }).catch(() => {
+    prompt('Copie o link:', link);
+  });
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a1a1a;color:white;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+async function cancelarEntrevista(id) {
+  if (!confirm('Cancelar esta entrevista?')) return;
+  try {
+    const r = await fetch(`${API}/api/empresa/entrevista/${id}`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'cancelada' })
+    });
+    if (r.ok) {
+      showToast('✅ Entrevista cancelada');
+      carregarEntrevistas();
+    } else {
+      alert('Erro ao cancelar');
     }
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
 
-    function formatarStatus(status) {
-      return {
-        'agendada': 'AGENDADA',
-        'confirmada': 'CONFIRMADA',
-        'cancelada': 'CANCELADA',
-        'realizada': 'REALIZADA',
-        'faltou': 'FALTOU'
-      }[status] || (status || '').toUpperCase();
+// ===== Filtros =====
+function filtrarPeriodo(periodo, el) {
+  filtroAtual = periodo;
+  document.querySelectorAll('.filtro').forEach(f => f.classList.remove('ativo'));
+  el.classList.add('ativo');
+  carregarEntrevistas();
+}
+
+// ===== Modal Nova =====
+let candidaturasDisponiveis = [];
+
+function setHora(hora) {
+  document.getElementById('nova-hora').value = hora;
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('ativo'));
+  if (event && event.target) event.target.classList.add('ativo');
+}
+
+async function abrirModalNova() {
+  document.getElementById('modal-nova').classList.add('aberto');
+  // Define data mínima = hoje
+  const hoje = new Date().toISOString().split('T')[0];
+  const inputData = document.getElementById('nova-data');
+  if (inputData) inputData.min = hoje;
+  // Sugere a próxima segunda como default
+  const d = new Date();
+  const dia = d.getDay();
+  const diff = dia === 0 ? 1 : (dia === 6 ? 2 : (dia < 5 ? 1 : 3));
+  d.setDate(d.getDate() + diff);
+  if (inputData) inputData.value = d.toISOString().split('T')[0];
+
+  // Carrega candidaturas em etapa 3 ou 4
+  candidaturasDisponiveis = [];
+  try {
+    let r = await fetch(`${API}/api/empresa/candidatos`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (r.ok) {
+      const data = await r.json();
+      candidaturasDisponiveis = (data.candidatos || data.candidaturas || []).map(c => ({...c, id: c.ultima_candidatura_id || c.id, candidatura_id: c.ultima_candidatura_id || c.id, candidato_nome: c.nome || c.candidato_nome, titulo: c.ultima_vaga_titulo || c.titulo || c.vaga_titulo, vaga_titulo: c.ultima_vaga_titulo || c.vaga_titulo, etapa_atual: c.ultima_etapa ?? c.etapa_atual})).filter(c => [3, 4].includes(parseInt(c.etapa_atual)));
     }
-
-    function showToast(msg) {
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 2500);
-    }
-
-    function copiarLink(link) {
-      if (!link) { showToast('Sem link pra copiar'); return; }
-      navigator.clipboard.writeText(link).then(() => {
-        showToast('✅ Link copiado!');
-      }).catch(() => {
-        prompt('Copie o link:', link);
+    if (candidaturasDisponiveis.length === 0) {
+      // Fallback: pega todas e filtra
+      r = await fetch(`${API}/api/empresa/candidatos`, {
+        headers: { 'Authorization': 'Bearer ' + token }
       });
-    }
-
-    function sair() {
-      if (confirm('Sair do portal?')) empresaSair();
-    }
-
-    function filtrarPeriodo(periodo, el) {
-      periodoAtual = periodo;
-      document.querySelectorAll('.filtro').forEach(f => f.classList.remove('ativo'));
-      if (el) el.classList.add('ativo');
-      carregar();
-    }
-
-    async function carregar() {
-      const lista = document.getElementById('lista');
-      lista.innerHTML = '<div class="empty"><div class="icon">📅</div><p>Carregando...</p></div>';
-      try {
-        const url = API + '/api/empresa/agenda' + (periodoAtual ? '?periodo=' + periodoAtual : '');
-        const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-        if (r.status === 401 || r.status === 403) { sair(); return; }
+      if (r.ok) {
         const data = await r.json();
-        const entrevistas = data.entrevistas || [];
-        const contador = document.getElementById('contador-resultados');
-        if (contador) contador.textContent = entrevistas.length === 1 ? '1 entrevista' : `${entrevistas.length} entrevistas`;
-
-        if (entrevistas.length === 0) {
-          lista.innerHTML = `
-            <div class="empty">
-              <div class="icon">📭</div>
-              <p>Nenhuma entrevista ${periodoAtual === 'proximos' ? 'futura' : periodoAtual === 'hoje' ? 'hoje' : periodoAtual === 'passados' ? 'passada' : ''}${periodoAtual === '' ? '' : ' encontrada'}.</p>
-            </div>`;
-          return;
-        }
-
-        lista.innerHTML = entrevistas.map(e => {
-          const dt = new Date(e.data_hora);
-          const dia = String(dt.getDate()).padStart(2, '0');
-          const mes = dt.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
-          const hora = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-          return `
-            <div class="entrev-card">
-              <div class="data-bloco">
-                <div class="dia">${dia}</div>
-                <div class="mes">${mes}</div>
-                <div class="hora">${hora}</div>
-              </div>
-              <div class="info-cand">
-                <div class="nome">${esc(e.candidato_nome || 'Candidato')}</div>
-                <div class="vaga">${esc(e.vaga_titulo || '')}${e.vaga_empresa ? ' — ' + esc(e.vaga_empresa) : ''}</div>
-                <span class="etapa-badge">Entrevista ${etapaLabel(e.etapa)}</span>
-                <span class="etapa-badge status" style="background:${getStatusColor(e.status)};">${formatarStatus(e.status)}</span>
-                ${e.observacoes ? '<div class="obs">"' + esc(e.observacoes) + '"</div>' : ''}
-                ${e.duracao_minutos ? '<div class="obs" style="margin-top:4px;">⏱ ' + esc(e.duracao_minutos) + ' min</div>' : ''}
-                ${e.link_reuniao ? '<div class="obs">🔗 ' + esc(e.link_reuniao) + '</div>' : ''}
-              </div>
-              <div class="acoes">
-                ${e.link_reuniao ? `<button class="btn-acao copiar" onclick='copiarLink(${JSON.stringify(e.link_reuniao)})' title="Copiar link">📋 Link</button>` : ''}
-                ${e.link_reuniao ? `<a class="btn-acao" href="${esc(e.link_reuniao)}" target="_blank" rel="noopener" title="Abrir sala">▶️ Abrir</a>` : ''}
-                <a class="btn-acao analisar" href="analisar.html?id=${e.candidatura_id}" title="Ver candidato">👤 Ver candidato</a>
-              </div>
-            </div>`;
-        }).join('');
-      } catch (e) {
-        lista.innerHTML = '<div class="empty"><div class="icon">⚠️</div><p>Erro: ' + e.message + '</p></div>';
+        candidaturasDisponiveis = (data.candidatos || data.candidaturas || []).map(c => ({...c, id: c.ultima_candidatura_id || c.id, candidatura_id: c.ultima_candidatura_id || c.id, candidato_nome: c.nome || c.candidato_nome, titulo: c.ultima_vaga_titulo || c.titulo || c.vaga_titulo, vaga_titulo: c.ultima_vaga_titulo || c.vaga_titulo, etapa_atual: c.ultima_etapa ?? c.etapa_atual})).filter(c => [3, 4].includes(parseInt(c.etapa_atual)));
       }
     }
+  } catch (e) { console.error(e); }
+  // Preenche select
+  const sel = document.getElementById('nova-candidatura');
+  if (candidaturasDisponiveis.length === 0) {
+    sel.innerHTML = '<option value="">Nenhum candidato em etapa 3 ou 4</option>';
+  } else {
+    sel.innerHTML = '<option value="">Selecione um candidato...</option>' +
+      candidaturasDisponiveis.map(c =>
+        `<option value="${c.id}">${c.candidato_nome} — ${c.titulo || c.vaga_titulo || ''} (Etapa ${c.etapa_atual})</option>`
+      ).join('');
+  }
+  // Limpa preview
+  const preview = document.getElementById('cand-preview');
+  if (preview) { preview.classList.remove('show'); preview.innerHTML = ''; }
+}
 
-    // O primeiro carregamento acontece após o refresh silencioso do auth helper.
+function mostrarCandidatoPreview() {
+  const id = document.getElementById('nova-candidatura').value;
+  const preview = document.getElementById('cand-preview');
+  if (!id || !preview) { if (preview) preview.classList.remove('show'); return; }
+  const c = candidaturasDisponiveis.find(x => x.id == id);
+  if (!c) return;
+  const iniciais = (c.candidato_nome || 'C').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+  preview.innerHTML = `
+    <div class="info">
+      <div class="avatar">${iniciais}</div>
+      <div>
+        <div class="nome">${c.candidato_nome || 'Candidato'}</div>
+        <div class="vaga">${c.titulo || c.vaga_titulo || ''} ${c.candidato_email ? ' • ' + c.candidato_email : ''}</div>
+        <span class="etapa">Etapa ${c.etapa_atual}</span>
+      </div>
+    </div>`;
+  preview.classList.add('show');
+}
 
-    // ── Modal Nova Entrevista ──────────────────────────────
-    async function abrirModalEntrevistaAgenda() {
-      // Buscar candidaturas ativas para selecionar
-      let opcoes = '<option value="">Selecione a candidatura...</option>';
-      try {
-        const r = await fetch(API + '/api/empresa/candidatos', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (r.ok) {
-          const d = await r.json();
-          (d.candidatos || []).filter(c => {
-            const etapa = Number(c.etapa_atual);
-            return [3, 4].includes(etapa) && c.status !== 'contratado' && c.status !== 'rejeitado';
-          }).forEach(c => {
-            opcoes += `<option value="${c.id}">${esc(c.candidato_nome || 'Candidato')} — ${esc(c.vaga_titulo || 'Vaga')} (Etapa ${c.etapa_atual})</option>`;
-          });
-        }
-      } catch(e) {}
+function fecharModalNova() {
+  document.getElementById('modal-nova').classList.remove('aberto');
+}
 
-      const modal = document.createElement('div');
-      modal.id = 'modal-nova-ent';
-      modal.style = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;';
-      modal.innerHTML = `
-        <div style="background:#fff;border-radius:12px;padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;">
-          <h3 style="margin:0 0 16px;font-size:17px;">📅 Agendar Nova Entrevista</h3>
-          <div style="display:grid;gap:12px;">
-            <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Candidatura *</label>
-              <select id="na-cand" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;">${opcoes}</select></div>
-            <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Etapa da entrevista *</label>
-              <select id="na-etapa" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;">
-                <option value="3">Etapa 3 — Entrevista RH</option>
-                <option value="4" selected>Etapa 4 — Entrevista Gestor/Empresa</option>
-              </select></div>
-            <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Data e hora *</label>
-              <input type="datetime-local" id="na-data" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;" /></div>
-            <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Tipo</label>
-              <select id="na-tipo" style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;">
-                <option value="video">🎥 Videoconferência</option>
-                <option value="presencial">🏢 Presencial</option>
-                <option value="telefone">📞 Telefone</option>
-              </select></div>
-            <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Link da reunião</label>
-              <input type="url" id="na-link" placeholder="https://meet.google.com/..." style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;" /></div>
-            <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Observações</label>
-              <textarea id="na-obs" rows="2" placeholder="Instruções para o candidato..." style="width:100%;padding:9px 12px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;resize:vertical;font-family:inherit;"></textarea></div>
-          </div>
-          <div id="na-erro" style="display:none;color:#C62828;font-size:13px;margin-top:8px;"></div>
-          <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
-            <button onclick="document.getElementById('modal-nova-ent').remove()" style="padding:9px 18px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">Cancelar</button>
-            <button id="btn-na" onclick="confirmarNovaEntrevista()" style="padding:9px 18px;background:#1565C0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Agendar</button>
-          </div>
-        </div>`;
-      document.body.appendChild(modal);
+async function confirmarNova() {
+  const candidatura_id = document.getElementById('nova-candidatura').value;
+  const etapa = parseInt(document.getElementById('nova-etapa').value);
+  const dataStr = document.getElementById('nova-data').value;
+  const horaStr = document.getElementById('nova-hora').value;
+  const duracao_minutos = parseInt(document.getElementById('nova-duracao').value) || 60;
+  const local = document.getElementById('nova-local').value;
+  const observacoes = document.getElementById('nova-obs').value;
+
+  if (!candidatura_id || !dataStr || !horaStr) {
+    alert('Preencha candidato, data e hora');
+    return;
+  }
+
+  // Junta data+hora no fuso local e converte pra ISO (corrige bug de 3h a menos)
+  const [ano, mes, dia] = dataStr.split('-');
+  const [h, m] = horaStr.split(':');
+  const d = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia), parseInt(h), parseInt(m), 0);
+  const data_hora = d.toISOString();
+
+  const btn = document.getElementById('btn-confirmar-nova');
+  btn.disabled = true;
+  btn.textContent = 'Agendando...';
+
+  try {
+    const r = await fetch(`${API}/api/empresa/entrevista`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        candidatura_id: parseInt(candidatura_id),
+        etapa,
+        data_hora,
+        duracao_minutos,
+        local: local || undefined,
+        observacoes: observacoes || undefined
+      })
+    });
+    if (r.ok) {
+      showToast('✅ Entrevista agendada!');
+      fecharModalNova();
+      carregarEntrevistas();
+      document.getElementById('nova-candidatura').value = '';
+      document.getElementById('nova-local').value = '';
+      document.getElementById('nova-obs').value = '';
+      const preview = document.getElementById('cand-preview');
+      if (preview) { preview.classList.remove('show'); preview.innerHTML = ''; }
+    } else {
+      const err = await r.json();
+      alert('Erro: ' + (err.erro || 'desconhecido'));
     }
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Agendar entrevista';
+  }
+}
 
-    async function confirmarNovaEntrevista() {
-      const candId = document.getElementById('na-cand').value;
-      const etapa = Number(document.getElementById('na-etapa').value || 4);
-      const dataHora = document.getElementById('na-data').value;
-      const tipo = document.getElementById('na-tipo').value;
-      const link = document.getElementById('na-link').value.trim();
-      const obs = document.getElementById('na-obs').value.trim();
-      const erroEl = document.getElementById('na-erro');
-      erroEl.style.display = 'none';
-      if (!candId) { erroEl.textContent = 'Selecione a candidatura.'; erroEl.style.display = 'block'; return; }
-      if (!dataHora) { erroEl.textContent = 'Informe data e hora.'; erroEl.style.display = 'block'; return; }
-      const btn = document.getElementById('btn-na');
-      btn.disabled = true; btn.textContent = 'Agendando…';
-      try {
-        const r = await fetch(API + '/api/empresa/entrevista', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ candidatura_id: Number(candId), etapa, data_hora: dataHora, tipo, link_reuniao: link || null, observacoes: obs || null })
-        });
-        const d = await r.json();
-        if (!r.ok) { erroEl.textContent = d.erro || 'Erro ao agendar.'; erroEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Agendar'; return; }
-        document.getElementById('modal-nova-ent').remove();
-        carregar();
-      } catch(e) { erroEl.textContent = 'Erro de conexão.'; erroEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Agendar'; }
-    }
-  </script>
-<script src="auth-helper.js?v=fase3_2026_07_28"></script>
-  <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
-  <script src="empresa-auth-patch.js?v=fase3_2026_07_28"></script>
-
-  <script>
-    // ===== INIT COMUM FASE 3 — RBAC frontend =====
-    (async function() {
-      setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
-
-      // tenta refresh silencioso antes de qualquer coisa
-      try { await authInit(); } catch (e) { console.warn('refresh falhou', e); }
-
-      // guard: sem token -> vai pro login
-      if (!localStorage.getItem('empresa_token')) {
-        const path = window.location.pathname;
-        if (!path.endsWith('login.html')) {
-          window.location.href = 'login.html';
-          return;
-        }
-      }
-
-      // aguarda DOM
-      const onReady = () => {
-        // mostra link Equipe se for admin
-        if (authRBAC.hasRole('admin_empresa')) {
-          const navEq = document.getElementById('nav-equipe');
-          if (navEq) navEq.style.display = '';
-        }
-
-        // preenche sidebar com dados do JWT
-        token = localStorage.getItem('empresa_token') || '';
-        const u = authRBAC.currentUser() || {};
-        const avatar = document.getElementById('avatar');
-        const nome = document.getElementById('user-nome');
-        const empresa = document.getElementById('user-empresa');
-        if (avatar && u.nome) avatar.textContent = u.nome.split(' ').filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join('');
-        if (nome) nome.textContent = u.nome || '—';
-        if (empresa) empresa.textContent = (u.role ? '[' + u.role + '] ' : '') + (u.empresa_nome || u.email || '—');
-
-        // guarda de role por pagina: se existe um atributo data-roles exigido,
-        // fazemos o guard UX (apenas visual; backend é autoridade)
-        const required = document.querySelector('main')?.dataset?.roles;
-        if (required && !authRBAC.hasRole.apply(null, required.split(','))) {
-          // redireciona com aviso
-          const main = document.querySelector('main');
-          if (main) main.innerHTML = '<div style="text-align:center; padding:80px 20px;"><h2 style="color:#999;">🚫 Acesso restrito</h2><p style="color:#666; margin-top:12px;">Você não tem permissão para acessar esta página.</p><p style="margin-top:24px;"><a href="index.html" style="color:#722F37;">← Voltar ao Dashboard</a></p></div>';
-        }
-        carregar();
-      };
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', onReady);
-      } else {
-        onReady();
-      }
-    })();
-  </script>
-<script src="chat-rh-flutuante.js?v=20260726b"></script>
-<script src="empresa-shell.js?v=20260803shell4"></script>
+// Inicializar
+carregarEntrevistas();
+// Recarregar a cada 60s
+setInterval(carregarEntrevistas, 60000);
+</script>
+<script src="chat-flutuante-admin.js?v=20260725acc2"></script>
+<script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
 </html>
