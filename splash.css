@@ -1,9 +1,10 @@
 /* VagasIO Splash Screen — experiência visual isolada da Home */
 :root {
-  --splash-blue: #1976D2;
-  --splash-blue-dark: #071A33;
-  --splash-blue-deep: #020A16;
-  --splash-blue-light: #42A5F5;
+  /* Paleta vinho oficial já usada na identidade do VagasIO */
+  --splash-wine: #720F35;
+  --splash-wine-dark: #3A0A1D;
+  --splash-wine-deep: #10050B;
+  --splash-wine-light: #C14A7A;
 }
 
 * { box-sizing: border-box; }
@@ -14,7 +15,7 @@ body {
   min-height: 100%;
   margin: 0;
   overflow: hidden;
-  background: var(--splash-blue-deep);
+  background: var(--splash-wine-deep);
 }
 
 body {
@@ -34,8 +35,8 @@ body {
   isolation: isolate;
   color: #fff;
   background:
-    radial-gradient(circle at 50% 46%, rgba(25, 118, 210, .20) 0%, rgba(13, 71, 161, .10) 27%, transparent 58%),
-    radial-gradient(circle at center, var(--splash-blue-dark) 0%, var(--splash-blue-deep) 75%);
+    radial-gradient(circle at 50% 46%, rgba(148, 19, 74, .22) 0%, rgba(114, 15, 53, .12) 27%, transparent 58%),
+    radial-gradient(circle at center, var(--splash-wine-dark) 0%, var(--splash-wine-deep) 75%);
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -51,7 +52,7 @@ body {
   width: min(72vw, 980px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: rgba(25, 118, 210, .18);
+  background: rgba(148, 19, 74, .18);
   filter: blur(120px);
   opacity: .65;
   transform: translateZ(0);
