@@ -596,94 +596,49 @@ async function excluirUsuarioEmpresa(id, nome) {
 }
 
 // ===== AGENDA =====
-let agendaPeriodoAtual = 'hoje';
-
-async function carregarAgenda(periodo) {
-  agendaPeriodoAtual = periodo || agendaPeriodoAtual;
-  document.querySelectorAll('.tab-agenda').forEach(t => t.classList.remove('ativo'));
-  document.querySelector(`.tab-agenda[data-periodo="${agendaPeriodoAtual}"]`)?.classList.add('ativo');
-
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  const lista = document.getElementById('agenda-lista');
-  lista.innerHTML = '<div class="empty">Carregando agenda...</div>';
-
-  try {
-    const r = await fetch(API + '/api/empresa/entrevistas?periodo=' + agendaPeriodoAtual, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const data = await r.json();
-    const entrevistas = data.entrevistas || [];
-
-    // Stats
-    const stats = document.getElementById('agenda-stats');
-    const cntHoje = entrevistas.filter(e => new Date(e.data_hora).toDateString() === new Date().toDateString()).length;
-    stats.innerHTML = `
-      <div class="card-mini"><div class="label">Hoje</div><div class="valor">${cntHoje}</div></div>
-      <div class="card-mini"><div class="label">Total no período</div><div class="valor">${entrevistas.length}</div></div>
-      <div class="card-mini"><div class="label">Confirmadas</div><div class="valor" style="color:#16a34a;">${entrevistas.filter(e => e.status === 'confirmada').length}</div></div>
-      <div class="card-mini"><div class="label">Agendadas</div><div class="valor" style="color:#2563eb;">${entrevistas.filter(e => e.status === 'agendada').length}</div></div>
-    `;
-
-    if (entrevistas.length === 0) {
-      lista.innerHTML = '<div class="empty">Nenhuma entrevista neste período. Clique em "+ Nova Entrevista" para agendar.</div>';
-      return;
-    }
-
-    lista.innerHTML = entrevistas.map(e => {
-      const dt = new Date(e.data_hora);
-      const dia = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-      const hora = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      const etapaNome = { 3: 'RH', 4: 'Gestor', 5: 'Proposta' }[e.etapa] || `Etapa ${e.etapa}`;
-      const statusCores = {
-        agendada: { bg: '#dbeafe', fg: '#1e40af' },
-        confirmada: { bg: '#dcfce7', fg: '#16a34a' },
-        realizada: { bg: '#f3e8ff', fg: '#7c3aed' },
-        cancelada: { bg: '#fee2e2', fg: '#dc2626' },
-        faltou: { bg: '#fef3c7', fg: '#d97706' }
-      };
-      const cor = statusCores[e.status] || { bg: '#f3f4f6', fg: '#6b7280' };
-      const isPassada = dt < new Date();
-      return `
-        <div class="agenda-item">
-          <div class="agenda-data">
-            <div class="agenda-dia">${dia}</div>
-            <div class="agenda-hora">${hora}</div>
-            <div class="agenda-duracao">${e.duracao_minutos || 60}min</div>
-          </div>
-          <div class="agenda-info">
-            <div class="agenda-candidato">${e.candidato_nome || '—'}</div>
-            <div class="agenda-vaga">📋 ${e.vaga_titulo || 'Vaga'} <span style="color:#888;">• Etapa ${e.etapa} (${etapaNome})</span></div>
-            <div class="agenda-meta">
-              ${e.link_reuniao
-                ? `🎥 Online (Google Meet) • <a href="${e.link_reuniao}" target="_blank" style="color:#16A34A; font-weight:600;">🔗 Entrar no Meet</a>`
-                : (e.local
-                    ? `📍 ${e.local}`
-                    : '🎥 Online (Google Meet)')}
-              ${e.observacoes ? `<div style="margin-top:6px; color:#666; font-style:italic;">"${e.observacoes}"</div>` : ''}
-            </div>
-          </div>
-          <div class="agenda-acoes">
-            <span class="badge" style="background:${cor.bg}; color:${cor.fg};">${e.status}</span>
-            ${!isPassada ? `
-              <div style="display:flex; gap:4px; margin-top:8px;">
-                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'confirmada')">✓ Confirmar</button>
-                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'realizada')">✔ Realizada</button>
-                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'cancelada')">✕ Cancelar</button>
-              </div>
-            ` : `
-              <div style="display:flex; gap:4px; margin-top:8px;">
-                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'realizada')">✔ Realizada</button>
-                <button class="btn btn-sm btn-sec" onclick="atualizarEntrevista(${e.id},'faltou')">⚠ Faltou</button>
-              </div>
-            `}
-          </div>
-        </div>
-      `;
-    }).join('');
-  } catch (err) {
-    lista.innerHTML = '<div class="empty" style="color:var(--vermelho);">Erro ao carregar agenda.</div>';
-  }
-}
+const agendaState = { view:'semana', currentDate:new Date(), events:[], selectedId:null, listPeriod:'hoje', search:'', status:'', etapa:'' };
+let agendaDetailsCache = {};
+const agendaHours = Array.from({length:11},(_,i)=>i+8);
+function agendaDateKey(d){const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;}
+function agendaSameDay(a,b){return agendaDateKey(a)===agendaDateKey(b);}
+function agendaTime(d){return new Date(d).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function agendaDateLong(d){return new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function agendaMonthShort(d){return new Date(d).toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase();}
+function agendaEtapaNome(n){return ({3:'RH',4:'Gestor',5:'Proposta',6:'Coleta Docs',7:'Contratação'}[Number(n)]||'Entrevista');}
+function agendaStatusText(s){return ({agendada:'Aguardando',confirmada:'Confirmada',realizada:'Concluída',cancelada:'Cancelada',faltou:'Não compareceu'}[s]||s||'Aguardando');}
+function agendaStatusClass(s){return ({agendada:'agendada',confirmada:'confirmada',realizada:'realizada',cancelada:'cancelada',faltou:'faltou'}[s]||'agendada');}
+function agendaMode(e){return e.local && !/online|meet|zoom|teams/i.test(e.local)?'Presencial':'Online';}
+function agendaEventClass(e){if(agendaMode(e)==='Presencial')return 'presencial';if(Number(e.etapa)===3)return 'rh';if(Number(e.etapa)===4)return 'gestor';if(Number(e.etapa)>=5)return 'final';return 'tech';}
+function agendaInitials(name){return String(name||'C').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
+function agendaFilteredEvents(){const q=agendaState.search.trim().toLocaleLowerCase('pt-BR');return agendaState.events.filter(e=>{const hay=[e.candidato_nome,e.vaga_titulo,e.email,e.local].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');return(!q||hay.includes(q))&&(!agendaState.status||e.status===agendaState.status)&&(!agendaState.etapa||String(e.etapa)===String(agendaState.etapa));});}
+function agendaUpcomingForList(){const now=new Date();let rows=agendaFilteredEvents();if(agendaState.listPeriod==='hoje')rows=rows.filter(e=>agendaSameDay(e.data_hora,now));if(agendaState.listPeriod==='proximas')rows=rows.filter(e=>new Date(e.data_hora)>=now&&e.status!=='cancelada');return rows.sort((a,b)=>new Date(a.data_hora)-new Date(b.data_hora)).slice(0,10);}
+async function carregarAgenda(periodo){if(periodo&&['hoje','proximas','passadas','todas'].includes(periodo))agendaState.listPeriod=periodo;const cal=document.getElementById('agenda-calendar');if(cal)cal.innerHTML='<div class="agenda-loading"><span class="spinner"></span> Carregando calendário...</div>';try{const r=await fetch(API+'/api/empresa/entrevistas?periodo=todas',{headers:{'Authorization':'Bearer '+token}});const data=await r.json();if(!r.ok)throw new Error(data.erro||'Erro ao carregar agenda');agendaState.events=data.entrevistas||[];if(agendaState.selectedId&&!agendaState.events.some(e=>Number(e.id)===Number(agendaState.selectedId)))agendaState.selectedId=null;renderAgenda();}catch(e){if(cal)cal.innerHTML=`<div class="agenda-empty-small">${escapeHtml(e.message||'Erro ao carregar agenda')}</div>`;}}
+function renderAgenda(){renderAgendaSummary();renderAgendaUpcoming();renderAgendaCalendar();renderAgendaAttention();if(agendaState.selectedId)loadAgendaDetail(agendaState.selectedId);else renderAgendaDetailEmpty();}
+function renderAgendaSummary(){const all=agendaState.events,now=new Date(),today=all.filter(e=>agendaSameDay(e.data_hora,now)),next=all.filter(e=>new Date(e.data_hora)>=now&&!['cancelada','realizada','faltou'].includes(e.status)).sort((a,b)=>new Date(a.data_hora)-new Date(b.data_hora))[0];const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set('agenda-kpi-hoje',today.length);set('agenda-kpi-confirmadas',today.filter(e=>e.status==='confirmada').length);set('agenda-kpi-pendentes',today.filter(e=>e.status==='agendada').length);set('agenda-kpi-concluidas',today.filter(e=>e.status==='realizada').length);set('agenda-kpi-proxima-hora',next?agendaTime(next.data_hora):'—');set('agenda-kpi-proxima-nome',next?(next.candidato_nome||'Candidato'):'Nenhuma entrevista próxima');set('agenda-kpi-proxima-tempo',next?agendaTempoAte(next.data_hora):'—');const d=document.getElementById('agenda-kpi-confirmadas-delta');if(d)d.textContent='Dados da agenda da empresa';}
+function agendaTempoAte(date){const diff=new Date(date)-new Date();if(diff<=0)return'agora';const m=Math.floor(diff/60000);if(m<60)return`em ${m} min`;const h=Math.floor(m/60);return`em ${h}h${m%60?String(m%60).padStart(2,'0'):''}`;}
+function renderAgendaUpcoming(){const box=document.getElementById('agenda-upcoming-list');if(!box)return;const rows=agendaUpcomingForList();if(!rows.length){box.innerHTML='<div class="agenda-empty-small">Nenhuma entrevista neste período.</div>';return;}box.innerHTML=rows.map(e=>`<div class="agenda-upcoming-item ${Number(e.id)===Number(agendaState.selectedId)?'selecionado':''}" onclick="selecionarEntrevista(${e.id})"><span class="agenda-time">${agendaTime(e.data_hora)}</span><span class="agenda-upcoming-avatar">${escapeHtml(agendaInitials(e.candidato_nome))}</span><span class="agenda-upcoming-copy"><strong>${escapeHtml(e.candidato_nome||'Candidato')}</strong><small>${escapeHtml(e.vaga_titulo||'Vaga')} · ${escapeHtml(agendaEtapaNome(e.etapa))}</small><small class="agenda-mode">${agendaMode(e)} · ${agendaStatusText(e.status)}</small></span><span class="agenda-status-dot ${agendaStatusClass(e.status)}">${agendaStatusText(e.status)}</span></div>`).join('');}
+function agendaWeekStart(date){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d;}
+function agendaWeekDays(date){const start=agendaWeekStart(date);return Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return d;});}
+function agendaPeriodLabel(){const d=agendaState.currentDate;if(agendaState.view==='dia')return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});if(agendaState.view==='mes')return d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});const days=agendaWeekDays(d);return `${String(days[0].getDate()).padStart(2,'0')} — ${String(days[6].getDate()).padStart(2,'0')} de ${days[6].toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}`;}
+function renderAgendaCalendar(){const box=document.getElementById('agenda-calendar');if(!box)return;const label=document.getElementById('agenda-periodo-label');if(label)label.textContent=agendaPeriodLabel();if(agendaState.view==='mes'){box.className='agenda-calendar';box.innerHTML=renderAgendaMonth();return;}const days=agendaState.view==='dia'?[new Date(agendaState.currentDate)]:agendaWeekDays(agendaState.currentDate);box.className='agenda-calendar'+(agendaState.view==='dia'?' day-mode':'');box.innerHTML=renderAgendaTimeGrid(days);updateAgendaCurrentLine();}
+function renderAgendaTimeGrid(days){const heads=days.map(d=>`<div class="agenda-day-head ${agendaSameDay(d,new Date())?'today':''}"><small>${d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</small><strong>${String(d.getDate()).padStart(2,'0')}</strong></div>`).join('');const cols=days.map(d=>{const ev=agendaFilteredEvents().filter(e=>agendaSameDay(e.data_hora,d));return renderAgendaDayColumn(d,ev);}).join('');const times=agendaHours.map(h=>`<div class="agenda-time-label">${String(h).padStart(2,'0')}:00</div>`).join('');return `<div class="agenda-week-grid ${days.length===1?'one-day':''}"><div class="agenda-time-head"></div>${heads}<div class="agenda-time-col">${times}</div>${cols}</div>`;}
+function renderAgendaDayColumn(day,events){const overlaps={};events.forEach((e,i)=>{const a=new Date(e.data_hora).getTime(),b=a+Number(e.duracao_minutos||60)*60000;const hit=events.filter(x=>{const c=new Date(x.data_hora).getTime(),d=c+Number(x.duracao_minutos||60)*60000;return x.id!==e.id&&a<d&&b>c;});overlaps[e.id]=hit.length?hit.length+1:1;});const items=events.map((e,i)=>{const d=new Date(e.data_hora),mins=(d.getHours()-8)*60+d.getMinutes(),top=Math.max(0,mins/60*58),height=Math.max(28,(Number(e.duracao_minutos||60)/60*58)-3),conf=overlaps[e.id]>1?' conflict':'';const left=overlaps[e.id]>1?(i%2)*50:0;const width=overlaps[e.id]>1?48:100;return `<div class="agenda-calendar-event ${agendaEventClass(e)}${conf} ${Number(e.id)===Number(agendaState.selectedId)?'selecionado':''}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px)" onclick="selecionarEntrevista(${e.id})"><strong>${agendaTime(e.data_hora)} · ${escapeHtml(e.candidato_nome||'Candidato')}</strong><small>${escapeHtml(e.vaga_titulo||'Vaga')}</small><small>${escapeHtml(agendaEtapaNome(e.etapa))} · ${agendaMode(e)}</small></div>`;}).join('');return `<div class="agenda-day-col" data-date="${agendaDateKey(day)}">${items}</div>`;}
+function renderAgendaMonth(){const d=new Date(agendaState.currentDate);const first=new Date(d.getFullYear(),d.getMonth(),1),start=new Date(first);start.setDate(1-first.getDay());const cells=Array.from({length:42},(_,i)=>{const day=new Date(start);day.setDate(start.getDate()+i);const events=agendaFilteredEvents().filter(e=>agendaSameDay(e.data_hora,day));const firstEvents=events.slice(0,2).map(e=>`<div class="agenda-month-event" onclick="event.stopPropagation();selecionarEntrevista(${e.id})">${agendaTime(e.data_hora)} ${escapeHtml(e.candidato_nome||'Candidato')}</div>`).join('');return `<div class="agenda-month-cell ${day.getMonth()!==d.getMonth()?'outside':''} ${agendaSameDay(day,new Date())?'today':''}" onclick="agendaSelecionarDia('${agendaDateKey(day)}')"><span class="agenda-month-day">${day.getDate()}</span><div class="agenda-month-events">${firstEvents}</div>${events.length>2?`<div class="agenda-month-count">+${events.length-2} entrevistas</div>`:''}</div>`;}).join('');return `<div class="agenda-month-grid">${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(x=>`<div class="agenda-day-head"><small>${x}</small></div>`).join('')}${cells}</div>`;}
+function updateAgendaCurrentLine(){const now=new Date();if(agendaState.view==='mes'||now.getHours()<8||now.getHours()>18)return;const col=document.querySelector(`.agenda-day-col[data-date="${agendaDateKey(now)}"]`);if(!col)return;const line=document.createElement('div');line.className='agenda-current-line';line.dataset.time=agendaTime(now);line.style.top=`${((now.getHours()-8)*60+now.getMinutes())/60*58}px`;col.appendChild(line);}
+function agendaMoverPeriodo(delta){const d=new Date(agendaState.currentDate);if(agendaState.view==='dia')d.setDate(d.getDate()+delta);else if(agendaState.view==='mes')d.setMonth(d.getMonth()+delta);else d.setDate(d.getDate()+delta*7);agendaState.currentDate=d;renderAgendaCalendar();}
+function agendaIrHoje(){agendaState.currentDate=new Date();renderAgenda();}
+function agendaSelecionarDia(key){const [y,m,d]=key.split('-').map(Number);agendaState.currentDate=new Date(y,m-1,d);agendaState.view='dia';document.querySelectorAll('.agenda-view-tabs button').forEach(b=>b.classList.toggle('ativo',b.dataset.view==='dia'));renderAgenda();}
+function selecionarEntrevista(id){agendaState.selectedId=id;renderAgendaUpcoming();renderAgendaCalendar();loadAgendaDetail(id);}
+function renderAgendaAttention(){const box=document.getElementById('agenda-attention-list'),all=agendaState.events,now=new Date(),items=[];all.filter(e=>e.status==='agendada'&&new Date(e.data_hora)>=now).slice(0,2).forEach(e=>items.push(`<div class="agenda-attention-item"><svg class="dash-svg"><use href="#icon-bell"></use></svg><span><strong>${escapeHtml(e.candidato_nome||'Candidato')} aguarda confirmação</strong>${agendaTime(e.data_hora)} · ${escapeHtml(e.vaga_titulo||'Vaga')}</span></div>`));const conflicts=all.filter((e,i)=>all.some((x,j)=>i<j&&agendaSameDay(e.data_hora,x.data_hora)&&new Date(e.data_hora)<new Date(x.data_hora)+(Number(x.duracao_minutos||60)*60000)&&new Date(x.data_hora)<new Date(e.data_hora)+(Number(e.duracao_minutos||60)*60000)));if(conflicts.length)items.push('<div class="agenda-attention-item"><svg class="dash-svg"><use href="#icon-filter"></use></svg><span><strong>Conflito de agenda detectado</strong>Há entrevistas sobrepostas.</span></div>');if(box)box.innerHTML=items.length?items.join(''):'<div class="agenda-empty-small">Nenhuma atenção pendente.</div>';const count=document.getElementById('agenda-attention-count');if(count)count.textContent=items.length;}
+function renderAgendaDetailEmpty(){const panel=document.getElementById('agenda-detail-panel');if(panel)panel.innerHTML='<div class="agenda-detail-empty"><svg class="dash-svg"><use href="#icon-calendar"></use></svg><strong>Entrevista selecionada</strong><span>Selecione um compromisso para ver os detalhes.</span></div>';}
+async function loadAgendaDetail(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));const panel=document.getElementById('agenda-detail-panel');if(!e||!panel)return;panel.classList.add('aberto');panel.innerHTML='<div class="agenda-detail-empty"><span class="spinner"></span><span>Carregando detalhes...</span></div>';try{const headers={'Authorization':'Bearer '+token};let cand={},candidatura=null;const reqs=[];if(e.candidato_id)reqs.push(fetch(API+'/api/empresa/candidatos/'+e.candidato_id,{headers}));if(e.candidatura_id)reqs.push(fetch(API+'/api/empresa/candidatura/'+e.candidatura_id,{headers}));const rs=await Promise.all(reqs);if(rs[0]){const d=await rs[0].json();cand=d.candidato||d;}if(rs[1])candidatura=await rs[1].json();agendaDetailsCache[id]={cand,candidatura};renderAgendaDetail(e,cand,candidatura);}catch(_){renderAgendaDetail(e,{},null);}}
+function renderAgendaDetail(e,c,candidatura){const stage=Number(candidatura?.etapa_atual||e.etapa||1),progress=Math.round(stage/7*100),steps=['Inscrição','Triagem','RH','Gestor','Proposta','Coleta Docs','Contratação'].map((name,i)=>{const n=i+1,cl=n<stage?'done':n===stage?'current':'';return `<div class="agenda-step ${cl}"><span class="agenda-step-dot">${n<stage?'✓':n}</span><span>${name}${n===stage?' — Atual':''}</span><small>${n<stage?'Concluída':n===stage?'Em andamento':'Pendente'}</small></div>`;}).join('');const link=e.link_reuniao?`<a class="agenda-link" href="${escapeHtml(e.link_reuniao)}" target="_blank" rel="noopener">Abrir entrevista ↗</a>`:'Link não informado';const note=e.observacoes?`<div class="agenda-note">${escapeHtml(e.observacoes)}</div>`:'<div class="agenda-note">Nenhuma nota registrada para esta entrevista.</div>';const panel=document.getElementById('agenda-detail-panel');panel.innerHTML=`<div class="agenda-detail-content"><div class="agenda-detail-head"><span class="agenda-detail-avatar">${escapeHtml(agendaInitials(c.nome||e.candidato_nome))}</span><div class="agenda-detail-head-copy"><h3>${escapeHtml(c.nome||e.candidato_nome||'Candidato')}</h3><p>${escapeHtml(e.vaga_titulo||'Vaga')} · ${escapeHtml(agendaEtapaNome(e.etapa))}</p><span class="agenda-detail-status">${agendaStatusText(e.status)}</span></div><button class="agenda-detail-close" type="button" aria-label="Fechar detalhes" onclick="fecharAgendaDetalhe()">×</button></div><div class="agenda-detail-actions"><button class="primary" type="button" ${e.link_reuniao?'onclick="window.open(\''+escapeHtml(e.link_reuniao)+'\',\'_blank\',\'noopener\')"':'disabled'}>${e.link_reuniao?'Entrar na entrevista':'Sem link'}</button><button type="button" onclick="reagendarEntrevista(${e.id})">Reagendar</button><button type="button" onclick="agendaMaisAcoes(${e.id})">Mais ações</button></div><section class="agenda-detail-section"><h4>Detalhes da entrevista</h4><div class="agenda-detail-info"><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Data e hora</strong>${agendaDateLong(e.data_hora)} às ${agendaTime(e.data_hora)}</span></div><div class="agenda-info-row">${candidatoSvg('arrow-up')}<span><strong>Duração</strong>${Number(e.duracao_minutos||60)} minutos</span></div><div class="agenda-info-row">${candidatoSvg('user')}<span><strong>Entrevistador</strong>Não informado no registro</span></div><div class="agenda-info-row">${candidatoSvg('file')}<span><strong>Tipo</strong>Entrevista com ${escapeHtml(agendaEtapaNome(e.etapa))}</span></div><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Formato</strong>${escapeHtml(agendaMode(e))}${e.local?` · ${escapeHtml(e.local)}`:''}</span></div><div class="agenda-info-row">${candidatoSvg('message')}<span><strong>Link / local</strong>${link}</span></div></div></section><section class="agenda-detail-section"><h4>Etapas do processo <span style="float:right">${stage} de 7</span></h4><div class="agenda-detail-progress"><span>Progresso</span><strong>${stage} de 7</strong></div><div class="agenda-detail-progress-bar"><i style="width:${progress}%"></i></div><div class="agenda-detail-steps">${steps}</div></section><section class="agenda-detail-section"><h4>Notas da entrevista</h4>${note}</section></div>`;}
+function fecharAgendaDetalhe(){agendaState.selectedId=null;document.getElementById('agenda-detail-panel')?.classList.remove('aberto');renderAgendaUpcoming();renderAgendaCalendar();renderAgendaDetailEmpty();}
+async function reagendarEntrevista(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));if(!e)return;const next=prompt('Nova data e hora (AAAA-MM-DD HH:MM):',new Date(new Date(e.data_hora).getTime()+86400000).toISOString().slice(0,16).replace('T',' '));if(!next)return;const duration=prompt('Duração em minutos:',String(e.duracao_minutos||60));if(!confirm(`Confirmar reagendamento para ${next}?`))return;try{const r=await fetch(API+'/api/empresa/entrevista/'+id,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({data_hora:next,duracao_minutos:Number(duration)||60})});if(!r.ok)throw new Error('Não foi possível reagendar');await carregarAgenda('todas');selecionarEntrevista(id);}catch(err){alert(err.message);}}
+function agendaMaisAcoes(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));if(!e)return;const action=prompt('Digite uma ação: confirmar, concluir ou cancelar','confirmar');if(action==='confirmar')atualizarEntrevista(id,'confirmada');else if(action==='concluir')atualizarEntrevista(id,'realizada');else if(action==='cancelar'&&confirm('Cancelar esta entrevista?'))atualizarEntrevista(id,'cancelada');}
+function limparFiltrosAgenda(){agendaState.search='';agendaState.status='';agendaState.etapa='';const s=document.getElementById('agenda-filtro-status'),e=document.getElementById('agenda-filtro-etapa'),q=document.getElementById('entrevistas-busca');if(s)s.value='';if(e)e.value='';if(q)q.value='';renderAgenda();}
+function bindAgendaControls(){if(window.__agendaControlsBound)return;window.__agendaControlsBound=true;if(window.innerWidth<=700){agendaState.view='dia';document.querySelectorAll('.agenda-view-tabs button').forEach(b=>b.classList.toggle('ativo',b.dataset.view==='dia'));}document.getElementById('entrevistas-busca')?.addEventListener('input',e=>{agendaState.search=e.target.value;renderAgenda();});document.getElementById('agenda-lista-periodo')?.addEventListener('change',e=>{agendaState.listPeriod=e.target.value;renderAgendaUpcoming();});document.getElementById('agenda-filtro-status')?.addEventListener('change',e=>{agendaState.status=e.target.value;renderAgenda();});document.getElementById('agenda-filtro-etapa')?.addEventListener('change',e=>{agendaState.etapa=e.target.value;renderAgenda();});document.getElementById('entrevistas-filtros-btn')?.addEventListener('click',e=>{const p=document.getElementById('entrevistas-filtros-advanced');const open=p.hasAttribute('hidden');if(open)p.removeAttribute('hidden');else p.setAttribute('hidden','');e.currentTarget.setAttribute('aria-expanded',String(open));});document.querySelectorAll('.agenda-view-tabs button').forEach(b=>b.addEventListener('click',()=>{agendaState.view=b.dataset.view;document.querySelectorAll('.agenda-view-tabs button').forEach(x=>x.classList.toggle('ativo',x===b));renderAgendaCalendar();}));}
+bindAgendaControls();
 
 async function atualizarEntrevista(id, status) {
   const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
