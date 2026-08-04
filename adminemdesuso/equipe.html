@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equipe · Admin Vagas.io</title>
+  <!-- CSS é inline (<style>) neste arquivo; link externo removido -->
+  <style>
+    :root { --vinho: #722F37; --dourado: #C9A961; --bg: #f7f5f2; --card: #ffffff; --texto: #1a1a1a; --borda: #e5e0d8; }
+    body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--texto); margin: 0; }
+    .app { display: flex; min-height: 100vh; }
+    aside { width: 260px; background: var(--vinho); color: #fff; padding: 20px; flex-shrink: 0; display: flex; flex-direction: column; }
+    .aside-logo { padding: 0 8px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
+    .aside-logo h1 { font-size: 18px; font-weight: 800; margin: 0; color: #fff; }
+    .aside-logo small { color: rgba(255,255,255,0.6); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+    .nav-item { display: block; padding: 12px; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; cursor: pointer; margin-bottom: 4px; }
+    .nav-item:hover, .nav-item.ativo { background: rgba(255,255,255,0.1); color: #fff; }
+    .aside-user { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+    .aside-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .aside-user-info { flex: 1; min-width: 0; }
+    .aside-user-info .nome { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .aside-user-info .empresa { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-logout { background: rgba(255,255,255,0.1); color: #fff; border: 0; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none; }
+    .btn-logout:hover { background: rgba(255,255,255,0.2); }
+    main { flex: 1; padding: 32px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--borda); }
+    .btn { padding: 10px 20px; border-radius: 8px; border: 0; cursor: pointer; font-weight: bold; }
+    .btn-primary { background: var(--vinho); color: #fff; }
+  </style>
+  <script src="../candidato/chat-uploader.js"></script>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="aside-logo">
+        <h1>Admin</h1>
+        <small>VAGAS.IO</small>
+      </div>
+      <a class="nav-item" href="index.html">📊 Dashboard</a>
+      <a class="nav-item" href="index.html?page=vagas">💼 Vagas</a>
+      <a class="nav-item" href="index.html?page=candidatos">👥 Base de Talentos</a>
+      <a class="nav-item" href="candidaturas.html">📋 Vagas com Candidatos</a>
+      <a class="nav-item" href="agenda.html">📅 Agenda</a>
+      <a class="nav-item ativo" href="equipe.html">👥 Equipe</a>
+      <a class="nav-item" href="../" style="opacity:0.7;">🏡 Voltar pro site</a>
+      <div class="aside-user">
+        <div class="aside-user-avatar" id="aside-user-avatar">--</div>
+        <div class="aside-user-info">
+          <div class="nome" id="aside-user-nome">--</div>
+          <div class="empresa" id="aside-user-empresa">--</div>
+        </div>
+        <a href="index.html" class="btn-logout" title="Sair">↪</a>
+      </div>
+    </aside>
+      <div class="aside-user">
+        <div class="aside-user-avatar" id="aside-user-avatar">--</div>
+        <div class="aside-user-info">
+          <div class="nome" id="aside-user-nome">--</div>
+          <div class="empresa" id="aside-user-empresa">--</div>
+        </div>
+        <a href="index.html" class="btn-logout" title="Sair">↪</a>
+      </div>
+    </aside>
+    <main>
+      <div class="header">
+        <h1>👥 Gestão de Equipe</h1>
+        <button class="btn btn-primary" onclick="alert('Funcionalidade em manutenção para ajustes multi-usuário')">+ Novo Membro</button>
+      </div>
+      <div class="grid" id="lista">
+        <div class="card">
+          <h3>Carregando membros...</h3>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    const token = localStorage.getItem('admin_token');
+    if (!token) window.location.href = 'index.html';
+
+    function carregarUsuarioSidebar() {
+      try {
+        if (!token) return;
+        const parts = token.split('.');
+        if (parts.length < 2) return;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const nome = payload.nome || 'Admin';
+        const iniciais = nome.split(/\s+/).map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+        const elAvatar = document.getElementById('aside-user-avatar');
+        const elNome = document.getElementById('aside-user-nome');
+        const elEmpresa = document.getElementById('aside-user-empresa');
+        if (elAvatar) elAvatar.textContent = iniciais || 'A';
+        if (elNome) elNome.textContent = nome;
+        if (elEmpresa) elEmpresa.textContent = payload.email || '';
+      } catch (e) { /* silencioso */ }
+    }
+
+    async function carregar() {
+      try {
+        const r = await fetch('https://recrutamento-api-novo.onrender.com/api/admin/equipe', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await r.json();
+        const lista = document.getElementById('lista');
+        const recs = data.recrutadores || [];
+        const emps = data.empresas || [];
+        const usrs = data.empresaUsuarios || [];
+        if (recs.length === 0 && emps.length === 0 && usrs.length === 0) {
+          lista.innerHTML = '<div class="card">Nenhum membro encontrado.</div>';
+          return;
+        }
+        let html = '';
+        if (recs.length) {
+          html += '<h2 style="margin-top:0;">Recrutadores</h2><div class="grid" style="margin-bottom:32px;">';
+          html += recs.map(u => `
+            <div class="card">
+              <div style="font-weight:bold; font-size:18px;">${u.nome}</div>
+              <div style="color:#666;">${u.email}</div>
+              <div style="margin-top:10px;"><span style="background:#dcfce7; color:#16a34a; padding:4px 8px; border-radius:6px; font-size:12px;">Recrutador</span></div>
+            </div>
+          `).join('');
+          html += '</div>';
+        }
+        if (usrs.length) {
+          html += '<h2>Usuários das empresas</h2><div class="grid" style="margin-bottom:32px;">';
+          html += usrs.map(u => {
+            const emp = emps.find(e => e.id === u.empresa_id);
+            return `<div class="card">
+              <div style="font-weight:bold; font-size:18px;">${u.nome}</div>
+              <div style="color:#666;">${u.email}</div>
+              <div style="color:#888; font-size:13px; margin-top:4px;">${u.cargo || '—'}</div>
+              <div style="color:#888; font-size:12px; margin-top:6px;">🏢 ${emp ? emp.nome : '—'}</div>
+            </div>`;
+          }).join('');
+          html += '</div>';
+        }
+        if (emps.length) {
+          html += '<h2>Empresas cadastradas</h2><div class="grid">';
+          html += emps.map(e => `
+            <div class="card">
+              <div style="font-weight:bold; font-size:18px;">${e.nome}</div>
+              <div style="color:#666;">${e.email || '—'}</div>
+              <div style="color:#888; font-size:13px; margin-top:4px;">CNPJ: ${e.cnpj || '—'}</div>
+              <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
+                <span style="background:#e0e7ff; color:#4338ca; padding:4px 8px; border-radius:6px; font-size:12px;">📋 ${e.qtd_vagas} vaga(s)</span>
+                <span style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:6px; font-size:12px;">👥 ${e.qtd_usuarios} usuário(s)</span>
+              </div>
+            </div>
+          `).join('');
+          html += '</div>';
+        }
+        lista.innerHTML = html;
+      } catch (e) {
+        document.getElementById('lista').innerHTML = '<div class="card" style="color:red;">Erro ao carregar equipe. Verifique sua conexão.</div>';
+      }
+    }
+    carregar();
+    carregarUsuarioSidebar();
+  </script>
+<script src="chat-flutuante-admin.js?v=20260725acc2"></script>
+<script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
+</body>
+</html>
