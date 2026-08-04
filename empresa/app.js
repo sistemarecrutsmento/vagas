@@ -863,18 +863,15 @@ async function carregarDashboardV2() {
     // === Vagas com mais candidatos ===
     const vRanking = data.vagas_mais_candidatos || [];
     if (vRanking.length > 0) {
-      document.getElementById('ranking-table-body').innerHTML = vRanking.map(v => `
-        <tr>
-          <td><strong>${v.titulo || '—'}</strong><br><span style="color:#888;font-size:12px;">${v.empresa || '—'}</span></td>
-          <td><span class="badge ${v.status === 'publicada' ? 'badge-ativa' : 'badge-fechada'}">${v.status === 'publicada' ? 'Ativa' : 'Encerrada'}</span></td>
-          <td style="text-align:right;">
-            <span style="color:#722F37;font-weight:700;">${v.total_candidatos || 0}</span>
-            <span style="color:#888;font-size:12px;"> / ${v.contratados || 0} contrat.</span>
-          </td>
-        </tr>
+      document.getElementById('ranking-table-body').innerHTML = vRanking.slice(0, 4).map((v, i) => `
+        <div class="ranking-item">
+          <div class="ranking-item-top"><strong>${v.titulo || '—'}</strong><span class="ranking-percent">${v.total_candidatos || 0}% este mês</span></div>
+          <div class="ranking-company">${v.empresa || '—'}</div>
+          <div class="ranking-item-bottom"><b>${v.total_candidatos || 0}</b> candidatos <span class="ranking-bar"><i style="width:${Math.min(100, Math.max(8, (v.total_candidatos || 0) * 2))}%"></i></span></div>
+        </div>
       `).join('');
     } else {
-      document.getElementById('ranking-table-body').innerHTML = '<tr><td colspan="3" class="empty">Nenhuma vaga com candidatos</td></tr>';
+      document.getElementById('ranking-table-body').innerHTML = '<div class="empty">Nenhuma vaga com candidatos</div>';
     }
     
     // === Atividades recentes ===
