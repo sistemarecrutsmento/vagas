@@ -570,6 +570,68 @@
     @media (max-width:1100px) { #page-vagas .vagas-kpi-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } #page-vagas .vagas-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } #page-vagas .vagas-header-tools { flex-wrap:wrap; justify-content:flex-end; } #page-vagas .vagas-search-top { width:190px; } #page-vagas .vagas-filter-bar { flex-wrap:wrap; } #page-vagas .vagas-search-filter { flex-basis:100%; border-right:0; border-bottom:1px solid #F0EAED; } }
     @media (max-width:700px) { #page-vagas .vagas-page-header { align-items:flex-start; flex-direction:column; } #page-vagas .vagas-header-tools { width:100%; justify-content:stretch; } #page-vagas .vagas-search-top { flex:1 1 100%; width:auto; } #page-vagas .vagas-header-tools select { flex:1 1 125px; } #page-vagas .vagas-new-btn { margin-left:auto; } #page-vagas .vagas-kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } #page-vagas .vagas-filter-bar { align-items:stretch; } #page-vagas .vagas-filter-bar select, #page-vagas .vagas-filter-more { flex:1 1 calc(50% - 6px); max-width:none; } #page-vagas .vagas-clear { width:100%; text-align:right; } #page-vagas .vagas-results-toolbar { align-items:flex-start; flex-direction:column; } #page-vagas .vagas-sort { width:100%; justify-content:space-between; } #page-vagas .vagas-sort select { flex:1; } #page-vagas .vagas-grid { grid-template-columns:1fr; } .vagas-grid.lista-view .vaga-card { display:flex; min-height:248px; } #page-vagas .vagas-pagination { flex-wrap:wrap; } #page-vagas .vagas-pagination > label { margin-left:auto; } }
     @media (max-width:380px) { #page-vagas .vagas-kpi-grid { gap:6px; } #page-vagas .vagas-mini-kpi { padding:8px 7px; } #page-vagas .vagas-mini-icon { width:21px; height:21px; } #page-vagas .vagas-mini-kpi small { font-size:7px; } #page-vagas .vagas-mini-kpi strong { font-size:16px; } #page-vagas .vagas-filter-bar select, #page-vagas .vagas-filter-more { flex-basis:100%; } #page-vagas .vagas-page-controls button { width:23px; } }
+
+    /* Dashboard responsive correction: one fluid layout, no desktop compression or horizontal overflow */
+    #app.logado { width:100%; min-width:0; overflow-x:clip; }
+    #app.logado > main { flex:1 1 0; width:0; max-width:none; min-width:0; overflow-x:clip; }
+    #page-dashboard, #page-dashboard * { min-width:0; }
+    #page-dashboard.ativo { width:100%; max-width:none; }
+    #page-dashboard .dashboard-header { min-width:0; }
+    #page-dashboard .dashboard-welcome { min-width:0; flex:1 1 auto; }
+    #page-dashboard .dashboard-welcome h2, #page-dashboard .dashboard-welcome p { overflow-wrap:anywhere; }
+    #page-dashboard .dashboard-actions { min-width:0; flex:0 1 auto; flex-wrap:wrap; justify-content:flex-end; }
+    #page-dashboard .kpis-grid, #page-dashboard .dash-card, #page-dashboard .dash-row { min-width:0; }
+    #page-dashboard .kpi-card, #page-dashboard .dash-card { overflow:hidden; }
+    #page-dashboard .conversao-area, #page-dashboard .conversao-svg, #page-dashboard .doc-chart { width:100%; max-width:100%; min-width:0; }
+    #page-dashboard .conversao-svg { aspect-ratio:400 / 100; height:auto; min-height:56px; }
+    #page-dashboard .dash-card-header h3, #page-dashboard .dash-link { min-width:0; overflow-wrap:anywhere; }
+    #page-dashboard .dash-card-header h3 { line-height:1.35; }
+    #page-dashboard .atividades-feed, #page-dashboard .lista-entrevistas { min-width:0; overflow:hidden; }
+    #page-dashboard .atividade-item, #page-dashboard .entrevista-item, #page-dashboard .ranking-item { min-width:0; max-width:100%; }
+    #page-dashboard .atividade-corpo, #page-dashboard .entrevista-info { min-width:0; overflow:hidden; }
+    #page-dashboard .ranking-grid, #page-dashboard .kpis-secundarios { min-width:0; }
+    #page-dashboard .doc-chart { justify-content:flex-start; }
+
+    /* 1200px and up: six KPIs, three primary panels, balanced lower grid. */
+    @media (min-width:1200px) {
+      #page-dashboard.ativo { grid-template-columns:repeat(12,minmax(0,1fr)); }
+      #page-dashboard { grid-template-areas:"head head head head head head head head head head head head" "kpis kpis kpis kpis kpis kpis kpis kpis kpis kpis kpis kpis" "stages stages stages stages activities activities activities activities upcoming upcoming upcoming upcoming" "jobs jobs jobs jobs conversion conversion docs docs strategic strategic strategic strategic"; }
+      #page-dashboard .kpis-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
+    }
+
+    /* 900–1199px: keep the sidebar in flow, reduce the dashboard to a six-column grid. */
+    @media (min-width:900px) and (max-width:1199px) {
+      #page-dashboard.ativo { grid-template-columns:repeat(6,minmax(0,1fr)); }
+      #page-dashboard { grid-template-areas:"head head head head head head" "kpis kpis kpis kpis kpis kpis" "stages stages stages activities activities activities" "upcoming upcoming upcoming upcoming upcoming upcoming" "jobs jobs jobs jobs jobs jobs" "conversion conversion conversion docs docs docs" "strategic strategic strategic strategic strategic strategic"; }
+      #page-dashboard .kpis-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      #page-dashboard .dashboard-header { align-items:flex-start; }
+      #page-dashboard .dashboard-actions { max-width:58%; }
+    }
+
+    /* 701–899px: tablet uses the same dashboard as a drawer + fluid six-column content. */
+    @media (min-width:701px) and (max-width:899px) {
+      #app.logado > aside { position:fixed; top:0; bottom:0; left:0; z-index:1000; width:232px; min-height:100vh; transform:translateX(-100%); transition:transform .25s ease; }
+      #app.logado > aside.aberto { transform:translateX(0); box-shadow:4px 0 24px rgba(0,0,0,.25); }
+      #app.logado > aside.aberto .menu-close { display:block; }
+      #app.logado .menu-toggle { display:block; }
+      #app.logado.aside-aberto .menu-toggle { display:none; }
+      #app.logado > main { width:100%; padding:27px 24px 30px; }
+      #page-dashboard.ativo { grid-template-columns:repeat(6,minmax(0,1fr)); }
+      #page-dashboard { grid-template-areas:"head head head head head head" "kpis kpis kpis kpis kpis kpis" "stages stages stages activities activities activities" "upcoming upcoming upcoming upcoming upcoming upcoming" "jobs jobs jobs jobs jobs jobs" "conversion conversion conversion docs docs docs" "strategic strategic strategic strategic strategic strategic"; }
+      #page-dashboard .kpis-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      #page-dashboard .dashboard-header { align-items:flex-start; }
+      #page-dashboard .dashboard-actions { width:100%; max-width:none; justify-content:flex-start; }
+    }
+
+    /* 700px and below: preserve the approved mobile behavior, adding only overflow guards. */
+    @media (max-width:700px) {
+      #app.logado > main { width:100%; min-width:0; overflow-x:clip; }
+      #page-dashboard.ativo { width:100%; min-width:0; }
+      #page-dashboard .dashboard-header, #page-dashboard .dashboard-actions { min-width:0; max-width:100%; }
+      #page-dashboard .dashboard-actions > * { min-width:0; }
+      #page-dashboard .dash-card, #page-dashboard .kpi-card { width:100%; max-width:100%; }
+      #page-dashboard .conversao-svg { min-height:62px; }
+    }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
 </head>
