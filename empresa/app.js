@@ -79,9 +79,13 @@ function carregarUsuarioSidebar() {
     const elAvatar = document.getElementById('aside-user-avatar');
     const elNome = document.getElementById('aside-user-nome');
     const elEmpresa = document.getElementById('aside-user-empresa');
+    const elCompanyName = document.getElementById('aside-company-name');
+    const elCompanyPlan = document.getElementById('aside-company-plan');
     if (elAvatar) elAvatar.textContent = iniciais || 'A';
     if (elNome) elNome.textContent = nome;
-    if (elEmpresa) elEmpresa.textContent = payload.email || '';
+    if (elEmpresa) elEmpresa.textContent = payload.email || 'Admin da empresa';
+    if (elCompanyName) elCompanyName.textContent = payload.empresa_nome || payload.empresa || 'Minha empresa';
+    if (elCompanyPlan) elCompanyPlan.textContent = payload.plano_nome || 'Plano da empresa';
   } catch (e) { /* silencioso */ }
 }
 
@@ -740,26 +744,36 @@ async function carregarDashboardV2() {
     const primeiroNome = (data.admin?.nome || 'Recrutador').split(' ')[0];
     document.getElementById('dash-greeting').textContent = `${saudacao}, ${primeiroNome}! 👋`;
     
-    // === KPIs principais (5) ===
+    // === KPIs principais: somente dados retornados para o tenant autenticado ===
     const k = data.kpis || {};
+    const vagasEmpresa = Array.isArray(data.vagas) ? data.vagas : [];
+    const limite30 = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    const abertasMais30 = vagasEmpresa.filter(v => v.status === 'publicada' && v.criada_em && new Date(v.criada_em).getTime() < limite30).length;
+    const contratacoesAtual = Number(k.contratacoes || 0);
+    const contratacoesAnterior = Number(data.kpis_deltas?.contratacoes?.anterior_30d || 0);
+    const contratacoesDelta = contratacoesAnterior > 0 ? Math.round(((contratacoesAtual - contratacoesAnterior) / contratacoesAnterior) * 100) : null;
+    const dashSvg = (name) => `<svg class="dash-svg" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+    const spark = {
+      briefcase: 'M1 15 L10 11 L18 13 L27 7 L36 10 L45 5 L55 7', users: 'M1 16 L10 13 L18 15 L27 9 L36 11 L45 4 L55 6',
+      file: 'M1 14 L10 15 L18 10 L27 12 L36 6 L45 9 L55 4', calendar: 'M1 16 L10 12 L18 14 L27 6 L36 9 L45 5 L55 7',
+      check: 'M1 17 L10 14 L18 15 L27 8 L36 10 L45 3 L55 5', talent: 'M1 14 L10 16 L18 11 L27 13 L36 7 L45 9 L55 4'
+    };
     const kpis = [
-      { label: 'Vagas ativas', valor: k.vagas_ativas || 0, delta: k.deltas?.vagas, icon: '💼', cor: 'rosa' },
-      { label: 'Candidatos', valor: k.total_candidatos || 0, delta: k.deltas?.candidatos, icon: '👥', cor: 'azul' },
-      { label: 'Processos ativos', valor: k.processos_ativos || 0, delta: k.deltas?.processos, icon: '📋', cor: 'roxo' },
-      { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: k.deltas?.entrevistas, icon: '📅', cor: 'verde' },
-      { label: 'Contratações (30d)', valor: k.contratacoes || 0, delta: null, icon: '🤝', cor: 'dourado' },
-      { label: 'Alertas +30d', valor: k.alertas_30d || 0, delta: null, icon: '⌛', cor: 'cinza' }
+      { label: 'Vagas ativas', valor: Number(k.vagas_ativas || 0), delta: k.deltas?.vagas, deltaLabel: 'novas nos últimos 7 dias', icon: 'briefcase', cor: 'vinho' },
+      { label: 'Candidatos', valor: Number(k.total_candidatos || 0), delta: k.deltas?.candidatos, deltaLabel: 'novos nos últimos 7 dias', icon: 'users', cor: 'roxo' },
+      { label: 'Processos ativos', valor: Number(k.processos_ativos || 0), delta: k.deltas?.processos, deltaLabel: 'novos nos últimos 7 dias', icon: 'file', cor: 'azul' },
+      { label: 'Entrevistas agendadas', valor: Number(k.entrevistas_agendadas || 0), delta: k.deltas?.entrevistas, deltaLabel: 'nos próximos 7 dias', icon: 'calendar', cor: 'verde' },
+      { label: 'Contratações (30d)', valor: contratacoesAtual, delta: contratacoesDelta, deltaLabel: 'vs. 30 dias anteriores', icon: 'check', cor: 'laranja' },
+      { label: 'Abertas +30d', valor: abertasMais30, delta: null, deltaLabel: 'vagas publicadas', icon: 'talent', cor: 'roxo' }
     ];
-    document.getElementById('kpis-grid').innerHTML = kpis.map(k => {
-      const delta = k.delta == null ? '' : (k.delta > 0 ? `<span class="kpi-delta up">+${k.delta}% este mês</span>` : k.delta < 0 ? `<span class="kpi-delta down">${k.delta}% este mês</span>` : `<span class="kpi-delta flat">0% este mês</span>`);
-      return `<div class="kpi-card kpi-${k.cor}">
-        <div class="kpi-top">
-          <div class="kpi-icon">${k.icon}</div>
-        </div>
-        <div class="kpi-label">${k.label}</div>
-        <div class="kpi-valor">${k.valor}</div>
-        ${delta}
-      </div>`;
+    document.getElementById('kpis-grid').innerHTML = kpis.map(metric => {
+      let delta = '';
+      if (metric.delta != null) {
+        const direction = metric.delta >= 0 ? 'up' : 'down';
+        const sign = metric.delta > 0 ? '+' : '';
+        delta = `<span class="kpi-delta ${direction}">${sign}${metric.delta}% ${metric.deltaLabel}</span>`;
+      } else if (metric.deltaLabel) delta = `<span class="kpi-delta flat">${metric.deltaLabel}</span>`;
+      return `<div class="kpi-card kpi-${metric.cor}"><div class="kpi-top"><span class="kpi-icon">${dashSvg(metric.icon)}</span><svg class="kpi-spark" viewBox="0 0 56 20" aria-hidden="true"><path d="${spark[metric.icon]}"></path></svg></div><div class="kpi-label">${metric.label}</div><div class="kpi-valor">${metric.valor.toLocaleString('pt-BR')}</div>${delta}</div>`;
     }).join('');
     
     // === Gráfico: Candidatos por etapa ===
@@ -781,10 +795,13 @@ async function carregarDashboardV2() {
       </div>`;
     }).join('');
     
-    // === Taxa de conversão ===
+    // === Taxa de conversão: calculada exclusivamente com os processos desta empresa ===
     const c = data.conversao || {};
-    const hist = c.historico || [];
-    const maxConv = Math.max(1, ...hist);
+    const convAprovados = Number(c.aprovados ?? k.processos_ativos ?? 0);
+    const convContratados = Number(c.contratados ?? contratacoesAtual);
+    const convAtual = Number(c.atual ?? (convAprovados > 0 ? Math.round((convContratados / convAprovados) * 100) : 0));
+    const hist = Array.isArray(c.historico) ? c.historico : [];
+    const maxConv = Math.max(1, ...hist, convAtual);
     const w = 200, h = 60;
     let pathD = '';
     if (hist.length > 1) {
@@ -803,11 +820,12 @@ async function carregarDashboardV2() {
       if (pathEl) pathEl.setAttribute('d', '');
       if (lineEl) lineEl.setAttribute('d', '');
     }
-    document.getElementById('conversao-valor').textContent = (c.atual || 0) + '%';
-    const convDetalhes = document.getElementById('conversao-contratados');
-    if (convDetalhes) {
-      // texto já existe no HTML ("contratados de X processos")
-    }
+    const convValorEl = document.getElementById('conversao-valor');
+    if (convValorEl) convValorEl.textContent = convAtual + '%';
+    const convAprovadosEl = document.getElementById('conversao-contratados');
+    const convTotalEl = document.getElementById('conversao-total');
+    if (convAprovadosEl) convAprovadosEl.textContent = convAprovados;
+    if (convTotalEl) convTotalEl.textContent = convContratados;
     
     // === Próximas Entrevistas ===
     const entrevistas = data.proximas_entrevistas || [];
@@ -816,10 +834,11 @@ async function carregarDashboardV2() {
         const dataE = new Date(e.data_hora);
         const dataStr = dataE.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
         const horaStr = dataE.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        const badgeClass = e.etapa === 3 ? 'rh' : 'gestor';
+        const statusNome = e.status === 'cancelada' ? 'Cancelada' : e.status === 'aguardando' ? 'Aguardando' : 'Agendada';
+        const badgeClass = e.status === 'cancelada' ? 'cancelada' : e.status === 'aguardando' ? 'aguardando' : 'confirmada';
         const nome = e.candidato_nome || e.nome || 'Candidato';
         const vaga = e.vaga_titulo || e.vaga || '—';
-        const etapaNome = e.etapa === 3 ? 'RH' : e.etapa === 4 ? 'Gestor' : (e.etapa_nome || 'Entrevista');
+        const etapaNome = statusNome;
         const iniciais = nome.split(' ').map(s => s.charAt(0)).slice(0, 2).join('').toUpperCase();
         return `<div class="entrevista-item">
           <div class="entrevista-avatar">${iniciais}</div>
@@ -848,6 +867,10 @@ async function carregarDashboardV2() {
     if (docFill) docFill.setAttribute('stroke-dasharray', `${dashTotal - offset} ${dashTotal}`);
     if (docTexto) docTexto.textContent = taxaDoc + '%';
     if (docPercent) docPercent.textContent = taxaDoc + '%';
+    const docRecebidosLabel = document.getElementById('doc-recebidos-label');
+    const docPendentesLabel = document.getElementById('doc-pendentes-label');
+    if (docRecebidosLabel) docRecebidosLabel.textContent = taxaDoc + '%';
+    if (docPendentesLabel) docPendentesLabel.textContent = Math.max(0, 100 - taxaDoc) + '%';
     const docProg = document.getElementById('doc-progresso-barra');
     if (docProg) {
       docProg.style.width = taxaDoc + '%';
@@ -857,13 +880,12 @@ async function carregarDashboardV2() {
     // === Vagas com mais candidatos ===
     const vRanking = data.vagas_mais_candidatos || [];
     if (vRanking.length > 0) {
-      document.getElementById('ranking-table-body').innerHTML = vRanking.slice(0, 4).map((v, i) => `
-        <div class="ranking-item">
-          <div class="ranking-item-top"><strong>${v.titulo || '—'}</strong><span class="ranking-percent">${v.total_candidatos || 0}% este mês</span></div>
-          <div class="ranking-company">${v.empresa || '—'}</div>
-          <div class="ranking-item-bottom"><b>${v.total_candidatos || 0}</b> candidatos <span class="ranking-bar"><i style="width:${Math.min(100, Math.max(8, (v.total_candidatos || 0) * 2))}%"></i></span></div>
-        </div>
-      `).join('');
+      const maxRanking = Math.max(1, ...vRanking.map(v => Number(v.total_candidatos || 0)));
+      document.getElementById('ranking-table-body').innerHTML = vRanking.slice(0, 4).map(v => {
+        const vagaReal = vagasEmpresa.find(item => Number(item.id) === Number(v.id));
+        const total = Number(v.total_candidatos || 0);
+        return `<div class="ranking-item"><div class="ranking-item-top"><strong>${v.titulo || '—'}</strong><span class="ranking-percent">${Math.round((total / maxRanking) * 100)}%</span></div><div class="ranking-company">${v.empresa || vagaReal?.empresa || 'Minha empresa'}</div><div class="ranking-item-bottom"><b>${total}</b> candidatos <span class="ranking-bar"><i style="width:${Math.max(8, Math.round((total / maxRanking) * 100))}%"></i></span></div></div>`;
+      }).join('');
     } else {
       document.getElementById('ranking-table-body').innerHTML = '<div class="empty">Nenhuma vaga com candidatos</div>';
     }
@@ -872,20 +894,20 @@ async function carregarDashboardV2() {
     const ats = data.atividades_recentes || [];
     if (ats.length > 0) {
       const tipoMap = {
-        'inscricao':        { icone: '✨', label: 'Nova inscrição',  tipo: 'inscricao' },
-        'avancar':          { icone: '▶️', label: 'Avançou etapa',   tipo: 'avancar' },
-        'reprovar':         { icone: '✖', label: 'Reprovado',       tipo: 'reprovar' },
-        'reabrir':          { icone: '↩', label: 'Reaberto',        tipo: 'reabrir' },
-        'recusar_proposta': { icone: '✖', label: 'Proposta recusada', tipo: 'proposta' },
-        'aceitar_proposta': { icone: '✓', label: 'Proposta aceita',  tipo: 'proposta' },
-        'enviar_proposta':  { icone: '📨', label: 'Proposta enviada', tipo: 'proposta' },
-        'entrevista':       { icone: '📅', label: 'Entrevista agendada', tipo: 'entrevista' }
+        'inscricao':        { icone: 'users', label: 'Nova inscrição',  tipo: 'inscricao' },
+        'avancar':          { icone: 'arrow-up', label: 'Avançou etapa',   tipo: 'avancar' },
+        'reprovar':         { icone: 'arrow-down', label: 'Reprovado',       tipo: 'reprovar' },
+        'reabrir':          { icone: 'arrow-up', label: 'Reaberto',        tipo: 'reabrir' },
+        'recusar_proposta': { icone: 'arrow-down', label: 'Proposta recusada', tipo: 'proposta' },
+        'aceitar_proposta': { icone: 'check', label: 'Proposta aceita',  tipo: 'proposta' },
+        'enviar_proposta':  { icone: 'file', label: 'Proposta enviada', tipo: 'proposta' },
+        'entrevista':       { icone: 'calendar', label: 'Entrevista agendada', tipo: 'entrevista' }
       };
       document.getElementById('atividades-recentes').innerHTML = ats.slice(0, 8).map(a => {
         const t = tipoMap[a.texto] || { icone: '•', label: a.texto, tipo: 'reabrir' };
         const quando = tempoRelativo(a.quando);
         return `<div class="atividade-item tipo-${t.tipo}">
-          <div class="atividade-icone">${t.icone}</div>
+          <div class="atividade-icone">${dashSvg(t.icone)}</div>
           <div class="atividade-corpo">
             <div class="atividade-topo">
               <span class="atividade-tipo">${t.label}</span>
@@ -905,10 +927,12 @@ async function carregarDashboardV2() {
     // === KPIs secundários ===
     const ks = data.kpis_secundarios || {};
     document.getElementById('ks-tempo').textContent = (ks.tempo_medio_contratacao || 0) + 'd';
-    document.getElementById('ks-aprovacao').textContent = (ks.taxa_aprovacao || 0) + '%';
-    document.getElementById('ks-desligamento').textContent = (ks.taxa_desligamento || 0) + '%';
+    document.getElementById('ks-aprovacao').textContent = (ks.taxa_aprovacao_30d ?? ks.taxa_aprovacao ?? 0) + '%';
+    document.getElementById('ks-desligamento').textContent = (ks.taxa_desistencia ?? ks.taxa_desligamento ?? 0) + '%';
     document.getElementById('ks-encerradas').textContent = ks.vagas_encerradas || 0;
-    document.getElementById('ks-empresas').textContent = ks.empresas_ativas || 0;
+    const semContratacao = ks.vagas_fechadas_sem_contratacao ?? vagasEmpresa.filter(v => v.status === 'fechada' && Number(v.contratados || 0) === 0).length;
+    document.getElementById('ks-processos').textContent = k.processos_ativos || 0;
+    document.getElementById('ks-sem-contratacao').textContent = semContratacao;
   } catch (e) {
     console.error('[DASHBOARD V2] ERRO:', e.message, e.stack);
     const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
