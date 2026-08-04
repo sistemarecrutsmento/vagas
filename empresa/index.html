@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard · Portal Empresa · VagasIO</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Painel de Recrutamento</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -14,16 +14,38 @@
       --preto: #1A1A1A;
       --preto-suave: #2A2A2A;
       --cinza-escuro: #3A3A3A;
-      --cinza: #F5F5F5;
-      --cinza-medio: #666;
       --borda: #E5E5E5;
+      --borda-escura: #444;
       --verde: #2E7D32;
       --amarelo: #F57C00;
       --vermelho: #C62828;
-      --dourado: #D4A155;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: #FAFAFA; color: var(--preto); }
+    /* Login */
+    .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--preto) 0%, var(--cinza-escuro) 100%); padding: 20px; }
+    .login-card { background: var(--branco); padding: 48px 40px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border-top: 4px solid var(--vinho); }
+    .login-card h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .login-card .sub { color: #888; margin-bottom: 32px; font-size: 14px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--preto); }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--borda);
+      border-radius: 6px; font-size: 15px; font-family: inherit; background: var(--branco);
+    }
+    .form-group input:focus { outline: none; border-color: var(--vinho); }
+    .btn { padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 15px; transition: all 0.2s; }
+    .btn-primary { background: var(--vinho); color: var(--branco); width: 100%; }
+    .btn-primary:hover { background: var(--vinho-escuro); }
+    .btn-primary:disabled { opacity: 0.5; }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    .btn-sec { background: var(--preto); color: var(--branco); }
+    .btn-perigo { background: var(--vermelho); color: var(--branco); }
+    .alert { padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+    .alert-erro { background: #FEE; color: var(--vermelho); border: 1px solid #FCC; }
+    /* Layout logado */
+    .app { display: none; }
+    .app.logado { display: flex; min-height: 100vh; }
     .menu-toggle { display: none; position: fixed; top: 12px; left: 12px; z-index: 1100; background: var(--vinho); color: #fff; border: 0; border-radius: 8px; width: 40px; height: 40px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     .menu-close { display: none; position: absolute; top: 12px; right: 12px; background: transparent; color: #fff; border: 0; font-size: 22px; cursor: pointer; padding: 4px 8px; }
     @media (max-width: 700px) {
@@ -32,19 +54,41 @@
       aside { position: fixed; top: 0; left: 0; height: 100vh; z-index: 1000; transform: translateX(-100%); transition: transform 0.25s ease; }
       aside.aberto { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
       aside.aberto .menu-close { display: block; }
-      main { padding: 20px 16px; padding-top: 64px; }
+      .aside-logo { padding: 12px 24px 24px; }
+      main { width: 100%; padding: 20px 16px; padding-top: 64px; }
+      .btn.btn-sec { padding: 8px 14px; background: var(--cinza-escuro); color: var(--branco); border: 0; border-radius: 6px; cursor: pointer; font-size: 13px; }
       .page-header { flex-direction: column; align-items: flex-start; }
       .page-header h2 { font-size: 20px; }
+      .tabela-wrap { width: 100%; }
+      /* Mobile: transforma tabela de candidatos em cards */
+      #vaga-cands-internal-table thead { display: none; }
+      #vaga-cands-internal-table, #vaga-cands-internal-table tbody, #vaga-cands-internal-table tr, #vaga-cands-internal-table td { display: block; width: 100% !important; max-width: 100% !important; table-layout: auto !important; }
+      #vaga-cands-internal-table tr { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+      #vaga-cands-internal-table td { padding: 4px 0; border: 0; text-align: left; box-sizing: border-box; word-break: normal; }
+      #vaga-cands-internal-table td:nth-child(1) { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+      #vaga-cands-internal-table td:nth-child(1)::before { content: ''; }
+      #vaga-cands-internal-table td:nth-child(2)::before { content: '📧 '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(2) { font-size: 13px; color: var(--cinza-medio); word-break: break-all; }
+      #vaga-cands-internal-table td:nth-child(3)::before { content: '📍 '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(3) { font-size: 12px; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(4)::before { content: '📊 Etapa: '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(4) { font-size: 13px; }
+      #vaga-cands-internal-table td:nth-child(5)::before { content: '🏷 Status: '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(5) { font-size: 13px; }
+      #vaga-cands-internal-table td:nth-child(6)::before { content: '📅 Data: '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(6) { font-size: 12px; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(7) { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--borda); text-align: right; }
+      #vaga-cands-internal-table td:nth-child(7) .btn-ver { padding: 8px 16px; }
     }
     /* Sidebar */
     aside { width: 240px; background: var(--vinho); color: var(--branco); padding: 24px 0; flex-shrink: 0; display: flex; flex-direction: column; min-height: 100vh; }
     .aside-logo { padding: 0 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
     .aside-logo h1 { font-size: 20px; font-weight: 800; color: #fff; }
-    .aside-logo h1 .dourado { color: #fff; }
     .aside-logo small { color: rgba(255,255,255,0.6); font-size: 12px; }
     .nav-item { display: block; padding: 12px 24px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; font-weight: 500; border-left: 3px solid transparent; cursor: pointer; transition: background 0.2s; }
     .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
     .nav-item.ativo { background: rgba(255,255,255,0.15); color: #fff; border-left-color: var(--branco); }
+    .nav-item.sair { margin-top: auto; color: rgba(255,255,255,0.5); }
     .aside-user { margin-top: auto; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
     .aside-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--dourado); color: var(--preto); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
     .aside-user-info { flex: 1; min-width: 0; }
@@ -52,43 +96,187 @@
     .aside-user-info .empresa { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .btn-logout { background: rgba(255,255,255,0.1); color: #fff; border: 0; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; }
     .btn-logout:hover { background: rgba(255,255,255,0.2); }
-    /* Layout */
-    .app { display: flex; min-height: 100vh; }
+    .nav-divisor { margin-top: 16px; padding: 8px 24px 4px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 11px; font-weight: 700; letter-spacing: 1px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+    /* Abas da página Equipe */
+    .tab-equipe { background: none; border: 0; padding: 10px 18px; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 3px solid transparent; }
+    .tab-equipe.ativo { color: var(--vinho); border-bottom-color: var(--vinho); }
+    .tab-equipe:hover { color: var(--preto); }
+    /* Abas da Agenda */
+    .tab-agenda { background: none; border: 0; padding: 10px 18px; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 3px solid transparent; }
+    .tab-agenda.ativo { color: var(--vinho); border-bottom-color: var(--vinho); }
+    .tab-agenda:hover { color: var(--preto); }
+    /* Cards de stats */
+    .card-mini { background: #fff; border: 1px solid var(--borda); border-radius: 8px; padding: 14px 18px; }
+    .card-mini .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-mini .valor { font-size: 26px; font-weight: 700; margin-top: 4px; }
+    /* Itens da agenda */
+    .agenda-item { display: grid; grid-template-columns: 90px 1fr auto; gap: 16px; align-items: start; background: #fff; border: 1px solid var(--borda); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .agenda-data { text-align: center; background: var(--vinho); color: #fff; border-radius: 6px; padding: 10px 6px; }
+    .agenda-dia { font-size: 14px; font-weight: 700; }
+    .agenda-hora { font-size: 20px; font-weight: 800; margin: 4px 0; }
+    .agenda-duracao { font-size: 11px; opacity: 0.8; }
+    .agenda-candidato { font-size: 16px; font-weight: 700; }
+    .agenda-vaga { font-size: 14px; color: #555; margin-top: 4px; }
+    .agenda-meta { font-size: 13px; color: #666; margin-top: 6px; }
+    .agenda-acoes { text-align: right; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: capitalize; }
+    @media (max-width: 600px) { .agenda-item { grid-template-columns: 70px 1fr; } .agenda-acoes { grid-column: 1 / -1; text-align: left; } }
+    /* Main */
     main { flex: 1; padding: 32px; overflow-y: auto; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
+    .page { display: none; }
+    .page.ativo { display: block; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .page-header h2 { font-size: 24px; font-weight: 700; }
     .page-header p { color: #888; font-size: 14px; margin-top: 2px; }
-    .btn { padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 15px; transition: all 0.2s; text-decoration: none; display: inline-block; }
-    .btn-sec { background: var(--preto); color: var(--branco); padding: 8px 14px; font-size: 13px; }
-    .btn-sec:hover { background: var(--cinza-escuro); }
+    /* Cards de stats */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--branco); padding: 20px; border-radius: 8px; border: 1px solid var(--borda); }
+    .stat-card .label { font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .stat-card .valor { font-size: 32px; font-weight: 800; margin-top: 8px; color: var(--preto); }
+    .stat-card.vinho .valor { color: var(--vinho); }
+    .stat-card.verde .valor { color: var(--verde); }
+    /* Tabela */
+    .tabela-wrap { background: var(--branco); border-radius: 8px; border: 1px solid var(--borda); overflow-x: auto; }
+    #vaga-cands-internal-table { min-width: 0; border-collapse: separate; border-spacing: 0; table-layout: fixed; width: 100%; }
+    #vaga-cands-internal-table th, #vaga-cands-internal-table td { white-space: normal; word-break: break-word; }
+    #vaga-cands-internal-table th:nth-child(1), #vaga-cands-internal-table td:nth-child(1) { width: 15%; }
+    #vaga-cands-internal-table th:nth-child(2), #vaga-cands-internal-table td:nth-child(2) { width: 22%; word-break: break-all; }
+    #vaga-cands-internal-table th:nth-child(3), #vaga-cands-internal-table td:nth-child(3) { width: 13%; }
+    #vaga-cands-internal-table th:nth-child(4), #vaga-cands-internal-table td:nth-child(4) { width: 14%; }
+    #vaga-cands-internal-table th:nth-child(5), #vaga-cands-internal-table td:nth-child(5) { width: 14%; }
+    #vaga-cands-internal-table th:nth-child(6), #vaga-cands-internal-table td:nth-child(6) { width: 12%; white-space: nowrap; }
+    #vaga-cands-internal-table th:nth-child(7), #vaga-cands-internal-table td:nth-child(7) { width: 10%; }
+    #vaga-cands-internal-table th { white-space: nowrap; }
+    #vaga-cands-internal-table .badge { white-space: nowrap; display: inline-block; }
+    #vaga-cands-internal-table th:last-child, #vaga-cands-internal-table td:last-child { text-align: right; }
+    #vaga-cands-internal-table .btn-ver { white-space: nowrap; }
+    #vaga-cands-internal-table thead th:last-child { background: #F8F8F8; }
+    .tabela-scroll { overflow-x: auto; }
+    .btn-ver { display: inline-block; padding: 6px 14px; background: var(--vinho); color: #fff; border-radius: 4px; font-size: 12px; text-decoration: none; white-space: nowrap; }
+    .btn-ver:hover { background: var(--vinho-claro); }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #F8F8F8; padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; font-weight: 700; border-bottom: 1px solid var(--borda); }
+    td { padding: 14px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #FAFAFA; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .badge-ativa { background: #E8F5E9; color: var(--verde); }
+    .badge-pendente { background: #FFF3E0; color: var(--amarelo); }
+    .badge-fechada { background: #F5F5F5; color: #888; }
+    .acoes { display: flex; gap: 6px; }
+    .acoes button { background: none; border: 1px solid var(--borda); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .acoes button:hover { border-color: var(--vinho); color: var(--vinho); }
+    .acoes .perigo:hover { border-color: var(--vermelho); color: var(--vermelho); }
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-overlay.aberto { display: flex; }
+    .modal { background: var(--branco); border-radius: 8px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-lg { max-width: 800px; }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 20px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #888; }
+    .modal-body { padding: 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--borda); display: flex; gap: 8px; justify-content: flex-end; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .det-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .det-item { background: #fafafa; padding: 10px 14px; border-radius: 6px; border: 1px solid var(--borda); }
+    .det-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--cinza-medio); margin-bottom: 4px; letter-spacing: 0.5px; }
+    .det-value { font-size: 14px; font-weight: 500; color: var(--preto); }
+    .det-section { margin-top: 16px; }
+    .det-section h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--borda); }
+    .alert-erro { color: var(--vermelho); padding: 8px; }
     .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 12px; }
     .alert-erro { background: #ffebee; color: var(--vermelho); }
-    .empty { text-align: center; padding: 40px; color: #888; }
+    .alert-sucesso { background: #e8f5e9; color: var(--verde); }
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .empty { text-align: center; padding: 40px; color: #888; }
 
-    /* ==== DASHBOARD v2 (mesmo visual admin) ==== */
-    .kpis-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 16px; }
-    @media (max-width: 1300px) { .kpis-grid { grid-template-columns: repeat(4, 1fr); } }
+    /* Áreas de interesse (Base de Talentos) */
+    .areas-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+    .badge-area { display: inline-block; padding: 3px 8px; background: #fdf2f4; color: var(--vinho); border: 1px solid #f3d4da; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .filtro-area { background: white; }
+    .filtro-area:focus { outline: none; border-color: var(--vinho); }
+
+    /* Modal de Currículo (Base de Talentos) */
+    .curriculo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .curriculo-card { background: #fafafa; border: 1px solid var(--borda); border-radius: 10px; padding: 14px; }
+    .curriculo-card h4 { font-size: 14px; color: var(--vinho); margin-bottom: 10px; }
+    .curriculo-card .kv { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; gap: 8px; }
+    .curriculo-card .kv span { color: var(--cinza); }
+    .curriculo-card .kv strong { text-align: right; word-break: break-word; }
+    .curriculo-full { grid-column: 1 / -1; }
+    @media (max-width: 700px) {
+      .curriculo-grid { grid-template-columns: 1fr; }
+      .curriculo-full { grid-column: 1; }
+    }
+
+    /* Base de Talentos — tabela em mobile (cards) */
+    @media (max-width: 700px) {
+      #candidatos-table, #candidatos-table tbody, #candidatos-table tr, #candidatos-table td { display: block; width: 100% !important; max-width: 100% !important; table-layout: auto !important; }
+      #candidatos-table thead { display: none; }
+      #candidatos-table tr { background: var(--branco); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+      #candidatos-table td { padding: 4px 0; border: 0; text-align: left; box-sizing: border-box; word-break: normal; }
+      #candidatos-table td::before { content: attr(data-label); display: block; font-size: 11px; color: var(--cinza-medio); text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
+    }
+
+    /* Cards de vagas com candidatos */
+    .vagas-cands-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .vaga-cand-card { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 18px; transition: transform .15s, box-shadow .15s; cursor: pointer; position: relative; }
+    .vaga-cand-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); border-color: var(--vinho); }
+    .vaga-cand-card h3 { font-size: 16px; color: var(--preto); margin-bottom: 4px; }
+    .vaga-cand-card .empresa { font-size: 13px; color: var(--cinza-medio); margin-bottom: 12px; }
+    .vaga-cand-stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; padding: 10px; background: var(--cinza); border-radius: 6px; }
+    .vaga-cand-stat { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 60px; }
+    .vaga-cand-stat .num { font-size: 20px; font-weight: 700; color: var(--vinho); }
+    .vaga-cand-stat .lbl { font-size: 11px; color: var(--cinza-medio); text-transform: uppercase; }
+    .vaga-cand-ver { display: inline-block; background: var(--vinho); color: white; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+    .vaga-cand-ver:hover { background: #5a1a1a; }
+
+    /* Modal xl */
+    .modal.modal-xl { max-width: 900px; }
+
+    /* Análise do candidato */
+    .analisar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 700px) { .analisar-grid { grid-template-columns: 1fr; } }
+    .analisar-bloco { background: var(--cinza); padding: 14px; border-radius: 8px; }
+    .analisar-bloco h4 { font-size: 13px; text-transform: uppercase; color: var(--cinza-medio); margin-bottom: 8px; letter-spacing: 0.5px; }
+    .analisar-bloco .valor { font-size: 14px; color: var(--preto); }
+    .analisar-bloco .valor small { color: var(--cinza-medio); display: block; font-size: 12px; margin-top: 2px; }
+    .analisar-foto { width: 80px; height: 80px; border-radius: 50%; background: var(--borda); display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--cinza-medio); overflow: hidden; flex-shrink: 0; }
+    .analisar-foto img { width: 100%; height: 100%; object-fit: cover; }
+    .analisar-topo { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--borda); }
+    .analisar-topo h2 { font-size: 20px; margin-bottom: 2px; }
+    .analisar-topo .sub { color: var(--cinza-medio); font-size: 13px; }
+    .analisar-acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 2px solid var(--borda); }
+    .analisar-acoes button { padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
+    .btn-avancar { background: #28a745; color: white; }
+    .btn-avancar:hover { background: #218838; }
+    .btn-reprovar { background: #dc3545; color: white; }
+    .btn-reprovar:hover { background: #c82333; }
+    .btn-reabrir { background: #ffc107; color: #333; }
+    .btn-reabrir:hover { background: #e0a800; }
+    .btn-msg { background: var(--cinza); color: var(--preto); }
+    .analisar-timeline { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 14px; background: var(--cinza); border-radius: 8px; margin: 16px 0; }
+    .analisar-etapa { display: flex; flex-direction: column; align-items: center; min-width: 90px; font-size: 11px; }
+    .analisar-etapa-bola { width: 28px; height: 28px; border-radius: 50%; background: var(--borda); color: var(--cinza-medio); display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 4px; }
+    .analisar-etapa.aprovada .analisar-etapa-bola { background: #28a745; color: white; }
+    .analisar-etapa.atual .analisar-etapa-bola { background: var(--vinho); color: white; animation: pulse 1.5s infinite; }
+    .analisar-etapa.rejeitada .analisar-etapa-bola { background: #dc3545; color: white; }
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(123, 31, 31, 0.5); } 50% { box-shadow: 0 0 0 8px rgba(123, 31, 31, 0); } }
+
+    /* ==== DASHBOARD v2 (jul/2026) ==== */
+    .kpis-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
     @media (max-width: 1100px) { .kpis-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 700px)  { .kpis-grid { grid-template-columns: repeat(2, 1fr); } }
-
-    .kpis-grid-secondary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
-    @media (max-width: 1100px) { .kpis-grid-secondary { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 600px)  { .kpis-grid-secondary { grid-template-columns: 1fr; } }
-
-    .kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: block; cursor: pointer; }
-    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--vinho); }
-    .kpi-card-sec { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); }
-    .kpi-card-sec:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .kpi-card::after { content: '→'; position: absolute; top: 14px; right: 14px; color: #bbb; font-size: 14px; opacity: 0; transition: opacity .2s; }
-    .kpi-card:hover::after { opacity: 1; color: var(--vinho); }
+    .kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     .kpi-icon { font-size: 24px; margin-bottom: 8px; display: inline-block; }
     .kpi-label { font-size: 13px; color: #666; font-weight: 500; }
-    .kpi-card-sec .kpi-label { font-size: 12px; }
     .kpi-valor { font-size: 32px; font-weight: 700; color: #1A1A1A; line-height: 1.1; margin-top: 4px; }
-    .kpi-sub { font-size: 12px; color: #999; font-weight: 500; margin-top: 6px; }
-    .kpi-delta { font-size: 11px; color: #10B981; font-weight: 600; margin-top: 8px; padding: 2px 6px; background: rgba(16,185,129,0.08); border-radius: 4px; display: inline-block; }
+    .kpi-delta { font-size: 12px; color: #2E7D32; font-weight: 600; margin-top: 6px; }
+    .kpi-delta.down { color: #C62828; }
+    .kpi-delta.neutro { color: #888; }
     /* Acento colorido lateral */
     .kpi-rosa     { border-left: 4px solid #EC4899; }
     .kpi-rosa .kpi-icon { color: #EC4899; }
@@ -100,10 +288,6 @@
     .kpi-verde .kpi-icon { color: #10B981; }
     .kpi-laranja  { border-left: 4px solid #F59E0B; }
     .kpi-laranja .kpi-icon { color: #F59E0B; }
-    .kpi-dourado  { border-left: 4px solid #D4A155; }
-    .kpi-dourado .kpi-icon { color: #D4A155; }
-    .kpi-vermelho { border-left: 4px solid #C62828; }
-    .kpi-vermelho .kpi-icon { color: #C62828; }
 
     .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     @media (max-width: 900px) { .dash-row { grid-template-columns: 1fr; } }
@@ -111,11 +295,12 @@
     .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .dash-card-header h3 { font-size: 15px; font-weight: 600; color: #1A1A1A; }
     .dash-card-tag { font-size: 11px; padding: 3px 10px; background: #F3F4F6; color: #666; border-radius: 12px; font-weight: 500; }
+    .dash-link { color: var(--vinho); text-decoration: none; font-size: 13px; font-weight: 600; }
+    .dash-link:hover { text-decoration: underline; }
 
     /* Gráfico de etapas - barras horizontais */
     .grafico-etapas { display: flex; flex-direction: column; gap: 10px; }
-    .etapa-barra-row { display: grid; grid-template-columns: 130px 1fr 50px; align-items: center; gap: 10px; }
-    @media (max-width: 500px) { .etapa-barra-row { grid-template-columns: 90px 1fr 30px; } }
+    .etapa-barra-row { display: grid; grid-template-columns: 110px 1fr 50px; align-items: center; gap: 10px; }
     .etapa-barra-nome { font-size: 13px; color: #444; font-weight: 500; }
     .etapa-barra-fundo { background: #F3F4F6; height: 28px; border-radius: 6px; overflow: hidden; position: relative; }
     .etapa-barra-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; display: flex; align-items: center; padding-left: 10px; color: #fff; font-size: 11px; font-weight: 600; min-width: 24px; }
@@ -123,23 +308,30 @@
     .etapa-barra-fill.e2 { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
     .etapa-barra-fill.e3 { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
     .etapa-barra-fill.e4 { background: linear-gradient(90deg, #06B6D4, #22D3EE); }
-    .etapa-barra-fill.e5 { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
-    .etapa-barra-fill.e6 { background: linear-gradient(90deg, #10B981, #34D399); }
+    .etapa-barra-fill.e5 { background: linear-gradient(90deg, #10B981, #34D399); }
+    .etapa-barra-fill.e6 { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
     .etapa-barra-fill.e7 { background: linear-gradient(90deg, #722F37, #8B3A45); }
     .etapa-barra-count { font-size: 14px; font-weight: 700; color: #1A1A1A; text-align: right; }
 
+    /* Taxa de Conversão - área SVG */
+    .conversao-area { position: relative; }
+    .conversao-valor { font-size: 36px; font-weight: 700; color: #1A1A1A; }
+    .conversao-svg { width: 100%; height: 100px; display: block; margin-top: 4px; }
+    .conversao-info { display: flex; gap: 18px; margin-top: 6px; font-size: 13px; color: #666; }
+    .conversao-info strong { color: #1A1A1A; }
+
     /* Lista de Entrevistas */
-    .lista-entrevistas { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+    .lista-entrevistas { display: flex; flex-direction: column; gap: 10px; }
     .entrevista-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #FAFAFA; border-radius: 8px; border-left: 3px solid #722F37; }
     .entrevista-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #722F37, #4A1F25); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
     .entrevista-info { flex: 1; min-width: 0; }
     .entrevista-nome { font-size: 14px; font-weight: 600; color: #1A1A1A; }
     .entrevista-vaga { font-size: 12px; color: #666; margin-top: 2px; }
-    .entrevista-data { font-size: 12px; color: #444; margin-top: 4px; }
-    .entrevista-tag { font-size: 11px; padding: 3px 8px; background: #fff; border: 1px solid var(--borda); border-radius: 6px; color: var(--cinza-medio); font-weight: 600; white-space: nowrap; }
-    .entrevista-empty { padding: 20px; text-align: center; color: #888; font-size: 13px; }
+    .entrevista-data { font-size: 12px; color: #444; white-space: nowrap; font-weight: 500; }
+    .entrevista-link { font-size: 12px; color: var(--vinho); text-decoration: none; font-weight: 600; }
+    .entrevista-link:hover { text-decoration: underline; }
 
-    /* Feed de Atividades (mesmo do admin) */
+    /* Feed de Atividades */
     .atividades-feed { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
     .atividade-item { display: flex; gap: 12px; padding: 12px; background: #FAFAFA; border-radius: 10px; border-left: 3px solid #E5E7EB; transition: background 0.15s; }
     .atividade-item:hover { background: #F3F4F6; }
@@ -151,375 +343,696 @@
     .atividade-candidato { font-size: 14px; font-weight: 600; color: #1A1A1A; line-height: 1.3; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .atividade-vaga { font-size: 12px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .atividade-vaga::before { content: "💼 "; }
-    .atividade-empty { padding: 20px; text-align: center; color: #888; font-size: 13px; }
-    /* Cores por tipo (mesmo do admin) */
-    .atividade-item.tipo-inscricao { border-left-color: #10B981; }
-    .atividade-item.tipo-inscricao .atividade-icone { background: #D1FAE5; }
-    .atividade-item.tipo-inscricao .atividade-tipo { color: #047857; }
-    .atividade-item.tipo-avancar { border-left-color: #3B82F6; }
-    .atividade-item.tipo-avancar .atividade-icone { background: #DBEAFE; }
-    .atividade-item.tipo-avancar .atividade-tipo { color: #1D4ED8; }
-    .atividade-item.tipo-reprovar { border-left-color: #DC2626; }
-    .atividade-item.tipo-reprovar .atividade-icone { background: #FEE2E2; }
-    .atividade-item.tipo-reprovar .atividade-tipo { color: #B91C1C; }
-    .atividade-item.tipo-reabrir { border-left-color: #F59E0B; }
-    .atividade-item.tipo-reabrir .atividade-icone { background: #FEF3C7; }
-    .atividade-item.tipo-reabrir .atividade-tipo { color: #B45309; }
-    .atividade-item.tipo-proposta { border-left-color: #722F37; }
-    .atividade-item.tipo-proposta .atividade-icone { background: #FDF2F4; }
-    .atividade-item.tipo-proposta .atividade-tipo { color: #722F37; }
-    .atividade-item.tipo-entrevista { border-left-color: #06B6D4; }
-    .atividade-item.tipo-entrevista .atividade-icone { background: #CFFAFE; }
-    .atividade-item.tipo-entrevista .atividade-tipo { color: #0E7490; }
+    /* Cores por tipo */
+    .atividade-item.tipo-inscricao   { border-left-color: #10B981; }
+    .atividade-item.tipo-inscricao   .atividade-icone { background: #D1FAE5; }
+    .atividade-item.tipo-inscricao   .atividade-tipo { color: #047857; }
+    .atividade-item.tipo-avancar     { border-left-color: #3B82F6; }
+    .atividade-item.tipo-avancar     .atividade-icone { background: #DBEAFE; }
+    .atividade-item.tipo-avancar     .atividade-tipo { color: #1D4ED8; }
+    .atividade-item.tipo-reprovar    { border-left-color: #EF4444; }
+    .atividade-item.tipo-reprovar    .atividade-icone { background: #FEE2E2; }
+    .atividade-item.tipo-reprovar    .atividade-tipo { color: #B91C1C; }
+    .atividade-item.tipo-reabrir     { border-left-color: #F59E0B; }
+    .atividade-item.tipo-reabrir     .atividade-icone { background: #FEF3C7; }
+    .atividade-item.tipo-reabrir     .atividade-tipo { color: #B45309; }
+    .atividade-item.tipo-proposta    { border-left-color: #8B5CF6; }
+    .atividade-item.tipo-proposta    .atividade-icone { background: #EDE9FE; }
+    .atividade-item.tipo-proposta    .atividade-tipo { color: #6D28D9; }
+    .atividade-item.tipo-entrevista  { border-left-color: #EC4899; }
+    .atividade-item.tipo-entrevista  .atividade-icone { background: #FCE7F3; }
+    .atividade-item.tipo-entrevista  .atividade-tipo { color: #BE185D; }
+    .atividade-empty { text-align: center; padding: 30px 20px; color: #999; font-size: 13px; }
+
+    /* Documentação - rosca */
+    .doc-chart { display: flex; align-items: center; gap: 20px; }
+    .doc-rosca { width: 120px; height: 120px; flex-shrink: 0; }
+    .doc-info { flex: 1; }
+    .doc-info-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; color: #444; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    /* KPIs secundários */
+    .kpis-secundarios { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .kpi-sec { padding: 12px; background: #FAFAFA; border-radius: 8px; }
+    .kpi-sec-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+    .kpi-sec-valor { font-size: 20px; font-weight: 700; color: #1A1A1A; }
   </style>
-  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell4">
+  <script src="../candidato/chat-uploader.js"></script>
 </head>
 <body>
-  <button class="menu-toggle" onclick="document.querySelector('aside').classList.add('aberto'); document.querySelector('.app').classList.add('aside-aberto');" aria-label="Abrir menu">☰</button>
 
-  <div class="app">
-    <!-- SIDEBAR -->
-    <aside class="empresa-shell-sidebar" aria-label="Navegação do Portal Empresa">
-      <button class="empresa-shell-close menu-close" type="button" onclick="this.closest('aside').classList.remove('empresa-shell-open','aberto');" aria-label="Fechar menu">✕</button>
-      <div class="empresa-shell-logo aside-logo"><h1>VagasIO</h1><small>Portal da Empresa</small></div>
-      <nav class="empresa-shell-nav">
-      <a class="nav-item ativo" href="index.html">📊 Dashboard</a>
-      <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
-      <a class="nav-item" href="base-candidatos.html">👥 Base de Talentos</a>
-      <a class="nav-item" href="vagas.html">📋 Vagas com Candidatos</a>
-      <a class="nav-item" href="agenda.html">📅 Agenda</a>
-      <a class="nav-item" href="chat.html">💬 Chat</a>
-      <a class="nav-item" href="analytics.html">📈 Analytics</a>
-      <a class="nav-item" href="notificacoes.html">🔔 Notificações</a>
-      <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
-      <a class="nav-item" id="nav-equipe" style="display:none;" href="usuarios.html">👥 Equipe</a>
-      </nav>
-      <div class="nav-divisor">Links</div>
-      <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
-      <div class="empresa-shell-user aside-user">
-        <div class="empresa-shell-avatar aside-user-avatar" id="avatar">--</div>
-        <div class="empresa-shell-user-info aside-user-info"><div class="nome" id="user-nome">--</div><div class="empresa" id="user-empresa">--</div><span id="user-role" style="display:none"></span></div>
-        <button class="empresa-shell-logout btn-logout" type="button" onclick="if (typeof empresaSair === 'function') empresaSair(); else { localStorage.removeItem('empresa_token'); localStorage.removeItem('empresa_refresh'); localStorage.removeItem('empresa_usuario'); location.href='login.html'; }" title="Sair">↪</button>
+<!-- LOGIN -->
+<div class="login-page" id="login-page">
+  <div class="login-card">
+    <h1>🔐 Painel Admin</h1>
+    <p class="sub">Acesso restrito para recrutadores</p>
+    <div id="alert-login"></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="admin@empresa.com" value="fabio08dejesusjunior@gmail.com">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••">
+    </div>
+    <button class="btn btn-primary" id="btn-entrar" onclick="fazerLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- APP LOGADA -->
+<div class="app" id="app">
+  <button class="menu-toggle" onclick="toggleMenu()" aria-label="Abrir menu">☰</button>
+  <aside id="aside">
+    <button class="menu-close" onclick="toggleMenu()" aria-label="Fechar menu">✕</button>
+    <div class="aside-logo">
+      <h1>Admin</h1>
+      <small>Recrutamento</small>
+    </div>
+    <a class="nav-item ativo" data-page="dashboard" onclick="irPara('dashboard')">📊 Dashboard</a>
+    <a class="nav-item" data-page="vagas" onclick="irPara('vagas')">💼 Vagas</a>
+    <a class="nav-item" data-page="candidatos" onclick="irPara('candidatos')">👥 Base de Talentos</a>
+    <a class="nav-item" data-page="candidaturas" onclick="irPara('candidaturas')">📋 Vagas com Candidatos</a>
+    <a class="nav-item" data-page="agenda" onclick="irPara('agenda')">📅 Agenda</a>
+    <a class="nav-item" data-page="equipe" onclick="irPara('equipe')">👥 Equipe</a>
+    <div class="nav-divisor">Links</div>
+    <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
+    <a class="nav-item" href="../empresa/">🏢 Portal da empresa</a>
+    <div class="aside-user" id="aside-user">
+      <div class="aside-user-avatar" id="aside-user-avatar">--</div>
+      <div class="aside-user-info">
+        <div class="nome" id="aside-user-nome">--</div>
+        <div class="empresa" id="aside-user-empresa">--</div>
       </div>
-    </aside>
+      <button class="btn-logout" onclick="sair()" title="Sair">↪</button>
+    </div>
+  </aside>
 
-    <!-- MAIN -->
-    <main>
-      <!-- Fase 9: banner de plano -->
-      <div id="banner-plano" style="display:none;background:#fff;border:1px solid #e8e4df;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:13px;color:#555;"></div>
-      <div class="page-header">
+  <main>
+    <!-- DASHBOARD (v2 - profissional jul/2026) -->
+    <div class="page ativo" id="page-dashboard">
+      <div class="page-header" style="margin-bottom: 24px;">
         <div>
-          <h2 id="saudacao">Olá! 👋</h2>
-          <p>Acompanhe suas vagas e candidatos em tempo real</p>
+          <h2 style="font-size:24px;margin-bottom:4px;" id="dash-greeting">Bom dia, Recrutador! 👋</h2>
+          <p style="color:#666;font-size:14px;" id="dash-subtitle">Aqui está o resumo geral do seu recrutamento</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="dash-periodo" onchange="carregarDashboardV2()" style="padding:8px 14px;border:1px solid var(--borda);border-radius:8px;font-size:13px;background:#fff;cursor:pointer;">
+            <option value="7">Últimos 7 dias</option>
+            <option value="30" selected>Últimos 30 dias</option>
+            <option value="90">Últimos 90 dias</option>
+          </select>
         </div>
       </div>
 
-      <!-- 6 KPIs principais (espelho Admin) -->
-      <div class="kpis-grid" id="kpis-grid"></div>
+      <!-- 5 KPIs coloridos -->
+      <div class="kpis-grid" id="kpis-grid">
+        <div class="kpi-card kpi-rosa"><div class="kpi-icon">💼</div><div class="kpi-label">Vagas Ativas</div><div class="kpi-valor" id="kpi-vagas">—</div><div class="kpi-delta" id="delta-vagas"></div></div>
+        <div class="kpi-card kpi-azul"><div class="kpi-icon">👥</div><div class="kpi-label">Total de Candidatos</div><div class="kpi-valor" id="kpi-candidatos">—</div><div class="kpi-delta" id="delta-candidatos"></div></div>
+        <div class="kpi-card kpi-roxo"><div class="kpi-icon">📋</div><div class="kpi-label">Processos Ativos</div><div class="kpi-valor" id="kpi-processos">—</div><div class="kpi-delta" id="delta-processos"></div></div>
+        <div class="kpi-card kpi-verde"><div class="kpi-icon">✨</div><div class="kpi-label">Novos (7d)</div><div class="kpi-valor" id="kpi-novos">—</div><div class="kpi-delta" id="delta-novos"></div></div>
+        <div class="kpi-card kpi-laranja"><div class="kpi-icon">📅</div><div class="kpi-label">Entrevistas Agendadas</div><div class="kpi-valor" id="kpi-entrevistas">—</div><div class="kpi-delta" id="delta-entrevistas"></div></div>
+      </div>
 
-      <!-- Indicadores Estratégicos (Espelho Admin) -->
-      <div class="kpis-grid-secondary" id="kpis-secundarios-grid"></div>
-
-      <!-- Funil por etapa + Entrevistas -->
+      <!-- 2 colunas: gráfico de etapas + taxa de conversão -->
       <div class="dash-row">
         <div class="dash-card">
           <div class="dash-card-header">
             <h3>📊 Candidatos por etapa do processo</h3>
-            <span class="dash-card-tag" id="etapas-total">0 candidatos</span>
+            <span class="dash-card-tag">Funil completo</span>
           </div>
-          <div class="grafico-etapas" id="grafico-etapas"></div>
+          <div id="grafico-etapas" class="grafico-etapas"></div>
         </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📈 Taxa de Conversão</h3>
+            <span class="dash-card-tag" id="conversao-tag">% contratação</span>
+          </div>
+          <div class="conversao-area">
+            <div class="conversao-valor" id="conversao-valor">—</div>
+            <svg id="conversao-grafico" class="conversao-svg" viewBox="0 0 400 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="conversao-grad" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path id="conversao-path" d="" fill="url(#conversao-grad)"/>
+              <path id="conversao-line" d="" fill="none" stroke="#3B82F6" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div class="conversao-info">
+            <span><strong id="conversao-contratados">—</strong> contratados</span>
+            <span>de <strong id="conversao-total">—</strong> processos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Próximas Entrevistas + Atividades Recentes -->
+      <div class="dash-row">
         <div class="dash-card">
           <div class="dash-card-header">
             <h3>📅 Próximas Entrevistas</h3>
-            <span class="dash-card-tag" id="entrevistas-count">0 agendadas</span>
+            <a href="#" class="dash-link" onclick="irPara('vagas')">Ver todas →</a>
           </div>
-          <div class="lista-entrevistas" id="lista-entrevistas"></div>
+          <div id="proximas-entrevistas" class="lista-entrevistas">
+            <div class="empty">Carregando...</div>
+          </div>
         </div>
-      </div>
-
-      <!-- Atividades recentes -->
-      <div class="dash-row" style="grid-template-columns: 1fr;">
         <div class="dash-card">
           <div class="dash-card-header">
-            <h3>⚡ Atividades Recentes</h3>
-            <span class="dash-card-tag" id="atividades-count">0 eventos</span>
+            <h3>🔔 Atividades Recentes</h3>
+            <span class="dash-card-tag" id="atividades-count">0</span>
           </div>
-          <div class="atividades-feed" id="atividades-recentes"></div>
+          <div id="atividades-recentes" class="atividades-feed">
+            <div class="empty">Carregando...</div>
+          </div>
         </div>
       </div>
-    </main>
-  </div>
 
-  <div class="toast" id="toast" style="position:fixed; bottom:24px; right:24px; background:#1A1A1A; color:#fff; padding:12px 18px; border-radius:8px; font-size:14px; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:200;"></div>
+      <!-- Tabela Vagas com mais volume -->
+      <div class="dash-card" style="margin-top:24px;">
+        <div class="dash-card-header">
+          <h3>🏆 Vagas com maior volume</h3>
+          <a href="#" class="dash-link" onclick="irPara('candidatos')">Ver detalhes →</a>
+        </div>
+        <div class="tabela-wrap" style="margin-top:12px;">
+          <table id="ranking-table">
+            <thead><tr><th>Vaga</th><th>Empresa</th><th>Status</th><th style="text-align:right;">Candidatos</th><th style="text-align:right;">Contratados</th></tr></thead>
+            <tbody id="ranking-table-body"><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
 
-  <script>
-    const API = 'https://recrutamento-api-novo.onrender.com';
-    let token = localStorage.getItem('empresa_token');
-    if (!token && !localStorage.getItem('empresa_refresh')) window.location.href = 'login.html';
-
-    function iniciais(nome) {
-      if (!nome) return '?';
-      return nome.split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
-    }
-
-    function sair() {
-      if (confirm('Sair do portal?')) empresaSair();
-    }
-
-    function toast(msg, tipo = '') {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.style.opacity = '1';
-      t.style.background = tipo === 'erro' ? '#C62828' : tipo === 'sucesso' ? '#2E7D32' : '#1A1A1A';
-      setTimeout(() => t.style.opacity = '0', 3000);
-    }
-
-    function tempoRelativo(dataIso) {
-      if (!dataIso) return '—';
-      const agora = new Date();
-      const data = new Date(dataIso);
-      const diffMs = agora - data;
-      const diffMin = Math.floor(diffMs / 60000);
-      if (diffMin < 1) return 'agora mesmo';
-      if (diffMin < 60) return `há ${diffMin} min`;
-      const diffH = Math.floor(diffMin / 60);
-      if (diffH < 24) return `há ${diffH} hora${diffH > 1 ? 's' : ''}`;
-      const diffD = Math.floor(diffH / 24);
-      if (diffD < 7) return `há ${diffD} dia${diffD > 1 ? 's' : ''}`;
-      return data.toLocaleDateString('pt-BR');
-    }
-
-    async function carregarDashboard() {
-      const usuario = JSON.parse(localStorage.getItem('empresa_usuario') || '{}');
-      document.getElementById('avatar').textContent = iniciais(usuario.nome);
-      document.getElementById('user-nome').textContent = usuario.nome || '--';
-      document.getElementById('user-empresa').textContent = usuario.empresa_nome || '--';
-
-      // Saudação dinâmica
-      const hora = new Date().getHours();
-      const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
-      const primeiroNome = (usuario.nome || '').split(' ')[0] || 'Empresa';
-      document.getElementById('saudacao').textContent = `${saudacao}, ${primeiroNome}! 👋`;
-
-      // Fase 9: exibe plano da empresa
-      try {
-        const rme = await fetch(API + '/api/empresa/minha-empresa', { headers: { 'Authorization': 'Bearer ' + token } });
-        if (rme.ok) {
-          const dme = await rme.json();
-          const e = dme.empresa || {};
-          const bannerEl = document.getElementById('banner-plano');
-          if (bannerEl) {
-            const planoNome = e.plano_nome || e.plano_slug || 'Essencial';
-            const limVagas = e.limite_vagas >= 999 ? '∞' : e.limite_vagas;
-            bannerEl.innerHTML = `<span>📦 Plano: <strong>${planoNome}</strong> &nbsp;·&nbsp; Até ${limVagas} vaga(s) ativa(s)</span> <a href="planos.html" style="color:var(--vinho);font-size:12px;margin-left:12px;">Ver planos</a>`;
-            bannerEl.style.display = 'block';
-          }
-          // Se onboarding_step < 3, redireciona
-          if ((e.onboarding_step || 0) < 3) {
-            window.location.href = 'onboarding.html';
-            return;
-          }
-        }
-      } catch (e) { /* não bloquear dashboard */ }
-
-      try {
-        const r = await fetch(API + '/api/empresa/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
-        const data = await r.json();
-        if (!r.ok) {
-          if (r.status === 401 || r.status === 403) { sair(); return; }
-          document.getElementById('kpis-grid').innerHTML = `<div class="alert alert-erro">Erro: ${data.erro || 'desconhecido'}</div>`;
-          return;
-        }
-
-        // === 6 KPIs principais (mesmo padrão visual do Admin) ===
-        const k = data.kpis || {};
-        const kpisList = [
-          { label: 'Vagas liberadas',  valor: k.vagas_ativas      || 0, delta: data.kpis_deltas?.vagas_ativas,  icon: '💼', cor: 'rosa', link: 'vagas-todas.html' },
-          { label: 'Candidatos',       valor: k.total_candidatos   || 0, delta: data.kpis_deltas?.total_candidatos, icon: '👥', cor: 'azul', link: 'vagas.html' },
-          { label: 'Processos ativos', valor: k.processos_ativos   || 0, delta: data.kpis_deltas?.processos_ativos, icon: '📋', cor: 'roxo', link: 'vagas.html' },
-          { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: null, icon: '📅', cor: 'laranja', link: 'agenda.html' },
-          { label: 'Contratações (30d)', valor: data.kpis?.contratacoes || 0, delta: data.kpis_deltas?.contratacoes, icon: '🎉', cor: 'verde', link: 'vagas.html?status=fechada' },
-          { label: 'Aguardando sua avaliação', valor: data.kpis?.em_etapa_gestor || 0, delta: null, icon: '⏳', cor: 'dourado', link: 'candidatos.html?etapa=4' }
-        ];
-        document.getElementById('kpis-grid').innerHTML = kpisList.map(kpi => {
-          let deltaHtml = '';
-          if (kpi.delta) {
-            if (kpi.delta.novos_7d != null) {
-              deltaHtml = `<div class="kpi-delta">+${kpi.delta.novos_7d} nos últimos 7d</div>`;
-            } else if (kpi.delta.atual_30d != null) {
-              const comp = kpi.delta.anterior_30d || 0;
-              const simb = kpi.delta.atual_30d >= comp ? '↑' : '↓';
-              deltaHtml = `<div class="kpi-delta">${simb} ${kpi.delta.atual_30d} (anterior: ${comp})</div>`;
-            }
-          }
-          return `<a class="kpi-card kpi-${kpi.cor}" href="${kpi.link}" title="Ver detalhes: ${kpi.label}">
-            <div class="kpi-top"><div class="kpi-icon">${kpi.icon}</div></div>
-            <div class="kpi-label">${kpi.label}</div>
-            <div class="kpi-valor">${kpi.valor}</div>
-            ${deltaHtml}
-          </a>`;
-        }).join('');
-
-        // === Indicadores Estratégicos (Secundários - espelho Admin) ===
-        const ks = data.kpis_secundarios || {};
-        const secundarios = [
-          { label: 'Tempo médio de contratação', valor: (ks.tempo_medio_contratacao || 0) + 'd', icon: '⏱️', cor: 'azul' },
-          { label: 'Taxa de aprovação (30d)', valor: (ks.taxa_aprovacao_30d || 0) + '%', sub: `${ks.taxa_aprovacao_30d_qtd || 0}/${ks.taxa_aprovacao_30d_total || 0} vagas`, icon: '✅', cor: 'verde' },
-          { label: 'Taxa de desistência', valor: (ks.taxa_desistencia || 0) + '%', sub: 'reprovados / total', icon: '🚪', cor: 'vermelho' },
-          { label: 'Vagas encerradas', valor: ks.vagas_encerradas || 0, sub: 'Status fechada', icon: '🏁', cor: 'roxo' }
-        ];
-        document.getElementById('kpis-secundarios-grid').innerHTML = secundarios.map(k => `
-          <div class="kpi-card-sec kpi-${k.cor}">
-            <div class="kpi-icon">${k.icon}</div>
-            <div class="kpi-label">${k.label}</div>
-            <div class="kpi-valor">${k.valor}</div>
-            ${k.sub ? `<div class="kpi-sub">${k.sub}</div>` : ''}
+      <!-- Documentação + KPIs secundários -->
+      <div class="dash-row" style="margin-top:24px;">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📄 Documentação Recebida</h3>
+            <span class="dash-card-tag" id="doc-percent">—%</span>
           </div>
-        `).join('');
+          <div class="doc-chart">
+            <svg viewBox="0 0 120 120" class="doc-rosca">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#F3F4F6" stroke-width="14"/>
+              <circle id="doc-rosca-fill" cx="60" cy="60" r="50" fill="none" stroke="#722F37" stroke-width="14"
+                stroke-dasharray="0 314" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+              <text x="60" y="68" text-anchor="middle" font-size="22" font-weight="700" fill="#1A1A1A" id="doc-rosca-texto">—</text>
+            </svg>
+            <div class="doc-info">
+              <div class="doc-info-item"><span class="dot" style="background:#722F37"></span><span>Recebidos</span></div>
+              <div class="doc-info-item"><span class="dot" style="background:#F3F4F6"></span><span>Pendentes</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h3>📊 Indicadores Estratégicos</h3>
+          </div>
+          <div class="kpis-secundarios" id="kpis-secundarios">
+            <div class="kpi-sec"><div class="kpi-sec-label">Tempo médio contratação</div><div class="kpi-sec-valor" id="ks-tempo">—</div></div>
+            <div class="kpi-sec"><div class="kpi-sec-label">Taxa de aprovação</div><div class="kpi-sec-valor" id="ks-aprovacao">—</div></div>
+            <div class="kpi-sec"><div class="kpi-sec-label">Taxa de desligamento</div><div class="kpi-sec-valor" id="ks-desligamento">—</div></div>
+            <div class="kpi-sec"><div class="kpi-sec-label">Vagas encerradas</div><div class="kpi-sec-valor" id="ks-encerradas">—</div></div>
+            <div class="kpi-sec"><div class="kpi-sec-label">Empresas ativas</div><div class="kpi-sec-valor" id="ks-empresas">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        // === Funil por etapa (mesmo visual Admin) ===
-        const etapasObj = data.etapas || {};
-        const labels = data.etapas_labels || ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'];
-        const etapasTotal = Object.values(etapasObj).reduce((s, v) => s + (parseInt(v) || 0), 0);
-        const maxEtapa = Math.max(1, ...Object.values(etapasObj).map(v => parseInt(v) || 0));
-        document.getElementById('grafico-etapas').innerHTML = labels.map((label, i) => {
-          const etapaNum = i + 1;
-          const val = parseInt(etapasObj[etapaNum] || 0);
-          const pct = (val / maxEtapa) * 100;
-          return `<div class="etapa-barra-row">
-            <div class="etapa-barra-nome">${i + 1}. ${label}</div>
-            <div class="etapa-barra-fundo"><div class="etapa-barra-fill e${etapaNum}" style="width:${pct}%">${val > 0 ? val : ''}</div></div>
-            <div class="etapa-barra-count">${val}</div>
-          </div>`;
-        }).join('');
-        document.getElementById('etapas-total').textContent = `${etapasTotal} candidato${etapasTotal !== 1 ? 's' : ''}`;
+    <!-- VAGAS -->
+    <div class="page" id="page-vagas">
+      <div class="page-header">
+        <div>
+          <h2>Vagas</h2>
+          <p>Gerencie as vagas publicadas</p>
+        </div>
+        <button class="btn btn-primary" style="width:auto;" onclick="abrirModalVaga()">+ Nova vaga</button>
+      </div>
+      <div class="tabela-wrap">
+        <table id="vagas-table">
+          <thead><tr><th>Título</th><th>Empresa</th><th>Categoria</th><th>Status</th><th></th></tr></thead>
+          <tbody><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-        // === Próximas entrevistas ===
-        const entrevistas = data.proximas || [];
-        document.getElementById('entrevistas-count').textContent = `${entrevistas.length} agendada${entrevistas.length !== 1 ? 's' : ''}`;
-        if (entrevistas.length > 0) {
-          document.getElementById('lista-entrevistas').innerHTML = entrevistas.slice(0, 8).map(e => {
-            const dataE = new Date(e.data_hora);
-            const dataStr = dataE.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
-            const horaStr = dataE.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const tagClass = e.etapa === 3 ? 'rh' : e.etapa === 4 ? 'gestor' : 'outra';
-            const tagNome = e.etapa === 3 ? 'RH' : e.etapa === 4 ? 'Gestor' : (e.etapa_nome || `Etapa ${e.etapa}`);
-            const nome = e.candidato_nome || 'Candidato';
-            const vaga = e.vaga_titulo || '—';
-            const iniciaisN = iniciais(nome);
-            return `<div class="entrevista-item">
-              <div class="entrevista-avatar">${iniciaisN}</div>
-              <div class="entrevista-info">
-                <div class="entrevista-nome">${nome}</div>
-                <div class="entrevista-vaga">${vaga}</div>
-                <div class="entrevista-data">📅 ${dataStr} às ${horaStr}</div>
-              </div>
-              <div class="entrevista-tag">${tagNome}</div>
-            </div>`;
-          }).join('');
-        } else {
-          document.getElementById('lista-entrevistas').innerHTML = '<div class="entrevista-empty">Nenhuma entrevista agendada</div>';
-        }
+    <!-- CANDIDATOS -->
+    <div class="page" id="page-candidatos">
+      <div class="page-header">
+        <div><h2>Base de Talentos</h2><p>Todos os candidatos cadastrados na plataforma</p></div>
+        <div class="base-filtros" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select id="candidatos-filtro-area" class="filtro-area" style="padding:8px 12px;border:1px solid var(--borda);border-radius:6px;font-size:14px;min-width:200px">
+            <option value="">📂 Todas as áreas</option>
+          </select>
+          <input type="text" id="candidatos-filtro-busca" placeholder="🔍 Buscar nome/email..." style="padding:8px 12px;border:1px solid var(--borda);border-radius:6px;font-size:14px;min-width:200px">
+          <button class="btn btn-primary" style="width:auto" onclick="carregarCandidatos()">Aplicar</button>
+          <button class="btn btn-sec" style="width:auto" onclick="limparFiltrosCandidatos()">Limpar</button>
+        </div>
+      </div>
+      <div class="tabela-wrap">
+        <table id="candidatos-table">
+          <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Cidade</th><th>Cadastro</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="6" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-        // === Atividades recentes ===
-        const ats = data.atividades || [];
-        document.getElementById('atividades-count').textContent = `${ats.length} evento${ats.length !== 1 ? 's' : ''}`;
-        if (ats.length > 0) {
-          const tipoMap = {
-            'inscricao':        { icone: '✨', label: 'Nova inscrição',     tipo: 'inscricao' },
-            'avancar':          { icone: '▶️', label: 'Avançou etapa',      tipo: 'avancar' },
-            'reprovar':         { icone: '✖', label: 'Reprovado',           tipo: 'reprovar' },
-            'reabrir':          { icone: '↩', label: 'Reaberto',           tipo: 'reabrir' },
-            'recusar_proposta': { icone: '✖', label: 'Proposta recusada',   tipo: 'proposta' },
-            'aceitar_proposta': { icone: '✓', label: 'Proposta aceita',    tipo: 'proposta' },
-            'enviar_proposta':  { icone: '📨', label: 'Proposta enviada',   tipo: 'proposta' },
-            'entrevista':       { icone: '📅', label: 'Entrevista agendada', tipo: 'entrevista' }
-          };
-          document.getElementById('atividades-recentes').innerHTML = ats.slice(0, 10).map(a => {
-            const t = tipoMap[a.texto] || { icone: '•', label: a.texto || 'Atualização', tipo: 'reabrir' };
-            const quando = tempoRelativo(a.quando);
-            return `<div class="atividade-item tipo-${t.tipo}">
-              <div class="atividade-icone">${t.icone}</div>
-              <div class="atividade-corpo">
-                <div class="atividade-topo">
-                  <span class="atividade-tipo">${t.label}</span>
-                  <span class="atividade-tempo">${quando}</span>
-                </div>
-                <div class="atividade-candidato">${a.candidato || '—'}</div>
-                <div class="atividade-vaga">${a.vaga || '—'}</div>
-              </div>
-            </div>`;
-          }).join('');
-        } else {
-          document.getElementById('atividades-recentes').innerHTML = '<div class="atividade-empty">Nenhuma atividade recente nas suas vagas</div>';
-        }
-      } catch (e) {
-        console.error(e);
-        document.getElementById('kpis-grid').innerHTML = '<div class="alert alert-erro">Erro de conexão: ' + e.message + '</div>';
-      }
-    }
+    <!-- CANDIDATURAS -->
+    <div class="page" id="page-candidaturas">
+      <div class="page-header">
+        <div><h2>Candidaturas</h2><p>Selecione uma vaga para ver os candidatos inscritos</p></div>
+      </div>
+      <div id="vagas-cands-grid" class="vagas-cands-grid">
+        <div class="empty"><div class="spinner"></div></div>
+      </div>
+    </div>
 
-  </script>
-<script src="auth-helper.js?v=fase3_2026_07_28"></script>
-  <script src="empresa-auth-init.js?v=fase3_2026_07_28"></script>
-  <script src="empresa-auth-patch.js?v=fase3_2026_07_28"></script>
+    <!-- CANDIDATOS DA VAGA (página interna) -->
+    <div class="page" id="page-candidatos-vaga">
+      <div class="page-header">
+        <div>
+          <button class="btn btn-sec" id="cands-vaga-voltar" style="margin-bottom:8px">← Voltar</button>
+          <h2 id="cands-vaga-titulo">Candidatos da vaga</h2>
+        </div>
+      </div>
+      <div id="cands-vaga-info" style="background:var(--cinza);padding:14px;border-radius:8px;margin-bottom:16px;font-size:13px"></div>
+      <div class="tabela-wrap tabela-scroll">
+        <table id="vaga-cands-internal-table">
+          <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-  <script>
-    // ===== INIT COMUM FASE 3 — RBAC frontend =====
-    (async function() {
-      setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
+    <!-- AGENDA -->
+    <div class="page" id="page-agenda">
+      <div class="page-header">
+        <div><h2>Agenda</h2><p>Entrevistas e compromissos agendados</p></div>
+        <button class="btn btn-pri" onclick="abrirModalNovaEntrevista()">+ Nova Entrevista</button>
+      </div>
 
-      // tenta refresh silencioso antes de qualquer coisa
-      try { await authInit(); } catch (e) { console.warn('refresh falhou', e); }
+      <div style="display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--borda); flex-wrap:wrap;">
+        <button class="tab-agenda ativo" data-periodo="hoje" onclick="carregarAgenda('hoje')">📅 Hoje</button>
+        <button class="tab-agenda" data-periodo="proximas" onclick="carregarAgenda('proximas')">⏭️ Próximas</button>
+        <button class="tab-agenda" data-periodo="passadas" onclick="carregarAgenda('passadas')">📋 Passadas</button>
+        <button class="tab-agenda" data-periodo="todas" onclick="carregarAgenda('todas')">🗂️ Todas</button>
+      </div>
 
-      // guard: sem token -> vai pro login
-      if (!localStorage.getItem('empresa_token')) {
-        const path = window.location.pathname;
-        if (!path.endsWith('login.html')) {
-          window.location.href = 'login.html';
-          return;
-        }
-      }
+      <div id="agenda-stats" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:20px;"></div>
 
-      // aguarda DOM
-      const onReady = () => {
-        // mostra link Equipe se for admin
-        if (authRBAC.hasRole('admin_empresa')) {
-          const navEq = document.getElementById('nav-equipe');
-          if (navEq) navEq.style.display = '';
-        }
+      <div id="agenda-lista"></div>
+    </div>
 
-        // preenche sidebar com dados do JWT
-        token = localStorage.getItem('empresa_token') || '';
-        const u = authRBAC.currentUser() || {};
-        const avatar = document.getElementById('avatar');
-        const nome = document.getElementById('user-nome');
-        const empresa = document.getElementById('user-empresa');
-        if (avatar && u.nome) avatar.textContent = u.nome.split(' ').filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join('');
-        if (nome) nome.textContent = u.nome || '—';
-        if (empresa) empresa.textContent = (u.role ? '[' + u.role + '] ' : '') + (u.empresa_nome || u.email || '—');
+    <!-- EQUIPE -->
+    <div class="page" id="page-equipe">
+      <div class="page-header">
+        <div><h2>Equipe e Clientes</h2><p>Gerenciamento de recrutadores e empresas</p></div>
+        <button class="btn btn-pri" id="btn-novo-equipe" onclick="abrirModalEquipe()">+ Novo Recrutador</button>
+      </div>
 
-        // guarda de role por pagina: se existe um atributo data-roles exigido,
-        // fazemos o guard UX (apenas visual; backend é autoridade)
-        const required = document.querySelector('main')?.dataset?.roles;
-        if (required && !authRBAC.hasRole.apply(null, required.split(','))) {
-          // redireciona com aviso
-          const main = document.querySelector('main');
-          if (main) main.innerHTML = '<div style="text-align:center; padding:80px 20px;"><h2 style="color:#999;">🚫 Acesso restrito</h2><p style="color:#666; margin-top:12px;">Você não tem permissão para acessar esta página.</p><p style="margin-top:24px;"><a href="index.html" style="color:#722F37;">← Voltar ao Dashboard</a></p></div>';
-        }
-        // Somente inicia o carregamento depois do refresh silencioso e do guard.
-        carregarDashboard();
-      };
+      <div style="display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--borda);">
+        <button class="tab-equipe ativo" data-tab="recrutadores" onclick="trocarTabEquipe('recrutadores')">👤 Recrutadores</button>
+        <button class="tab-equipe" data-tab="empresas" onclick="trocarTabEquipe('empresas')">🏢 Empresas</button>
+      </div>
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', onReady);
-      } else {
-        onReady();
-      }
-    })();
-  </script>
-<script src="chat-rh-flutuante.js?v=20260726b"></script>
-<script src="empresa-shell.js?v=20260803shell4"></script>
+      <div id="tab-recrutadores" class="tab-content-equipe">
+        <div id="lista-recrutadores" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:20px;">
+          <div class="empty">Carregando recrutadores...</div>
+        </div>
+      </div>
+
+      <div id="tab-empresas" class="tab-content-equipe" style="display:none;">
+        <div id="lista-empresas" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:20px;">
+          <div class="empty">Carregando empresas...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Análise de candidato agora é página separada: admin/analisar.html -->
+  </main>
+</div>
+
+<!-- MODAL CANDIDATOS DA VAGA -->
+<div class="modal-overlay" id="modal-vaga-cands">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3 id="vaga-cands-titulo">Candidatos da vaga</h3>
+      <button class="modal-close" onclick="fecharModal('vaga-cands')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="vaga-cands-info" style="background:var(--cinza);padding:14px;border-radius:8px;margin-bottom:16px;font-size:13px"></div>
+      <div class="tabela-wrap">
+        <table id="vaga-cands-table">
+          <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ANÁLISE DO CANDIDATO -->
+<div class="modal-overlay" id="modal-analisar">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3 id="analisar-titulo">Análise do candidato</h3>
+      <button class="modal-close" onclick="fecharModal('analisar')">&times;</button>
+    </div>
+    <div class="modal-body" id="analisar-body">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VAGA -->
+<div class="modal-overlay" id="modal-vaga">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="vaga-modal-titulo">Nova vaga</h3>
+      <button class="modal-close" onclick="fecharModal('vaga')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="alert-vaga"></div>
+      <input type="hidden" id="vaga-id">
+      <div class="form-row">
+        <div class="form-group"><label>Título *</label><input id="v-titulo" placeholder="Ex: Desenvolvedor Full Stack"></div>
+        <div class="form-group"><label>Empresa</label><input id="v-empresa" placeholder="Nome da empresa"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Área</label>
+          <select id="v-categoria">
+            <option value="">Selecione...</option>
+            <option>Tecnologia</option><option>Vendas</option><option>Administrativo</option>
+            <option>Operacional</option><option>Marketing</option><option>Financeiro</option>
+            <option>Comercial</option><option>Saúde</option><option>Educação</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Nível</label>
+          <select id="v-nivel">
+            <option value="">Selecione...</option>
+            <option>Júnior</option><option>Pleno</option><option>Sênior</option>
+            <option>Especialista</option><option>Coordenação</option><option>Gerência</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Cidade</label><input id="v-cidade" placeholder="Cidade"></div>
+        <div class="form-group"><label>UF</label><input id="v-estado" maxlength="2" placeholder="BA"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Salário mín.</label><input id="v-salario-min" type="number" placeholder="0"></div>
+        <div class="form-group"><label>Salário máx.</label><input id="v-salario-max" type="number" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tipo de contrato</label>
+          <select id="v-tipo"><option>CLT</option><option>PJ</option><option>Estágio</option><option>Temporário</option></select>
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select id="v-status"><option value="publicada">Publicada</option><option value="pausada">Pausada</option><option value="fechada">Fechada</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Descrição</label><textarea id="v-descricao" rows="4"></textarea></div>
+      <div class="form-group"><label>Requisitos</label><textarea id="v-requisitos" rows="3"></textarea></div>
+      <div class="form-group"><label>Benefícios</label><textarea id="v-beneficios" rows="2"></textarea></div>
+
+      <div class="form-group" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--borda);">
+        <label>🔄 Modelo de processo seletivo</label>
+        <select id="v-template" onchange="aplicarTemplateEtapas()">
+          <option value="">— Usar padrão (6 etapas fixas) —</option>
+          <option value="operacional">Operacional (Auxiliar, Ajudante)</option>
+          <option value="administrativo">Administrativo (Assistente, Analista)</option>
+          <option value="ti">Técnico de TI</option>
+          <option value="comercial">Comercial / Vendas</option>
+          <option value="estagio">Estágio</option>
+          <option value="personalizado">Personalizado (definir manualmente)</option>
+        </select>
+        <small style="color:var(--txt-sec); display:block; margin-top:6px;">Escolha um modelo para preencher as etapas. Você pode editar abaixo.</small>
+      </div>
+
+      <div class="form-group">
+        <label>Etapas do processo</label>
+        <small style="color:var(--txt-sec); display:block; margin-bottom:10px;">
+          <span style="color:var(--vinho);">🔒</span> <b>Inscrição</b> e <b>Triagem</b> são obrigatórias. As demais você pode adicionar, remover e reordenar.
+        </small>
+        <div id="v-etapas-lista" style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;"></div>
+        <button type="button" class="btn btn-sec" style="width:auto; padding:6px 12px; font-size:13px;" onclick="adicionarEtapaVaga()">+ Adicionar etapa</button>
+        <input type="hidden" id="v-etapas">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('vaga')">Cancelar</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="salvarVaga()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Novo Recrutador -->
+<div class="modal-overlay" id="modal-novo-membro">
+  <div class="modal" style="max-width: 480px;">
+    <div class="modal-header">
+      <h3>👤 Novo Recrutador</h3>
+      <button class="modal-close" onclick="fecharModal('novo-membro')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color: var(--cinza-medio); font-size: 13px; margin-bottom: 16px;">O recrutador poderá acessar o admin com o e-mail e a senha provisória abaixo. Recomendamos que ele redefina a senha no primeiro acesso.</p>
+      <div class="form-group">
+        <label>Nome completo *</label>
+        <input id="membro-nome" placeholder="Ex: Maria Silva" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>E-mail (login) *</label>
+        <input id="membro-email" type="email" placeholder="maria@empresa.com" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Senha provisória *</label>
+        <input id="membro-senha" type="text" value="mudar123">
+        <div style="font-size: 12px; color: var(--cinza-medio); margin-top: 6px;">O recrutador será obrigado a redefinir no primeiro acesso.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('novo-membro')">Cancelar</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="salvarNovoRecrutador()">Criar recrutador</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar Recrutador -->
+<div class="modal-overlay" id="modal-editar-membro">
+  <div class="modal" style="max-width: 480px;">
+    <div class="modal-header">
+      <h3>✏️ Editar Recrutador</h3>
+      <button class="modal-close" onclick="fecharModal('editar-membro')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="emembro-id">
+      <div class="form-group">
+        <label>Nome *</label>
+        <input id="emembro-nome" autocomplete="off">
+      </div>
+      <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+        <input type="checkbox" id="emembro-ativo" style="width:18px; height:18px;">
+        <label for="emembro-ativo" style="margin:0; cursor:pointer;">Recrutador ativo (pode entrar no sistema)</label>
+      </div>
+      <div class="form-group">
+        <label>Resetar senha</label>
+        <input id="emembro-senha" type="text" placeholder="Deixe vazio pra manter a atual">
+        <div style="font-size: 12px; color: var(--cinza-medio); margin-top: 6px;">Se preencher, o recrutador será obrigado a redefinir no próximo login.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('editar-membro')">Cancelar</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="salvarEdicaoRecrutador()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nova Empresa -->
+<div class="modal-overlay" id="modal-nova-empresa">
+  <div class="modal" style="max-width: 520px;">
+    <div class="modal-header">
+      <h3>🏢 Nova Empresa</h3>
+      <button class="modal-close" onclick="fecharModal('nova-empresa')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color: var(--cinza-medio); font-size: 13px; margin-bottom: 16px;">Cadastre uma empresa parceira. Depois você poderá vincular vagas a ela e adicionar usuários com acesso restrito.</p>
+      <div class="form-group">
+        <label>Nome da empresa *</label>
+        <input id="emp-nome" placeholder="Ex: Contábil Sergipe" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>CNPJ</label>
+          <input id="emp-cnpj" placeholder="00.000.000/0001-00" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Telefone</label>
+          <input id="emp-telefone" placeholder="(00) 00000-0000" autocomplete="off">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>E-mail de contato da empresa</label>
+        <input id="emp-email" type="email" placeholder="contato@empresa.com" autocomplete="off">
+      </div>
+
+      <hr style="border:none; border-top:1px solid var(--borda); margin: 18px 0;">
+      <p style="color: var(--cinza-medio); font-size: 12px; margin-bottom: 12px;">👤 <b>Usuário principal</b> (terá acesso ao portal da empresa). Pode pular e adicionar depois.</p>
+      <div class="form-group">
+        <label>Nome do usuário</label>
+        <input id="emp-user-nome" placeholder="Ex: João da Silva" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>E-mail (login do usuário)</label>
+          <input id="emp-user-email" type="email" placeholder="joao@empresa.com" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Senha provisória</label>
+          <input id="emp-user-senha" type="text" value="mudar123">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('nova-empresa')">Cancelar</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="salvarNovaEmpresa()">Criar empresa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar Empresa -->
+<div class="modal-overlay" id="modal-editar-empresa">
+  <div class="modal" style="max-width: 520px;">
+    <div class="modal-header">
+      <h3>✏️ Editar Empresa</h3>
+      <button class="modal-close" onclick="fecharModal('editar-empresa')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="eemp-id">
+      <div class="form-group">
+        <label>Nome *</label>
+        <input id="eemp-nome" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>CNPJ</label>
+          <input id="eemp-cnpj" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Telefone</label>
+          <input id="eemp-telefone" autocomplete="off">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>E-mail principal</label>
+        <input id="eemp-email" type="email" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('editar-empresa')">Cancelar</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="salvarEdicaoEmpresa()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Criar/Editar Usuário da Empresa -->
+<div class="modal-overlay" id="modal-usuario-empresa">
+  <div class="modal" style="max-width: 480px;">
+    <div class="modal-header">
+      <h3 id="titu-usuario-empresa">👤 Novo Usuário</h3>
+      <button class="modal-close" onclick="fecharModal('usuario-empresa')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ue-id">
+      <input type="hidden" id="ue-empresa-id">
+      <div class="form-group">
+        <label id="lue-empresa">Empresa</label>
+        <input id="ue-empresa-nome" disabled style="background:#f5f5f5;">
+      </div>
+      <div class="form-group">
+        <label>Nome *</label>
+        <input id="ue-nome" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>E-mail (login) *</label>
+        <input id="ue-email" type="email" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Cargo</label>
+        <input id="ue-cargo" autocomplete="off" placeholder="Ex: Gerente de RH">
+      </div>
+      <div class="form-group">
+        <label id="lue-senha">Senha *</label>
+        <input id="ue-senha" type="text" autocomplete="off" placeholder="Será enviado ao usuário">
+        <small id="hint-senha" style="color:#888; font-size:11px;">Mínimo 6 caracteres</small>
+      </div>
+      <div class="form-group" id="grp-ue-ativo" style="display:none;">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input id="ue-ativo" type="checkbox" checked>
+          <span>Usuário ativo</span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('usuario-empresa')">Cancelar</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="salvarUsuarioEmpresa()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Vincular Vagas à Empresa -->
+<div class="modal-overlay" id="modal-vincular-vagas">
+  <div class="modal modal-lg" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3>🔗 Vincular vagas — <span id="vinc-empresa-nome"></span></h3>
+      <button class="modal-close" onclick="fecharModal('vincular-vagas')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color: var(--cinza-medio); font-size: 13px; margin-bottom: 16px;">Selecione quais vagas esta empresa terá acesso no portal. Os candidatos dessas vagas aparecerão no dashboard da empresa.</p>
+
+      <h4 style="font-size:13px; font-weight:700; color:#16a34a; margin: 0 0 10px;">✅ Vagas liberadas</h4>
+      <div id="vinc-liberadas" style="margin-bottom: 20px;"></div>
+
+      <h4 style="font-size:13px; font-weight:700; color:#555; margin: 0 0 10px;">📋 Outras vagas da plataforma</h4>
+      <div id="vinc-disponiveis"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('vincular-vagas')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Detalhes da Candidatura -->
+<div class="modal-overlay" id="modal-candidatura">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h3>📋 Detalhes da Candidatura</h3>
+      <button class="modal-close" onclick="fecharModal('candidatura')">&times;</button>
+    </div>
+    <div class="modal-body" id="candidatura-detalhes">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('candidatura')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Currículo do Candidato (Base de Talentos) -->
+<div class="modal-overlay" id="modal-curriculo">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3 id="curriculo-titulo">📄 Currículo do Candidato</h3>
+      <button class="modal-close" onclick="fecharModal('curriculo')">&times;</button>
+    </div>
+    <div class="modal-body" id="curriculo-body">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sec" onclick="fecharModal('curriculo')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth-helper.js?v=empresa-old-ui1"></script>
+<script src="app.js?v=empresa-old-ui1"></script>
+<script src="chat-rh-flutuante.js?v=empresa-old-ui1"></script>
 </body>
 </html>
