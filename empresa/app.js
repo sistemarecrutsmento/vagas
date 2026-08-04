@@ -1266,67 +1266,68 @@ async function deletarVaga(id) {
 
 // ===== CANDIDATOS =====
 const AREAS_INTERESSE_ADMIN = [
-  'Atendimento ao Cliente','Caixa','Vendas','Comercial','Administrativo','Recepção','Estoque','Logística','Expedição','Compras',
-  'Financeiro','Recursos Humanos (RH)','Marketing','Telemarketing','Suporte Técnico','Tecnologia da Informação (TI)','Desenvolvimento de Software',
-  'Design Gráfico','E-commerce','Supervisão','Gerência','Liderança Comercial','Operações','Produção','Qualidade','Segurança Patrimonial','Portaria',
-  'Limpeza e Conservação','Serviços Gerais','Manutenção','Transporte','Motorista','Entregas','Alimentação e Restaurantes','Hotelaria e Turismo','Saúde',
-  'Educação','Farmácia','Construção Civil','Indústria','Estágio','Jovem Aprendiz','Primeiro Emprego'
+  'Atendimento ao Cliente','Caixa','Vendas','Comercial','Administrativo','Recepção','Estoque','Logística','Expedição','Compras','Financeiro','Recursos Humanos (RH)','Marketing','Telemarketing','Suporte Técnico','Tecnologia da Informação (TI)','Desenvolvimento de Software','Design Gráfico','E-commerce','Supervisão','Gerência','Liderança Comercial','Operações','Produção','Qualidade','Segurança Patrimonial','Portaria','Limpeza e Conservação','Serviços Gerais','Manutenção','Transporte','Motorista','Entregas','Alimentação e Restaurantes','Hotelaria e Turismo','Saúde','Educação','Farmácia','Construção Civil','Indústria','Estágio','Jovem Aprendiz','Primeiro Emprego'
 ];
+const candidatosState = { search:'', etapa:'', vaga:'', status:'', cidade:'', estado:'', area:'', page:1, limite:10, ordenar:'recentes' };
+let candidatosRows = [];
+let candidatosTotal = 0;
+let candidatosDashboard = null;
+let candidatosVagas = [];
+let candidatoSelecionadoId = null;
 
-function popularSelectAreas() {
-  const sel = document.getElementById('candidatos-filtro-area');
-  if (!sel || sel.options.length > 1) return;
-  AREAS_INTERESSE_ADMIN.forEach(a => {
-    const o = document.createElement('option');
-    o.value = a;
-    o.textContent = a;
-    sel.appendChild(o);
-  });
+function candidatoEtapaNome(n) { return ['Inscrição','Triagem','RH','Gestor','Proposta','Coleta Docs','Contratação'][Math.max(0,Math.min(6,Number(n||1)-1))] || 'Inscrição'; }
+function candidatoStatusText(s) { return ({ em_andamento:'Em processo', em_analise:'Aguardando', aprovado:'Avançou', contratado:'Contratado', reprovado:'Reprovado', rejeitado:'Desistiu' }[s] || s || 'Em processo'); }
+function candidatoStatusClass(s) { return ({ contratado:'contratado', reprovado:'reprovado', rejeitado:'desistiu', aprovado:'avancou', em_analise:'aguardando' }[s] || 'processo'); }
+function candidatoIniciais(nome) { return String(nome || 'C').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase(); }
+function candidatoData(data) { if(!data) return '—'; const d=new Date(data); return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('pt-BR'); }
+function candidatoUltimaAtividade(c) { return c.atualizada_em || c.criada_em ? tempoRelativo(c.atualizada_em || c.criada_em) : 'Sem atividade'; }
+function candidatoSvg(name) { return `<svg class="dash-svg" aria-hidden="true"><use href="#icon-${name}"></use></svg>`; }
+function candidatoAvatar(c, large=false) { return c.foto_url ? `<span class="candidato-avatar"${large?' data-large="1"':''}><img src="${escapeHtml(c.foto_url)}" alt=""></span>` : `<span class="candidato-avatar"${large?' data-large="1"':''}>${escapeHtml(candidatoIniciais(c.nome))}</span>`; }
+function popularSelectAreas() { const sel=document.getElementById('candidatos-filtro-area'); if(!sel || sel.options.length>1)return; AREAS_INTERESSE_ADMIN.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o);}); }
+function popularSelectVagas() { const sel=document.getElementById('candidatos-filtro-vaga'); if(!sel || sel.options.length>1)return; candidatosVagas.forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.titulo || 'Vaga';sel.appendChild(o);}); }
+function atualizarKpisCandidatos() {
+  const d=candidatosDashboard||{}; const k=d.kpis||{}; const etapas=d.etapas||{}; const total=Number(k.total_candidatos||0); const avancaram=Object.entries(etapas).filter(([n])=>Number(n)>1).reduce((s,[,v])=>s+Number(v||0),0); const taxa=Number(d.kpis_secundarios?.taxa_desistencia||d.kpis_secundarios?.taxa_desligamento||0); const desistencias=Math.round(total*taxa/100);
+  const vals={'cand-kpi-total':total,'cand-kpi-processo':Number(k.processos_ativos||0),'cand-kpi-avancaram':avancaram,'cand-kpi-contratados':Number(k.contratacoes||0),'cand-kpi-desistencias':desistencias}; Object.entries(vals).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v.toLocaleString('pt-BR');});
+  const delta=document.getElementById('cand-kpi-total-delta');if(delta)delta.textContent=`+${Number(k.deltas?.candidatos||0)} novos nos últimos 7 dias`;
+  document.getElementById('cand-stage-total')?.replaceChildren(document.createTextNode(total.toLocaleString('pt-BR')));
+  document.querySelectorAll('#candidatos-stage-filters button[data-etapa]').forEach(btn=>{const n=btn.dataset.etapa;if(n) {const b=btn.querySelector('b');if(b)b.textContent=Number(etapas[n]||0).toLocaleString('pt-BR');}});
 }
-
-function limparFiltrosCandidatos() {
-  const sel = document.getElementById('candidatos-filtro-area');
-  const inp = document.getElementById('candidatos-filtro-busca');
-  if (sel) sel.value = '';
-  if (inp) inp.value = '';
-  carregarCandidatos();
-}
-
+function candidatosQuery() { const p=new URLSearchParams({pagina:String(candidatosState.etapa?1:candidatosState.page),limite:String(candidatosState.etapa?100:candidatosState.limite)}); if(candidatosState.search)p.set('q',candidatosState.search); if(candidatosState.vaga)p.set('vaga_id',candidatosState.vaga); if(candidatosState.status)p.set('status',candidatosState.status); if(candidatosState.cidade)p.set('cidade',candidatosState.cidade); if(candidatosState.estado)p.set('estado',candidatosState.estado); if(candidatosState.area)p.set('area',candidatosState.area); return p.toString(); }
 async function carregarCandidatos() {
+  const table=document.querySelector('#candidatos-table tbody'); const mobile=document.getElementById('candidatos-mobile-list'); if(table)table.innerHTML='<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>'; if(mobile)mobile.innerHTML='';
   popularSelectAreas();
-  const tb = document.querySelector('#candidatos-table tbody');
-  tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
   try {
-    const area = document.getElementById('candidatos-filtro-area')?.value || '';
-    const busca = (document.getElementById('candidatos-filtro-busca')?.value || '').toLowerCase().trim();
-    const url = API + '/api/empresa/candidatos' + (area ? '?area=' + encodeURIComponent(area) : '');
-    const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-    const data = await r.json();
-    let lista = data.candidatos || [];
-    if (busca) {
-      lista = lista.filter(c =>
-        (c.nome || '').toLowerCase().includes(busca) ||
-        (c.email || '').toLowerCase().includes(busca)
-      );
-    }
-    if (lista.length === 0) {
-      tb.innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato encontrado' + (area ? ' com a área "' + area + '"' : '') + '</td></tr>';
-      return;
-    }
-    tb.innerHTML = lista.map(c => {
-      return `<tr>
-        <td data-label="Nome"><strong>${c.nome}</strong></td>
-        <td data-label="Email">${c.email || '—'}</td>
-        <td data-label="Telefone">${c.celular || '—'}</td>
-        <td data-label="Cidade">${c.cidade ? c.cidade + (c.estado ? '/' + c.estado : '') : '—'}</td>
-        <td data-label="Cadastro">${formatarData(c.criado_em)}</td>
-        <td data-label="Ações"><a class="btn-ver" href="javascript:void(0)" onclick="abrirCurriculo(${c.id})">👁 Ver currículo</a></td>
-      </tr>`;
-    }).join('');
-  } catch {
-    tb.innerHTML = '<tr><td colspan="6" class="alert-erro">Erro ao carregar</td></tr>';
-  }
+    const headers={'Authorization':'Bearer '+token}; const jobs=[];
+    jobs.push(fetch(API+'/api/empresa/candidatos?'+candidatosQuery(),{headers}));
+    if(!candidatosDashboard) jobs.push(fetch(API+'/api/empresa/dashboard',{headers}));
+    if(!candidatosVagas.length) jobs.push(fetch(API+'/api/empresa/vagas',{headers}));
+    const responses=await Promise.all(jobs); const candResp=await responses[0].json(); if(!responses[0].ok)throw new Error(candResp.erro||'Erro ao carregar candidatos'); let idx=1;
+    if(!candidatosDashboard){candidatosDashboard=await responses[idx].json();idx++;} if(!candidatosVagas.length){const v=await responses[idx].json();candidatosVagas=v.vagas||[];popularSelectVagas();}
+    atualizarKpisCandidatos(); let rows=candResp.candidatos||[]; if(candidatosState.etapa)rows=rows.filter(c=>Number(c.ultima_etapa||1)===Number(candidatosState.etapa));
+    if(candidatosState.ordenar==='nome')rows.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR')); else if(candidatosState.ordenar==='etapa')rows.sort((a,b)=>Number(a.ultima_etapa||1)-Number(b.ultima_etapa||1)); else if(candidatosState.ordenar==='antigos')rows.sort((a,b)=>new Date(a.criado_em||0)-new Date(b.criado_em||0));
+    if(candidatosState.etapa){ candidatosTotal=rows.length; const offset=(candidatosState.page-1)*candidatosState.limite; rows=rows.slice(offset,offset+candidatosState.limite); } else { candidatosTotal=Number(candResp.paginacao?.total||rows.length); }
+    candidatosRows=rows; renderCandidatos();
+  } catch(e) { if(table)table.innerHTML=`<tr><td colspan="7" class="empty">${escapeHtml(e.message||'Erro ao carregar candidatos')}</td></tr>`; }
 }
+function renderCandidatos() {
+  const table=document.querySelector('#candidatos-table tbody'), mobile=document.getElementById('candidatos-mobile-list'); const rows=candidatosRows; if(!rows.length){if(table)table.innerHTML='<tr><td colspan="7" class="empty">Nenhum candidato corresponde aos filtros selecionados.</td></tr>';if(mobile)mobile.innerHTML='<div class="candidatos-empty-mobile">Nenhum candidato corresponde aos filtros selecionados.</div>';}
+  else {if(table)table.innerHTML=rows.map(renderCandidatoRow).join('');if(mobile)mobile.innerHTML=rows.map(renderCandidatoMobile).join('');}
+  const totalPages=Math.max(1,Math.ceil(candidatosTotal/candidatosState.limite)); const start=candidatosTotal?((candidatosState.page-1)*candidatosState.limite+1):0; const end=candidatosState.etapa?Math.min(start+rows.length-1,candidatosTotal):Math.min(candidatosState.page*candidatosState.limite,candidatosTotal); const label=document.getElementById('candidatos-paginacao-label');if(label)label.textContent=`Mostrando ${start}–${end} de ${candidatosTotal} candidato${candidatosTotal===1?'':'s'}`; const count=document.getElementById('candidatos-list-count');if(count)count.textContent=`${candidatosTotal.toLocaleString('pt-BR')} candidato${candidatosTotal===1?'':'s'}`; renderCandidatosPagination(totalPages);
+  document.querySelectorAll('#candidatos-table tbody tr[data-candidato-id]').forEach(row=>row.classList.toggle('selecionado',Number(row.dataset.candidatoId)===Number(candidatoSelecionadoId)));
+}
+function renderCandidatoRow(c) { const stage=Number(c.ultima_etapa||1); return `<tr data-candidato-id="${c.id}" onclick="abrirPainelCandidato(${c.id})"><td><input type="checkbox" class="candidato-check" data-id="${c.id}" aria-label="Selecionar ${escapeHtml(c.nome||'candidato')}" onclick="event.stopPropagation();atualizarSelecaoCandidatos()"></td><td><span class="candidato-row-main">${candidatoAvatar(c)}<span class="candidato-row-copy"><strong>${escapeHtml(c.nome||'Candidato')}</strong><small>${escapeHtml(c.email||'—')}</small></span></span></td><td><span class="candidato-vaga">${escapeHtml(c.ultima_vaga_titulo||'—')}<small>${escapeHtml([c.cidade,c.estado].filter(Boolean).join('/')||'')}</small></span></td><td><span class="candidato-stage-badge candidato-stage-${stage}">${candidatoEtapaNome(stage)}</span></td><td><span class="candidato-date"><strong>${candidatoData(c.criada_em)}</strong><small>${candidatoStatusText(c.ultimo_status)}</small></span></td><td><span class="candidato-date"><strong>${escapeHtml(candidatoUltimaAtividade(c))}</strong><small>${c.ultimo_status==='contratado'?'Contratação concluída':'Atualização do processo'}</small></span></td><td><span class="candidato-row-actions"><button type="button" aria-label="Ver perfil" onclick="event.stopPropagation();abrirPainelCandidato(${c.id})"><svg class="dash-svg"><use href="#icon-user"></use></svg></button><button type="button" aria-label="Mais ações" onclick="event.stopPropagation();abrirPainelCandidato(${c.id})">•••</button></span></td></tr>`; }
+function renderCandidatoMobile(c) { const stage=Number(c.ultima_etapa||1); return `<article class="candidato-mobile-card" data-candidato-id="${c.id}" onclick="abrirPainelCandidato(${c.id})">${candidatoAvatar(c)}<div class="candidato-mobile-copy"><strong>${escapeHtml(c.nome||'Candidato')}</strong><small>${escapeHtml(c.email||'—')}</small><div class="candidato-mobile-meta"><span>${escapeHtml(candidatoEtapaNome(stage))}</span><span>${escapeHtml(c.ultima_vaga_titulo||'Sem vaga')}</span></div></div><span class="candidato-mobile-action"><svg class="dash-svg"><use href="#icon-user"></use></svg></span></article>`; }
+function renderCandidatosPagination(pages) { const box=document.getElementById('candidatos-paginacao-controles');if(!box)return;let html=`<button type="button" ${candidatosState.page<=1?'disabled':''} onclick="irPaginaCandidatos(${candidatosState.page-1})">‹</button>`;for(let i=1;i<=pages;i++){if(pages>7&&i>2&&i<pages-1&&Math.abs(i-candidatosState.page)>1){if(i===3)html+='<span>…</span>';continue;}html+=`<button type="button" class="${i===candidatosState.page?'ativo':''}" onclick="irPaginaCandidatos(${i})">${i}</button>`;}html+=`<button type="button" ${candidatosState.page>=pages?'disabled':''} onclick="irPaginaCandidatos(${candidatosState.page+1})">›</button>`;box.innerHTML=html; }
+function irPaginaCandidatos(page){const pages=Math.max(1,Math.ceil(candidatosTotal/candidatosState.limite));if(page<1||page>pages)return;candidatosState.page=page;carregarCandidatos();}
+function atualizarSelecaoCandidatos(){const checks=[...document.querySelectorAll('.candidato-check:checked')];const bar=document.getElementById('candidatos-selection-bar');const count=document.getElementById('candidatos-selecionados-count');if(count)count.textContent=checks.length;if(bar)bar.hidden=!checks.length;}
+function limparSelecaoCandidatos(){document.querySelectorAll('.candidato-check').forEach(c=>c.checked=false);atualizarSelecaoCandidatos();const all=document.getElementById('candidatos-selecionar-todos');if(all)all.checked=false;}
+function limparFiltrosCandidatos(){Object.assign(candidatosState,{search:'',etapa:'',vaga:'',status:'',cidade:'',estado:'',area:'',page:1});['candidatos-busca-top','candidatos-busca','candidatos-filtro-cidade','candidatos-filtro-estado'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['candidatos-filtro-vaga','candidatos-filtro-status','candidatos-filtro-area'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});document.querySelectorAll('#candidatos-stage-filters button').forEach(b=>b.classList.toggle('ativo',b.dataset.etapa===''));carregarCandidatos();}
+function abrirModalNovoCandidato(){alert('O cadastro de candidatos é realizado pelo portal do candidato. Esta tela não cria registros duplicados.');}
+async function abrirPainelCandidato(id){const row=candidatosRows.find(c=>Number(c.id)===Number(id));if(!row)return;candidatoSelecionadoId=id;const panel=document.getElementById('candidato-detail-panel');if(!panel)return;panel.classList.add('aberto');panel.innerHTML='<div class="candidato-detail-empty"><span class="spinner"></span><span>Carregando dados permitidos para esta empresa...</span></div>';renderCandidatos();try{const headers={'Authorization':'Bearer '+token};const reqs=[fetch(API+'/api/empresa/candidatos/'+id,{headers})];if(row.ultima_candidatura_id)reqs.push(fetch(API+'/api/empresa/candidatura/'+row.ultima_candidatura_id,{headers}),fetch(API+'/api/empresa/candidatura/'+row.ultima_candidatura_id+'/documentos',{headers}));const rs=await Promise.all(reqs);const detalhe=await rs[0].json();const cand=detalhe.candidato||detalhe;let candidatura=null,docs=[];if(row.ultima_candidatura_id){candidatura=await rs[1].json();const docData=await rs[2].json();docs=docData.documentos||[];}renderCandidatoDetalhe(cand,row,candidatura,docs);}catch(e){panel.innerHTML=`<div class="candidato-detail-empty"><strong>Não foi possível carregar o candidato</strong><span>${escapeHtml(e.message||'Tente novamente.')}</span></div>`;}}
+function renderCandidatoDetalhe(c,row,candidatura,docs){const stage=Number(row.ultima_etapa||candidatura?.etapa_atual||1);const progress=Math.round((stage/7)*100);const hist=Array.isArray(candidatura?.historico)?candidatura.historico:[];const lastNote=[...hist].reverse().find(h=>h.tipo==='comentario' || h.mensagem);const steps=['Inscrição','Triagem','RH','Gestor','Proposta','Coleta Docs','Contratação'].map((name,i)=>{const n=i+1;const cls=n<stage?'concluida':n===stage?'atual':'';return `<div class="candidato-step ${cls}"><span class="candidato-step-dot">${n<stage?'✓':n}</span><span>${name}${n===stage?' — atual':''}</span><small>${n<stage?'Concluída':n===stage?'Em andamento':'Pendente'}</small></div>`;}).join('');const docsHtml=docs.length?docs.slice(0,4).map(d=>`<div class="candidato-doc"><svg class="dash-svg"><use href="#icon-file"></use></svg><span>${escapeHtml(d.arquivo_nome||d.tipo||'Documento')}<small>${escapeHtml(d.arquivo_tipo||'Arquivo')} · ${d.arquivo_tamanho?Math.round(Number(d.arquivo_tamanho)/1024)+' KB':'—'}</small></span></div>`).join(''):'<div class="candidato-note">Nenhum anexo disponível para esta candidatura.</div>';const noteHtml=lastNote?`<div class="candidato-note">${escapeHtml(lastNote.mensagem||lastNote.texto||'Nota registrada')}<em>Adicionado por ${escapeHtml(lastNote.por||'usuário da empresa')} · ${candidatoData(lastNote.em||lastNote.data)}</em></div>`:'<div class="candidato-note">Nenhuma nota interna registrada.</div>';const panel=document.getElementById('candidato-detail-panel');panel.innerHTML=`<div class="candidato-detail-content"><div class="candidato-detail-head">${candidatoAvatar(c,true)}<div class="candidato-detail-head-copy"><h3>${escapeHtml(c.nome||row.nome||'Candidato')}</h3><p>${escapeHtml(row.ultima_vaga_titulo||'Processo seletivo')}</p><span class="candidato-detail-status">${candidatoStatusText(row.ultimo_status)}</span></div><button class="candidato-detail-close" type="button" aria-label="Fechar detalhes" onclick="fecharPainelCandidato()">×</button></div><div class="candidato-detail-actions"><button type="button" onclick="abrirCurriculo(${c.id})"><svg class="dash-svg"><use href="#icon-user"></use></svg>Ver perfil</button><button type="button" onclick="irPara('candidaturas')"><svg class="dash-svg"><use href="#icon-file"></use></svg>Candidatura</button><button type="button" onclick="abrirModalNovaEntrevista()"><svg class="dash-svg"><use href="#icon-calendar"></use></svg>Agendar</button><button type="button" onclick="fecharPainelCandidato()"><svg class="dash-svg"><use href="#icon-message"></use></svg>Fechar</button></div><div class="candidato-contact-grid"><div class="candidato-contact-item">${candidatoSvg('message')}<span>${escapeHtml(c.email||'E-mail não informado')}</span></div><div class="candidato-contact-item">${candidatoSvg('user')}<span>${escapeHtml(c.celular||'Telefone não informado')}</span></div><div class="candidato-contact-item">${candidatoSvg('talent')}<span>${escapeHtml([c.cidade,c.estado].filter(Boolean).join(' / ')||'Local não informado')}</span></div></div><section class="candidato-detail-section"><div class="candidato-detail-section-header"><h4>Etapas do processo</h4><strong class="candidato-detail-count">${stage} de 7</strong></div><div class="candidato-progress-copy"><span>Progresso</span><strong>${stage} de 7</strong></div><div class="candidato-progress-bar"><i style="width:${progress}%"></i></div><div class="candidato-steps">${steps}</div></section><section class="candidato-detail-section"><div class="candidato-detail-section-header"><h4>Notas internas</h4><button type="button">Ver todas</button></div>${noteHtml}</section><section class="candidato-detail-section"><div class="candidato-detail-section-header"><h4>Anexos</h4><button type="button">Ver todos</button></div><div class="candidato-docs">${docsHtml}</div></section></div>`;}
+function fecharPainelCandidato(){document.getElementById('candidato-detail-panel')?.classList.remove('aberto');candidatoSelecionadoId=null;renderCandidatos();}
+function bindCandidatosControls(){if(window.__candidatosControlsBound)return;window.__candidatosControlsBound=true;const sync=v=>{candidatosState.search=v;['candidatos-busca-top','candidatos-busca'].forEach(id=>{const e=document.getElementById(id);if(e&&e.value!==v)e.value=v;});candidatosState.page=1;carregarCandidatos();};['candidatos-busca-top','candidatos-busca'].forEach(id=>document.getElementById(id)?.addEventListener('input',e=>sync(e.target.value)));[['candidatos-filtro-vaga','vaga'],['candidatos-filtro-status','status'],['candidatos-filtro-cidade','cidade'],['candidatos-filtro-estado','estado'],['candidatos-filtro-area','area'],['candidatos-ordenar','ordenar'],['candidatos-itens-pagina','limite']].forEach(([id,key])=>document.getElementById(id)?.addEventListener('change',e=>{candidatosState[key]=key==='limite'?Number(e.target.value):e.target.value;candidatosState.page=1;carregarCandidatos();}));document.querySelectorAll('#candidatos-stage-filters button').forEach(btn=>btn.addEventListener('click',()=>{candidatosState.etapa=btn.dataset.etapa;candidatosState.page=1;document.querySelectorAll('#candidatos-stage-filters button').forEach(b=>b.classList.toggle('ativo',b===btn));carregarCandidatos();}));document.getElementById('candidatos-mais-filtros-top')?.addEventListener('click',e=>{const p=document.getElementById('candidatos-advanced');const open=p.hasAttribute('hidden');if(open)p.removeAttribute('hidden');else p.setAttribute('hidden','');e.currentTarget.setAttribute('aria-expanded',String(open));});document.getElementById('candidatos-selecionar-todos')?.addEventListener('change',e=>{document.querySelectorAll('.candidato-check').forEach(c=>c.checked=e.target.checked);atualizarSelecaoCandidatos();});}
+bindCandidatosControls();
 
 async function abrirCurriculo(id) {
   abrirModal('curriculo');
