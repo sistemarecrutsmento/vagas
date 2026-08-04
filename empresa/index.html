@@ -511,11 +511,11 @@
       <small>Recrutamento</small>
     </div>
     <a class="nav-item ativo" data-page="dashboard" onclick="irPara('dashboard')">📊 Dashboard</a>
-    <a class="nav-item" data-page="vagas" onclick="irPara('vagas')">💼 Vagas</a>
-    <a class="nav-item" data-page="candidatos" onclick="irPara('candidatos')">👥 Base de Talentos</a>
-    <a class="nav-item" data-page="candidaturas" onclick="irPara('candidaturas')">📋 Vagas com Candidatos</a>
-    <a class="nav-item" data-page="agenda" onclick="irPara('agenda')">📅 Agenda</a>
-    <a class="nav-item" data-page="equipe" onclick="irPara('equipe')">👥 Equipe</a>
+    <a class="nav-item" data-page="vagas" href="vagas-todas.html">💼 Minhas Vagas</a>
+    <a class="nav-item" data-page="candidatos" href="base-candidatos.html">👥 Base de Talentos</a>
+    <a class="nav-item" data-page="candidaturas" href="vagas.html">📋 Vagas com Candidatos</a>
+    <a class="nav-item" data-page="agenda" href="agenda.html">📅 Agenda</a>
+    <a class="nav-item" data-page="equipe" href="equipe.html">👥 Equipe</a>
     <div class="nav-divisor">Links</div>
     <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
     <a class="nav-item" href="../empresa/">🏢 Portal da empresa</a>
@@ -594,7 +594,7 @@
         <div class="dash-card">
           <div class="dash-card-header">
             <h3>📅 Próximas Entrevistas</h3>
-            <a href="#" class="dash-link" onclick="irPara('vagas')">Ver todas →</a>
+            <a href="agenda.html" class="dash-link">Ver todas →</a>
           </div>
           <div id="proximas-entrevistas" class="lista-entrevistas">
             <div class="empty">Carregando...</div>
@@ -615,7 +615,7 @@
       <div class="dash-card" id="card-ranking" style="margin-top:24px;">
         <div class="dash-card-header">
           <h3>🏆 Vagas com maior volume</h3>
-          <a href="#" class="dash-link" onclick="irPara('candidatos')">Ver detalhes →</a>
+          <a href="vagas.html" class="dash-link">Ver detalhes →</a>
         </div>
         <div class="ranking-grid" id="ranking-table-body">
           <div class="empty">Carregando...</div>
