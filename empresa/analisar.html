@@ -322,7 +322,7 @@
             '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
               '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
               '<div><strong style="color:#166534;">📍 Local:</strong><br>' + (ativa.local || '—') + '</div>' +
-              (ativa.link_reuniao ? '<div style="grid-column: 1 / -1;"><strong style="color:#166534;">🔗 Link:</strong> <a href="' + ativa.link_reuniao + '" target="_blank" style="color:#7C3AED;">' + ativa.link_reuniao + '</a></div>' : '') +
+              (ativa.link_reuniao ? '<div style="grid-column: 1 / -1;"><strong style="color:#166534;">🔗 Link:</strong> <a href="' + safeUrl(ativa.link_reuniao) + '" target="_blank" style="color:#7C3AED;">' + safeUrl(ativa.link_reuniao) + '</a></div>' : '') +
             '</div>' +
             '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:12px; color:#166534; border:1px solid #BBF7D0;">' +
               '💡 Esta entrevista já está visível na aba <strong>📅 Agenda</strong> do seu Dashboard.' +
@@ -430,13 +430,13 @@
 
       // Endereço completo
       const endCompleto = [
-        c.logradouro ? c.logradouro : null,
-        c.numero ? ', ' + c.numero : null,
-        c.complemento ? ' — ' + c.complemento : null,
-        c.bairro ? '<br>' + c.bairro : null,
-        (c.cd_cidade || c.cidade) ? '<br>' + (c.cd_cidade || c.cidade) : null,
-        (c.cd_estado || c.estado) ? ' / ' + (c.cd_estado || c.estado) : null,
-        c.cep ? '<br>CEP ' + c.cep : null
+        c.logradouro ? escapeHtml(c.logradouro) : null,
+        c.numero ? ', ' + escapeHtml(c.numero) : null,
+        c.complemento ? ' — ' + escapeHtml(c.complemento) : null,
+        c.bairro ? '<br>' + escapeHtml(c.bairro) : null,
+        (c.cd_cidade || c.cidade) ? '<br>' + escapeHtml(c.cd_cidade || c.cidade) : null,
+        (c.cd_estado || c.estado) ? ' / ' + escapeHtml(c.cd_estado || c.estado) : null,
+        c.cep ? '<br>CEP ' + escapeHtml(c.cep) : null
       ].filter(Boolean).join('');
 
       // Experiências (array + campo antigo "experiencia")
@@ -451,14 +451,14 @@
           return '<div class="exp-item-admin">' +
             '<div class="exp-item-num">' + (i + 1) + '</div>' +
             '<div class="exp-item-corpo">' +
-              '<div class="exp-item-titulo"><strong>' + (e.cargo || '—') + '</strong> em ' + (e.empresa || '—') + '</div>' +
+              '<div class="exp-item-titulo"><strong>' + escapeHtml(e.cargo || '—') + '</strong> em ' + escapeHtml(e.empresa || '—') + '</div>' +
               '<div class="exp-item-periodo">' + ini + (fim ? ' — ' + fim : '') + '</div>' +
-              (e.descricao ? '<div class="exp-item-desc">' + e.descricao + '</div>' : '') +
+              (e.descricao ? '<div class="exp-item-desc">' + escapeHtml(e.descricao) + '</div>' : '') +
             '</div>' +
             '</div>';
         }).join('') + '</div>';
       } else if (c.experiencia) {
-        expsHtml = '<div style="padding:10px;border-left:3px solid var(--vinho);background:#FAFAFA;font-size:14px;white-space:pre-wrap">' + c.experiencia + '</div>';
+        expsHtml = '<div style="padding:10px;border-left:3px solid var(--vinho);background:#FAFAFA;font-size:14px;white-space:pre-wrap">' + escapeHtml(c.experiencia) + '</div>';
       } else {
         expsHtml = '<p style="color:var(--cinza-medio);font-size:14px">Nenhuma experiência informada.</p>';
       }
@@ -500,16 +500,16 @@
       const concl = fmtData((f && f.data_conclusao) || c.data_conclusao);
       if (esc || curso || inst) {
         formacaoHtml =
-          '<div class="field-value" style="font-weight:600">' + (escLabel || '—') + '</div>' +
-          (curso ? '<div class="field-value" style="margin-top:6px">' + curso + '</div>' : '') +
-          (inst ? '<div class="field-value" style="font-weight:400;color:var(--cinza-medio);margin-top:2px">' + inst + '</div>' : '') +
-          ((sit || concl) ? '<div class="field-value" style="font-weight:400;font-size:13px;color:var(--cinza-medio);margin-top:4px">' + (sit || '') + (concl ? ' • Conclusão: ' + concl : '') + '</div>' : '');
+          '<div class="field-value" style="font-weight:600">' + escapeHtml(escLabel || '—') + '</div>' +
+          (curso ? '<div class="field-value" style="margin-top:6px">' + escapeHtml(curso) + '</div>' : '') +
+          (inst ? '<div class="field-value" style="font-weight:400;color:var(--cinza-medio);margin-top:2px">' + escapeHtml(inst) + '</div>' : '') +
+          ((sit || concl) ? '<div class="field-value" style="font-weight:400;font-size:13px;color:var(--cinza-medio);margin-top:4px">' + escapeHtml(sit || '') + (concl ? ' • Conclusão: ' + escapeHtml(concl) : '') + '</div>' : '');
       }
 
       // Sobre Você
       const sobre = c.sobre_voce || c.sobre;
       const sobreHtml = sobre
-        ? '<p style="font-size:14px;line-height:1.6;white-space:pre-wrap">' + sobre + '</p>'
+        ? '<p style="font-size:14px;line-height:1.6;white-space:pre-wrap">' + escapeHtml(sobre) + '</p>'
         : '<p style="color:var(--cinza-medio);font-size:14px">Não informado.</p>';
 
       // Histórico: só mostrar até a etapa atual (não inventar movimentações futuras)
@@ -556,16 +556,17 @@
                           h.status;
           }
           const etapaNome = (etapaNum != null && etapas[etapaNum - 1]) ? etapas[etapaNum - 1] : null;
+          const acaoLabelEsc = escapeHtml(acaoLabel);
           return '<div class="hist-item" id="etapa-' + (etapaNum != null ? etapaNum : '0') + '">' +
             '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
-              '<strong>' + acaoLabel + '</strong>' +
-              (etapaNum != null ? ' <span class="badge-etapa">Etapa ' + etapaNum + (etapaNome ? ' — ' + etapaNome : '') + '</span>' : '') +
-              (statusLabel ? ' <span style="font-size:11px;padding:2px 8px;background:#EEE;border-radius:999px;color:#555">[' + statusLabel + ']</span>' : '') +
+              '<strong>' + acaoLabelEsc + '</strong>' +
+              (etapaNum != null ? ' <span class="badge-etapa">Etapa ' + etapaNum + (etapaNome ? ' — ' + escapeHtml(etapaNome) : '') + '</span>' : '') +
+              (statusLabel ? ' <span style="font-size:11px;padding:2px 8px;background:#EEE;border-radius:999px;color:#555">[' + escapeHtml(statusLabel) + ']</span>' : '') +
             '</div>' +
             (h.mensagem ? '<div style="margin-top:4px;font-size:13px;color:#444">"' + escapeHtml(h.mensagem) + '"</div>' : '') +
             '<div style="margin-top:4px;font-size:11px;color:var(--cinza-medio)">' +
-              (dataFmt ? dataFmt : '') +
-              (h.por ? ' • por ' + h.por : '') +
+              (dataFmt ? escapeHtml(dataFmt) : '') +
+              (h.por ? ' • por ' + escapeHtml(h.por) : '') +
             '</div>' +
           '</div>';
         }).join('');
@@ -633,8 +634,8 @@
           ? '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
               '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Link do Google Meet:</div>' +
               '<div style="display:flex; gap:8px; align-items:center;">' +
-                '<a href="' + e.link_reuniao + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + e.link_reuniao + '</a>' +
-                '<button type="button" onclick="navigator.clipboard.writeText(\'' + e.link_reuniao + '\').then(function(b){b.textContent=\'✅ Copiado!\'; setTimeout(function(){b.textContent=\'📋 Copiar\';}, 2000)})" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
+                '<a href="' + safeUrl(e.link_reuniao) + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + safeUrl(e.link_reuniao) + '</a>' +
+                '<button type="button" onclick="navigator.clipboard.writeText(\'' + safeUrl(e.link_reuniao) + '\').then(function(b){b.textContent=\'✅ Copiado!\'; setTimeout(function(){b.textContent=\'📋 Copiar\';}, 2000)})" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
               '</div>' +
             '</div>'
           : '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +
@@ -762,8 +763,8 @@
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>' +
             'Voltar' +
           '</button>' +
-          '<h1><span id="v-build" style="display:none">V2</span> ' + (c.nome || 'Candidato') + '</h1>' +
-          '<div class="sub">' + (c.titulo || 'Vaga') + (c.v_cidade ? ' • ' + c.v_cidade : '') + '</div>' +
+          '<h1><span id="v-build" style="display:none">V2</span> ' + escapeHtml(c.nome || 'Candidato') + '</h1>' +
+          '<div class="sub">' + escapeHtml(c.titulo || 'Vaga') + (c.v_cidade ? ' • ' + escapeHtml(c.v_cidade) : '') + '</div>' +
           '<span class="status-pill status-' + status + '">' + (status === 'em_analise' ? 'Em análise' : status === 'em_andamento' ? 'Em andamento' : status === 'contratado' ? 'Contratado' : status === 'reprovado' ? 'Reprovado' : status === 'rejeitado' ? 'Reprovado' : status === 'aprovado' ? 'Aprovado' : status) + '</span>' +
         '</div>' +
 
@@ -786,16 +787,16 @@
         // 3) Dados Pessoais + Endereço (SEM "sobre você")
         '<div class="card" id="card-dados-pessoais">' +
           '<div class="dados-pessoais-header">' +
-            (c.foto_url ? '<img class="dados-foto" src="' + c.foto_url + '" alt="Foto de ' + (c.nome || 'Candidato') + '" onerror="this.style.display=\'none\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
+            (c.foto_url ? '<img class="dados-foto" src="' + safeUrl(c.foto_url) + '" alt="Foto de ' + escapeHtml(c.nome || 'Candidato') + '" onerror="this.style.display=\'none\'">' : '<div class="dados-foto dados-foto-vazia">👤</div>') +
             '<h2 style="margin:0">👤 Dados Pessoais</h2>' +
           '</div>' +
           '<div class="grid-2">' +
-            '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (c.email || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + (c.celular || '—') + '</div></div>' +
-            '<div class="field"><div class="field-label">CPF</div><div class="field-value">' + (c.cpf || '—') + '</div></div>' +
+            '<div class="field"><div class="field-label">Email</div><div class="field-value">' + (escapeHtml(c.email || '—')) + '</div></div>' +
+            '<div class="field"><div class="field-label">Celular</div><div class="field-value">' + (escapeHtml(c.celular || '—')) + '</div></div>' +
+            '<div class="field"><div class="field-label">CPF</div><div class="field-value">' + (escapeHtml(c.cpf || '—')) + '</div></div>' +
             '<div class="field"><div class="field-label">Data de Nascimento</div><div class="field-value">' + (fmtData(c.data_nascimento) || '—') + '</div></div>' +
-            (c.sexo ? '<div class="field"><div class="field-label">Sexo</div><div class="field-value">' + (c.sexo === 'M' ? 'Masculino' : c.sexo === 'F' ? 'Feminino' : c.sexo === 'O' ? 'Outro' : c.sexo) + '</div></div>' : '') +
-            (c.acessibilidade ? '<div class="field"><div class="field-label">Acessibilidade</div><div class="field-value">' + c.acessibilidade + '</div></div>' : '') +
+            (c.sexo ? '<div class="field"><div class="field-label">Sexo</div><div class="field-value">' + escapeHtml(c.sexo === 'M' ? 'Masculino' : c.sexo === 'F' ? 'Feminino' : c.sexo === 'O' ? 'Outro' : c.sexo) + '</div></div>' : '') +
+            (c.acessibilidade ? '<div class="field"><div class="field-label">Acessibilidade</div><div class="field-value">' + escapeHtml(c.acessibilidade) + '</div></div>' : '') +
             '<div class="field" style="grid-column:1 / -1"><div class="field-label">Endereço</div><div class="field-value">' + (endCompleto || '—') + '</div></div>' +
           '</div>' +
         '</div>' +
@@ -869,7 +870,7 @@
           alert('Erro: ' + (data.erro || 'Não foi possível salvar'));
         }
       } catch (e) {
-        alert('Erro: ' + e.message);
+        alert('Erro: ' + escapeHtml(e.message || 'Erro interno'));
       }
     }
 
@@ -906,7 +907,7 @@
         // Recarrega a página → volta o form de novo agendamento
         render(currentCandidatura);
       } catch (e) {
-        alert('Erro ao cancelar: ' + e.message);
+        alert('Erro ao cancelar: ' + escapeHtml(e.message || 'Erro interno'));
         if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
       }
     }
@@ -1008,7 +1009,7 @@
           '</div>';
 
       } catch (e) {
-        alert('❌ Erro ao agendar: ' + e.message);
+        alert('❌ Erro ao agendar: ' + escapeHtml(e.message || 'Erro interno'));
         btn.disabled = false;
         btn.innerHTML = '💾 Confirmar Agendamento';
       }
@@ -1035,7 +1036,7 @@
           alert('Erro: ' + (data.erro || 'Não foi possível atualizar'));
         }
       } catch (e) {
-        alert('Erro: ' + e.message);
+        alert('Erro: ' + escapeHtml(e.message || 'Erro interno'));
       }
     }
 
@@ -1118,7 +1119,7 @@
         if (isArquivo) {
           if (d && d.arquivo_url) {
             // Link pra URL do Cloudinary (target _blank)
-            valorHtml = '<div class="doc-valor"><a href="' + d.arquivo_url + '" target="_blank" rel="noopener">📎 ' + (d.arquivo_nome || 'ver arquivo') + '</a> <span style="color:var(--cinza-medio)">(' + fmt(d.arquivo_tamanho) + ')</span></div>';
+            valorHtml = '<div class="doc-valor"><a href="' + safeUrl(d.arquivo_url) + '" target="_blank" rel="noopener">📎 ' + escapeHtml(d.arquivo_nome || 'ver arquivo') + '</a> <span style="color:var(--cinza-medio)">(' + fmt(d.arquivo_tamanho) + ')</span></div>';
           } else {
             valorHtml = '<div class="doc-pendente">⏳ Candidato ainda não enviou</div>';
           }
@@ -1222,7 +1223,7 @@
           atualizarBotaoAprovarTudo();
         }
       } catch (e) {
-        alert('Erro: ' + e.message);
+        alert('Erro: ' + escapeHtml(e.message || 'Erro interno'));
       }
     }
 
@@ -1262,7 +1263,7 @@
         }
         alert('Documento retornado. O candidato será notificado e poderá reenviar.');
       } catch (e) {
-        alert('Erro: ' + e.message);
+        alert('Erro: ' + escapeHtml(e.message || 'Erro interno'));
       }
     }
 
@@ -1520,7 +1521,7 @@
         }
         alert('Documento retornado. O candidato será notificado e poderá reenviar.');
       } catch (e) {
-        alert('Erro: ' + e.message);
+        alert('Erro: ' + escapeHtml(e.message || 'Erro interno'));
       }
     }
 
@@ -1550,7 +1551,7 @@
           atualizarDocsCount();
         }
       } catch (e) {
-        alert('Erro: ' + e.message);
+        alert('Erro: ' + escapeHtml(e.message || 'Erro interno'));
       }
     }
 
@@ -1590,7 +1591,7 @@
         // Recarrega a página pra mostrar a timeline atualizada
         location.reload();
       } catch (e) {
-        alert('Erro: ' + e.message);
+        alert('Erro: ' + escapeHtml(e.message || 'Erro interno'));
         if (btn) { btn.disabled = false; btn.textContent = '✅ Aprovar tudo e avançar etapa'; }
       }
     }
@@ -1626,15 +1627,20 @@
         alert(msg);
         location.reload();
       } catch (e) {
-        alert('Erro: ' + e.message);
+        alert('Erro: ' + escapeHtml(e.message || 'Erro interno'));
         if (btn) { btn.disabled = false; btn.textContent = '✅ Aprovar tudo e avançar etapa'; }
       }
     }
 
     function escapeHtml(s) {
-      return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]));
     }
-
+    function safeUrl(value) {
+      try {
+        const url = new URL(String(value || ''), window.location.origin);
+        return ['http:', 'https:'].includes(url.protocol) ? escapeHtml(url.href) : '';
+      } catch (_) { return ''; }
+    }
     // ====== Modal de Proposta (etapa 5) ======
     let _propostaCandId = null;
     function abrirModalProposta(candidaturaId) {
@@ -1723,7 +1729,5 @@
   <style>
     #modal-proposta.aberto { display: flex !important; }
   </style>
-<script src="chat-flutuante-admin.js?v=20260725fix13"></script>
-<script src="chat-empresa-flutuante.js?v=20260725fix13"></script>
 </body>
 </html>
