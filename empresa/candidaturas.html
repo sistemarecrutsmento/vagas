@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vagas com Candidatos — Portal Empresa</title>
+  <title>Vagas com Candidatos — Admin</title>
   <style>
     :root {
       --vinho: #7B1F1F;
@@ -57,31 +57,28 @@
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
-  <link rel="stylesheet" href="empresa-shell.css?v=20260803shell4">
 </head>
 <body>
   <div class="app">
-    <aside class="empresa-shell-sidebar" aria-label="Navegação do Portal Empresa">
-      <button class="empresa-shell-close menu-close" type="button" onclick="this.closest('aside').classList.remove('empresa-shell-open','aberto');" aria-label="Fechar menu">✕</button>
-      <div class="empresa-shell-logo aside-logo"><h1>VagasIO</h1><small>Portal da Empresa</small></div>
-      <nav class="empresa-shell-nav">
+    <aside>
+      <div class="aside-logo">
+        <h1>Admin</h1>
+        <small>Vagas.io</small>
+      </div>
       <a class="nav-item" href="index.html">📊 Dashboard</a>
-      <a class="nav-item" href="vagas-todas.html">💼 Minhas Vagas</a>
-      <a class="nav-item" href="base-candidatos.html">👥 Base de Talentos</a>
-      <a class="nav-item ativo" href="vagas.html">📋 Vagas com Candidatos</a>
+      <a class="nav-item" href="index.html?page=vagas">💼 Vagas</a>
+      <a class="nav-item" href="index.html?page=candidatos">👥 Base de Talentos</a>
+      <a class="nav-item ativo" href="candidaturas.html">📋 Vagas com Candidatos</a>
       <a class="nav-item" href="agenda.html">📅 Agenda</a>
-      <a class="nav-item" href="chat.html">💬 Chat</a>
-      <a class="nav-item" href="analytics.html">📈 Analytics</a>
-      <a class="nav-item" href="notificacoes.html">🔔 Notificações</a>
-      <a class="nav-item" href="perfil.html">⚙️ Perfil</a>
-      <a class="nav-item" id="nav-equipe" style="display:none;" href="usuarios.html">👥 Equipe</a>
-      </nav>
-      <div class="nav-divisor">Links</div>
-      <a class="nav-item" href="../candidato/">👤 Portal do candidato</a>
-      <div class="empresa-shell-user aside-user">
-        <div class="empresa-shell-avatar aside-user-avatar" id="avatar">--</div>
-        <div class="empresa-shell-user-info aside-user-info"><div class="nome" id="user-nome">--</div><div class="empresa" id="user-empresa">--</div><span id="user-role" style="display:none"></span></div>
-        <button class="empresa-shell-logout btn-logout" type="button" onclick="if (typeof empresaSair === 'function') empresaSair(); else { localStorage.removeItem('empresa_token'); localStorage.removeItem('empresa_refresh'); localStorage.removeItem('empresa_usuario'); location.href='login.html'; }" title="Sair">↪</button>
+      <a class="nav-item" href="equipe.html">👥 Equipe</a>
+      <a class="nav-item" href="../" style="opacity:0.7;">🏡 Voltar pro site</a>
+      <div class="aside-user">
+        <div class="aside-user-avatar" id="aside-user-avatar">--</div>
+        <div class="aside-user-info">
+          <div class="nome" id="aside-user-nome">--</div>
+          <div class="empresa" id="aside-user-empresa">--</div>
+        </div>
+        <a href="index.html" class="btn-logout" title="Sair">↪</a>
       </div>
     </aside>
     <main>
@@ -95,15 +92,14 @@
     </main>
   </div>
 
-  <script src="auth-helper.js?v=fase4_2026_07_28"></script>
-  <script src="empresa-auth-init.js?v=fase4_2026_07_28"></script>
-  <script src="empresa-auth-patch.js?v=fase4_2026_07_28"></script>
+<script src="auth-helper.js?v=empresa-old-ui1"></script>
+<script src="empresa-auth-init.js?v=empresa-old-ui1"></script>
+<script src="empresa-auth-patch.js?v=empresa-old-ui1"></script>
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
-    const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
     const token = localStorage.getItem('empresa_token');
 
-    if (!token && !localStorage.getItem('empresa_refresh')) { window.location.href = 'login.html'; }
+    if (!token) { window.location.href = 'index.html'; }
 
     function carregarUsuarioSidebar() {
       try {
@@ -114,9 +110,9 @@
         const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
         const nome = payload.nome || 'Admin';
         const iniciais = nome.split(/\s+/).map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
-        const elAvatar = document.getElementById('avatar');
-        const elNome = document.getElementById('user-nome');
-        const elEmpresa = document.getElementById('user-empresa');
+        const elAvatar = document.getElementById('aside-user-avatar');
+        const elNome = document.getElementById('aside-user-nome');
+        const elEmpresa = document.getElementById('aside-user-empresa');
         if (elAvatar) elAvatar.textContent = iniciais || 'A';
         if (elNome) elNome.textContent = nome;
         if (elEmpresa) elEmpresa.textContent = payload.email || '';
@@ -126,12 +122,12 @@
     async function carregar() {
       const grid = document.getElementById('vagas-grid');
       try {
-        const r = await authFetch(API + '/api/empresa/vagas-com-candidaturas', {
-          headers: { 'Authorization': 'Bearer ' + (authTokens.getAccess() || token) }
+        const r = await fetch(API + '/api/empresa/vagas-com-candidaturas', {
+          headers: { 'Authorization': 'Bearer ' + token }
         });
         if (r.status === 401 || r.status === 403) {
           localStorage.removeItem('empresa_token');
-          window.location.href = 'login.html';
+          window.location.href = 'index.html';
           return;
         }
         const data = await r.json();
@@ -145,8 +141,8 @@
         grid.innerHTML = vagas.map(v => {
           const local = [v.cidade, v.estado].filter(Boolean).join(' / ') || '—';
           return `<div class="vaga-card">
-            <h3>${esc(v.titulo || '—')}</h3>
-            <div class="empresa">${esc(v.empresa || '—')} • ${esc(local)}</div>
+            <h3>${v.titulo || '—'}</h3>
+            <div class="empresa">${v.empresa || '—'} • ${local}</div>
             <div class="stats">
               <span class="stat-mini">👥 <strong>${v.total_geral || 0}</strong> total</span>
               <span class="stat-mini">🔍 <strong>${v.em_analise || 0}</strong> em análise</span>
@@ -160,14 +156,10 @@
       }
     }
 
-    (async function initEmpresaCandidaturas() {
-      try { await authInit(); } catch (_) {}
-      if (!localStorage.getItem('empresa_token')) { window.location.href = 'login.html'; return; }
-      carregarUsuarioSidebar();
-      carregar();
-    })();
+    carregar();
+    carregarUsuarioSidebar();
   </script>
-<script src="chat-rh-flutuante.js?v=20260803"></script>
-<script src="empresa-shell.js?v=20260803shell4"></script>
+<script src="chat-flutuante-admin.js?v=20260725acc2"></script>
+<script src="chat-empresa-flutuante.js?v=20260725acc2"></script>
 </body>
 </html>
