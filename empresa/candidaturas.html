@@ -55,6 +55,17 @@
     .empty { text-align: center; padding: 40px 20px; color: var(--cinza-medio); grid-column: 1 / -1; }
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--borda); border-top-color: var(--vinho); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 768px) {
+      .app { flex-direction: column; min-width: 0; }
+      aside { width: 100%; min-height: auto; padding: 12px; }
+      .aside-logo { padding: 0 8px 12px; margin-bottom: 8px; }
+      .nav-item { display: inline-block; padding: 8px 9px; margin: 2px 0; font-size: 12px; }
+      .aside-user { margin-top: 10px; padding: 10px 8px 0; }
+      main { width: 100%; padding: 20px 12px; overflow-x: auto; }
+      .topo { flex-wrap: wrap; padding: 12px 16px; }
+      .topo h1 { font-size: 16px; }
+      .container { margin: 16px 0; padding: 0; }
+    }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
 </head>
