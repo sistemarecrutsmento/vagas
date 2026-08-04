@@ -1006,7 +1006,8 @@ async function carregarVagasAdmin() {
     const counts = new Map((totais.vagas || []).map(v => [Number(v.id), v]));
     vagasEmpresaCache = (lista.vagas || []).map(v => { const c = counts.get(Number(v.id)) || {}; return { ...v, total_candidatos: Number(v.total_candidatos ?? c.total_geral ?? 0), em_andamento: Number(v.em_andamento ?? c.em_andamento ?? 0), contratados: Number(v.contratados ?? c.contratados ?? 0) }; });
     setVagasKpis(dash);
-    fillVagasSelect('vagas-filtro-status', vagasEmpresaCache.map(v => statusVagaLabel[v.status] ? v.status : v.status), 'Todos os status', vagasState.status);
+    fillVagasSelect('vagas-filtro-status', vagasEmpresaCache.map(v => v.status), 'Todos os status', vagasState.status);
+    document.querySelectorAll('#vagas-filtro-status option').forEach(o => { if (o.value) o.textContent = statusVagaLabel[o.value] || o.value; });
     fillVagasSelect('vagas-filtro-area', vagasEmpresaCache.map(v => v.area || v.categoria), 'Todas as áreas', vagasState.area);
     fillVagasSelect('vagas-filtro-nivel', vagasEmpresaCache.map(v => v.nivel), 'Todos os níveis', vagasState.nivel);
     fillVagasSelect('vagas-filtro-tipo', vagasEmpresaCache.map(v => v.tipo_contrato), 'Tipo de contrato', vagasState.tipo);
