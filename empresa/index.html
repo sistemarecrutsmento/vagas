@@ -394,7 +394,7 @@
     #page-dashboard #row-docs .dash-card:first-child { grid-area:docs; }
     #page-dashboard #row-docs .dash-card:nth-child(2) { grid-area:strategic; }
     #page-dashboard { grid-template-areas:"head head head head head head head head head head head head" "kpis kpis kpis kpis kpis kpis kpis kpis kpis kpis kpis kpis" "stages stages stages stages activities activities activities activities upcoming upcoming upcoming upcoming" "jobs jobs jobs jobs jobs jobs conversion conversion docs docs strategic strategic"; }
-    #page-dashboard .kpis-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin-bottom:0; }
+    #page-dashboard .kpis-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-bottom:0; }
     #page-dashboard .kpi-card { min-height:92px; padding:12px 13px; border-radius:8px; box-shadow:0 1px 5px rgba(0,0,0,.06); }
     #page-dashboard .kpi-label { font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     #page-dashboard .kpi-valor { font-size:24px; margin-top:6px; }
@@ -428,6 +428,9 @@
     #page-dashboard .kpi-sec { padding:8px; }
     #page-dashboard .kpi-sec-label { font-size:8px; }
     #page-dashboard .kpi-sec-valor { font-size:15px; }
+    @media (max-width:1100px) {
+      #page-dashboard .kpis-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    }
     @media (max-width:900px) {
       #page-dashboard { grid-template-columns:1fr 1fr; grid-template-areas:"head head" "kpis kpis" "stages activities" "upcoming upcoming" "jobs jobs" "conversion docs" "strategic strategic"; }
       #page-dashboard .kpis-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
