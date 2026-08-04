@@ -7,7 +7,10 @@ const API = 'https://recrutamento-api-novo.onrender.com';
 let token = null;
 let vagaEmEdicao = null;
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+  if (typeof window.authInit === 'function') {
+    try { await window.authInit(); } catch (_) {}
+  }
   const saved = localStorage.getItem('empresa_token');
   if (saved) {
     token = saved;
