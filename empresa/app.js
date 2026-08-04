@@ -59,12 +59,11 @@ function toggleMenu() {
 
 function mostrarApp() {
   document.getElementById('login-page').style.display = 'none';
-  const topbar = document.getElementById('topbar');
-  if (topbar) topbar.style.display = 'none';
-  document.body.classList.remove('dashboard-view');
   document.getElementById('app').classList.add('logado');
   carregarUsuarioSidebar();
-  irPara('dashboard');
+  const requested = new URLSearchParams(window.location.search).get('page');
+  const allowed = ['dashboard', 'vagas', 'candidatos', 'candidaturas', 'agenda', 'equipe'];
+  irPara(allowed.includes(requested) ? requested : 'dashboard');
 }
 
 // === Sidebar: avatar + nome do admin logado ===
@@ -83,21 +82,11 @@ function carregarUsuarioSidebar() {
     if (elAvatar) elAvatar.textContent = iniciais || 'A';
     if (elNome) elNome.textContent = nome;
     if (elEmpresa) elEmpresa.textContent = payload.email || '';
-    const topAvatar = document.getElementById('top-avatar');
-    const topAdmin = document.getElementById('top-admin');
-    const topEmail = document.getElementById('top-email');
-    if (topAvatar) topAvatar.textContent = iniciais || 'A';
-    if (topAdmin) topAdmin.textContent = nome || 'Admin';
-    if (topEmail) topEmail.textContent = payload.email || '';
   } catch (e) { /* silencioso */ }
 }
 
 // ===== NAVEGAÇÃO =====
 function irPara(page) {
-  const isDashboard = page === 'dashboard';
-  document.body.classList.toggle('dashboard-view', isDashboard);
-  const topbar = document.getElementById('topbar');
-  if (topbar) topbar.style.display = isDashboard ? 'flex' : 'none';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('ativo'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
   document.getElementById('page-' + page).classList.add('ativo');
