@@ -164,9 +164,12 @@
     .status-faltou { background: #dc2626; color: white; }
 
     @media (max-width: 768px) {
-      .app { flex-direction: column; }
-      aside { width: 100%; padding: 16px; }
-      main { padding: 20px 16px; }
+      .app { flex-direction: column; min-width: 0; }
+      aside { width: 100%; min-height: auto; padding: 12px; }
+      .aside-logo { padding: 0 8px 12px; margin-bottom: 8px; }
+      .nav-item { display: inline-block; padding: 8px 9px; margin: 2px 0; font-size: 12px; }
+      .aside-user { margin-top: 10px; padding: 10px 8px 0; }
+      main { width: 100%; padding: 20px 12px; overflow-x: auto; }
       .entrev-card { grid-template-columns: auto 1fr; }
       .acoes { grid-column: 1 / -1; justify-content: stretch; }
       .acoes .btn-acao { flex: 1; }
