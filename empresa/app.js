@@ -845,7 +845,7 @@ async function carregarDashboardV2() {
           <div class="entrevista-info">
             <div class="entrevista-nome">${nome}</div>
             <div class="entrevista-vaga">${vaga}</div>
-            <div class="entrevista-data">📅 ${dataStr} às ${horaStr}</div>
+            <div class="entrevista-data">${dataStr} às ${horaStr}</div>
           </div>
           <div class="entrevista-badge entrevista-${badgeClass}">${etapaNome}</div>
         </div>`;
