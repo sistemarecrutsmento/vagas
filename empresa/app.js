@@ -116,489 +116,7 @@ function irPara(page) {
 }
 
 // ===== EQUIPE =====
-let equipeCarregada = false;
-
-function trocarTabEquipe(tab) {
-  document.querySelectorAll('.tab-equipe').forEach(t => t.classList.remove('ativo'));
-  document.querySelector(`.tab-equipe[data-tab="${tab}"]`)?.classList.add('ativo');
-  document.querySelectorAll('.tab-content-equipe').forEach(c => c.style.display = 'none');
-  document.getElementById('tab-' + tab).style.display = 'block';
-  // Troca label/handler do botão de acordo com a aba
-  const btn = document.getElementById('btn-novo-equipe');
-  if (tab === 'empresas') {
-    btn.textContent = '+ Nova Empresa';
-    btn.onclick = abrirModalEmpresa;
-  } else {
-    btn.textContent = '+ Novo Recrutador';
-    btn.onclick = abrirModalRecrutador;
-  }
-}
-
-async function carregarEquipe() {
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    const r = await fetch(API + '/api/empresa/equipe', { headers: { 'Authorization': 'Bearer ' + token } });
-    const data = await r.json();
-    if (!data.recrutadores && Array.isArray(data.equipe)) data.recrutadores = data.equipe;
-    if (!data.empresas) data.empresas = [];
-    if (!data.empresaUsuarios) data.empresaUsuarios = [];
-
-    // Recrutadores
-    const recDiv = document.getElementById('lista-recrutadores');
-    if (data.recrutadores && data.recrutadores.length > 0) {
-      recDiv.innerHTML = data.recrutadores.map(u => `
-        <div class="vaga-card">
-          <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-            <div style="width:48px; height:48px; border-radius:50%; background:var(--vinho); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;">${(u.nome||'?').charAt(0).toUpperCase()}</div>
-            <div style="flex:1;">
-              <div style="font-weight:700; font-size:16px;">${u.nome}</div>
-              <div style="color:#888; font-size:13px;">${u.email}</div>
-            </div>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; gap:8px; flex-wrap:wrap;">
-            <span style="background:${u.ativo === false ? '#fee2e2' : '#dcfce7'}; color:${u.ativo === false ? '#b91c1c' : '#16a34a'}; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">${u.ativo === false ? 'Inativo' : 'Recrutador'}</span>
-            <div style="display:flex; gap:6px;">
-              <button class="btn btn-sec btn-sm" onclick="editarRecrutador(${u.id}, '${(u.nome||'').replace(/'/g, "\\'")}', ${u.ativo === false})">✏️ Editar</button>
-              <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirRecrutador(${u.id}, '${(u.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      recDiv.innerHTML = '<div class="empty">Nenhum recrutador cadastrado. Use "+ Novo Recrutador" acima.</div>';
-    }
-
-    // Empresas
-    const empDiv = document.getElementById('lista-empresas');
-    const todosUsuarios = data.empresaUsuarios || [];
-    if (data.empresas && data.empresas.length > 0) {
-      empDiv.innerHTML = data.empresas.map(e => {
-        const usuariosEmp = todosUsuarios.filter(u => u.empresa_id === e.id);
-        const usuariosHtml = usuariosEmp.length > 0
-          ? usuariosEmp.map(u => `
-              <div style="display:flex; align-items:center; gap:8px; padding:8px; background:#f8fafc; border-radius:6px; margin-top:6px;">
-                <div style="width:32px; height:32px; border-radius:50%; background:#1e40af; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">${(u.nome||'?').charAt(0).toUpperCase()}</div>
-                <div style="flex:1; min-width:0;">
-                  <div style="font-size:13px; font-weight:600; color:#333; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.nome}</div>
-                  <div style="font-size:11px; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${u.email}${u.cargo ? ' • ' + u.cargo : ''}</div>
-                </div>
-                <button class="btn btn-sec btn-sm" title="Editar" onclick="editarUsuarioEmpresa(${u.id}, ${e.id}, '${(u.nome||'').replace(/'/g, "\\'")}', '${(u.email||'').replace(/'/g, "\\'")}', '${(u.cargo||'').replace(/'/g, "\\'")}', ${u.ativo === false})">✏️</button>
-                <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" title="Excluir" onclick="excluirUsuarioEmpresa(${u.id}, '${(u.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
-              </div>
-            `).join('')
-          : '<div style="font-size:12px; color:#999; font-style:italic; padding:6px 0;">Nenhum usuário cadastrado</div>';
-
-        return `
-        <div class="vaga-card">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
-            <div style="font-weight:700; font-size:16px;">🏢 ${e.nome}</div>
-            <div style="display:flex; gap:6px;">
-              <button class="btn btn-sec btn-sm" onclick="abrirModalVincularVagas(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}')">🔗 Vagas (${e.qtd_vagas || 0})</button>
-              <button class="btn btn-sec btn-sm" onclick="editarEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}', '${(e.cnpj||'').replace(/'/g, "\\'")}', '${(e.email_principal||'').replace(/'/g, "\\'")}', '${(e.telefone||'').replace(/'/g, "\\'")}')">✏️ Editar</button>
-              <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="excluirEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")}')">🗑️</button>
-            </div>
-          </div>
-          <div style="color:#888; font-size:13px;">${e.email_principal || '—'}</div>
-          ${e.cnpj ? `<div style="color:#888; font-size:12px; margin-top:4px;">CNPJ: ${e.cnpj}</div>` : ''}
-          ${e.telefone ? `<div style="color:#888; font-size:12px;">Tel: ${e.telefone}</div>` : ''}
-          <div style="margin-top:10px;"><span style="background:#dbeafe; color:#1e40af; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Empresa</span></div>
-
-          <div style="margin-top:12px; padding-top:10px; border-top:1px solid #eee;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <div style="font-size:12px; font-weight:700; color:#555;">👥 Usuários (${usuariosEmp.length})</div>
-              <button class="btn btn-sec btn-sm" onclick="abrirModalNovoUsuarioEmpresa(${e.id}, '${(e.nome||'').replace(/'/g, "\\'")})">+ Usuário</button>
-            </div>
-            ${usuariosHtml}
-          </div>
-        </div>
-        `;
-      }).join('');
-    } else {
-      empDiv.innerHTML = '<div class="empty">Nenhuma empresa parceira cadastrada.</div>';
-    }
-    equipeCarregada = true;
-  } catch (e) {
-    document.getElementById('lista-recrutadores').innerHTML = '<div class="empty" style="color:var(--vermelho);">Erro ao carregar equipe. Verifique sua conexão.</div>';
-  }
-}
-
-function abrirModalRecrutador() {
-  document.getElementById('membro-nome').value = '';
-  document.getElementById('membro-email').value = '';
-  document.getElementById('membro-senha').value = 'mudar123';
-  abrirModal('novo-membro');
-  setTimeout(() => document.getElementById('membro-nome').focus(), 100);
-}
-
-async function salvarNovoRecrutador() {
-  const nome = document.getElementById('membro-nome').value.trim();
-  const email = document.getElementById('membro-email').value.trim();
-  const senha = document.getElementById('membro-senha').value;
-  if (!nome || !email || !senha) {
-    alert('Preencha nome, e-mail e senha.');
-    return;
-  }
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    const r = await fetch(API + '/api/empresa/recrutadores', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ nome, email, senha })
-    });
-    const data = await r.json();
-    if (r.ok) {
-      fecharModal('novo-membro');
-      alert('✅ Recrutador criado com sucesso!');
-      carregarEquipe();
-    } else {
-      alert('Erro: ' + (data.erro || JSON.stringify(data)));
-    }
-  } catch (e) { alert('Erro de conexão'); }
-}
-
-function abrirModalEmpresa() {
-  document.getElementById('emp-nome').value = '';
-  document.getElementById('emp-cnpj').value = '';
-  document.getElementById('emp-telefone').value = '';
-  document.getElementById('emp-email').value = '';
-  document.getElementById('emp-user-nome').value = '';
-  document.getElementById('emp-user-email').value = '';
-  document.getElementById('emp-user-senha').value = 'mudar123';
-  abrirModal('nova-empresa');
-  setTimeout(() => document.getElementById('emp-nome').focus(), 100);
-}
-
-async function salvarNovaEmpresa() {
-  const nome = document.getElementById('emp-nome').value.trim();
-  const cnpj = document.getElementById('emp-cnpj').value.trim() || null;
-  const telefone = document.getElementById('emp-telefone').value.trim() || null;
-  const email_principal = document.getElementById('emp-email').value.trim() || null;
-  const userNome = document.getElementById('emp-user-nome').value.trim();
-  const userEmail = document.getElementById('emp-user-email').value.trim();
-  const userSenha = document.getElementById('emp-user-senha').value;
-  if (!nome) {
-    alert('Preencha pelo menos o nome da empresa.');
-    return;
-  }
-  // Monta payload
-  const payload = { nome, cnpj, telefone, email_principal };
-  // Se preenchou pelo menos nome+email do usuário, inclui (senha tem default)
-  if (userNome && userEmail) {
-    payload.usuario = { nome: userNome, email: userEmail, senha: userSenha || 'mudar123', cargo: 'admin' };
-  }
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    const r = await fetch(API + '/api/empresa/empresas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(payload)
-    });
-    const data = await r.json();
-    if (r.ok) {
-      fecharModal('nova-empresa');
-      alert('✅ Empresa criada com sucesso!');
-      carregarEquipe();
-    } else {
-      alert('Erro: ' + (data.erro || JSON.stringify(data)));
-    }
-  } catch (e) { alert('Erro de conexão'); }
-}
-
-function editarRecrutador(id, nomeAtual, inativo) {
-  document.getElementById('emembro-id').value = id;
-  document.getElementById('emembro-nome').value = nomeAtual || '';
-  document.getElementById('emembro-ativo').checked = !inativo;
-  document.getElementById('emembro-senha').value = '';
-  abrirModal('editar-membro');
-  setTimeout(() => document.getElementById('emembro-nome').focus(), 100);
-}
-
-async function salvarEdicaoRecrutador() {
-  const id = document.getElementById('emembro-id').value;
-  const nome = document.getElementById('emembro-nome').value.trim();
-  const ativo = document.getElementById('emembro-ativo').checked;
-  const senha = document.getElementById('emembro-senha').value.trim();
-  if (!nome) { alert('O nome é obrigatório.'); return; }
-  const payload = { nome, ativo };
-  if (senha) payload.senha = senha;
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    const r = await fetch(API + '/api/empresa/recrutadores/' + id, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(payload)
-    });
-    const data = await r.json();
-    if (r.ok) {
-      fecharModal('editar-membro');
-      alert('✅ Recrutador atualizado!');
-      carregarEquipe();
-    } else {
-      alert('Erro: ' + (data.erro || JSON.stringify(data)));
-    }
-  } catch (e) { alert('Erro de conexão'); }
-}
-
-function excluirRecrutador(id, nome) {
-  if (!confirm('Excluir o recrutador "' + nome + '"?\n\nEssa ação não pode ser desfeita.')) return;
-  fetch(API + '/api/empresa/recrutadores/' + id, {
-    method: 'DELETE',
-    headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('empresa_token') || localStorage.getItem('token')) }
-  })
-    .then(r => r.json())
-    .then(data => {
-      if (data.ok) { alert('Recrutador excluído!'); carregarEquipe(); }
-      else alert('Erro: ' + (data.erro || JSON.stringify(data)));
-    })
-    .catch(() => alert('Erro de conexão'));
-}
-
-function editarEmpresa(id, nome, cnpj, email, telefone) {
-  document.getElementById('eemp-id').value = id;
-  document.getElementById('eemp-nome').value = nome || '';
-  document.getElementById('eemp-cnpj').value = cnpj || '';
-  document.getElementById('eemp-telefone').value = telefone || '';
-  document.getElementById('eemp-email').value = email || '';
-  abrirModal('editar-empresa');
-  setTimeout(() => document.getElementById('eemp-nome').focus(), 100);
-}
-
-async function salvarEdicaoEmpresa() {
-  const id = document.getElementById('eemp-id').value;
-  const nome = document.getElementById('eemp-nome').value.trim();
-  const cnpj = document.getElementById('eemp-cnpj').value.trim() || null;
-  const telefone = document.getElementById('eemp-telefone').value.trim() || null;
-  const email_principal = document.getElementById('eemp-email').value.trim() || null;
-  if (!nome) { alert('O nome é obrigatório.'); return; }
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    const r = await fetch(API + '/api/empresa/empresas/' + id, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ nome, cnpj, telefone, email_principal })
-    });
-    const data = await r.json();
-    if (r.ok) {
-      fecharModal('editar-empresa');
-      alert('✅ Empresa atualizada!');
-      carregarEquipe();
-    } else {
-      alert('Erro: ' + (data.erro || JSON.stringify(data)));
-    }
-  } catch (e) { alert('Erro de conexão'); }
-}
-
-function excluirEmpresa(id, nome) {
-  if (!confirm('Excluir a empresa "' + nome + '"?\n\nEssa ação não pode ser desfeita.')) return;
-  fetch(API + '/api/empresa/empresas/' + id, {
-    method: 'DELETE',
-    headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('empresa_token') || localStorage.getItem('token')) }
-  })
-    .then(r => r.json())
-    .then(data => {
-      if (data.ok) { alert('Empresa excluída!'); carregarEquipe(); }
-      else alert('Erro: ' + (data.erro || JSON.stringify(data)));
-    })
-    .catch(() => alert('Erro de conexão'));
-}
-
-// ===== VINCULAR VAGAS À EMPRESA =====
-let vincEmpresaId = null;
-let vincTodasVagas = [];
-let vincLiberadas = [];
-
-async function abrirModalVincularVagas(empresaId, empresaNome) {
-  vincEmpresaId = empresaId;
-  document.getElementById('vinc-empresa-nome').textContent = empresaNome;
-  document.getElementById('vinc-liberadas').innerHTML = '<div class="empty">Carregando...</div>';
-  document.getElementById('vinc-disponiveis').innerHTML = '';
-  abrirModal('vincular-vagas');
-  await carregarVincularVagas();
-}
-
-async function carregarVincularVagas() {
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    // Busca todas as vagas + as já liberadas pra essa empresa em paralelo
-    const [rVagas, rLiberadas] = await Promise.all([
-      fetch(API + '/api/empresa/vagas', { headers: { 'Authorization': 'Bearer ' + token } }),
-      fetch(API + '/api/empresa/empresa-vaga/' + vincEmpresaId, { headers: { 'Authorization': 'Bearer ' + token } })
-    ]);
-    const dVagas = await rVagas.json();
-    const dLiberadas = await rLiberadas.json();
-    vincTodasVagas = dVagas.vagas || dVagas || [];
-    vincLiberadas = dLiberadas.vagas || [];
-    renderVincularVagas();
-  } catch (e) {
-    document.getElementById('vinc-liberadas').innerHTML = '<div class="empty" style="color:var(--vermelho);">Erro ao carregar vagas.</div>';
-  }
-}
-
-function renderVincularVagas() {
-  const liberadasIds = new Set(vincLiberadas.map(v => v.id));
-  const liberadas = vincTodasVagas.filter(v => liberadasIds.has(v.id));
-  const disponiveis = vincTodasVagas.filter(v => !liberadasIds.has(v.id));
-
-  // Vagas liberadas
-  const libDiv = document.getElementById('vinc-liberadas');
-  if (liberadas.length === 0) {
-    libDiv.innerHTML = '<div class="empty" style="padding: 14px;">Nenhuma vaga liberada ainda. Clique em ➕ abaixo pra liberar.</div>';
-  } else {
-    libDiv.innerHTML = liberadas.map(v => `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid #16a34a; background:#f0fdf4; border-radius:6px; margin-bottom:6px;">
-        <div>
-          <div style="font-weight:600; color:#15803d;">${v.titulo}</div>
-          <div style="font-size:12px; color:#666;">${v.empresa || ''} ${v.cidade ? '• ' + v.cidade : ''}</div>
-        </div>
-        <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="desvincularVagaEmpresa(${v.id})">❌ Remover</button>
-      </div>
-    `).join('');
-  }
-
-  // Vagas disponíveis
-  const dispDiv = document.getElementById('vinc-disponiveis');
-  if (disponiveis.length === 0) {
-    dispDiv.innerHTML = '<div class="empty" style="padding: 14px;">Todas as vagas já estão liberadas pra essa empresa.</div>';
-  } else {
-    dispDiv.innerHTML = disponiveis.map(v => `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid var(--borda); border-radius:6px; margin-bottom:6px;">
-        <div>
-          <div style="font-weight:600;">${v.titulo}</div>
-          <div style="font-size:12px; color:#666;">${v.empresa || ''} ${v.cidade ? '• ' + v.cidade : ''}</div>
-        </div>
-        <button class="btn btn-primary btn-sm" style="width:auto;" onclick="vincularVagaEmpresa(${v.id})">➕ Liberar</button>
-      </div>
-    `).join('');
-  }
-}
-
-async function vincularVagaEmpresa(vagaId) {
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    const r = await fetch(API + '/api/empresa/empresa-vaga', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ empresa_id: vincEmpresaId, vaga_id: vagaId })
-    });
-    const d = await r.json();
-    if (d.ok || d.empresa_id) { await carregarVincularVagas(); }
-    else alert('Erro: ' + (d.erro || JSON.stringify(d)));
-  } catch (e) { alert('Erro de conexão'); }
-}
-
-async function desvincularVagaEmpresa(vagaId) {
-  if (!confirm('Remover acesso dessa vaga para a empresa?')) return;
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    const r = await fetch(API + '/api/empresa/empresa-vaga', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ empresa_id: vincEmpresaId, vaga_id: vagaId })
-    });
-    const d = await r.json();
-    if (d.ok) { await carregarVincularVagas(); }
-    else alert('Erro: ' + (d.erro || JSON.stringify(d)));
-  } catch (e) { alert('Erro de conexão'); }
-}
-
-// ===== USUÁRIOS DA EMPRESA =====
-function abrirModalNovoUsuarioEmpresa(empresaId, empresaNome) {
-  document.getElementById('ue-id').value = '';
-  document.getElementById('ue-empresa-id').value = empresaId;
-  document.getElementById('ue-empresa-nome').value = empresaNome;
-  document.getElementById('ue-nome').value = '';
-  document.getElementById('ue-email').value = '';
-  document.getElementById('ue-cargo').value = '';
-  document.getElementById('ue-senha').value = '';
-  document.getElementById('ue-ativo').checked = true;
-  document.getElementById('titu-usuario-empresa').textContent = '👤 Novo Usuário — ' + empresaNome;
-  document.getElementById('lue-senha').innerHTML = 'Senha *';
-  document.getElementById('hint-senha').style.display = 'block';
-  document.getElementById('hint-senha').textContent = 'Mínimo 6 caracteres. Será enviado ao usuário.';
-  document.getElementById('grp-ue-ativo').style.display = 'none';
-  document.getElementById('ue-email').disabled = false;
-  abrirModal('usuario-empresa');
-}
-
-function editarUsuarioEmpresa(id, empresaId, nome, email, cargo, inativo) {
-  document.getElementById('ue-id').value = id;
-  document.getElementById('ue-empresa-id').value = empresaId;
-  document.getElementById('ue-empresa-nome').value = '';
-  // Pega o nome da empresa do card (busca no DOM)
-  const empNome = document.querySelector(`#lista-empresas .vaga-card:nth-child(${empresaId}) > div > div`)?.textContent || '';
-  document.getElementById('ue-empresa-nome').value = empNome.replace('🏢', '').trim();
-  document.getElementById('ue-nome').value = nome;
-  document.getElementById('ue-email').value = email;
-  document.getElementById('ue-cargo').value = cargo;
-  document.getElementById('ue-senha').value = '';
-  document.getElementById('ue-ativo').checked = !inativo;
-  document.getElementById('titu-usuario-empresa').textContent = '✏️ Editar Usuário';
-  document.getElementById('lue-senha').innerHTML = 'Nova senha (opcional)';
-  document.getElementById('hint-senha').style.display = 'block';
-  document.getElementById('hint-senha').textContent = 'Deixe vazio para manter a senha atual.';
-  document.getElementById('grp-ue-ativo').style.display = 'block';
-  document.getElementById('ue-email').disabled = true;
-  abrirModal('usuario-empresa');
-}
-
-async function salvarUsuarioEmpresa() {
-  const id = document.getElementById('ue-id').value;
-  const empresaId = document.getElementById('ue-empresa-id').value;
-  const nome = document.getElementById('ue-nome').value.trim();
-  const email = document.getElementById('ue-email').value.trim();
-  const cargo = document.getElementById('ue-cargo').value.trim();
-  const senha = document.getElementById('ue-senha').value;
-  const ativo = document.getElementById('ue-ativo').checked;
-
-  if (!nome) return alert('Informe o nome.');
-  if (!email) return alert('Informe o e-mail.');
-  if (!id && !senha) return alert('Informe a senha inicial.');
-  if (senha && senha.length < 6) return alert('A senha deve ter no mínimo 6 caracteres.');
-
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    let r;
-    if (id) {
-      // Editar
-      const body = { nome, cargo, ativo };
-      if (senha) body.senha = senha;
-      r = await fetch(API + '/api/empresa/empresa-usuarios/' + id, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify(body)
-      });
-    } else {
-      // Criar
-      r = await fetch(API + '/api/empresa/empresas/' + empresaId + '/usuarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ nome, email, senha, cargo })
-      });
-    }
-    const d = await r.json();
-    if (r.ok && d.ok !== false) {
-      fecharModal('usuario-empresa');
-      alert('✅ Usuário ' + (id ? 'atualizado' : 'criado') + ' com sucesso!');
-      carregarEquipe();
-    } else {
-      alert('Erro: ' + (d.erro || JSON.stringify(d)));
-    }
-  } catch (e) { alert('Erro de conexão'); }
-}
-
-async function excluirUsuarioEmpresa(id, nome) {
-  if (!confirm('Excluir o usuário "' + nome + '"?\n\nEle não conseguirá mais acessar o portal da empresa.')) return;
-  const token = localStorage.getItem('empresa_token') || localStorage.getItem('token');
-  try {
-    const r = await fetch(API + '/api/empresa/empresa-usuarios/' + id, {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const d = await r.json();
-    if (d.ok) { alert('Usuário excluído!'); carregarEquipe(); }
-    else alert('Erro: ' + (d.erro || JSON.stringify(d)));
-  } catch (e) { alert('Erro de conexão'); }
-}
+// Gestão consolidada implementada no módulo EQUIPE abaixo.
 
 // ===== AGENDA =====
 const agendaState = { view:'semana', currentDate:new Date(), events:[], selectedId:null, listPeriod:'hoje', search:'', status:'', etapa:'' };
@@ -637,7 +155,7 @@ function selecionarEntrevista(id){agendaState.selectedId=id;renderAgendaUpcoming
 function renderAgendaAttention(){const box=document.getElementById('agenda-attention-list'),all=agendaState.events,now=new Date(),items=[];all.filter(e=>e.status==='agendada'&&new Date(e.data_hora)>=now).slice(0,2).forEach(e=>items.push(`<div class="agenda-attention-item"><svg class="dash-svg"><use href="#icon-bell"></use></svg><span><strong>${escapeHtml(e.candidato_nome||'Candidato')} aguarda confirmação</strong>${agendaTime(e.data_hora)} · ${escapeHtml(e.vaga_titulo||'Vaga')}</span></div>`));const conflicts=all.filter((e,i)=>all.some((x,j)=>i<j&&agendaSameDay(e.data_hora,x.data_hora)&&new Date(e.data_hora)<new Date(x.data_hora)+(Number(x.duracao_minutos||60)*60000)&&new Date(x.data_hora)<new Date(e.data_hora)+(Number(e.duracao_minutos||60)*60000)));if(conflicts.length)items.push('<div class="agenda-attention-item"><svg class="dash-svg"><use href="#icon-filter"></use></svg><span><strong>Conflito de agenda detectado</strong>Há entrevistas sobrepostas.</span></div>');if(box)box.innerHTML=items.length?items.join(''):'<div class="agenda-empty-small">Nenhuma atenção pendente.</div>';const count=document.getElementById('agenda-attention-count');if(count)count.textContent=items.length;}
 function renderAgendaDetailEmpty(){const panel=document.getElementById('agenda-detail-panel');if(panel)panel.innerHTML='<div class="agenda-detail-empty"><svg class="dash-svg"><use href="#icon-calendar"></use></svg><strong>Entrevista selecionada</strong><span>Selecione um compromisso para ver os detalhes.</span></div>';}
 async function loadAgendaDetail(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));const panel=document.getElementById('agenda-detail-panel');if(!e||!panel)return;panel.classList.add('aberto');panel.innerHTML='<div class="agenda-detail-empty"><span class="spinner"></span><span>Carregando detalhes...</span></div>';try{const headers={'Authorization':'Bearer '+token};let cand={},candidatura=null;const reqs=[];if(e.candidato_id)reqs.push(fetch(API+'/api/empresa/candidatos/'+e.candidato_id,{headers}));if(e.candidatura_id)reqs.push(fetch(API+'/api/empresa/candidatura/'+e.candidatura_id,{headers}));const rs=await Promise.all(reqs);if(rs[0]){const d=await rs[0].json();cand=d.candidato||d;}if(rs[1])candidatura=await rs[1].json();agendaDetailsCache[id]={cand,candidatura};renderAgendaDetail(e,cand,candidatura);}catch(_){renderAgendaDetail(e,{},null);}}
-function renderAgendaDetail(e,c,candidatura){const stage=Number(candidatura?.etapa_atual||e.etapa||1),progress=Math.round(stage/7*100),steps=['Inscrição','Triagem','RH','Gestor','Proposta','Coleta Docs','Contratação'].map((name,i)=>{const n=i+1,cl=n<stage?'done':n===stage?'current':'';return `<div class="agenda-step ${cl}"><span class="agenda-step-dot">${n<stage?'✓':n}</span><span>${name}${n===stage?' — Atual':''}</span><small>${n<stage?'Concluída':n===stage?'Em andamento':'Pendente'}</small></div>`;}).join('');const link=e.link_reuniao?`<a class="agenda-link" href="${escapeHtml(e.link_reuniao)}" target="_blank" rel="noopener">Abrir entrevista ↗</a>`:'Link não informado';const note=e.observacoes?`<div class="agenda-note">${escapeHtml(e.observacoes)}</div>`:'<div class="agenda-note">Nenhuma nota registrada para esta entrevista.</div>';const panel=document.getElementById('agenda-detail-panel');panel.innerHTML=`<div class="agenda-detail-content"><div class="agenda-detail-head"><span class="agenda-detail-avatar">${escapeHtml(agendaInitials(c.nome||e.candidato_nome))}</span><div class="agenda-detail-head-copy"><h3>${escapeHtml(c.nome||e.candidato_nome||'Candidato')}</h3><p>${escapeHtml(e.vaga_titulo||'Vaga')} · ${escapeHtml(agendaEtapaNome(e.etapa))}</p><span class="agenda-detail-status">${agendaStatusText(e.status)}</span></div><button class="agenda-detail-close" type="button" aria-label="Fechar detalhes" onclick="fecharAgendaDetalhe()">×</button></div><div class="agenda-detail-actions"><button class="primary" type="button" ${e.link_reuniao?'onclick="window.open(\''+escapeHtml(e.link_reuniao)+'\',\'_blank\',\'noopener\')"':'disabled'}>${e.link_reuniao?'Entrar na entrevista':'Sem link'}</button><button type="button" onclick="reagendarEntrevista(${e.id})">Reagendar</button><button type="button" onclick="agendaMaisAcoes(${e.id})">Mais ações</button></div><section class="agenda-detail-section"><h4>Detalhes da entrevista</h4><div class="agenda-detail-info"><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Data e hora</strong>${agendaDateLong(e.data_hora)} às ${agendaTime(e.data_hora)}</span></div><div class="agenda-info-row">${candidatoSvg('arrow-up')}<span><strong>Duração</strong>${Number(e.duracao_minutos||60)} minutos</span></div><div class="agenda-info-row">${candidatoSvg('user')}<span><strong>Entrevistador</strong>Não informado no registro</span></div><div class="agenda-info-row">${candidatoSvg('file')}<span><strong>Tipo</strong>Entrevista com ${escapeHtml(agendaEtapaNome(e.etapa))}</span></div><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Formato</strong>${escapeHtml(agendaMode(e))}${e.local?` · ${escapeHtml(e.local)}`:''}</span></div><div class="agenda-info-row">${candidatoSvg('message')}<span><strong>Link / local</strong>${link}</span></div></div></section><section class="agenda-detail-section"><h4>Etapas do processo <span style="float:right">${stage} de 7</span></h4><div class="agenda-detail-progress"><span>Progresso</span><strong>${stage} de 7</strong></div><div class="agenda-detail-progress-bar"><i style="width:${progress}%"></i></div><div class="agenda-detail-steps">${steps}</div></section><section class="agenda-detail-section"><h4>Notas da entrevista</h4>${note}</section></div>`;}
+function renderAgendaDetail(e,c,candidatura){const stage=Number(candidatura?.etapa_atual||e.etapa||1),progress=Math.round(stage/7*100),steps=['Inscrição','Triagem','RH','Gestor','Proposta','Coleta Docs','Contratação'].map((name,i)=>{const n=i+1,cl=n<stage?'done':n===stage?'current':'';return `<div class="agenda-step ${cl}"><span class="agenda-step-dot">${n<stage?'✓':n}</span><span>${name}${n===stage?' — Atual':''}</span><small>${n<stage?'Concluída':n===stage?'Em andamento':'Pendente'}</small></div>`;}).join('');const link=e.link_reuniao?`<a class="agenda-link" href="${safeExternalUrl(e.link_reuniao)}" target="_blank" rel="noopener">Abrir entrevista ↗</a>`:'Link não informado';const note=e.observacoes?`<div class="agenda-note">${escapeHtml(e.observacoes)}</div>`:'<div class="agenda-note">Nenhuma nota registrada para esta entrevista.</div>';const panel=document.getElementById('agenda-detail-panel');panel.innerHTML=`<div class="agenda-detail-content"><div class="agenda-detail-head"><span class="agenda-detail-avatar">${escapeHtml(agendaInitials(c.nome||e.candidato_nome))}</span><div class="agenda-detail-head-copy"><h3>${escapeHtml(c.nome||e.candidato_nome||'Candidato')}</h3><p>${escapeHtml(e.vaga_titulo||'Vaga')} · ${escapeHtml(agendaEtapaNome(e.etapa))}</p><span class="agenda-detail-status">${agendaStatusText(e.status)}</span></div><button class="agenda-detail-close" type="button" aria-label="Fechar detalhes" onclick="fecharAgendaDetalhe()">×</button></div><div class="agenda-detail-actions"><button class="primary" type="button" ${e.link_reuniao?'onclick="window.open(\''+safeExternalUrl(e.link_reuniao)+'\',\'_blank\',\'noopener\')"':'disabled'}>${e.link_reuniao?'Entrar na entrevista':'Sem link'}</button><button type="button" onclick="reagendarEntrevista(${e.id})">Reagendar</button><button type="button" onclick="agendaMaisAcoes(${e.id})">Mais ações</button></div><section class="agenda-detail-section"><h4>Detalhes da entrevista</h4><div class="agenda-detail-info"><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Data e hora</strong>${agendaDateLong(e.data_hora)} às ${agendaTime(e.data_hora)}</span></div><div class="agenda-info-row">${candidatoSvg('arrow-up')}<span><strong>Duração</strong>${Number(e.duracao_minutos||60)} minutos</span></div><div class="agenda-info-row">${candidatoSvg('user')}<span><strong>Entrevistador</strong>Não informado no registro</span></div><div class="agenda-info-row">${candidatoSvg('file')}<span><strong>Tipo</strong>Entrevista com ${escapeHtml(agendaEtapaNome(e.etapa))}</span></div><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Formato</strong>${escapeHtml(agendaMode(e))}${e.local?` · ${escapeHtml(e.local)}`:''}</span></div><div class="agenda-info-row">${candidatoSvg('message')}<span><strong>Link / local</strong>${link}</span></div></div></section><section class="agenda-detail-section"><h4>Etapas do processo <span style="float:right">${stage} de 7</span></h4><div class="agenda-detail-progress"><span>Progresso</span><strong>${stage} de 7</strong></div><div class="agenda-detail-progress-bar"><i style="width:${progress}%"></i></div><div class="agenda-detail-steps">${steps}</div></section><section class="agenda-detail-section"><h4>Notas da entrevista</h4>${note}</section></div>`;}
 function fecharAgendaDetalhe(){agendaState.selectedId=null;document.getElementById('agenda-detail-panel')?.classList.remove('aberto');renderAgendaUpcoming();renderAgendaCalendar();renderAgendaDetailEmpty();}
 async function reagendarEntrevista(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));if(!e)return;const next=prompt('Nova data e hora (AAAA-MM-DD HH:MM):',new Date(new Date(e.data_hora).getTime()+86400000).toISOString().slice(0,16).replace('T',' '));if(!next)return;const duration=prompt('Duração em minutos:',String(e.duracao_minutos||60));if(!confirm(`Confirmar reagendamento para ${next}?`))return;try{const r=await fetch(API+'/api/empresa/entrevista/'+id,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({data_hora:next,duracao_minutos:Number(duration)||60})});if(!r.ok)throw new Error('Não foi possível reagendar');await carregarAgenda('todas');selecionarEntrevista(id);}catch(err){alert(err.message);}}
 function agendaMaisAcoes(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));if(!e)return;const action=prompt('Digite uma ação: confirmar, concluir ou cancelar','confirmar');if(action==='confirmar')atualizarEntrevista(id,'confirmada');else if(action==='concluir')atualizarEntrevista(id,'realizada');else if(action==='cancelar'&&confirm('Cancelar esta entrevista?'))atualizarEntrevista(id,'cancelada');}
@@ -801,10 +319,10 @@ async function carregarDashboardV2() {
         const etapaNome = statusNome;
         const iniciais = nome.split(' ').map(s => s.charAt(0)).slice(0, 2).join('').toUpperCase();
         return `<div class="entrevista-item">
-          <div class="entrevista-avatar">${iniciais}</div>
+          <div class="entrevista-avatar">${escapeHtml(iniciais)}</div>
           <div class="entrevista-info">
-            <div class="entrevista-nome">${nome}</div>
-            <div class="entrevista-vaga">${vaga}</div>
+            <div class="entrevista-nome">${escapeHtml(nome)}</div>
+            <div class="entrevista-vaga">${escapeHtml(vaga)}</div>
             <div class="entrevista-data">${dataStr} às ${horaStr}</div>
           </div>
           <div class="entrevista-badge entrevista-${badgeClass}">${etapaNome}</div>
@@ -815,26 +333,27 @@ async function carregarDashboardV2() {
     }
     
     // === Documentação (taxa de aprovação) ===
-    const taxaDoc = data.kpis_secundarios?.taxa_documentacao || 0;
+    const taxaDocRaw = data.kpis_secundarios?.taxa_documentacao;
+    const taxaDoc = taxaDocRaw !== null && taxaDocRaw !== undefined && Number.isFinite(Number(taxaDocRaw)) ? Number(taxaDocRaw) : null;
     const totalDocs = 16;
-    const aprovados = Math.round(totalDocs * taxaDoc / 100);
+    const aprovados = taxaDoc === null ? null : Math.round(totalDocs * taxaDoc / 100);
     const circ = 2 * Math.PI * 50; // raio=50 conforme o HTML
     const dashTotal = circ;
-    const offset = circ - (taxaDoc / 100) * circ;
+    const offset = taxaDoc === null ? circ : circ - (taxaDoc / 100) * circ;
     const docFill = document.getElementById('doc-rosca-fill');
     const docTexto = document.getElementById('doc-rosca-texto');
     const docPercent = document.getElementById('doc-percent');
     if (docFill) docFill.setAttribute('stroke-dasharray', `${dashTotal - offset} ${dashTotal}`);
-    if (docTexto) docTexto.textContent = taxaDoc + '%';
-    if (docPercent) docPercent.textContent = taxaDoc + '%';
+    if (docTexto) docTexto.textContent = taxaDoc === null ? '—' : taxaDoc + '%';
+    if (docPercent) docPercent.textContent = taxaDoc === null ? '—' : taxaDoc + '%';
     const docRecebidosLabel = document.getElementById('doc-recebidos-label');
     const docPendentesLabel = document.getElementById('doc-pendentes-label');
-    if (docRecebidosLabel) docRecebidosLabel.textContent = taxaDoc + '%';
-    if (docPendentesLabel) docPendentesLabel.textContent = Math.max(0, 100 - taxaDoc) + '%';
+    if (docRecebidosLabel) docRecebidosLabel.textContent = taxaDoc === null ? '—' : taxaDoc + '%';
+    if (docPendentesLabel) docPendentesLabel.textContent = taxaDoc === null ? '—' : Math.max(0, 100 - taxaDoc) + '%';
     const docProg = document.getElementById('doc-progresso-barra');
     if (docProg) {
-      docProg.style.width = taxaDoc + '%';
-      docProg.textContent = taxaDoc > 10 ? `${aprovados}/${totalDocs} aprovados` : '';
+      docProg.style.width = taxaDoc === null ? '0%' : taxaDoc + '%';
+      docProg.textContent = taxaDoc !== null && taxaDoc > 10 ? `${aprovados}/${totalDocs} aprovados` : '';
     }
     
     // === Vagas com mais candidatos ===
@@ -844,7 +363,7 @@ async function carregarDashboardV2() {
       document.getElementById('ranking-table-body').innerHTML = vRanking.slice(0, 4).map(v => {
         const vagaReal = vagasEmpresa.find(item => Number(item.id) === Number(v.id));
         const total = Number(v.total_candidatos || 0);
-        return `<div class="ranking-item"><div class="ranking-item-top"><strong>${v.titulo || '—'}</strong><span class="ranking-percent">${Math.round((total / maxRanking) * 100)}%</span></div><div class="ranking-company">${v.empresa || vagaReal?.empresa || 'Minha empresa'}</div><div class="ranking-item-bottom"><b>${total}</b> candidatos <span class="ranking-bar"><i style="width:${Math.max(8, Math.round((total / maxRanking) * 100))}%"></i></span></div></div>`;
+        return `<div class="ranking-item"><div class="ranking-item-top"><strong>${escapeHtml(v.titulo || '—')}</strong><span class="ranking-percent">${Math.round((total / maxRanking) * 100)}%</span></div><div class="ranking-company">${escapeHtml(v.empresa || vagaReal?.empresa || 'Minha empresa')}</div><div class="ranking-item-bottom"><b>${total}</b> candidatos <span class="ranking-bar"><i style="width:${Math.max(8, Math.round((total / maxRanking) * 100))}%"></i></span></div></div>`;
       }).join('');
     } else {
       document.getElementById('ranking-table-body').innerHTML = '<div class="empty">Nenhuma vaga com candidatos</div>';
@@ -864,7 +383,7 @@ async function carregarDashboardV2() {
         'entrevista':       { icone: 'calendar', label: 'Entrevista agendada', tipo: 'entrevista' }
       };
       document.getElementById('atividades-recentes').innerHTML = ats.slice(0, 8).map(a => {
-        const t = tipoMap[a.texto] || { icone: '•', label: a.texto, tipo: 'reabrir' };
+        const t = tipoMap[a.texto] || { icone: '•', label: escapeHtml(a.texto), tipo: 'reabrir' };
         const quando = tempoRelativo(a.quando);
         return `<div class="atividade-item tipo-${t.tipo}">
           <div class="atividade-icone">${dashSvg(t.icone)}</div>
@@ -873,8 +392,8 @@ async function carregarDashboardV2() {
               <span class="atividade-tipo">${t.label}</span>
               <span class="atividade-tempo">${quando}</span>
             </div>
-            <div class="atividade-candidato">${a.candidato || '—'}</div>
-            <div class="atividade-vaga">${a.vaga || '—'}</div>
+            <div class="atividade-candidato">${escapeHtml(a.candidato || '—')}</div>
+            <div class="atividade-vaga">${escapeHtml(a.vaga || '—')}</div>
           </div>
         </div>`;
       }).join('');
@@ -1146,6 +665,12 @@ function moverEtapaVaga(idx, dir) {
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
+function safeExternalUrl(value) {
+  try {
+    const url = new URL(String(value || ''), window.location.origin);
+    return ['http:', 'https:'].includes(url.protocol) ? escapeHtml(url.href) : '';
+  } catch (_) { return ''; }
+}
 
 async function editarVaga(id) {
   try {
@@ -1242,7 +767,7 @@ function candidatoIniciais(nome) { return String(nome || 'C').split(/\s+/).filte
 function candidatoData(data) { if(!data) return '—'; const d=new Date(data); return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('pt-BR'); }
 function candidatoUltimaAtividade(c) { return c.atualizada_em || c.criada_em ? tempoRelativo(c.atualizada_em || c.criada_em) : 'Sem atividade'; }
 function candidatoSvg(name) { return `<svg class="dash-svg" aria-hidden="true"><use href="#icon-${name}"></use></svg>`; }
-function candidatoAvatar(c, large=false) { return c.foto_url ? `<span class="candidato-avatar"${large?' data-large="1"':''}><img src="${escapeHtml(c.foto_url)}" alt=""></span>` : `<span class="candidato-avatar"${large?' data-large="1"':''}>${escapeHtml(candidatoIniciais(c.nome))}</span>`; }
+function candidatoAvatar(c, large=false) { return c.foto_url ? `<span class="candidato-avatar"${large?' data-large="1"':''}><img src="${safeExternalUrl(c.foto_url)}" alt=""></span>` : `<span class="candidato-avatar"${large?' data-large="1"':''}>${escapeHtml(candidatoIniciais(c.nome))}</span>`; }
 function popularSelectAreas() { const sel=document.getElementById('candidatos-filtro-area'); if(!sel || sel.options.length>1)return; AREAS_INTERESSE_ADMIN.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o);}); }
 function popularSelectVagas() { const sel=document.getElementById('candidatos-filtro-vaga'); if(!sel || sel.options.length>1)return; candidatosVagas.forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.titulo || 'Vaga';sel.appendChild(o);}); }
 function atualizarKpisCandidatos() {
@@ -1408,7 +933,7 @@ function renderContratacoesPagination(total,pages){const box=document.getElement
 function contratacoesIrPagina(p){contratacoesState.page=p;renderContratacoes();}
 function selecionarContratacao(id){contratacoesState.selectedId=id;contratacaoDetailTab='detalhes';renderContratacoes();loadContratacaoDetail(id);}
 async function loadContratacaoDetail(id){const base=contratacoesAll.find(c=>Number(c.id)===Number(id)),panel=document.getElementById('contratacao-detail-panel');if(!base||!panel)return;panel.classList.add('aberto');panel.innerHTML='<div class="contratacao-detail-empty"><span class="spinner"></span><span>Carregando contratação...</span></div>';try{const r=await fetch(API+'/api/empresa/candidatura/'+id,{headers:{'Authorization':'Bearer '+token}}),d=await r.json();renderContratacaoDetail(d&&d.id?d:base);}catch(_){renderContratacaoDetail(base);}}
-function renderContratacaoDetail(c){const panel=document.getElementById('contratacao-detail-panel');if(!panel||!c)return;const base=contratacoesAll.find(x=>Number(x.id)===Number(c.id))||c,info=contratacaoDocs[c.id]||{docs:[],total:0,enviados:0,pendentes:0},s=contratacaoStatus(base),progress=contratacaoProgress(base),history=Array.isArray(c.historico)?c.historico:[],required=info.total?`${info.enviados}/${info.total} documentos`:'Não informado';const tabs=['detalhes','documentos','historico','notas'].map(t=>`<button type="button" class="${contratacaoDetailTab===t?'ativo':''}" onclick="contratacaoTrocarAba('${t}')">${t[0].toUpperCase()+t.slice(1)}</button>`).join('');let body='';if(contratacaoDetailTab==='detalhes')body=`<section class="contratacao-detail-section"><h4>Informações principais</h4><div class="contratacao-info-grid"><div class="contratacao-info-item"><small>Data de aprovação</small><strong>Não informada</strong></div><div class="contratacao-info-item"><small>Data da proposta</small><strong>${contratacaoDate(c.proposta_enviada_em)}</strong></div><div class="contratacao-info-item"><small>Data de aceite</small><strong>${contratacaoDate(c.proposta_aceita_em)}</strong></div><div class="contratacao-info-item"><small>Data de início</small><strong>Não informada</strong></div><div class="contratacao-info-item"><small>Tipo de contratação</small><strong>Não informado</strong></div><div class="contratacao-info-item"><small>Remuneração</small><strong>Não informada</strong></div></div></section><section class="contratacao-detail-section"><h4>Progresso da contratação</h4><div class="contratacao-progress-large"><span>Etapa real ${Number(c.etapa_atual||0)+1}</span><strong>${progress}%</strong></div><div class="contratacao-progress-bar"><i style="width:${progress}%"></i></div></section><section class="contratacao-detail-section"><h4>Checklist de contratação</h4><div class="contratacao-checklist"><div class="contratacao-check-item done"><span class="contratacao-check-dot">✓</span><span>Candidato aprovado</span><small>${contratacaoDate(c.proposta_aceita_em)}</small></div><div class="contratacao-check-item ${c.proposta_aceita_em?'done':''}"><span class="contratacao-check-dot">${c.proposta_aceita_em?'✓':'○'}</span><span>Proposta aceita</span><small>${contratacaoDate(c.proposta_aceita_em)}</small></div><div class="contratacao-check-item ${info.enviados?'done':''}"><span class="contratacao-check-dot">${info.enviados?'✓':'○'}</span><span>Documentos enviados</span><small>${required}</small></div><div class="contratacao-check-item ${info.total&&info.pendentes===0?'done':''}"><span class="contratacao-check-dot">${info.total&&info.pendentes===0?'✓':'○'}</span><span>Documentos conferidos</span><small>${info.pendentes?`${info.pendentes} pendência(s)`:'Não informado'}</small></div><div class="contratacao-check-item ${c.status==='contratado'?'done':''}"><span class="contratacao-check-dot">${c.status==='contratado'?'✓':'○'}</span><span>Contratação concluída</span><small>${c.status==='contratado'?contratacaoDate(c.atualizada_em):'Pendente'}</small></div></div></section>`;else if(contratacaoDetailTab==='documentos')body=`<section class="contratacao-detail-section"><h4>Documentação real</h4><div class="contratacao-doc-list">${info.docs.length?info.docs.map(d=>`<div class="contratacao-doc-item ${d.status==='aprovado'?'done':['reprovado','retornado'].includes(d.status)?'pending':''}"><span class="contratacao-doc-dot">${d.status==='aprovado'?'✓':d.status==='reprovado'||d.status==='retornado'?'!':'○'}</span><span>${escapeHtml(d.tipo||d.arquivo_nome||'Documento')}<small>${escapeHtml(d.status||'Enviado')} · ${contratacaoDate(d.enviado_em)}</small></span>${d.arquivo_url?`<a href="${escapeHtml(d.arquivo_url)}" target="_blank" rel="noopener">Abrir</a>`:''}</div>`).join(''):'<div class="contratacao-note">Nenhum documento foi retornado para esta candidatura.</div>'}</div></section>`;else if(contratacaoDetailTab==='historico')body=`<section class="contratacao-detail-section"><h4>Histórico da contratação</h4><div class="contratacao-timeline">${history.length?history.map(h=>`<div class="contratacao-timeline-item done"><span class="contratacao-timeline-dot">✓</span><span>${escapeHtml(h.mensagem||h.detalhes||h.acao||h.tipo||'Atualização')}<small>${contratacaoDate(h.data||h.quando||h.criado_em)} · ${escapeHtml(h.por||'Sistema')}</small></span></div>`).join(''):'<div class="contratacao-note">Nenhum evento de histórico disponível.</div>'}</div></section>`;else body=`<section class="contratacao-detail-section"><h4>Notas internas</h4><div class="contratacao-note">As notas internas são registradas como comentários da candidatura.</div><button class="btn btn-sec" style="margin-top:9px" type="button" onclick="adicionarNotaContratacao(${c.id})">Adicionar nota</button></section>`;const canApprove=info.total>0&&info.pendentes===0&&c.status!=='contratado';panel.innerHTML=`<div class="contratacao-detail-content"><div class="contratacao-detail-head"><span class="contratacao-detail-avatar">${escapeHtml(contratacaoInitials(c.nome||c.candidato_nome))}</span><div class="contratacao-detail-copy"><h3>${escapeHtml(c.nome||c.candidato_nome||'Candidato')}</h3><p>${escapeHtml(c.vaga_titulo||c.titulo||'Vaga')} · ${escapeHtml(c.vaga_empresa||c.empresa||'Minha empresa')}</p><span class="contratacao-detail-status">${contratacaoStatusText(s)}</span></div><button class="contratacao-detail-close" type="button" onclick="fecharContratacaoDetalhe()">×</button></div><div class="contratacao-detail-actions"><button class="primary" type="button" onclick="abrirCurriculo(${c.candidato_id_full||c.candidato_id||0})">Ver candidato</button>${canApprove?`<button type="button" onclick="aprovarDocsContratacao(${c.id})">Aprovar docs</button>`:''}<button type="button" onclick="irPara('propostas')">Ver proposta</button></div><div class="contratacao-detail-tabs">${tabs}</div>${body}</div>`;}
+function renderContratacaoDetail(c){const panel=document.getElementById('contratacao-detail-panel');if(!panel||!c)return;const base=contratacoesAll.find(x=>Number(x.id)===Number(c.id))||c,info=contratacaoDocs[c.id]||{docs:[],total:0,enviados:0,pendentes:0},s=contratacaoStatus(base),progress=contratacaoProgress(base),history=Array.isArray(c.historico)?c.historico:[],required=info.total?`${info.enviados}/${info.total} documentos`:'Não informado';const tabs=['detalhes','documentos','historico','notas'].map(t=>`<button type="button" class="${contratacaoDetailTab===t?'ativo':''}" onclick="contratacaoTrocarAba('${t}')">${t[0].toUpperCase()+t.slice(1)}</button>`).join('');let body='';if(contratacaoDetailTab==='detalhes')body=`<section class="contratacao-detail-section"><h4>Informações principais</h4><div class="contratacao-info-grid"><div class="contratacao-info-item"><small>Data de aprovação</small><strong>Não informada</strong></div><div class="contratacao-info-item"><small>Data da proposta</small><strong>${contratacaoDate(c.proposta_enviada_em)}</strong></div><div class="contratacao-info-item"><small>Data de aceite</small><strong>${contratacaoDate(c.proposta_aceita_em)}</strong></div><div class="contratacao-info-item"><small>Data de início</small><strong>Não informada</strong></div><div class="contratacao-info-item"><small>Tipo de contratação</small><strong>Não informado</strong></div><div class="contratacao-info-item"><small>Remuneração</small><strong>Não informada</strong></div></div></section><section class="contratacao-detail-section"><h4>Progresso da contratação</h4><div class="contratacao-progress-large"><span>Etapa real ${Number(c.etapa_atual||0)+1}</span><strong>${progress}%</strong></div><div class="contratacao-progress-bar"><i style="width:${progress}%"></i></div></section><section class="contratacao-detail-section"><h4>Checklist de contratação</h4><div class="contratacao-checklist"><div class="contratacao-check-item done"><span class="contratacao-check-dot">✓</span><span>Candidato aprovado</span><small>${contratacaoDate(c.proposta_aceita_em)}</small></div><div class="contratacao-check-item ${c.proposta_aceita_em?'done':''}"><span class="contratacao-check-dot">${c.proposta_aceita_em?'✓':'○'}</span><span>Proposta aceita</span><small>${contratacaoDate(c.proposta_aceita_em)}</small></div><div class="contratacao-check-item ${info.enviados?'done':''}"><span class="contratacao-check-dot">${info.enviados?'✓':'○'}</span><span>Documentos enviados</span><small>${required}</small></div><div class="contratacao-check-item ${info.total&&info.pendentes===0?'done':''}"><span class="contratacao-check-dot">${info.total&&info.pendentes===0?'✓':'○'}</span><span>Documentos conferidos</span><small>${info.pendentes?`${info.pendentes} pendência(s)`:'Não informado'}</small></div><div class="contratacao-check-item ${c.status==='contratado'?'done':''}"><span class="contratacao-check-dot">${c.status==='contratado'?'✓':'○'}</span><span>Contratação concluída</span><small>${c.status==='contratado'?contratacaoDate(c.atualizada_em):'Pendente'}</small></div></div></section>`;else if(contratacaoDetailTab==='documentos')body=`<section class="contratacao-detail-section"><h4>Documentação real</h4><div class="contratacao-doc-list">${info.docs.length?info.docs.map(d=>`<div class="contratacao-doc-item ${d.status==='aprovado'?'done':['reprovado','retornado'].includes(d.status)?'pending':''}"><span class="contratacao-doc-dot">${d.status==='aprovado'?'✓':d.status==='reprovado'||d.status==='retornado'?'!':'○'}</span><span>${escapeHtml(d.tipo||d.arquivo_nome||'Documento')}<small>${escapeHtml(d.status||'Enviado')} · ${contratacaoDate(d.enviado_em)}</small></span>${d.arquivo_url?`<a href="${safeExternalUrl(d.arquivo_url)}" target="_blank" rel="noopener">Abrir</a>`:''}</div>`).join(''):'<div class="contratacao-note">Nenhum documento foi retornado para esta candidatura.</div>'}</div></section>`;else if(contratacaoDetailTab==='historico')body=`<section class="contratacao-detail-section"><h4>Histórico da contratação</h4><div class="contratacao-timeline">${history.length?history.map(h=>`<div class="contratacao-timeline-item done"><span class="contratacao-timeline-dot">✓</span><span>${escapeHtml(h.mensagem||h.detalhes||h.acao||h.tipo||'Atualização')}<small>${contratacaoDate(h.data||h.quando||h.criado_em)} · ${escapeHtml(h.por||'Sistema')}</small></span></div>`).join(''):'<div class="contratacao-note">Nenhum evento de histórico disponível.</div>'}</div></section>`;else body=`<section class="contratacao-detail-section"><h4>Notas internas</h4><div class="contratacao-note">As notas internas são registradas como comentários da candidatura.</div><button class="btn btn-sec" style="margin-top:9px" type="button" onclick="adicionarNotaContratacao(${c.id})">Adicionar nota</button></section>`;const canApprove=info.total>0&&info.pendentes===0&&c.status!=='contratado';panel.innerHTML=`<div class="contratacao-detail-content"><div class="contratacao-detail-head"><span class="contratacao-detail-avatar">${escapeHtml(contratacaoInitials(c.nome||c.candidato_nome))}</span><div class="contratacao-detail-copy"><h3>${escapeHtml(c.nome||c.candidato_nome||'Candidato')}</h3><p>${escapeHtml(c.vaga_titulo||c.titulo||'Vaga')} · ${escapeHtml(c.vaga_empresa||c.empresa||'Minha empresa')}</p><span class="contratacao-detail-status">${contratacaoStatusText(s)}</span></div><button class="contratacao-detail-close" type="button" onclick="fecharContratacaoDetalhe()">×</button></div><div class="contratacao-detail-actions"><button class="primary" type="button" onclick="abrirCurriculo(${c.candidato_id_full||c.candidato_id||0})">Ver candidato</button>${canApprove?`<button type="button" onclick="aprovarDocsContratacao(${c.id})">Aprovar docs</button>`:''}<button type="button" onclick="irPara('propostas')">Ver proposta</button></div><div class="contratacao-detail-tabs">${tabs}</div>${body}</div>`;}
 function contratacaoTrocarAba(tab){contratacaoDetailTab=tab;const c=contratacoesAll.find(x=>Number(x.id)===Number(contratacoesState.selectedId));if(c)renderContratacaoDetail(c);}
 function fecharContratacaoDetalhe(){contratacoesState.selectedId=null;document.getElementById('contratacao-detail-panel')?.classList.remove('aberto');renderContratacoes();}
 async function aprovarDocsContratacao(id){if(!confirm('Aprovar os documentos e avançar este processo?'))return;try{const r=await fetch(API+'/api/empresa/candidatura/'+id+'/aprovar-documentos',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:'{}'}),d=await r.json();if(!r.ok)throw new Error(d.erro||'Não foi possível aprovar os documentos');await carregarContratacoes();selecionarContratacao(id);}catch(e){alert(e.message);}}
@@ -1439,7 +964,7 @@ function renderPropostasPagination(total,pages){const box=document.getElementByI
 function propostasIrPagina(page){propostasState.page=page;renderPropostas();}
 function selecionarProposta(id){propostasState.selectedId=id;renderPropostas();loadPropostaDetail(id);}
 async function loadPropostaDetail(id){const c=propostasAll.find(x=>Number(x.id)===Number(id));if(!c)return;const panel=document.getElementById('proposta-detail-panel');if(!panel)return;panel.classList.add('aberto');panel.innerHTML='<div class="proposta-detail-empty"><span class="spinner"></span><span>Carregando detalhes da proposta...</span></div>';try{const r=await fetch(API+'/api/empresa/candidatura/'+id,{headers:{'Authorization':'Bearer '+token}});const d=await r.json();renderPropostaDetail(d&&d.id?d:c);}catch(_){renderPropostaDetail(c);}}
-function renderPropostaDetail(c){const panel=document.getElementById('proposta-detail-panel');if(!panel||!c)return;const s=propostaStatus(c),history=Array.isArray(c.historico)?c.historico:[],sent=c.proposta_enviada_em,accepted=c.proposta_aceita_em,refused=c.proposta_recusada_em;const timeline=[{label:'Candidatura aprovada',date:c.criada_em,done:true},{label:'Proposta enviada',date:sent,done:!!sent},{label:accepted?'Proposta aceita':refused?'Proposta recusada':'Aguardando candidato',date:accepted||refused||sent,current:!!sent&&!accepted&&!refused},{label:'Contratação',date:null,done:c.status==='contratado'}];const tabButtons=['detalhes','historico','documentos','notas'].map(t=>`<button type="button" class="${propostaDetailTab===t?'ativo':''}" onclick="propostaTrocarAba('${t}')">${t[0].toUpperCase()+t.slice(1)}</button>`).join('');let body='';if(propostaDetailTab==='detalhes')body=`<section class="proposta-detail-section"><h4>Detalhes da proposta</h4><div class="proposta-info-grid"><div class="proposta-info-item"><small>Remuneração</small><strong>Não informada</strong></div><div class="proposta-info-item"><small>Tipo de contratação</small><strong>Não informado</strong></div><div class="proposta-info-item"><small>Data de envio</small><strong>${propostaDate(sent)}</strong></div><div class="proposta-info-item"><small>Validade</small><strong>Não informada</strong></div><div class="proposta-info-item"><small>Vaga</small><strong>${escapeHtml(c.titulo||'—')}</strong></div><div class="proposta-info-item"><small>Responsável</small><strong>Não informado</strong></div></div><div class="proposta-card-value" style="margin-top:9px">${escapeHtml(c.proposta_texto||'Texto da proposta não informado.')}</div></section><section class="proposta-detail-section"><h4>Linha do tempo da proposta</h4><div class="proposta-timeline">${timeline.map(x=>`<div class="proposta-timeline-item ${x.done?'done':''} ${x.current?'current':''}"><span class="proposta-timeline-dot">${x.done?'✓':x.current?'•':'○'}</span><span>${x.label}<small>${x.date?propostaDate(x.date):x.current?'Atual':'Pendente'}</small></span></div>`).join('')}</div></section>`;else if(propostaDetailTab==='historico')body=`<section class="proposta-detail-section"><h4>Histórico real</h4><div class="proposta-timeline">${history.length?history.map(h=>`<div class="proposta-timeline-item done"><span class="proposta-timeline-dot">✓</span><span>${escapeHtml(h.mensagem||h.detalhes||h.acao||h.tipo||'Atualização')}<small>${propostaDate(h.data||h.quando||h.criado_em)} · ${escapeHtml(h.por||'Sistema')}</small></span></div>`).join(''):'<div class="proposta-note">Nenhum evento de histórico disponível.</div>'}</div></section>`;else if(propostaDetailTab==='documentos')body=`<section class="proposta-detail-section"><h4>Anexos da proposta</h4>${c.proposta_pdf_url?`<div class="proposta-document"><svg class="dash-svg"><use href="#icon-file"></use></svg><span>Documento da proposta</span><a href="${escapeHtml(c.proposta_pdf_url)}" target="_blank" rel="noopener">Visualizar</a></div>`:'<div class="proposta-note">Nenhum documento anexado à proposta.</div>'}</section>`;else body='<section class="proposta-detail-section"><h4>Notas internas</h4><div class="proposta-note">Nenhuma nota interna disponível para esta proposta.</div></section>';panel.innerHTML=`<div class="proposta-detail-content"><div class="proposta-detail-head"><span class="proposta-detail-avatar">${escapeHtml(propostaInitials(c.candidato_nome||c.nome))}</span><div class="proposta-detail-head-copy"><h3>${escapeHtml(c.candidato_nome||c.nome||'Candidato')}</h3><p>${escapeHtml(c.titulo||c.vaga_titulo||'Vaga')} · ${escapeHtml(c.empresa||c.vaga_empresa||'Minha empresa')}</p><span class="proposta-detail-status">${propostaStatusText(s)}</span></div><button class="proposta-detail-close" type="button" onclick="fecharPropostaDetalhe()">×</button></div><div class="proposta-detail-actions"><button class="primary" type="button" onclick="abrirCurriculo(${c.candidato_id||c.candidato_id_full||0})">Ver candidato</button><button type="button" onclick="irPara('candidaturas')">Ver candidatura</button><button type="button" onclick="fecharPropostaDetalhe()">Fechar</button></div><div class="proposta-detail-tabs">${tabButtons}</div>${body}</div>`;}
+function renderPropostaDetail(c){const panel=document.getElementById('proposta-detail-panel');if(!panel||!c)return;const s=propostaStatus(c),history=Array.isArray(c.historico)?c.historico:[],sent=c.proposta_enviada_em,accepted=c.proposta_aceita_em,refused=c.proposta_recusada_em;const timeline=[{label:'Candidatura aprovada',date:c.criada_em,done:true},{label:'Proposta enviada',date:sent,done:!!sent},{label:accepted?'Proposta aceita':refused?'Proposta recusada':'Aguardando candidato',date:accepted||refused||sent,current:!!sent&&!accepted&&!refused},{label:'Contratação',date:null,done:c.status==='contratado'}];const tabButtons=['detalhes','historico','documentos','notas'].map(t=>`<button type="button" class="${propostaDetailTab===t?'ativo':''}" onclick="propostaTrocarAba('${t}')">${t[0].toUpperCase()+t.slice(1)}</button>`).join('');let body='';if(propostaDetailTab==='detalhes')body=`<section class="proposta-detail-section"><h4>Detalhes da proposta</h4><div class="proposta-info-grid"><div class="proposta-info-item"><small>Remuneração</small><strong>Não informada</strong></div><div class="proposta-info-item"><small>Tipo de contratação</small><strong>Não informado</strong></div><div class="proposta-info-item"><small>Data de envio</small><strong>${propostaDate(sent)}</strong></div><div class="proposta-info-item"><small>Validade</small><strong>Não informada</strong></div><div class="proposta-info-item"><small>Vaga</small><strong>${escapeHtml(c.titulo||'—')}</strong></div><div class="proposta-info-item"><small>Responsável</small><strong>Não informado</strong></div></div><div class="proposta-card-value" style="margin-top:9px">${escapeHtml(c.proposta_texto||'Texto da proposta não informado.')}</div></section><section class="proposta-detail-section"><h4>Linha do tempo da proposta</h4><div class="proposta-timeline">${timeline.map(x=>`<div class="proposta-timeline-item ${x.done?'done':''} ${x.current?'current':''}"><span class="proposta-timeline-dot">${x.done?'✓':x.current?'•':'○'}</span><span>${x.label}<small>${x.date?propostaDate(x.date):x.current?'Atual':'Pendente'}</small></span></div>`).join('')}</div></section>`;else if(propostaDetailTab==='historico')body=`<section class="proposta-detail-section"><h4>Histórico real</h4><div class="proposta-timeline">${history.length?history.map(h=>`<div class="proposta-timeline-item done"><span class="proposta-timeline-dot">✓</span><span>${escapeHtml(h.mensagem||h.detalhes||h.acao||h.tipo||'Atualização')}<small>${propostaDate(h.data||h.quando||h.criado_em)} · ${escapeHtml(h.por||'Sistema')}</small></span></div>`).join(''):'<div class="proposta-note">Nenhum evento de histórico disponível.</div>'}</div></section>`;else if(propostaDetailTab==='documentos')body=`<section class="proposta-detail-section"><h4>Anexos da proposta</h4>${c.proposta_pdf_url?`<div class="proposta-document"><svg class="dash-svg"><use href="#icon-file"></use></svg><span>Documento da proposta</span><a href="${safeExternalUrl(c.proposta_pdf_url)}" target="_blank" rel="noopener">Visualizar</a></div>`:'<div class="proposta-note">Nenhum documento anexado à proposta.</div>'}</section>`;else body='<section class="proposta-detail-section"><h4>Notas internas</h4><div class="proposta-note">Nenhuma nota interna disponível para esta proposta.</div></section>';panel.innerHTML=`<div class="proposta-detail-content"><div class="proposta-detail-head"><span class="proposta-detail-avatar">${escapeHtml(propostaInitials(c.candidato_nome||c.nome))}</span><div class="proposta-detail-head-copy"><h3>${escapeHtml(c.candidato_nome||c.nome||'Candidato')}</h3><p>${escapeHtml(c.titulo||c.vaga_titulo||'Vaga')} · ${escapeHtml(c.empresa||c.vaga_empresa||'Minha empresa')}</p><span class="proposta-detail-status">${propostaStatusText(s)}</span></div><button class="proposta-detail-close" type="button" onclick="fecharPropostaDetalhe()">×</button></div><div class="proposta-detail-actions"><button class="primary" type="button" onclick="abrirCurriculo(${c.candidato_id||c.candidato_id_full||0})">Ver candidato</button><button type="button" onclick="irPara('candidaturas')">Ver candidatura</button><button type="button" onclick="fecharPropostaDetalhe()">Fechar</button></div><div class="proposta-detail-tabs">${tabButtons}</div>${body}</div>`;}
 function propostaTrocarAba(tab){propostaDetailTab=tab;const c=propostasAll.find(x=>Number(x.id)===Number(propostasState.selectedId));if(c)renderPropostaDetail(c);}
 function fecharPropostaDetalhe(){propostasState.selectedId=null;document.getElementById('proposta-detail-panel')?.classList.remove('aberto');renderPropostas();}
 function limparFiltrosPropostas(){Object.assign(propostasState,{search:'',status:'',vaga:'',periodo:'',page:1});['propostas-busca','propostas-filtro-status','propostas-filtro-vaga','propostas-filtro-periodo','propostas-filtro-vaga-top'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderPropostas();}
@@ -1459,43 +984,44 @@ async function abrirCurriculo(id) {
     const r = await fetch(API + '/api/empresa/candidatos/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
-      body.innerHTML = '<div class="alert alert-erro">Erro: ' + (err.erro || r.status) + '</div>';
+      body.innerHTML = '<div class="alert alert-erro">Erro: ' + escapeHtml(err.erro || String(r.status)) + '</div>';
       return;
     }
     const c = await r.json();
     const cand = c.candidato || c;
+    const esc = escapeHtml;
     titulo.textContent = '📄 ' + (cand.nome || 'Candidato');
 
     const areas = Array.isArray(cand.areas_interesse) ? cand.areas_interesse : [];
     const areasHtml = areas.length
-      ? areas.map(a => `<span class="badge-area">${a}</span>`).join(' ')
+      ? areas.map(a => `<span class="badge-area">${esc(a)}</span>`).join(' ')
       : '<span style="color:var(--cinza-medio)">Nenhuma área selecionada</span>';
 
     body.innerHTML = `
       <div class="curriculo-grid">
         <div class="curriculo-card">
           <h4>👤 Dados pessoais</h4>
-          <div class="kv"><span>Nome</span><strong>${cand.nome || '—'}</strong></div>
-          <div class="kv"><span>CPF</span><strong>${cand.cpf || '—'}</strong></div>
+          <div class="kv"><span>Nome</span><strong>${esc(cand.nome || '—')}</strong></div>
+          <div class="kv"><span>CPF</span><strong>${esc(cand.cpf || '—')}</strong></div>
           <div class="kv"><span>Nascimento</span><strong>${formatarData(cand.data_nascimento)}</strong></div>
-          <div class="kv"><span>Sexo</span><strong>${cand.sexo || '—'}</strong></div>
-          <div class="kv"><span>Email</span><strong>${cand.email || '—'}</strong></div>
-          <div class="kv"><span>Celular</span><strong>${cand.celular || '—'}</strong></div>
-          <div class="kv"><span>Acessibilidade</span><strong>${cand.acessibilidade || 'Nenhuma'}</strong></div>
+          <div class="kv"><span>Sexo</span><strong>${esc(cand.sexo || '—')}</strong></div>
+          <div class="kv"><span>Email</span><strong>${esc(cand.email || '—')}</strong></div>
+          <div class="kv"><span>Celular</span><strong>${esc(cand.celular || '—')}</strong></div>
+          <div class="kv"><span>Acessibilidade</span><strong>${esc(cand.acessibilidade || 'Nenhuma')}</strong></div>
         </div>
         <div class="curriculo-card">
           <h4>📍 Endereço</h4>
-          <div class="kv"><span>CEP</span><strong>${cand.cep || '—'}</strong></div>
-          <div class="kv"><span>Logradouro</span><strong>${(cand.logradouro || '—') + (cand.numero ? ', ' + cand.numero : '')}${cand.complemento ? ' — ' + cand.complemento : ''}</strong></div>
-          <div class="kv"><span>Bairro</span><strong>${cand.bairro || '—'}</strong></div>
-          <div class="kv"><span>Cidade/UF</span><strong>${(cand.cidade || '—') + (cand.estado ? '/' + cand.estado : '')}</strong></div>
+          <div class="kv"><span>CEP</span><strong>${esc(cand.cep || '—')}</strong></div>
+          <div class="kv"><span>Logradouro</span><strong>${esc((cand.logradouro || '—') + (cand.numero ? ', ' + cand.numero : '') + (cand.complemento ? ' — ' + cand.complemento : ''))}</strong></div>
+          <div class="kv"><span>Bairro</span><strong>${esc(cand.bairro || '—')}</strong></div>
+          <div class="kv"><span>Cidade/UF</span><strong>${esc((cand.cidade || '—') + (cand.estado ? '/' + cand.estado : ''))}</strong></div>
         </div>
         <div class="curriculo-card">
           <h4>🎓 Escolaridade</h4>
-          <div class="kv"><span>Formação</span><strong>${cand.formacao || '—'}</strong></div>
-          <div class="kv"><span>Instituição</span><strong>${cand.instituicao || '—'}</strong></div>
-          <div class="kv"><span>Curso</span><strong>${cand.curso || '—'}</strong></div>
-          <div class="kv"><span>Situação</span><strong>${cand.situacao || '—'}</strong></div>
+          <div class="kv"><span>Formação</span><strong>${esc(cand.formacao || '—')}</strong></div>
+          <div class="kv"><span>Instituição</span><strong>${esc(cand.instituicao || '—')}</strong></div>
+          <div class="kv"><span>Curso</span><strong>${esc(cand.curso || '—')}</strong></div>
+          <div class="kv"><span>Situação</span><strong>${esc(cand.situacao || '—')}</strong></div>
           <div class="kv"><span>Conclusão</span><strong>${formatarData(cand.data_conclusao)}</strong></div>
           <div class="kv"><span>Primeiro emprego?</span><strong>${cand.primeiro_emprego ? 'Sim' : 'Não'}</strong></div>
         </div>
@@ -1505,11 +1031,11 @@ async function abrirCurriculo(id) {
         </div>
         <div class="curriculo-card curriculo-full">
           <h4>💼 Experiências</h4>
-          <pre style="white-space:pre-wrap;font-family:inherit;background:#fafafa;padding:10px;border-radius:6px;margin-top:6px">${cand.experiencia || 'Não informado'}</pre>
+          <pre style="white-space:pre-wrap;font-family:inherit;background:#fafafa;padding:10px;border-radius:6px;margin-top:6px">${esc(cand.experiencia || 'Não informado')}</pre>
         </div>
         <div class="curriculo-card curriculo-full">
           <h4>📝 Sobre você</h4>
-          <pre style="white-space:pre-wrap;font-family:inherit;background:#fafafa;padding:10px;border-radius:6px;margin-top:6px">${cand.sobre_voce || 'Não informado'}</pre>
+          <pre style="white-space:pre-wrap;font-family:inherit;background:#fafafa;padding:10px;border-radius:6px;margin-top:6px">${esc(cand.sobre_voce || 'Não informado')}</pre>
         </div>
         <div class="curriculo-card curriculo-full">
           <h4>📊 Status no Banco de Talentos</h4>
@@ -1518,7 +1044,7 @@ async function abrirCurriculo(id) {
         </div>
       </div>`;
   } catch (e) {
-    body.innerHTML = '<div class="alert alert-erro">Erro: ' + e.message + '</div>';
+    body.innerHTML = '<div class="alert alert-erro">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</div>';
   }
 }
 
@@ -1535,7 +1061,7 @@ async function carregarCandidaturas() {
     const r = await fetch(API + '/api/empresa/vagas-com-candidaturas', { headers: { 'Authorization': 'Bearer ' + token } });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
-      grid.innerHTML = '<div class="empty">Erro: ' + (err.erro || r.status) + '</div>';
+      grid.innerHTML = '<div class="empty">Erro: ' + escapeHtml(err.erro || String(r.status)) + '</div>';
       return;
     }
     const data = await r.json();
@@ -1549,10 +1075,10 @@ async function carregarCandidaturas() {
       return `
         <div class="vaga-cand-card" onclick="abrirVagaCands(${v.id})" style="cursor:pointer">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-            <h3 style="margin:0;font-size:16px;color:var(--vinho)">${v.titulo}</h3>
-            <span class="badge ${statusBadge}">${v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status}</span>
+            <h3 style="margin:0;font-size:16px;color:var(--vinho)">${escapeHtml(v.titulo || 'Vaga')}</h3>
+            <span class="badge ${statusBadge}">${escapeHtml(v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status || '')}</span>
           </div>
-          <div style="font-size:13px;color:var(--cinza-medio);margin-bottom:12px">${v.empresa || '—'} • ${v.cidade || ''}${v.estado ? '/' + v.estado : ''}</div>
+          <div style="font-size:13px;color:var(--cinza-medio);margin-bottom:12px">${escapeHtml(v.empresa || '—')} • ${escapeHtml(v.cidade || '')}${v.estado ? '/' + escapeHtml(v.estado) : ''}</div>
           <div class="vaga-cand-stats">
             <div class="vaga-cand-stat">
               <div class="vaga-cand-stat-num">${v.total_ativas || 0}</div>
@@ -1567,7 +1093,7 @@ async function carregarCandidaturas() {
         </div>`;
     }).join('');
   } catch (e) {
-    grid.innerHTML = '<div class="empty">Erro de conexão: ' + e.message + '</div>';
+    grid.innerHTML = '<div class="empty">Erro de conexão: ' + escapeHtml(e.message || 'Erro interno') + '</div>';
   }
 }
 
@@ -1593,7 +1119,7 @@ async function abrirVagaCands(vagaId) {
     const r = await fetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', { headers: { 'Authorization': 'Bearer ' + token } });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
-      tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + (err.erro || r.status) + '</td></tr>';
+      tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + escapeHtml(err.erro || String(r.status)) + '</td></tr>';
       return;
     }
     const data = await r.json();
@@ -1604,13 +1130,13 @@ async function abrirVagaCands(vagaId) {
     vagaAtualCands = data.vaga;
     candidaturasVagaCache = data.candidaturas;
 
-    document.getElementById('cands-vaga-titulo').textContent = '👥 ' + data.vaga.titulo + ' — Candidatos';
+    document.getElementById('cands-vaga-titulo').textContent = '👥 ' + (data.vaga.titulo || '') + ' — Candidatos';
     document.getElementById('cands-vaga-voltar').onclick = () => irParaPagina('candidaturas');
     const info = document.getElementById('cands-vaga-info');
     info.innerHTML = `
       <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div><strong>Empresa:</strong> ${data.vaga.empresa || '—'}</div>
-        <div><strong>Local:</strong> ${data.vaga.cidade || '—'}${data.vaga.estado ? '/' + data.vaga.estado : ''}</div>
+        <div><strong>Empresa:</strong> ${escapeHtml(data.vaga.empresa || '—')}</div>
+        <div><strong>Local:</strong> ${escapeHtml(data.vaga.cidade || '—')}${data.vaga.estado ? '/' + escapeHtml(data.vaga.estado) : ''}</div>
         <div><strong>Total de candidatos:</strong> ${candidaturasVagaCache.length}</div>
         <div><strong>Criada em:</strong> ${formatarData(data.vaga.criada_em)}</div>
       </div>`;
@@ -1631,11 +1157,11 @@ async function abrirVagaCands(vagaId) {
       const idxZero = numEtapa - 1;
       const etapaNome = (etapasArr[idxZero] && (typeof etapasArr[idxZero] === 'string' ? etapasArr[idxZero] : etapasArr[idxZero].nome)) || `Etapa ${numEtapa}`;
       return `<tr>
-        <td><strong>${c.nome || '—'}</strong></td>
-        <td>${c.email || '—'}</td>
-        <td>${c.cidade ? (c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td>
-        <td>${numEtapa}. ${etapaNome}</td>
-        <td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : c.status}</span></td>
+        <td><strong>${escapeHtml(c.nome || '—')}</strong></td>
+        <td>${escapeHtml(c.email || '—')}</td>
+        <td>${c.cidade ? (escapeHtml(c.cidade + (c.estado ? '/' + c.estado : ''))) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td>
+        <td>${numEtapa}. ${escapeHtml(etapaNome)}</td>
+        <td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : escapeHtml(c.status || '')}</span></td>
         <td>${formatarData(c.criada_em)}</td>
         <td>
           <a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a>
@@ -1643,7 +1169,7 @@ async function abrirVagaCands(vagaId) {
       </tr>`;
     }).join('');
   } catch (e) {
-    tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + e.message + '</td></tr>';
+    tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</td></tr>';
   }
 }
 
@@ -1692,19 +1218,19 @@ async function verCandidatura(id) {
     const r = await fetch(API + '/api/empresa/candidatura/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
     const data = await r.json();
     if (!r.ok) {
-      container.innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro'}</div>`;
+      container.innerHTML = `<div class="alert alert-erro">${escapeHtml(data.erro || 'Erro')}</div>`;
       return;
     }
     const c0 = data.candidatura || data;
     const c = { ...c0, titulo: c0.titulo || c0.vaga_titulo, empresa: c0.empresa || c0.vaga_empresa };
     container.innerHTML = `
       <div class="det-grid">
-        <div class="det-item"><div class="det-label">Candidato</div><div class="det-value">${c.nome || '—'}</div></div>
-        <div class="det-item"><div class="det-label">E-mail</div><div class="det-value">${c.email || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Celular</div><div class="det-value">${c.celular || '—'}</div></div>
-        <div class="det-item"><div class="det-label">CPF</div><div class="det-value">${c.cpf || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Vaga</div><div class="det-value">${c.titulo || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Empresa</div><div class="det-value">${c.empresa || '—'}</div></div>
+        <div class="det-item"><div class="det-label">Candidato</div><div class="det-value">${escapeHtml(c.nome || '—')}</div></div>
+        <div class="det-item"><div class="det-label">E-mail</div><div class="det-value">${escapeHtml(c.email || '—')}</div></div>
+        <div class="det-item"><div class="det-label">Celular</div><div class="det-value">${escapeHtml(c.celular || '—')}</div></div>
+        <div class="det-item"><div class="det-label">CPF</div><div class="det-value">${escapeHtml(c.cpf || '—')}</div></div>
+        <div class="det-item"><div class="det-label">Vaga</div><div class="det-value">${escapeHtml(c.titulo || '—')}</div></div>
+        <div class="det-item"><div class="det-label">Empresa</div><div class="det-value">${escapeHtml(c.empresa || '—')}</div></div>
         <div class="det-item"><div class="det-label">Status</div><div class="det-value"><span class="badge ${c.status === 'contratado' ? 'badge-ativa' : (c.status === 'reprovado' || c.status === 'rejeitado') ? 'badge-fechada' : c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente'}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : c.status}</span></div></div>
         <div class="det-item"><div class="det-label">Criada em</div><div class="det-value">${formatarData(c.criada_em)}</div></div>
       </div>
@@ -1713,15 +1239,15 @@ async function verCandidatura(id) {
         ${(c.historico && c.historico.length > 0)
           ? '<ul style="list-style:none;padding:0;">' + c.historico.map(h => {
               const d = h.data ? new Date(h.data).toLocaleString('pt-BR') : '';
-              const m = h.mensagem ? '<br><em style="color:var(--cinza-medio);">' + h.mensagem + '</em>' : '';
-              const p = h.por ? '<br><small>por ' + h.por + '</small>' : '';
-              return '<li style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#f9f9f9;"><strong>' + (h.etapa || h.status) + '</strong> [' + h.status + '] — ' + d + p + m + '</li>';
+              const m = h.mensagem ? '<br><em style="color:var(--cinza-medio);">' + escapeHtml(h.mensagem) + '</em>' : '';
+              const p = h.por ? '<br><small>por ' + escapeHtml(h.por) + '</small>' : '';
+              return '<li style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#f9f9f9;"><strong>' + escapeHtml(h.etapa || h.status || '') + '</strong> [' + escapeHtml(h.status || '') + '] — ' + escapeHtml(d) + p + m + '</li>';
             }).join('') + '</ul>'
           : '<p style="color:var(--cinza-medio);">Nenhuma movimentação ainda.</p>'}
       </div>
     `;
   } catch (e) {
-    container.innerHTML = `<div class="alert alert-erro">Erro: ${e.message}</div>`;
+    container.innerHTML = `<div class="alert alert-erro">Erro: ${escapeHtml(e.message || 'Erro interno')}</div>`;
   }
 }
 
@@ -1736,29 +1262,4 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
 function formatarData(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('pt-BR');
-}
-
-// ===== SEED DEMO: Importa 6 vagas de exemplo =====
-async function importarVagasDemo() {
-  if (!confirm('🌱 Importar 6 vagas de demonstração?\n\nSe alguma vaga com mesmo título+empresa já existir, ela será IGNORADA (não duplica).')) return;
-  const token = localStorage.getItem('empresa_token');
-  if (!token) { alert('Faça login primeiro.'); return; }
-  try {
-    const r = await fetch(API + '/api/empresa/seed-vagas-demo', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.erro || 'Erro ao importar');
-    const lista = (j.detalhes.criadas || []).map(v => '✅ ' + v.titulo + ' (' + v.empresa + ')').join('\n');
-    const exist = (j.detalhes.jaExistiam || []).map(v => '⚠️ ' + v.titulo + ' (' + v.empresa + ')').join('\n');
-    let msg = `🎉 Concluído!\n\n${j.criadas} vagas criadas.\n${j.jaExistiam} já existiam (ignoradas).`;
-    if (lista) msg += '\n\n--- Criadas ---\n' + lista;
-    if (exist) msg += '\n\n--- Já existiam ---\n' + exist;
-    alert(msg);
-    // Atualiza a lista de vagas se estiver na página
-    if (typeof carregarVagas === 'function') carregarVagas();
-  } catch (e) {
-    alert('❌ Erro: ' + e.message);
-  }
 }
