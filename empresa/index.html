@@ -409,7 +409,7 @@
     #app .aside-user-info .empresa { font-size:8px; }
     #app .btn-logout { padding:4px 6px; font-size:11px; }
     #app main { padding:18px 18px 28px; overflow-y:auto; background:#FBFBFC; }
-    #page-dashboard { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,.95fr); gap:12px; align-content:start; }
+    #page-dashboard { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:12px; align-content:start; }
     #page-dashboard > .page-header, #page-dashboard > .kpis-grid { grid-column:1 / -1; }
     #page-dashboard > .page-header { margin-bottom:0 !important; }
     #page-dashboard > .dash-row { display:contents; }
@@ -420,7 +420,7 @@
     #page-dashboard #card-ranking { grid-area:jobs; margin-top:0 !important; }
     #page-dashboard #row-docs .dash-card:first-child { grid-area:docs; }
     #page-dashboard #row-docs .dash-card:nth-child(2) { grid-area:strategic; }
-    #page-dashboard { grid-template-areas:"head head head" "kpis kpis kpis" "stages activities upcoming" "jobs jobs conversion" "jobs jobs docs" "jobs jobs strategic"; }
+    #page-dashboard { grid-template-areas:"head head head head head head head head head head head head" "kpis kpis kpis kpis kpis kpis kpis kpis kpis kpis kpis kpis" "stages stages stages stages activities activities activities activities upcoming upcoming upcoming upcoming" "jobs jobs jobs jobs jobs jobs conversion conversion docs docs strategic strategic"; }
     #page-dashboard .kpis-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin-bottom:0; }
     #page-dashboard .kpi-card { min-height:92px; padding:12px 13px; border-radius:8px; box-shadow:0 1px 5px rgba(0,0,0,.06); }
     #page-dashboard .kpi-label { font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -440,7 +440,16 @@
     #page-dashboard .entrevista-item { padding:7px; gap:7px; }
     #page-dashboard .entrevista-nome { font-size:10px; }
     #page-dashboard .entrevista-vaga, #page-dashboard .entrevista-data, #page-dashboard .entrevista-badge { font-size:8px; }
-    #page-dashboard .tabela-wrap { overflow:hidden; }
+    #page-dashboard .ranking-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px; }
+    #page-dashboard .ranking-item { border:1px solid #EFEFEF; border-radius:6px; padding:9px; min-width:0; }
+    #page-dashboard .ranking-item-top { display:flex; align-items:center; justify-content:space-between; gap:5px; }
+    #page-dashboard .ranking-item-top strong { font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    #page-dashboard .ranking-percent { font-size:7px; color:#C39B38; white-space:nowrap; }
+    #page-dashboard .ranking-company { color:#777; font-size:8px; margin:4px 0 9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    #page-dashboard .ranking-item-bottom { color:#777; font-size:8px; }
+    #page-dashboard .ranking-item-bottom b { color:#542337; font-size:15px; margin-right:2px; }
+    #page-dashboard .ranking-bar { display:block; height:3px; background:#F0F0F0; border-radius:4px; margin-top:6px; overflow:hidden; }
+    #page-dashboard .ranking-bar i { display:block; height:100%; background:#E36A98; border-radius:4px; }
     #page-dashboard table th, #page-dashboard table td { padding:8px 7px; font-size:9px; }
     #page-dashboard .kpis-secundarios { gap:7px; }
     #page-dashboard .kpi-sec { padding:8px; }
@@ -608,11 +617,8 @@
           <h3>🏆 Vagas com maior volume</h3>
           <a href="#" class="dash-link" onclick="irPara('candidatos')">Ver detalhes →</a>
         </div>
-        <div class="tabela-wrap" style="margin-top:12px;">
-          <table id="ranking-table">
-            <thead><tr><th>Vaga</th><th>Empresa</th><th>Status</th><th style="text-align:right;">Candidatos</th><th style="text-align:right;">Contratados</th></tr></thead>
-            <tbody id="ranking-table-body"><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
-          </table>
+        <div class="ranking-grid" id="ranking-table-body">
+          <div class="empty">Carregando...</div>
         </div>
       </div>
 
