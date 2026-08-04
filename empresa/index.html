@@ -288,6 +288,10 @@
     .kpi-verde .kpi-icon { color: #10B981; }
     .kpi-laranja  { border-left: 4px solid #F59E0B; }
     .kpi-laranja .kpi-icon { color: #F59E0B; }
+    .kpi-dourado { border-left:4px solid #C9A961; }
+    .kpi-dourado .kpi-icon { color:#C9A961; }
+    .kpi-cinza { border-left:4px solid #6B7280; }
+    .kpi-cinza .kpi-icon { color:#6B7280; }
 
     .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     @media (max-width: 900px) { .dash-row { grid-template-columns: 1fr; } }
@@ -376,6 +380,83 @@
     .kpi-sec { padding: 12px; background: #FAFAFA; border-radius: 8px; }
     .kpi-sec-label { font-size: 12px; color: #666; margin-bottom: 4px; }
     .kpi-sec-valor { font-size: 20px; font-weight: 700; color: #1A1A1A; }
+
+    /* ===== Layout executivo de referência ===== */
+    .empresa-topbar { height:44px; min-height:44px; background:#fff; border-bottom:1px solid #E7E7E7; align-items:center; padding:0 18px; gap:18px; color:#202020; position:relative; z-index:1200; }
+    .empresa-topbar-brand { display:flex; align-items:center; gap:8px; font-size:14px; letter-spacing:.1px; }
+    .empresa-topbar-mark { color:#2C2C2C; font-size:17px; transform:rotate(-10deg); display:inline-block; }
+    .empresa-topbar-menu { border:0; background:transparent; color:#555; font-size:18px; cursor:pointer; padding:4px 8px; }
+    .empresa-topbar-actions { margin-left:auto; display:flex; align-items:center; gap:9px; font-size:11px; }
+    .empresa-topbar-notify { position:relative; border:0; background:transparent; color:#555; font-size:17px; cursor:pointer; padding:4px 8px; }
+    .empresa-topbar-notify span { position:absolute; top:-1px; right:0; background:#B4233C; color:#fff; min-width:13px; height:13px; border-radius:10px; font-size:8px; display:flex; align-items:center; justify-content:center; }
+    .empresa-topbar-avatar { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#333; color:#fff; font-weight:700; font-size:10px; }
+    .empresa-topbar-user { display:flex; flex-direction:column; line-height:1.05; min-width:55px; }
+    .empresa-topbar-user strong { font-size:10px; font-weight:600; }
+    .empresa-topbar-user small { color:#888; font-size:8px; }
+    .empresa-topbar-chevron { color:#777; font-size:13px; }
+    #app { min-height:calc(100vh - 44px); height:calc(100vh - 44px); }
+    #app > .menu-toggle { display:none !important; }
+    #app aside { width:157px; min-width:157px; height:calc(100vh - 44px); min-height:calc(100vh - 44px); padding:18px 0 12px; background:#542337; }
+    #app .aside-logo { padding:0 16px 18px; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,.12); }
+    #app .aside-logo h1 { font-size:15px; line-height:1.1; }
+    #app .aside-logo small { display:block; font-size:8px; margin-top:4px; color:rgba(255,255,255,.7); }
+    #app .nav-item { padding:8px 16px; font-size:10px; line-height:1.2; border-left:2px solid transparent; white-space:nowrap; }
+    #app .nav-item.ativo { border-left-color:#D0A2AE; background:rgba(255,255,255,.15); }
+    #app .nav-divisor { margin-top:10px; padding:8px 16px 4px; font-size:8px; }
+    #app .aside-user { padding:10px 12px; gap:6px; }
+    #app .aside-user-avatar { width:24px; height:24px; font-size:10px; }
+    #app .aside-user-info .nome { font-size:9px; }
+    #app .aside-user-info .empresa { font-size:8px; }
+    #app .btn-logout { padding:4px 6px; font-size:11px; }
+    #app main { padding:18px 18px 28px; overflow-y:auto; background:#FBFBFC; }
+    #page-dashboard { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,.95fr); gap:12px; align-content:start; }
+    #page-dashboard > .page-header, #page-dashboard > .kpis-grid { grid-column:1 / -1; }
+    #page-dashboard > .page-header { margin-bottom:0 !important; }
+    #page-dashboard > .dash-row { display:contents; }
+    #page-dashboard #row-stages .dash-card:first-child { grid-area:stages; }
+    #page-dashboard #row-stages .dash-card:nth-child(2) { grid-area:conversion; }
+    #page-dashboard #row-activities .dash-card:first-child { grid-area:upcoming; }
+    #page-dashboard #row-activities .dash-card:nth-child(2) { grid-area:activities; }
+    #page-dashboard #card-ranking { grid-area:jobs; margin-top:0 !important; }
+    #page-dashboard #row-docs .dash-card:first-child { grid-area:docs; }
+    #page-dashboard #row-docs .dash-card:nth-child(2) { grid-area:strategic; }
+    #page-dashboard { grid-template-areas:"head head head" "kpis kpis kpis" "stages activities upcoming" "jobs jobs conversion" "jobs jobs docs" "jobs jobs strategic"; }
+    #page-dashboard .kpis-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin-bottom:0; }
+    #page-dashboard .kpi-card { min-height:92px; padding:12px 13px; border-radius:8px; box-shadow:0 1px 5px rgba(0,0,0,.06); }
+    #page-dashboard .kpi-label { font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    #page-dashboard .kpi-valor { font-size:24px; margin-top:6px; }
+    #page-dashboard .kpi-icon { font-size:15px; }
+    #page-dashboard .kpi-delta { font-size:9px; }
+    #page-dashboard .dash-card { border-radius:8px; padding:12px; margin:0; box-shadow:0 1px 5px rgba(0,0,0,.055); min-width:0; }
+    #page-dashboard .dash-card-header h3 { font-size:11px; }
+    #page-dashboard .dash-card-tag { font-size:8px; padding:4px 7px; }
+    #page-dashboard .grafico-etapas { gap:7px; }
+    #page-dashboard .etapa-label { font-size:9px; min-width:50px; }
+    #page-dashboard .etapa-val { font-size:9px; }
+    #page-dashboard .atividades-feed, #page-dashboard .lista-entrevistas { max-height:210px; gap:6px; }
+    #page-dashboard .atividade-item { padding:7px; gap:7px; }
+    #page-dashboard .atividade-candidato { font-size:10px; }
+    #page-dashboard .atividade-vaga, #page-dashboard .atividade-tempo, #page-dashboard .atividade-tipo { font-size:8px; }
+    #page-dashboard .entrevista-item { padding:7px; gap:7px; }
+    #page-dashboard .entrevista-nome { font-size:10px; }
+    #page-dashboard .entrevista-vaga, #page-dashboard .entrevista-data, #page-dashboard .entrevista-badge { font-size:8px; }
+    #page-dashboard .tabela-wrap { overflow:hidden; }
+    #page-dashboard table th, #page-dashboard table td { padding:8px 7px; font-size:9px; }
+    #page-dashboard .kpis-secundarios { gap:7px; }
+    #page-dashboard .kpi-sec { padding:8px; }
+    #page-dashboard .kpi-sec-label { font-size:8px; }
+    #page-dashboard .kpi-sec-valor { font-size:15px; }
+    @media (max-width:900px) {
+      #page-dashboard { grid-template-columns:1fr 1fr; grid-template-areas:"head head" "kpis kpis" "stages activities" "upcoming upcoming" "jobs jobs" "conversion docs" "strategic strategic"; }
+      #page-dashboard .kpis-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    }
+    @media (max-width:700px) {
+      .empresa-topbar { padding:0 10px; }
+      #app { height:auto; min-height:calc(100vh - 44px); }
+      #app main { padding:60px 12px 20px; }
+      #page-dashboard { display:grid; grid-template-columns:1fr; grid-template-areas:"head" "kpis" "stages" "activities" "upcoming" "jobs" "conversion" "docs" "strategic"; }
+      #page-dashboard .kpis-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
 </head>
@@ -398,6 +479,18 @@
     <button class="btn btn-primary" id="btn-entrar" onclick="fazerLogin()">Entrar</button>
   </div>
 </div>
+
+<!-- TOPO DO PORTAL — aparece somente após autenticação -->
+<header class="empresa-topbar" id="topbar" style="display:none;">
+  <div class="empresa-topbar-brand"><span class="empresa-topbar-mark">⚙</span><strong>vagasio.com.br</strong></div>
+  <button class="empresa-topbar-menu" type="button" onclick="toggleMenu()" aria-label="Abrir menu">☰</button>
+  <div class="empresa-topbar-actions">
+    <button class="empresa-topbar-notify" type="button" title="Notificações">🔔<span>12</span></button>
+    <div class="empresa-topbar-avatar" id="top-avatar">A</div>
+    <div class="empresa-topbar-user"><strong id="top-admin">Admin</strong><small id="top-email">—</small></div>
+    <span class="empresa-topbar-chevron">⌄</span>
+  </div>
+</header>
 
 <!-- APP LOGADA -->
 <div class="app" id="app">
@@ -454,7 +547,7 @@
       </div>
 
       <!-- 2 colunas: gráfico de etapas + taxa de conversão -->
-      <div class="dash-row">
+      <div class="dash-row" id="row-stages">
         <div class="dash-card">
           <div class="dash-card-header">
             <h3>📊 Candidatos por etapa do processo</h3>
@@ -488,7 +581,7 @@
       </div>
 
       <!-- Próximas Entrevistas + Atividades Recentes -->
-      <div class="dash-row">
+      <div class="dash-row" id="row-activities">
         <div class="dash-card">
           <div class="dash-card-header">
             <h3>📅 Próximas Entrevistas</h3>
@@ -510,7 +603,7 @@
       </div>
 
       <!-- Tabela Vagas com mais volume -->
-      <div class="dash-card" style="margin-top:24px;">
+      <div class="dash-card" id="card-ranking" style="margin-top:24px;">
         <div class="dash-card-header">
           <h3>🏆 Vagas com maior volume</h3>
           <a href="#" class="dash-link" onclick="irPara('candidatos')">Ver detalhes →</a>
@@ -524,7 +617,7 @@
       </div>
 
       <!-- Documentação + KPIs secundários -->
-      <div class="dash-row" style="margin-top:24px;">
+      <div class="dash-row" id="row-docs" style="margin-top:24px;">
         <div class="dash-card">
           <div class="dash-card-header">
             <h3>📄 Documentação Recebida</h3>
