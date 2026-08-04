@@ -8,6 +8,11 @@ let token = null;
 let vagaEmEdicao = null;
 
 window.addEventListener('DOMContentLoaded', () => {
+  if (window.__ADMIN_PREVIEW__) {
+    token = 'preview-mode';
+    mostrarApp();
+    return;
+  }
   const saved = localStorage.getItem('admin_token');
   if (saved) {
     token = saved;
