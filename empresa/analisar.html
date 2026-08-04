@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Analisar Candidato — Admin</title>
+  <title>Analisar Candidato — Portal Empresa</title>
   <style>
     :root { --vinho:#6B0F1A; --vinho-claro:#8B1A2B; --cinza:#F5F5F5; --cinza-medio:#999; --cinza-escuro:#2A2A2A; --branco:#fff; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -153,9 +153,9 @@
     </div>
   </div>
 
-<script src="auth-helper.js?v=empresa-old-ui1"></script>
-<script src="empresa-auth-init.js?v=empresa-old-ui1"></script>
-<script src="empresa-auth-patch.js?v=empresa-old-ui1"></script>
+<script src="auth-helper.js?v=empresa-portal2"></script>
+<script src="empresa-auth-init.js?v=empresa-portal2"></script>
+<script src="empresa-auth-patch.js?v=empresa-portal2"></script>
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
 
@@ -220,12 +220,12 @@
         }
         const data = await r.json();
         if (!r.ok) {
-          content.innerHTML = '<div class="card"><div class="alert alert-erro">' + (data.erro || 'Erro ao carregar') + '</div></div>';
+          content.innerHTML = '<div class="card"><div class="alert alert-erro">' + escapeHtml(data.erro || 'Erro ao carregar') + '</div></div>';
           return;
         }
-        candidatura = data.candidatura;
+        candidatura = data.candidatura || data;
       } catch (e) {
-        content.innerHTML = '<div class="card"><div class="alert alert-erro">Erro: ' + e.message + '</div></div>';
+        content.innerHTML = '<div class="card"><div class="alert alert-erro">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</div></div>';
         return;
       }
 
@@ -321,7 +321,7 @@
             '</div>' +
             '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
               '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
-              '<div><strong style="color:#166534;">📍 Local:</strong><br>' + (ativa.local || '—') + '</div>' +
+              '<div><strong style="color:#166534;">📍 Local:</strong><br>' + escapeHtml(ativa.local || '—') + '</div>' +
               (ativa.link_reuniao ? '<div style="grid-column: 1 / -1;"><strong style="color:#166534;">🔗 Link:</strong> <a href="' + safeUrl(ativa.link_reuniao) + '" target="_blank" style="color:#7C3AED;">' + safeUrl(ativa.link_reuniao) + '</a></div>' : '') +
             '</div>' +
             '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:12px; color:#166534; border:1px solid #BBF7D0;">' +
@@ -408,7 +408,7 @@
         else if (idx === etapaAtual) cls = 'atual';
         // onclick="scrollSecao('etapa-X')" — rola até a seção dessa etapa
         return '<div class="etapa ' + cls + '" onclick="scrollSecao(\'etapa-' + idx + '\')" style="cursor:pointer" title="Ir para detalhes da etapa ' + idx + '">' +
-          '<div class="num">' + idx + '/' + totalEtapas + '</div>' + nome + '</div>';
+          '<div class="num">' + idx + '/' + totalEtapas + '</div>' + escapeHtml(nome) + '</div>';
       }).join('');
 
       // Helper: formata data
@@ -654,7 +654,7 @@
               '<div><strong style="color:#166534;">' + (isOnline ? '🎥 Formato:</strong><br>Online (Google Meet)' : '📍 Formato:</strong><br>Presencial') + '</div>' +
             '</div>' +
             blocoFormato +
-            (e.observacoes ? '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:13px; color:#166534; border:1px solid #BBF7D0;"><strong>💬 Observações:</strong> ' + e.observacoes.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' : '') +
+            (e.observacoes ? '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:13px; color:#166534; border:1px solid #BBF7D0;"><strong>💬 Observações:</strong> ' + escapeHtml(e.observacoes) + '</div>' : '') +
             '<div style="margin-top:14px; padding-top:14px; border-top:1px solid #BBF7D0; display:flex; justify-content:space-between; align-items:center; font-size:12px; gap:10px;">' +
               '<div style="color:#166534;">' + (isOnline ? '📧 Convite enviado por e-mail ao candidato.' : '📍 Endereço visível ao candidato no painel dele.') + ' Aparece também na aba <strong>📅 Agenda</strong>.</div>' +
               '<button type="button" onclick="cancelarEntrevistaExistente(' + e.id + ')" style="background:#FEE2E2; color:#991B1B; border:1px solid #FCA5A5; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer; font-size:12px; white-space:nowrap;" title="Libera novo agendamento. Use se a entrevista não aconteceu.">❌ Falhou</button>' +
@@ -765,13 +765,13 @@
           '</button>' +
           '<h1><span id="v-build" style="display:none">V2</span> ' + escapeHtml(c.nome || 'Candidato') + '</h1>' +
           '<div class="sub">' + escapeHtml(c.titulo || 'Vaga') + (c.v_cidade ? ' • ' + escapeHtml(c.v_cidade) : '') + '</div>' +
-          '<span class="status-pill status-' + status + '">' + (status === 'em_analise' ? 'Em análise' : status === 'em_andamento' ? 'Em andamento' : status === 'contratado' ? 'Contratado' : status === 'reprovado' ? 'Reprovado' : status === 'rejeitado' ? 'Reprovado' : status === 'aprovado' ? 'Aprovado' : status) + '</span>' +
+          '<span class="status-pill status-' + escapeHtml(['em_analise','em_andamento','contratado','reprovado','rejeitado','aprovado'].includes(status) ? status : 'em_andamento') + '">' + escapeHtml(status === 'em_analise' ? 'Em análise' : status === 'em_andamento' ? 'Em andamento' : status === 'contratado' ? 'Contratado' : status === 'reprovado' ? 'Reprovado' : status === 'rejeitado' ? 'Reprovado' : status === 'aprovado' ? 'Aprovado' : 'Em andamento') + '</span>' +
         '</div>' +
 
         // 1) Status do Processo (timeline interativa)
         '<div class="card" id="card-timeline">' +
           '<h2>📋 Status do Processo</h2>' +
-          '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual + '/' + totalEtapas + ' — ' + (etapas[etapaAtual - 1] || '—') + '</span></div>' +
+          '<div style="margin-bottom:8px">Etapa atual: <span class="badge-etapa">' + etapaAtual + '/' + totalEtapas + ' — ' + escapeHtml(etapas[etapaAtual - 1] || '—') + '</span></div>' +
           '<div style="font-size:12px;color:var(--cinza-medio);margin-bottom:6px">💡 Clique em uma etapa para ver detalhes.</div>' +
           '<div class="timeline">' + timeline + '</div>' +
         '</div>' +
