@@ -110,6 +110,12 @@ async function fazerLogin() {
     // 2FA: se o backend exigiu verificação de 2 etapas, mostra tela de código
     if (r.ok && data.requer_2fa && data.codigo_id) {
       console.log('[login] 2FA requerido, codigo_id=', data.codigo_id);
+      // A tela legada não contém o formulário 2FA moderno; usa a tela
+      // oficial de login para concluir a verificação sem quebrar o layout antigo.
+      if (!document.getElementById('login-step-2')) {
+        window.location.href = 'login.html?next=index.html';
+        return;
+      }
       loginCodigoId = data.codigo_id;
       loginEmailEmProgresso = data.email || email;
       if (alertEl) alertEl.innerHTML = '';
@@ -2814,15 +2820,19 @@ async function abrirVagaCands(vagaId) {
   const tb = document.querySelector('#vaga-cands-internal-table tbody');
   tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
   try {
-    const r = await authedFetch(API + '/api/empresa/vagas/' + vagaId + '/candidaturas', { headers: {} });
+    const r = await authedFetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', { headers: {} });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
       tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + (err.erro || r.status) + '</td></tr>';
       return;
     }
     const data = await r.json();
+    const vagaResp = await authedFetch(API + '/api/empresa/vagas/' + vagaId, { headers: {} });
+    const vagaData = await vagaResp.json().catch(() => ({}));
+    data.vaga = vagaData.vaga || vagaData;
+    data.candidaturas = data.candidatos || data.candidaturas || [];
     vagaAtualCands = data.vaga;
-    candidaturasVagaCache = data.candidaturas || [];
+    candidaturasVagaCache = data.candidaturas;
 
     document.getElementById('cands-vaga-titulo').textContent = '👥 ' + data.vaga.titulo + ' — Candidatos';
     document.getElementById('cands-vaga-voltar').onclick = () => irParaPagina('candidaturas');
@@ -2906,10 +2916,10 @@ async function acaoCandidatura(id, acao) {
     const data = await r.json();
     if (!r.ok) { alert('Erro: ' + (data.erro || 'Não foi possível atualizar')); return; }
     if (vagaAtualCands) {
-      const r2 = await authedFetch(API + '/api/empresa/vagas/' + vagaAtualCands.id + '/candidaturas', { headers: {} });
+      const r2 = await authedFetch(API + '/api/empresa/vagas/' + vagaAtualCands.id + '/candidatos', { headers: {} });
       if (r2.ok) {
         const d2 = await r2.json();
-        candidaturasVagaCache = d2.candidaturas || [];
+        candidaturasVagaCache = d2.candidatos || d2.candidaturas || [];
       }
     }
   } catch (e) {
@@ -2933,7 +2943,8 @@ async function verCandidatura(id) {
       container.innerHTML = `<div class="alert alert-erro">${escapeHtml(data.erro || 'Erro')}</div>`;
       return;
     }
-    const c = data.candidatura;
+    const c0 = data.candidatura || data;
+    const c = { ...c0, titulo: c0.titulo || c0.vaga_titulo, empresa: c0.empresa || c0.vaga_empresa };
     container.innerHTML = `
       <div class="det-grid">
         <div class="det-item"><div class="det-label">Candidato</div><div class="det-value">${c.nome || '—'}</div></div>
