@@ -961,34 +961,105 @@ async function carregarDashboard() {
 }
 
 // ===== VAGAS =====
-async function carregarVagasAdmin() {
-  const tb = document.querySelector('#vagas-table tbody');
-  tb.innerHTML = '<tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr>';
-  try {
-    const r = await fetch(API + '/api/empresa/vagas', { headers: { 'Authorization': 'Bearer ' + token } });
-    const data = await r.json();
-    const vagas = data.vagas || [];
-    if (vagas.length === 0) {
-      tb.innerHTML = '<tr><td colspan="5" class="empty">Nenhuma vaga cadastrada. Clique em "+ Nova vaga" pra começar.</td></tr>';
-      return;
-    }
-    tb.innerHTML = vagas.map(v => {
-      const badge = v.status === 'publicada' ? 'badge-ativa' : v.status === 'pausada' ? 'badge-pendente' : 'badge-fechada';
-      return `<tr>
-        <td><strong>${v.titulo}</strong></td>
-        <td>${v.empresa || '—'}</td>
-        <td>${v.area || v.categoria || '—'}</td>
-        <td><span class="badge ${badge}">${v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status}</span></td>
-        <td><div class="acoes">
-          <button onclick="editarVaga(${v.id})">Editar</button>
-          <button class="perigo" onclick="deletarVaga(${v.id})">Excluir</button>
-        </div></td>
-      </tr>`;
-    }).join('');
-  } catch {
-    tb.innerHTML = '<tr><td colspan="5" class="alert-erro">Erro ao carregar</td></tr>';
-  }
+let vagasEmpresaCache = [];
+let vagasCandidatosCache = {};
+const vagasState = { search: '', status: '', area: '', nivel: '', tipo: '', cidade: '', criacao: '', periodo: '30', sort: 'recentes', page: 1, perPage: 8, view: 'cards' };
+
+const statusVagaLabel = { publicada: 'Publicada', pausada: 'Pausada', rascunho: 'Rascunho', fechada: 'Encerrada' };
+function statusVagaClass(v) {
+  if (v.status === 'fechada') return 'fechada';
+  if (v.status === 'rascunho') return 'rascunho';
+  if (v.status === 'pausada') return 'pausada';
+  return Number(v.total_candidatos || 0) > 0 ? 'processo' : 'publicada';
 }
+function statusVagaText(v) { if (v.status === 'publicada' && Number(v.total_candidatos || 0) > 0) return 'Em processo seletivo'; return statusVagaLabel[v.status] || v.status || '—'; }
+function vagaLocal(v) { return [v.cidade, v.estado].filter(Boolean).join(', ') || 'Local não informado'; }
+function vagaContrato(v) { return [v.tipo_contrato, v.nivel].filter(Boolean).join(' · ') || 'Detalhes não informados'; }
+function vagaData(v) { return v.atualizada_em || v.criada_em; }
+function vagaDate(v) { if (!vagaData(v)) return 'Sem atividade'; const d = new Date(vagaData(v)); return Number.isNaN(d.getTime()) ? 'Sem atividade' : tempoRelativo(vagaData(v)); }
+function fillVagasSelect(id, values, placeholder, current) {
+  const el = document.getElementById(id); if (!el) return;
+  const unique = [...new Set(values.filter(Boolean).map(String))].sort((a,b) => a.localeCompare(b,'pt-BR'));
+  el.innerHTML = `<option value="">${placeholder}</option>` + unique.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+  el.value = current || '';
+}
+function setVagasKpis(dash) {
+  const k = dash?.kpis || {};
+  const rows = Array.isArray(dash?.vagas) ? dash.vagas : vagasEmpresaCache;
+  const old = rows.filter(v => v.status === 'publicada' && v.criada_em && new Date(v.criada_em).getTime() < Date.now() - 30*86400000).length;
+  const vals = { 'vagas-kpi-ativas': k.vagas_ativas ?? rows.filter(v => v.status === 'publicada').length, 'vagas-kpi-candidatos': k.total_candidatos ?? 0, 'vagas-kpi-processos': k.processos_ativos ?? 0, 'vagas-kpi-entrevistas': k.entrevistas_agendadas ?? 0, 'vagas-kpi-contratacoes': k.contratacoes ?? 0, 'vagas-kpi-antigas': old };
+  Object.entries(vals).forEach(([id,val]) => { const el=document.getElementById(id); if(el) el.textContent=Number(val || 0).toLocaleString('pt-BR'); });
+}
+async function carregarVagasAdmin() {
+  const grid = document.getElementById('vagas-grid');
+  if (!grid) return;
+  grid.innerHTML = '<div class="vagas-loading"><span class="spinner"></span> Carregando suas vagas...</div>';
+  try {
+    const headers = { 'Authorization': 'Bearer ' + token };
+    const [listaR, totaisR, dashR] = await Promise.all([
+      fetch(API + '/api/empresa/vagas', { headers }),
+      fetch(API + '/api/empresa/vagas-todas', { headers }),
+      fetch(API + '/api/empresa/dashboard', { headers })
+    ]);
+    const lista = await listaR.json(); const totais = await totaisR.json(); const dash = await dashR.json();
+    if (!listaR.ok) throw new Error(lista.erro || 'Não foi possível carregar as vagas');
+    const counts = new Map((totais.vagas || []).map(v => [Number(v.id), v]));
+    vagasEmpresaCache = (lista.vagas || []).map(v => { const c = counts.get(Number(v.id)) || {}; return { ...v, total_candidatos: Number(v.total_candidatos ?? c.total_geral ?? 0), em_andamento: Number(v.em_andamento ?? c.em_andamento ?? 0), contratados: Number(v.contratados ?? c.contratados ?? 0) }; });
+    setVagasKpis(dash);
+    fillVagasSelect('vagas-filtro-status', vagasEmpresaCache.map(v => statusVagaLabel[v.status] ? v.status : v.status), 'Todos os status', vagasState.status);
+    fillVagasSelect('vagas-filtro-area', vagasEmpresaCache.map(v => v.area || v.categoria), 'Todas as áreas', vagasState.area);
+    fillVagasSelect('vagas-filtro-nivel', vagasEmpresaCache.map(v => v.nivel), 'Todos os níveis', vagasState.nivel);
+    fillVagasSelect('vagas-filtro-tipo', vagasEmpresaCache.map(v => v.tipo_contrato), 'Tipo de contrato', vagasState.tipo);
+    fillVagasSelect('vagas-filtro-cidade', vagasEmpresaCache.map(v => vagaLocal(v)), 'Cidade', vagasState.cidade);
+    renderVagas();
+  } catch (e) { grid.innerHTML = `<div class="vagas-empty"><strong>Não foi possível carregar suas vagas</strong><p>${escapeHtml(e.message || 'Tente novamente em instantes.')}</p><button class="btn btn-primary" type="button" onclick="carregarVagasAdmin()">Tentar novamente</button></div>`; }
+}
+function getVagasFiltered() {
+  const q = vagasState.search.trim().toLocaleLowerCase('pt-BR');
+  const now = Date.now();
+  let rows = vagasEmpresaCache.filter(v => {
+    const hay = [v.titulo,v.empresa,v.area,v.categoria,v.cidade,v.estado,v.nivel,v.tipo_contrato].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');
+    const created = v.criada_em ? new Date(v.criada_em).getTime() : 0;
+    const period = vagasState.criacao || vagasState.periodo;
+    const inPeriod = !period || period === 'all' || !created || created >= now - Number(period)*86400000;
+    return (!q || hay.includes(q)) && (!vagasState.status || v.status === vagasState.status) && (!vagasState.area || (v.area || v.categoria) === vagasState.area) && (!vagasState.nivel || v.nivel === vagasState.nivel) && (!vagasState.tipo || v.tipo_contrato === vagasState.tipo) && (!vagasState.cidade || vagaLocal(v) === vagasState.cidade) && inPeriod;
+  });
+  rows.sort((a,b) => { const ca=Number(a.total_candidatos||0), cb=Number(b.total_candidatos||0); const da=new Date(vagaData(a)||0).getTime(), db=new Date(vagaData(b)||0).getTime(); if(vagasState.sort==='antigas') return da-db; if(vagasState.sort==='candidatos') return cb-ca; if(vagasState.sort==='menos-candidatos') return ca-cb; if(vagasState.sort==='atividade') return db-da; return db-da; });
+  return rows;
+}
+function pipelineFor(v) { return Array.isArray(v._pipeline) && v._pipeline.length === 7 ? v._pipeline : Array(7).fill(null); }
+function renderVagaCard(v) {
+  const cls = statusVagaClass(v); const status = statusVagaText(v); const total = Number(v.total_candidatos || 0); const pipe = pipelineFor(v); const max = Math.max(1, ...pipe.map(x => Number(x || 0)));
+  const stageNames = ['Inscrição','Triagem','RH','Gestor','Proposta','Docs','Contratação'];
+  const stages = stageNames.map((name,i) => `<div class="vaga-stage"><span class="vaga-stage-label">${name}</span><b class="vaga-stage-value">${pipe[i] == null ? '—' : pipe[i]}</b><span class="vaga-stage-bar"><i style="width:${pipe[i] == null ? 0 : Math.max(5, Math.round((Number(pipe[i]) / max) * 100))}%"></i></span></div>`).join('');
+  const actionLabel = v.status === 'rascunho' ? 'Editar rascunho' : v.status === 'fechada' ? 'Ver detalhes' : 'Gerenciar vaga';
+  const mainClick = v.status === 'rascunho' || v.status === 'fechada' ? `editarVaga(${v.id})` : `abrirVagaCands(${v.id})`;
+  const closed = v.status === 'fechada' ? `<div class="vaga-card-meta">Encerrada em ${v.atualizada_em ? new Date(v.atualizada_em).toLocaleDateString('pt-BR') : '—'}</div>` : '';
+  const alert = v.status !== 'fechada' && vagaData(v) && Date.now() - new Date(vagaData(v)).getTime() > 7*86400000 ? '<div class="vaga-alert">Atenção: sem movimentação há mais de 7 dias</div>' : '';
+  return `<article class="vaga-card ${cls === 'fechada' ? 'closed' : ''} ${v.status === 'rascunho' ? 'draft' : ''}" data-vaga-id="${v.id}"><div class="vaga-card-head"><h3 class="vaga-card-title">${escapeHtml(v.titulo || 'Vaga sem título')}</h3><div class="vaga-card-menu"><button type="button" aria-label="Ações da vaga" onclick="toggleVagaCardMenu(${v.id})">•••</button><div class="vaga-card-menu-panel" id="vaga-menu-${v.id}"><button type="button" onclick="editarVaga(${v.id})">Editar</button><button type="button" class="danger" onclick="deletarVaga(${v.id})">Encerrar vaga</button></div></div></div><div class="vaga-card-meta">${escapeHtml(v.empresa || 'Minha empresa')} · ${escapeHtml(vagaLocal(v))}</div><div class="vaga-card-meta">${escapeHtml(vagaContrato(v))}</div>${closed}<div class="vaga-card-tags"><span class="vaga-status vaga-status-${cls}">${status}</span></div><div class="vaga-card-stats"><div class="vaga-candidate-count"><strong>${total.toLocaleString('pt-BR')}</strong><small>candidatos</small></div><div class="vaga-last-activity"><strong>${escapeHtml(vagaDate(v))}</strong><span>última atividade</span></div></div>${alert}<div class="vaga-pipeline" aria-label="Pipeline da vaga">${stages}</div><div class="vaga-card-footer"><button type="button" class="vaga-card-action" onclick="${mainClick}">${v.status === 'rascunho' ? 'Editar rascunho' : v.status === 'fechada' ? 'Ver detalhes' : 'Ver candidatos'}</button><button type="button" class="vaga-card-action primary" onclick="editarVaga(${v.id})">${actionLabel}</button><button type="button" class="vaga-card-action menu-action" aria-label="Abrir ações" onclick="toggleVagaCardMenu(${v.id})">•••</button></div></article>`;
+}
+function renderVagaList(v) { return renderVagaCard(v); }
+function renderVagas() {
+  const grid=document.getElementById('vagas-grid'); if(!grid) return; const rows=getVagasFiltered(); const total=rows.length; const pages=Math.max(1,Math.ceil(total/vagasState.perPage)); if(vagasState.page>pages) vagasState.page=pages; const start=(vagasState.page-1)*vagasState.perPage; const pageRows=rows.slice(start,start+vagasState.perPage);
+  if (!total) { grid.className='vagas-grid'; grid.innerHTML='<div class="vagas-empty"><strong>Nenhuma vaga encontrada</strong><p>Crie sua primeira oportunidade ou ajuste os filtros para continuar.</p><button class="btn btn-primary" type="button" onclick="abrirModalVaga()">+ Criar primeira vaga</button></div>'; }
+  else { grid.className='vagas-grid' + (vagasState.view==='lista' ? ' lista-view' : ''); grid.innerHTML=pageRows.map(renderVagasCardForState).join(''); hydrateVagaPipelines(pageRows); }
+  const shownStart=total ? start+1 : 0, shownEnd=Math.min(start+vagasState.perPage,total); const label=document.getElementById('vagas-paginacao-label'); if(label) label.textContent=`Mostrando ${shownStart}–${shownEnd} de ${total} vaga${total===1?'':'s'}`; renderVagasPagination(pages);
+}
+function renderVagasCardForState(v) { return vagasState.view==='lista' ? renderVagaList(v) : renderVagaCard(v); }
+function renderVagasPagination(pages) { const box=document.getElementById('vagas-paginacao-controles'); if(!box)return; let html=`<button type="button" ${vagasState.page<=1?'disabled':''} onclick="vagasGoPage(${vagasState.page-1})">‹</button>`; for(let i=1;i<=pages;i++){ if(pages>6 && i>2 && i<pages-1 && Math.abs(i-vagasState.page)>1){if(i===3)html+='<span>…</span>';continue;} html+=`<button type="button" class="${i===vagasState.page?'ativo':''}" onclick="vagasGoPage(${i})">${i}</button>`; } html+=`<button type="button" ${vagasState.page>=pages?'disabled':''} onclick="vagasGoPage(${vagasState.page+1})">›</button>`; box.innerHTML=html; }
+function vagasGoPage(page) { vagasState.page=page; renderVagas(); window.scrollTo({top:0,behavior:'smooth'}); }
+async function hydrateVagaPipelines(rows) { const missing=rows.filter(v=>v.id && !(v.id in vagasCandidatosCache)); await Promise.all(missing.map(async v=>{ try{const r=await fetch(API+'/api/empresa/vagas/'+v.id+'/candidatos',{headers:{'Authorization':'Bearer '+token}});const d=await r.json();const cs=(d.candidatos||[]).filter(c=>!['reprovado','rejeitado'].includes(c.status));const counts=Array(7).fill(0);cs.forEach(c=>{const i=Math.max(0,Math.min(6,Number(c.etapa_atual||1)-1));counts[i]++;});vagasCandidatosCache[v.id]=counts;v._pipeline=counts;}catch(_){vagasCandidatosCache[v.id]=null;} })); if(missing.length) renderVagas(); }
+function toggleVagaCardMenu(id) { document.querySelectorAll('.vaga-card-menu-panel.aberto').forEach(x=>x.classList.remove('aberto')); document.getElementById('vaga-menu-'+id)?.classList.toggle('aberto'); }
+function bindVagasControls() {
+  if (window.__vagasControlsBound) return; window.__vagasControlsBound=true;
+  const sync=(value)=>{vagasState.search=value; const a=document.getElementById('vagas-busca-top'),b=document.getElementById('vagas-busca'); if(a&&a.value!==value)a.value=value;if(b&&b.value!==value)b.value=value;vagasState.page=1;renderVagas();};
+  ['vagas-busca-top','vagas-busca'].forEach(id=>document.getElementById(id)?.addEventListener('input',e=>sync(e.target.value)));
+  [['vagas-filtro-status','status'],['vagas-filtro-area','area'],['vagas-filtro-nivel','nivel'],['vagas-filtro-tipo','tipo'],['vagas-filtro-cidade','cidade'],['vagas-filtro-criacao','criacao'],['vagas-periodo','periodo'],['vagas-ordenar','sort'],['vagas-itens-pagina','perPage']].forEach(([id,key])=>document.getElementById(id)?.addEventListener('change',e=>{vagasState[key]=key==='perPage'?Number(e.target.value):e.target.value;if(key==='periodo')vagasState.criacao='';if(key==='sort'||key==='perPage'||key==='periodo'||key==='criacao')vagasState.page=1;renderVagas();}));
+  document.getElementById('vagas-limpar')?.addEventListener('click',()=>{Object.assign(vagasState,{search:'',status:'',area:'',nivel:'',tipo:'',cidade:'',criacao:'',periodo:'all',page:1});['vagas-busca-top','vagas-busca'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['vagas-filtro-status','vagas-filtro-area','vagas-filtro-nivel','vagas-filtro-tipo','vagas-filtro-cidade','vagas-filtro-criacao','vagas-periodo'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});const p=document.getElementById('vagas-periodo');if(p)p.value='all';renderVagas();});
+  document.getElementById('vagas-mais-filtros')?.addEventListener('click',e=>{const p=document.getElementById('vagas-advanced');const open=p.hasAttribute('hidden');if(open)p.removeAttribute('hidden');else p.setAttribute('hidden','');e.currentTarget.setAttribute('aria-expanded',String(open));});
+  document.querySelectorAll('.vagas-view-switch button').forEach(btn=>btn.addEventListener('click',()=>{vagasState.view=btn.dataset.view;document.querySelectorAll('.vagas-view-switch button').forEach(b=>b.classList.toggle('ativo',b===btn));renderVagas();}));
+}
+bindVagasControls();
 
 function abrirModalVaga(vaga) {
   vagaEmEdicao = vaga || null;
