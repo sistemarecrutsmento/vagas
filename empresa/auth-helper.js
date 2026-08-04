@@ -21,7 +21,7 @@
 //   authRBAC.hideIfNoRole(...roles, el)    → esconde el se não tem role
 //
 // Como usar:
-//   <script src="../_shared/auth-helper.js"></script>
+//   <script src="auth-helper.js"></script>
 //   <script>
 //     setStorageKeys('admin_token', 'admin_refresh');
 //     window.addEventListener('DOMContentLoaded', async () => {
@@ -253,7 +253,7 @@
         try {
           const key = ACCESS_KEY;
           if (key.startsWith('empresa_')) window.location.href = 'login.html';
-          else if (key.startsWith('admin_')) window.location.href = '../admin/index.html';
+          else if (key.startsWith('admin_')) window.location.href = 'login.html';
           else if (key.startsWith('candidato_')) window.location.href = '../candidato/login.html';
         } catch (e) {}
         throw new Error('Sessão expirada. Faça login novamente.');
@@ -293,7 +293,7 @@
     try {
       const key = ACCESS_KEY;
       if (key.startsWith('empresa_')) window.location.href = 'login.html';
-      else if (key.startsWith('admin_')) window.location.href = '../admin/index.html';
+      else if (key.startsWith('admin_')) window.location.href = 'login.html';
       else if (key.startsWith('candidato_')) window.location.href = '../candidato/login.html';
       else window.location.reload();
     } catch (e) { window.location.reload(); }
