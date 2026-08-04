@@ -60,7 +60,8 @@ function toggleMenu() {
 function mostrarApp() {
   document.getElementById('login-page').style.display = 'none';
   const topbar = document.getElementById('topbar');
-  if (topbar) topbar.style.display = 'flex';
+  if (topbar) topbar.style.display = 'none';
+  document.body.classList.remove('dashboard-view');
   document.getElementById('app').classList.add('logado');
   carregarUsuarioSidebar();
   irPara('dashboard');
@@ -93,6 +94,10 @@ function carregarUsuarioSidebar() {
 
 // ===== NAVEGAÇÃO =====
 function irPara(page) {
+  const isDashboard = page === 'dashboard';
+  document.body.classList.toggle('dashboard-view', isDashboard);
+  const topbar = document.getElementById('topbar');
+  if (topbar) topbar.style.display = isDashboard ? 'flex' : 'none';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('ativo'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
   document.getElementById('page-' + page).classList.add('ativo');
