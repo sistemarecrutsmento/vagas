@@ -1,0 +1,201 @@
+/* VagasIO Splash Screen — experiência visual isolada da Home */
+:root {
+  --splash-blue: #1976D2;
+  --splash-blue-dark: #071A33;
+  --splash-blue-deep: #020A16;
+  --splash-blue-light: #42A5F5;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--splash-blue-deep);
+}
+
+body {
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+
+.vagasio-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  color: #fff;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(25, 118, 210, .20) 0%, rgba(13, 71, 161, .10) 27%, transparent 58%),
+    radial-gradient(circle at center, var(--splash-blue-dark) 0%, var(--splash-blue-deep) 75%);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 850ms cubic-bezier(.22, 1, .36, 1),
+              transform 850ms cubic-bezier(.22, 1, .36, 1),
+              visibility 0s linear 850ms;
+}
+
+.vagasio-splash::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  width: min(72vw, 980px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(25, 118, 210, .18);
+  filter: blur(120px);
+  opacity: .65;
+  transform: translateZ(0);
+  animation: splash-glow 4s ease-in-out infinite;
+}
+
+.vagasio-splash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 25%, rgba(0, 0, 0, .28) 100%);
+}
+
+.vagasio-splash__watermark {
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  width: clamp(520px, 72vw, 1180px);
+  max-width: 86vw;
+  height: auto;
+  object-fit: contain;
+  transform: translate(-50%, -50%) scale(.96);
+  opacity: .035;
+  filter: saturate(1.15) brightness(1.2);
+  user-select: none;
+  pointer-events: none;
+  animation: splash-watermark 10s ease-in-out infinite;
+}
+
+.vagasio-splash__content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: min(88vw, 620px);
+  text-align: center;
+  transform: translateZ(0);
+}
+
+.vagasio-splash__logo {
+  display: block;
+  width: clamp(220px, 32vw, 480px);
+  max-width: 78vw;
+  height: auto;
+  object-fit: contain;
+  opacity: 0;
+  filter: blur(8px);
+  transform: scale(.94) translateZ(0);
+  animation: splash-logo-in 1.2s cubic-bezier(.22, 1, .36, 1) 180ms forwards;
+}
+
+.vagasio-splash__hint {
+  margin: 26px 0 0;
+  color: rgba(255, 255, 255, .64);
+  font-size: clamp(10px, 1.1vw, 13px);
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: splash-hint-in 700ms ease 800ms forwards;
+}
+
+.vagasio-splash.is-leaving {
+  opacity: 0;
+  transform: scale(1.03);
+  pointer-events: none;
+}
+
+.vagasio-splash.is-leaving .vagasio-splash__logo {
+  opacity: 0;
+  transform: scale(1.03);
+  transition: opacity 760ms ease, transform 760ms ease;
+}
+
+.vagasio-splash.is-leaving .vagasio-splash__hint {
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+@keyframes splash-logo-in {
+  from { opacity: 0; filter: blur(8px); transform: scale(.94) translateZ(0); }
+  to { opacity: 1; filter: blur(0); transform: scale(1) translateZ(0); }
+}
+
+@keyframes splash-watermark {
+  0%, 100% { opacity: .025; transform: translate(-50%, -50%) scale(.96); }
+  50% { opacity: .055; transform: translate(-50%, -50%) scale(1.03); }
+}
+
+@keyframes splash-glow {
+  0%, 100% { opacity: .48; transform: scale(.94) translateZ(0); }
+  50% { opacity: .78; transform: scale(1.04) translateZ(0); }
+}
+
+@keyframes splash-hint-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 700px) {
+  .vagasio-splash::before {
+    width: 90vw;
+    filter: blur(86px);
+    opacity: .55;
+  }
+
+  .vagasio-splash__watermark {
+    width: 86vw;
+    max-width: 520px;
+  }
+
+  .vagasio-splash__logo {
+    width: clamp(200px, 62vw, 280px);
+  }
+
+  .vagasio-splash__hint {
+    margin-top: 20px;
+    font-size: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vagasio-splash,
+  .vagasio-splash::before,
+  .vagasio-splash__watermark,
+  .vagasio-splash__logo,
+  .vagasio-splash__hint {
+    animation: none;
+    transition-duration: 200ms;
+  }
+
+  .vagasio-splash__logo {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+
+  .vagasio-splash__watermark {
+    opacity: .035;
+    transform: translate(-50%, -50%);
+  }
+
+  .vagasio-splash__hint { opacity: 1; }
+}
