@@ -66,6 +66,18 @@
     .empty { text-align: center; padding: 40px; color: var(--cinza-medio); }
     .acoes-cell { display: flex; gap: 6px; flex-wrap: wrap; }
     .doc-pill { display: inline-block; margin-left: 6px; padding: 2px 8px; background: var(--dourado); color: var(--preto); border-radius: 999px; font-size: 10px; font-weight: 700; vertical-align: middle; }
+    @media (max-width: 768px) {
+      .app { flex-direction: column; min-width: 0; }
+      aside { width: 100%; min-height: auto; padding: 12px; }
+      .aside-logo { padding: 0 8px 12px; margin-bottom: 8px; }
+      .nav-item { display: inline-block; padding: 8px 9px; margin: 2px 0; font-size: 12px; }
+      .aside-user { margin-top: 10px; padding: 10px 8px 0; }
+      main { width: 100%; padding: 20px 12px; overflow-x: auto; }
+      .topo { flex-wrap: wrap; padding: 12px 16px; }
+      .topo h1 { font-size: 16px; }
+      .container { margin: 16px 0; padding: 0; }
+      table { min-width: 640px; }
+    }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
 </head>
