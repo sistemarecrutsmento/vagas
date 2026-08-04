@@ -59,6 +59,8 @@ function toggleMenu() {
 
 function mostrarApp() {
   document.getElementById('login-page').style.display = 'none';
+  const topbar = document.getElementById('topbar');
+  if (topbar) topbar.style.display = 'flex';
   document.getElementById('app').classList.add('logado');
   carregarUsuarioSidebar();
   irPara('dashboard');
@@ -80,6 +82,12 @@ function carregarUsuarioSidebar() {
     if (elAvatar) elAvatar.textContent = iniciais || 'A';
     if (elNome) elNome.textContent = nome;
     if (elEmpresa) elEmpresa.textContent = payload.email || '';
+    const topAvatar = document.getElementById('top-avatar');
+    const topAdmin = document.getElementById('top-admin');
+    const topEmail = document.getElementById('top-email');
+    if (topAvatar) topAvatar.textContent = iniciais || 'A';
+    if (topAdmin) topAdmin.textContent = nome || 'Admin';
+    if (topEmail) topEmail.textContent = payload.email || '';
   } catch (e) { /* silencioso */ }
 }
 
@@ -745,7 +753,8 @@ async function carregarDashboardV2() {
       { label: 'Candidatos', valor: k.total_candidatos || 0, delta: k.deltas?.candidatos, icon: '👥', cor: 'azul' },
       { label: 'Processos ativos', valor: k.processos_ativos || 0, delta: k.deltas?.processos, icon: '📋', cor: 'roxo' },
       { label: 'Entrevistas agendadas', valor: k.entrevistas_agendadas || 0, delta: k.deltas?.entrevistas, icon: '📅', cor: 'verde' },
-      { label: 'Novos (7 dias)', valor: k.candidatos_novos_7d || 0, delta: k.deltas?.candidatos, icon: '✨', cor: 'laranja' }
+      { label: 'Contratações (30d)', valor: k.contratacoes || 0, delta: null, icon: '🤝', cor: 'dourado' },
+      { label: 'Alertas +30d', valor: k.alertas_30d || 0, delta: null, icon: '⌛', cor: 'cinza' }
     ];
     document.getElementById('kpis-grid').innerHTML = kpis.map(k => {
       const delta = k.delta == null ? '' : (k.delta > 0 ? `<span class="kpi-delta up">+${k.delta}% este mês</span>` : k.delta < 0 ? `<span class="kpi-delta down">${k.delta}% este mês</span>` : `<span class="kpi-delta flat">0% este mês</span>`);
