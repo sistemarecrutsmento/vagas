@@ -421,6 +421,11 @@ async function carregarEquipe() {
   try {
     const r = await authedFetch(API + '/api/empresa/equipe', { headers: {} });
     const data = await r.json();
+    // A API tenant retorna { equipe }; o layout antigo trabalha com
+    // { recrutadores, empresas, empresaUsuarios }.
+    if (!data.recrutadores && Array.isArray(data.equipe)) data.recrutadores = data.equipe;
+    if (!data.empresas) data.empresas = [];
+    if (!data.empresaUsuarios) data.empresaUsuarios = [];
 
     // Recrutadores
     const recDiv = document.getElementById('lista-recrutadores');
