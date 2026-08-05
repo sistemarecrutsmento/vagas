@@ -266,9 +266,15 @@
       // ou após (índice 7 = Contratação). Para vagas menores, ajusta abaixo.
       const etapaNum = Number(candidatura.etapa_atual || 0);
       let docsCard = '';
-      // Coleta = índice (total - 2) para a maioria das vagas (Penúltima etapa)
-      const idxColetaEsperado = (candidatura.etapas || []).length - 2;
-      if (etapaNum >= idxColetaEsperado) {
+      let etapasCandidatura = candidatura.etapas;
+      if (typeof etapasCandidatura === 'string') {
+        try { etapasCandidatura = JSON.parse(etapasCandidatura); } catch (_) { etapasCandidatura = []; }
+      }
+      etapasCandidatura = Array.isArray(etapasCandidatura) ? etapasCandidatura : [];
+      // Só consulta documentos quando a vaga realmente possui uma etapa de
+      // coleta. Sem etapas configuradas, dados de teste não podem bloquear a tela.
+      const idxColetaEsperado = etapasCandidatura.length ? etapasCandidatura.length - 2 : Infinity;
+      if (etapasCandidatura.length && etapaNum >= idxColetaEsperado) {
         try {
           await carregarDocumentos(id);
           if (_obrigatoriosDocs.length) {
@@ -307,7 +313,13 @@
           console.error('Erro ao carregar documentos:', e);
         }
       }
-      render(candidatura, docsCard);
+      try {
+        render(candidatura, docsCard);
+      } catch (e) {
+        console.error('Erro ao renderizar análise:', e);
+        content.innerHTML = '<div class="card"><div class="alert alert-erro">Não foi possível montar os detalhes deste candidato. ' + escapeHtml(e.message || 'Verifique os dados da candidatura.') + '</div></div>';
+        return;
+      }
       window.currentCandidatura = candidatura;
       carregarEntrevistasExistentes(id);
       // Reaplica estado dos accordions (cards podem ter sido criados dinâmicamente)
@@ -397,7 +409,19 @@
 
     function render(c, docsCard) {
       const content = document.getElementById('content');
-      const etapas = (c.etapas || []).map(e => typeof e === 'string' ? e : e.nome);
+      // Dados de teste/legados podem trazer etapas como JSON string, array de
+      // objetos ou até nulo. Normalizamos antes de montar a timeline para que
+      // um campo vazio nunca interrompa a renderização inteira.
+      const etapasPadrao = ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta de Documentos', 'Contratação'];
+      let etapasRaw = c.etapas;
+      if (typeof etapasRaw === 'string') {
+        try { etapasRaw = JSON.parse(etapasRaw); } catch (_) { etapasRaw = []; }
+      }
+      const etapas = (Array.isArray(etapasRaw) ? etapasRaw : [])
+        .map(e => typeof e === 'string' ? e : (e && e.nome))
+        .map(e => String(e || '').trim())
+        .filter(Boolean);
+      if (!etapas.length) etapas.push(...etapasPadrao);
       // etapa_atual do banco = 0-indexed da PRÓXIMA etapa a fazer (etapa_atual=0 = Inscrição,
       // etapa_atual=1 = Triagem após Inscrição concluída, etc).
       // etapaAtual = 1-indexed da etapa em andamento (etapa_atual + 1), usado no display.
