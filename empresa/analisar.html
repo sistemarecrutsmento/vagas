@@ -245,7 +245,7 @@
 
       let candidatura;
       try {
-        const request = { headers: { 'Authorization': 'Bearer ' + token } };
+        const request = { headers: { 'Authorization': 'Bearer ' + token }, __native: true };
         const r = await fetchEmpresaComTimeout(API + '/api/empresa/candidatura/' + id, request);
         if (r.status === 401 || r.status === 403) {
           content.innerHTML = '<div class="card"><div class="alert alert-erro">Sessão expirada. <a href="login.html" target="_top">Faça login</a> novamente.</div></div>';
@@ -1082,7 +1082,8 @@
       try {
         const token = window.authTokens?.getAccess?.() || localStorage.getItem('empresa_token');
         const r = await fetchEmpresaComTimeout(API + '/api/empresa/candidatura/' + candidaturaId + '/documentos', {
-          headers: { 'Authorization': 'Bearer ' + token }
+          headers: { 'Authorization': 'Bearer ' + token },
+          __native: true
         });
         if (!r.ok) {
           _obrigatoriosDocs = []; _docsCache = [];
