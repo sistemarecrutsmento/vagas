@@ -426,13 +426,14 @@
       const etapaAtualBanco = Number(c.etapa_atual || 0);
       const etapaAtual = etapaAtualBanco + 1;
       const totalEtapas = etapas.length || 1;
-      // Compara com etapa_atual do banco (0-indexed): Proposta=5, Entrevista Gestor=4, Triagem=1
-      // (Triagem=índice 1 do array; o backend grava etapa_atual=1 quando a inscrição é concluída)
+      // Os índices variam quando a empresa customiza etapas. Resolva pelo
+      // nome para manter o fluxo correto tanto em vagas de 7 etapas quanto
+      // em vagas legadas de 8 etapas (com uma etapa intermediária extra).
       const ehTriagem = etapaAtualBanco === 1;
-      // Proposta está no índice 5 nas vagas com 8 etapas (Inscrição=0, Triagem=1, RH=2, Gestor=3,
-      // Validação=4, Proposta=5)
-      const ehProposta = etapaAtualBanco === 5;
-      // Entrevista gestor = índice 3 (4ª etapa)
+      const idxEtapaProposta = etapas.findIndex(n => /proposta/i.test(n));
+      const ehProposta = etapaAtualBanco === (idxEtapaProposta >= 0 ? idxEtapaProposta : 4);
+      // Entrevista gestor = índice 3 (quando existir; a comparação por nome
+      // abaixo também cobre vagas customizadas).
       const ehEntrevistaGestor = etapaAtualBanco === 3;
       const status = c.status || 'em_andamento';
 
