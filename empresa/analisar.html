@@ -169,6 +169,15 @@
 <script src="empresa-auth-patch.js?v=empresa-portal2"></script>
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
+    async function fetchEmpresaComTimeout(url, options = {}, timeoutMs = 15000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, { ...options, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+    }
 
     // Accordion: expandir/recolher card colapsável
     function toggleCard(id) {
@@ -214,7 +223,12 @@
       // No shell integrado, aguarda a renovação silenciosa antes da primeira
       // consulta para não deixar a tela presa no "Carregando" com JWT antigo.
       if (typeof window.authInit === 'function') {
-        try { await window.authInit(); } catch (_) {}
+        try {
+          await Promise.race([
+            window.authInit(),
+            new Promise(resolve => setTimeout(resolve, 4000))
+          ]);
+        } catch (_) {}
       }
       const token = window.authTokens?.getAccess?.() || localStorage.getItem('empresa_token');
       if (!token) {
@@ -232,7 +246,7 @@
       let candidatura;
       try {
         const request = { headers: { 'Authorization': 'Bearer ' + token } };
-        const r = await (window.authFetch ? window.authFetch(API + '/api/empresa/candidatura/' + id, request) : fetch(API + '/api/empresa/candidatura/' + id, request));
+        const r = await fetchEmpresaComTimeout(API + '/api/empresa/candidatura/' + id, request);
         if (r.status === 401 || r.status === 403) {
           content.innerHTML = '<div class="card"><div class="alert alert-erro">Sessão expirada. <a href="login.html" target="_top">Faça login</a> novamente.</div></div>';
           return;
@@ -1066,8 +1080,8 @@
 
     async function carregarDocumentos(candidaturaId) {
       try {
-        const token = localStorage.getItem('empresa_token');
-        const r = await fetch(API + '/api/empresa/candidatura/' + candidaturaId + '/documentos', {
+        const token = window.authTokens?.getAccess?.() || localStorage.getItem('empresa_token');
+        const r = await fetchEmpresaComTimeout(API + '/api/empresa/candidatura/' + candidaturaId + '/documentos', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
         if (!r.ok) {
