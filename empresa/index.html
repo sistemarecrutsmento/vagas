@@ -125,6 +125,12 @@
     main { flex: 1 1 auto; min-width: 0; padding: 32px; overflow: visible; }
     .page { display: none; }
     .page.ativo { display: block; }
+    /* A análise continua sendo o mesmo documento operacional; aqui ele é apenas
+       exibido dentro do shell da SPA para não alterar suas funções ou layout. */
+    #page-analisar { min-width: 0; }
+    .analisar-embed-frame { width: 100%; min-width: 0; overflow: hidden; border-radius: 10px; background: #F5F5F5; }
+    #analisar-iframe { display: block; width: 100%; height: calc(100vh - 64px); min-height: 720px; border: 0; background: #F5F5F5; }
+    @media (max-width: 700px) { #analisar-iframe { height: calc(100vh - 32px); min-height: 680px; } }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .page-header h2 { font-size: 24px; font-weight: 700; }
     .page-header p { color: #888; font-size: 14px; margin-top: 2px; }
@@ -967,7 +973,12 @@
       <section class="equipe-invites-panel"><div class="equipe-panel-heading"><div><h3>Convites pendentes</h3><p>Convites reais aguardando aceite. Eles expiram após 7 dias.</p></div></div><div id="equipe-invites-list"><div class="equipe-empty-inline">Carregando convites...</div></div></section><section class="equipe-activity-panel"><div class="equipe-panel-heading"><div><h3>Atividade recente</h3><p>Atividades de usuários só aparecem quando existe um registro auditável disponível.</p></div></div><div id="equipe-activity-list"><div class="equipe-empty-inline">Nenhum histórico de atividades disponível para esta empresa.</div></div></section>
     </div>
 
-    <!-- Análise de candidato agora é página separada: empresa/analisar.html -->
+    <!-- ANÁLISE DO CANDIDATO — o documento original é preservado dentro do shell -->
+    <div class="page" id="page-analisar" aria-label="Analisar candidato">
+      <div class="analisar-embed-frame">
+        <iframe id="analisar-iframe" title="Análise do candidato" loading="eager"></iframe>
+      </div>
+    </div>
   </main>
 </div>
 
