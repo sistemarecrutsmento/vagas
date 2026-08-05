@@ -252,14 +252,15 @@ function abrirModalNovaEntrevista() {
 
 // ===== DASHBOARD =====
 // ==== DASHBOARD V2 (jul/2026 - profissional) ====
-async function carregarDashboardV2() {
+async function carregarDashboardBase() {
   try {
     const r = await fetch(API + '/api/empresa/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
     const data = await r.json();
+    window.__empresaDashboardData = data;
     if (!r.ok) {
       console.error('[DASHBOARD]', data);
       const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
-      if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro: ${data.erro || 'desconhecido'}</div>`;
+      if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar o dashboard: ${escapeHtml(data.erro || 'desconhecido')} <button type="button" class="btn btn-sec" onclick="carregarDashboardV2()">Tentar novamente</button></div>`;
       return;
     }
     // === Saudação dinâmica (bom dia / boa tarde / boa noite) ===
@@ -283,12 +284,12 @@ async function carregarDashboardV2() {
       check: 'M1 17 L10 14 L18 15 L27 8 L36 10 L45 3 L55 5', talent: 'M1 14 L10 16 L18 11 L27 13 L36 7 L45 9 L55 4'
     };
     const kpis = [
-      { label: 'Vagas ativas', valor: Number(k.vagas_ativas || 0), delta: k.deltas?.vagas, deltaLabel: 'novas nos últimos 7 dias', icon: 'briefcase', cor: 'vinho' },
-      { label: 'Candidatos', valor: Number(k.total_candidatos || 0), delta: k.deltas?.candidatos, deltaLabel: 'novos nos últimos 7 dias', icon: 'users', cor: 'roxo' },
-      { label: 'Processos ativos', valor: Number(k.processos_ativos || 0), delta: k.deltas?.processos, deltaLabel: 'novos nos últimos 7 dias', icon: 'file', cor: 'azul' },
-      { label: 'Entrevistas agendadas', valor: Number(k.entrevistas_agendadas || 0), delta: k.deltas?.entrevistas, deltaLabel: 'nos próximos 7 dias', icon: 'calendar', cor: 'verde' },
-      { label: 'Contratações (30d)', valor: contratacoesAtual, delta: contratacoesDelta, deltaLabel: 'vs. 30 dias anteriores', icon: 'check', cor: 'laranja' },
-      { label: 'Abertas +30d', valor: abertasMais30, delta: null, deltaLabel: 'vagas publicadas', icon: 'talent', cor: 'roxo' }
+      { label: 'Vagas ativas', valor: Number(k.vagas_ativas || 0), delta: k.deltas?.vagas, deltaLabel: 'novas nos últimos 7 dias', icon: 'briefcase', cor: 'vinho', action:'active-vagas' },
+      { label: 'Candidatos', valor: Number(k.total_candidatos || 0), delta: k.deltas?.candidatos, deltaLabel: 'novos nos últimos 7 dias', icon: 'users', cor: 'roxo', action:'candidatos' },
+      { label: 'Processos ativos', valor: Number(k.processos_ativos || 0), delta: k.deltas?.processos, deltaLabel: 'novos nos últimos 7 dias', icon: 'file', cor: 'azul', action:'processos' },
+      { label: 'Entrevistas agendadas', valor: Number(k.entrevistas_agendadas || 0), delta: k.deltas?.entrevistas, deltaLabel: 'nos próximos 7 dias', icon: 'calendar', cor: 'verde', action:'entrevistas' },
+      { label: 'Contratações (30d)', valor: contratacoesAtual, delta: contratacoesDelta, deltaLabel: 'vs. 30 dias anteriores', icon: 'check', cor: 'laranja', action:'contratacoes' },
+      { label: 'Abertas +30d', valor: abertasMais30, delta: null, deltaLabel: 'vagas publicadas', icon: 'talent', cor: 'roxo', action:'antigas' }
     ];
     document.getElementById('kpis-grid').innerHTML = kpis.map(metric => {
       let delta = '';
@@ -297,7 +298,7 @@ async function carregarDashboardV2() {
         const sign = metric.delta > 0 ? '+' : '';
         delta = `<span class="kpi-delta ${direction}">${sign}${metric.delta}% ${metric.deltaLabel}</span>`;
       } else if (metric.deltaLabel) delta = `<span class="kpi-delta flat">${metric.deltaLabel}</span>`;
-      return `<div class="kpi-card kpi-${metric.cor}"><div class="kpi-top"><span class="kpi-icon">${dashSvg(metric.icon)}</span><svg class="kpi-spark" viewBox="0 0 56 20" aria-hidden="true"><path d="${spark[metric.icon]}"></path></svg></div><div class="kpi-label">${metric.label}</div><div class="kpi-valor">${metric.valor.toLocaleString('pt-BR')}</div>${delta}</div>`;
+      return `<button type="button" class="kpi-card kpi-${metric.cor} dash-kpi-click" onclick="dashboardKpi('${metric.action}')" aria-label="Abrir ${escapeHtml(metric.label)}"><div class="kpi-top"><span class="kpi-icon">${dashSvg(metric.icon)}</span><svg class="kpi-spark" viewBox="0 0 56 20" aria-hidden="true"><path d="${spark[metric.icon]}"></path></svg></div><div class="kpi-label">${metric.label}</div><div class="kpi-valor">${metric.valor.toLocaleString('pt-BR')}</div>${delta}</button>`;
     }).join('');
     
     // === Gráfico: Candidatos por etapa ===
@@ -305,18 +306,21 @@ async function carregarDashboardV2() {
     const labels = data.etapas_labels || ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'];
     const cores = ['#FF8FA3', '#5B9BD5', '#A78BFA', '#34D399', '#FBBF24', '#F472B6', '#722F37'];
     const maxEtapa = Math.max(1, ...Object.values(etapasObj).map(v => parseInt(v) || 0));
-    document.getElementById('grafico-etapas').innerHTML = labels.map((label, i) => {
+    const observedStageMax = Math.max(0, ...Object.entries(etapasObj).filter(([,v]) => Number(v)>0).map(([n]) => Number(n)));
+    const configuredStageMax = vagasEmpresa.reduce((max,v) => { try { const e=Array.isArray(v.etapas)?v.etapas:(typeof v.etapas==='string'?JSON.parse(v.etapas):[]); return Math.max(max,e.length); } catch (_) { return max; } }, 0);
+    const visibleStageCount = Math.min(labels.length, Math.max(observedStageMax, configuredStageMax));
+    document.getElementById('grafico-etapas').innerHTML = labels.slice(0,visibleStageCount).map((label, i) => {
       const etapaNum = i + 1;
       const val = parseInt(etapasObj[etapaNum] || 0);
       const pct = (val / maxEtapa) * 100;
-      return `<div class="etapa-row">
-        <div class="etapa-label">${label}</div>
+      return `<button type="button" class="etapa-row" onclick="dashOpenStage(${etapaNum})" aria-label="Ver candidatos na etapa ${escapeHtml(label)}">
+        <div class="etapa-label">${escapeHtml(label)}</div>
         <div class="etapa-bar-bg">
           <div class="etapa-bar" style="width:${pct}%;background:${cores[i]}">
             <span class="etapa-val">${val}</span>
           </div>
         </div>
-      </div>`;
+      </button>`;
     }).join('');
     
     // === Taxa de conversão: calculada exclusivamente com os processos desta empresa ===
@@ -409,7 +413,7 @@ async function carregarDashboardV2() {
       document.getElementById('ranking-table-body').innerHTML = vRanking.slice(0, 4).map(v => {
         const vagaReal = vagasEmpresa.find(item => Number(item.id) === Number(v.id));
         const total = Number(v.total_candidatos || 0);
-        return `<div class="ranking-item"><div class="ranking-item-top"><strong>${escapeHtml(v.titulo || '—')}</strong><span class="ranking-percent">${Math.round((total / maxRanking) * 100)}%</span></div><div class="ranking-company">${escapeHtml(v.empresa || vagaReal?.empresa || 'Minha empresa')}</div><div class="ranking-item-bottom"><b>${total}</b> candidatos <span class="ranking-bar"><i style="width:${Math.max(8, Math.round((total / maxRanking) * 100))}%"></i></span></div></div>`;
+        const id=Number(v.id); if(!Number.isInteger(id)||id<=0)return ''; return `<button type="button" class="ranking-item" onclick="dashOpenVaga(${id})" aria-label="Abrir vaga ${escapeHtml(v.titulo || '')}"><div class="ranking-item-top"><strong>${escapeHtml(v.titulo || '—')}</strong><span class="ranking-percent">${Math.round((total / maxRanking) * 100)}%</span></div><div class="ranking-company">${escapeHtml(v.empresa || vagaReal?.empresa || 'Minha empresa')}</div><div class="ranking-item-bottom"><b>${total}</b> candidatos <span class="ranking-bar"><i style="width:${Math.max(8, Math.round((total / maxRanking) * 100))}%"></i></span></div></button>`;
       }).join('');
     } else {
       document.getElementById('ranking-table-body').innerHTML = '<div class="empty">Nenhuma vaga com candidatos</div>';
@@ -461,7 +465,7 @@ async function carregarDashboardV2() {
   } catch (e) {
     console.error('[DASHBOARD V2] ERRO:', e.message, e.stack);
     const grid = document.getElementById('kpis-grid') || document.getElementById('stats-grid');
-    if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar: ${e.message}</div>`;
+    if (grid) grid.innerHTML = `<div class="alert alert-erro">Erro ao carregar o dashboard: ${escapeHtml(e.message || 'Erro de conexão')} <button type="button" class="btn btn-sec" onclick="carregarDashboardV2()">Tentar novamente</button></div>`;
   }
 }
 
@@ -488,7 +492,7 @@ async function carregarDashboard() {
 // ===== VAGAS =====
 let vagasEmpresaCache = [];
 let vagasCandidatosCache = {};
-const vagasState = { search: '', status: '', area: '', nivel: '', tipo: '', cidade: '', criacao: '', periodo: '30', sort: 'recentes', page: 1, perPage: 8, view: 'cards' };
+const vagasState = { search: '', status: '', area: '', nivel: '', tipo: '', cidade: '', criacao: '', periodo: '30', sort: 'recentes', page: 1, perPage: 8, view: 'cards', vagaId: '' };
 
 const statusVagaLabel = { publicada: 'Publicada', pausada: 'Pausada', rascunho: 'Rascunho', fechada: 'Encerrada' };
 function statusVagaClass(v) {
@@ -544,6 +548,7 @@ function getVagasFiltered() {
   const q = vagasState.search.trim().toLocaleLowerCase('pt-BR');
   const now = Date.now();
   let rows = vagasEmpresaCache.filter(v => {
+    if (vagasState.vagaId && String(v.id) !== String(vagasState.vagaId)) return false;
     const hay = [v.titulo,v.empresa,v.area,v.categoria,v.cidade,v.estado,v.nivel,v.tipo_contrato].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');
     const created = v.criada_em ? new Date(v.criada_em).getTime() : 0;
     const period = vagasState.criacao || vagasState.periodo;
@@ -1316,3 +1321,53 @@ function formatarData(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('pt-BR');
 }
+// ===== DASHBOARD INTEGRADO — navegação e visões internas =====
+function dashValidId(value){const n=Number(value);return Number.isInteger(n)&&n>0?n:null;}
+function dashQuery(page, params={}){const q=new URLSearchParams();q.set('page',page);Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=='')q.set(k,String(v));});return q;}
+function dashNavigate(page, params={}){const q=dashQuery(page,params);history.replaceState(null,'','?'+q.toString());irPara(page,{keepQuery:true});}
+function dashReadQuery(){const q=new URLSearchParams(location.search);return {page:q.get('page')||'dashboard',status:q.get('status')||'',vagaId:q.get('vaga_id')||'',etapa:q.get('etapa')||'',dashview:q.get('dashview')||''};}
+function dashApplyQuery(){
+  const q=dashReadQuery();
+  if(typeof vagasState!=='undefined'){vagasState.status=q.status||'';vagasState.vagaId=dashValidId(q.vagaId)||'';}
+  if(typeof candidatosState!=='undefined'){candidatosState.vaga=q.vagaId||'';candidatosState.etapa=q.etapa||'';candidatosState.page=1;}
+  if(typeof contratacoesState!=='undefined'){contratacoesState.status=q.status||'';contratacoesState.vaga=q.vagaId||'';contratacoesState.page=1;}
+  return q;
+}
+function dashboardToggleBase(show){['row-stages','row-activities','card-ranking','row-docs'].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=show;});}
+function dashboardInsightText(value){return escapeHtml(value===undefined||value===null||value===''?'—':String(value));}
+function dashboardDate(value){if(!value)return '—';const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function dashboardActivityLabel(a){const map={inscricao:'Nova inscrição',avancar:'Avançou de etapa',reprovar:'Reprovado',reabrir:'Reaberto',recusar_proposta:'Proposta recusada',aceitar_proposta:'Proposta aceita',enviar_proposta:'Proposta enviada',entrevista:'Entrevista agendada',comentario:'Parecer adicionado'};return map[a.evento_tipo||a.texto]||a.mensagem||'Atualização do processo';}
+function dashboardSafeCandidatesLink(vagaId,etapa){const id=dashValidId(vagaId);if(!id&&!etapa)return '';const p={};if(id)p.vaga_id=id;if(etapa)p.etapa=etapa;return '?'+dashQuery('candidatos',p).toString();}
+function showDashboardInsight(view){
+  const box=document.getElementById('dashboard-insight'),title=document.getElementById('dashboard-insight-title'),sub=document.getElementById('dashboard-insight-subtitle'),content=document.getElementById('dashboard-insight-content');
+  if(!box||!title||!sub||!content)return;
+  const d=window.__empresaDashboardData||{}, rows=Array.isArray(d.vagas)?d.vagas:[];
+  dashboardToggleBase(true);box.hidden=false;box.dataset.view=view;let html='';
+  if(view==='processos'){
+    title.textContent='Processos ativos';sub.textContent='Vagas com candidaturas não encerradas, vinculadas à sua empresa.';
+    const data=Array.isArray(d.processos_por_vaga)?d.processos_por_vaga:[];
+    html=data.length?`<table><thead><tr><th>Vaga</th><th>Status</th><th>Processos</th><th>Ação</th></tr></thead><tbody>${data.map(v=>{const id=dashValidId(v.vaga_id);return id?`<tr><td>${dashboardInsightText(v.titulo)}</td><td>${dashboardInsightText(v.vaga_status)}</td><td>${Number(v.processos_ativos||0)}</td><td><a href="${dashboardSafeCandidatesLink(id)}">Ver candidatos</a></td></tr>`:''}).join('')}</tbody></table>`:'<div class="insight-empty"><strong>Nenhum processo ativo</strong>Não há candidaturas em andamento nas vagas disponíveis.</div>';
+  } else if(view==='antigas'){
+    title.textContent='Vagas abertas há mais de 30 dias';sub.textContent='Somente vagas publicadas com data real de criação superior a 30 dias.';
+    const data=Array.isArray(d.vagas_abertas_mais_30)?d.vagas_abertas_mais_30:rows.filter(v=>v.status==='publicada'&&v.criada_em&&Date.now()-new Date(v.criada_em).getTime()>30*86400000);
+    html=data.length?`<table><thead><tr><th>Vaga</th><th>Aberta em</th><th>Candidatos</th><th>Ação</th></tr></thead><tbody>${data.map(v=>{const id=dashValidId(v.id);return id?`<tr><td>${dashboardInsightText(v.titulo)}</td><td>${dashboardDate(v.criada_em)}</td><td>${Number(v.total_candidatos||0)}</td><td><a href="${dashQuery('vagas',{vaga_id:id,status:'publicada'})}">Ver vaga</a></td></tr>`:''}).join('')}</tbody></table>`:'<div class="insight-empty"><strong>Nenhuma vaga nesta condição</strong>Não há vaga publicada aberta há mais de 30 dias.</div>';
+  } else if(view==='funil'){
+    title.textContent='Funil completo';sub.textContent='Clique em uma etapa para abrir os candidatos reais filtrados.';
+    const labels=Array.isArray(d.etapas_labels)?d.etapas_labels:[];const counts=d.etapas||{};const observed=Object.entries(counts).filter(([,value])=>Number(value)>0).map(([key])=>Number(key)).filter(Number.isFinite);const maxObserved=observed.length?Math.max(...observed):0;const configured=rows.map(v=>{try{return Array.isArray(v.etapas)?v.etapas.length:(typeof v.etapas==='string'?JSON.parse(v.etapas).length:0);}catch(_){return 0;}}).reduce((m,n)=>Math.max(m,n),0);const n=Math.min(7,Math.max(maxObserved,configured));
+    html=n?`<div class="dashboard-insight-list">${Array.from({length:n},(_,i)=>{const stage=i+1;return `<button type="button" class="dashboard-insight-stage" onclick="dashOpenStage(${stage})"><b>${Number(counts[stage]||0)}</b><span>${dashboardInsightText(labels[i]||`Etapa ${stage}`)}</span><small>Ver candidatos →</small></button>`;}).join('')}</div>`:'<div class="insight-empty"><strong>Funil indisponível</strong>A empresa ainda não possui etapas configuradas ou candidaturas observadas.</div>';
+  } else {
+    title.textContent='Histórico de atividades';sub.textContent='Eventos reais das candidaturas desta empresa nas últimas 48 horas.';
+    const data=Array.isArray(d.atividades_historico_48h)?d.atividades_historico_48h:[];
+    html=data.length?`<div class="dashboard-insight-list">${data.map(a=>`<a class="dashboard-insight-event" href="${dashValidId(a.candidatura_id)?'analisar.html?id='+encodeURIComponent(String(a.candidatura_id)):'#'}" ${dashValidId(a.candidatura_id)?'':'aria-disabled="true"'}><div><strong>${dashboardInsightText(dashboardActivityLabel(a))}</strong><span>${dashboardInsightText(a.candidato)} · ${dashboardInsightText(a.vaga)} · ${dashboardDate(a.quando)}${a.por?' · '+dashboardInsightText(a.por):''}</span></div></a>`).join('')}</div>`:'<div class="insight-empty"><strong>Nenhuma atividade encontrada</strong>Não houve evento disponível nas últimas 48 horas.</div>';
+  }
+  content.innerHTML=html;
+}
+function fecharDashboardInsight(){dashboardToggleBase(false);const box=document.getElementById('dashboard-insight');if(box){box.hidden=true;box.dataset.view='';}history.replaceState(null,'','?page=dashboard');}
+function dashboardKpi(action){if(action==='active-vagas')return dashNavigate('vagas',{status:'publicada'});if(action==='candidatos')return dashNavigate('candidatos');if(action==='entrevistas')return dashNavigate('agenda');if(action==='contratacoes')return dashNavigate('contratacoes',{status:'concluido'});if(action==='processos'||action==='antigas')return dashNavigate('dashboard',{dashview:action});}
+function dashOpenVaga(id){const n=dashValidId(id);if(n)dashNavigate('vagas',{vaga_id:n});}
+function dashOpenStage(stage){const n=dashValidId(stage);if(n)dashNavigate('candidatos',{etapa:n});}
+function dashApplyOfficialState(){const q=dashApplyQuery();if(q.page==='vagas'){const st=document.getElementById('vagas-filtro-status');if(st)st.value=vagasState.status||'';}if(q.page==='candidatos'){const st=document.getElementById('candidatos-filtro-vaga');if(st)st.value=candidatosState.vaga||'';document.querySelectorAll('#candidatos-stage-filters button').forEach(b=>b.classList.toggle('ativo',String(b.dataset.etapa||'')===String(candidatosState.etapa||'')));}if(q.page==='contratacoes'){const st=document.getElementById('contratacoes-filtro-status');if(st)st.value=contratacoesState.status||'';}}
+function irPara(page,opts={}){const el=document.getElementById('page-'+page);if(!el)return;if(!opts.keepQuery)history.replaceState(null,'','?'+dashQuery(page,opts.query||{}).toString());dashApplyQuery();document.querySelectorAll('.page').forEach(p=>p.classList.remove('ativo'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('ativo'));el.classList.add('ativo');document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('ativo');document.getElementById('aside')?.classList.remove('aberto');document.getElementById('app')?.classList.remove('aside-aberto');if(page==='dashboard'){carregarDashboard();return;}if(page==='vagas'){carregarVagasAdmin();return;}if(page==='candidatos'){carregarCandidatos();return;}if(page==='candidaturas'){carregarCandidaturas();return;}if(page==='propostas'){carregarPropostas();return;}if(page==='contratacoes'){carregarContratacoes();return;}if(page==='talentos'){carregarBancoTalentos();return;}if(page==='relatorios'){carregarRelatorios();return;}if(page==='configuracoes'){carregarConfiguracoes();return;}if(page==='equipe'){carregarEquipe();return;}if(page==='agenda'){carregarAgenda('hoje');}}
+function mostrarApp(){document.getElementById('login-page').style.display='none';document.getElementById('app').classList.add('logado');carregarUsuarioSidebar();dashApplyQuery();const q=dashReadQuery();const allowed=['dashboard','vagas','candidatos','candidaturas','propostas','contratacoes','talentos','relatorios','agenda','equipe','configuracoes'];irPara(allowed.includes(q.page)?q.page:'dashboard',{keepQuery:true});carregarContadorNotificacoes();}
+async function carregarDashboardV2(){await carregarDashboardBase();const q=dashReadQuery();if(q.page==='dashboard'&&q.dashview)showDashboardInsight(q.dashview);else dashboardToggleBase(false);}
+document.addEventListener('click',e=>{const link=e.target.closest('#page-dashboard .dash-link');if(!link)return;const text=(link.textContent||'').toLowerCase();if(text.includes('todas')){e.preventDefault();dashNavigate('dashboard',{dashview:'history'});}else if(text.includes('funil')){e.preventDefault();dashNavigate('dashboard',{dashview:'funil'});}});
