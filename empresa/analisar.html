@@ -145,6 +145,17 @@
     }
   </style>
   <script src="../candidato/chat-uploader.js"></script>
+  <script>
+    // Deep links continuam funcionando, mas entram no shell do Portal Empresa.
+    // Com embed=1 o documento permanece exatamente nesta página, dentro do iframe.
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (window.top === window.self && params.get('embed') !== '1' && /^\d+$/.test(String(id || ''))) {
+        window.location.replace('index.html?page=analisar&candidatura_id=' + encodeURIComponent(id));
+      }
+    })();
+  </script>
 </head>
 <body>
   <div class="container">
@@ -185,10 +196,12 @@
     document.addEventListener('DOMContentLoaded', restaurarEstadoCards);
 
     function voltar() {
-      // Volta pra lista de candidatos da vaga (SPA)
-      const params = new URLSearchParams(location.search);
-      const candId = params.get('id');
-      // Se tiver histórico, volta; senão vai pra SPA
+      // Dentro do Portal, volta para a aba Candidatos do shell principal.
+      if (window.top !== window.self) {
+        window.top.location.href = 'index.html?page=candidatos';
+        return;
+      }
+      // Mantém o comportamento original quando a página for aberta isoladamente.
       if (document.referrer && document.referrer.includes(location.host)) {
         history.back();
       } else {
