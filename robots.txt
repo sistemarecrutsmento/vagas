@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /empresa/
+Disallow: /admin/
+Disallow: /adminemdesuso/
+Disallow: /saas/
+Disallow: /candidato/
+
+Sitemap: https://vagasio.com.br/sitemap.xml
