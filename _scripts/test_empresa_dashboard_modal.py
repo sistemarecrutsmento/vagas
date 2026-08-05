@@ -53,6 +53,7 @@ def main() -> None:
     require("Date.now() - 24 * 60 * 60 * 1000", API, "recent activity is not limited to 24h")
     require("slice(0, 8)", API, "recent activity is not capped at eight")
     require("INTERVAL '48 hours'", API, "48h activity history window missing")
+    require("NULLIF(h->>'em','')::timestamptz", API, "historical event timestamp is incomplete")
     require("eva.empresa_id = $1", API, "tenant scope predicate missing")
     require("processos_por_vaga", API, "process aggregate missing")
     require("v.status = 'publicada' AND v.criada_em < NOW() - INTERVAL '30 days'", API, "30d vacancy rule missing")
