@@ -1322,53 +1322,86 @@ function formatarData(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('pt-BR');
 }
-// ===== DASHBOARD INTEGRADO — navegação e visões internas =====
+// ===== DASHBOARD — ações diretas e detalhes em modal =====
 function dashValidId(value){const n=Number(value);return Number.isInteger(n)&&n>0?n:null;}
 function dashQuery(page, params={}){const q=new URLSearchParams();q.set('page',page);Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=='')q.set(k,String(v));});return q;}
 function dashNavigate(page, params={}){const q=dashQuery(page,params);history.replaceState(null,'','?'+q.toString());irPara(page,{keepQuery:true});}
-function dashReadQuery(){const q=new URLSearchParams(location.search);return {page:q.get('page')||'dashboard',status:q.get('status')||'',vagaId:q.get('vaga_id')||'',etapa:q.get('etapa')||'',dashview:q.get('dashview')||''};}
+function dashReadQuery(){const q=new URLSearchParams(location.search);return {page:q.get('page')||'dashboard',status:q.get('status')||'',vagaId:q.get('vaga_id')||'',etapa:q.get('etapa')||'',periodo:q.get('periodo')||''};}
 function dashApplyQuery(){
   const q=dashReadQuery();
-  if(typeof vagasState!=='undefined'){vagasState.status=q.status||'';vagasState.vagaId=dashValidId(q.vagaId)||'';}
+  if(typeof vagasState!=='undefined'){vagasState.status=q.status||'';vagasState.vagaId=dashValidId(q.vagaId)||'';if(q.periodo)vagasState.periodo=q.periodo;}
   if(typeof candidatosState!=='undefined'){candidatosState.vaga=q.vagaId||'';candidatosState.etapa=q.etapa||'';candidatosState.page=1;}
   if(typeof contratacoesState!=='undefined'){contratacoesState.status=q.status||'';contratacoesState.vaga=q.vagaId||'';contratacoesState.page=1;}
   return q;
 }
-function dashboardToggleBase(show){['row-stages','row-activities','card-ranking','row-docs'].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=show;});}
 function dashboardInsightText(value){return escapeHtml(value===undefined||value===null||value===''?'—':String(value));}
 function dashboardDate(value){if(!value)return '—';const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
 function dashboardActivityLabel(a){const map={inscricao:'Nova inscrição',avancar:'Avançou de etapa',reprovar:'Reprovado',reabrir:'Reaberto',recusar_proposta:'Proposta recusada',aceitar_proposta:'Proposta aceita',enviar_proposta:'Proposta enviada',entrevista:'Entrevista agendada',comentario:'Parecer adicionado'};return map[a.evento_tipo||a.texto]||a.mensagem||'Atualização do processo';}
-function dashboardSafeCandidatesLink(vagaId,etapa){const id=dashValidId(vagaId);if(!id&&!etapa)return '';const p={};if(id)p.vaga_id=id;if(etapa)p.etapa=etapa;return '?'+dashQuery('candidatos',p).toString();}
-function showDashboardInsight(view){
-  const box=document.getElementById('dashboard-insight'),title=document.getElementById('dashboard-insight-title'),sub=document.getElementById('dashboard-insight-subtitle'),content=document.getElementById('dashboard-insight-content');
-  if(!box||!title||!sub||!content)return;
-  const d=window.__empresaDashboardData||{}, rows=Array.isArray(d.vagas)?d.vagas:[];
-  dashboardToggleBase(true);box.hidden=false;box.dataset.view=view;let html='';
+
+// A única visão auxiliar do Dashboard é este modal. Ele nunca troca a página nem a URL.
+let dashboardModalLastFocus=null;
+let dashboardModalView='';
+let dashboardModalPreviousBodyOverflow='';
+function dashboardModalElements(){return {overlay:document.getElementById('modal-dashboard-insight'),dialog:document.querySelector('#modal-dashboard-insight .dashboard-modal'),title:document.getElementById('dashboard-modal-title'),subtitle:document.getElementById('dashboard-modal-subtitle'),content:document.getElementById('dashboard-modal-content')};}
+function dashboardModalState(kind,message,detail=''){const text=kind==='loading'?'Carregando dados reais...':kind==='error'?'Não foi possível carregar estes dados.':'Nenhum registro corresponde a este resumo.';return `<div class="dashboard-modal-state ${kind}">${kind==='loading'?'<span class="spinner" aria-hidden="true"></span>':''}<strong>${escapeHtml(message||text)}</strong>${detail?`<span>${escapeHtml(detail)}</span>`:''}${kind==='error'?'<button type="button" class="btn btn-sec" data-dashboard-retry>Tentar novamente</button>':''}</div>`;}
+function dashboardModalFocusables(dialog){return [...dialog.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>el.offsetParent!==null);}
+function dashboardModalKeydown(e){const {overlay,dialog}=dashboardModalElements();if(!overlay?.classList.contains('aberto'))return;if(e.key==='Escape'){e.preventDefault();fecharDashboardInsight();return;}if(e.key!=='Tab')return;const items=dashboardModalFocusables(dialog);if(!items.length){e.preventDefault();dialog.focus();return;}const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+function openDashboardModal(view){
+  const parts=dashboardModalElements();if(!parts.overlay||!parts.dialog||!parts.content)return;
+  dashboardModalView=['processos','antigas','funil','history'].includes(view)?view:'history';
+  dashboardModalLastFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  parts.overlay.classList.add('aberto');parts.overlay.setAttribute('aria-hidden','false');
+  dashboardModalPreviousBodyOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
+  parts.title.textContent='Detalhes do dashboard';parts.subtitle.textContent='';parts.content.innerHTML=dashboardModalState('loading');
+  parts.dialog.focus();
+  // Sempre passa pelo estado de carregamento; isso também cobre um dashboard ainda sem dados.
+  requestAnimationFrame(async()=>{try{if(!window.__empresaDashboardData)await carregarDashboardBase();if(!window.__empresaDashboardData)throw new Error('Dashboard indisponível');renderDashboardModal(dashboardModalView);}catch(e){parts.content.innerHTML=dashboardModalState('error','Não foi possível carregar os detalhes.',e.message||'Tente novamente.');}});
+}
+function abrirDashboardModal(view){return openDashboardModal(view);}
+function fecharDashboardInsight(){
+  const parts=dashboardModalElements();if(!parts.overlay)return;
+  parts.overlay.classList.remove('aberto');parts.overlay.setAttribute('aria-hidden','true');document.body.style.overflow=dashboardModalPreviousBodyOverflow||'';dashboardModalView='';
+  if(dashboardModalLastFocus?.isConnected){dashboardModalLastFocus.focus();}dashboardModalLastFocus=null;
+}
+function dashboardModalRetry(){if(dashboardModalView)openDashboardModal(dashboardModalView);}
+function renderDashboardModal(view){
+  const {title,subtitle,content}=dashboardModalElements(),d=window.__empresaDashboardData||{},rows=Array.isArray(d.vagas)?d.vagas:[];if(!title||!subtitle||!content)return;
+  let html='';
   if(view==='processos'){
-    title.textContent='Processos ativos';sub.textContent='Vagas com candidaturas não encerradas, vinculadas à sua empresa.';
+    title.textContent='Processos ativos';subtitle.textContent='Candidaturas em andamento nas vagas vinculadas à sua empresa.';
     const data=Array.isArray(d.processos_por_vaga)?d.processos_por_vaga:[];
-    html=data.length?`<table><thead><tr><th>Vaga</th><th>Status</th><th>Processos</th><th>Ação</th></tr></thead><tbody>${data.map(v=>{const id=dashValidId(v.vaga_id);return id?`<tr><td>${dashboardInsightText(v.titulo)}</td><td>${dashboardInsightText(v.vaga_status)}</td><td>${Number(v.processos_ativos||0)}</td><td><a href="${dashboardSafeCandidatesLink(id)}">Ver candidatos</a></td></tr>`:''}).join('')}</tbody></table>`:'<div class="insight-empty"><strong>Nenhum processo ativo</strong>Não há candidaturas em andamento nas vagas disponíveis.</div>';
-  } else if(view==='antigas'){
-    title.textContent='Vagas abertas há mais de 30 dias';sub.textContent='Somente vagas publicadas com data real de criação superior a 30 dias.';
+    html=data.length?`<div class="dashboard-modal-table-wrap"><table><thead><tr><th>Vaga</th><th>Status</th><th>Processos</th><th>Ação</th></tr></thead><tbody>${data.map(v=>{const id=dashValidId(v.vaga_id);return id?`<tr><td><strong>${dashboardInsightText(v.titulo)}</strong></td><td>${dashboardInsightText(v.vaga_status)}</td><td>${Number(v.processos_ativos||0).toLocaleString('pt-BR')}</td><td><button type="button" class="dashboard-modal-action" data-dashboard-nav="candidatos" data-vaga-id="${id}">Ver candidatos</button></td></tr>`:''}).join('')}</tbody></table></div>`:dashboardModalState('empty','Nenhum processo ativo','Não há candidaturas em andamento nas vagas disponíveis.');
+  }else if(view==='antigas'){
+    title.textContent='Vagas abertas há mais de 30 dias';subtitle.textContent='Vagas publicadas cuja data real de criação ultrapassa 30 dias.';
     const data=Array.isArray(d.vagas_abertas_mais_30)?d.vagas_abertas_mais_30:rows.filter(v=>v.status==='publicada'&&v.criada_em&&Date.now()-new Date(v.criada_em).getTime()>30*86400000);
-    html=data.length?`<table><thead><tr><th>Vaga</th><th>Aberta em</th><th>Candidatos</th><th>Ação</th></tr></thead><tbody>${data.map(v=>{const id=dashValidId(v.id);return id?`<tr><td>${dashboardInsightText(v.titulo)}</td><td>${dashboardDate(v.criada_em)}</td><td>${Number(v.total_candidatos||0)}</td><td><a href="${dashQuery('vagas',{vaga_id:id,status:'publicada'})}">Ver vaga</a></td></tr>`:''}).join('')}</tbody></table>`:'<div class="insight-empty"><strong>Nenhuma vaga nesta condição</strong>Não há vaga publicada aberta há mais de 30 dias.</div>';
-  } else if(view==='funil'){
-    title.textContent='Funil completo';sub.textContent='Clique em uma etapa para abrir os candidatos reais filtrados.';
-    const configuredLabels=rows.flatMap(v=>{try{const e=Array.isArray(v.etapas)?v.etapas:(typeof v.etapas==='string'?JSON.parse(v.etapas):[]);return e.map(x=>typeof x==='string'?x:x?.nome).filter(Boolean);}catch(_){return [];}});const labels=configuredLabels.length?configuredLabels:(Array.isArray(d.etapas_labels)?d.etapas_labels:[]);const counts=d.etapas||{};const observed=Object.entries(counts).filter(([,value])=>Number(value)>0).map(([key])=>Number(key)).filter(Number.isFinite);const maxObserved=observed.length?Math.max(...observed):0;const configured=rows.map(v=>{try{return Array.isArray(v.etapas)?v.etapas.length:(typeof v.etapas==='string'?JSON.parse(v.etapas).length:0);}catch(_){return 0;}}).reduce((m,n)=>Math.max(m,n),0);const n=Math.min(7,Math.max(maxObserved,configured));
-    html=n?`<div class="dashboard-insight-list">${Array.from({length:n},(_,i)=>{const stage=i+1;return `<button type="button" class="dashboard-insight-stage" onclick="dashOpenStage(${stage})"><b>${Number(counts[stage]||0)}</b><span>${dashboardInsightText(labels[i]||`Etapa ${stage}`)}</span><small>Ver candidatos →</small></button>`;}).join('')}</div>`:'<div class="insight-empty"><strong>Funil indisponível</strong>A empresa ainda não possui etapas configuradas ou candidaturas observadas.</div>';
-  } else {
-    title.textContent='Histórico de atividades';sub.textContent='Eventos reais das candidaturas desta empresa nas últimas 48 horas.';
+    html=data.length?`<div class="dashboard-modal-table-wrap"><table><thead><tr><th>Vaga</th><th>Aberta em</th><th>Candidatos</th><th>Ação</th></tr></thead><tbody>${data.map(v=>{const id=dashValidId(v.id);return id?`<tr><td><strong>${dashboardInsightText(v.titulo)}</strong></td><td>${dashboardDate(v.criada_em)}</td><td>${Number(v.total_candidatos||0).toLocaleString('pt-BR')}</td><td><button type="button" class="dashboard-modal-action" data-dashboard-nav="vagas" data-vaga-id="${id}" data-status="publicada" data-periodo="all">Ver vaga</button></td></tr>`:''}).join('')}</tbody></table></div>`:dashboardModalState('empty','Nenhuma vaga nesta condição','Não há vaga publicada aberta há mais de 30 dias.');
+  }else if(view==='funil'){
+    title.textContent='Funil completo';subtitle.textContent='Selecione uma etapa para abrir Candidatos com o identificador real da etapa.';
+    const configuredLabels=rows.flatMap(v=>{try{const e=Array.isArray(v.etapas)?v.etapas:(typeof v.etapas==='string'?JSON.parse(v.etapas):[]);return e.map(x=>typeof x==='string'?x:x?.nome).filter(Boolean);}catch(_){return [];}});const labels=configuredLabels.length?configuredLabels:(Array.isArray(d.etapas_labels)?d.etapas_labels:[]);const counts=d.etapas||{};const observed=Object.entries(counts).filter(([,value])=>Number(value)>0).map(([key])=>Number(key)).filter(Number.isFinite);const configured=rows.map(v=>{try{const e=Array.isArray(v.etapas)?v.etapas:(typeof v.etapas==='string'?JSON.parse(v.etapas):[]);return e.length;}catch(_){return 0;}}).reduce((m,n)=>Math.max(m,n),0);const n=Math.min(7,Math.max(observed.length?Math.max(...observed):0,configured));
+    html=n?`<div class="dashboard-modal-list">${Array.from({length:n},(_,i)=>{const stage=i+1;return `<button type="button" class="dashboard-modal-stage" data-dashboard-nav="candidatos" data-etapa="${stage}"><b>${Number(counts[stage]||0).toLocaleString('pt-BR')}</b><span>${dashboardInsightText(labels[i]||`Etapa ${stage}`)}</span><small>Ver candidatos →</small></button>`;}).join('')}</div>`:dashboardModalState('empty','Funil indisponível','A empresa ainda não possui etapas configuradas ou candidaturas observadas.');
+  }else{
+    title.textContent='Histórico de atividades';subtitle.textContent='Eventos reais das candidaturas desta empresa nas últimas 48 horas, do mais novo ao mais antigo.';
     const data=Array.isArray(d.atividades_historico_48h)?d.atividades_historico_48h:[];
-    html=data.length?`<div class="dashboard-insight-list">${data.map(a=>`<a class="dashboard-insight-event" href="${dashValidId(a.candidatura_id)?'analisar.html?id='+encodeURIComponent(String(a.candidatura_id)):'#'}" ${dashValidId(a.candidatura_id)?'':'aria-disabled="true"'}><div><strong>${dashboardInsightText(dashboardActivityLabel(a))}</strong><span>${dashboardInsightText(a.candidato)} · ${dashboardInsightText(a.vaga)} · ${dashboardDate(a.quando)}${a.por?' · '+dashboardInsightText(a.por):''}</span></div></a>`).join('')}</div>`:'<div class="insight-empty"><strong>Nenhuma atividade encontrada</strong>Não houve evento disponível nas últimas 48 horas.</div>';
+    html=data.length?`<div class="dashboard-modal-list">${data.map(a=>`<div class="dashboard-modal-event"><strong>${dashboardInsightText(dashboardActivityLabel(a))}</strong><span>${dashboardInsightText(a.candidato)} · ${dashboardInsightText(a.vaga)} · ${dashboardDate(a.quando)}${a.por?' · '+dashboardInsightText(a.por):''}</span></div>`).join('')}</div>`:dashboardModalState('empty','Nenhuma atividade encontrada','Não houve evento disponível nas últimas 48 horas.');
   }
   content.innerHTML=html;
+  const first=dashboardModalFocusables(document.querySelector('#modal-dashboard-insight .dashboard-modal'))[0];if(first)first.focus();
 }
-function fecharDashboardInsight(){dashboardToggleBase(false);const box=document.getElementById('dashboard-insight');if(box){box.hidden=true;box.dataset.view='';}history.replaceState(null,'','?page=dashboard');}
-function dashboardKpi(action){if(action==='active-vagas')return dashNavigate('vagas',{status:'publicada'});if(action==='candidatos')return dashNavigate('candidatos');if(action==='entrevistas')return dashNavigate('agenda');if(action==='contratacoes')return dashNavigate('contratacoes',{status:'concluido'});if(action==='processos'||action==='antigas')return dashNavigate('dashboard',{dashview:action});}
-function dashOpenVaga(id){const n=dashValidId(id);if(n)dashNavigate('vagas',{vaga_id:n});}
+function dashboardKpi(action){if(action==='active-vagas')return dashNavigate('vagas',{status:'publicada',periodo:'all'});if(action==='candidatos')return dashNavigate('candidatos');if(action==='entrevistas')return dashNavigate('agenda');if(action==='contratacoes')return dashNavigate('contratacoes',{status:'concluido'});if(action==='processos')return openDashboardModal('processos');if(action==='antigas')return openDashboardModal('antigas');}
+function dashOpenVaga(id){const n=dashValidId(id);if(n)dashNavigate('vagas',{vaga_id:n,periodo:'all'});}
 function dashOpenStage(stage){const n=dashValidId(stage);if(n)dashNavigate('candidatos',{etapa:n});}
 function dashApplyOfficialState(){const q=dashApplyQuery();if(q.page==='vagas'){const st=document.getElementById('vagas-filtro-status');if(st)st.value=vagasState.status||'';}if(q.page==='candidatos'){const st=document.getElementById('candidatos-filtro-vaga');if(st)st.value=candidatosState.vaga||'';document.querySelectorAll('#candidatos-stage-filters button').forEach(b=>b.classList.toggle('ativo',String(b.dataset.etapa||'')===String(candidatosState.etapa||'')));}if(q.page==='contratacoes'){const st=document.getElementById('contratacoes-filtro-status');if(st)st.value=contratacoesState.status||'';}}
 function irPara(page,opts={}){const el=document.getElementById('page-'+page);if(!el)return;if(!opts.keepQuery)history.replaceState(null,'','?'+dashQuery(page,opts.query||{}).toString());dashApplyQuery();document.querySelectorAll('.page').forEach(p=>p.classList.remove('ativo'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('ativo'));el.classList.add('ativo');document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('ativo');document.getElementById('aside')?.classList.remove('aberto');document.getElementById('app')?.classList.remove('aside-aberto');if(page==='dashboard'){carregarDashboard();return;}if(page==='vagas'){carregarVagasAdmin();return;}if(page==='candidatos'){carregarCandidatos();return;}if(page==='candidaturas'){carregarCandidaturas();return;}if(page==='propostas'){carregarPropostas();return;}if(page==='contratacoes'){carregarContratacoes();return;}if(page==='talentos'){carregarBancoTalentos();return;}if(page==='relatorios'){carregarRelatorios();return;}if(page==='configuracoes'){carregarConfiguracoes();return;}if(page==='equipe'){carregarEquipe();return;}if(page==='agenda'){carregarAgenda('hoje');}}
 function mostrarApp(){document.getElementById('login-page').style.display='none';document.getElementById('app').classList.add('logado');carregarUsuarioSidebar();dashApplyQuery();const q=dashReadQuery();const allowed=['dashboard','vagas','candidatos','candidaturas','propostas','contratacoes','talentos','relatorios','agenda','equipe','configuracoes'];irPara(allowed.includes(q.page)?q.page:'dashboard',{keepQuery:true});carregarContadorNotificacoes();}
-async function carregarDashboardV2(){await carregarDashboardBase();const q=dashReadQuery();if(q.page==='dashboard'&&q.dashview)showDashboardInsight(q.dashview);else dashboardToggleBase(false);}
-document.addEventListener('click',e=>{const link=e.target.closest('#page-dashboard .dash-link');if(!link)return;const text=(link.textContent||'').toLowerCase();if(text.includes('todas')){e.preventDefault();dashNavigate('dashboard',{dashview:'history'});}else if(text.includes('funil')){e.preventDefault();dashNavigate('dashboard',{dashview:'funil'});}});
+async function carregarDashboardV2(){await carregarDashboardBase();}
+document.addEventListener('keydown',dashboardModalKeydown);
+document.addEventListener('click',e=>{
+  const parts=dashboardModalElements();
+  if(e.target===parts.overlay){fecharDashboardInsight();return;}
+  if(e.target.closest('#dashboard-modal-close')){fecharDashboardInsight();return;}
+  if(e.target.closest('[data-dashboard-retry]')){dashboardModalRetry();return;}
+  const action=e.target.closest('[data-dashboard-nav]');if(!action)return;
+  const page=action.dataset.dashboardNav,id=dashValidId(action.dataset.vagaId),stage=dashValidId(action.dataset.etapa);if(!page)return;
+  e.preventDefault();fecharDashboardInsight();if(page==='candidatos')return dashNavigate('candidatos',stage?{etapa:stage}:id?{vaga_id:id}:{});if(page==='vagas'&&id)return dashNavigate('vagas',{vaga_id:id,status:action.dataset.status||'',periodo:action.dataset.periodo||'all'});
+});
+
