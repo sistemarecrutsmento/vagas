@@ -303,7 +303,8 @@ async function carregarDashboardBase() {
     
     // === Gráfico: Candidatos por etapa ===
     const etapasObj = data.etapas || {};
-    const labels = data.etapas_labels || ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação'];
+    const configuredLabels = vagasEmpresa.flatMap(v => { try { const e=Array.isArray(v.etapas)?v.etapas:(typeof v.etapas==='string'?JSON.parse(v.etapas):[]); return e.map(x=>typeof x==='string'?x:x?.nome).filter(Boolean); } catch (_) { return []; } });
+    const labels = configuredLabels.length ? configuredLabels : (data.etapas_labels || ['Inscrição', 'Triagem', 'RH', 'Gestor', 'Proposta', 'Coleta Docs', 'Contratação']);
     const cores = ['#FF8FA3', '#5B9BD5', '#A78BFA', '#34D399', '#FBBF24', '#F472B6', '#722F37'];
     const maxEtapa = Math.max(1, ...Object.values(etapasObj).map(v => parseInt(v) || 0));
     const observedStageMax = Math.max(0, ...Object.entries(etapasObj).filter(([,v]) => Number(v)>0).map(([n]) => Number(n)));
@@ -1353,7 +1354,7 @@ function showDashboardInsight(view){
     html=data.length?`<table><thead><tr><th>Vaga</th><th>Aberta em</th><th>Candidatos</th><th>Ação</th></tr></thead><tbody>${data.map(v=>{const id=dashValidId(v.id);return id?`<tr><td>${dashboardInsightText(v.titulo)}</td><td>${dashboardDate(v.criada_em)}</td><td>${Number(v.total_candidatos||0)}</td><td><a href="${dashQuery('vagas',{vaga_id:id,status:'publicada'})}">Ver vaga</a></td></tr>`:''}).join('')}</tbody></table>`:'<div class="insight-empty"><strong>Nenhuma vaga nesta condição</strong>Não há vaga publicada aberta há mais de 30 dias.</div>';
   } else if(view==='funil'){
     title.textContent='Funil completo';sub.textContent='Clique em uma etapa para abrir os candidatos reais filtrados.';
-    const labels=Array.isArray(d.etapas_labels)?d.etapas_labels:[];const counts=d.etapas||{};const observed=Object.entries(counts).filter(([,value])=>Number(value)>0).map(([key])=>Number(key)).filter(Number.isFinite);const maxObserved=observed.length?Math.max(...observed):0;const configured=rows.map(v=>{try{return Array.isArray(v.etapas)?v.etapas.length:(typeof v.etapas==='string'?JSON.parse(v.etapas).length:0);}catch(_){return 0;}}).reduce((m,n)=>Math.max(m,n),0);const n=Math.min(7,Math.max(maxObserved,configured));
+    const configuredLabels=rows.flatMap(v=>{try{const e=Array.isArray(v.etapas)?v.etapas:(typeof v.etapas==='string'?JSON.parse(v.etapas):[]);return e.map(x=>typeof x==='string'?x:x?.nome).filter(Boolean);}catch(_){return [];}});const labels=configuredLabels.length?configuredLabels:(Array.isArray(d.etapas_labels)?d.etapas_labels:[]);const counts=d.etapas||{};const observed=Object.entries(counts).filter(([,value])=>Number(value)>0).map(([key])=>Number(key)).filter(Number.isFinite);const maxObserved=observed.length?Math.max(...observed):0;const configured=rows.map(v=>{try{return Array.isArray(v.etapas)?v.etapas.length:(typeof v.etapas==='string'?JSON.parse(v.etapas).length:0);}catch(_){return 0;}}).reduce((m,n)=>Math.max(m,n),0);const n=Math.min(7,Math.max(maxObserved,configured));
     html=n?`<div class="dashboard-insight-list">${Array.from({length:n},(_,i)=>{const stage=i+1;return `<button type="button" class="dashboard-insight-stage" onclick="dashOpenStage(${stage})"><b>${Number(counts[stage]||0)}</b><span>${dashboardInsightText(labels[i]||`Etapa ${stage}`)}</span><small>Ver candidatos →</small></button>`;}).join('')}</div>`:'<div class="insight-empty"><strong>Funil indisponível</strong>A empresa ainda não possui etapas configuradas ou candidaturas observadas.</div>';
   } else {
     title.textContent='Histórico de atividades';sub.textContent='Eventos reais das candidaturas desta empresa nas últimas 48 horas.';
