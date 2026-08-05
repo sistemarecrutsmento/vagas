@@ -79,7 +79,7 @@ async function carregarContadorNotificacoes() {
 // Feed real de notificacoes do tenant. Conteudo e URLs derivados sao validados/escapados.
 function notificacaoReferenciaUrl(n) {
   const id=Number(n?.referencia_id); if(!Number.isInteger(id)||id<=0)return '';
-  if(n.referencia_tipo==='candidatura')return 'analisar.html?id='+encodeURIComponent(String(id));
+  if(n.referencia_tipo==='candidatura')return 'index.html?page=analisar&candidatura_id='+encodeURIComponent(String(id));
   if(n.referencia_tipo==='vaga')return 'index.html?page=vagas';
   return '';
 }
