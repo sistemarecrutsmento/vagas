@@ -164,9 +164,18 @@
     </div>
   </div>
 
-<script src="auth-helper.js?v=empresa-portal2"></script>
-<script src="empresa-auth-init.js?v=empresa-portal2"></script>
-<script src="empresa-auth-patch.js?v=empresa-portal2"></script>
+<script src="auth-helper.js?v=empresa-portal3"></script>
+<script src="empresa-auth-patch.js?v=empresa-portal3"></script>
+<script>
+  // Esta página é carregada dentro do iframe do Portal Empresa. O init
+  // automático das páginas completas concorria com a primeira consulta e
+  // podia deixar o spinner aguardando um refresh sem fim. Aqui usamos apenas
+  // o helper central, com as chaves do Portal Empresa, e o fluxo abaixo faz
+  // um único refresh controlado.
+  if (typeof window.setStorageKeys === 'function') {
+    window.setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
+  }
+</script>
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
     async function fetchEmpresaComTimeout(url, options = {}, timeoutMs = 15000) {
