@@ -1242,7 +1242,7 @@ function carregarAnalisarEmbed() {
     frame.removeAttribute('src');
     return;
   }
-  const src = 'analisar.html?id=' + encodeURIComponent(id) + '&embed=1';
+  const src = 'analisar.html?id=' + encodeURIComponent(id) + '&embed=1&v=empresa-analisar-3';
   if (frame.getAttribute('src') !== src) frame.src = src;
 }
 function analisarCandidatura(id) {
