@@ -676,17 +676,41 @@
       return;
     }
     try {
-      const r = await fetch('https://recrutamento-api-novo.onrender.com/api/candidato/notificacoes', {
+      const r = await fetch('https://recrutamento-api-novo.onrender.com/api/notificacoes?limit=50', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.erro || 'Erro ' + r.status);
-      notifCache = data;
-      body.innerHTML = notifRenderAguardando(data.aguardando);
-      if (rodape) {
-        const tot = (data.aguardando?.length || 0) + (data.atualizacoes?.length || 0);
-        rodape.textContent = `${tot} notificação(ões) · Atualizado agora`;
+      const raw = await r.json();
+      if (!r.ok) throw new Error(raw.erro || 'Erro ' + r.status);
+      const notificacoes = Array.isArray(raw.notificacoes) ? raw.notificacoes : [];
+      // O endpoint antigo foi substituído pelo feed unificado. Mantemos o
+      // modal compatível, separando proposta recebida (ação pendente) do
+      // restante do histórico real, sem inventar dados.
+      const aguardando = notificacoes.filter(n => n.tipo === 'proposta_enviada').map(n => ({
+        icone: '📨',
+        vaga: n.mensagem || '',
+        titulo: n.titulo || 'Nova proposta recebida',
+        descricao: 'Abra sua candidatura para visualizar e responder.',
+        link: n.referencia_id ? 'candidatura.html?id=' + encodeURIComponent(n.referencia_id) : 'candidaturas.html',
+        linkTexto: 'Ver proposta'
+      }));
+      const atualizacoes = notificacoes.filter(n => n.tipo !== 'proposta_enviada').map(n => ({
+        icone: '📌',
+        vaga: n.titulo || 'Atualização do processo',
+        mensagem: n.mensagem || n.titulo || 'Nova atualização',
+        data: n.criada_em,
+        status: ''
+      }));
+      notifCache = { aguardando, atualizacoes };
+      const tabAtualizacoes = document.querySelector('.notif-tab[data-tab="atualizacoes"]');
+      if (aguardando.length) {
+        body.innerHTML = notifRenderAguardando(aguardando);
+      } else {
+        if (tabAtualizacoes) tabAtualizacoes.classList.add('ativo');
+        const tabAguardando = document.querySelector('.notif-tab[data-tab="aguardando"]');
+        if (tabAguardando) tabAguardando.classList.remove('ativo');
+        body.innerHTML = notifRenderAtualizacoes(atualizacoes);
       }
+      if (rodape) rodape.textContent = `${notificacoes.length} notificação(ões) · Atualizado agora`;
     } catch (e) {
       body.innerHTML = `<div class="notif-vazio">
         <div class="notif-vazio-icone">⚠️</div>
