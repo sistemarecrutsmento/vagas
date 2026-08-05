@@ -164,16 +164,13 @@
     </div>
   </div>
 
-<script src="auth-helper.js?v=empresa-portal3"></script>
-<script src="empresa-auth-patch.js?v=empresa-portal3"></script>
 <script>
-  // Esta página é carregada dentro do iframe do Portal Empresa. O init
-  // automático das páginas completas concorria com a primeira consulta e
-  // podia deixar o spinner aguardando um refresh sem fim. Aqui usamos apenas
-  // o helper central, com as chaves do Portal Empresa, e o fluxo abaixo faz
-  // um único refresh controlado.
-  if (typeof window.setStorageKeys === 'function') {
-    window.setStorageKeys('empresa_token', 'empresa_refresh', 'empresa_usuario');
+  // A análise roda dentro de um iframe do Portal Empresa. Ela usa somente o
+  // access token já mantido pelo shell no mesmo domínio. Não carregamos aqui
+  // os scripts globais de refresh: eles podem disputar a primeira consulta
+  // do iframe e prender a tela no spinner em navegadores móveis.
+  function getEmpresaToken() {
+    try { return localStorage.getItem('empresa_token') || ''; } catch (_) { return ''; }
   }
 </script>
   <script>
@@ -229,17 +226,7 @@
 
     (async () => {
       const content = document.getElementById('content');
-      // No shell integrado, aguarda a renovação silenciosa antes da primeira
-      // consulta para não deixar a tela presa no "Carregando" com JWT antigo.
-      if (typeof window.authInit === 'function') {
-        try {
-          await Promise.race([
-            window.authInit(),
-            new Promise(resolve => setTimeout(resolve, 4000))
-          ]);
-        } catch (_) {}
-      }
-      const token = (window.authTokens && typeof window.authTokens.getAccess === 'function' ? window.authTokens.getAccess() : null) || localStorage.getItem('empresa_token');
+      const token = getEmpresaToken();
       if (!token) {
         content.innerHTML = '<div class="card"><div class="alert alert-erro">Você não está logado. <a href="login.html">Faça login</a> primeiro.</div></div>';
         return;
@@ -1113,7 +1100,7 @@
 
     async function carregarDocumentos(candidaturaId) {
       try {
-        const token = (window.authTokens && typeof window.authTokens.getAccess === 'function' ? window.authTokens.getAccess() : null) || localStorage.getItem('empresa_token');
+        const token = getEmpresaToken();
         const r = await fetchEmpresaComTimeout(API + '/api/empresa/candidatura/' + candidaturaId + '/documentos', {
           headers: { 'Authorization': 'Bearer ' + token },
           __native: true
