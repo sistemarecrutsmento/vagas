@@ -62,7 +62,7 @@ function mostrarApp() {
   document.getElementById('app').classList.add('logado');
   carregarUsuarioSidebar();
   const requested = new URLSearchParams(window.location.search).get('page');
-  const allowed = ['dashboard', 'vagas', 'candidatos', 'candidaturas', 'propostas', 'contratacoes', 'talentos', 'relatorios', 'agenda', 'equipe', 'configuracoes'];
+  const allowed = ['dashboard', 'vagas', 'candidatos', 'candidaturas', 'propostas', 'contratacoes', 'talentos', 'relatorios', 'agenda', 'equipe', 'configuracoes', 'analisar'];
   irPara(allowed.includes(requested) ? requested : 'dashboard');
   carregarContadorNotificacoes();
 }
@@ -1232,9 +1232,23 @@ async function abrirVagaCands(vagaId) {
   }
 }
 
-// Abre a página de análise completa da candidatura
+// Abre a análise completa dentro do shell da SPA. O documento original
+// continua sendo carregado sem alterações dentro do iframe.
+function carregarAnalisarEmbed() {
+  const frame = document.getElementById('analisar-iframe');
+  if (!frame) return;
+  const id = new URLSearchParams(window.location.search).get('candidatura_id');
+  if (!id || !/^\d+$/.test(String(id))) {
+    frame.removeAttribute('src');
+    return;
+  }
+  const src = 'analisar.html?id=' + encodeURIComponent(id) + '&embed=1';
+  if (frame.getAttribute('src') !== src) frame.src = src;
+}
 function analisarCandidatura(id) {
-  window.location.href = 'analisar.html?id=' + id;
+  const n = Number(id);
+  if (!Number.isInteger(n) || n <= 0) return;
+  dashNavigate('analisar', { candidatura_id: n });
 }
 
 async function acaoCandidatura(id, acao) {
@@ -1392,8 +1406,8 @@ function dashboardKpi(action){if(action==='active-vagas')return dashNavigate('va
 function dashOpenVaga(id){const n=dashValidId(id);if(n)dashNavigate('vagas',{vaga_id:n,periodo:'all'});}
 function dashOpenStage(stage){const n=dashValidId(stage);if(n)dashNavigate('candidatos',{etapa:n});}
 function dashApplyOfficialState(){const q=dashApplyQuery();if(q.page==='vagas'){const st=document.getElementById('vagas-filtro-status');if(st)st.value=vagasState.status||'';}if(q.page==='candidatos'){const st=document.getElementById('candidatos-filtro-vaga');if(st)st.value=candidatosState.vaga||'';document.querySelectorAll('#candidatos-stage-filters button').forEach(b=>b.classList.toggle('ativo',String(b.dataset.etapa||'')===String(candidatosState.etapa||'')));}if(q.page==='contratacoes'){const st=document.getElementById('contratacoes-filtro-status');if(st)st.value=contratacoesState.status||'';}}
-function irPara(page,opts={}){const el=document.getElementById('page-'+page);if(!el)return;if(!opts.keepQuery)history.replaceState(null,'','?'+dashQuery(page,opts.query||{}).toString());dashApplyQuery();dashApplyOfficialState();document.querySelectorAll('.page').forEach(p=>p.classList.remove('ativo'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('ativo'));el.classList.add('ativo');document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('ativo');document.getElementById('aside')?.classList.remove('aberto');document.getElementById('app')?.classList.remove('aside-aberto');if(page==='dashboard'){carregarDashboard();return;}if(page==='vagas'){carregarVagasAdmin();return;}if(page==='candidatos'){carregarCandidatos();return;}if(page==='candidaturas'){carregarCandidaturas();return;}if(page==='propostas'){carregarPropostas();return;}if(page==='contratacoes'){carregarContratacoes();return;}if(page==='talentos'){carregarBancoTalentos();return;}if(page==='relatorios'){carregarRelatorios();return;}if(page==='configuracoes'){carregarConfiguracoes();return;}if(page==='equipe'){carregarEquipe();return;}if(page==='agenda'){carregarAgenda('hoje');}}
-function mostrarApp(){document.getElementById('login-page').style.display='none';document.getElementById('app').classList.add('logado');carregarUsuarioSidebar();dashApplyQuery();const q=dashReadQuery();const allowed=['dashboard','vagas','candidatos','candidaturas','propostas','contratacoes','talentos','relatorios','agenda','equipe','configuracoes'];irPara(allowed.includes(q.page)?q.page:'dashboard',{keepQuery:true});carregarContadorNotificacoes();}
+function irPara(page,opts={}){const el=document.getElementById('page-'+page);if(!el)return;if(!opts.keepQuery)history.replaceState(null,'','?'+dashQuery(page,opts.query||{}).toString());dashApplyQuery();dashApplyOfficialState();document.querySelectorAll('.page').forEach(p=>p.classList.remove('ativo'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('ativo'));el.classList.add('ativo');document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('ativo');document.getElementById('aside')?.classList.remove('aberto');document.getElementById('app')?.classList.remove('aside-aberto');if(page==='dashboard'){carregarDashboard();return;}if(page==='vagas'){carregarVagasAdmin();return;}if(page==='candidatos'){carregarCandidatos();return;}if(page==='candidaturas'){carregarCandidaturas();return;}if(page==='propostas'){carregarPropostas();return;}if(page==='contratacoes'){carregarContratacoes();return;}if(page==='talentos'){carregarBancoTalentos();return;}if(page==='relatorios'){carregarRelatorios();return;}if(page==='configuracoes'){carregarConfiguracoes();return;}if(page==='equipe'){carregarEquipe();return;}if(page==='agenda'){carregarAgenda('hoje');}if(page==='analisar'){carregarAnalisarEmbed();}}
+function mostrarApp(){document.getElementById('login-page').style.display='none';document.getElementById('app').classList.add('logado');carregarUsuarioSidebar();dashApplyQuery();const q=dashReadQuery();const allowed=['dashboard','vagas','candidatos','candidaturas','propostas','contratacoes','talentos','relatorios','agenda','equipe','configuracoes','analisar'];irPara(allowed.includes(q.page)?q.page:'dashboard',{keepQuery:true});carregarContadorNotificacoes();}
 async function carregarDashboardV2(){await carregarDashboardBase();}
 document.addEventListener('keydown',dashboardModalKeydown);
 document.addEventListener('click',e=>{
