@@ -239,7 +239,7 @@
           ]);
         } catch (_) {}
       }
-      const token = window.authTokens?.getAccess?.() || localStorage.getItem('empresa_token');
+      const token = (window.authTokens && typeof window.authTokens.getAccess === 'function' ? window.authTokens.getAccess() : null) || localStorage.getItem('empresa_token');
       if (!token) {
         content.innerHTML = '<div class="card"><div class="alert alert-erro">Você não está logado. <a href="login.html">Faça login</a> primeiro.</div></div>';
         return;
@@ -1113,7 +1113,7 @@
 
     async function carregarDocumentos(candidaturaId) {
       try {
-        const token = window.authTokens?.getAccess?.() || localStorage.getItem('empresa_token');
+        const token = (window.authTokens && typeof window.authTokens.getAccess === 'function' ? window.authTokens.getAccess() : null) || localStorage.getItem('empresa_token');
         const r = await fetchEmpresaComTimeout(API + '/api/empresa/candidatura/' + candidaturaId + '/documentos', {
           headers: { 'Authorization': 'Bearer ' + token },
           __native: true
@@ -1577,7 +1577,7 @@
         // Atualiza cache local
         const idx = _docsCache.findIndex(d => d.id === docId);
         if (idx >= 0) {
-          _docsCache[idx] = { ..._docsCache[idx], status: data.documento?.status || 'retornado', justificativa_admin: msg.trim(), revisado_em: new Date().toISOString() };
+          _docsCache[idx] = { ..._docsCache[idx], status: (data.documento && data.documento.status) || 'retornado', justificativa_admin: msg.trim(), revisado_em: new Date().toISOString() };
         }
         // Re-renderiza a seção
         const card = document.getElementById('card-documentos');
