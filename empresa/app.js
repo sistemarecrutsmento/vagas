@@ -828,7 +828,7 @@ function atualizarKpisCandidatos() {
   document.getElementById('cand-stage-total')?.replaceChildren(document.createTextNode(total.toLocaleString('pt-BR')));
   document.querySelectorAll('#candidatos-stage-filters button[data-etapa]').forEach(btn=>{const n=btn.dataset.etapa;if(n) {const b=btn.querySelector('b');if(b)b.textContent=Number(etapas[n]||0).toLocaleString('pt-BR');}});
 }
-function candidatosQuery() { const p=new URLSearchParams({pagina:String(candidatosState.etapa?1:candidatosState.page),limite:String(candidatosState.etapa?100:candidatosState.limite)}); if(candidatosState.search)p.set('q',candidatosState.search); if(candidatosState.vaga)p.set('vaga_id',candidatosState.vaga); if(candidatosState.status)p.set('status',candidatosState.status); if(candidatosState.cidade)p.set('cidade',candidatosState.cidade); if(candidatosState.estado)p.set('estado',candidatosState.estado); if(candidatosState.area)p.set('area',candidatosState.area); return p.toString(); }
+function candidatosQuery() { const p=new URLSearchParams({pagina:String(candidatosState.page),limite:String(candidatosState.limite)}); if(candidatosState.search)p.set('q',candidatosState.search); if(candidatosState.vaga)p.set('vaga_id',candidatosState.vaga); if(candidatosState.status)p.set('status',candidatosState.status); if(candidatosState.cidade)p.set('cidade',candidatosState.cidade); if(candidatosState.estado)p.set('estado',candidatosState.estado); if(candidatosState.area)p.set('area',candidatosState.area); if(candidatosState.etapa)p.set('etapa',candidatosState.etapa); return p.toString(); }
 async function carregarCandidatos() {
   const table=document.querySelector('#candidatos-table tbody'); const mobile=document.getElementById('candidatos-mobile-list'); if(table)table.innerHTML='<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>'; if(mobile)mobile.innerHTML='';
   popularSelectAreas();
@@ -839,9 +839,9 @@ async function carregarCandidatos() {
     if(!candidatosVagas.length) jobs.push(fetch(API+'/api/empresa/vagas',{headers}));
     const responses=await Promise.all(jobs); const candResp=await responses[0].json(); if(!responses[0].ok)throw new Error(candResp.erro||'Erro ao carregar candidatos'); let idx=1;
     if(!candidatosDashboard){candidatosDashboard=await responses[idx].json();idx++;} if(!candidatosVagas.length){const v=await responses[idx].json();candidatosVagas=v.vagas||[];popularSelectVagas();}
-    atualizarKpisCandidatos(); let rows=candResp.candidatos||[]; if(candidatosState.etapa)rows=rows.filter(c=>Number(c.ultima_etapa||1)===Number(candidatosState.etapa));
+    atualizarKpisCandidatos(); let rows=candResp.candidatos||[];
     if(candidatosState.ordenar==='nome')rows.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR')); else if(candidatosState.ordenar==='etapa')rows.sort((a,b)=>Number(a.ultima_etapa||1)-Number(b.ultima_etapa||1)); else if(candidatosState.ordenar==='antigos')rows.sort((a,b)=>new Date(a.criado_em||0)-new Date(b.criado_em||0));
-    if(candidatosState.etapa){ candidatosTotal=rows.length; const offset=(candidatosState.page-1)*candidatosState.limite; rows=rows.slice(offset,offset+candidatosState.limite); } else { candidatosTotal=Number(candResp.paginacao?.total||rows.length); }
+    candidatosTotal=Number(candResp.paginacao?.total||rows.length);
     candidatosRows=rows; renderCandidatos();
   } catch(e) { if(table)table.innerHTML=`<tr><td colspan="7" class="empty">${escapeHtml(e.message||'Erro ao carregar candidatos')}</td></tr>`; }
 }
