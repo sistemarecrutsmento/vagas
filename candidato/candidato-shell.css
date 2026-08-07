@@ -1,6 +1,16 @@
 /* VagasIO — padrão único do Portal do Candidato */
 :root { --vagasio-wine: #5f1527; --vagasio-wine-deep: #43101e; --vagasio-line: rgba(95,21,39,.14); }
 
+/* Cabeçalho e faixa de título únicos em todas as páginas autenticadas */
+body > header.candidate-header { position: sticky !important; top: 0 !important; z-index: 100 !important; min-height: 66px !important; height: auto !important; padding: 0 !important; background: var(--vagasio-wine) !important; color: #fff !important; border: 0 !important; box-shadow: 0 3px 18px rgba(39,10,19,.18) !important; }
+body > header.candidate-header .header-inner { box-sizing: border-box !important; width: 100% !important; max-width: 1240px !important; min-height: 66px !important; margin: 0 auto !important; padding: 10px 24px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; }
+body > header.candidate-header .logo { display: inline-flex !important; align-items: center !important; color: #fff !important; font-weight: 800 !important; font-size: 23px !important; letter-spacing: -.04em !important; text-decoration: none !important; white-space: nowrap !important; }
+body > header.candidate-header .header-actions { display: flex !important; align-items: center !important; justify-content: flex-end !important; gap: 8px !important; margin-left: auto !important; }
+body > .subheader { display: block !important; background: var(--vagasio-wine) !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 10px rgba(39,10,19,.12) !important; }
+body > .subheader .subheader-inner { width: 100% !important; max-width: 1240px !important; min-height: 64px !important; margin: 0 auto !important; padding: 16px 24px !important; display: flex !important; align-items: center !important; }
+body > .subheader h1 { margin: 0 !important; color: #fff !important; font-size: 24px !important; line-height: 1.2 !important; }
+#sino-fase7, .perfil-card-sino { display: none !important; }
+
 /* Drawer único injetado em todas as páginas internas */
 body:not(.candidate-home) .drawer-overlay { position: fixed !important; inset: 0 !important; z-index: 998 !important; background: rgba(22,8,13,.42) !important; opacity: 0 !important; visibility: hidden !important; transition: opacity .2s ease, visibility .2s ease !important; }
 body:not(.candidate-home) .drawer-overlay.aberto { opacity: 1 !important; visibility: visible !important; }
@@ -88,6 +98,12 @@ body:not(.candidate-home) .drawer-logout {
 body:not(.candidate-home) .drawer-logout:hover { background: var(--vagasio-wine) !important; color: #fff !important; }
 
 @media (max-width: 640px) {
+  body > header.candidate-header,
+  body > header.candidate-header .header-inner { min-height: 54px !important; }
+  body > header.candidate-header .header-inner { padding: 7px 16px !important; }
+  body > header.candidate-header .logo { font-size: 20px !important; }
+  body > .subheader .subheader-inner { min-height: 56px !important; padding: 16px !important; }
+  body > .subheader h1 { font-size: 21px !important; }
   body:not(.candidate-home) > header,
   body:not(.candidate-home) > header .header-inner { min-height: 54px !important; }
   body:not(.candidate-home) > header .header-inner { padding: 7px 16px !important; }

@@ -31,6 +31,25 @@
     return;
   }
 
+  // Cabeçalho e faixa de título únicos em todas as páginas autenticadas.
+  const titulos = { painel: 'Página do candidato', favoritos: 'Favoritos', conversas: 'Chat', notificacoes: 'Notificações', seguranca: 'Segurança', entrevistas: 'Entrevistas', documentos: 'Documentos', candidaturas: 'Minhas candidaturas', perfil: 'Meu perfil', candidatura: 'Candidatura' };
+  const baseNome = current.replace('.html', '');
+  const tituloPagina = titulos[baseNome] || 'Página do candidato';
+  let header = document.querySelector('body > header');
+  if (!header) {
+    document.body.insertAdjacentHTML('afterbegin', '<header class="candidate-header"></header>');
+    header = document.querySelector('body > header');
+  }
+  header.className = 'candidate-header';
+  header.innerHTML = '<div class="header-inner"><a href="' + root + 'index.html" class="logo">VagasIO</a><div class="header-actions" id="header-actions"></div></div>';
+  let subheader = document.querySelector('body > .subheader');
+  if (!subheader) {
+    header.insertAdjacentHTML('afterend', '<section class="subheader"><div class="subheader-inner"><h1>' + escapeHtml(tituloPagina) + '</h1></div></section>');
+  } else {
+    subheader.innerHTML = '<div class="subheader-inner"><h1>' + escapeHtml(tituloPagina) + '</h1></div>';
+  }
+  document.querySelectorAll('#sino-fase7, .perfil-card-sino').forEach(el => el.remove());
+
   function drawerMarkup() {
     return `<div class="drawer-overlay" id="drawer-overlay"></div>
       <aside class="drawer" id="drawer" aria-label="Menu do candidato">
