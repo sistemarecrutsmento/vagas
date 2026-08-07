@@ -922,12 +922,16 @@ async function loginEntrar(btn) {
   const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Entrando...';
+  const ctrl = new AbortController();
+  const timeoutId = setTimeout(() => ctrl.abort(), 20000);
   try {
     const r = await fetch(API + '/api/candidato/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, senha })
+      body: JSON.stringify({ email, senha }),
+      signal: ctrl.signal
     });
+    clearTimeout(timeoutId);
     const data = await r.json();
     if (r.ok) {
       tokenCandidato = data.token;
@@ -950,6 +954,7 @@ async function loginEntrar(btn) {
   } catch (e) {
     showCandidateFeedback('Não foi possível entrar agora. Verifique sua conexão e tente novamente.', 'error', 'login-feedback');
   } finally {
+    clearTimeout(timeoutId);
     btn.disabled = false;
     btn.textContent = oldText;
   }
