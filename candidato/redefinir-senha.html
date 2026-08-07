@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Redefinir senha — Vagas.io</title>
+  <title>Redefinir senha — VagasIO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -89,7 +89,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Vagas.io">
+  <meta name="apple-mobile-web-app-title" content="VagasIO">
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
@@ -97,8 +97,7 @@
 <body>
   <div class="container">
     <div class="logo">
-      <div class="logo-icon">V</div>
-      <span>Vagas<strong>.io</strong></span>
+      <img src="/divulgacao/assets/logo-vagasio-header.png" alt="VagasIO.com.br" style="width:150px;height:75px;object-fit:contain;" />
     </div>
     <h1>Redefinir senha</h1>
     <p class="subtitulo" id="subtitulo">Digite sua nova senha abaixo.</p>
@@ -107,9 +106,9 @@
 
     <form id="form-redefinir" style="display: none;">
       <label for="senha">Nova senha</label>
-      <input type="password" id="senha" name="senha" required minlength="6" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+      <input type="password" id="senha" name="senha" required minlength="8" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
       <label for="confirma" style="margin-top: 14px;">Confirme a nova senha</label>
-      <input type="password" id="confirma" name="confirma" required minlength="6" placeholder="Digite de novo" autocomplete="new-password" />
+      <input type="password" id="confirma" name="confirma" required minlength="8" placeholder="Digite de novo" autocomplete="new-password" />
 
       <button type="submit" class="btn" id="btn-redefinir">
         <span class="loading" id="loading">⏳</span>
@@ -163,9 +162,9 @@
         msg.textContent = '❌ As senhas não coincidem.';
         return;
       }
-      if (senha.length < 6) {
+      if (senha.length < 8) {
         msg.className = 'mensagem erro';
-        msg.textContent = '❌ A senha deve ter no mínimo 6 caracteres.';
+        msg.textContent = '❌ A senha deve ter no mínimo 8 caracteres.';
         return;
       }
 

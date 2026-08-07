@@ -1,5 +1,5 @@
 // ============================================
-// VAGAS.IO — Front-end do Candidato
+// VagasIO — Front-end do Candidato
 // Conecta com backend: https://recrutamento-api-novo.onrender.com
 // Fluxo: Cadastro/Login com e-mail + senha (sem código de verificação)
 // ============================================
@@ -10,6 +10,40 @@ let vagaSelecionada = null;
 let emailLogado = null;
 let tokenCandidato = null;
 let cadastroCompleto = false;
+
+// Feedback visual compartilhado pela Home, Login e Cadastro.
+// Mantém a lógica existente, mas evita interromper o candidato com alert().
+function showCandidateFeedback(message, type = 'error', targetId = null) {
+  const modalCad = document.getElementById('modal-cad');
+  const modalLogin = document.getElementById('modal-login');
+  const id = targetId || (modalCad?.classList.contains('aberto') ? 'cad-feedback' : (modalLogin?.classList.contains('aberto') ? 'login-feedback' : null));
+  const target = id ? document.getElementById(id) : null;
+  if (target) {
+    target.textContent = message || '';
+    target.className = 'candidate-feedback' + (message ? ' visible' : '') + (type === 'success' ? ' success' : '');
+    target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+  let toast = document.getElementById('candidate-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'candidate-toast';
+    toast.className = 'candidate-toast';
+    toast.setAttribute('role', 'status');
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message || '';
+  toast.classList.toggle('success', type === 'success');
+  toast.classList.add('visible');
+  clearTimeout(window.__candidateToastTimer);
+  window.__candidateToastTimer = setTimeout(() => toast.classList.remove('visible'), 4200);
+}
+window.showCandidateFeedback = showCandidateFeedback;
+
+function clearCandidateFeedback(id) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = ''; el.className = 'candidate-feedback'; }
+}
 
 // Portal universal ou portal público de uma empresa.
 // O mesmo aplicativo é usado nos dois casos; só muda a fonte das vagas.
@@ -134,7 +168,7 @@ function renderAreasChips() {
       if (idx >= 0) {
         areasSelecionadas.splice(idx, 1);
       } else {
-        if (areasSelecionadas.length >= AREAS_MAX) return alert('Você pode escolher no máximo ' + AREAS_MAX + ' áreas.');
+        if (areasSelecionadas.length >= AREAS_MAX) return showCandidateFeedback('Você pode escolher no máximo ' + AREAS_MAX + ' áreas.');
         areasSelecionadas.push(area);
       }
       renderAreasChips();
@@ -176,10 +210,15 @@ window.addEventListener('DOMContentLoaded', async () => {
       const label = btn.textContent.trim();
       document.querySelectorAll('#filtro-dropdown button').forEach(b => b.classList.remove('ativo'));
       btn.classList.add('ativo');
-      document.getElementById('filtro-label').textContent = '📂 ' + label;
+      document.getElementById('filtro-label').textContent = label === 'Todas' ? 'Todas as áreas' : label;
       categoriaAtiva = cat;
       document.getElementById('filtro-dropdown').classList.remove('aberto');
       carregarVagas();
+    });
+  });
+  ['busca', 'busca-cidade'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); carregarVagas(); }
     });
   });
 
@@ -209,6 +248,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     }, 1500);
   }
 });
+
+function usarBuscaPopular(termo) {
+  const campo = document.getElementById('busca');
+  if (!campo) return;
+  campo.value = termo;
+  carregarVagas();
+  document.getElementById('vagas')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+window.usarBuscaPopular = usarBuscaPopular;
 
 function toggleFiltroDropdown() {
   document.getElementById('filtro-dropdown').classList.toggle('aberto');
@@ -244,6 +292,19 @@ async function carregarVagas() {
       const vagasData = await rv.json();
       nomeEmpresa = empresaData.empresa?.nome || CANDIDATO_EMPRESA_SLUG;
       vagas = (vagasData.vagas || []).map(v => ({ ...v, empresa: nomeEmpresa }));
+      // O endpoint público da empresa não recebe os mesmos filtros do catálogo
+      // universal; aplica os filtros localmente sem alterar a integração.
+      const termo = busca.trim().toLocaleLowerCase('pt-BR');
+      const local = (document.getElementById('busca-cidade')?.value || '').trim().toLocaleLowerCase('pt-BR');
+      if (termo) {
+        vagas = vagas.filter(v => [v.titulo, v.empresa, v.area, v.modalidade].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR').includes(termo));
+      }
+      if (local) {
+        vagas = vagas.filter(v => [v.cidade, v.estado].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR').includes(local));
+      }
+      if (categoriaAtiva) {
+        vagas = vagas.filter(v => String(v.area || '').toLocaleLowerCase('pt-BR') === categoriaAtiva.toLocaleLowerCase('pt-BR'));
+      }
       document.title = 'Vagas de ' + nomeEmpresa + ' · VagasIO';
       const titulo = document.querySelector('.section-title');
       if (titulo) titulo.textContent = 'Vagas abertas de ' + nomeEmpresa;
@@ -251,6 +312,11 @@ async function carregarVagas() {
       let url = API + '/api/vagas';
       const params = new URLSearchParams();
       if (busca) params.set('busca', busca);
+      const cidade = (document.getElementById('busca-cidade')?.value || '').trim();
+      if (cidade) {
+        if (/^[A-Za-z]{2}$/.test(cidade)) params.set('estado', cidade.toUpperCase());
+        else params.set('cidade', cidade);
+      }
       if (categoriaAtiva) params.set('area', categoriaAtiva);
       if (params.toString()) url += '?' + params;
       const ctrl = new AbortController();
@@ -272,7 +338,7 @@ async function carregarVagas() {
       const salTexto = (sMin && sMax) ? `R$ ${sMin.toLocaleString('pt-BR')} - R$ ${sMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
       const base = CANDIDATO_EMPRESA_SLUG ? '/candidato/' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) + '/' : '/candidato/';
       const detalhe = base + '?vaga=' + encodeURIComponent(v.id) + (CANDIDATO_EMPRESA_SLUG ? '&slug=' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) : '');
-      return `<a class="vaga-card" href="${detalhe}" style="text-decoration:none;color:inherit;display:block;"><div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div><h3>${escapeHtml(v.titulo)}</h3><div class="vaga-tags">${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}${v.cidade ? `<span class="tag">📍 ${escapeHtml(v.cidade)}</span>` : ''}</div><div class="salario">${escapeHtml(salTexto)}</div><div class="footer"><span class="data">${formatarData(v.criada_em)}</span><span class="cta">Ver detalhes →</span></div></a>`;
+      return `<a class="vaga-card" href="${detalhe}" style="text-decoration:none;color:inherit;display:block;"><div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div><h3>${escapeHtml(v.titulo)}</h3><div class="vaga-tags">${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}${v.cidade ? `<span class="tag">${escapeHtml(v.cidade)}</span>` : ''}</div><div class="salario">${escapeHtml(salTexto)}</div><div class="footer"><span class="data">${formatarData(v.criada_em)}</span><span class="cta">Ver detalhes →</span></div></a>`;
     }).join('');
     if (contador) contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
@@ -291,7 +357,7 @@ function abrirDetalhes(id) {
       const v = data.vaga || data;
       vagaSelecionada = v;
       const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-      setTxt('det-empresa', v.empresa || 'Confidencial');
+      setTxt('det-empresa', v.empresa || v.empresa_nome || (CANDIDATO_EMPRESA_SLUG ? CANDIDATO_EMPRESA_SLUG : 'Confidencial'));
       setTxt('det-titulo', v.titulo);
       setTxt('det-local', v.cidade || '—');
       setTxt('det-contrato', v.tipo_contrato || '—');
@@ -348,7 +414,7 @@ function abrirDetalhes(id) {
       // Analytics: vaga visualizada
       if (window.vagiasTrack) window.vagiasTrack('vaga_visualizada', { vaga_id: id, metadata: { origem: 'portal' } });
     })
-    .catch(() => alert('Erro ao carregar detalhes da vaga'));
+    .catch(() => showCandidateFeedback('Não foi possível carregar os detalhes desta vaga. Tente novamente.'));
 }
 
 function atualizarBotaoCandidatar(vagaId) {
@@ -363,7 +429,7 @@ function atualizarBotaoCandidatar(vagaId) {
     btn.disabled = false;
     btn.onclick = () => {
       emailLogado = localStorage.getItem('candidato_email') || emailLogado;
-      const cadEmail = document.getElementById('cad-email');
+      const cadEmail = document.getElementById('w1-email') || document.getElementById('cad-email');
       if (cadEmail) cadEmail.value = emailLogado || '';
       fecharModal('detalhes');
       abrirModal('cad');
@@ -378,16 +444,16 @@ function atualizarBotaoCandidatar(vagaId) {
 
 async function candidatar(vagaId) {
   if (!tokenCandidato) {
-    alert('Você precisa fazer login antes de se candidatar.');
     fecharModal('detalhes');
     abrirModal('login');
+    showCandidateFeedback('Entre na sua conta para se candidatar.', 'error', 'login-feedback');
     return;
   }
   if (!cadastroCompleto) {
-    alert('Complete seu cadastro antes de se candidatar.');
     fecharModal('detalhes');
     abrirModal('cad');
     irParaEtapa(2);
+    showCandidateFeedback('Complete seu perfil para se candidatar.', 'error', 'cad-feedback');
     return;
   }
   const btn = document.getElementById('btn-candidatar');
@@ -421,6 +487,7 @@ async function candidatar(vagaId) {
 // ===== MODAIS =====
 function abrirModal(id) {
   if (id === 'cad') {
+    clearCandidateFeedback('cad-feedback');
     // Reset wizard
     wizardExps = [];
     wizardEtapa1 = null;
@@ -436,6 +503,7 @@ function abrirModal(id) {
     }
   }
   if (id === 'login') {
+    clearCandidateFeedback('login-feedback');
     // Reset login para etapa 1
     const etapa1 = document.getElementById('login-etapa-1');
     const etapa2 = document.getElementById('login-etapa-2');
@@ -467,6 +535,7 @@ function wizardIrPara(n) {
   document.querySelectorAll('.wizard-passo').forEach(el => el.classList.remove('ativo', 'concluido'));
   const etapa = document.getElementById('wizard-etapa-' + n);
   if (etapa) etapa.style.setProperty('display', 'block', 'important');
+  clearCandidateFeedback('cad-feedback');
   for (let i = 1; i <= 5; i++) {
     const p = document.querySelector(`.wizard-passo[data-p="${i}"]`);
     if (!p) continue;
@@ -508,9 +577,9 @@ function wizardEtapa1Validar() {
   const email = document.getElementById('w1-email')?.value.trim().toLowerCase();
   const senha = document.getElementById('w1-senha')?.value;
   const senhaConf = document.getElementById('w1-senha-conf')?.value;
-  if (!email || !email.includes('@')) return alert('Informe um e-mail válido');
-  if (!senha || senha.length < 6) return alert('A senha deve ter no mínimo 6 caracteres');
-  if (senha !== senhaConf) return alert('As senhas não coincidem');
+  if (!email || !email.includes('@')) return showCandidateFeedback('Informe um e-mail válido.');
+  if (!senha || senha.length < 8) return showCandidateFeedback('A senha deve ter no mínimo 8 caracteres.');
+  if (senha !== senhaConf) return showCandidateFeedback('As senhas não coincidem.');
 
   wizardEtapa1 = { email, senha, jaLogado: false };
   wizardIrPara(2);
@@ -529,12 +598,12 @@ function wizardEtapa2Validar() {
   const banco = document.getElementById('w2-banco')?.checked;
   const areas = areasSelecionadas.slice();
 
-  if (!cpf || cpf.length !== 11) return alert('CPF é obrigatório (11 dígitos)');
-  if (!nome) return alert('Informe seu nome completo');
-  if (!dataNasc) return alert('Informe sua data de nascimento');
-  if (!sexo) return alert('Selecione o sexo');
-  if (!celular || celular.replace(/\D/g, '').length < 10) return alert('Informe um celular válido');
-  if (!politica) return alert('Você precisa aceitar a Política de Privacidade');
+  if (!cpf || cpf.length !== 11) return showCandidateFeedback('CPF é obrigatório (11 dígitos).');
+  if (!nome) return showCandidateFeedback('Informe seu nome completo.');
+  if (!dataNasc) return showCandidateFeedback('Informe sua data de nascimento.');
+  if (!sexo) return showCandidateFeedback('Selecione o sexo.');
+  if (!celular || celular.replace(/\D/g, '').length < 10) return showCandidateFeedback('Informe um celular válido.');
+  if (!politica) return showCandidateFeedback('Você precisa aceitar a Política de Privacidade.');
 
   // E-mail vem do cadastro (etapa 1) ou do candidato logado
   wizardEtapa1 = wizardEtapa1 || {};
@@ -553,12 +622,12 @@ function wizardEtapa3Validar() {
   const numero = document.getElementById('w3-numero')?.value.trim();
   const complemento = document.getElementById('w3-complemento')?.value.trim() || null;
 
-  if (cep.length !== 8) return alert('CEP é obrigatório (8 dígitos)');
-  if (!estado || estado.length !== 2) return alert('UF é obrigatório (ex: SP)');
-  if (!cidade) return alert('Cidade é obrigatória');
-  if (!bairro) return alert('Bairro é obrigatório');
-  if (!logradouro) return alert('Logradouro é obrigatório');
-  if (!numero) return alert('Número é obrigatório');
+  if (cep.length !== 8) return showCandidateFeedback('CEP é obrigatório (8 dígitos).');
+  if (!estado || estado.length !== 2) return showCandidateFeedback('UF é obrigatório (ex: SP).');
+  if (!cidade) return showCandidateFeedback('Cidade é obrigatória.');
+  if (!bairro) return showCandidateFeedback('Bairro é obrigatório.');
+  if (!logradouro) return showCandidateFeedback('Logradouro é obrigatório.');
+  if (!numero) return showCandidateFeedback('Número é obrigatório.');
 
   wizardEtapa1.dados = wizardEtapa1.dados || {};
   Object.assign(wizardEtapa1.dados, { cep, estado, cidade, bairro, logradouro, numero, complemento });
@@ -572,7 +641,7 @@ function wizardEtapa4Validar() {
   const situacao = document.getElementById('w4-situacao')?.value || null;
   const dataConclusao = document.getElementById('w4-conclusao')?.value || null;
 
-  if (!formacao) return alert('Selecione a formação');
+  if (!formacao) return showCandidateFeedback('Selecione a formação.');
 
   wizardEtapa1.dados = wizardEtapa1.dados || {};
   Object.assign(wizardEtapa1.dados, { formacao, instituicao, curso, situacao, data_conclusao: dataConclusao });
@@ -587,14 +656,14 @@ function wizardAddExperiencia() {
   const empregoAtual = document.getElementById('w5-atual')?.checked;
   const descricao = document.getElementById('w5-descricao')?.value.trim() || null;
 
-  if (!cargo) return alert('Informe o cargo');
-  if (!empresa) return alert('Informe a empresa');
+  if (!cargo) return showCandidateFeedback('Informe o cargo da experiência.');
+  if (!empresa) return showCandidateFeedback('Informe o nome da empresa.');
 
   if (empregoAtual) {
     wizardExps.push({ cargo, empresa, inicio, fim: null, emprego_atual: true, descricao });
   } else {
-    if (!inicio) return alert('Informe a data de início');
-    if (!fim) return alert('Informe a data de término (ou marque "Emprego atual")');
+    if (!inicio) return showCandidateFeedback('Informe a data de início.');
+    if (!fim) return showCandidateFeedback('Informe a data de término ou marque “Emprego atual”.');
     wizardExps.push({ cargo, empresa, inicio, fim, emprego_atual: false, descricao });
   }
 
@@ -657,7 +726,7 @@ async function wizardFinalizar() {
       });
       const dc = await rc.json();
       if (!rc.ok) {
-        alert('Erro: ' + (dc.erro || 'não foi possível criar a conta'));
+        showCandidateFeedback(dc.erro || 'Não foi possível criar a conta.');
         if (btn) { btn.disabled = false; btn.textContent = 'Finalizar cadastro'; }
         return;
       }
@@ -670,6 +739,9 @@ async function wizardFinalizar() {
       }
       localStorage.setItem('candidato_email', emailLogado);
       localStorage.setItem('candidato_nome', dados.nome);
+      // A conta já existe mesmo que a gravação complementar do perfil falhe.
+      // Permite repetir somente o perfil sem tentar criar o e-mail novamente.
+      wizardEtapa1.jaLogado = true;
     }
 
     // 2) Salva o resto do perfil (endereço, escolaridade, experiências)
@@ -680,7 +752,7 @@ async function wizardFinalizar() {
     });
     const dp = await rp.json();
     if (!rp.ok) {
-      alert('Erro: ' + (dp.erro || 'não foi possível salvar o perfil'));
+      showCandidateFeedback(dp.erro || 'Não foi possível salvar o perfil.');
       if (btn) { btn.disabled = false; btn.textContent = 'Finalizar cadastro'; }
       return;
     }
@@ -702,7 +774,7 @@ async function wizardFinalizar() {
       atualizarHeaderUsuario();
     }
   } catch (e) {
-    alert('Erro de conexão. Tente novamente.');
+    showCandidateFeedback('Não foi possível concluir agora. Verifique sua conexão e tente novamente.');
     if (btn) { btn.disabled = false; btn.textContent = 'Finalizar cadastro'; }
   }
 }
@@ -732,8 +804,8 @@ function aplicarPrimeiroEmprego() {
 async function loginEntrar(btn) {
   const email = document.getElementById('login-email')?.value.trim().toLowerCase();
   const senha = document.getElementById('login-senha')?.value;
-  if (!email || !email.includes('@')) return alert('Informe um e-mail válido');
-  if (!senha) return alert('Informe sua senha');
+  if (!email || !email.includes('@')) return showCandidateFeedback('Informe um e-mail válido.', 'error', 'login-feedback');
+  if (!senha) return showCandidateFeedback('Informe sua senha.', 'error', 'login-feedback');
 
   const oldText = btn.textContent;
   btn.disabled = true;
@@ -761,10 +833,10 @@ async function loginEntrar(btn) {
         abrirModal('cad');
       }
     } else {
-      alert('Erro: ' + (data.erro || 'Não foi possível entrar'));
+      showCandidateFeedback(data.erro || 'E-mail ou senha incorretos.', 'error', 'login-feedback');
     }
   } catch (e) {
-    alert('Erro de conexão');
+    showCandidateFeedback('Não foi possível entrar agora. Verifique sua conexão e tente novamente.', 'error', 'login-feedback');
   } finally {
     btn.disabled = false;
     btn.textContent = oldText;
@@ -834,11 +906,11 @@ function atualizarHeaderUsuario() {
     // Logado: header-actions vazio (☰ fica no lado do logo)
     headerActions.innerHTML = '';
   } else if (tokenCandidato) {
-    headerActions.innerHTML = `<button class="btn-outline" onclick="abrirModal('cad')">📝 Completar cadastro</button>`;
+    headerActions.innerHTML = `<button class="btn-header-primary" type="button" onclick="abrirModal('cad')">Completar cadastro</button>`;
   } else {
     headerActions.innerHTML = `
-      <button class="btn-outline" onclick="abrirModal('login')">Entrar</button>
-      <button id="btn-cadastrar" class="btn-outline" onclick="abrirModal('cad')">Cadastrar</button>
+      <button class="btn-outline" type="button" onclick="abrirModal('login')">Entrar</button>
+      <button id="btn-cadastrar" class="btn-header-primary" type="button" onclick="abrirModal('cad')">Criar conta</button>
     `;
   }
   // SEMPRE garante que o botão ☰ no logo existe (logado ou deslogado)
@@ -1384,9 +1456,9 @@ async function trocarSenha(btn) {
   const atual = document.getElementById('senha-atual').value;
   const nova = document.getElementById('senha-nova').value;
   const conf = document.getElementById('senha-nova-conf').value;
-  if (!atual || !nova || !conf) { alert('Preencha todos os campos'); return; }
-  if (nova.length < 6) { alert('A nova senha deve ter pelo menos 6 caracteres'); return; }
-  if (nova !== conf) { alert('A confirmação não confere com a nova senha'); return; }
+  if (!atual || !nova || !conf) { showCandidateFeedback('Preencha todos os campos.'); return; }
+  if (nova.length < 8) { showCandidateFeedback('A nova senha deve ter pelo menos 8 caracteres.'); return; }
+  if (nova !== conf) { showCandidateFeedback('A confirmação não confere com a nova senha.'); return; }
   if (btn) { btn.disabled = true; btn.textContent = 'Atualizando...'; }
   try {
     const r = await fetchAuth(API + '/api/candidato/trocar-senha', {
@@ -1399,11 +1471,11 @@ async function trocarSenha(btn) {
       if (btn) { btn.textContent = '✓ Senha atualizada!'; btn.style.background = 'var(--verde)'; }
       setTimeout(() => { if (btn) { btn.textContent = 'Atualizar senha'; btn.style.background = ''; btn.disabled = false; } document.getElementById('senha-atual').value = ''; document.getElementById('senha-nova').value = ''; document.getElementById('senha-nova-conf').value = ''; }, 800);
     } else {
-      alert('Erro: ' + (data.erro || ''));
+      showCandidateFeedback(data.erro || 'Não foi possível atualizar sua senha.');
       if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha'; }
     }
   } catch (e) {
-    alert('Erro de conexão');
+    showCandidateFeedback('Não foi possível atualizar sua senha agora.');
     if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha'; }
   }
 }

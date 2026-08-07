@@ -310,45 +310,85 @@
     .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background-size: cover; background-position: center; flex-shrink: 0; }
     .user-info { display: flex; align-items: center; gap: 10px; }
   </style>
+  <link rel="stylesheet" href="/candidato/home-redesign.css?v=home-candidate-1">
   <script src="/candidato/chat-uploader.js"></script>
   <link rel="manifest" href="/candidato/manifest.json">
   <meta name="theme-color" content="#722F37">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Vagas.io">
+  <meta name="apple-mobile-web-app-title" content="VagasIO">
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
 </head>
-<body>
+<body class="candidate-home">
 
-<header>
+<header class="candidate-header">
   <div class="container">
     <div class="header-inner">
-      <div class="logo">VagasIO</div>
+      <a class="brand-link" href="/candidato/" aria-label="VagasIO — página inicial">
+        <img class="brand-logo" src="/divulgacao/assets/logo-vagasio-header.png" alt="VagasIO.com.br">
+      </a>
+      <nav class="candidate-nav" aria-label="Navegação principal">
+        <a href="#vagas">Vagas</a>
+        <a href="/plataforma-rh.html">Para empresas</a>
+        <a href="/vagas.html">Como funciona</a>
+      </nav>
       <div class="header-actions" id="header-actions">
-        <button class="btn-outline" onclick="abrirModal('login')">Entrar</button>
-        <button id="btn-cadastrar" class="btn-outline" onclick="abrirModal('cad')">Cadastrar</button>
+        <button class="btn-outline" type="button" onclick="abrirModal('login')">Entrar</button>
+        <button id="btn-cadastrar" class="btn-header-primary" type="button" onclick="abrirModal('cad')">Criar conta</button>
       </div>
     </div>
   </div>
 </header>
 
-<section class="hero">
+<main>
+<section class="candidate-hero">
   <div class="container">
-    <div class="search-box search-box-central">
-      <input type="text" id="busca" placeholder="Buscar por cargo ou empresa...">
-      <button onclick="carregarVagas()">Buscar</button>
+    <div class="hero-copy">
+      <div class="hero-kicker">O próximo passo da sua carreira</div>
+      <h1>Encontre oportunidades<br>que <em>combinam com você</em></h1>
+      <p>Encontre empresas que buscam pessoas como você, candidate-se às oportunidades e acompanhe tudo em um só lugar.</p>
+      <div class="hero-search-card" role="search" aria-label="Buscar vagas">
+        <label class="hero-search-field" for="busca">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
+          <input type="search" id="busca" placeholder="Cargo, palavra-chave ou empresa" autocomplete="off">
+        </label>
+        <label class="hero-search-field" for="busca-cidade">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+          <input type="search" id="busca-cidade" placeholder="Cidade ou estado" autocomplete="address-level2">
+        </label>
+        <button class="hero-search-submit" type="button" onclick="carregarVagas()">Buscar vagas</button>
+      </div>
+      <div class="popular-searches" aria-label="Buscas populares">
+        <span class="popular-label">Buscas populares:</span>
+        <button class="popular-chip" type="button" onclick="usarBuscaPopular('Vendas')">Vendas</button>
+        <button class="popular-chip" type="button" onclick="usarBuscaPopular('Analista')">Analista</button>
+        <button class="popular-chip" type="button" onclick="usarBuscaPopular('Estágio')">Estágio</button>
+        <button class="popular-chip" type="button" onclick="usarBuscaPopular('Administrativo')">Administrativo</button>
+      </div>
     </div>
   </div>
 </section>
 
-<div class="filtros">
+<section class="candidate-proof" aria-label="Recursos para candidatos">
+  <div class="container proof-grid">
+    <div class="proof-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 5h16v14H4z"></path><path d="M8 9h8M8 13h5"></path></svg><span>Vagas abertas</span></div>
+    <div class="proof-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 5h14v14H5z"></path><path d="m8 12 2.5 2.5L16 9"></path></svg><span>Processo simples</span></div>
+    <div class="proof-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 10v5M12 7.5h.01"></path></svg><span>Acompanhe tudo</span></div>
+    <div class="proof-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3 19 6v5c0 4.5-3 7.5-7 10-4-2.5-7-5.5-7-10V6l7-3Z"></path><path d="m9 12 2 2 4-4"></path></svg><span>Privacidade e segurança</span></div>
+  </div>
+</section>
+
+<div class="filtros candidate-filters">
   <div class="container">
     <div class="filtros-row">
-      <button class="filtro-toggle" id="filtro-label">📂 Todas</button>
-      <button class="filtro-toggle" style="background: var(--branco); color: var(--preto); border: 1px solid var(--borda);" onclick="toggleFiltroDropdown()">Filtrar ▾</button>
+      <span class="filter-heading">Encontre sua próxima oportunidade</span>
+      <div class="filter-actions">
+        <button class="filtro-toggle" id="filtro-label" type="button">Todas as áreas</button>
+        <button class="filtro-toggle" type="button" onclick="toggleFiltroDropdown()">Filtrar por área <span aria-hidden="true">⌄</span></button>
+      </div>
       <div class="filtro-dropdown" id="filtro-dropdown">
         <button data-cat="" class="ativo">Todas</button>
         <button data-cat="Tecnologia">Tecnologia</button>
@@ -367,18 +407,40 @@
   </div>
 </div>
 
-<section class="vagas-section">
+<section class="vagas-section candidate-vagas-section" id="vagas">
   <div class="container">
-    <h2 class="section-title">Vagas abertas</h2>
-    <p class="section-sub" id="contador">Carregando...</p>
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Vagas em destaque</h2>
+        <p class="section-sub" id="contador">Carregando oportunidades...</p>
+      </div>
+    </div>
     <div class="vagas-grid" id="vagas-grid">
       <div class="empty"><div class="spinner"></div></div>
     </div>
   </div>
 </section>
 
-<footer>
-  <div class="container"><p>© 2025 VagasIO — Plataforma de recrutamento</p></div>
+<section class="candidate-benefits">
+  <div class="container benefits-inner">
+    <div class="benefits-copy">
+      <h2>Seu próximo passo começa aqui</h2>
+      <p>Crie seu perfil, encontre oportunidades e acompanhe cada etapa do seu processo em um só lugar.</p>
+    </div>
+    <div class="benefits-list">
+      <div class="benefit-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 5h16v14H4z"></path><path d="M8 9h8M8 13h5"></path></svg><strong>Cadastro gratuito</strong><span>Crie seu perfil para começar.</span></div>
+      <div class="benefit-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 5h14v14H5z"></path><path d="m8 12 2.5 2.5L16 9"></path></svg><strong>Processo simples</strong><span>Candidate-se com seus dados.</span></div>
+      <div class="benefit-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3 19 6v5c0 4.5-3 7.5-7 10-4-2.5-7-5.5-7-10V6l7-3Z"></path><path d="m9 12 2 2 4-4"></path></svg><strong>Conecte-se</strong><span>Acompanhe as atualizações do processo.</span></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="candidate-footer">
+  <div class="container candidate-footer-inner">
+    <img class="candidate-footer-logo" src="/assets/logo-vagasio-combr-original.jpg" alt="VagasIO.com.br">
+    <p>© 2025 VagasIO — Plataforma de recrutamento</p>
+  </div>
 </footer>
 
 <!-- MODAL DETALHES DA VAGA -->
@@ -610,7 +672,7 @@
   .btn-hamburguer-header { background: var(--branco); border: 1px solid var(--borda); color: var(--preto); width: 38px; height: 38px; border-radius: 8px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .btn-hamburguer-header:hover { background: #f5f5f7; }
 
-  /* ☰ na lateral direita, alinhado com o logo "Vagas.io" */
+  /* ☰ na lateral direita, alinhado com o logo VagasIO */
   .btn-menu-logo { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; }
   .btn-menu-logo:hover { background: rgba(255,255,255,0.25); }
   /* Empurra o header-actions pra não cobrir o ☰ */
@@ -670,8 +732,8 @@
 </aside>
 
 <script src="/candidato/auth-helper.js?v=etapa2_2026_07_27"></script>
-<script src="/candidato/app-v2.js?v=portal-universal-empresa-1"></script>
-<script src="/candidato/modals.js?v=NOTIF_994903"></script>
+<script src="/candidato/app-v2.js?v=portal-candidate-redesign-1"></script>
+<script src="/candidato/modals.js?v=portal-candidate-redesign-1"></script>
 <script>
 function abrirDrawer(e) {
   if (e) e.stopPropagation();

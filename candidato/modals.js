@@ -3,6 +3,19 @@
 // Garante que abrirModal('login') e abrirModal('cad') funcionem em qualquer lugar
 
 (function() {
+  // Alternância visual de senha — não altera o payload nem a autenticação.
+  window.toggleSenhaCampo = function(id, button) {
+    const input = document.getElementById(id);
+    if (!input) return;
+    const mostrar = input.type === 'password';
+    input.type = mostrar ? 'text' : 'password';
+    if (button) {
+      button.textContent = mostrar ? '◉' : '◌';
+      button.setAttribute('aria-label', mostrar ? 'Ocultar senha' : 'Mostrar senha');
+      button.setAttribute('title', mostrar ? 'Ocultar senha' : 'Mostrar senha');
+    }
+  };
+
   // CSS mínimo dos modais (caso a página não tenha)
   if (!document.getElementById('modals-shared-css')) {
     const style = document.createElement('style');
@@ -47,31 +60,41 @@
 
   // HTML do modal de login
   const loginHTML = `
-<div class="modal-overlay" id="modal-login">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>Entrar</h2>
-      <button class="modal-close" onclick="fecharModal('login')">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="step" id="login-etapa-1">
-        <div class="info-box">Acesse sua conta com e-mail e senha.</div>
-        <div class="form-group"><label>Seu e-mail</label><input type="email" id="login-email" autocomplete="email"></div>
-        <div class="form-group"><label>Senha</label><input type="password" id="login-senha" autocomplete="current-password"></div>
-        <button class="btn btn-primary" onclick="loginEntrar(this)">Entrar</button>
-      </div>
-      <div class="step" id="login-etapa-2" style="display:none !important"></div>
-      <p style="text-align:center;margin-top:16px;font-size:14px;">
-        Não tem conta? <a href="#" onclick="fecharModal('login');abrirModal('cad');return false;" style="color:#722F37;font-weight:600;">Cadastre-se</a>
-      </p>
+<div class="modal-overlay" id="modal-login" role="dialog" aria-modal="true" aria-labelledby="login-title">
+  <div class="modal login-modal">
+    <div class="login-layout">
+      <section class="login-main">
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="modal-close" type="button" onclick="fecharModal('login')" aria-label="Fechar login">×</button>
+        </div>
+        <img class="login-brand" src="/divulgacao/assets/logo-vagasio-header.png" alt="VagasIO.com.br">
+        <h2 class="login-title" id="login-title">Bem-vindo de volta!</h2>
+        <p class="login-subtitle">Entre na sua conta para continuar.</p>
+        <div class="step" id="login-etapa-1">
+          <div class="candidate-feedback" id="login-feedback" role="alert" aria-live="polite"></div>
+          <div class="form-group"><label for="login-email">E-mail</label><input type="email" id="login-email" autocomplete="email" placeholder="voce@exemplo.com"></div>
+          <div class="form-group"><label for="login-senha">Senha</label><div class="password-field"><input type="password" id="login-senha" autocomplete="current-password" placeholder="Digite sua senha"><button class="password-toggle" type="button" onclick="toggleSenhaCampo('login-senha', this)" aria-label="Mostrar senha" title="Mostrar senha">◉</button></div></div>
+          <div class="login-links"><span></span><a href="/candidato/esqueci-senha.html">Esqueci minha senha</a></div>
+          <button class="btn btn-primary" type="button" onclick="loginEntrar(this)">Entrar</button>
+        </div>
+        <div class="step" id="login-etapa-2" style="display:none !important"></div>
+        <div class="login-divider"><span>ou</span></div>
+        <p class="login-register">Ainda não tem uma conta? <a href="#" onclick="fecharModal('login');abrirModal('cad');return false;">Criar conta</a></p>
+      </section>
+      <aside class="login-side">
+        <img class="login-side-logo" src="/assets/logo-vagasio-combr-original.jpg" alt="VagasIO.com.br">
+        <div class="login-side-rule"></div>
+        <h3>Oportunidades que combinam com você.</h3>
+        <p>Encontre vagas, candidate-se e acompanhe cada etapa do seu processo seletivo em um só lugar.</p>
+      </aside>
     </div>
   </div>
 </div>`;
 
   // HTML do modal de cadastro (wizard)
   const cadHTML = `
-<div class="modal-overlay" id="modal-cad">
-  <div class="modal modal-large">
+<div class="modal-overlay" id="modal-cad" role="dialog" aria-modal="true" aria-labelledby="cad-titulo">
+  <div class="modal modal-large signup-modal">
     <div class="modal-header">
       <div style="flex:1">
         <h2 id="cad-titulo">Cadastre-se</h2>
@@ -86,12 +109,14 @@
       <button class="modal-close" onclick="fecharModal('cad')">×</button>
     </div>
     <div class="modal-body">
+      <div class="signup-intro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 19 6v5c0 4.5-3 7.5-7 10-4-2.5-7-5.5-7-10V6l7-3Z"></path><path d="m9 12 2 2 4-4"></path></svg><span>Seu cadastro é gratuito. Complete seu perfil para encontrar oportunidades mais alinhadas ao que você busca.</span></div>
+      <div class="candidate-feedback" id="cad-feedback" role="alert" aria-live="polite"></div>
       <div class="wizard-etapa" id="wizard-etapa-1">
-        <h3 class="wizard-titulo">Crie sua conta</h3>
-        <p class="wizard-subtitulo">É rápido e gratuito. Você poderá se candidatar às vagas imediatamente.</p>
+        <h3 class="wizard-titulo">Vamos começar pela sua conta</h3>
+        <p class="wizard-subtitulo">Use um e-mail que você acompanha para receber atualizações sobre suas candidaturas.</p>
         <div class="form-group"><label>E-mail *</label><input type="email" id="w1-email" placeholder="seu@email.com" autocomplete="email"></div>
-        <div class="form-group"><label>Senha * (mínimo 6 caracteres)</label><input type="password" id="w1-senha" placeholder="••••••" minlength="6" autocomplete="new-password"></div>
-        <div class="form-group"><label>Confirme sua senha *</label><input type="password" id="w1-senha-conf" placeholder="••••••" minlength="6" autocomplete="new-password"></div>
+        <div class="form-group"><label for="w1-senha">Senha * (mínimo 8 caracteres)</label><div class="password-field"><input type="password" id="w1-senha" placeholder="Crie uma senha segura" minlength="8" autocomplete="new-password"><button class="password-toggle" type="button" onclick="toggleSenhaCampo('w1-senha', this)" aria-label="Mostrar senha" title="Mostrar senha">◉</button></div><div class="password-hint" id="cad-senha-hint">Use pelo menos 8 caracteres.</div></div>
+        <div class="form-group"><label for="w1-senha-conf">Confirme sua senha *</label><div class="password-field"><input type="password" id="w1-senha-conf" placeholder="Digite sua senha novamente" minlength="8" autocomplete="new-password"><button class="password-toggle" type="button" onclick="toggleSenhaCampo('w1-senha-conf', this)" aria-label="Mostrar senha" title="Mostrar senha">◉</button></div></div>
         <div class="wizard-botoes">
           <button class="btn btn-primary" onclick="wizardProximo()">Continuar</button>
         </div>
@@ -133,7 +158,7 @@
           <div id="w2-areas-contador" style="margin-top:6px;font-size:12px;color:#666;">0 de 5 selecionadas</div>
         </div>
         <div class="form-group">
-          <label class="check-label"><input type="checkbox" id="w2-politica" required> Li e aceito a <a href="#" onclick="alert('Política de privacidade');return false;" style="color:var(--vinho);font-weight:600;">Política de privacidade</a></label>
+          <label class="check-label"><input type="checkbox" id="w2-politica" required> Li e aceito a Política de Privacidade do VagasIO.</label>
         </div>
         <div class="form-group">
           <label class="check-label"><input type="checkbox" id="w2-comunicacoes"> Desejo receber comunicações sobre novas vagas e atualizações.</label>
@@ -256,6 +281,22 @@
       div.innerHTML = cadHTML;
       document.body.appendChild(div.firstElementChild);
     }
+    const senha = document.getElementById('w1-senha');
+    const hint = document.getElementById('cad-senha-hint');
+    if (senha && hint && !senha.dataset.feedbackBound) {
+      senha.dataset.feedbackBound = '1';
+      senha.addEventListener('input', () => {
+        const n = senha.value.length;
+        if (!n) { hint.textContent = 'Use pelo menos 8 caracteres.'; hint.className = 'password-hint'; return; }
+        if (n < 8) { hint.textContent = 'Ainda faltam ' + (8 - n) + ' caracteres.'; hint.className = 'password-hint weak'; return; }
+        if (n < 12) { hint.textContent = 'Senha válida. Combine letras, números e símbolos para reforçar.'; hint.className = 'password-hint medium'; return; }
+        hint.textContent = 'Senha forte.'; hint.className = 'password-hint strong';
+      });
+    }
+    const loginFields = [document.getElementById('login-email'), document.getElementById('login-senha')];
+    loginFields.forEach(field => field?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); document.querySelector('#login-etapa-1 .btn-primary')?.click(); }
+    }));
   }
 
   if (document.readyState === 'loading') {
