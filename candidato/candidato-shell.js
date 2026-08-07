@@ -12,6 +12,15 @@
   ];
   const current = location.pathname.split('/').pop() || 'index.html';
   const body = document.body;
+  const autenticado = !!localStorage.getItem('candidato_token');
+
+  // Visitante não deve ver nem abrir o menu lateral do candidato.
+  if (!autenticado) {
+    document.querySelectorAll('.btn-menu-logo').forEach(el => el.remove());
+    document.getElementById('drawer-overlay')?.remove();
+    document.getElementById('drawer')?.remove();
+    return;
+  }
 
   function drawerMarkup() {
     return `<div class="drawer-overlay" id="drawer-overlay"></div>
