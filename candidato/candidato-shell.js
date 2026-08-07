@@ -49,7 +49,7 @@
 
   const header = document.createElement('header');
   header.className = 'candidate-header';
-  header.innerHTML = '<div class="header-inner"><a href="' + ROOT + 'index.html" class="logo">VagasIO</a><div class="header-actions" id="header-actions"><button type="button" class="btn-menu-logo" id="btn-menu-logo" aria-label="Abrir menu" aria-controls="candidato-sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div>';
+  header.innerHTML = '<div class="header-inner"><a href="' + ROOT + 'index.html" class="logo">VagasIO</a><div class="header-actions" id="header-actions"></div><button type="button" class="btn-menu-logo" id="btn-menu-logo" aria-label="Abrir menu" aria-controls="candidato-sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>'
   document.body.insertBefore(header, document.body.firstChild);
   const subheader = document.createElement('section');
   subheader.className = 'subheader';
