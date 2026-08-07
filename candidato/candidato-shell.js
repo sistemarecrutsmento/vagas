@@ -4,10 +4,10 @@
 
   const ROOT = '/candidato/';
   const authenticated = !!localStorage.getItem('candidato_token');
-  // A home pública nunca vira o shell autenticado apenas porque há uma sessão
-  // persistida: isso evitava o segundo wine band e mantinha drawer no visitante.
-  const publicPage = ['index.html', 'vaga.html'].includes((location.pathname.split('/').pop() || 'index.html').toLowerCase());
-  const useShell = authenticated && !publicPage;
+  // Visitantes veem apenas o cabeçalho público. Com sessão válida, qualquer
+  // página do portal — inclusive a home e os detalhes da vaga — usa o shell
+  // autenticado único, com o menu lateral disponível.
+  const useShell = authenticated;
   const currentFile = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const titles = {
     index: 'Vagas', painel: 'Meu perfil', perfil: 'Meu perfil', entrevistas: 'Entrevistas',
