@@ -34,37 +34,6 @@
   .header-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; padding-right: 80px; }
   .logo { font-weight: 800; font-size: 22px; color: var(--branco); text-decoration: none; }
   .logo span { color: var(--branco); opacity: 0.8; font-weight: 300; }
-  .btn-menu-logo { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; width: 42px; height: 42px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; }
-  .btn-menu-logo:hover { background: rgba(255,255,255,0.25); border-color: white; }
-
-  /* Subheader vinho */
-  .subheader { background: var(--vinho); color: white; padding: 22px 0; box-shadow: 0 2px 8px rgba(114, 47, 55, 0.15); }
-  .subheader-inner { max-width: 800px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; gap: 16px; }
-  .subheader h1 { font-size: 22px; font-weight: 700; flex: 1; }
-  .subheader-voltar { color: rgba(255,255,255,0.85); font-size: 14px; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-  .subheader-voltar:hover { background: rgba(255,255,255,0.15); color: white; }
-
-  /* Drawer */
-  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
-  .drawer-overlay.aberto { display: block; }
-  aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
-  aside.drawer.aberto { transform: translateX(0); }
-  .drawer-header { padding: 20px; background: var(--vinho); color: white; display: flex; align-items: center; gap: 12px; }
-  .drawer-foto { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; background-size: cover; background-position: center; flex-shrink: 0; }
-  .drawer-info { flex: 1; min-width: 0; }
-  .drawer-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .drawer-info p { font-size: 12px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .drawer-close { background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .drawer-close:hover { background: rgba(255,255,255,0.25); }
-  .drawer-body { flex: 1 1 auto; min-height: 0; padding: 16px 0; overflow-y: auto; }
-  .drawer-section { padding: 8px 20px 4px; font-size: 11px; font-weight: 700; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 12px; }
-  .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--preto); font-size: 15px; font-weight: 500; transition: all 0.15s; border-right: 3px solid transparent; cursor: pointer; }
-  .drawer-link:hover { background: #f5f5f7; }
-  .drawer-link.ativo { background: #fdf2f3; border-right-color: var(--vinho); color: var(--vinho); font-weight: 700; }
-  .drawer-link .icon { font-size: 20px; width: 24px; text-align: center; }
-  .drawer-footer { padding: 12px 20px; border-top: 1px solid var(--borda); background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); flex-shrink: 0; }
-  .drawer-logout { width: 100%; background: transparent; color: var(--vinho); border: 1px solid var(--vinho); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .drawer-logout:hover { background: var(--vinho); color: white; }
 
   /* Container */
   .container { max-width: 800px; margin: 0 auto; padding: 28px 20px 60px; }
@@ -151,47 +120,17 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-2">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v10">
 </head>
 <body>
 
-<header>
-  <div class="header-inner">
-    <a href="painel.html" class="logo">VagasIO</a>
-  </div>
-  <button class="btn-menu-logo" onclick="abrirDrawer()" title="Menu">☰</button>
-</header>
 
-<section class="subheader">
-  <div class="subheader-inner">
-    <a class="subheader-voltar" href="painel.html">← Voltar</a>
-    <h1>Documentos para contratação</h1>
-  </div>
-</section>
+
+
 
 <!-- Drawer -->
-<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
-<aside class="drawer" id="drawer">
-  <div class="drawer-header">
-    <div class="drawer-foto" id="drawer-foto">👤</div>
-    <div class="drawer-info">
-      <h3 id="drawer-nome">Candidato</h3>
-      <p id="drawer-email">—</p>
-    </div>
-    <button class="drawer-close" onclick="fecharDrawer()">×</button>
-  </div>
-  <div class="drawer-body">
-    <div class="drawer-section">Navegação</div>
-    <a href="index.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">🏠</span> Vagas</a>
-    <a href="painel.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">👤</span> Meu perfil</a>
-    <a href="entrevistas.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">📅</span> Entrevistas</a>
-    <a href="favoritos.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">⭐</span> Favoritos</a>
-    <a href="conversas.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">💬</span> Chat</a>
-  </div>
-  <div class="drawer-footer">
-    <button class="drawer-logout" onclick="logout()" aria-label="Sair do perfil">🚪 Sair</button>
-  </div>
-</aside>
+
+
 
 <div class="container">
 
@@ -219,20 +158,6 @@ let docsExistentes = {}; // tipo -> {status, ...}
 // ============== AUTH ==============
 if (!TOKEN) location.href = 'index.html';
 
-function logout() {
-  localStorage.removeItem('candidato_token');
-  localStorage.removeItem('candidato_id');
-  location.href = 'index.html';
-}
-
-function abrirDrawer() {
-  document.getElementById('drawer').classList.add('aberto');
-  document.getElementById('drawer-overlay').classList.add('aberto');
-}
-function fecharDrawer() {
-  document.getElementById('drawer').classList.remove('aberto');
-  document.getElementById('drawer-overlay').classList.remove('aberto');
-}
 
 // ============== LOAD ==============
 async function carregarCandidatura() {
@@ -568,6 +493,6 @@ carregarCandidatura();
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-3"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v10"></script>
 </body>
 </html>

@@ -30,13 +30,6 @@
     .btn-menu { background: rgba(255,255,255,0.1); border: none; color: white; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; font-size: 20px; }
     .btn-menu:hover { background: rgba(255,255,255,0.2); }
 
-    /* === SUBHEADER === */
-    .subheader {
-      background: white; padding: 18px 20px; border-bottom: 1px solid var(--borda);
-    }
-    .subheader h1 { font-size: 20px; font-weight: 700; margin: 0; color: var(--vinho); display: flex; align-items: center; gap: 8px; }
-    .subheader p { font-size: 13px; color: var(--texto-suave); margin: 4px 0 0; }
-
     /* === KPI strip (resumo no topo) === */
     .kpi-strip {
       display: grid; grid-template-columns: repeat(3, 1fr);
@@ -205,36 +198,6 @@
     .empty h3 { color: var(--vinho); margin: 0 0 8px; font-size: 18px; }
     .empty p { color: var(--texto-suave); margin-bottom: 20px; font-size: 14px; }
 
-    /* === DRAWER (igual candidato) === */
-    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
-    .drawer-overlay.aberto { display: block; }
-    aside.drawer {
-      position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 90vw;
-      background: white; z-index: 200; transform: translateX(100%);
-      transition: transform 0.25s ease; box-shadow: -4px 0 16px rgba(0,0,0,0.1);
-      display: flex; flex-direction: column; overflow: hidden;
-    }
-    aside.drawer.aberto { transform: translateX(0); }
-    .drawer-header { padding: 20px; background: var(--vinho); color: white; display: flex; align-items: center; gap: 12px; }
-    .drawer-foto {
-      width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 800; flex-shrink: 0;
-    }
-    .drawer-info { flex: 1; min-width: 0; }
-    .drawer-info h3 { font-size: 15px; font-weight: 700; margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .drawer-info p { font-size: 12px; opacity: 0.85; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .drawer-close { background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 20px; }
-    .drawer-body { flex: 1 1 auto; min-height: 0; padding: 16px 0; overflow-y: auto; }
-    .drawer-section { padding: 8px 20px 4px; font-size: 11px; font-weight: 700; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 12px; }
-    .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--texto); text-decoration: none; font-size: 14px; }
-    .drawer-link:hover { background: #f9fafb; }
-    .drawer-link.ativo { background: #faf5f5; color: var(--vinho); font-weight: 600; }
-    .drawer-link .icon { font-size: 18px; }
-    .drawer-footer { padding: 12px 20px; border-top: 1px solid var(--borda); background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); flex-shrink: 0; }
-    .drawer-logout { width: 100%; background: #fef2f2; color: #991b1b; border: 0; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
-    .drawer-logout:hover { background: #fee2e2; }
-
     /* Toast mini (substitui alert()) */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120%);
@@ -271,19 +234,13 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-2">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v10">
 </head>
 <body>
 
-<header>
-  <div class="marca">VagasIO <small>Entrevistas</small></div>
-  <button class="btn-menu" id="btn-menu-logo" aria-label="Menu">☰</button>
-</header>
 
-<div class="subheader">
-  <h1>📅 Suas Entrevistas</h1>
-  <p>Acompanhe os horários e entre na sala de vídeo no dia marcado</p>
-</div>
+
+
 
 <!-- KPIs (preenchidos via JS) -->
 <div class="kpi-strip" id="kpi-strip" style="display:none">
@@ -306,28 +263,8 @@
 </main>
 
 <!-- Drawer -->
-<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
-<aside class="drawer" id="drawer">
-  <div class="drawer-header">
-    <div class="drawer-foto" id="drawer-foto">👤</div>
-    <div class="drawer-info">
-      <h3 id="drawer-nome">Visitante</h3>
-      <p id="drawer-email">—</p>
-    </div>
-    <button class="drawer-close" onclick="fecharDrawer()">×</button>
-  </div>
-  <div class="drawer-body">
-    <div class="drawer-section">Navegação</div>
-    <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
-    <a href="painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
-    <a href="entrevistas.html" class="drawer-link ativo"><span class="icon">📅</span> Entrevistas</a>
-    <a href="favoritos.html" class="drawer-link"><span class="icon">⭐</span> Favoritos</a>
-    <a href="conversas.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">💬</span> Chat</a>
-  </div>
-  <div class="drawer-footer" id="drawer-footer-logado" style="display:none">
-    <button class="drawer-logout" onclick="logout()">🚪 Sair</button>
-  </div>
-</aside>
+
+
 
 <!-- Toast (substitui alert) -->
 <div class="toast" id="toast"></div>
@@ -353,23 +290,6 @@
   let tokenCandidato = localStorage.getItem('candidato_token');
   let emailLogado = localStorage.getItem('candidato_email');
 
-  function logout() {
-    showToast('Saindo...', '🚪');
-    setTimeout(() => {
-      localStorage.removeItem('candidato_token');
-      localStorage.removeItem('candidato_email');
-      window.location.href = 'index.html';
-    }, 600);
-  }
-
-  function abrirDrawer() {
-    document.getElementById('drawer').classList.add('aberto');
-    document.getElementById('drawer-overlay').classList.add('aberto');
-  }
-  function fecharDrawer() {
-    document.getElementById('drawer').classList.remove('aberto');
-    document.getElementById('drawer-overlay').classList.remove('aberto');
-  }
 
   // === DADOS DO CANDIDATO ===
   async function carregarCandidato() {
@@ -646,8 +566,6 @@
 
   // === INIT ===
   document.addEventListener('DOMContentLoaded', () => {
-    const btnMenu = document.getElementById('btn-menu-logo');
-    if (btnMenu) btnMenu.addEventListener('click', abrirDrawer);
     carregarCandidato();
     carregarEntrevistas();
     // Atualiza a cada 30s pra countdown ficar certo
@@ -665,6 +583,6 @@
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-3"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v10"></script>
 </body>
 </html>

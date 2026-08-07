@@ -1,113 +1,64 @@
-/* VagasIO — padrão único do Portal do Candidato */
-:root { --vagasio-wine: #5f1527; --vagasio-wine-deep: #43101e; --vagasio-line: rgba(95,21,39,.14); }
-
-/* Cabeçalho e faixa de título únicos em todas as páginas autenticadas */
-body > header.candidate-header { position: sticky !important; top: 0 !important; z-index: 100 !important; min-height: 66px !important; height: auto !important; padding: 0 !important; background: var(--vagasio-wine) !important; color: #fff !important; border: 0 !important; box-shadow: 0 3px 18px rgba(39,10,19,.18) !important; }
-body > header.candidate-header .header-inner { box-sizing: border-box !important; width: 100% !important; max-width: 1240px !important; min-height: 66px !important; margin: 0 auto !important; padding: 10px 24px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; }
-body > header.candidate-header .logo { display: inline-flex !important; align-items: center !important; color: #fff !important; font-weight: 800 !important; font-size: 23px !important; letter-spacing: -.04em !important; text-decoration: none !important; white-space: nowrap !important; }
-body > header.candidate-header .header-actions { display: flex !important; align-items: center !important; justify-content: flex-end !important; gap: 8px !important; margin-left: auto !important; }
-body > .subheader { display: block !important; background: var(--vagasio-wine) !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 10px rgba(39,10,19,.12) !important; }
-body > .subheader .subheader-inner { width: 100% !important; max-width: 1240px !important; min-height: 64px !important; margin: 0 auto !important; padding: 16px 24px !important; display: flex !important; align-items: center !important; }
-body > .subheader h1 { margin: 0 !important; color: #fff !important; font-size: 24px !important; line-height: 1.2 !important; }
-#sino-fase7, .perfil-card-sino { display: none !important; }
-
-/* Drawer único injetado em todas as páginas internas */
-body:not(.candidate-home) .drawer-overlay { position: fixed !important; inset: 0 !important; z-index: 998 !important; background: rgba(22,8,13,.42) !important; opacity: 0 !important; visibility: hidden !important; transition: opacity .2s ease, visibility .2s ease !important; }
-body:not(.candidate-home) .drawer-overlay.aberto { opacity: 1 !important; visibility: visible !important; }
-body:not(.candidate-home) aside.drawer { position: fixed !important; top: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 999 !important; transform: translateX(105%) !important; transition: transform .24s ease !important; display: flex !important; flex-direction: column !important; }
-body:not(.candidate-home) aside.drawer.aberto { transform: translateX(0) !important; }
-body:not(.candidate-home) .drawer-body { flex: 1 1 auto !important; overflow-y: auto !important; }
-body:not(.candidate-home) .drawer-section { padding: 24px 20px 10px !important; color: #766d71 !important; font-size: 12px !important; letter-spacing: .08em !important; font-weight: 700 !important; }
-body:not(.candidate-home) .drawer-info h3, body:not(.candidate-home) .drawer-info p { margin: 0 !important; color: #fff !important; }
-
-/* Faixa superior fixa: mesma altura, cor e alinhamento em todas as telas internas */
-body:not(.candidate-home) > header {
-  position: sticky !important; top: 0 !important; z-index: 100 !important;
-  min-height: 66px !important; background: var(--vagasio-wine) !important;
-  color: #fff !important; border: 0 !important;
-  box-shadow: 0 3px 18px rgba(39,10,19,.18) !important;
-}
-body:not(.candidate-home) > header .header-inner {
-  box-sizing: border-box !important; width: 100% !important; max-width: 1240px !important;
-  min-height: 66px !important; margin: 0 auto !important; padding: 10px 24px !important;
-  display: flex !important; flex-direction: row !important; align-items: center !important;
-  justify-content: space-between !important; gap: 16px !important;
-}
-body:not(.candidate-home) > header .logo {
-  display: inline-flex !important; align-items: center !important; color: #fff !important;
-  font-weight: 800 !important; font-size: 23px !important; letter-spacing: -.04em !important;
-  text-decoration: none !important; white-space: nowrap !important;
-}
-body:not(.candidate-home) > header .header-actions {
-  display: flex !important; align-items: center !important; justify-content: flex-end !important;
-  gap: 8px !important; margin-left: auto !important;
-}
-body:not(.candidate-home) > header .header-actions button,
-body:not(.candidate-home) > header .btn-voltar {
-  min-height: 38px !important; border-radius: 8px !important;
-}
-body:not(.candidate-home) > header .btn-menu-logo {
-  position: static !important; transform: none !important; display: inline-flex !important;
-  align-items: center !important; justify-content: center !important; width: 38px !important;
-  height: 38px !important; padding: 0 !important; margin: 0 !important;
-  color: #fff !important; background: transparent !important;
-  border: 1px solid rgba(255,255,255,.46) !important; border-radius: 8px !important;
+/* VagasIO — tokens e shell único do Portal do Candidato */
+:root {
+  --vagasio-wine: #5f1527;
+  --vagasio-wine-deep: #43101e;
+  --vagasio-canvas: #f7f5f6;
+  --vagasio-surface: #fff;
+  --vagasio-ink: #171419;
+  --vagasio-muted: #6f6870;
+  --vagasio-line: #e9e4e7;
+  --vagasio-focus: rgba(138,51,72,.35);
 }
 
-/* Faixa vinho de título/subnavegação */
-body:not(.candidate-home) .subheader {
-  background: var(--vagasio-wine) !important; color: #fff !important;
-  border: 0 !important; box-shadow: 0 2px 10px rgba(39,10,19,.12) !important;
+body.drawer-aberto { overflow: hidden; }
+body > header.candidate-header {
+  position: sticky; top: 0; z-index: 100; min-height: 66px; width: 100%;
+  background: var(--vagasio-wine); color: #fff; box-shadow: 0 3px 18px rgba(39,10,19,.18);
 }
-body:not(.candidate-home) .subheader-inner { min-height: 64px; }
-body:not(.candidate-home) .subheader h1,
-body:not(.candidate-home) .subheader p,
-body:not(.candidate-home) .subheader a,
-body:not(.candidate-home) .subheader-voltar { color: #fff !important; }
+.candidate-header .header-inner {
+  box-sizing: border-box; width: 100%; max-width: 1240px; min-height: 66px;
+  margin: 0 auto; padding: 10px 24px; display: flex; align-items: center;
+  justify-content: space-between; gap: 16px;
+}
+.candidate-header .logo { color: #fff; font-size: 23px; font-weight: 800; letter-spacing: -.04em; text-decoration: none; white-space: nowrap; }
+.candidate-header .header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.btn-menu-logo { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.5); border-radius: 8px; cursor: pointer; }
+.btn-menu-logo svg { width: 21px; height: 21px; }
+.btn-menu-logo:hover { background: rgba(255,255,255,.12); }
+.btn-menu-logo:focus-visible, .drawer-close:focus-visible, .drawer-link:focus-visible, .drawer-logout:focus-visible { outline: 3px solid var(--vagasio-focus); outline-offset: 2px; }
 
-/* Barra lateral de operações: mesmo comportamento, espaçamento e estado ativo */
-body:not(.candidate-home) aside.drawer {
-  width: 320px !important; max-width: 90vw !important; background: #fff !important;
-  border-left: 1px solid var(--vagasio-line) !important;
-  box-shadow: -8px 0 28px rgba(27,10,17,.16) !important;
-}
-body:not(.candidate-home) .drawer-header,
-body:not(.candidate-home) .drawer-head {
-  background: var(--vagasio-wine) !important; color: #fff !important;
-  min-height: 88px !important; box-sizing: border-box !important;
-  padding: 18px 20px !important;
-}
-body:not(.candidate-home) .drawer-link {
-  min-height: 46px !important; box-sizing: border-box !important;
-  padding: 11px 20px !important; color: #30292d !important;
-  display: flex !important; align-items: center !important; gap: 13px !important;
-}
-body .drawer-link .icon { width: 21px !important; height: 21px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; flex: 0 0 21px !important; color: currentColor !important; }
-body .drawer-link .icon svg { width: 20px !important; height: 20px !important; display: block !important; }
-  border-right: 3px solid transparent !important; text-decoration: none !important;
-}
-body:not(.candidate-home) .drawer-link:hover { background: #faf5f6 !important; }
-body:not(.candidate-home) .drawer-link.ativo {
-  background: #f7ecef !important; color: var(--vagasio-wine) !important;
-  border-right-color: var(--vagasio-wine) !important; font-weight: 700 !important;
-}
-body:not(.candidate-home) .drawer-footer { background: #fff !important; border-top-color: #eee5e7 !important; }
-body:not(.candidate-home) .drawer-logout {
-  color: var(--vagasio-wine) !important; border-color: var(--vagasio-wine) !important;
-}
-body:not(.candidate-home) .drawer-logout:hover { background: var(--vagasio-wine) !important; color: #fff !important; }
+body > .subheader { display: block; background: var(--vagasio-wine); color: #fff; box-shadow: 0 2px 10px rgba(39,10,19,.12); }
+.subheader .subheader-inner { box-sizing: border-box; width: 100%; max-width: 1240px; min-height: 64px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; }
+.subheader h1 { margin: 0; color: #fff; font-size: 24px; line-height: 1.2; }
+
+.drawer-overlay { position: fixed; inset: 0; z-index: 998; background: rgba(22,8,13,.46); opacity: 0; visibility: hidden; transition: opacity .22s ease, visibility .22s ease; }
+.drawer-overlay.aberto { opacity: 1; visibility: visible; }
+aside.drawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 999; width: 320px; max-width: 90vw; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; background: var(--vagasio-surface); border-left: 1px solid rgba(95,21,39,.14); box-shadow: -8px 0 28px rgba(27,10,17,.16); transform: translateX(105%); transition: transform .24s ease; }
+aside.drawer.aberto { transform: translateX(0); }
+.drawer-header { min-height: 88px; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 18px 20px; color: #fff; background: var(--vagasio-wine); }
+.drawer-foto { width: 48px; height: 48px; flex: 0 0 48px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%; color: #fff; background: rgba(255,255,255,.2); font-size: 15px; font-weight: 800; }
+.drawer-info { min-width: 0; flex: 1; }
+.drawer-info h3, .drawer-info p { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drawer-info h3 { font-size: 15px; font-weight: 700; }
+.drawer-info p { margin-top: 3px; opacity: .88; font-size: 12px; }
+.drawer-close { width: 34px; height: 34px; flex: 0 0 34px; border: 0; border-radius: 7px; color: #fff; background: rgba(255,255,255,.14); font-size: 23px; line-height: 1; cursor: pointer; }
+.drawer-close:hover { background: rgba(255,255,255,.24); }
+.drawer-body { min-height: 0; flex: 1 1 auto; overflow-y: auto; padding: 16px 0; }
+.drawer-section { padding: 8px 20px 10px; color: var(--vagasio-muted); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.drawer-link { min-height: 46px; box-sizing: border-box; display: flex; align-items: center; gap: 13px; padding: 11px 20px; color: var(--vagasio-ink); border-right: 3px solid transparent; text-decoration: none; font-size: 15px; }
+.drawer-link:hover { background: #faf5f6; }
+.drawer-link.ativo { color: var(--vagasio-wine); background: #f7ecef; border-right-color: var(--vagasio-wine); font-weight: 700; }
+.drawer-link .icon { width: 21px; height: 21px; flex: 0 0 21px; display: inline-flex; align-items: center; justify-content: center; color: currentColor; }
+.drawer-link .icon svg { display: block; width: 20px; height: 20px; }
+.drawer-footer { flex: 0 0 auto; padding: 16px 20px; border-top: 1px solid var(--vagasio-line); background: #fff; }
+.drawer-logout { width: 100%; min-height: 42px; border: 1px solid var(--vagasio-wine); border-radius: 8px; color: var(--vagasio-wine); background: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+.drawer-logout:hover { color: #fff; background: var(--vagasio-wine); }
 
 @media (max-width: 640px) {
-  body > header.candidate-header,
-  body > header.candidate-header .header-inner { min-height: 54px !important; }
-  body > header.candidate-header .header-inner { padding: 7px 16px !important; }
-  body > header.candidate-header .logo { font-size: 20px !important; }
-  body > .subheader .subheader-inner { min-height: 56px !important; padding: 16px !important; }
-  body > .subheader h1 { font-size: 21px !important; }
-  body:not(.candidate-home) > header,
-  body:not(.candidate-home) > header .header-inner { min-height: 54px !important; }
-  body:not(.candidate-home) > header .header-inner { padding: 7px 16px !important; }
-  body:not(.candidate-home) > header .logo { font-size: 20px !important; }
-  body:not(.candidate-home) .subheader-inner { min-height: 56px; padding-left: 16px; padding-right: 16px; }
-  body:not(.candidate-home) aside.drawer { width: min(320px, 90vw) !important; }
+  body > header.candidate-header, .candidate-header .header-inner { min-height: 54px; }
+  .candidate-header .header-inner { padding: 7px 16px; }
+  .candidate-header .logo { font-size: 20px; }
+  .subheader .subheader-inner { min-height: 56px; padding: 16px; }
+  .subheader h1 { font-size: 21px; }
+  aside.drawer { width: min(320px, 90vw); }
 }

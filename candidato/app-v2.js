@@ -203,7 +203,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   carregarVagas();
   checarAuth();
   // Garante o ☰ no logo (mesmo deslogado)
-  setTimeout(garantirBotaoMenu, 50);
   setTimeout(processarRetornoSocial, 120);
   document.querySelectorAll('#filtro-dropdown button').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -402,7 +401,6 @@ function abrirDetalhes(id) {
       // Fase 11 — Favorito e Match (apenas para candidatos logados)
       if (tokenCandidato) {
         carregarFavoritoStatus(v.id);
-        carregarMatchCandidato(v.id);
         const btnFav = document.getElementById('btn-favoritar');
         if (btnFav) btnFav.style.display = '';
       } else {
@@ -1081,7 +1079,6 @@ function atualizarHeaderUsuario() {
     `;
   }
   // SEMPRE garante que o botão ☰ no logo existe (logado ou deslogado)
-  garantirBotaoMenu();
 }
 
 // fetchAuth: wrapper sobre fetch() que adiciona Authorization automaticamente
@@ -1107,28 +1104,6 @@ async function fetchAuth(url, options = {}) {
   return r;
 }
 window.fetchAuth = fetchAuth;
-
-function garantirBotaoMenu() {
-  const existe = document.getElementById('btn-menu-logo');
-  // Qualquer usuário logado deve ter acesso ao menu (inclusive antes de
-  // completar o cadastro), para conseguir sair da conta em qualquer página.
-  if (!tokenCandidato) {
-    if (existe && existe.dataset.staticMenu !== 'true') existe.remove();
-    return;
-  }
-  if (existe) return;
-  const headerActions = document.getElementById('header-actions');
-  if (!headerActions) return;
-  const btn = document.createElement('button');
-  btn.id = 'btn-menu-logo';
-  btn.className = 'btn-menu-logo';
-  btn.title = 'Menu';
-  btn.setAttribute('aria-label', 'Abrir menu');
-  btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
-  btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); window.abrirDrawer && window.abrirDrawer(e); });
-  // Menu só aparece para usuário autenticado e fica alinhado às ações do header.
-  headerActions.appendChild(btn);
-}
 
 async function abrirPainelCandidato() {
   if (!tokenCandidato) { abrirModal('login'); return; }
