@@ -491,6 +491,7 @@ function abrirModal(id) {
     clearCandidateFeedback('cad-feedback');
     // Reset wizard
     wizardExps = [];
+    wizardCompetencias = [];
     wizardEtapa1 = null;
     areasSelecionadas = [];
     if (typeof wizardRenderExps === 'function') wizardRenderExps();
@@ -529,6 +530,7 @@ function fecharModal(id) {
 let wizardStep = 1;
 let wizardAtCurriculo = false;
 let wizardExps = []; // experiências adicionadas no passo 5
+let wizardCompetencias = []; // competências preservadas pela importação
 let wizardEtapa1 = null; // email+senha do passo 1 (criar conta) — null se já logado
 let wizardCurriculoArquivo = null;
 
@@ -621,6 +623,7 @@ function wizardImportarCurriculo(input) {
       const data = await r.json();
       if (!r.ok) throw new Error(data.erro || 'Não foi possível ler o currículo.');
       wizardCurriculoArquivo = { base64, nome: file.name, tipo: file.type || 'application/pdf' };
+      window.__curriculoDiagnostico = data.diagnostico || null;
       preencherFormularioComCurriculo(data.dados || {});
       if (status) status.textContent = 'Currículo lido. Confira os dados e complete o que estiver em branco.';
       wizardIrPara(2);
@@ -655,6 +658,7 @@ function preencherFormularioComCurriculo(dados) {
   Object.entries(valores).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value !== undefined && value !== null && String(value).trim()) el.value = value; });
   const selects = { 'w2-sexo': pessoal.sexo, 'w4-formacao': form.nivel, 'w4-situacao': form.situacao };
   Object.entries(selects).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value) { const opt = [...el.options].find(o => o.value === value || o.textContent.toLowerCase().includes(String(value).toLowerCase())); if (opt) el.value = opt.value; } });
+  wizardCompetencias = Array.isArray(s.competencias) ? s.competencias.slice() : [];
   const experiencias = Array.isArray(s.experiencias) ? s.experiencias : [];
   wizardExps = experiencias.filter(e => e && (e.cargo || e.empresa || e.descricao)).map(e => ({
     cargo: e.cargo || '', empresa: e.empresa || '', inicio: toDate(e.inicio), fim: e.emprego_atual ? null : toDate(e.fim),
@@ -780,7 +784,8 @@ function wizardRenderExps() {
 async function wizardFinalizar() {
   const dados = {
     ...(wizardEtapa1.dados || {}),
-    experiencias: wizardExps
+    experiencias: wizardExps,
+    competencias: wizardCompetencias
   };
 
   const btn = document.querySelector('#wizard-etapa-5 .btn-primary');
