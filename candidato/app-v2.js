@@ -11,6 +11,19 @@ let emailLogado = null;
 let tokenCandidato = null;
 let cadastroCompleto = false;
 
+// Portal universal ou portal público de uma empresa.
+// O mesmo aplicativo é usado nos dois casos; só muda a fonte das vagas.
+const CANDIDATO_EMPRESA_SLUG = (() => {
+  const qsSlug = new URLSearchParams(location.search).get('slug');
+  if (qsSlug && /^[a-z0-9-]{1,80}$/i.test(qsSlug)) return qsSlug.toLowerCase();
+  const partes = location.pathname.split('/').filter(Boolean);
+  const i = partes.indexOf('candidato');
+  const proximo = i >= 0 ? partes[i + 1] : '';
+  if (proximo && !['index.html','vaga.html','painel.html','inscricao.html'].includes(proximo.toLowerCase()) && /^[a-z0-9-]{1,80}$/i.test(proximo)) return proximo.toLowerCase();
+  return '';
+})();
+window.CANDIDATO_EMPRESA_SLUG = CANDIDATO_EMPRESA_SLUG;
+
 // =====================================================
 // FONTE DA VERDADE — Cálculo de % do perfil do candidato
 // Use em QUALQUER página: window.calcularProgressoPerfil(perfil)
@@ -218,24 +231,38 @@ async function carregarVagas() {
   const buscaEl = document.getElementById('busca');
   const busca = buscaEl ? buscaEl.value : '';
   try {
-    let url = API + '/api/vagas';
-    const params = new URLSearchParams();
-    if (busca) params.set('busca', busca);
-    if (categoriaAtiva) params.set('area', categoriaAtiva);
-    if (params.toString()) url += '?' + params;
-    const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 30000);
-    const r = await fetch(url, { signal: ctrl.signal });
-    clearTimeout(timeoutId);
-    const data = await r.json();
-    const vagas = data.vagas || [];
+    let vagas = [];
+    let nomeEmpresa = '';
+    if (CANDIDATO_EMPRESA_SLUG) {
+      // Portal da empresa: mesma interface, apenas vagas publicadas daquele tenant.
+      const [re, rv] = await Promise.all([
+        fetch(API + '/api/public/empresa/' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG)),
+        fetch(API + '/api/public/empresa/' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) + '/vagas')
+      ]);
+      if (!re.ok || !rv.ok) throw new Error('Empresa não encontrada');
+      const empresaData = await re.json();
+      const vagasData = await rv.json();
+      nomeEmpresa = empresaData.empresa?.nome || CANDIDATO_EMPRESA_SLUG;
+      vagas = (vagasData.vagas || []).map(v => ({ ...v, empresa: nomeEmpresa }));
+      document.title = 'Vagas de ' + nomeEmpresa + ' · VagasIO';
+      const titulo = document.querySelector('.section-title');
+      if (titulo) titulo.textContent = 'Vagas abertas de ' + nomeEmpresa;
+    } else {
+      let url = API + '/api/vagas';
+      const params = new URLSearchParams();
+      if (busca) params.set('busca', busca);
+      if (categoriaAtiva) params.set('area', categoriaAtiva);
+      if (params.toString()) url += '?' + params;
+      const ctrl = new AbortController();
+      const timeoutId = setTimeout(() => ctrl.abort(), 30000);
+      const r = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(timeoutId);
+      const data = await r.json();
+      vagas = data.vagas || [];
+    }
+    window.vagas = vagas;
     if (vagas.length === 0) {
-      grid.innerHTML = `
-        <div class="empty" style="grid-column:1/-1;">
-          <div class="empty-icon">📋</div>
-          <h3>Nenhuma vaga disponível no momento</h3>
-          <p>Volte mais tarde — atualizamos toda semana.</p>
-        </div>`;
+      grid.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">📋</div><h3>Nenhuma vaga disponível no momento</h3><p>Volte mais tarde — atualizamos toda semana.</p></div>';
       if (contador) contador.textContent = '0 vagas encontradas';
       return;
     }
@@ -243,36 +270,22 @@ async function carregarVagas() {
       const sMin = Number(v.salario_min) || null;
       const sMax = Number(v.salario_max) || null;
       const salTexto = (sMin && sMax) ? `R$ ${sMin.toLocaleString('pt-BR')} - R$ ${sMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
-      return `
-      <a class="vaga-card" href="vaga.html?id=${v.id}" style="text-decoration:none;color:inherit;display:block;">
-        <div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div>
-        <h3>${escapeHtml(v.titulo)}</h3>
-        <div class="vaga-tags">
-          ${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}
-          ${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}
-          ${v.cidade ? `<span class="tag">📍 ${escapeHtml(v.cidade)}</span>` : ''}
-        </div>
-        <div class="salario">${escapeHtml(salTexto)}</div>
-        <div class="footer">
-          <span class="data">${formatarData(v.criada_em)}</span>
-          <span class="cta">Ver detalhes →</span>
-        </div>
-      </a>
-    `;
+      const base = CANDIDATO_EMPRESA_SLUG ? '/candidato/' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) + '/' : '/candidato/';
+      const detalhe = base + '?vaga=' + encodeURIComponent(v.id) + (CANDIDATO_EMPRESA_SLUG ? '&slug=' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) : '');
+      return `<a class="vaga-card" href="${detalhe}" style="text-decoration:none;color:inherit;display:block;"><div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div><h3>${escapeHtml(v.titulo)}</h3><div class="vaga-tags">${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}${v.cidade ? `<span class="tag">📍 ${escapeHtml(v.cidade)}</span>` : ''}</div><div class="salario">${escapeHtml(salTexto)}</div><div class="footer"><span class="data">${formatarData(v.criada_em)}</span><span class="cta">Ver detalhes →</span></div></a>`;
     }).join('');
     if (contador) contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;">
-      <div class="empty-icon">⚠️</div><h3>Não foi possível carregar as vagas</h3>
-      <p>O servidor pode estar iniciando. Tente novamente.</p>
-      <button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="carregarVagas()">Tentar novamente</button>
-    </div>`;
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;"><div class="empty-icon">⚠️</div><h3>Não foi possível carregar as vagas</h3><p>O servidor pode estar iniciando. Tente novamente.</p><button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="carregarVagas()">Tentar novamente</button></div>`;
     if (contador) contador.textContent = 'Não foi possível carregar';
   }
 }
 
 function abrirDetalhes(id) {
-  fetch(API + '/api/vagas/' + id)
+  const detalheUrl = CANDIDATO_EMPRESA_SLUG
+    ? API + '/api/public/empresa/' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) + '/vagas/' + id
+    : API + '/api/vagas/' + id;
+  fetch(detalheUrl)
     .then(r => r.json())
     .then(data => {
       const v = data.vaga || data;
@@ -886,7 +899,7 @@ async function abrirPainelCandidato() {
   }
 
   // Vai pra página dedicada do candidato (não mais modal)
-  location.href = 'painel.html';
+  location.href = '/candidato/painel.html';
 }
 
 async function carregarPainel() {
@@ -1065,7 +1078,7 @@ async function carregarCands() {
           : 'linear-gradient(90deg, var(--vinho) 0%, var(--vinho-claro) 100%)';
       const localTxt = c.cidade ? `${c.cidade}${c.estado ? ' / ' + c.estado : ''}` : '';
       return `
-        <div class="cand-card${cardExtras}" onclick="location.href='inscricao.html?vaga=${c.vaga_id}'" title="Acompanhar processo seletivo">
+        <div class="cand-card${cardExtras}" onclick="location.href='/candidato/inscricao.html?vaga=${c.vaga_id}'" title="Acompanhar processo seletivo">
           <div class="cand-card-top">
             <div class="cand-card-info">
               <h4>${c.titulo || 'Vaga'}</h4>
@@ -1436,7 +1449,7 @@ function logout() {
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('aberto'));
   // Redireciona pra home se não estiver lá
   if (!location.pathname.endsWith('index.html') && !location.pathname.endsWith('/')) {
-    location.href = 'index.html';
+    location.href = '/candidato/index.html';
   } else {
     location.reload();
   }
