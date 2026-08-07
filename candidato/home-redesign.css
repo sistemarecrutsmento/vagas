@@ -302,6 +302,6 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
   .candidate-home .modal-overlay { padding-left: 5px; padding-right: 5px; }
   .candidate-home .modal-body, .candidate-home .modal-header { padding-left: 14px; padding-right: 14px; }
 }
-@media (min-width:641px) { .wizard-step-summary { display: none; } .btn-menu-logo { display: none !important; } }
+@media (min-width:641px) { .wizard-step-summary { display: none; } }
 @media (max-width:640px) { .btn-menu-logo { display: inline-flex !important; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *,*::before,*::after { transition-duration:.01ms !important; animation-duration:.01ms !important; } }

@@ -959,7 +959,7 @@ function atualizarHeaderUsuario() {
   if (!headerActions) return;
 
   if (tokenCandidato && cadastroCompleto) {
-    // Logado: header-actions vazio (☰ fica no lado do logo)
+    // Logado: deixa apenas o menu da conta no lado direito.
     headerActions.innerHTML = '';
   } else if (tokenCandidato) {
     headerActions.innerHTML = `<button class="btn-header-primary" type="button" onclick="abrirModal('cad')">Completar cadastro</button>`;
@@ -1006,8 +1006,8 @@ function garantirBotaoMenu() {
     return;
   }
   if (existe) return;
-  const headerEl = document.querySelector('header');
-  if (!headerEl) return;
+  const headerActions = document.getElementById('header-actions');
+  if (!headerActions) return;
   const btn = document.createElement('button');
   btn.id = 'btn-menu-logo';
   btn.className = 'btn-menu-logo';
@@ -1015,8 +1015,8 @@ function garantirBotaoMenu() {
   btn.setAttribute('aria-label', 'Abrir menu');
   btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
   btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); window.abrirDrawer && window.abrirDrawer(e); });
-  // Volta pro <header> como primeiro filho (absolute na direita)
-  headerEl.insertBefore(btn, headerEl.firstChild);
+  // Menu só aparece para usuário autenticado e fica alinhado às ações do header.
+  headerActions.appendChild(btn);
 }
 
 async function abrirPainelCandidato() {
