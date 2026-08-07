@@ -649,14 +649,14 @@ function preencherFormularioComCurriculo(dados) {
   const form = Array.isArray(s.formacao) ? (s.formacao[0] || {}) : s.formacao || {};
   const toDate = value => { const v = String(value || ''); return /^\d{4}-\d{2}$/.test(v) ? `${v}-01` : v; };
   const valores = {
-    'w2-nome': pessoal.nome, 'w2-cpf': pessoal.cpf, 'w2-nascimento': toDate(pessoal.data_nascimento),
+    'w1-email': pessoal.email, 'w2-nome': pessoal.nome, 'w2-cpf': pessoal.cpf, 'w2-nascimento': toDate(pessoal.data_nascimento),
     'w2-celular': pessoal.celular, 'w3-cep': endereco.cep, 'w3-cidade': endereco.cidade,
     'w3-estado': endereco.estado, 'w3-bairro': endereco.bairro, 'w3-logradouro': endereco.logradouro,
     'w3-numero': endereco.numero, 'w3-complemento': endereco.complemento,
     'w4-instituicao': form.instituicao, 'w4-curso': form.curso,
     'w4-conclusao': toDate(form.data_conclusao), 'w2-sobre-voce': perfil.sobre_voce
   };
-  Object.entries(valores).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value !== undefined && value !== null && String(value).trim()) el.value = value; });
+  Object.entries(valores).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value !== undefined && value !== null && String(value).trim() && (id !== 'w1-email' || !String(el.value || '').trim())) el.value = value; });
   const selects = { 'w2-sexo': pessoal.sexo, 'w4-formacao': form.nivel, 'w4-situacao': form.situacao };
   Object.entries(selects).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value) { const opt = [...el.options].find(o => o.value === value || o.textContent.toLowerCase().includes(String(value).toLowerCase())); if (opt) el.value = opt.value; } });
   wizardCompetencias = Array.isArray(s.competencias) ? s.competencias.slice() : [];
