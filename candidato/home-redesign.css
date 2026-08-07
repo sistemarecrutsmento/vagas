@@ -163,7 +163,7 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
 .login-register { margin: 20px 0 0; color: #81777d; font-size: 13px; text-align: center; }
 .login-divider { display: flex; align-items: center; gap: 12px; margin: 19px 0 14px; color: #aaa0a6; font-size: 11px; }
 .login-divider::before, .login-divider::after { content: ''; height: 1px; flex: 1; background: #eee7e9; }
-.social-login-group { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.social-login-group { display: grid; grid-template-columns: 1fr; gap: 9px; }
 .social-login-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 10px; border: 1px solid #ded4d8; border-radius: 7px; background: #fff; color: #312b30; font-size: 12px; font-weight: 700; cursor: pointer; }
 .social-login-btn:hover, .social-login-btn:focus-visible { border-color: var(--wine); background: #fffafb; outline: 0; }
 .social-login-btn:disabled { opacity: .65; cursor: wait; }

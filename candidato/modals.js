@@ -84,10 +84,6 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-1.99 3.02v2.5h3.22c1.89-1.74 2.99-4.3 2.99-7.35Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.61-2.42l-3.22-2.5c-.9.6-2.05.96-3.39.96-2.6 0-4.8-1.76-5.59-4.13H3.08v2.58A9.98 9.98 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.41 13.91A5.99 5.99 0 0 1 6.1 12c0-.66.11-1.3.31-1.91V7.51H3.08A10 10 0 0 0 2 12c0 1.61.39 3.14 1.08 4.49l3.33-2.58Z"/><path fill="#EA4335" d="M12 5.96c1.47 0 2.79.5 3.83 1.49l2.87-2.87C16.95 2.95 14.7 2 12 2a9.98 9.98 0 0 0-8.92 5.51l3.33 2.58C7.2 7.72 9.4 5.96 12 5.96Z"/></svg>
             <span>Continuar com Google</span>
           </button>
-          <button class="social-login-btn" type="button" data-provider="apple" onclick="continuarSocial('apple', this)">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.7 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.7-1.7-3.3-1.7-1.4-.2-2.7.8-3.4.8-.7 0-1.8-.8-3-.8-1.5 0-2.9.9-3.7 2.2-1.6 2.7-.4 6.7 1.1 8.8.8 1 1.7 2.1 2.9 2.1 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.2 0 2-.9 2.8-2 .9-1.2 1.3-2.4 1.3-2.5-.1 0-2.6-1-2.6-3.5Zm-2.2-6.6c.6-.8 1-1.8.9-2.9-.9 0-2 .6-2.6 1.3-.6.7-1 1.7-.9 2.7 1 .1 2-.4 2.6-1.1Z"/></svg>
-            <span>Continuar com Apple</span>
-          </button>
         </div>
         <p class="login-register">Ainda não tem uma conta? <a href="#" onclick="fecharModal('login');abrirModal('cad');return false;">Criar conta</a></p>
       </section>
