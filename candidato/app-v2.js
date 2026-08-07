@@ -645,6 +645,13 @@ function preencherFormularioComCurriculo(dados) {
   ['w2-sexo','w2-acessibilidade','w4-formacao','w4-situacao'].forEach(id => {
     const el = document.getElementById(id); if (el && dados[id.replace(/^w2-/, '').replace(/^w4-/, '')]) el.value = dados[id.replace(/^w2-/, '').replace(/^w4-/, '')];
   });
+  if (Array.isArray(dados.experiencias) && dados.experiencias.length) {
+    wizardExps = dados.experiencias.filter(e => e && (e.cargo || e.empresa || e.descricao)).map(e => ({
+      cargo: e.cargo || '', empresa: e.empresa || '', inicio: e.inicio || null, fim: e.fim || null,
+      emprego_atual: !!e.emprego_atual, descricao: e.descricao || null
+    }));
+    wizardRenderExps();
+  }
 }
 
 function wizardEtapa2Validar() {
