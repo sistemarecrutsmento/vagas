@@ -636,25 +636,31 @@ function wizardImportarCurriculo(input) {
 }
 
 function preencherFormularioComCurriculo(dados) {
+  // O backend entrega o formato legado plano por compatibilidade e `estrutura` no schema novo.
+  // Esta camada é o único ponto que traduz o resultado da importação para os IDs reais do wizard.
+  const s = dados.estrutura || dados;
+  const pessoal = s.dados_pessoais || dados;
+  const endereco = s.endereco || dados;
+  const perfil = s.perfil || dados;
+  const form = Array.isArray(s.formacao) ? (s.formacao[0] || {}) : s.formacao || {};
+  const toDate = value => { const v = String(value || ''); return /^\d{4}-\d{2}$/.test(v) ? `${v}-01` : v; };
   const valores = {
-    'w2-nome': dados.nome, 'w2-cpf': dados.cpf, 'w2-nascimento': dados.data_nascimento,
-    'w2-celular': dados.celular, 'w3-cep': dados.cep, 'w3-cidade': dados.cidade,
-    'w3-estado': dados.estado, 'w3-bairro': dados.bairro, 'w3-logradouro': dados.logradouro,
-    'w3-numero': dados.numero, 'w3-complemento': dados.complemento,
-    'w4-instituicao': dados.instituicao, 'w4-curso': dados.curso,
-    'w4-conclusao': dados.data_conclusao, 'w2-sobre-voce': dados.sobre_voce
+    'w2-nome': pessoal.nome, 'w2-cpf': pessoal.cpf, 'w2-nascimento': toDate(pessoal.data_nascimento),
+    'w2-celular': pessoal.celular, 'w3-cep': endereco.cep, 'w3-cidade': endereco.cidade,
+    'w3-estado': endereco.estado, 'w3-bairro': endereco.bairro, 'w3-logradouro': endereco.logradouro,
+    'w3-numero': endereco.numero, 'w3-complemento': endereco.complemento,
+    'w4-instituicao': form.instituicao, 'w4-curso': form.curso,
+    'w4-conclusao': toDate(form.data_conclusao), 'w2-sobre-voce': perfil.sobre_voce
   };
-  Object.entries(valores).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value) el.value = value; });
-  ['w2-sexo','w2-acessibilidade','w4-formacao','w4-situacao'].forEach(id => {
-    const el = document.getElementById(id); if (el && dados[id.replace(/^w2-/, '').replace(/^w4-/, '')]) el.value = dados[id.replace(/^w2-/, '').replace(/^w4-/, '')];
-  });
-  if (Array.isArray(dados.experiencias) && dados.experiencias.length) {
-    wizardExps = dados.experiencias.filter(e => e && (e.cargo || e.empresa || e.descricao)).map(e => ({
-      cargo: e.cargo || '', empresa: e.empresa || '', inicio: e.inicio || null, fim: e.fim || null,
-      emprego_atual: !!e.emprego_atual, descricao: e.descricao || null
-    }));
-    wizardRenderExps();
-  }
+  Object.entries(valores).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value !== undefined && value !== null && String(value).trim()) el.value = value; });
+  const selects = { 'w2-sexo': pessoal.sexo, 'w4-formacao': form.nivel, 'w4-situacao': form.situacao };
+  Object.entries(selects).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value) { const opt = [...el.options].find(o => o.value === value || o.textContent.toLowerCase().includes(String(value).toLowerCase())); if (opt) el.value = opt.value; } });
+  const experiencias = Array.isArray(s.experiencias) ? s.experiencias : [];
+  wizardExps = experiencias.filter(e => e && (e.cargo || e.empresa || e.descricao)).map(e => ({
+    cargo: e.cargo || '', empresa: e.empresa || '', inicio: toDate(e.inicio), fim: e.emprego_atual ? null : toDate(e.fim),
+    emprego_atual: !!e.emprego_atual, descricao: e.descricao || ''
+  }));
+  wizardRenderExps();
 }
 
 function wizardEtapa2Validar() {
