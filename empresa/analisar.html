@@ -817,8 +817,22 @@
           '<div class="card-body">' + histHtml + '</div>' +
         '</div>';
 
-      // Chat com candidato fica SÓ via bolinha flutuante (chat-flutuante-admin.js)
-      const chatCard = '';
+      // O chat do candidato pertence ao shell do Portal Empresa. O botão abaixo
+      // chama a janela do shell sem tentar abrir uma página antiga/redirect.
+      const chatCard = '<div class="card" style="border-top:4px solid #722F37;background:#FFFBFC">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">' +
+        '<div><h2 style="margin:0;color:#722F37">Chat com o candidato</h2><p style="margin:5px 0 0;color:#756971;font-size:13px">Converse diretamente sobre esta candidatura.</p></div>' +
+        '<button class="btn" style="background:#722F37;color:#fff" onclick="abrirChatCandidato()">Abrir chat</button></div></div>';
+
+      window.abrirChatCandidato = function() {
+        const cid = new URLSearchParams(location.search).get('id');
+        if (window.top && window.top.__ccChat && cid) {
+          window.top.__ccChat.toggle();
+          setTimeout(() => window.top.__ccChat.abrir(Number(cid)), 80);
+          return;
+        }
+        alert('O chat do candidato está disponível no Portal Empresa.');
+      };
 
       // Chat com empresa agora é via chat-empresa-flutuante.js (janela empilhada acima do candidato)
 
