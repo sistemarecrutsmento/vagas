@@ -354,11 +354,13 @@
   `;
   document.head.appendChild(style);
 
-  const fab = document.createElement('a');
-  fab.href = 'chat.html';
+  const fab = document.createElement('button');
+  fab.type = 'button';
   fab.className = 'chat-cand-fab';
   fab.title = 'Chat com candidatos';
+  fab.setAttribute('aria-label', 'Abrir chat com candidatos');
   fab.innerHTML = '💬';
+  fab.addEventListener('click', () => window.__crChat?.toggle());
   document.body.appendChild(fab);
 
   const tip = document.createElement('div');
