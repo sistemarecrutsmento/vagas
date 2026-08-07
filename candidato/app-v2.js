@@ -527,29 +527,31 @@ function fecharModal(id) {
 
 // ===== WIZARD DE CADASTRO (4 ETAPAS) =====
 let wizardStep = 1;
-let wizardExps = []; // experiências adicionadas no passo 4
+let wizardAtCurriculo = false;
+let wizardExps = []; // experiências adicionadas no passo 5
 let wizardEtapa1 = null; // email+senha do passo 1 (criar conta) — null se já logado
+let wizardCurriculoArquivo = null;
 
 function wizardIrPara(n) {
-  wizardStep = n;
+  wizardAtCurriculo = n === 'curriculo';
+  if (!wizardAtCurriculo) wizardStep = n;
   document.querySelectorAll('.wizard-etapa').forEach(el => el.style.setProperty('display', 'none', 'important'));
   document.querySelectorAll('.wizard-passo').forEach(el => el.classList.remove('ativo', 'concluido'));
-  const etapa = document.getElementById('wizard-etapa-' + n);
+  const etapa = document.getElementById(wizardAtCurriculo ? 'wizard-etapa-curriculo' : 'wizard-etapa-' + n);
   if (etapa) etapa.style.setProperty('display', 'block', 'important');
   clearCandidateFeedback('cad-feedback');
+  const progresso = wizardAtCurriculo ? 2 : (Number(n) === 1 ? 1 : Number(n) + 1);
   const stepSummary = document.getElementById('wizard-step-summary');
-  if (stepSummary) stepSummary.textContent = `Etapa ${n} de 5`;
-  for (let i = 1; i <= 5; i++) {
+  if (stepSummary) stepSummary.textContent = `Etapa ${progresso} de 6`;
+  for (let i = 1; i <= 6; i++) {
     const p = document.querySelector(`.wizard-passo[data-p="${i}"]`);
     if (!p) continue;
-    if (i < n) p.classList.add('concluido');
-    if (i === n) p.classList.add('ativo');
+    if (i < progresso) p.classList.add('concluido');
+    if (i === progresso) p.classList.add('ativo');
   }
-  // já rolar pro topo do modal
   const modal = document.getElementById('modal-cad');
   if (modal) modal.scrollTop = 0;
-  // Aplica regra do "primeiro emprego" na etapa 5
-  if (n === 5) aplicarPrimeiroEmprego();
+  if (!wizardAtCurriculo && n === 5) aplicarPrimeiroEmprego();
 }
 
 function wizardProximo() {
@@ -566,6 +568,8 @@ function wizardProximo() {
 }
 
 function wizardVoltar() {
+  if (wizardAtCurriculo) return wizardIrPara(1);
+  if (wizardStep === 2) return wizardIrPara('curriculo');
   if (wizardStep > 1) wizardIrPara(wizardStep - 1);
 }
 
@@ -573,7 +577,7 @@ function wizardEtapa1Validar() {
   // Se já tem token (caso "completar cadastro"), pula etapa 1
   if (tokenCandidato) {
     wizardEtapa1 = { email: emailLogado, jaLogado: true };
-    wizardIrPara(2);
+    wizardIrPara('curriculo');
     return;
   }
 
@@ -585,7 +589,62 @@ function wizardEtapa1Validar() {
   if (senha !== senhaConf) return showCandidateFeedback('As senhas não coincidem.');
 
   wizardEtapa1 = { email, senha, jaLogado: false };
+  wizardIrPara('curriculo');
+}
+
+function wizardPreencherManual() {
   wizardIrPara(2);
+}
+
+function wizardImportarCurriculo(input) {
+  const file = input?.files?.[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+    return showCandidateFeedback('Anexe um arquivo em PDF.', 'error', 'cad-feedback');
+  }
+  if (file.size > 7 * 1024 * 1024) {
+    return showCandidateFeedback('O currículo deve ter no máximo 7 MB.', 'cad-feedback');
+  }
+  const status = document.getElementById('curriculo-status');
+  if (status) status.textContent = 'Lendo seu currículo...';
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      const base64 = String(reader.result).split(',')[1];
+      const r = await fetch(API + '/api/candidato/analisar-curriculo', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arquivo_base64: base64, arquivo_nome: file.name })
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.erro || 'Não foi possível ler o currículo.');
+      wizardCurriculoArquivo = { base64, nome: file.name, tipo: file.type || 'application/pdf' };
+      preencherFormularioComCurriculo(data.dados || {});
+      if (status) status.textContent = 'Currículo lido. Confira os dados e complete o que estiver em branco.';
+      wizardIrPara(2);
+    } catch (e) {
+      if (status) status.textContent = '';
+      showCandidateFeedback(e.message || 'Não foi possível ler o currículo. Você pode preencher manualmente.', 'error', 'cad-feedback');
+    } finally {
+      input.value = '';
+    }
+  };
+  reader.onerror = () => { if (status) status.textContent = ''; showCandidateFeedback('Não foi possível abrir o arquivo.', 'error', 'cad-feedback'); };
+  reader.readAsDataURL(file);
+}
+
+function preencherFormularioComCurriculo(dados) {
+  const valores = {
+    'w2-nome': dados.nome, 'w2-cpf': dados.cpf, 'w2-nascimento': dados.data_nascimento,
+    'w2-celular': dados.celular, 'w3-cep': dados.cep, 'w3-cidade': dados.cidade,
+    'w3-estado': dados.estado, 'w3-bairro': dados.bairro, 'w3-logradouro': dados.logradouro,
+    'w3-numero': dados.numero, 'w3-complemento': dados.complemento,
+    'w4-instituicao': dados.instituicao, 'w4-curso': dados.curso,
+    'w4-conclusao': dados.data_conclusao, 'w2-sobre-voce': dados.sobre_voce
+  };
+  Object.entries(valores).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value) el.value = value; });
+  ['w2-sexo','w2-acessibilidade','w4-formacao','w4-situacao'].forEach(id => {
+    const el = document.getElementById(id); if (el && dados[id.replace(/^w2-/, '').replace(/^w4-/, '')]) el.value = dados[id.replace(/^w2-/, '').replace(/^w4-/, '')];
+  });
 }
 
 function wizardEtapa2Validar() {
@@ -1688,6 +1747,8 @@ window.salvarPerfilCompleto = salvarPerfilCompleto;
 window.wizardIrPara = wizardIrPara;
 window.wizardProximo = wizardProximo;
 window.wizardVoltar = wizardVoltar;
+window.wizardPreencherManual = wizardPreencherManual;
+window.wizardImportarCurriculo = wizardImportarCurriculo;
 window.wizardAddExperiencia = wizardAddExperiencia;
 window.wizardRemoverExp = wizardRemoverExp;
 window.wizardFinalizar = wizardFinalizar;

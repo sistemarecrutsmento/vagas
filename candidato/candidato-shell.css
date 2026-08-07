@@ -1,0 +1,84 @@
+/* VagasIO — padrão único do Portal do Candidato */
+:root { --vagasio-wine: #5f1527; --vagasio-wine-deep: #43101e; --vagasio-line: rgba(95,21,39,.14); }
+
+/* Faixa superior fixa: mesma altura, cor e alinhamento em todas as telas internas */
+body:not(.candidate-home) > header {
+  position: sticky !important; top: 0 !important; z-index: 100 !important;
+  min-height: 66px !important; background: var(--vagasio-wine) !important;
+  color: #fff !important; border: 0 !important;
+  box-shadow: 0 3px 18px rgba(39,10,19,.18) !important;
+}
+body:not(.candidate-home) > header .header-inner {
+  box-sizing: border-box !important; width: 100% !important; max-width: 1240px !important;
+  min-height: 66px !important; margin: 0 auto !important; padding: 10px 24px !important;
+  display: flex !important; flex-direction: row !important; align-items: center !important;
+  justify-content: space-between !important; gap: 16px !important;
+}
+body:not(.candidate-home) > header .logo {
+  display: inline-flex !important; align-items: center !important; color: #fff !important;
+  font-weight: 800 !important; font-size: 23px !important; letter-spacing: -.04em !important;
+  text-decoration: none !important; white-space: nowrap !important;
+}
+body:not(.candidate-home) > header .header-actions {
+  display: flex !important; align-items: center !important; justify-content: flex-end !important;
+  gap: 8px !important; margin-left: auto !important;
+}
+body:not(.candidate-home) > header .header-actions button,
+body:not(.candidate-home) > header .btn-voltar {
+  min-height: 38px !important; border-radius: 8px !important;
+}
+body:not(.candidate-home) > header .btn-menu-logo {
+  position: static !important; transform: none !important; display: inline-flex !important;
+  align-items: center !important; justify-content: center !important; width: 38px !important;
+  height: 38px !important; padding: 0 !important; margin: 0 !important;
+  color: #fff !important; background: transparent !important;
+  border: 1px solid rgba(255,255,255,.46) !important; border-radius: 8px !important;
+}
+
+/* Faixa vinho de título/subnavegação */
+body:not(.candidate-home) .subheader {
+  background: var(--vagasio-wine) !important; color: #fff !important;
+  border: 0 !important; box-shadow: 0 2px 10px rgba(39,10,19,.12) !important;
+}
+body:not(.candidate-home) .subheader-inner { min-height: 64px; }
+body:not(.candidate-home) .subheader h1,
+body:not(.candidate-home) .subheader p,
+body:not(.candidate-home) .subheader a,
+body:not(.candidate-home) .subheader-voltar { color: #fff !important; }
+
+/* Barra lateral de operações: mesmo comportamento, espaçamento e estado ativo */
+body:not(.candidate-home) aside.drawer {
+  width: 320px !important; max-width: 90vw !important; background: #fff !important;
+  border-left: 1px solid var(--vagasio-line) !important;
+  box-shadow: -8px 0 28px rgba(27,10,17,.16) !important;
+}
+body:not(.candidate-home) .drawer-header,
+body:not(.candidate-home) .drawer-head {
+  background: var(--vagasio-wine) !important; color: #fff !important;
+  min-height: 88px !important; box-sizing: border-box !important;
+  padding: 18px 20px !important;
+}
+body:not(.candidate-home) .drawer-link {
+  min-height: 46px !important; box-sizing: border-box !important;
+  padding: 11px 20px !important; color: #30292d !important;
+  border-right: 3px solid transparent !important; text-decoration: none !important;
+}
+body:not(.candidate-home) .drawer-link:hover { background: #faf5f6 !important; }
+body:not(.candidate-home) .drawer-link.ativo {
+  background: #f7ecef !important; color: var(--vagasio-wine) !important;
+  border-right-color: var(--vagasio-wine) !important; font-weight: 700 !important;
+}
+body:not(.candidate-home) .drawer-footer { background: #fff !important; border-top-color: #eee5e7 !important; }
+body:not(.candidate-home) .drawer-logout {
+  color: var(--vagasio-wine) !important; border-color: var(--vagasio-wine) !important;
+}
+body:not(.candidate-home) .drawer-logout:hover { background: var(--vagasio-wine) !important; color: #fff !important; }
+
+@media (max-width: 640px) {
+  body:not(.candidate-home) > header,
+  body:not(.candidate-home) > header .header-inner { min-height: 54px !important; }
+  body:not(.candidate-home) > header .header-inner { padding: 7px 16px !important; }
+  body:not(.candidate-home) > header .logo { font-size: 20px !important; }
+  body:not(.candidate-home) .subheader-inner { min-height: 56px; padding-left: 16px; padding-right: 16px; }
+  body:not(.candidate-home) aside.drawer { width: min(320px, 90vw) !important; }
+}

@@ -106,12 +106,13 @@
         <h2 id="cad-titulo">Cadastre-se</h2>
         <div class="wizard-progresso" id="wizard-progresso">
           <div class="wizard-passo ativo" data-p="1"><span>1</span> Conta</div>
-          <div class="wizard-passo" data-p="2"><span>2</span> Dados pessoais</div>
-          <div class="wizard-passo" data-p="3"><span>3</span> Endereço</div>
-          <div class="wizard-passo" data-p="4"><span>4</span> Escolaridade</div>
-          <div class="wizard-passo" data-p="5"><span>5</span> Experiência</div>
+          <div class="wizard-passo" data-p="2"><span>2</span> Currículo</div>
+          <div class="wizard-passo" data-p="3"><span>3</span> Dados pessoais</div>
+          <div class="wizard-passo" data-p="4"><span>4</span> Endereço</div>
+          <div class="wizard-passo" data-p="5"><span>5</span> Escolaridade</div>
+          <div class="wizard-passo" data-p="6"><span>6</span> Experiência</div>
         </div>
-        <div class="wizard-step-summary" id="wizard-step-summary" aria-live="polite">Etapa 1 de 5</div>
+        <div class="wizard-step-summary" id="wizard-step-summary" aria-live="polite">Etapa 1 de 6</div>
       </div>
       <button class="modal-close" onclick="fecharModal('cad')">×</button>
     </div>
@@ -126,6 +127,26 @@
         <div class="form-group"><label for="w1-senha-conf">Confirme sua senha *</label><div class="password-field"><input type="password" id="w1-senha-conf" placeholder="Digite sua senha novamente" minlength="8" autocomplete="new-password"><button class="password-toggle" type="button" onclick="toggleSenhaCampo('w1-senha-conf', this)" aria-label="Mostrar senha" title="Mostrar senha">◉</button></div></div>
         <div class="wizard-botoes">
           <button class="btn btn-primary" onclick="wizardProximo()">Continuar</button>
+        </div>
+      </div>
+
+      <div class="wizard-etapa wizard-curriculo-etapa" id="wizard-etapa-curriculo" style="display:none !important">
+        <h3 class="wizard-titulo">Como você quer preencher seu perfil?</h3>
+        <p class="wizard-subtitulo">Você pode importar seu currículo em PDF ou seguir preenchendo cada etapa manualmente.</p>
+        <div class="curriculo-opcoes">
+          <button class="curriculo-opcao" type="button" onclick="document.getElementById('curriculo-pdf').click()">
+            <span class="curriculo-opcao-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 3.5h8l4 4V20.5H6z"></path><path d="M14 3.5v4h4M8.5 12h7M8.5 15.5h5"></path></svg></span>
+            <span><strong>Importar currículo</strong><small>Anexe um PDF e preencha seus dados automaticamente.</small></span>
+          </button>
+          <input id="curriculo-pdf" type="file" accept="application/pdf,.pdf" hidden onchange="wizardImportarCurriculo(this)">
+          <button class="curriculo-opcao curriculo-opcao-secundaria" type="button" onclick="wizardPreencherManual()">
+            <span class="curriculo-opcao-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4.5h14v15H5z"></path><path d="M8 9h8M8 13h6M8 16h4"></path></svg></span>
+            <span><strong>Preencher manualmente</strong><small>Continue pelas etapas do cadastro como antes.</small></span>
+          </button>
+        </div>
+        <div class="curriculo-status" id="curriculo-status" role="status" aria-live="polite"></div>
+        <div class="wizard-botoes">
+          <button class="btn btn-secondary" type="button" onclick="wizardVoltar()">Voltar</button>
         </div>
       </div>
 

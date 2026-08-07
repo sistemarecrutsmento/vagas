@@ -143,7 +143,7 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
 .candidate-toast.success { border-color: #d8b9c2; background: var(--wine-pale); color: var(--wine); }
 .login-layout { display: grid; grid-template-columns: minmax(0,1fr) 250px; min-height: 480px; }
 .login-main { padding: 27px 30px 29px; }
-.login-brand { width: 134px; height: 60px; object-fit: contain; margin: 0 auto 10px; }
+.login-brand { display: block; width: 134px; height: 60px; object-fit: contain; margin: 0 auto 10px; }
 .login-title { margin: 7px 0 4px; color: var(--ink); font-size: 24px; letter-spacing: -.04em; }
 .login-subtitle { margin: 0 0 23px; color: #81777d; font-size: 13px; }
 .login-side { display: flex; flex-direction: column; justify-content: center; padding: 30px 25px; background: var(--wine); color: #fff; }
@@ -170,6 +170,16 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
 .social-login-btn svg { width: 18px; height: 18px; flex: 0 0 auto; }
 .signup-intro { display: flex; align-items: flex-start; gap: 11px; margin: 0 0 19px; padding: 12px 13px; border: 1px solid #eadde1; border-radius: 8px; background: #fdfcfb; color: #665a61; font-size: 13px; line-height: 1.45; }
 .signup-intro svg { width: 18px; height: 18px; flex: 0 0 auto; color: var(--wine); }
+.curriculo-opcoes { display: grid; gap: 11px; margin: 24px 0 8px; }
+.curriculo-opcao { display: flex; align-items: center; gap: 14px; width: 100%; padding: 16px; border: 1px solid #e3d9d8; border-radius: 10px; background: #fff; color: var(--ink); text-align: left; cursor: pointer; transition: border-color .2s ease, background .2s ease, box-shadow .2s ease; }
+.curriculo-opcao:hover, .curriculo-opcao:focus-visible { border-color: var(--wine); background: #fdf9f8; box-shadow: 0 5px 16px rgba(48,25,31,.07); outline: 0; }
+.curriculo-opcao-icone { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: 0 0 auto; border-radius: 9px; background: var(--wine-pale); color: var(--wine); }
+.curriculo-opcao-icone svg { width: 22px; height: 22px; }
+.curriculo-opcao strong, .curriculo-opcao small { display: block; }
+.curriculo-opcao strong { margin-bottom: 3px; font-size: 14px; }
+.curriculo-opcao small { color: var(--muted); font-size: 12px; line-height: 1.45; }
+.curriculo-opcao-secundaria .curriculo-opcao-icone { background: #f7f5f1; color: #5e5659; }
+.curriculo-status { min-height: 20px; margin-top: 10px; color: var(--wine); font-size: 12px; font-weight: 700; line-height: 1.45; }
 .inline-icon { width: 16px; height: 16px; display: inline-block; vertical-align: -3px; }
 #modal-notificacoes h2 svg, .notif-tab svg, .notif-section-titulo svg, .notif-card-icone svg, .notif-timeline-icone svg, .notif-vazio-icone svg { width: 18px; height: 18px; display: inline-block; vertical-align: -4px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .notif-card-icone svg, .notif-timeline-icone svg, .notif-vazio-icone svg { width: 22px; height: 22px; vertical-align: 0; }
@@ -261,8 +271,8 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
   .candidate-home .modal-body { padding: 17px 16px max(20px,env(safe-area-inset-bottom)); }
   .candidate-home .modal-close { width: 42px; height: 42px; }
   .login-layout { display: block; min-height: 0; }
-  .login-main { padding: 17px 17px 22px; }
-  .login-brand { width: 128px; height: 54px; margin-bottom: 8px; }
+  .login-main { padding: 7px 17px 22px; }
+  .login-brand { width: 128px; height: 54px; margin: 0 auto 8px; }
   .login-title { font-size: 24px; line-height: 1.15; }
   .login-subtitle { margin-bottom: 19px; font-size: 12px; }
   .candidate-home .form-group { margin-bottom: 14px; }
@@ -274,6 +284,11 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
   .login-register { margin-top: 16px; font-size: 12px; }
   .login-side { display: none; }
   .signup-intro { font-size: 12px; padding: 10px; margin-bottom: 15px; }
+  .curriculo-opcoes { margin-top: 18px; gap: 9px; }
+  .curriculo-opcao { padding: 13px; gap: 11px; }
+  .curriculo-opcao-icone { width: 39px; height: 39px; }
+  .curriculo-opcao strong { font-size: 13px; }
+  .curriculo-opcao small { font-size: 11px; }
   .candidate-home .wizard-progresso { display: block; margin-top: 7px; }
   .candidate-home .wizard-passo { display: none; }
   .candidate-home .wizard-passo.ativo { display: inline-flex; padding: 5px 8px; }
@@ -303,5 +318,13 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
   .candidate-home .modal-body, .candidate-home .modal-header { padding-left: 14px; padding-right: 14px; }
 }
 @media (min-width:641px) { .wizard-step-summary { display: none; } }
-@media (max-width:640px) { .btn-menu-logo { display: inline-flex !important; } }
+@media (max-width:640px) {
+  .btn-menu-logo { display: inline-flex !important; }
+  /* O header do candidato permanece em uma única barra depois do login.
+     O CSS legado do index.html definia coluna e deixava o hambúrguer absoluto. */
+  .candidate-header .header-inner { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; min-height: 54px !important; }
+  .candidate-header .brand-link { flex: 0 0 auto; }
+  .candidate-header .header-actions { display: flex !important; flex-direction: row !important; align-items: center !important; margin-left: auto !important; }
+  .candidate-header .header-actions .btn-menu-logo { position: static !important; transform: none !important; margin: 0 !important; }
+}
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *,*::before,*::after { transition-duration:.01ms !important; animation-duration:.01ms !important; } }
