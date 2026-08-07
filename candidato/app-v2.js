@@ -1066,6 +1066,9 @@ function checarAuth() {
 function atualizarHeaderUsuario() {
   const headerActions = document.getElementById('header-actions');
   if (!headerActions) return;
+  // O shell oficial é a única fonte do menu autenticado. Não o substitua
+  // pelo botão de completar cadastro nem remova o botão da drawer.
+  if (document.getElementById('btn-menu-logo')) return;
 
   if (tokenCandidato && cadastroCompleto) {
     // Logado: deixa apenas o menu da conta no lado direito.
