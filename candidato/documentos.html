@@ -161,8 +161,11 @@ if (!TOKEN) location.href = 'index.html';
 
 // ============== LOAD ==============
 async function carregarCandidatura() {
+  const ctrl = new AbortController();
+  const timeoutId = setTimeout(() => ctrl.abort(), 15000);
   try {
-    const r = await fetch(`${API}/api/candidato/candidaturas`, { headers: { Authorization: `Bearer ${TOKEN}` }});
+    const r = await fetch(`${API}/api/candidato/candidaturas`, { headers: { Authorization: `Bearer ${TOKEN}` }, signal: ctrl.signal });
+    clearTimeout(timeoutId);
     if (!r.ok) throw new Error('Falha ao carregar');
     const data = await r.json();
     // Pega a primeira candidatura (a que está na etapa de documentos)
@@ -174,7 +177,8 @@ async function carregarCandidatura() {
     candidaturaId = cand.id;
     await carregarDocumentos();
   } catch (e) {
-    document.getElementById('conteudo').innerHTML = `<div class="card"><p>Erro: ${e.message}</p></div>`;
+    clearTimeout(timeoutId);
+    document.getElementById('conteudo').innerHTML = `<div class="card"><p>Não foi possível carregar seus documentos agora. Tente novamente.</p></div>`;
   }
 }
 
@@ -200,7 +204,7 @@ function render() {
   const total = obrigatorios.length;
   document.getElementById('docs-aprovados').textContent = aprovados;
   document.getElementById('docs-total').textContent = total;
-  document.getElementById('progresso-fill').style.width = ((aprovados / total) * 100) + '%';
+  document.getElementById('progresso-fill').style.width = (total ? (aprovados / total) * 100 : 0) + '%';
 
   // Cabeçalho de alerta
   const reprovados = Object.values(docsExistentes).filter(d => d.status === 'reprovado' || d.status === 'retornado');
