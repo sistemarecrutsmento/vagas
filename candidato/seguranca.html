@@ -117,7 +117,14 @@ let refreshPendente = null;
 
 async function req(method, path, body) {
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` };
-  const r = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const ctrl = new AbortController();
+  const timeoutId = setTimeout(() => ctrl.abort(), 15000);
+  let r;
+  try {
+    r = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined, signal: ctrl.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
   if (r.status === 401 && REFRESH && !refreshPendente) {
     refreshPendente = fetch(API + '/api/auth/refresh', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
