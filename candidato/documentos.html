@@ -183,14 +183,18 @@ async function carregarCandidatura() {
 }
 
 async function carregarDocumentos() {
+  const ctrl = new AbortController();
+  const timeoutId = setTimeout(() => ctrl.abort(), 15000);
   try {
-    const r = await fetch(`${API}/api/candidatura/${candidaturaId}/documentos`);
+    const r = await fetch(`${API}/api/candidatura/${candidaturaId}/documentos`, { signal: ctrl.signal, headers: { Authorization: `Bearer ${TOKEN}` } });
+    clearTimeout(timeoutId);
     const data = await r.json();
     obrigatorios = data.obrigatorios || [];
     (data.documentos || []).forEach(d => docsExistentes[d.tipo] = d);
     render();
   } catch (e) {
-    document.getElementById('conteudo').innerHTML = `<div class="card"><p>Erro: ${e.message}</p></div>`;
+    clearTimeout(timeoutId);
+    document.getElementById('conteudo').innerHTML = '<div class="card"><p>Não foi possível carregar os documentos agora. Tente novamente.</p></div>';
   }
 }
 
