@@ -60,6 +60,8 @@
   sidebar.id = 'candidato-sidebar';
   sidebar.setAttribute('aria-label', 'Menu do candidato');
   sidebar.setAttribute('aria-hidden', 'true');
+  sidebar.setAttribute('aria-modal', 'true');
+  sidebar.inert = true;
   sidebar.innerHTML = '<div class="drawer-header"><div class="drawer-foto" id="drawer-foto" aria-hidden="true">' + esc(initials || 'C') + '</div><div class="drawer-info"><h3 id="drawer-nome">' + esc(localStorage.getItem('candidato_nome') || 'Candidato') + '</h3><p id="drawer-email">' + esc(localStorage.getItem('candidato_email') || '—') + '</p></div><button class="drawer-close" id="drawer-close" type="button" aria-label="Fechar menu">×</button></div><nav class="drawer-body" aria-label="Navegação"><div class="drawer-section">NAVEGAÇÃO</div>' + menu.map(([href, icon, label]) => '<a href="' + ROOT + href + '" class="drawer-link' + (currentFile === href ? ' ativo' : '') + '"' + (currentFile === href ? ' aria-current="page"' : '') + '><span class="icon" aria-hidden="true">' + icon + '</span><span>' + label + '</span></a>').join('') + '</nav><div class="drawer-footer"><button class="drawer-logout" id="drawer-logout" type="button">Sair</button></div>';
   document.body.append(overlay, sidebar);
 
@@ -68,6 +70,7 @@
   const setOpen = open => {
     sidebar.classList.toggle('aberto', open); overlay.classList.toggle('aberto', open);
     sidebar.setAttribute('aria-hidden', String(!open)); overlay.setAttribute('aria-hidden', String(!open));
+    sidebar.inert = !open;
     button.setAttribute('aria-expanded', String(open)); document.body.classList.toggle('drawer-aberto', open);
     if (open) close.focus(); else button.focus();
   };

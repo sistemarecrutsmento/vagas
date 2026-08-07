@@ -153,7 +153,7 @@ function renderEvento(ev) {
 
 async function carregar() {
   const tk = authTokens.getAccess();
-  if (!tk) { window.location.href = 'login.html'; return; }
+  if (!tk) { window.location.href = 'index.html'; return; }
   if (!cid) { document.getElementById('loading').innerHTML = '<p>ID inválido</p>'; return; }
 
   try {

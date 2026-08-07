@@ -171,12 +171,12 @@ function renderCard(c) {
 
 async function carregar() {
   const tk = authTokens.getAccess();
-  if (!tk) { window.location.href = 'login.html'; return; }
+  if (!tk) { window.location.href = 'index.html'; return; }
 
   try {
     const r = await authFetch(`${API}/api/candidato/candidaturas`);
     if (!r.ok) {
-      if (r.status === 401) { window.location.href = 'login.html'; return; }
+      if (r.status === 401) { window.location.href = 'index.html'; return; }
       throw new Error('Falha ao carregar');
     }
     const data = await r.json();
