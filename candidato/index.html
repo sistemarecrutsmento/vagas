@@ -310,7 +310,7 @@
     .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background-size: cover; background-position: center; flex-shrink: 0; }
     .user-info { display: flex; align-items: center; gap: 10px; }
   </style>
-  <link rel="stylesheet" href="/candidato/home-redesign.css?v=home-candidate-1">
+  <link rel="stylesheet" href="/candidato/home-redesign.css?v=home-candidate-2">
   <script src="/candidato/chat-uploader.js"></script>
   <link rel="manifest" href="/candidato/manifest.json">
   <meta name="theme-color" content="#722F37">
@@ -338,6 +338,9 @@
       <div class="header-actions" id="header-actions">
         <button class="btn-outline" type="button" onclick="abrirModal('login')">Entrar</button>
         <button id="btn-cadastrar" class="btn-header-primary" type="button" onclick="abrirModal('cad')">Criar conta</button>
+        <button id="btn-menu-logo" data-static-menu="true" class="btn-menu-logo" type="button" onclick="abrirDrawer(event)" aria-label="Abrir menu" title="Menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -466,8 +469,8 @@
       <div class="det-section"><h3>Benefícios</h3><p id="det-beneficios"></p></div>
     </div>
     <!-- Fase 11: Score de Match -->
-    <div id="bloco-match" style="display:none;margin:0 0 12px 0;padding:12px 16px;background:#f8f4ff;border-radius:8px;border-left:4px solid #722F37;">
-      <div style="font-size:13px;font-weight:600;color:#722F37;margin-bottom:6px;">🎯 Seu nível de compatibilidade: <span id="match-pct">—</span></div>
+    <div id="bloco-match" style="display:none;margin:0 0 12px 0;padding:12px 16px;background:#f8edf0;border-radius:8px;border-left:4px solid #722F37;">
+      <div style="font-size:13px;font-weight:600;color:#722F37;margin-bottom:6px;"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg> Seu nível de compatibilidade: <span id="match-pct">—</span></div>
       <div id="match-detalhes" style="font-size:12px;color:#555;line-height:1.7;"></div>
     </div>
     <!-- Fase 11: Tags da vaga -->
@@ -476,7 +479,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-primary" id="btn-candidatar" style="width:auto;">Candidatar-se</button>
-      <button class="btn" id="btn-favoritar" style="width:auto;background:#fff;border:1.5px solid #ddd;color:#555;display:none;" onclick="toggleFavoritar()">⭐ Favoritar</button>
+      <button class="btn" id="btn-favoritar" style="width:auto;background:#fff;border:1.5px solid #ddd;color:#555;display:none;" onclick="toggleFavoritar()"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> Favoritar</button>
     </div>
   </div>
 </div>
@@ -494,7 +497,7 @@
       <!-- Lado esquerdo: perfil + progresso -->
       <aside class="painel-lateral">
         <div class="painel-perfil">
-          <div class="painel-foto" id="painel-foto">👤</div>
+          <div class="painel-foto" id="painel-foto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 20c.7-3.4 2.9-5.2 6.5-5.2s5.8 1.8 6.5 5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
           <h3 id="painel-nome">—</h3>
           <p id="painel-email" class="painel-email">—</p>
         </div>
@@ -507,10 +510,10 @@
           <p class="progresso-dica" id="painel-progresso-dica">Complete seu perfil para aumentar suas chances.</p>
         </div>
         <nav class="painel-menu">
-          <button class="painel-tab ativo" data-tab="cands">📋 Minhas candidaturas</button>
-          <button class="painel-tab" data-tab="perfil">👤 Editar perfil</button>
-          <button class="painel-tab" data-tab="senha">🔑 Trocar senha</button>
-          <button class="painel-tab painel-tab-sair" onclick="logout()">🚪 Sair</button>
+          <button class="painel-tab ativo" data-tab="cands"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14v15H5z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Minhas candidaturas</button>
+          <button class="painel-tab" data-tab="perfil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 20c.7-3.4 2.9-5.2 6.5-5.2s5.8 1.8 6.5 5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Editar perfil</button>
+          <button class="painel-tab" data-tab="senha"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg> Trocar senha</button>
+          <button class="painel-tab painel-tab-sair" onclick="logout()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Sair</button>
         </nav>
       </aside>
 
@@ -532,9 +535,9 @@
               <span class="perfil-foto-inicial" id="perfil-foto-inicial">?</span>
             </div>
             <div class="perfil-foto-acoes">
-              <label class="btn btn-secondary" for="perfil-foto-input">📷 Escolher foto</label>
+              <label class="btn btn-secondary" for="perfil-foto-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h4l1.5-2h5L16 7h4v12H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg> Escolher foto</label>
               <input type="file" id="perfil-foto-input" accept="image/jpeg,image/png,image/webp" onchange="perfilFotoEscolher(this)" style="display:none">
-              <button type="button" class="btn btn-vinho-outline" id="perfil-foto-remover" style="display:none" onclick="perfilFotoRemover()">🗑️ Remover</button>
+              <button type="button" class="btn btn-vinho-outline" id="perfil-foto-remover" style="display:none" onclick="perfilFotoRemover()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M8 7l1-2h6l1 2m-9 0 1 13h8l1-13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Remover</button>
               <p class="perfil-foto-info">JPG, PNG ou WebP — até 5 MB</p>
             </div>
           </div>
@@ -703,7 +706,7 @@
 <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-header">
-    <div class="drawer-foto" id="drawer-foto">👤</div>
+    <div class="drawer-foto" id="drawer-foto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 20c.7-3.4 2.9-5.2 6.5-5.2s5.8 1.8 6.5 5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
     <div class="drawer-info">
       <h3 id="drawer-nome">Visitante</h3>
       <p id="drawer-email">—</p>
@@ -712,28 +715,28 @@
   </div>
   <div class="drawer-body">
     <div class="drawer-section">Navegação</div>
-    <a href="/candidato/index.html" class="drawer-link ativo"><span class="icon">🏠</span> Vagas</a>
+    <a href="/candidato/index.html" class="drawer-link ativo"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-6 8 6v9H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 19v-5h6v5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span> Vagas</a>
     <div id="drawer-logado" style="display:none">
-      <a href="/candidato/painel.html" class="drawer-link"><span class="icon">👤</span> Meu perfil</a>
-      <a href="/candidato/entrevistas.html" class="drawer-link"><span class="icon">📅</span> Entrevistas</a>
-    <a href="/candidato/favoritos.html" class="drawer-link"><span class="icon">⭐</span> Favoritos</a>
-    <a href="/candidato/conversas.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">💬</span> Chat</a>
-      <a href="javascript:void(0)" onclick="abrirModalNotificacoes()" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
+      <a href="/candidato/painel.html" class="drawer-link"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 20c.7-3.4 2.9-5.2 6.5-5.2s5.8 1.8 6.5 5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span> Meu perfil</a>
+      <a href="/candidato/entrevistas.html" class="drawer-link"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 3.5v4M16 3.5v4M4 10h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span> Entrevistas</a>
+    <a href="/candidato/favoritos.html" class="drawer-link"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span> Favoritos</a>
+    <a href="/candidato/conversas.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v10H10l-4 3v-3H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span> Chat</a>
+      <a href="javascript:void(0)" onclick="abrirModalNotificacoes()" class="drawer-link"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2v-4a4.5 4.5 0 0 0-9 0v4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 19.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span> Notificações</a>
     </div>
     <div id="drawer-deslogado">
       <div class="drawer-section">Sua conta</div>
-      <a href="javascript:void(0)" onclick="fecharDrawer();abrirModal('login')" class="drawer-link"><span class="icon">🔐</span> Entrar</a>
-      <a href="javascript:void(0)" onclick="fecharDrawer();abrirModal('cad')" class="drawer-link"><span class="icon">📝</span> Cadastre-se</a>
+      <a href="javascript:void(0)" onclick="fecharDrawer();abrirModal('login')" class="drawer-link"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span> Entrar</a>
+      <a href="javascript:void(0)" onclick="fecharDrawer();abrirModal('cad')" class="drawer-link"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14v15H5z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span> Cadastre-se</a>
     </div>
   </div>
   <div class="drawer-footer" id="drawer-footer-logado" style="display:none">
-    <button class="drawer-logout" onclick="logout()" type="button" aria-label="Sair do perfil">🚪 Sair</button>
+    <button class="drawer-logout" onclick="logout()" type="button" aria-label="Sair do perfil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Sair</button>
   </div>
 </aside>
 
 <script src="/candidato/auth-helper.js?v=etapa2_2026_07_27"></script>
-<script src="/candidato/app-v2.js?v=portal-candidate-redesign-1"></script>
-<script src="/candidato/modals.js?v=portal-candidate-redesign-1"></script>
+<script src="/candidato/app-v2.js?v=portal-candidate-redesign-2"></script>
+<script src="/candidato/modals.js?v=portal-candidate-redesign-2"></script>
 <script>
 function abrirDrawer(e) {
   if (e) e.stopPropagation();

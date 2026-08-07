@@ -204,6 +204,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   checarAuth();
   // Garante o ☰ no logo (mesmo deslogado)
   setTimeout(garantirBotaoMenu, 50);
+  setTimeout(processarRetornoSocial, 120);
   document.querySelectorAll('#filtro-dropdown button').forEach(btn => {
     btn.addEventListener('click', () => {
       const cat = btn.dataset.cat;
@@ -328,7 +329,7 @@ async function carregarVagas() {
     }
     window.vagas = vagas;
     if (vagas.length === 0) {
-      grid.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">📋</div><h3>Nenhuma vaga disponível no momento</h3><p>Volte mais tarde — atualizamos toda semana.</p></div>';
+      grid.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14v15H5z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Nenhuma vaga disponível no momento</h3><p>Volte mais tarde — atualizamos toda semana.</p></div>';
       if (contador) contador.textContent = '0 vagas encontradas';
       return;
     }
@@ -342,7 +343,7 @@ async function carregarVagas() {
     }).join('');
     if (contador) contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;"><div class="empty-icon">⚠️</div><h3>Não foi possível carregar as vagas</h3><p>O servidor pode estar iniciando. Tente novamente.</p><button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="carregarVagas()">Tentar novamente</button></div>`;
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;"><div class="empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 21 19H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Não foi possível carregar as vagas</h3><p>O servidor pode estar iniciando. Tente novamente.</p><button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="carregarVagas()">Tentar novamente</button></div>`;
     if (contador) contador.textContent = 'Não foi possível carregar';
   }
 }
@@ -421,11 +422,11 @@ function atualizarBotaoCandidatar(vagaId) {
   const btn = document.getElementById('btn-candidatar');
   if (!btn) return;
   if (!tokenCandidato) {
-    btn.textContent = '🔒 Faça login para se candidatar';
+    btn.textContent = 'Faça login para se candidatar';
     btn.disabled = false;
     btn.onclick = () => { fecharModal('detalhes'); abrirModal('login'); };
   } else if (!cadastroCompleto) {
-    btn.textContent = '📝 Complete seu cadastro para candidatar-se';
+    btn.textContent = 'Complete seu cadastro para candidatar-se';
     btn.disabled = false;
     btn.onclick = () => {
       emailLogado = localStorage.getItem('candidato_email') || emailLogado;
@@ -436,7 +437,7 @@ function atualizarBotaoCandidatar(vagaId) {
       irParaEtapa(2);
     };
   } else {
-    btn.textContent = '✅ Candidatar-se a esta vaga';
+    btn.textContent = 'Candidatar-se a esta vaga';
     btn.disabled = false;
     btn.onclick = () => candidatar(vagaId);
   }
@@ -465,21 +466,21 @@ async function candidatar(vagaId) {
     });
     const data = await r.json();
     if (r.ok) {
-      btn.textContent = '✓ Candidatura enviada!';
+      btn.textContent = 'Candidatura enviada';
       btn.style.background = '#2E7D32';
       btn.style.color = 'white';
     } else if (r.status === 401) {
       logout();
-      btn.textContent = '🔒 Faça login para se candidatar';
+      btn.textContent = 'Faça login para se candidatar';
       btn.disabled = false;
       btn.onclick = () => { fecharModal('detalhes'); abrirModal('login'); };
-      alert('Sua sessão expirou. Faça login novamente.');
+      showCandidateFeedback('Sua sessão expirou. Faça login novamente.', 'error', 'login-feedback');
     } else {
-      btn.textContent = '❌ ' + (data.erro || 'Erro');
+      btn.textContent = data.erro || 'Não foi possível concluir';
       btn.disabled = false;
     }
   } catch (e) {
-    btn.textContent = '❌ Erro de conexão';
+    btn.textContent = 'Erro de conexão';
     btn.disabled = false;
   }
 }
@@ -536,6 +537,8 @@ function wizardIrPara(n) {
   const etapa = document.getElementById('wizard-etapa-' + n);
   if (etapa) etapa.style.setProperty('display', 'block', 'important');
   clearCandidateFeedback('cad-feedback');
+  const stepSummary = document.getElementById('wizard-step-summary');
+  if (stepSummary) stepSummary.textContent = `Etapa ${n} de 5`;
   for (let i = 1; i <= 5; i++) {
     const p = document.querySelector(`.wizard-passo[data-p="${i}"]`);
     if (!p) continue;
@@ -765,7 +768,7 @@ async function wizardFinalizar() {
       atualizarHeaderUsuario();
       const btnCand = document.getElementById('btn-candidatar');
       if (btnCand) {
-        btnCand.textContent = '✅ Candidatar-se a esta vaga';
+        btnCand.textContent = 'Candidatar-se a esta vaga';
         btnCand.disabled = false;
         btnCand.onclick = () => candidatar(vagaSelecionada.id);
       }
@@ -840,6 +843,59 @@ async function loginEntrar(btn) {
   } finally {
     btn.disabled = false;
     btn.textContent = oldText;
+  }
+}
+
+async function continuarSocial(provider, btn) {
+  if (!['google', 'apple'].includes(provider)) return;
+  const oldText = btn?.textContent || '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Conectando…'; }
+  try {
+    const r = await fetch(`${API}/api/auth/social/${provider}/start`, { headers: { Accept: 'application/json' } });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.url) {
+      showCandidateFeedback(data.erro || `Login com ${provider === 'google' ? 'Google' : 'Apple'} indisponível no momento.`, 'error', 'login-feedback');
+      return;
+    }
+    window.location.assign(data.url);
+  } catch (e) {
+    showCandidateFeedback('Não foi possível iniciar o login social. Tente novamente.', 'error', 'login-feedback');
+  } finally {
+    if (btn && document.body.contains(btn)) { btn.disabled = false; btn.textContent = oldText; }
+  }
+}
+window.continuarSocial = continuarSocial;
+
+async function processarRetornoSocial() {
+  const qs = new URLSearchParams(location.search);
+  const socialCode = qs.get('social_code');
+  const socialError = qs.get('social_error');
+  if (!socialCode && !socialError) return;
+  history.replaceState({}, document.title, location.pathname + (CANDIDATO_EMPRESA_SLUG ? `?slug=${encodeURIComponent(CANDIDATO_EMPRESA_SLUG)}` : ''));
+  if (socialError) {
+    abrirModal('login');
+    setTimeout(() => showCandidateFeedback(socialError, 'error', 'login-feedback'), 80);
+    return;
+  }
+  try {
+    const r = await fetch(API + '/api/auth/social/exchange', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: socialCode })
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.token || !data.candidato) throw new Error(data.erro || 'Código social inválido');
+    tokenCandidato = data.token;
+    emailLogado = data.candidato.email;
+    localStorage.setItem('candidato_token', tokenCandidato);
+    localStorage.setItem('candidato_email', emailLogado);
+    if (data.refreshToken) localStorage.setItem('candidato_refresh', data.refreshToken);
+    await checarPerfil();
+    atualizarHeaderUsuario();
+    if (!cadastroCompleto) abrirModal('cad');
+  } catch (e) {
+    abrirModal('login');
+    setTimeout(() => showCandidateFeedback(e.message || 'Não foi possível concluir o login social.', 'error', 'login-feedback'), 80);
   }
 }
 
@@ -946,7 +1002,7 @@ function garantirBotaoMenu() {
   // Qualquer usuário logado deve ter acesso ao menu (inclusive antes de
   // completar o cadastro), para conseguir sair da conta em qualquer página.
   if (!tokenCandidato) {
-    if (existe) existe.remove();
+    if (existe && existe.dataset.staticMenu !== 'true') existe.remove();
     return;
   }
   if (existe) return;
@@ -957,7 +1013,7 @@ function garantirBotaoMenu() {
   btn.className = 'btn-menu-logo';
   btn.title = 'Menu';
   btn.setAttribute('aria-label', 'Abrir menu');
-  btn.innerHTML = '☰';
+  btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
   btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); window.abrirDrawer && window.abrirDrawer(e); });
   // Volta pro <header> como primeiro filho (absolute na direita)
   headerEl.insertBefore(btn, headerEl.firstChild);
@@ -996,7 +1052,7 @@ async function carregarPainel() {
         painelFoto.textContent = '';
       } else {
         painelFoto.style.backgroundImage = '';
-        painelFoto.textContent = iniciais || '👤';
+        painelFoto.textContent = iniciais || '?';
       }
     }
     document.getElementById('painel-nome').textContent = nome;
@@ -1017,7 +1073,7 @@ async function carregarPainel() {
     if (pFill) pFill.style.width = r.pct + '%';
     if (pPct) pPct.textContent = r.pct + '%';
     if (pDica) pDica.textContent = r.pct === 100
-      ? '🎉 Seu perfil está completo!'
+      ? 'Seu perfil está completo.'
       : `Preencha mais ${r.faltam.length} campo(s) obrigatório(s): ${r.faltam.slice(0, 3).join(', ')}${r.faltam.length > 3 ? '…' : ''}.`;
     // Atualiza flag global também
     cadastroCompleto = r.cadastroCompleto;
@@ -1043,7 +1099,7 @@ async function carregarCands() {
     if (lista.length === 0) {
       listaEl.innerHTML = `
         <div class="empty">
-          <div class="empty-icon">📭</div>
+          <div class="empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></div>
           <p>Você ainda não se candidatou a nenhuma vaga.</p>
           <p style="font-size:13px;color:#888;margin-top:8px">Volte para a lista de vagas e candidate-se!</p>
           <button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="fecharModal('minhas')">Ver vagas</button>
@@ -1113,7 +1169,7 @@ async function carregarCands() {
         } else if (i === etapaAtualBanco) {
           if (isReprovado) { cls = 'reprovada'; bola = '✕'; }
           else if (isContratado) { cls = 'concluida'; bola = '✓'; }
-          else { cls = 'andamento'; bola = '⏳'; }
+          else { cls = 'andamento'; bola = '…'; }
         }
         const tooltip = descricao ? `${nome} — ${descricao}` : nome;
         return `<div class="cand-etapa ${cls}" title="${escapeHtml(tooltip)}">
@@ -1130,7 +1186,7 @@ async function carregarCands() {
       const etapaAtualObj = c.etapas[etapaAtualBanco];
       const etapaAtualFmt = etapaObj(etapaAtualObj);
       const etapaNome = (() => {
-        if (isContratado) return '🎉 Contratação concluída';
+        if (isContratado) return 'Contratação concluída';
         if (isReprovado) return 'Processo encerrado';
         if (!etapaAtualObj) return 'Inscrição recebida';
         return `Etapa ${etapaAtual} de ${totalEtapas} — ${etapaAtualFmt.nome}`;
@@ -1144,7 +1200,7 @@ async function carregarCands() {
       const statusClass = c.status || 'em_analise';
       const cardExtras = isContratado ? ' contratado' : (isReprovado ? ' reprovado' : '');
       const fillBg = isContratado
-        ? 'linear-gradient(90deg, #16a34a 0%, #22c55e 100%)'
+        ? 'linear-gradient(90deg, var(--vinho) 0%, var(--vinho-claro) 100%)'
         : isReprovado
           ? 'var(--vermelho)'
           : 'linear-gradient(90deg, var(--vinho) 0%, var(--vinho-claro) 100%)';
@@ -1155,8 +1211,8 @@ async function carregarCands() {
             <div class="cand-card-info">
               <h4>${c.titulo || 'Vaga'}</h4>
               <div class="cand-card-meta">
-                <span>🏢 ${c.empresa || 'Empresa'}</span>
-                ${localTxt ? `<span class="sep">•</span><span>📍 ${localTxt}</span>` : ''}
+                <span>Empresa: ${c.empresa || 'Empresa'}</span>
+                ${localTxt ? `<span class="sep">•</span><span>Local: ${localTxt}</span>` : ''}
               </div>
             </div>
             <span class="cand-status status-${statusClass}"><span class="dot"></span>${statusLabel(c.status)}</span>
@@ -1171,13 +1227,13 @@ async function carregarCands() {
           </div>
           <div class="cand-timeline">${etapasHTML}</div>
           <div class="cand-card-footer">
-            <span>📅 Inscrito em ${formatarData(c.criada_em)}</span>
+            <span>Inscrito em ${formatarData(c.criada_em)}</span>
             <span class="ver-mais">Acompanhar processo →</span>
           </div>
           ${(['cancelado','rejeitado','contratado'].includes(c.status)) ? '' : `
             <div style="margin-top:12px;padding-top:12px;border-top:1px dashed #e0e0e0;text-align:center">
               <button class="btn-desistir" onclick="event.stopPropagation();desistirVaga(${c.id}, '${(c.titulo || '').replace(/'/g, '&#39;')}')" style="background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600">
-                🚪 Desistir da vaga
+                Desistir da vaga
               </button>
             </div>
           `}
@@ -1200,11 +1256,11 @@ async function desistirVaga(candidaturaId, tituloVaga) {
       body: JSON.stringify({ motivo })
     });
     const data = await r.json();
-    if (!r.ok) { alert(data.erro || 'Erro ao desistir'); return; }
-    alert('Voce desistiu da vaga.');
+    if (!r.ok) { showCandidateFeedback(data.erro || 'Não foi possível desistir da vaga.'); return; }
+    showCandidateFeedback('Você desistiu da vaga.', 'success');
     carregarMinhasCandidaturas();
   } catch (e) {
-    alert('Erro de conexao: ' + e.message);
+    showCandidateFeedback('Não foi possível concluir agora.');
   }
 }
 
@@ -1297,7 +1353,7 @@ async function salvarPerfilCompleto(target) {
     if (r.ok) {
       cadastroCompleto = true;
       localStorage.setItem('candidato_nome', payload.nome);
-      if (btn) { btn.textContent = '✓ Salvo!'; btn.style.background = 'var(--verde)'; }
+      if (btn) { btn.textContent = 'Salvo'; btn.style.background = 'var(--vinho)'; }
       setTimeout(() => { 
         if (btn) { 
           btn.textContent = btn._oldText || 'Salvar perfil'; 
@@ -1308,11 +1364,11 @@ async function salvarPerfilCompleto(target) {
         if (location.pathname.includes('perfil.html')) location.reload();
       }, 800);
     } else {
-      alert('Erro: ' + (data.erro || ''));
+      showCandidateFeedback(data.erro || 'Não foi possível salvar seu perfil.');
       if (btn) { btn.disabled = false; btn.textContent = btn._oldText || 'Salvar perfil'; }
     }
   } catch (e) {
-    alert('Erro de conexão');
+    showCandidateFeedback('Não foi possível salvar seu perfil agora.');
     if (btn) { btn.disabled = false; btn.textContent = btn._oldText || 'Salvar perfil'; }
   }
 }
@@ -1335,7 +1391,7 @@ function perfilFotoInit(perfil) {
     localStorage.setItem('candidato_foto', fotoUrl);
   } else {
     preview.style.backgroundImage = '';
-    if (inicial) { inicial.style.display = ''; inicial.textContent = ini || '👤'; }
+    if (inicial) { inicial.style.display = ''; inicial.textContent = ini || '?'; }
     if (btnRemover) btnRemover.style.display = 'none';
   }
 }
@@ -1344,12 +1400,12 @@ function perfilFotoEscolher(input) {
   const file = input.files && input.files[0];
   if (!file) return;
   if (!/^image\/(jpeg|jpg|png|webp)$/i.test(file.type)) {
-    alert('Formato inválido. Use JPG, PNG ou WebP.');
+    showCandidateFeedback('Formato inválido. Use JPG, PNG ou WebP.');
     input.value = '';
     return;
   }
   if (file.size > 5 * 1024 * 1024) {
-    alert('Imagem muito grande. Máximo 5 MB.');
+    showCandidateFeedback('Imagem muito grande. Máximo 5 MB.');
     input.value = '';
     return;
   }
@@ -1384,7 +1440,7 @@ function perfilFotoEscolher(input) {
       }
       atualizarHeaderUsuario();
     } catch (err) {
-      alert('Erro ao enviar foto: ' + err.message);
+      showCandidateFeedback('Não foi possível enviar a foto agora.');
     }
   };
   reader.readAsDataURL(file);
@@ -1415,7 +1471,7 @@ async function perfilFotoRemover() {
     }
     atualizarHeaderUsuario();
   } catch (e) {
-    alert('Erro: ' + e.message);
+    showCandidateFeedback('Não foi possível remover a foto agora.');
   }
 }
 
@@ -1676,12 +1732,12 @@ function atualizarBtnFavoritar() {
   const btn = document.getElementById('btn-favoritar');
   if (!btn) return;
   if (_isFavorito) {
-    btn.textContent = '\u2605 Favoritado';
-    btn.style.background = '#fef9c3';
-    btn.style.borderColor = '#d4a017';
-    btn.style.color = '#92400e';
+    btn.innerHTML = '<svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg> Favoritado';
+    btn.style.background = '#fffafb';
+    btn.style.borderColor = '#c99eaa';
+    btn.style.color = '#5f1527';
   } else {
-    btn.textContent = '\u2606 Favoritar';
+    btn.innerHTML = '<svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> Favoritar';
     btn.style.background = '#fff';
     btn.style.borderColor = '#ddd';
     btn.style.color = '#555';
@@ -1725,7 +1781,7 @@ async function carregarMatchCandidato(vagaId) {
         ? items.map(x => `<span>+${escapeHtml(x.criterio)}: ${x.pontos}pts</span>`).join(' &nbsp;|&nbsp; ')
         : '<span style="color:#999">Perfil incompleto para calcular</span>';
     }
-    const cor = score >= 70 ? '#16a34a' : score >= 40 ? '#d97706' : '#dc2626';
+    const cor = score >= 70 ? 'var(--vinho)' : score >= 40 ? 'var(--vinho-claro)' : 'var(--vermelho)';
     bloco.style.borderLeftColor = cor;
     if (pct) pct.style.color = cor;
   } catch (e) { if (bloco) bloco.style.display = 'none'; }

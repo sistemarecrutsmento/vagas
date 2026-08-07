@@ -79,6 +79,16 @@
         </div>
         <div class="step" id="login-etapa-2" style="display:none !important"></div>
         <div class="login-divider"><span>ou</span></div>
+        <div class="social-login-group" aria-label="Login social">
+          <button class="social-login-btn" type="button" data-provider="google" onclick="continuarSocial('google', this)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-1.99 3.02v2.5h3.22c1.89-1.74 2.99-4.3 2.99-7.35Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.61-2.42l-3.22-2.5c-.9.6-2.05.96-3.39.96-2.6 0-4.8-1.76-5.59-4.13H3.08v2.58A9.98 9.98 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.41 13.91A5.99 5.99 0 0 1 6.1 12c0-.66.11-1.3.31-1.91V7.51H3.08A10 10 0 0 0 2 12c0 1.61.39 3.14 1.08 4.49l3.33-2.58Z"/><path fill="#EA4335" d="M12 5.96c1.47 0 2.79.5 3.83 1.49l2.87-2.87C16.95 2.95 14.7 2 12 2a9.98 9.98 0 0 0-8.92 5.51l3.33 2.58C7.2 7.72 9.4 5.96 12 5.96Z"/></svg>
+            <span>Continuar com Google</span>
+          </button>
+          <button class="social-login-btn" type="button" data-provider="apple" onclick="continuarSocial('apple', this)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.7 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.7-1.7-3.3-1.7-1.4-.2-2.7.8-3.4.8-.7 0-1.8-.8-3-.8-1.5 0-2.9.9-3.7 2.2-1.6 2.7-.4 6.7 1.1 8.8.8 1 1.7 2.1 2.9 2.1 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.2 0 2-.9 2.8-2 .9-1.2 1.3-2.4 1.3-2.5-.1 0-2.6-1-2.6-3.5Zm-2.2-6.6c.6-.8 1-1.8.9-2.9-.9 0-2 .6-2.6 1.3-.6.7-1 1.7-.9 2.7 1 .1 2-.4 2.6-1.1Z"/></svg>
+            <span>Continuar com Apple</span>
+          </button>
+        </div>
         <p class="login-register">Ainda não tem uma conta? <a href="#" onclick="fecharModal('login');abrirModal('cad');return false;">Criar conta</a></p>
       </section>
       <aside class="login-side">
@@ -105,6 +115,7 @@
           <div class="wizard-passo" data-p="4"><span>4</span> Escolaridade</div>
           <div class="wizard-passo" data-p="5"><span>5</span> Experiência</div>
         </div>
+        <div class="wizard-step-summary" id="wizard-step-summary" aria-live="polite">Etapa 1 de 5</div>
       </div>
       <button class="modal-close" onclick="fecharModal('cad')">×</button>
     </div>
@@ -283,6 +294,21 @@
     }
     const senha = document.getElementById('w1-senha');
     const hint = document.getElementById('cad-senha-hint');
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      if (overlay.dataset.behaviorBound === '1') return;
+      overlay.dataset.behaviorBound = '1';
+      overlay.addEventListener('click', event => {
+        if (event.target === overlay) overlay.classList.remove('aberto');
+      });
+    });
+    if (!window.__candidateModalEscapeBound) {
+      window.__candidateModalEscapeBound = true;
+      document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
+        const open = Array.from(document.querySelectorAll('.modal-overlay.aberto')).pop();
+        if (open) open.classList.remove('aberto');
+      });
+    }
     if (senha && hint && !senha.dataset.feedbackBound) {
       senha.dataset.feedbackBound = '1';
       senha.addEventListener('input', () => {
@@ -557,15 +583,15 @@
 <div class="modal-overlay" id="modal-notificacoes">
   <div class="modal modal-xlarge">
     <div class="modal-header">
-      <h2>🔔 Notificações</h2>
+      <h2>${notifIcon('bell')} Notificações</h2>
       <button class="modal-close" onclick="fecharModal('notificacoes')">×</button>
     </div>
     <div class="notif-tabs">
       <button class="notif-tab ativo" data-tab="aguardando" onclick="notifTrocarTab('aguardando', this)">
-        ⏰ Aguardando ação <span class="notif-tab-badge" id="notif-badge-aguardando" style="display:none">0</span>
+        ${notifIcon('clock')} Aguardando ação <span class="notif-tab-badge" id="notif-badge-aguardando" style="display:none">0</span>
       </button>
       <button class="notif-tab" data-tab="atualizacoes" onclick="notifTrocarTab('atualizacoes', this)">
-        📰 Atualizações
+        ${notifIcon('news')} Atualizações
       </button>
     </div>
     <div class="notif-body" id="notif-body">
@@ -583,6 +609,13 @@
       const div = document.createElement('div');
       div.innerHTML = notifHTML;
       document.body.appendChild(div.firstElementChild);
+      const overlay = document.getElementById('modal-notificacoes');
+      if (overlay) {
+        overlay.dataset.behaviorBound = '1';
+        overlay.addEventListener('click', event => {
+          if (event.target === overlay) overlay.classList.remove('aberto');
+        });
+      }
     }
   }
   if (document.readyState === 'loading') {
@@ -593,23 +626,34 @@
 
   // Cache em memória (não precisa re-buscar se abrir 2x em sequência)
   let notifCache = null;
-
+  function notifIcon(kind = 'bell') {
+    const paths = {
+      bell: '<path d="M6 17h12l-1.5-2v-4a4.5 4.5 0 0 0-9 0v4z"/><path d="M10 19.5h4"/>',
+      clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/>',
+      news: '<path d="M5 4.5h14v15H5z"/><path d="M8 9h8M8 13h5"/>',
+      check: '<circle cx="12" cy="12" r="8"/><path d="m8.5 12 2.2 2.2 4.8-5"/>',
+      lock: '<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+      alert: '<path d="M12 4 21 19H3z"/><path d="M12 9v5M12 17h.01"/>',
+      pin: '<path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z"/>'
+    };
+    return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[kind] || paths.bell}</svg>`;
+  }
   function notifRenderAguardando(lista) {
     const badge = document.getElementById('notif-badge-aguardando');
     if (lista.length === 0) {
       if (badge) badge.style.display = 'none';
       return `<div class="notif-vazio">
-        <div class="notif-vazio-icone">🎉</div>
+        <div class="notif-vazio-icone">${notifIcon('check')}</div>
         <p class="notif-vazio-titulo">Tudo em dia!</p>
         <p class="notif-vazio-sub">Você não tem nenhuma ação pendente agora.</p>
       </div>`;
     }
     if (badge) { badge.textContent = lista.length; badge.style.display = ''; }
-    let html = '<div class="notif-section-titulo">⏰ Aguardando ação do candidato</div>';
+    let html = `<div class="notif-section-titulo">${notifIcon('clock')} Aguardando ação do candidato</div>`;
     lista.forEach(n => {
       html += `
         <div class="notif-card urgente">
-          <div class="notif-card-icone">${n.icone || '🔔'}</div>
+          <div class="notif-card-icone">${notifIcon(n.icone_tipo || 'bell')}</div>
           <div class="notif-card-conteudo">
             ${n.vaga ? `<span class="notif-card-vaga">${escHtml(n.vaga)}</span>` : ''}
             <p class="notif-card-titulo">${escHtml(n.titulo)}</p>
@@ -624,18 +668,18 @@
   function notifRenderAtualizacoes(lista) {
     if (lista.length === 0) {
       return `<div class="notif-vazio">
-        <div class="notif-vazio-icone">📭</div>
+        <div class="notif-vazio-icone">${notifIcon('news')}</div>
         <p class="notif-vazio-titulo">Sem atualizações ainda</p>
         <p class="notif-vazio-sub">Quando seu processo seletivo avançar, aparece aqui.</p>
       </div>`;
     }
-    let html = '<div class="notif-section-titulo">📰 Histórico dos seus processos</div>';
+    let html = `<div class="notif-section-titulo">${notifIcon('news')} Histórico dos seus processos</div>`;
     html += '<div class="notif-timeline">';
     lista.forEach(n => {
       const cls = n.status === 'contratado' ? 'contratado' : (n.status === 'rejeitado' || n.status === 'reprovado' ? 'rejeitado' : '');
       html += `
         <div class="notif-timeline-item">
-          <div class="notif-timeline-icone ${cls}">${n.icone || '📌'}</div>
+          <div class="notif-timeline-icone ${cls}">${notifIcon(n.icone_tipo || 'pin')}</div>
           <div class="notif-timeline-conteudo">
             <p class="notif-timeline-titulo"><strong>${escHtml(n.vaga)}</strong> — ${escHtml(n.mensagem || (n.acao || 'Atualização'))}</p>
             <div class="notif-timeline-meta">
@@ -653,7 +697,7 @@
   function statusLabel(s) {
     return ({
       'em_andamento': 'Em andamento',
-      'contratado': '🎉 Contratado',
+      'contratado': 'Contratado',
       'rejeitado': 'Rejeitado',
       'reprovado': 'Reprovado',
       'cancelado': 'Cancelado'
@@ -710,7 +754,7 @@
     const token = localStorage.getItem('candidato_token');
     if (!token) {
       body.innerHTML = `<div class="notif-vazio">
-        <div class="notif-vazio-icone">🔒</div>
+        <div class="notif-vazio-icone">${notifIcon('lock')}</div>
         <p class="notif-vazio-titulo">Você precisa estar logado</p>
         <p class="notif-vazio-sub">Faça login para ver suas notificações.</p>
       </div>`;
@@ -727,7 +771,7 @@
       // modal compatível, separando proposta recebida (ação pendente) do
       // restante do histórico real, sem inventar dados.
       const aguardando = notificacoes.filter(n => n.tipo === 'proposta_enviada').map(n => ({
-        icone: '📨',
+        icone_tipo: 'news',
         vaga: n.mensagem || '',
         titulo: n.titulo || 'Nova proposta recebida',
         descricao: 'Abra sua candidatura para visualizar e responder.',
@@ -735,7 +779,7 @@
         linkTexto: 'Ver proposta'
       }));
       const atualizacoes = notificacoes.filter(n => n.tipo !== 'proposta_enviada').map(n => ({
-        icone: '📌',
+        icone_tipo: 'pin',
         vaga: n.titulo || 'Atualização do processo',
         mensagem: n.mensagem || n.titulo || 'Nova atualização',
         data: n.criada_em,
@@ -754,7 +798,7 @@
       if (rodape) rodape.textContent = `${notificacoes.length} notificação(ões) · Atualizado agora`;
     } catch (e) {
       body.innerHTML = `<div class="notif-vazio">
-        <div class="notif-vazio-icone">⚠️</div>
+        <div class="notif-vazio-icone">${notifIcon('alert')}</div>
         <p class="notif-vazio-titulo">Não foi possível carregar</p>
         <p class="notif-vazio-sub">${escHtml(e.message)}</p>
       </div>`;
