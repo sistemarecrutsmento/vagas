@@ -213,17 +213,26 @@
     document.addEventListener('DOMContentLoaded', restaurarEstadoCards);
 
     function voltar() {
-      // Dentro do Portal, volta para a aba Candidatos do shell principal.
+      // Dentro do SPA, retorna para a origem real registrada pelo shell.
       if (window.top !== window.self) {
-        window.top.location.href = 'index.html?page=candidatos';
+        const topWin = window.top;
+        const topParams = new URLSearchParams(topWin.location.search);
+        const origem = topParams.get('voltar_para') || 'candidatos';
+        const vagaId = topParams.get('voltar_vaga_id');
+        if (origem === 'candidatos-vaga' && vagaId && typeof topWin.abrirVagaCands === 'function') {
+          topWin.history.replaceState(null, '', 'index.html?page=candidaturas');
+          topWin.abrirVagaCands(vagaId);
+        } else if (typeof topWin.irPara === 'function' && ['dashboard','vagas','candidatos','candidaturas','propostas','contratacoes','talentos','relatorios','agenda','equipe','configuracoes'].includes(origem)) {
+          topWin.history.replaceState(null, '', 'index.html?page=' + encodeURIComponent(origem));
+          topWin.irPara(origem, { keepQuery: true });
+        } else {
+          topWin.location.href = 'index.html?page=candidatos';
+        }
         return;
       }
       // Mantém o comportamento original quando a página for aberta isoladamente.
-      if (document.referrer && document.referrer.includes(location.host)) {
-        history.back();
-      } else {
-        location.href = 'index.html';
-      }
+      if (document.referrer && document.referrer.includes(location.host)) history.back();
+      else location.href = 'index.html';
     }
 
     (async () => {
@@ -1350,18 +1359,30 @@
     async function loadPDFLib() {
       if (window.PDFLib) return window.PDFLib;
       if (_docPDFLibLoading) return _docPDFLibLoading;
-      _docPDFLibLoading = new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
-        s.onload = () => res(window.PDFLib);
-        s.onerror = rej;
-        document.head.appendChild(s);
-      });
+      _docPDFLibLoading = (async () => {
+        const urls = [
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js',
+          'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js'
+        ];
+        for (const src of urls) {
+          try {
+            await new Promise((resolve, reject) => {
+              const s = document.createElement('script');
+              s.src = src;
+              s.onload = resolve;
+              s.onerror = reject;
+              document.head.appendChild(s);
+            });
+            if (window.PDFLib) return window.PDFLib;
+          } catch (_) {}
+        }
+        throw new Error('Não foi possível carregar o gerador de PDF. Verifique sua conexão e tente novamente.');
+      })();
       return _docPDFLibLoading;
     }
 
     async function docBaixarTudo() {
-      const arquivos = _docsCache.filter(d => d.categoria === 'arquivo' && d.arquivo_url);
+      const arquivos = _docsCache.filter(d => d.arquivo_url && (d.categoria === 'arquivo' || d.arquivo_nome || d.arquivo_tipo));
       if (!arquivos.length) { alert('Nenhum arquivo pra baixar.'); return; }
       const btn = document.getElementById('btn-baixar-tudo-pdf');
       const origTxt = btn ? btn.textContent : '';
@@ -1429,7 +1450,14 @@
           if (btn) btn.textContent = '⏳ Processando ' + (i + 1) + '/' + arquivos.length + '...';
 
           try {
-            const r = await fetch(doc.arquivo_url);
+            // Baixa pelo proxy autenticado da API: evita bloqueio CORS dos
+            // provedores de arquivo e garante que a empresa só acesse seu documento.
+            const candidaturaIdAtual = new URLSearchParams(location.search).get('id');
+            const tokenAtual = getEmpresaToken();
+            const proxyUrl = candidaturaIdAtual && doc.id
+              ? API + '/api/empresa/candidatura/' + encodeURIComponent(candidaturaIdAtual) + '/documentos/' + encodeURIComponent(doc.id) + '/arquivo'
+              : doc.arquivo_url;
+            const r = await fetch(proxyUrl, { headers: tokenAtual ? { 'Authorization': 'Bearer ' + tokenAtual } : {} });
             if (!r.ok) throw new Error('HTTP ' + r.status);
             const bytes = await r.arrayBuffer();
             let img = null;
