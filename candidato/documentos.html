@@ -456,7 +456,7 @@ async function enviar() {
   try {
     const r = await fetch(`${API}/api/candidatura/${candidaturaId}/documentos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` },
       body: JSON.stringify({ documentos: docs })
     });
     const data = await r.json();
