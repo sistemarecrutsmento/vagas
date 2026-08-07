@@ -186,8 +186,17 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
 
 /* Mobile is a separate composition, not a compressed desktop. */
 @media (max-width:640px) {
-  .candidate-header .container, .candidate-hero .container, .candidate-proof .container, .candidate-filters .container, .candidate-vagas-section .container, .candidate-benefits .container, .candidate-footer .container { padding-left: 16px; padding-right: 16px; }
-  .candidate-header .header-inner { min-height: 60px; gap: 8px; }
+  .candidate-header { background: var(--wine); border-bottom-color: rgba(255,255,255,.14); box-shadow: 0 3px 18px rgba(39,10,19,.18); }
+  .candidate-header .container, .candidate-hero .container, .candidate-filters .container, .candidate-vagas-section .container, .candidate-benefits .container, .candidate-footer .container { padding-left: 16px; padding-right: 16px; }
+  .candidate-header .header-inner { min-height: 54px; gap: 7px; }
+  .brand-logo { filter: brightness(0) invert(1); }
+  .candidate-header .btn-outline { color: #fff; background: transparent; border-color: rgba(255,255,255,.46); }
+  .candidate-header .btn-outline:hover { background: rgba(255,255,255,.12); border-color: #fff; }
+  .candidate-header .btn-header-primary { color: var(--wine); background: #fff; border-color: #fff; }
+  .candidate-header .btn-header-primary:hover { color: var(--wine-deep); background: #f7eeee; border-color: #f7eeee; }
+  .candidate-header .btn-menu-logo { color: #fff; background: transparent; border-color: rgba(255,255,255,.46); }
+  .candidate-header .btn-menu-logo:hover { background: rgba(255,255,255,.12); border-color: #fff; }
+
   .brand-logo { width: 116px; height: 47px; }
   .candidate-header .header-actions { gap: 6px; }
   .candidate-header .btn-outline { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 0 12px; font-size: 12px; }
@@ -280,11 +289,12 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
   .modal-footer .btn { width: 100% !important; min-height: 46px; }
 }
 @media (max-width:380px) {
-  .candidate-header .container { padding-left: 12px; padding-right: 12px; }
-  .brand-logo { width: 105px; height: 43px; }
-  .candidate-header .btn-outline { display: none; }
-  .candidate-header .btn-header-primary { padding: 0 10px; font-size: 11px; }
-  .candidate-header .btn-menu-logo { width: 37px; height: 37px; }
+  .candidate-header .container { padding-left: 10px; padding-right: 10px; }
+  .brand-logo { width: 86px; height: 38px; }
+  .candidate-header .header-actions { gap: 4px; }
+  .candidate-header .btn-outline { display: inline-flex; padding: 0 7px; font-size: 10px; }
+  .candidate-header .btn-header-primary { padding: 0 7px; font-size: 10px; }
+  .candidate-header .btn-menu-logo { width: 33px; height: 33px; }
   .candidate-hero h1 { font-size: 31px; }
   .candidate-hero p { font-size: 12px; }
   .proof-item { font-size: 9px; }
