@@ -492,6 +492,7 @@ function abrirModal(id) {
     // Reset wizard
     wizardExps = [];
     wizardCompetencias = [];
+    document.getElementById('w2-competencias-importadas-wrap')?.remove();
     wizardEtapa1 = null;
     areasSelecionadas = [];
     if (typeof wizardRenderExps === 'function') wizardRenderExps();
@@ -659,6 +660,15 @@ function preencherFormularioComCurriculo(dados) {
   const selects = { 'w2-sexo': pessoal.sexo, 'w4-formacao': form.nivel, 'w4-situacao': form.situacao };
   Object.entries(selects).forEach(([id, value]) => { const el = document.getElementById(id); if (el && value) { const opt = [...el.options].find(o => o.value === value || o.textContent.toLowerCase().includes(String(value).toLowerCase())); if (opt) el.value = opt.value; } });
   wizardCompetencias = Array.isArray(s.competencias) ? s.competencias.slice() : [];
+  if (wizardCompetencias.length) {
+    const sobre = document.getElementById('w2-sobre-voce');
+    if (sobre && !document.getElementById('w2-competencias-importadas-wrap')) {
+      const wrap = document.createElement('div'); wrap.id = 'w2-competencias-importadas-wrap'; wrap.className = 'form-group';
+      wrap.innerHTML = '<label for="w2-competencias-importadas">Competências identificadas (revise)</label><textarea id="w2-competencias-importadas" rows="3" style="resize:vertical"></textarea>';
+      sobre.closest('.form-group')?.after(wrap);
+    }
+    const compEl = document.getElementById('w2-competencias-importadas'); if (compEl) compEl.value = wizardCompetencias.join('\n');
+  }
   const experiencias = Array.isArray(s.experiencias) ? s.experiencias : [];
   wizardExps = experiencias.filter(e => e && (e.cargo || e.empresa || e.descricao)).map(e => ({
     cargo: e.cargo || '', empresa: e.empresa || '', inicio: toDate(e.inicio), fim: e.emprego_atual ? null : toDate(e.fim),
@@ -775,6 +785,7 @@ function wizardRenderExps() {
       <div>
         <strong>${escapeHtml(e.cargo)}</strong> — ${escapeHtml(e.empresa)}
         <div class="muted" style="font-size:12px">${escapeHtml(e.inicio || '?')} → ${e.emprego_atual ? 'Atual' : escapeHtml(e.fim || '?')}</div>
+        ${e.descricao ? `<div class="muted" style="font-size:12px;margin-top:5px;line-height:1.4">${escapeHtml(e.descricao)}</div>` : ''}
       </div>
       <button type="button" class="btn-x" onclick="wizardRemoverExp(${i})" title="Remover">×</button>
     </div>
@@ -782,10 +793,12 @@ function wizardRenderExps() {
 }
 
 async function wizardFinalizar() {
+  const compEl = document.getElementById('w2-competencias-importadas');
+  const competencias = compEl ? compEl.value.split(/[\n,;]+/).map(v => v.trim()).filter(Boolean) : wizardCompetencias;
   const dados = {
     ...(wizardEtapa1.dados || {}),
     experiencias: wizardExps,
-    competencias: wizardCompetencias
+    competencias
   };
 
   const btn = document.querySelector('#wizard-etapa-5 .btn-primary');
