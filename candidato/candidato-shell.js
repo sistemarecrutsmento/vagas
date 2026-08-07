@@ -67,12 +67,16 @@
 
   const button = document.getElementById('btn-menu-logo');
   const close = document.getElementById('drawer-close');
+  let restoreFocus = button;
+  const getFocusable = () => [...sidebar.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')];
   const setOpen = open => {
+    if (open) restoreFocus = document.activeElement instanceof HTMLElement ? document.activeElement : button;
     sidebar.classList.toggle('aberto', open); overlay.classList.toggle('aberto', open);
     sidebar.setAttribute('aria-hidden', String(!open)); overlay.setAttribute('aria-hidden', String(!open));
     sidebar.inert = !open;
     button.setAttribute('aria-expanded', String(open)); document.body.classList.toggle('drawer-aberto', open);
-    if (open) close.focus(); else button.focus();
+    if (open) close.focus();
+    else if (restoreFocus && typeof restoreFocus.focus === 'function') restoreFocus.focus();
   };
   const openDrawer = () => setOpen(true);
   const closeDrawer = () => setOpen(false);
@@ -82,7 +86,16 @@
   };
   button.addEventListener('click', openDrawer); close.addEventListener('click', closeDrawer); overlay.addEventListener('click', closeDrawer);
   sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && sidebar.classList.contains('aberto')) closeDrawer(); });
+  document.addEventListener('keydown', e => {
+    if (!sidebar.classList.contains('aberto')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeDrawer(); return; }
+    if (e.key !== 'Tab') return;
+    const focusable = getFocusable();
+    if (!focusable.length) { e.preventDefault(); close.focus(); return; }
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
   document.getElementById('drawer-logout').addEventListener('click', logout);
   window.abrirDrawer = openDrawer; window.fecharDrawer = closeDrawer; window.logout = logout;
 })();

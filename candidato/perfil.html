@@ -44,7 +44,7 @@
   .perfil-foto-remove { position: absolute; top: 0; right: 0; width: 28px; height: 28px; border-radius: 50%; background: white; color: var(--vermelho); border: 2px solid var(--borda); display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
   .perfil-foto-remove:hover { background: var(--vermelho); color: white; border-color: var(--vermelho); }
   .perfil-foto-remove.visivel { display: flex; }
-  .perfil-foto-info-col { flex: 1; min-width: 240px; }
+  .perfil-foto-info-col { flex: 1 1 220px; min-width: 0; }
   .perfil-foto-info-col h2 { font-size: 22px; color: var(--preto); margin-bottom: 4px; }
   .perfil-foto-info-col p { color: var(--cinza); font-size: 14px; word-break: break-all; }
   .perfil-foto-info-col .perfil-progresso { margin-top: 12px; }
@@ -110,7 +110,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v10">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v11">
 </head>
 <body>
 
@@ -423,7 +423,7 @@ function perfilRenderExps() {
           <p>${fmtData(e.inicio)} → ${e.emprego_atual ? 'Atual' : (e.fim ? fmtData(e.fim) : '?')}</p>
           ${desc}
         </div>
-        <button type="button" class="btn-x" onclick="perfilRemoverExp(${i})" title="Remover">×</button>
+        <button type="button" class="btn-x" aria-label="Remover experiência" onclick="perfilRemoverExp(${i})" title="Remover">×</button>
       </div>
     `;
   }).join('');
@@ -461,6 +461,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-v10"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v11"></script>
 </body>
 </html>

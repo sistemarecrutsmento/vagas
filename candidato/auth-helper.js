@@ -135,8 +135,7 @@
       } else {
         // Refresh falhou — chama callback de logout se existir, senão reload
         clearTokens();
-        if (window.location.pathname.indexOf('/login') === -1 &&
-            window.location.pathname.indexOf('login.html') === -1) {
+        if (window.location.pathname.indexOf('/login') === -1) {
           window.location.reload();
         }
       }

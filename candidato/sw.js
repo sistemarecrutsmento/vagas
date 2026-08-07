@@ -6,25 +6,16 @@
 //   • offline fallback: página amigável
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE_NAME   = 'vagasio-v10';
-const CACHE_STATIC = 'vagasio-static-v10';
+const CACHE_NAME   = 'vagasio-v12';
+const CACHE_STATIC = 'vagasio-static-v12';
 
 // Assets estáticos que podem ser cacheados (sem dados privados)
 const STATIC_ASSETS = [
-  '/candidato/',
-  '/candidato/index.html',
-  '/candidato/painel.html',
-  '/candidato/candidaturas.html',
-  '/candidato/entrevistas.html',
-  '/candidato/favoritos.html',
-  '/candidato/notificacoes.html',
-  '/candidato/onboarding.html',
   '/candidato/home-redesign.css',
   '/candidato/candidato-shell.css',
   '/candidato/candidato-shell.js',
   '/candidato/app-v2.js',
   '/candidato/modals.js',
-  '/candidato/email-preferencias.html',
   '/candidato/manifest.json',
   '/candidato/icons/icon-192.png',
   '/candidato/icons/icon-512.png',
@@ -115,19 +106,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 3. Páginas HTML públicas → network-first (conteúdo fresco preferido)
+  // 3. HTML do portal: sempre rede. Páginas autenticadas nunca entram no cache.
   if (request.method === 'GET' && request.headers.get('accept')?.includes('text/html')) {
-    event.respondWith(
-      fetch(request).then(response => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_STATIC).then(c => c.put(request, clone));
-        }
-        return response;
-      }).catch(() =>
-        caches.match(request).then(cached => cached || offlineFallback(request))
-      )
-    );
+    event.respondWith(fetch(request).catch(() => offlineFallback(request)));
     return;
   }
 

@@ -145,7 +145,7 @@
         <h3 id="chat-head-titulo">💬 Mensagens</h3>
         <p id="chat-head-sub">Com o recrutador</p>
       </div>
-      <button class="chat-head-fechar" onclick="document.getElementById('chat-window').classList.remove('aberto')">×</button>
+      <button type="button" class="chat-head-fechar" aria-label="Fechar chat" onclick="document.getElementById('chat-window').classList.remove('aberto')">×</button>
     </div>
     <div class="chat-vagas" id="chat-vagas"></div>
     <div class="chat-msg-area" id="chat-msg-area">

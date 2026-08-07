@@ -120,7 +120,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v10">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v11">
 </head>
 <body>
 
@@ -263,7 +263,7 @@ function renderDoc(doc) {
     html += `<label for="file-${doc.tipo}">📤 ${ex ? 'Trocar arquivo' : 'Escolher arquivo'}</label>`;
     html += `<input type="file" id="file-${doc.tipo}" accept="image/*,application/pdf" onchange="arquivoEscolhido('${doc.tipo}', this)">`;
     html += `<span class="arq-nome" id="arq-nome-${doc.tipo}">${arqLabel}</span>`;
-    if (ex) html += `<button type="button" class="arq-limpar" onclick="arquivoLimpar('${doc.tipo}')" title="Remover">×</button>`;
+    if (ex) html += `<button type="button" class="arq-limpar" aria-label="Remover arquivo" onclick="arquivoLimpar('${doc.tipo}')" title="Remover">×</button>`;
     html += `</div>`;
     if (ex && ex.arquivo_url) {
       html += `<div class="doc-extra"><a href="${ex.arquivo_url}" target="_blank" rel="noopener">👁️ Ver arquivo enviado</a></div>`;
@@ -493,6 +493,6 @@ carregarCandidatura();
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-v10"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v11"></script>
 </body>
 </html>
