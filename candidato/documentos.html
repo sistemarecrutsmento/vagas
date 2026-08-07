@@ -120,7 +120,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v12">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v13">
 </head>
 <body>
 
@@ -210,7 +210,7 @@ function render() {
     alerta = `<div class="alerta aviso">📨 <div><strong>${retornados.length} documento(s) precisa(m) ser reenviado(s).</strong> O recrutador pediu ajustes — veja a mensagem abaixo em cada item e reenvie.</div></div>`;
   } else if (reprovados.length > 0) {
     alerta = `<div class="alerta aviso">⚠️ <div><strong>${reprovados.length} documento(s) precisa(m) ser reenviado(s).</strong> Veja a justificativa do recrutador abaixo em cada item.</div></div>`;
-  } else if (aprovados === total) {
+  } else if (total > 0 && aprovados === total) {
     alerta = `<div class="alerta sucesso">✅ <div><strong>Tudo certo!</strong> Todos os documentos foram aprovados. Aguarde o próximo passo do recrutador.</div></div>`;
   } else {
     alerta = `<div class="alerta info">ℹ️ <div>Preencha os campos de texto e anexe os arquivos pedidos. Você pode reenviar quantas vezes precisar até a aprovação do recrutador.</div></div>`;
@@ -493,6 +493,6 @@ carregarCandidatura();
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-v12"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v13"></script>
 </body>
 </html>
