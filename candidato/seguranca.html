@@ -115,7 +115,7 @@ let TOKEN = localStorage.getItem('candidato_token') || '';
 let REFRESH = localStorage.getItem('candidato_refresh') || '';
 let refreshPendente = null;
 
-async function req(method, path, body) {
+async function req(method, path, body, retried = false) {
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` };
   const ctrl = new AbortController();
   const timeoutId = setTimeout(() => ctrl.abort(), 15000);
@@ -125,7 +125,7 @@ async function req(method, path, body) {
   } finally {
     clearTimeout(timeoutId);
   }
-  if (r.status === 401 && REFRESH && !refreshPendente) {
+  if (r.status === 401 && REFRESH && !refreshPendente && !retried) {
     refreshPendente = fetch(API + '/api/auth/refresh', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken: REFRESH })
@@ -138,7 +138,7 @@ async function req(method, path, body) {
       refreshPendente = null;
     });
     await refreshPendente;
-    return req(method, path, body);
+    return req(method, path, body, true);
   }
   return r;
 }
