@@ -551,7 +551,10 @@ function wizardIrPara(n) {
   }
   const modal = document.getElementById('modal-cad');
   if (modal) modal.scrollTop = 0;
-  if (!wizardAtCurriculo && n === 5) aplicarPrimeiroEmprego();
+  if (!wizardAtCurriculo && n === 5) {
+    aplicarPrimeiroEmprego();
+    if (typeof wizardRenderExps === 'function') wizardRenderExps();
+  }
 }
 
 function wizardProximo() {
