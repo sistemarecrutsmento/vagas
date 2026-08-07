@@ -70,6 +70,10 @@ body:not(.candidate-home) .drawer-head {
 body:not(.candidate-home) .drawer-link {
   min-height: 46px !important; box-sizing: border-box !important;
   padding: 11px 20px !important; color: #30292d !important;
+  display: flex !important; align-items: center !important; gap: 13px !important;
+}
+body .drawer-link .icon { width: 21px !important; height: 21px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; flex: 0 0 21px !important; color: currentColor !important; }
+body .drawer-link .icon svg { width: 20px !important; height: 20px !important; display: block !important; }
   border-right: 3px solid transparent !important; text-decoration: none !important;
 }
 body:not(.candidate-home) .drawer-link:hover { background: #faf5f6 !important; }

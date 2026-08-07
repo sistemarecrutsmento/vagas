@@ -1,14 +1,23 @@
 /* VagasIO — shell lateral único do Portal do Candidato */
 (function () {
   const root = '/candidato/';
+  const icons = {
+    vagas: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5v8.5H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 19v-5h6v5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>',
+    perfil: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 20c.7-3.4 2.9-5.2 6.5-5.2s5.8 1.8 6.5 5.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    entrevistas: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 3v4M16 3v4M4 10h16M8 14h3M8 17h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    favoritos: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+    chat: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+    notificacoes: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2v-4a4.5 4.5 0 0 0-9 0v4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19.5h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    seguranca: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 4.6-2.7 7.7-7 10-4.3-2.3-7-5.4-7-10V6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 12 11 13.5l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
   const links = [
-    ['index.html', '🏠', 'Vagas'],
-    ['painel.html', '👤', 'Meu perfil'],
-    ['entrevistas.html', '📅', 'Entrevistas'],
-    ['favoritos.html', '☆', 'Favoritos'],
-    ['conversas.html', '▢', 'Chat'],
-    ['notificacoes.html', '♧', 'Notificações'],
-    ['seguranca.html', '🔒', 'Segurança']
+    ['index.html', icons.vagas, 'Vagas'],
+    ['painel.html', icons.perfil, 'Meu perfil'],
+    ['entrevistas.html', icons.entrevistas, 'Entrevistas'],
+    ['favoritos.html', icons.favoritos, 'Favoritos'],
+    ['conversas.html', icons.chat, 'Chat'],
+    ['notificacoes.html', icons.notificacoes, 'Notificações'],
+    ['seguranca.html', icons.seguranca, 'Segurança']
   ];
   const current = location.pathname.split('/').pop() || 'index.html';
   const body = document.body;
