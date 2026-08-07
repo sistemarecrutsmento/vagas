@@ -494,7 +494,6 @@
         <nav class="painel-menu">
           <button class="painel-tab ativo" data-tab="cands"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14v15H5z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Minhas candidaturas</button>
           <button class="painel-tab" data-tab="perfil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 20c.7-3.4 2.9-5.2 6.5-5.2s5.8 1.8 6.5 5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Editar perfil</button>
-          <button class="painel-tab" data-tab="senha"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg> Trocar senha</button>
           <button class="painel-tab painel-tab-sair" onclick="logout()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Sair</button>
         </nav>
       </aside>
@@ -635,18 +634,6 @@
           </form>
         </div>
 
-        <!-- ABA: TROCAR SENHA -->
-        <div class="painel-secao" id="painel-secao-senha">
-          <h3 class="painel-titulo">Trocar senha</h3>
-          <form class="perfil-form" onsubmit="event.preventDefault();trocarSenha(this)">
-            <div class="form-group"><label>Senha atual *</label><input type="password" id="senha-atual" required minlength="6"></div>
-            <div class="form-group"><label>Nova senha * (mínimo 6 caracteres)</label><input type="password" id="senha-nova" required minlength="6"></div>
-            <div class="form-group"><label>Confirme a nova senha *</label><input type="password" id="senha-nova-conf" required minlength="6"></div>
-            <div class="perfil-acoes">
-              <button type="submit" class="btn btn-primary">Atualizar senha</button>
-            </div>
-          </form>
-        </div>
       </section>
     </div>
   </div>
@@ -790,6 +777,7 @@ window.fecharDrawer = fecharDrawer;
     }
   </script>
 <script src="/_shared/analytics.js"></script>
+  <script src="candidato-shell.js?v=candidato-shell-3"></script>
 </body>
 </html>
 

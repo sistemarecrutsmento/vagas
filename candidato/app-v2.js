@@ -1892,7 +1892,9 @@ async function carregarMatchCandidato(vagaId) {
       const items = d.detalhes.filter(x => x.pontos > 0);
       det.innerHTML = items.length
         ? items.map(x => `<span>+${escapeHtml(x.criterio)}: ${x.pontos}pts</span>`).join(' &nbsp;|&nbsp; ')
-        : '<span style="color:#999">Perfil incompleto para calcular</span>';
+        : d.perfil_completo
+          ? '<span style="color:#777">Nenhum critério compatível encontrado para esta vaga.</span>'
+          : `<span style="color:#999">Perfil incompleto para calcular${Array.isArray(d.campos_faltantes) && d.campos_faltantes.length ? ` — falta: ${escapeHtml(d.campos_faltantes.join(', '))}` : ''}</span>`;
     }
     const cor = score >= 70 ? 'var(--vinho)' : score >= 40 ? 'var(--vinho-claro)' : 'var(--vermelho)';
     bloco.style.borderLeftColor = cor;

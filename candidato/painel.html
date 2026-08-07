@@ -280,14 +280,11 @@
     <div class="drawer-section">Navegação</div>
     <a href="index.html" class="drawer-link"><span class="icon">🏠</span> Vagas</a>
     <a href="painel.html" class="drawer-link ativo"><span class="icon">👤</span> Meu perfil</a>
-    <a href="candidaturas.html" class="drawer-link"><span class="icon">📋</span> Minhas Candidaturas</a>
     <a href="entrevistas.html" class="drawer-link"><span class="icon">📅</span> Entrevistas</a>
     <a href="favoritos.html" class="drawer-link"><span class="icon">⭐</span> Favoritos</a>
     <a href="conversas.html" class="drawer-link" onclick="fecharDrawer()"><span class="icon">💬</span> Chat</a>
     <a href="notificacoes.html" class="drawer-link"><span class="icon">🔔</span> Notificações</a>
-    <a href="email-preferencias.html" class="drawer-link"><span class="icon">✉️</span> E-mail</a>
     <a href="seguranca.html" class="drawer-link"><span class="icon">🔒</span> Segurança</a>
-    <a href="javascript:void(0)" onclick="abrirEdicaoPerfil();fecharDrawer()" class="drawer-link"><span class="icon">🔑</span> Trocar senha</a>
   </div>
   <div class="drawer-footer">
     <button class="drawer-logout" onclick="logout()" type="button" aria-label="Sair do perfil">🚪 Sair</button>
@@ -358,7 +355,6 @@
         </div>
         <nav class="painel-menu">
           <button class="painel-tab ativo" data-tab="perfil">👤 Editar perfil</button>
-          <button class="painel-tab" data-tab="senha">🔑 Trocar senha</button>
           <button class="painel-tab painel-tab-sair" onclick="logout()">🚪 Sair</button>
         </nav>
       </aside>
@@ -485,17 +481,6 @@
           </form>
         </div>
 
-        <div class="painel-secao" id="painel-secao-senha">
-          <h3 class="painel-titulo">Trocar senha</h3>
-          <form class="perfil-form" onsubmit="event.preventDefault();trocarSenha(this)">
-            <div class="form-group"><label>Senha atual *</label><input type="password" id="senha-atual" required minlength="6"></div>
-            <div class="form-group"><label>Nova senha * (mínimo 6 caracteres)</label><input type="password" id="senha-nova" required minlength="6"></div>
-            <div class="form-group"><label>Confirme a nova senha *</label><input type="password" id="senha-nova-conf" required minlength="6"></div>
-            <div class="perfil-acoes">
-              <button type="submit" class="btn btn-primary">Atualizar senha</button>
-            </div>
-          </form>
-        </div>
       </section>
     </div>
   </div>
@@ -704,5 +689,6 @@ window.fecharDrawer = fecharDrawer;
     }
   </script>
 <script src="../_shared/analytics.js"></script>
+  <script src="candidato-shell.js?v=candidato-shell-3"></script>
 </body>
 </html>

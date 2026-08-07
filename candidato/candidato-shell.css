@@ -1,6 +1,15 @@
 /* VagasIO — padrão único do Portal do Candidato */
 :root { --vagasio-wine: #5f1527; --vagasio-wine-deep: #43101e; --vagasio-line: rgba(95,21,39,.14); }
 
+/* Drawer único injetado em todas as páginas internas */
+body:not(.candidate-home) .drawer-overlay { position: fixed !important; inset: 0 !important; z-index: 998 !important; background: rgba(22,8,13,.42) !important; opacity: 0 !important; visibility: hidden !important; transition: opacity .2s ease, visibility .2s ease !important; }
+body:not(.candidate-home) .drawer-overlay.aberto { opacity: 1 !important; visibility: visible !important; }
+body:not(.candidate-home) aside.drawer { position: fixed !important; top: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 999 !important; transform: translateX(105%) !important; transition: transform .24s ease !important; display: flex !important; flex-direction: column !important; }
+body:not(.candidate-home) aside.drawer.aberto { transform: translateX(0) !important; }
+body:not(.candidate-home) .drawer-body { flex: 1 1 auto !important; overflow-y: auto !important; }
+body:not(.candidate-home) .drawer-section { padding: 24px 20px 10px !important; color: #766d71 !important; font-size: 12px !important; letter-spacing: .08em !important; font-weight: 700 !important; }
+body:not(.candidate-home) .drawer-info h3, body:not(.candidate-home) .drawer-info p { margin: 0 !important; color: #fff !important; }
+
 /* Faixa superior fixa: mesma altura, cor e alinhamento em todas as telas internas */
 body:not(.candidate-home) > header {
   position: sticky !important; top: 0 !important; z-index: 100 !important;
