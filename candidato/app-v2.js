@@ -670,9 +670,16 @@ function preencherFormularioComCurriculo(dados) {
     const compEl = document.getElementById('w2-competencias-importadas'); if (compEl) compEl.value = wizardCompetencias.join('\n');
   }
   const experiencias = Array.isArray(s.experiencias) ? s.experiencias : [];
-  wizardExps = experiencias.filter(e => e && (e.cargo || e.empresa || e.descricao)).map(e => ({
-    cargo: e.cargo || '', empresa: e.empresa || '', inicio: toDate(e.inicio), fim: e.emprego_atual ? null : toDate(e.fim),
-    emprego_atual: !!e.emprego_atual, descricao: e.descricao || ''
+  const normalizarDataExp = value => {
+    const v = String(value || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v.slice(0, 7);
+    if (/^(?:19|20)\d{2}-(?:0[1-9]|1[0-2])$/.test(v) || /^(?:19|20)\d{2}$/.test(v)) return v;
+    return '';
+  };
+  // Contrato interno único: toda entrada parcialmente preenchida continua válida.
+  wizardExps = experiencias.filter(e => e && (e.empresa || e.cargo || e.inicio || e.fim || e.descricao || e.emprego_atual)).map(e => ({
+    empresa: String(e.empresa || ''), cargo: String(e.cargo || ''), inicio: normalizarDataExp(e.inicio),
+    fim: e.emprego_atual ? '' : normalizarDataExp(e.fim), emprego_atual: Boolean(e.emprego_atual), descricao: String(e.descricao || '')
   }));
   wizardRenderExps();
 }
@@ -773,21 +780,32 @@ function wizardRemoverExp(idx) {
   wizardRenderExps();
 }
 
+function wizardAtualizarExpCampo(index, campo, valor) {
+  if (!wizardExps[index]) return;
+  wizardExps[index][campo] = campo === 'emprego_atual' ? Boolean(valor) : String(valor ?? '');
+  if (campo === 'emprego_atual' && wizardExps[index].emprego_atual) wizardExps[index].fim = '';
+}
+
 function wizardRenderExps() {
   const cont = document.getElementById('w5-lista');
   if (!cont) return;
   if (wizardExps.length === 0) {
-    cont.innerHTML = '<p class="muted">Nenhuma experiência adicionada ainda. Você pode adicionar ou pular essa etapa.</p>';
+    cont.innerHTML = '<p class="muted">Nenhuma experiência profissional identificada.</p>';
     return;
   }
   cont.innerHTML = wizardExps.map((e, i) => `
-    <div class="exp-item">
-      <div>
-        <strong>${escapeHtml(e.cargo)}</strong> — ${escapeHtml(e.empresa)}
-        <div class="muted" style="font-size:12px">${escapeHtml(e.inicio || '?')} → ${e.emprego_atual ? 'Atual' : escapeHtml(e.fim || '?')}</div>
-        ${e.descricao ? `<div class="muted" style="font-size:12px;margin-top:5px;line-height:1.4">${escapeHtml(e.descricao)}</div>` : ''}
+    <div class="exp-item" data-experiencia-index="${i}" style="display:block;padding:14px;margin-bottom:12px">
+      <div class="form-row">
+        <div class="form-group"><label for="experiencia-${i}-empresa">Empresa</label><input id="experiencia-${i}-empresa" type="text" value="${escapeHtml(e.empresa)}" oninput="wizardAtualizarExpCampo(${i}, 'empresa', this.value)"></div>
+        <div class="form-group"><label for="experiencia-${i}-cargo">Cargo</label><input id="experiencia-${i}-cargo" type="text" value="${escapeHtml(e.cargo)}" oninput="wizardAtualizarExpCampo(${i}, 'cargo', this.value)"></div>
       </div>
-      <button type="button" class="btn-x" onclick="wizardRemoverExp(${i})" title="Remover">×</button>
+      <div class="form-row">
+        <div class="form-group"><label for="experiencia-${i}-inicio">Início</label><input id="experiencia-${i}-inicio" type="text" inputmode="numeric" placeholder="YYYY-MM ou YYYY" value="${escapeHtml(e.inicio)}" oninput="wizardAtualizarExpCampo(${i}, 'inicio', this.value)"></div>
+        <div class="form-group"><label for="experiencia-${i}-fim">Fim</label><input id="experiencia-${i}-fim" type="text" inputmode="numeric" placeholder="YYYY-MM ou YYYY" value="${escapeHtml(e.fim)}" ${e.emprego_atual ? 'disabled' : ''} oninput="wizardAtualizarExpCampo(${i}, 'fim', this.value)"></div>
+      </div>
+      <label class="check-label"><input id="experiencia-${i}-atual" type="checkbox" ${e.emprego_atual ? 'checked' : ''} onchange="wizardAtualizarExpCampo(${i}, 'emprego_atual', this.checked); wizardRenderExps()"> Emprego atual</label>
+      <div class="form-group"><label for="experiencia-${i}-descricao">Descrição</label><textarea id="experiencia-${i}-descricao" rows="3" style="resize:vertical" oninput="wizardAtualizarExpCampo(${i}, 'descricao', this.value)">${escapeHtml(e.descricao)}</textarea></div>
+      <button type="button" class="btn-x" onclick="wizardRemoverExp(${i})" title="Remover experiência">Remover experiência</button>
     </div>
   `).join('');
 }
