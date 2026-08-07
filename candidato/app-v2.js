@@ -1064,6 +1064,8 @@ function checarAuth() {
 }
 
 function atualizarHeaderUsuario() {
+  // O shell persistente controla o menu lateral; nunca o substitua por ações da página.
+  if (document.getElementById('btn-menu-logo')) return;
   const headerActions = document.getElementById('header-actions');
   if (!headerActions) return;
 
