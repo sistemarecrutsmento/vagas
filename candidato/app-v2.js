@@ -803,7 +803,7 @@ function wizardRenderExps() {
       </div>
       <label class="check-label"><input id="experiencia-${i}-atual" type="checkbox" ${e.emprego_atual ? 'checked' : ''} onchange="wizardAtualizarExpCampo(${i}, 'emprego_atual', this.checked); wizardRenderExps()"> Emprego atual</label>
       <div class="form-group"><label for="experiencia-${i}-descricao">Descrição</label><textarea id="experiencia-${i}-descricao" rows="3" style="resize:vertical" oninput="wizardAtualizarExpCampo(${i}, 'descricao', this.value)">${escapeHtml(e.descricao)}</textarea></div>
-      <button type="button" class="btn-x" onclick="wizardRemoverExp(${i})" title="Remover experiência">Remover experiência</button>
+      <button type="button" class="btn-x" aria-label="Remover experiência" onclick="wizardRemoverExp(${i})" title="Remover experiência">Remover experiência</button>
     </div>
   `).join('');
 }

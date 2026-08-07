@@ -4,6 +4,10 @@
 
   const ROOT = '/candidato/';
   const authenticated = !!localStorage.getItem('candidato_token');
+  // A home pública nunca vira o shell autenticado apenas porque há uma sessão
+  // persistida: isso evitava o segundo wine band e mantinha drawer no visitante.
+  const publicPage = ['index.html', 'vaga.html'].includes((location.pathname.split('/').pop() || 'index.html').toLowerCase());
+  const useShell = authenticated && !publicPage;
   const currentFile = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const titles = {
     index: 'Vagas', painel: 'Meu perfil', perfil: 'Meu perfil', entrevistas: 'Entrevistas',
@@ -36,10 +40,10 @@
   // Visitantes mantêm o cabeçalho público, mas nunca recebem componentes autenticados.
   document.querySelectorAll('body > .drawer, body > .drawer-overlay, body > #drawer, body > #drawer-overlay, body > .btn-menu-logo').forEach(el => el.remove());
   document.querySelectorAll('#sino-fase7, .perfil-card-sino').forEach(el => el.remove());
-  if (!authenticated) return;
+  if (!useShell) return;
 
   // Em páginas autenticadas, remove qualquer implementação antiga antes de inserir a única estrutura oficial.
-  document.querySelectorAll('body > header, body > .subheader, body > .candidato-subheader').forEach(el => el.remove());
+  document.querySelectorAll('body > header, body > .subheader, body > .candidato-subheader, body > .header, body > .topbar').forEach(el => el.remove());
 
   const header = document.createElement('header');
   header.className = 'candidate-header';
