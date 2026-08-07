@@ -114,7 +114,7 @@
         </div>
         <div class="wizard-step-summary" id="wizard-step-summary" aria-live="polite">Etapa 1 de 6</div>
       </div>
-      <button type="button" class="modal-close" aria-label="Fechar cadastro" onclick="fecharModal('cad')">×</button>
+      <button class="modal-close" onclick="fecharModal('cad')">×</button>
     </div>
     <div class="modal-body">
       <div class="signup-intro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 19 6v5c0 4.5-3 7.5-7 10-4-2.5-7-5.5-7-10V6l7-3Z"></path><path d="m9 12 2 2 4-4"></path></svg><span>Seu cadastro é gratuito. Complete seu perfil para encontrar oportunidades mais alinhadas ao que você busca.</span></div>
@@ -601,7 +601,7 @@
   <div class="modal modal-xlarge">
     <div class="modal-header">
       <h2>${notifIcon('bell')} Notificações</h2>
-      <button type="button" class="modal-close" aria-label="Fechar notificações" onclick="fecharModal('notificacoes')">×</button>
+      <button class="modal-close" onclick="fecharModal('notificacoes')">×</button>
     </div>
     <div class="notif-tabs">
       <button class="notif-tab ativo" data-tab="aguardando" onclick="notifTrocarTab('aguardando', this)">

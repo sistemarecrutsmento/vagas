@@ -22,7 +22,7 @@
     input[type=password]{width:100%;padding:10px 12px;border:1px solid var(--borda);border-radius:8px;font-size:14px;outline:none;}
     input:focus{border-color:var(--vinho);}
     .row{display:flex;gap:12px;flex-wrap:wrap;}
-    .row .f{flex:1 1 180px;min-width:0;}
+    .row .f{flex:1;min-width:200px;}
     .btn{cursor:pointer;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;transition:.15s;}
     .btn-p{background:var(--vinho);color:#fff;}
     .btn-p:hover{background:var(--vinho-claro);}
@@ -51,7 +51,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v13">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v11">
 </head>
 <body>
 
@@ -115,17 +115,10 @@ let TOKEN = localStorage.getItem('candidato_token') || '';
 let REFRESH = localStorage.getItem('candidato_refresh') || '';
 let refreshPendente = null;
 
-async function req(method, path, body, retried = false) {
+async function req(method, path, body) {
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` };
-  const ctrl = new AbortController();
-  const timeoutId = setTimeout(() => ctrl.abort(), 15000);
-  let r;
-  try {
-    r = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined, signal: ctrl.signal });
-  } finally {
-    clearTimeout(timeoutId);
-  }
-  if (r.status === 401 && REFRESH && !refreshPendente && !retried) {
+  const r = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  if (r.status === 401 && REFRESH && !refreshPendente) {
     refreshPendente = fetch(API + '/api/auth/refresh', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken: REFRESH })
@@ -138,7 +131,7 @@ async function req(method, path, body, retried = false) {
       refreshPendente = null;
     });
     await refreshPendente;
-    return req(method, path, body, true);
+    return req(method, path, body);
   }
   return r;
 }
@@ -169,27 +162,23 @@ async function trocarSenha() {
 
 // ── Sessões ──
 async function carregarSessoes() {
+  const r = await req('GET', '/api/auth/sessoes');
+  if (!r.ok) return;
+  const d = await r.json();
   const el = document.getElementById('lista-sessoes');
-  try {
-    const r = await req('GET', '/api/auth/sessoes');
-    if (!r.ok) throw new Error('Não foi possível carregar as sessões.');
-    const d = await r.json();
-    if (!d.sessoes?.length) { el.innerHTML = '<p style="font-size:14px;color:#888;">Nenhuma sessão ativa.</p>'; return; }
-    el.innerHTML = d.sessoes.map(s => {
-      const dt = new Date(s.criado_em).toLocaleString('pt-BR');
-      const ua = s.user_agent || 'Dispositivo desconhecido';
-      const ip = s.ip || '';
-      return `<div class="sessao-item">
-        <div class="sessao-info">
-          <strong>${ua.length>60?ua.slice(0,60)+'…':ua}</strong>
-          <span>${ip ? ip + ' · ' : ''}${dt}</span>
-        </div>
-        <button class="btn btn-s" style="font-size:12px;padding:6px 12px;" onclick="encerrarSessao(${s.id})">Encerrar</button>
-      </div>`;
-    }).join('');
-  } catch (e) {
-    el.innerHTML = '<p style="font-size:14px;color:#9a6570;">Não foi possível carregar as sessões agora.</p>';
-  }
+  if (!d.sessoes?.length) { el.innerHTML = '<p style="font-size:14px;color:#888;">Nenhuma sessão ativa.</p>'; return; }
+  el.innerHTML = d.sessoes.map(s => {
+    const dt = new Date(s.criado_em).toLocaleString('pt-BR');
+    const ua = s.user_agent || 'Dispositivo desconhecido';
+    const ip = s.ip || '';
+    return `<div class="sessao-item">
+      <div class="sessao-info">
+        <strong>${ua.length>60?ua.slice(0,60)+'…':ua}</strong>
+        <span>${ip ? ip + ' · ' : ''}${dt}</span>
+      </div>
+      <button class="btn btn-s" style="font-size:12px;padding:6px 12px;" onclick="encerrarSessao(${s.id})">Encerrar</button>
+    </div>`;
+  }).join('');
 }
 
 async function encerrarSessao(id) {
@@ -256,6 +245,6 @@ carregarSessoes();
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-v13"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v11"></script>
 </body>
 </html>

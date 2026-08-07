@@ -81,7 +81,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v13">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v11">
 </head>
 <body>
 
@@ -100,7 +100,7 @@
   <div id="content" style="display:none;"></div>
 </div>
 
-<script src="/candidato/auth-helper.js?v=portal-auth-fix-1613"></script>
+<script src="/_shared/auth-helper.js"></script>
 <script>
 setStorageKeys('candidato_token', 'candidato_refresh');
 
@@ -153,7 +153,7 @@ function renderEvento(ev) {
 
 async function carregar() {
   const tk = authTokens.getAccess();
-  if (!tk) { window.location.href = 'index.html'; return; }
+  if (!tk) { window.location.href = 'login.html'; return; }
   if (!cid) { document.getElementById('loading').innerHTML = '<p>ID inválido</p>'; return; }
 
   try {
@@ -253,6 +253,6 @@ window.addEventListener('DOMContentLoaded', async () => {
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-v13"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v11"></script>
 </body>
 </html>

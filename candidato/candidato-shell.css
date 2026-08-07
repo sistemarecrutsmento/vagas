@@ -11,6 +11,13 @@
 }
 
 body.drawer-aberto { overflow: hidden; }
+/* O conteúdo autenticado roda no documento filho para manter um shell único
+   sem reescrever os scripts e IDs já usados pelas páginas internas. */
+body:not(.candidate-shell-frame) > .candidate-shell-frame {
+  display: block; width: 100%; min-height: calc(100vh - 130px); border: 0; background: transparent;
+}
+body.candidate-shell-frame { min-height: 100vh; }
+body.candidate-shell-frame > script, body.candidate-shell-frame > link { display: none; }
 body > header.candidate-header {
   position: sticky; top: 0; z-index: 100; min-height: 66px; width: 100%;
   background: var(--vagasio-wine); color: #fff; box-shadow: 0 3px 18px rgba(39,10,19,.18);

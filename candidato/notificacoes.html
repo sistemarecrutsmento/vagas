@@ -35,7 +35,7 @@ main { max-width: 800px; margin: 24px auto; padding: 0 24px; }
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v13">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v11">
 </head>
 <body>
 
@@ -79,7 +79,7 @@ function render() {
   }
   feed.innerHTML = cache.map(n => `
     <div class="notif ${n.lida_em ? '' : 'nao-lida'}" onclick="abrir(${n.id}, '${n.referencia_tipo || ''}', ${n.referencia_id || 'null'})">
-      <p class="titulo">${escape(n.titulo)}${!n.lida_em ? '<span class="badge" style="margin-left:8px;vertical-align:middle">NOVA</span>' : ''}</p>
+      <p class="titulo">${escape(n.titulo)}${!n.lida_em ? '<span class="badge">NOVA</span>' : ''}</p>
       ${n.mensagem ? `<p class="mensagem">${escape(n.mensagem)}</p>` : ''}
       <div class="meta">${formatarData(n.criada_em)} · ${n.tipo}</div>
     </div>
@@ -130,6 +130,6 @@ setInterval(atualizar, 60_000);
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-v13"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v11"></script>
 </body>
 </html>

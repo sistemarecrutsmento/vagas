@@ -120,7 +120,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v13">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v11">
 </head>
 <body>
 
@@ -161,11 +161,8 @@ if (!TOKEN) location.href = 'index.html';
 
 // ============== LOAD ==============
 async function carregarCandidatura() {
-  const ctrl = new AbortController();
-  const timeoutId = setTimeout(() => ctrl.abort(), 15000);
   try {
-    const r = await fetch(`${API}/api/candidato/candidaturas`, { headers: { Authorization: `Bearer ${TOKEN}` }, signal: ctrl.signal });
-    clearTimeout(timeoutId);
+    const r = await fetch(`${API}/api/candidato/candidaturas`, { headers: { Authorization: `Bearer ${TOKEN}` }});
     if (!r.ok) throw new Error('Falha ao carregar');
     const data = await r.json();
     // Pega a primeira candidatura (a que está na etapa de documentos)
@@ -177,24 +174,21 @@ async function carregarCandidatura() {
     candidaturaId = cand.id;
     await carregarDocumentos();
   } catch (e) {
-    clearTimeout(timeoutId);
-    document.getElementById('conteudo').innerHTML = `<div class="card"><p>Não foi possível carregar seus documentos agora. Tente novamente.</p></div>`;
+    document.getElementById('conteudo').innerHTML = `<div class="card"><p>Erro: ${e.message}</p></div>`;
   }
 }
 
 async function carregarDocumentos() {
-  const ctrl = new AbortController();
-  const timeoutId = setTimeout(() => ctrl.abort(), 15000);
   try {
-    const r = await fetch(`${API}/api/candidatura/${candidaturaId}/documentos`, { signal: ctrl.signal, headers: { Authorization: `Bearer ${TOKEN}` } });
-    clearTimeout(timeoutId);
+    const r = await fetch(`${API}/api/candidatura/${candidaturaId}/documentos`, {
+      headers: { Authorization: `Bearer ${TOKEN}` }
+    });
     const data = await r.json();
     obrigatorios = data.obrigatorios || [];
     (data.documentos || []).forEach(d => docsExistentes[d.tipo] = d);
     render();
   } catch (e) {
-    clearTimeout(timeoutId);
-    document.getElementById('conteudo').innerHTML = '<div class="card"><p>Não foi possível carregar os documentos agora. Tente novamente.</p></div>';
+    document.getElementById('conteudo').innerHTML = `<div class="card"><p>Erro: ${e.message}</p></div>`;
   }
 }
 
@@ -208,7 +202,7 @@ function render() {
   const total = obrigatorios.length;
   document.getElementById('docs-aprovados').textContent = aprovados;
   document.getElementById('docs-total').textContent = total;
-  document.getElementById('progresso-fill').style.width = (total ? (aprovados / total) * 100 : 0) + '%';
+  document.getElementById('progresso-fill').style.width = ((aprovados / total) * 100) + '%';
 
   // Cabeçalho de alerta
   const reprovados = Object.values(docsExistentes).filter(d => d.status === 'reprovado' || d.status === 'retornado');
@@ -218,7 +212,7 @@ function render() {
     alerta = `<div class="alerta aviso">📨 <div><strong>${retornados.length} documento(s) precisa(m) ser reenviado(s).</strong> O recrutador pediu ajustes — veja a mensagem abaixo em cada item e reenvie.</div></div>`;
   } else if (reprovados.length > 0) {
     alerta = `<div class="alerta aviso">⚠️ <div><strong>${reprovados.length} documento(s) precisa(m) ser reenviado(s).</strong> Veja a justificativa do recrutador abaixo em cada item.</div></div>`;
-  } else if (total > 0 && aprovados === total) {
+  } else if (aprovados === total) {
     alerta = `<div class="alerta sucesso">✅ <div><strong>Tudo certo!</strong> Todos os documentos foram aprovados. Aguarde o próximo passo do recrutador.</div></div>`;
   } else {
     alerta = `<div class="alerta info">ℹ️ <div>Preencha os campos de texto e anexe os arquivos pedidos. Você pode reenviar quantas vezes precisar até a aprovação do recrutador.</div></div>`;
@@ -271,7 +265,7 @@ function renderDoc(doc) {
     html += `<label for="file-${doc.tipo}">📤 ${ex ? 'Trocar arquivo' : 'Escolher arquivo'}</label>`;
     html += `<input type="file" id="file-${doc.tipo}" accept="image/*,application/pdf" onchange="arquivoEscolhido('${doc.tipo}', this)">`;
     html += `<span class="arq-nome" id="arq-nome-${doc.tipo}">${arqLabel}</span>`;
-    if (ex) html += `<button type="button" class="arq-limpar" aria-label="Remover arquivo" onclick="arquivoLimpar('${doc.tipo}')" title="Remover">×</button>`;
+    if (ex) html += `<button type="button" class="arq-limpar" onclick="arquivoLimpar('${doc.tipo}')" title="Remover">×</button>`;
     html += `</div>`;
     if (ex && ex.arquivo_url) {
       html += `<div class="doc-extra"><a href="${ex.arquivo_url}" target="_blank" rel="noopener">👁️ Ver arquivo enviado</a></div>`;
@@ -456,7 +450,10 @@ async function enviar() {
   try {
     const r = await fetch(`${API}/api/candidatura/${candidaturaId}/documentos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${TOKEN}`
+      },
       body: JSON.stringify({ documentos: docs })
     });
     const data = await r.json();
@@ -501,6 +498,6 @@ carregarCandidatura();
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-v13"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v11"></script>
 </body>
 </html>

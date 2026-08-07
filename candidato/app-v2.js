@@ -803,7 +803,7 @@ function wizardRenderExps() {
       </div>
       <label class="check-label"><input id="experiencia-${i}-atual" type="checkbox" ${e.emprego_atual ? 'checked' : ''} onchange="wizardAtualizarExpCampo(${i}, 'emprego_atual', this.checked); wizardRenderExps()"> Emprego atual</label>
       <div class="form-group"><label for="experiencia-${i}-descricao">Descrição</label><textarea id="experiencia-${i}-descricao" rows="3" style="resize:vertical" oninput="wizardAtualizarExpCampo(${i}, 'descricao', this.value)">${escapeHtml(e.descricao)}</textarea></div>
-      <button type="button" class="btn-x" aria-label="Remover experiência" onclick="wizardRemoverExp(${i})" title="Remover experiência">Remover experiência</button>
+      <button type="button" class="btn-x" onclick="wizardRemoverExp(${i})" title="Remover experiência">Remover experiência</button>
     </div>
   `).join('');
 }
@@ -922,16 +922,12 @@ async function loginEntrar(btn) {
   const oldText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Entrando...';
-  const ctrl = new AbortController();
-  const timeoutId = setTimeout(() => ctrl.abort(), 20000);
   try {
     const r = await fetch(API + '/api/candidato/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, senha }),
-      signal: ctrl.signal
+      body: JSON.stringify({ email, senha })
     });
-    clearTimeout(timeoutId);
     const data = await r.json();
     if (r.ok) {
       tokenCandidato = data.token;
@@ -954,7 +950,6 @@ async function loginEntrar(btn) {
   } catch (e) {
     showCandidateFeedback('Não foi possível entrar agora. Verifique sua conexão e tente novamente.', 'error', 'login-feedback');
   } finally {
-    clearTimeout(timeoutId);
     btn.disabled = false;
     btn.textContent = oldText;
   }
@@ -1071,9 +1066,6 @@ function checarAuth() {
 function atualizarHeaderUsuario() {
   const headerActions = document.getElementById('header-actions');
   if (!headerActions) return;
-  // O shell oficial é a única fonte do menu autenticado. Não o substitua
-  // pelo botão de completar cadastro nem remova o botão da drawer.
-  if (document.getElementById('btn-menu-logo')) return;
 
   if (tokenCandidato && cadastroCompleto) {
     // Logado: deixa apenas o menu da conta no lado direito.

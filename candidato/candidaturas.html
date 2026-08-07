@@ -74,7 +74,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v13">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v11">
 </head>
 <body>
 
@@ -100,7 +100,7 @@
   </div>
 </div>
 
-<script src="/candidato/auth-helper.js?v=portal-auth-fix-1613"></script>
+<script src="/_shared/auth-helper.js"></script>
 <script>
 setStorageKeys('candidato_token', 'candidato_refresh');
 
@@ -170,12 +170,12 @@ function renderCard(c) {
 
 async function carregar() {
   const tk = authTokens.getAccess();
-  if (!tk) { window.location.href = 'index.html'; return; }
+  if (!tk) { window.location.href = 'login.html'; return; }
 
   try {
     const r = await authFetch(`${API}/api/candidato/candidaturas`);
     if (!r.ok) {
-      if (r.status === 401) { window.location.href = 'index.html'; return; }
+      if (r.status === 401) { window.location.href = 'login.html'; return; }
       throw new Error('Falha ao carregar');
     }
     const data = await r.json();
@@ -224,6 +224,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   </script>
 <script src="../_shared/analytics.js"></script>
-  <script src="candidato-shell.js?v=candidato-shell-v13"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v11"></script>
 </body>
 </html>
