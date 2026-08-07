@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VagasIO — Vagas da empresa</title>
+</head>
+<body style="font-family:Arial,sans-serif;text-align:center;padding:48px;color:#722F37">
+  <p>Carregando vagas...</p>
+  <script>
+    // GitHub Pages usa este fallback para /candidato/{slug}/.
+    // O aplicativo é sempre carregado do portal universal: uma única fonte de código.
+    fetch('/candidato/index.html', { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error('portal indisponível'); return r.text(); })
+      .then(html => { document.open(); document.write(html); document.close(); })
+      .catch(() => { document.body.innerHTML = '<p>Não foi possível carregar o portal de vagas.</p>'; });
+  </script>
+</body>
+</html>
