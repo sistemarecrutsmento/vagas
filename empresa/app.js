@@ -1002,7 +1002,7 @@ async function abrirConviteTalento(candidatoId){
   try{
     const r=await fetch(API+'/api/empresa/vagas',{headers:{'Authorization':'Bearer '+token}}),d=await r.json();
     if(!r.ok)throw new Error(d.erro||'Não foi possível carregar as vagas');
-    const vagas=(d.vagas||[]).filter(v=>v.status==='publicada'||v.status==='aberta'||!v.status);
+    const vagas=(d.vagas||[]).filter(v=>!['arquivada','encerrada','cancelada','fechada'].includes(String(v.status||'').toLowerCase()));
     select.innerHTML='<option value="">Selecione a vaga para o convite...</option>'+vagas.map(v=>`<option value="${v.id}">${escapeHtml(v.titulo||'Vaga')} · ${escapeHtml(v.cidade||'Local não informado')}</option>`).join('');
     if(!vagas.length)select.innerHTML='<option value="">Nenhuma vaga publicada disponível</option>';
   }catch(e){select.innerHTML='<option value="">Não foi possível carregar as vagas</option>';alerta.innerHTML=`<div class="alert alert-erro">${escapeHtml(e.message||'Tente novamente.')}</div>`;}
