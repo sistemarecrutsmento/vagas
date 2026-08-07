@@ -186,9 +186,10 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
 
 /* Mobile is a separate composition, not a compressed desktop. */
 @media (max-width:640px) {
-  .candidate-header { background: var(--wine); border-bottom-color: rgba(255,255,255,.14); box-shadow: 0 3px 18px rgba(39,10,19,.18); }
+  .candidate-header { padding: 6px 0 !important; background: var(--wine); border-bottom-color: rgba(255,255,255,.14); box-shadow: 0 3px 18px rgba(39,10,19,.18); }
   .candidate-header .container, .candidate-hero .container, .candidate-filters .container, .candidate-vagas-section .container, .candidate-benefits .container, .candidate-footer .container { padding-left: 16px; padding-right: 16px; }
-  .candidate-header .header-inner { min-height: 54px; gap: 7px; }
+  .candidate-header .header-inner { min-height: 54px; gap: 7px; flex-direction: row !important; justify-content: space-between; }
+  .candidate-header .btn-menu-logo { position: static; transform: none; }
   .brand-logo { filter: brightness(0) invert(1); }
   .candidate-header .btn-outline { color: #fff; background: transparent; border-color: rgba(255,255,255,.46); }
   .candidate-header .btn-outline:hover { background: rgba(255,255,255,.12); border-color: #fff; }
