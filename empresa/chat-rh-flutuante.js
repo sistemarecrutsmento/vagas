@@ -1,7 +1,7 @@
 // ============================================
-// CHAT FLUTUANTE - CHAT COM O RH (empresa)
-// Bolinha DOURADA, lista conversas com RH
-// Disponível desde a ETAPA 1 (inscrição)
+// CHAT FLUTUANTE - CHAT COM CANDIDATOS (empresa)
+// Bolinha dourada, lista e abre as conversas reais da candidatura
+// Usa a API unificada de chat empresa ↔ candidato.
 // ============================================
 
 (function() {
@@ -113,7 +113,7 @@
     <div class="cr-head">
       <button class="cr-voltar" id="cr-voltar-btn" style="display:none" onclick="window.__crChat.voltar()">‹</button>
       <div class="cr-head-titulo">
-        <h3 id="cr-head-titulo">💬 Chat com o RH</h3>
+        <h3 id="cr-head-titulo">💬 Chat com candidatos</h3>
         <p id="cr-head-sub">Selecione uma conversa</p>
       </div>
       <button class="cr-head-fechar" onclick="window.__crChat.fechar()">×</button>
@@ -123,7 +123,7 @@
       <div class="cr-vazio"><div class="icon">💬</div><p>Carregando...</p></div>
     </div>
     <div class="cr-input" id="cr-input-area" style="display:none">
-      <textarea id="cr-input" placeholder="Digite sua mensagem para o RH…" rows="1"></textarea>
+      <textarea id="cr-input" placeholder="Digite sua mensagem para o candidato…" rows="1"></textarea>
       <button class="cr-send-btn" id="cr-send-btn" onclick="window.__crChat.enviar()">➤</button>
     </div>
   `;
@@ -138,8 +138,8 @@
   // === API ===
   async function carregarConversas() {
     try {
-      const r = await apiFetch(API + '/api/empresa/chat-rh-lista');
-      if (!r.ok) return;
+      const r = await apiFetch(API + '/api/empresa/chat');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
       const data = await r.json();
       conversas = data.conversas || [];
       renderFab();
@@ -157,13 +157,13 @@
       const c = conversas[0];
       const ini = iniciais(c.candidato_nome);
       fabContainer.innerHTML = `
-        <button class="crfab-bolinha" onclick="window.__crChat.toggle()" title="Chat com RH: ${escapeHtml(c.candidato_nome)}">
+        <button class="crfab-bolinha" onclick="window.__crChat.toggle()" title="Chat com candidato: ${escapeHtml(c.candidato_nome)}">
           <span class="crfab-iniciais">${ini}</span>
           ${parseInt(c.nao_lidas || 0) > 0 ? `<span class="crfab-badge">${c.nao_lidas > 9 ? '9+' : c.nao_lidas}</span>` : ''}
         </button>`;
     } else {
       fabContainer.innerHTML = `
-        <button class="crfab-bolinha" onclick="window.__crChat.toggle()" title="${conversas.length} conversas com o RH">
+        <button class="crfab-bolinha" onclick="window.__crChat.toggle()" title="${conversas.length} conversas com candidatos">
           <span class="crfab-iniciais">💬</span>
           ${totalNaoLidas > 0 ? `<span class="crfab-badge">${totalNaoLidas > 9 ? '9+' : totalNaoLidas}</span>` : ''}
         </button>`;
@@ -183,25 +183,25 @@
     document.getElementById('cr-msg-area').style.display = 'none';
     document.getElementById('cr-input-area').style.display = 'none';
     document.getElementById('cr-voltar-btn').style.display = 'none';
-    document.getElementById('cr-head-titulo').textContent = '💬 Chat com o RH';
+    document.getElementById('cr-head-titulo').textContent = '💬 Chat com candidatos';
     document.getElementById('cr-head-sub').textContent = conversas.length + ' conversa(s)';
     const lista = document.getElementById('cr-lista');
     if (conversas.length === 0) {
-      lista.innerHTML = '<div class="cr-vazio"><div class="icon">💬</div><p>Nenhuma conversa com o RH ainda.</p></div>';
+      lista.innerHTML = '<div class="cr-vazio"><div class="icon">💬</div><p>Nenhuma conversa com candidatos ainda.</p></div>';
       return;
     }
     lista.innerHTML = conversas.map(c => {
       const ini = iniciais(c.candidato_nome);
       const naoLidas = parseInt(c.nao_lidas || 0);
-      const ehMeu = c.ultimo_remetente_tipo === 'empresa';
+      const ehMeu = c.ultimo_autor_tipo === 'empresa';
       return `
         <div class="cr-conv" onclick="window.__crChat.abrir(${c.candidatura_id})">
           <div class="cr-conv-topo">
             <span class="cr-conv-nome">${ini} ${escapeHtml(c.candidato_nome)}</span>
-            <span class="cr-conv-data">${formatarData(c.ultima_data)}</span>
+            <span class="cr-conv-data">${formatarData(c.ultima_msg_em)}</span>
           </div>
           <div class="cr-conv-vaga">${escapeHtml(c.vaga_titulo || '')}</div>
-          <div class="cr-conv-msg"><strong>${ehMeu ? 'Você: ' : ''}</strong>${escapeHtml(c.ultima_mensagem || '')}${naoLidas > 0 ? `<span class="cr-conv-badge">${naoLidas} nova(s)</span>` : ''}</div>
+          <div class="cr-conv-msg"><strong>${ehMeu ? 'Você: ' : ''}</strong>${escapeHtml(c.ultima_msg || '')}${naoLidas > 0 ? `<span class="cr-conv-badge">${naoLidas} nova(s)</span>` : ''}</div>
         </div>
       `;
     }).join('');
@@ -214,20 +214,20 @@
     document.getElementById('cr-head-titulo').textContent = c.candidato_nome || 'Candidato';
     document.getElementById('cr-head-sub').textContent = c.vaga_titulo || '';
     try {
-      const r = await apiFetch(API + '/api/empresa/candidatura/' + conversaAtiva + '/chat');
-      if (!r.ok) return;
+      const r = await apiFetch(API + '/api/empresa/chat/' + conversaAtiva);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
       const data = await r.json();
       const msgs = data.mensagens || [];
       const area = document.getElementById('cr-msg-area');
       area.innerHTML = msgs.map(m => {
-        const cls = m.remetente_tipo === 'empresa' ? 'empresa' : 'rh';
-        const ini = iniciais(m.remetente_nome);
+        const cls = m.autor_tipo === 'empresa' ? 'empresa' : 'rh';
+        const ini = iniciais(m.autor_nome);
         return `
           <div class="cr-msg ${cls}">
             <div class="cr-msg-av ${cls}">${ini}</div>
             <div class="cr-msg-balao">
-              <div class="cr-msg-conteudo">${escapeHtml(m.mensagem)}</div>
-              <div class="cr-msg-meta">${escapeHtml(m.remetente_nome)} • ${formatarData(m.criado_em, true)}</div>
+              <div class="cr-msg-conteudo">${escapeHtml(m.texto)}</div>
+              <div class="cr-msg-meta">${escapeHtml(m.autor_nome)} • ${formatarData(m.criado_em, true)}</div>
             </div>
           </div>
         `;
@@ -235,6 +235,7 @@
       area.scrollTop = area.scrollHeight;
       c.nao_lidas = 0;
       renderFab();
+      apiFetch(API + '/api/empresa/chat/' + conversaAtiva + '/lidas', { method: 'PATCH' }).catch(() => {});
     } catch (e) { console.error('[cr-chat] carregarMensagens', e); }
   }
 
@@ -246,10 +247,10 @@
     const btn = document.getElementById('cr-send-btn');
     btn.disabled = true;
     try {
-      const r = await apiFetch(API + '/api/empresa/candidatura/' + conversaAtiva + '/chat', {
+      const r = await apiFetch(API + '/api/empresa/chat/' + conversaAtiva + '/mensagens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mensagem: txt })
+        body: JSON.stringify({ texto: txt })
       });
       if (r.ok) {
         inp.value = '';
