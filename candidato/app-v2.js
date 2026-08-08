@@ -499,6 +499,7 @@ function abrirDetalhes(id) {
       const bm = document.getElementById('bloco-match');
       if (bm && !tokenCandidato) bm.style.display = 'none';
       document.querySelectorAll('#modal-detalhes .det-accordion-toggle').forEach(t => t.setAttribute('aria-expanded', 'true'));
+      document.body.classList.add('detalhes-aberto');
       document.getElementById('modal-detalhes').classList.add('aberto');
       if (window.top !== window.self) window.parent.postMessage({ type: 'candidate-modal', open: true }, '*');
       // Analytics: vaga visualizada
@@ -614,7 +615,10 @@ function abrirModal(id) {
 function fecharModal(id) {
   const modal = document.getElementById('modal-' + id);
   if (modal) modal.classList.remove('aberto');
-  if (id === 'detalhes' && window.top !== window.self) window.parent.postMessage({ type: 'candidate-modal', open: false }, '*');
+  if (id === 'detalhes') {
+    document.body.classList.remove('detalhes-aberto');
+    if (window.top !== window.self) window.parent.postMessage({ type: 'candidate-modal', open: false }, '*');
+  }
 }
 
 // ===== WIZARD DE CADASTRO (4 ETAPAS) =====
