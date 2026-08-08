@@ -1,12 +1,8 @@
 // Chat da empresa com candidatos — API unificada de candidaturas.
 (function () {
   'use strict';
-  function boot() {
-  if (!document.getElementById('app')?.classList.contains('logado')) return;
   const token = () => localStorage.getItem('empresa_token') || '';
-  let sessionValid = false;
-  try { const raw = token(), payload = raw ? JSON.parse(atob(raw.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))) : null; sessionValid = !!raw && (!payload?.exp || payload.exp * 1000 > Date.now()); } catch (_) { sessionValid = false; }
-  if (!sessionValid) return;
+  if (!token()) return;
   const API = 'https://recrutamento-api-novo.onrender.com';
   const apiFetch = (url, opts = {}) => {
     if (typeof window.authFetch === 'function') return window.authFetch(url, opts);
@@ -52,6 +48,4 @@
   function toggle(){aberto=!aberto;win.classList.toggle('aberto',aberto);if(aberto){renderList();carregar();}}
   fab.addEventListener('click',toggle); els.close.addEventListener('click',()=>{aberto=false;win.classList.remove('aberto');}); els.back.addEventListener('click',renderList); els.send.addEventListener('click',enviar); els.text.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviar();}});
   window.__ccChat={toggle,abrir,carregar}; carregar(); setInterval(carregar,30000); setInterval(()=>{if(aberto&&ativa)abrir(ativa);},12000);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
 })();

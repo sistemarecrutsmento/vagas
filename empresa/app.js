@@ -14,12 +14,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     try { await window.authInit(); } catch (_) {}
   }
   const saved = localStorage.getItem('empresa_token');
-  let sessionOk = false;
   if (saved) {
-    try { const payload = JSON.parse(atob(saved.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); sessionOk = !payload.exp || payload.exp * 1000 > Date.now(); } catch (_) { sessionOk = false; }
+    token = saved;
+    mostrarApp();
   }
-  if (saved && sessionOk) { token = saved; mostrarApp(); }
-  else if (saved) { localStorage.removeItem('empresa_token'); localStorage.removeItem('empresa_refresh'); }
 });
 
 // ===== AUTH =====

@@ -41,12 +41,6 @@
 
     // Se a request tem Authorization manual, deixa o authFetch cuidar
     // (ele já adiciona + faz auto-refresh)
-    // Login e refresh são endpoints públicos: nunca podem ser interceptados
-    // pelo authFetch, senão uma tentativa de login pode entrar no fluxo de
-    // refresh de uma sessão antiga e ser redirecionada antes de concluir.
-    if (apiUrl.includes('/api/auth/login-empresa') || apiUrl.includes('/api/auth/refresh')) {
-      return originalFetch(url, opts);
-    }
     if (apiUrl.includes('/api/')) {
       return window.authFetch(apiUrl, opts);
     }
