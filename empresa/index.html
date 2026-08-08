@@ -1085,7 +1085,7 @@
         <div class="form-group"><label>Salário máx.</label><input id="v-salario-max" type="number" placeholder="0"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Filial direcionada</label><select id="v-filiais" multiple size="3" aria-describedby="v-filiais-ajuda"></select><small id="v-filiais-ajuda" style="display:block;color:#777;margin-top:4px">Selecione uma ou mais Filiais. Elas verão apenas esta vaga.</small></div>
+        <div class="form-group"><label>Filial direcionada</label><select id="v-filiais" aria-describedby="v-filiais-ajuda"><option value="">Carregando Filiais...</option></select><small id="v-filiais-ajuda" style="display:block;color:#777;margin-top:4px">Escolha a Filial responsável por esta vaga.</small></div>
         <div class="form-group"><label>Tipo de contrato</label>
           <select id="v-tipo"><option>CLT</option><option>PJ</option><option>Estágio</option><option>Temporário</option></select>
         </div>
@@ -1156,6 +1156,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-sec" onclick="fecharModal('curriculo')">Fechar</button>
+      <button class="btn btn-primary" type="button" onclick="abrirConviteTalento(window.__curriculoConviteId)">Convidar candidato</button>
     </div>
   </div>
 </div>
@@ -1179,7 +1180,7 @@
 
 <script src="auth-helper.js?v=empresa-admin-restore2"></script>
 <script src="empresa-auth-patch.js?v=empresa-admin-restore2"></script>
-<script src="app.js?v=empresa-rbac-7"></script>
+<script src="app.js?v=filial-ui-1"></script>
 <script src="chat-rh-flutuante.js?v=empresa-rh-chat-2"></script>
 <script src="chat-candidatos-flutuante.js?v=empresa-candidato-chat-1"></script>
 </body>

@@ -735,7 +735,7 @@ async function carregarFiliaisVaga(selecionadas = []) {
     const r = await fetch(API + '/api/empresa/usuarios', { headers: { 'Authorization': 'Bearer ' + token } });
     const d = await r.json();
     const filiais = (d.usuarios || []).filter(u => u.role === 'viewer' && u.ativo !== false);
-    select.innerHTML = filiais.length ? filiais.map(u => `<option value="${Number(u.id)}" ${selecionadas.map(Number).includes(Number(u.id)) ? 'selected' : ''}>${escapeHtml(u.nome || u.email)}</option>`).join('') : '<option disabled>Nenhuma Filial cadastrada</option>';
+    select.innerHTML = '<option value="">Sem Filial direcionada</option>' + (filiais.length ? filiais.map(u => `<option value="${Number(u.id)}" ${selecionadas.map(Number).includes(Number(u.id)) ? 'selected' : ''}>${escapeHtml(u.nome || u.email)}</option>`).join('') : '<option disabled>Nenhuma Filial cadastrada</option>');
   } catch (_) { select.innerHTML = '<option disabled>Não foi possível carregar as Filiais</option>'; }
 }
 function filiaisSelecionadasVaga() { return [...(document.getElementById('v-filiais')?.selectedOptions || [])].map(o => Number(o.value)).filter(Number.isInteger); }
@@ -1146,6 +1146,7 @@ async function abrirCurriculo(id) {
   const body = document.getElementById('curriculo-body');
   const titulo = document.getElementById('curriculo-titulo');
   body.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+  window.__curriculoConviteId = Number(id);
   titulo.textContent = '📄 Currículo do Candidato';
   try {
     const r = await fetch(API + '/api/empresa/candidatos/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
