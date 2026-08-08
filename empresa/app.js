@@ -28,8 +28,8 @@ async function fazerLogin() {
       body: JSON.stringify({ email, senha })
     });
     const data = await r.json();
-    if (r.ok && data.requer_2fa) {
-      window.location.href = 'login.html?next=index.html';
+    if (r.ok && data.requer_2fa && data.pending_token) {
+      mostrarLogin2fa(data.pending_token);
       return;
     }
     if (r.ok && data.token) {
@@ -54,8 +54,48 @@ async function fazerLogin() {
 }
 
 function sair() {
-  localStorage.removeItem('empresa_token');
+  // Revoga o refresh token no backend e limpa access + refresh localmente.
+  // O logout anterior removia apenas empresa_token; o authInit o renovava
+  // imediatamente e o usuário continuava logado.
+  if (typeof window.authLogout === 'function') {
+    window.authLogout();
+    return;
+  }
+  ['empresa_token', 'empresa_refresh', 'empresa_usuario'].forEach(k => localStorage.removeItem(k));
   location.reload();
+}
+
+function mostrarLogin2fa(pendingToken) {
+  const card = document.querySelector('#login-page .login-card');
+  if (!card) return;
+  card.innerHTML = `<h1>🔐 Verificação em duas etapas</h1>
+    <p class="sub">Digite o código do seu aplicativo autenticador ou um código de backup.</p>
+    <div id="alert-login"></div>
+    <div class="form-group"><label>Código</label><input type="text" id="login-2fa-codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="000000" autofocus></div>
+    <button class="btn btn-primary" id="btn-2fa-entrar" onclick="verificar2faEmpresa(${JSON.stringify(pendingToken)})">Confirmar</button>
+    <button class="btn btn-sec" type="button" onclick="location.reload()">Voltar</button>`;
+  document.getElementById('login-2fa-codigo')?.focus();
+}
+
+async function verificar2faEmpresa(pendingToken) {
+  const codigo = document.getElementById('login-2fa-codigo')?.value.trim();
+  const alertBox = document.getElementById('alert-login');
+  if (!codigo) { if (alertBox) alertBox.innerHTML = '<div class="alert alert-erro">Informe o código.</div>'; return; }
+  try {
+    const r = await fetch(API + '/api/empresa/2fa/verificar', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pending_token: pendingToken, codigo })
+    });
+    const data = await r.json();
+    if (!r.ok || !data.token) throw new Error(data.erro || 'Não foi possível validar o código');
+    token = data.token;
+    if (window.authTokens?.setTokens) window.authTokens.setTokens(data.token, data.refreshToken);
+    else { localStorage.setItem('empresa_token', data.token); if (data.refreshToken) localStorage.setItem('empresa_refresh', data.refreshToken); }
+    if (data.usuario) localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
+    mostrarApp();
+  } catch (e) {
+    if (alertBox) alertBox.innerHTML = `<div class="alert alert-erro">${escapeHtml(e.message || 'Código inválido')}</div>`;
+  }
 }
 
 function toggleMenu() {
