@@ -258,6 +258,10 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
   .candidate-home .modal-header { padding: 14px 16px 11px; }
   .candidate-home .modal-body { padding: 17px 16px max(20px,env(safe-area-inset-bottom)); }
   .candidate-home .modal-close { width: 42px; height: 42px; }
+  /* Detalhes da vaga: mantém o rodapé e o botão de candidatura acessíveis no celular. */
+  .candidate-home #modal-detalhes .modal { display: flex; flex-direction: column; }
+  .candidate-home #modal-detalhes .modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+  .candidate-home #modal-detalhes .modal-footer { flex: 0 0 auto; position: sticky; bottom: 0; z-index: 1; background: #fff; }
   .login-layout { display: block; min-height: 0; }
   .login-main { padding: 7px 17px 22px; }
   .login-brand { width: 128px; height: 54px; margin: 0 auto 8px; }
