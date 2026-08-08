@@ -8,8 +8,11 @@
   'use strict';
 
   const API = 'https://recrutamento-api-novo.onrender.com';
-  // Pode existir apenas refresh token enquanto a sessão é renovada.
-  if (!localStorage.getItem('empresa_token') && !localStorage.getItem('empresa_refresh')) return;
+  // Nunca inicializar o chat com credencial ausente, inválida ou expirada.
+  const rawToken = localStorage.getItem('empresa_token');
+  let sessionValid = false;
+  try { const payload = rawToken ? JSON.parse(atob(rawToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))) : null; sessionValid = !!rawToken && (!payload?.exp || payload.exp * 1000 > Date.now()); } catch (_) { sessionValid = false; }
+  if (!sessionValid) return;
   const apiFetch = (url, opts = {}) => typeof window.authFetch === 'function'
     ? window.authFetch(url, opts)
     : fetch(url, opts);

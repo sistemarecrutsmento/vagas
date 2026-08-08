@@ -2,7 +2,9 @@
 (function () {
   'use strict';
   const token = () => localStorage.getItem('empresa_token') || '';
-  if (!token()) return;
+  let sessionValid = false;
+  try { const raw = token(), payload = raw ? JSON.parse(atob(raw.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))) : null; sessionValid = !!raw && (!payload?.exp || payload.exp * 1000 > Date.now()); } catch (_) { sessionValid = false; }
+  if (!sessionValid) return;
   const API = 'https://recrutamento-api-novo.onrender.com';
   const apiFetch = (url, opts = {}) => {
     if (typeof window.authFetch === 'function') return window.authFetch(url, opts);
