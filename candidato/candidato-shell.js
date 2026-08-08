@@ -51,8 +51,10 @@
 
   const header = document.createElement('header');
   header.className = 'candidate-header';
-  header.innerHTML = '<div class="header-inner"><a href="' + ROOT + 'index.html" class="logo">VagasIO</a><div class="header-actions" id="header-actions"></div><button type="button" class="btn-menu-logo" id="btn-menu-logo" aria-label="Abrir menu" aria-controls="candidato-sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>'
+  header.innerHTML = '<div class="header-inner"><a href="' + ROOT + 'index.html" class="logo">VagasIO</a><nav class="desktop-nav" id="desktop-nav" aria-label="Navegação principal"></nav><div class="header-actions" id="header-actions"></div><button type="button" class="btn-menu-logo" id="btn-menu-logo" aria-label="Abrir menu" aria-controls="candidato-sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>'
   document.body.insertBefore(header, document.body.firstChild);
+  const desktopNav = header.querySelector('#desktop-nav');
+  desktopNav.innerHTML = menu.map(([href, icon, label]) => '<a href="' + ROOT + href + '" class="desktop-nav-link' + (currentFile === href ? ' ativo' : '') + '">' + label + '</a>').join('');
   const subheader = document.createElement('section');
   subheader.className = 'subheader';
   subheader.innerHTML = '<div class="subheader-inner"><h1 id="sub-titulo">' + esc(titleFor(currentFile)) + '</h1></div>';
@@ -67,11 +69,14 @@
   const setOpen = open => { sidebar.classList.toggle('aberto', open); overlay.classList.toggle('aberto', open); sidebar.setAttribute('aria-hidden', String(!open)); overlay.setAttribute('aria-hidden', String(!open)); button.setAttribute('aria-expanded', String(open)); document.body.classList.toggle('drawer-aberto', open); if (open) close.focus(); else button.focus(); };
   const logout = () => { ['candidato_token','candidato_refresh','candidato_email','candidato_nome','candidato_foto','candidato_id'].forEach(k => localStorage.removeItem(k)); location.href = ROOT; };
   button.addEventListener('click', () => setOpen(true)); close.addEventListener('click', () => setOpen(false)); overlay.addEventListener('click', () => setOpen(false));
-  sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', e => {
+  const navigateShell = (a, e) => {
     e.preventDefault(); setOpen(false);
-    const target = new URL(a.href, location.origin).pathname + new URL(a.href, location.origin).search;
+    const u = new URL(a.href, location.origin);
+    const target = u.pathname + u.search;
     history.pushState({}, '', target); loadFrame(target);
-  }));
+  };
+  sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', e => navigateShell(a, e)));
+  desktopNav.querySelectorAll('a').forEach(a => a.addEventListener('click', e => navigateShell(a, e)));
   header.querySelector('.logo').addEventListener('click', e => {
     e.preventDefault(); const target = ROOT + 'index.html'; history.pushState({}, '', target); loadFrame(target);
   });
@@ -89,7 +94,7 @@
   original.forEach(el => { if (el.tagName !== 'SCRIPT' && el.tagName !== 'LINK' && el.tagName !== 'STYLE') el.hidden = true; });
   document.body.appendChild(frame);
   let loadingFromShell = false;
-  const syncShell = path => { const f = (new URL(path, location.origin).pathname.split('/').pop() || 'index.html').toLowerCase(); document.getElementById('sub-titulo').textContent = titleFor(f); sidebar.querySelectorAll('.drawer-link').forEach(a => { const active = a.getAttribute('href').endsWith('/' + f); a.classList.toggle('ativo', active); active ? a.setAttribute('aria-current','page') : a.removeAttribute('aria-current'); }); };
+  const syncShell = path => { const f = (new URL(path, location.origin).pathname.split('/').pop() || 'index.html').toLowerCase(); document.getElementById('sub-titulo').textContent = titleFor(f); sidebar.querySelectorAll('.drawer-link').forEach(a => { const active = a.getAttribute('href').endsWith('/' + f); a.classList.toggle('ativo', active); active ? a.setAttribute('aria-current','page') : a.removeAttribute('aria-current'); }); desktopNav.querySelectorAll('.desktop-nav-link').forEach(a => { const active = a.getAttribute('href').endsWith('/' + f); a.classList.toggle('ativo', active); }); };
   const loadFrame = path => { loadingFromShell = true; frame.src = frameURL(path || cleanCurrent()); syncShell(path || cleanCurrent()); };
   frame.addEventListener('load', () => {
     loadingFromShell = false;
