@@ -67,8 +67,6 @@
 
   <script>
     const API = "https://recrutamento-api-novo.onrender.com";
-    let scores = {};
-
     function getToken() { return localStorage.getItem('candidato_token') || localStorage.getItem('token'); }
 
     async function carregarFavoritos() {
@@ -82,28 +80,6 @@
       const d = await r.json();
       renderFavoritos(d.favoritos || []);
 
-      // Carrega scores em background
-      for (const f of (d.favoritos || [])) {
-        carregarScore(f.id, token);
-      }
-    }
-
-    async function carregarScore(vagaId, token) {
-      try {
-        const r = await fetch(`${API}/api/candidato/vagas/${vagaId}/match`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!r.ok) return;
-        const d = await r.json();
-        scores[vagaId] = d.score;
-        const el = document.getElementById(`score-${vagaId}`);
-        if (el) {
-          const cls = d.score >= 70 ? 'score-alto' : d.score >= 40 ? 'score-medio' : 'score-baixo';
-          el.className = `score-badge ${cls}`;
-          el.textContent = `${d.score}% compatível`;
-          el.style.display = '';
-        }
-      } catch {}
     }
 
     function renderFavoritos(favs) {
@@ -125,7 +101,6 @@
                 <div class="fav-titulo">${esc(f.titulo)}</div>
                 <div class="fav-empresa">${esc(f.empresa)}</div>
               </div>
-              <span class="score-badge" id="score-${f.id}" style="display:none"></span>
             </div>
             ${f.cidade ? `<div class="fav-loc">📍 ${esc(f.cidade)}${f.estado ? ', '+f.estado.toUpperCase() : ''}</div>` : ''}
             <div class="fav-meta">
@@ -137,7 +112,7 @@
             <div class="fav-acoes">
               ${f.candidatura_id
                 ? `<a class="btn-primary" href="candidatura.html?id=${f.candidatura_id}">Ver candidatura →</a>`
-                : `<a class="btn-primary" href="vaga.html?id=${f.id}">Ver vaga →</a>`}
+                : `<a class="btn-primary" href="index.html?vaga=${f.id}">Ver vaga →</a>`}
               <button class="btn-desfav" onclick="desfavoritar(${f.id})">✕</button>
             </div>
           </div>`;
