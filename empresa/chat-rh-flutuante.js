@@ -6,6 +6,8 @@
 
 (function() {
   'use strict';
+  function boot() {
+  if (!document.getElementById('app')?.classList.contains('logado')) return;
 
   const API = 'https://recrutamento-api-novo.onrender.com';
   // Nunca inicializar o chat com credencial ausente, inválida ou expirada.
@@ -325,4 +327,6 @@
   setInterval(() => {
     if (aberto && conversaAtiva) carregarMensagens();
   }, 10000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
 })();
