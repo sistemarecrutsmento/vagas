@@ -7,7 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CACHE_NAME   = 'vagasio-v37';
-const CACHE_STATIC = 'vagasio-static-v20';
+const CACHE_STATIC = 'vagasio-static-v21';
 
 // Assets estáticos que podem ser cacheados (sem dados privados)
 const STATIC_ASSETS = [
