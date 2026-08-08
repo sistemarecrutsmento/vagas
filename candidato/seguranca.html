@@ -162,23 +162,31 @@ async function trocarSenha() {
 
 // ── Sessões ──
 async function carregarSessoes() {
-  const r = await req('GET', '/api/auth/sessoes');
-  if (!r.ok) return;
-  const d = await r.json();
   const el = document.getElementById('lista-sessoes');
-  if (!d.sessoes?.length) { el.innerHTML = '<p style="font-size:14px;color:#888;">Nenhuma sessão ativa.</p>'; return; }
-  el.innerHTML = d.sessoes.map(s => {
-    const dt = new Date(s.criado_em).toLocaleString('pt-BR');
-    const ua = s.user_agent || 'Dispositivo desconhecido';
-    const ip = s.ip || '';
-    return `<div class="sessao-item">
-      <div class="sessao-info">
-        <strong>${ua.length>60?ua.slice(0,60)+'…':ua}</strong>
-        <span>${ip ? ip + ' · ' : ''}${dt}</span>
-      </div>
-      <button class="btn btn-s" style="font-size:12px;padding:6px 12px;" onclick="encerrarSessao(${s.id})">Encerrar</button>
-    </div>`;
-  }).join('');
+  if (!el) return;
+  try {
+    const r = await req('GET', '/api/auth/sessoes');
+    if (!r.ok) throw new Error('Não foi possível carregar as sessões.');
+    const d = await r.json();
+    if (!d.sessoes?.length) {
+      el.innerHTML = '<p style="font-size:14px;color:#888;">Nenhuma sessão ativa.</p>';
+      return;
+    }
+    el.innerHTML = d.sessoes.map(s => {
+      const dt = new Date(s.criado_em).toLocaleString('pt-BR');
+      const ua = s.user_agent || 'Dispositivo desconhecido';
+      const ip = s.ip || '';
+      return `<div class="sessao-item">
+        <div class="sessao-info">
+          <strong>${ua.length>60?ua.slice(0,60)+'…':ua}</strong>
+          <span>${ip ? ip + ' · ' : ''}${dt}</span>
+        </div>
+        <button class="btn btn-s" style="font-size:12px;padding:6px 12px;" onclick="encerrarSessao(${s.id})">Encerrar</button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="font-size:14px;color:#9a6570;">Não foi possível carregar as sessões agora. Tente novamente.</p>';
+  }
 }
 
 async function encerrarSessao(id) {
