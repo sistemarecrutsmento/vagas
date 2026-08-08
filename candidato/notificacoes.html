@@ -91,7 +91,8 @@ async function abrir(id, tipo, refId) {
     method: 'PATCH', headers: { 'Authorization': 'Bearer ' + getToken() }
   });
   if (tipo === 'candidatura' && refId) {
-    window.location.href = 'candidatura.html?id=' + refId;
+    // A notificação está dentro do iframe do shell; a candidatura deve abrir no shell principal.
+    window.top.location.href = 'candidatura.html?id=' + refId;
   } else {
     atualizar();
   }
