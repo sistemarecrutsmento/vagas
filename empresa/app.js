@@ -34,7 +34,16 @@ async function fazerLogin() {
     }
     if (r.ok && data.token) {
       token = data.token;
-      localStorage.setItem('empresa_token', token);
+      // Mantém a sessão durável no mesmo padrão do portal do candidato.
+      // O access token continua em empresa_token; o refresh fica em
+      // empresa_refresh para que o auth-helper possa renovar a sessão.
+      if (window.authTokens && typeof window.authTokens.setTokens === 'function') {
+        window.authTokens.setTokens(data.token, data.refreshToken);
+      } else {
+        localStorage.setItem('empresa_token', data.token);
+        if (data.refreshToken) localStorage.setItem('empresa_refresh', data.refreshToken);
+      }
+      if (data.usuario) localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
       mostrarApp();
     } else {
       document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao entrar'}</div>`;
