@@ -51,7 +51,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v19">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v18">
 </head>
 <body>
 
@@ -241,7 +241,8 @@ function sair() {
 // ── Init ──
 if (!TOKEN) { location.href = 'index.html'; }
 const usr = JSON.parse(localStorage.getItem('candidato_usuario') || '{}');
-document.getElementById('avatar').textContent = iniciais(usr.nome || localStorage.getItem('candidato_nome') || 'Candidato');
+const avatar = document.getElementById('avatar');
+if (avatar) avatar.textContent = iniciais(usr.nome || localStorage.getItem('candidato_nome') || 'Candidato');
 carregarSessoes();
 </script>
   <script>
@@ -253,6 +254,6 @@ carregarSessoes();
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-v19"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v18"></script>
 </body>
 </html>
