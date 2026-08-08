@@ -6,8 +6,8 @@
 //   • offline fallback: página amigável
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE_NAME   = 'vagasio-v36';
-const CACHE_STATIC = 'vagasio-static-v19';
+const CACHE_NAME   = 'vagasio-v37';
+const CACHE_STATIC = 'vagasio-static-v20';
 
 // Assets estáticos que podem ser cacheados (sem dados privados)
 const STATIC_ASSETS = [
