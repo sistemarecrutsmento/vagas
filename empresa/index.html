@@ -1000,7 +1000,7 @@
   <div class="modal modal-lg equipe-modal">
     <div class="modal-header"><h3>Adicionar membro à equipe</h3><button class="modal-close" onclick="fecharModal('equipe-novo')" aria-label="Fechar">&times;</button></div>
     <div class="modal-body"><div id="equipe-modal-alert"></div><p class="equipe-modal-note">O convite será enviado ao e-mail informado. A pessoa definirá a própria senha por um link seguro com validade de 7 dias.</p><div class="equipe-form-grid"><label>Nome<input id="equipe-novo-nome" type="text" autocomplete="name"></label><label>E-mail corporativo<input id="equipe-novo-email" type="email" autocomplete="email"></label><label>Cargo<input id="equipe-novo-cargo" type="text" placeholder="Cargo registrado"></label><label>Função<select id="equipe-novo-role"><option value="viewer">Filial</option><option value="recrutador">Recrutador</option><option value="admin_empresa">Administrador da empresa</option></select></label></div></div>
-    <div class="modal-footer"><button class="btn btn-sec" onclick="fecharModal('equipe-novo')">Cancelar</button><button class="btn btn-primary" onclick="salvarNovoMembroEquipe()">Enviar convite</button></div>
+    <div class="modal-footer"><button class="btn btn-sec" onclick="fecharModal('equipe-novo')">Cancelar</button><button id="btn-enviar-convite-equipe" type="button" class="btn btn-primary" onclick="salvarNovoMembroEquipe(); return false;">Enviar convite</button></div>
   </div>
 </div>
 
@@ -1178,7 +1178,7 @@
 
 <script src="auth-helper.js?v=empresa-admin-restore2"></script>
 <script src="empresa-auth-patch.js?v=empresa-admin-restore2"></script>
-<script src="app.js?v=empresa-rbac-5"></script>
+<script src="app.js?v=empresa-rbac-6"></script>
 <script src="chat-rh-flutuante.js?v=empresa-rh-chat-2"></script>
 <script src="chat-candidatos-flutuante.js?v=empresa-candidato-chat-1"></script>
 </body>
