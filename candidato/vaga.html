@@ -12,7 +12,9 @@
 <main class="vaga-page"><a class="vaga-back" href="/candidato/index.html">← Voltar para vagas</a><div id="conteudo" class="estado">Carregando detalhes da vaga…</div></main>
 <script>
 const API='https://recrutamento-api-novo.onrender.com';
-const qs=new URLSearchParams(location.search);const id=Number(qs.get('vaga'));const slug=qs.get('slug');
+const qs=new URLSearchParams(location.search);const id=Number(qs.get('vaga')||qs.get('id'));const slug=qs.get('slug');
+// Compatibilidade com links antigos: o detalhe oficial agora é o modal do catálogo.
+if(id>0){const destino='/candidato/index.html?vaga='+encodeURIComponent(id)+(slug?'&slug='+encodeURIComponent(slug):'');location.replace(destino);}
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=(a,b,s)=>a&&b?`R$ ${Number(a).toLocaleString('pt-BR')} - R$ ${Number(b).toLocaleString('pt-BR')}`:(s||'A combinar');
 function urlDetalhe(){return slug?API+'/api/public/empresa/'+encodeURIComponent(slug)+'/vagas/'+id:API+'/api/vagas/'+id}
