@@ -258,6 +258,25 @@ function usarBuscaPopular(termo) {
 }
 window.usarBuscaPopular = usarBuscaPopular;
 
+function normalizarArea(valor) {
+  return String(valor || '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+function areaCorresponde(valor, categoria) {
+  const area = normalizarArea(valor);
+  const filtro = normalizarArea(categoria);
+  const equivalencias = {
+    'operacional': ['operacional', 'operacao', 'operacoes'],
+    'administrativo': ['administrativo', 'administracao', 'gestao'],
+    'comercial': ['comercial', 'vendas'],
+    'atendimento / vendas': ['atendimento', 'vendas'],
+    'administracao / gestao': ['administrativo', 'administracao', 'gestao'],
+    'saude': ['saude', 'farmacia'],
+    'saude / farmacia': ['saude', 'farmacia'],
+    'farmaceutico': ['farmaceutico', 'farmacia', 'saude']
+  };
+  return (equivalencias[filtro] || [filtro]).some(termo => area.includes(termo));
+}
+
 function toggleFiltroDropdown() {
   document.getElementById('filtro-dropdown').classList.toggle('aberto');
 }
@@ -281,6 +300,8 @@ async function carregarVagas() {
   try {
     let vagas = [];
     let nomeEmpresa = '';
+    let podeCarregarMais = false;
+    let urlPaginacao = '';
     if (CANDIDATO_EMPRESA_SLUG) {
       // Portal da empresa: mesma interface, apenas vagas publicadas daquele tenant.
       const [re, rv] = await Promise.all([
@@ -303,7 +324,7 @@ async function carregarVagas() {
         vagas = vagas.filter(v => [v.cidade, v.estado].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR').includes(local));
       }
       if (categoriaAtiva) {
-        vagas = vagas.filter(v => String(v.area || '').toLocaleLowerCase('pt-BR') === categoriaAtiva.toLocaleLowerCase('pt-BR'));
+        vagas = vagas.filter(v => areaCorresponde(v.area, categoriaAtiva));
       }
       document.title = 'Vagas de ' + nomeEmpresa + ' · VagasIO';
       const titulo = document.querySelector('.section-title');
@@ -319,24 +340,19 @@ async function carregarVagas() {
       }
       // A área é filtrada localmente para funcionar também quando a API retorna
       // nomes equivalentes (por exemplo, "Operações" e "Operacional").
+      const paginada = !categoriaAtiva;
+      if (paginada) { params.set('limite', '20'); params.set('offset', '0'); }
       if (params.toString()) url += '?' + params;
+      urlPaginacao = url;
       const ctrl = new AbortController();
       const timeoutId = setTimeout(() => ctrl.abort(), 30000);
       const r = await fetch(url, { signal: ctrl.signal });
       clearTimeout(timeoutId);
       const data = await r.json();
       vagas = data.vagas || [];
+      podeCarregarMais = !!data.mais;
       if (categoriaAtiva) {
-        const normalizar = valor => String(valor || '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        const area = normalizar(categoriaAtiva);
-        const equivalencias = {
-          'operacional': ['operacional', 'operacao', 'operacoes'],
-          'administracao / gestao': ['administrativo', 'administracao', 'gestao'],
-          'atendimento / vendas': ['atendimento', 'vendas'],
-          'saude / farmacia': ['saude', 'farmacia']
-        };
-        const termos = equivalencias[area] || [area];
-        vagas = vagas.filter(v => termos.some(t => normalizar(v.area).includes(t)));
+        vagas = vagas.filter(v => areaCorresponde(v.area, categoriaAtiva));
       }
     }
     window.vagas = vagas;
@@ -361,13 +377,29 @@ async function carregarVagas() {
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); }
         });
       });
-      if (limiteVagas < vagas.length) {
+      if (limiteVagas < vagas.length || podeCarregarMais) {
         const mais = document.createElement('button');
         mais.type = 'button';
         mais.className = 'btn-ver-mais';
         mais.textContent = 'Ver mais';
         mais.style.cssText = 'grid-column:1/-1;justify-self:center;margin:8px auto 0;min-width:140px;';
-        mais.addEventListener('click', () => { limiteVagas += 20; renderVagas(); });
+        mais.addEventListener('click', async () => {
+          if (!podeCarregarMais) { limiteVagas += 20; renderVagas(); return; }
+          mais.disabled = true; mais.textContent = 'Carregando...';
+          try {
+            const u = new URL(urlPaginacao, location.origin);
+            u.searchParams.set('offset', String(vagas.length));
+            const r = await fetch(u.toString());
+            if (!r.ok) throw new Error('Falha ao carregar mais vagas');
+            const data = await r.json();
+            vagas = vagas.concat(data.vagas || []);
+            podeCarregarMais = !!data.mais;
+            limiteVagas = vagas.length;
+            renderVagas();
+          } catch (_) {
+            mais.disabled = false; mais.textContent = 'Tentar novamente';
+          }
+        });
         grid.appendChild(mais);
       }
     };
