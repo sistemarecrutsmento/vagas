@@ -310,7 +310,8 @@
     .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background-size: cover; background-position: center; flex-shrink: 0; }
     .user-info { display: flex; align-items: center; gap: 10px; }
   </style>
-  <link rel="stylesheet" href="/candidato/home-redesign.css?v=home-candidate-12">
+  <link rel="stylesheet" href="/candidato/home-redesign.css?v=home-candidate-13">
+  <link rel="stylesheet" href="/candidato/mobile-detail-fix.css?v=detail-mobile-1">
   <script src="/candidato/chat-uploader.js"></script>
   <link rel="manifest" href="/candidato/manifest.json">
   <meta name="theme-color" content="#722F37">
@@ -446,15 +447,16 @@
         <div class="det-item"><div class="det-label">Área</div><div class="det-value" id="det-area"></div></div>
         <div class="det-item" style="grid-column:1/-1"><div class="det-label">Salário</div><div class="det-value" id="det-salario"></div></div>
       </div>
-      <div class="det-section"><h3>Descrição</h3><p id="det-descricao"></p></div>
-      <div class="det-section"><h3>Requisitos</h3><p id="det-requisitos"></p></div>
-      <div class="det-section"><h3>Benefícios</h3><p id="det-beneficios"></p></div>
+      <section class="det-section"><h3>Descrição da vaga</h3><p id="det-descricao"></p></section>
+      <section class="det-section"><h3>Requisitos</h3><div id="det-requisitos"></div></section>
+      <section class="det-section" id="det-bloco-beneficios"><h3>Benefícios</h3><div id="det-beneficios"></div></section>
     </div>
     <!-- Fase 11: Tags da vaga -->
     <div id="bloco-tags" style="display:none;margin:0 0 12px 0;">
       <div id="tags-container" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" onclick="fecharModal('detalhes')">Voltar para a lista</button>
       <button class="btn btn-primary" id="btn-candidatar" style="width:auto;">Candidatar-se</button>
       <button class="btn" id="btn-favoritar" style="width:auto;background:#fff;border:1.5px solid #ddd;color:#555;display:none;" onclick="toggleFavoritar()"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> Favoritar</button>
     </div>
@@ -645,8 +647,8 @@
 
 
 <script src="/candidato/auth-helper.js?v=etapa2_2026_07_27"></script>
-<script src="/candidato/app-v2.js?v=portal-candidate-redesign-12"></script>
-<script src="/candidato/modals.js?v=portal-candidate-redesign-12"></script>
+<script src="/candidato/app-v2.js?v=portal-candidate-redesign-13"></script>
+<script src="/candidato/modals.js?v=portal-candidate-redesign-13"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
