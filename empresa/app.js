@@ -5,6 +5,7 @@
 
 const API = 'https://recrutamento-api-novo.onrender.com';
 let token = null;
+let empresa2faPendingToken = null;
 let vagaEmEdicao = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -82,18 +83,20 @@ function sair() {
 }
 
 function mostrarLogin2fa(pendingToken) {
+  empresa2faPendingToken = pendingToken;
   const card = document.querySelector('#login-page .login-card');
   if (!card) return;
   card.innerHTML = `<h1>🔐 Verificação em duas etapas</h1>
     <p class="sub">Digite o código do seu aplicativo autenticador ou um código de backup.</p>
     <div id="alert-login"></div>
     <div class="form-group"><label>Código</label><input type="text" id="login-2fa-codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="000000" autofocus></div>
-    <button class="btn btn-primary" id="btn-2fa-entrar" onclick="verificar2faEmpresa(${JSON.stringify(pendingToken)})">Confirmar</button>
+    <button class="btn btn-primary" id="btn-2fa-entrar" onclick="verificar2faEmpresa()">Confirmar</button>
     <button class="btn btn-sec" type="button" onclick="location.reload()">Voltar</button>`;
   document.getElementById('login-2fa-codigo')?.focus();
 }
 
-async function verificar2faEmpresa(pendingToken) {
+async function verificar2faEmpresa() {
+  const pendingToken = empresa2faPendingToken;
   const codigo = document.getElementById('login-2fa-codigo')?.value.trim();
   const alertBox = document.getElementById('alert-login');
   if (!codigo) { if (alertBox) alertBox.innerHTML = '<div class="alert alert-erro">Informe o código.</div>'; return; }
