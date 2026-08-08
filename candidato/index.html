@@ -311,7 +311,7 @@
     .user-info { display: flex; align-items: center; gap: 10px; }
   </style>
   <link rel="stylesheet" href="/candidato/home-redesign.css?v=home-candidate-13">
-  <link rel="stylesheet" href="/candidato/mobile-detail-fix.css?v=detail-mobile-1">
+  <link rel="stylesheet" href="/candidato/mobile-detail-fix.css?v=detail-mobile-2">
   <script src="/candidato/chat-uploader.js"></script>
   <link rel="manifest" href="/candidato/manifest.json">
   <meta name="theme-color" content="#722F37">
@@ -430,35 +430,32 @@
 </footer>
 
 <!-- MODAL DETALHES DA VAGA -->
-<div class="modal-overlay" id="modal-detalhes">
-  <div class="modal modal-large">
+<div class="modal-overlay" id="modal-detalhes" role="dialog" aria-modal="true" aria-labelledby="det-titulo">
+  <div class="modal modal-large detalhe-vaga-modal">
+    <div class="det-handle" aria-hidden="true"></div>
     <div class="modal-header">
-      <div>
-        <div class="empresa" style="font-size:13px;color:var(--cinza-medio);text-transform:uppercase;font-weight:600;" id="det-empresa"></div>
+      <div class="det-cabecalho">
+        <span class="det-area-badge" id="det-area-badge"></span>
         <h2 id="det-titulo"></h2>
+        <div class="det-meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5 12 4l8 5.5v9.5H4zM9 19v-5h6v5"/></svg><span id="det-empresa"></span></span><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg><span id="det-local"></span></span></div>
       </div>
-      <button class="modal-close" onclick="fecharModal('detalhes')">×</button>
+      <button class="modal-close" type="button" aria-label="Fechar detalhes da vaga" onclick="fecharModal('detalhes')">×</button>
     </div>
     <div class="modal-body">
       <div class="det-grid">
-        <div class="det-item"><div class="det-label">Localização</div><div class="det-value" id="det-local"></div></div>
-        <div class="det-item"><div class="det-label">Contrato</div><div class="det-value" id="det-contrato"></div></div>
-        <div class="det-item"><div class="det-label">Nível</div><div class="det-value" id="det-nivel"></div></div>
-        <div class="det-item"><div class="det-label">Área</div><div class="det-value" id="det-area"></div></div>
-        <div class="det-item" style="grid-column:1/-1"><div class="det-label">Salário</div><div class="det-value" id="det-salario"></div></div>
+        <div class="det-item"><div class="det-label"><span class="det-item-icon">▣</span> CONTRATO</div><div class="det-value" id="det-contrato"></div></div>
+        <div class="det-item"><div class="det-label"><span class="det-item-icon">▥</span> NÍVEL</div><div class="det-value" id="det-nivel"></div></div>
+        <div class="det-item"><div class="det-label"><span class="det-item-icon">♧</span> ÁREA</div><div class="det-value" id="det-area"></div></div>
+        <div class="det-item"><div class="det-label"><span class="det-item-icon">◉</span> SALÁRIO</div><div class="det-value" id="det-salario"></div></div>
       </div>
-      <section class="det-section"><h3>Descrição da vaga</h3><p id="det-descricao"></p></section>
-      <section class="det-section"><h3>Requisitos</h3><div id="det-requisitos"></div></section>
-      <section class="det-section" id="det-bloco-beneficios"><h3>Benefícios</h3><div id="det-beneficios"></div></section>
+      <section class="det-accordion det-section"><button class="det-accordion-toggle" type="button" aria-expanded="true"><span><span class="det-section-icon">▤</span>Descrição da vaga</span><span class="det-chevron">⌃</span></button><div class="det-accordion-content"><p id="det-descricao"></p></div></section>
+      <section class="det-accordion det-section"><button class="det-accordion-toggle" type="button" aria-expanded="true"><span><span class="det-section-icon">✓</span>Requisitos</span><span class="det-chevron">⌃</span></button><div class="det-accordion-content"><div id="det-requisitos"></div></div></section>
+      <section class="det-accordion det-section" id="det-bloco-beneficios"><button class="det-accordion-toggle" type="button" aria-expanded="true"><span><span class="det-section-icon">☆</span>Benefícios</span><span class="det-chevron">⌃</span></button><div class="det-accordion-content"><div id="det-beneficios"></div></div></section>
     </div>
-    <!-- Fase 11: Tags da vaga -->
-    <div id="bloco-tags" style="display:none;margin:0 0 12px 0;">
-      <div id="tags-container" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" type="button" onclick="fecharModal('detalhes')">Voltar para a lista</button>
-      <button class="btn btn-primary" id="btn-candidatar" style="width:auto;">Candidatar-se</button>
-      <button class="btn" id="btn-favoritar" style="width:auto;background:#fff;border:1.5px solid #ddd;color:#555;display:none;" onclick="toggleFavoritar()"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> Favoritar</button>
+    <div class="modal-footer detalhe-acoes">
+      <button class="btn btn-primary" id="btn-candidatar">Candidatar-se a esta vaga</button>
+      <button class="btn btn-secondary" id="btn-favoritar" onclick="toggleFavoritar()"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> Favoritar</button>
+      <button class="det-voltar" type="button" onclick="fecharModal('detalhes')">← Voltar para a lista</button>
     </div>
   </div>
 </div>

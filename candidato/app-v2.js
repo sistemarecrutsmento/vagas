@@ -434,6 +434,9 @@ document.addEventListener('keydown', e => {
   const modal = document.getElementById('modal-detalhes');
   if (e.key === 'Escape' && modal?.classList.contains('aberto')) fecharModal('detalhes');
 });
+document.querySelectorAll('#modal-detalhes .det-accordion-toggle').forEach(toggle => {
+  toggle.addEventListener('click', () => toggle.setAttribute('aria-expanded', String(toggle.getAttribute('aria-expanded') !== 'true')));
+});
 
 function abrirDetalhes(id) {
   const detalheUrl = CANDIDATO_EMPRESA_SLUG
@@ -446,14 +449,15 @@ function abrirDetalhes(id) {
       vagaSelecionada = v;
       const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
       setTxt('det-empresa', v.empresa || v.empresa_nome || (CANDIDATO_EMPRESA_SLUG ? CANDIDATO_EMPRESA_SLUG : 'Confidencial'));
-      setTxt('det-titulo', v.titulo);
-      setTxt('det-local', v.cidade || '—');
-      setTxt('det-contrato', v.tipo_contrato || '—');
-      setTxt('det-nivel', v.nivel || '—');
-      setTxt('det-area', v.area || '—');
+      setTxt('det-titulo', v.titulo || 'Vaga sem título');
+      setTxt('det-local', [v.cidade, v.estado].filter(Boolean).join(', ') || 'Localização não informada');
+      setTxt('det-contrato', v.tipo_contrato || 'Não informado');
+      setTxt('det-nivel', v.nivel || 'Não informado');
+      setTxt('det-area', v.area || 'Não informado');
+      setTxt('det-area-badge', v.area || 'Área não informada');
       const salMin = Number(v.salario_min) || null;
       const salMax = Number(v.salario_max) || null;
-      const sal = (salMin && salMax) ? `R$ ${salMin.toLocaleString('pt-BR')} - R$ ${salMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
+      const sal = (salMin && salMax) ? `R$ ${salMin.toLocaleString('pt-BR')} - R$ ${salMax.toLocaleString('pt-BR')}` : (v.salario || 'Não informado');
       setTxt('det-salario', sal);
       setTxt('det-descricao', v.descricao || 'Sem descrição');
       renderDetalheTexto('det-requisitos', v.requisitos, 'Requisitos não informados');
@@ -488,17 +492,13 @@ function abrirDetalhes(id) {
       atualizarBotaoCandidatar(v.id);
       // Fase 11 — Tags
       renderTagsVaga(v.tags || []);
-      // Fase 11 — Favorito e Match (apenas para candidatos logados)
-      if (tokenCandidato) {
-        carregarFavoritoStatus(v.id);
-        const btnFav = document.getElementById('btn-favoritar');
-        if (btnFav) btnFav.style.display = '';
-      } else {
-        const btnFav = document.getElementById('btn-favoritar');
-        if (btnFav) btnFav.style.display = 'none';
-        const bm = document.getElementById('bloco-match');
-        if (bm) bm.style.display = 'none';
-      }
+      // Favoritar é visível para todos; a autenticação só é solicitada ao tocar na ação.
+      const btnFav = document.getElementById('btn-favoritar');
+      if (btnFav) btnFav.style.display = '';
+      if (tokenCandidato) carregarFavoritoStatus(v.id);
+      const bm = document.getElementById('bloco-match');
+      if (bm && !tokenCandidato) bm.style.display = 'none';
+      document.querySelectorAll('#modal-detalhes .det-accordion-toggle').forEach(t => t.setAttribute('aria-expanded', 'true'));
       document.getElementById('modal-detalhes').classList.add('aberto');
       if (window.top !== window.self) window.parent.postMessage({ type: 'candidate-modal', open: true }, '*');
       // Analytics: vaga visualizada
@@ -511,7 +511,7 @@ function atualizarBotaoCandidatar(vagaId) {
   const btn = document.getElementById('btn-candidatar');
   if (!btn) return;
   if (!tokenCandidato) {
-    btn.textContent = 'Faça login para se candidatar';
+    btn.textContent = 'Candidatar-se a esta vaga';
     btn.disabled = false;
     btn.onclick = () => { fecharModal('detalhes'); abrirModal('login'); };
   } else if (!cadastroCompleto) {
