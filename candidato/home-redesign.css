@@ -82,7 +82,8 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
 .candidate-vagas-section .section-title { margin: 0; color: var(--ink); font-size: 28px; letter-spacing: -.035em; }
 .candidate-vagas-section .section-sub { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
 .candidate-vagas-section .vagas-grid { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; }
-.candidate-vagas-section .vaga-card { min-width: 0; padding: 19px; border-color: #e8e1e4; border-radius: 9px; box-shadow: 0 2px 8px rgba(38,18,25,.025); transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.candidate-vagas-section .vaga-card { min-width: 0; padding: 19px; border-color: #e8e1e4; border-radius: 9px; box-shadow: 0 2px 8px rgba(38,18,25,.025); transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; text-decoration: none; color: inherit; display: block; }
+.candidate-vagas-section .vaga-card:focus-visible { outline: 3px solid rgba(95,21,39,.24); outline-offset: 3px; }
 .candidate-vagas-section .btn-ver-mais { grid-column: 1/-1; justify-self: center; min-width: 140px; margin: 8px auto 0; padding: 11px 22px; border: 1px solid var(--wine); border-radius: 8px; color: #fff; background: var(--wine); font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 14px rgba(95,21,39,.16); }
 .candidate-vagas-section .btn-ver-mais:hover { background: var(--wine-deep); border-color: var(--wine-deep); }
 .candidate-vagas-section .vaga-card:hover { border-color: #c99eaa; box-shadow: var(--shadow-card); transform: translateY(-3px); }

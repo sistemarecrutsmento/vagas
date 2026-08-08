@@ -1,47 +1,25 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="refresh" content="0; url=/candidato/?vaga=__VAGA__&slug=__SLUG__">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vaga · VagasIO</title>
+<link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v19">
 <style>
-  body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#f5f5f7;display:flex;align-items:center;justify-content:center;height:100vh;color:#666;}
-</style>
-  <link rel="manifest" href="/candidato/manifest.json">
-  <meta name="theme-color" content="#722F37">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Vagas.io">
-  <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
-  <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v18">
-</head>
+:root{--wine:#5f1527;--ink:#171419;--muted:#6f6870;--line:#e9e4e7;--canvas:#f7f5f6}
+*{box-sizing:border-box}body{margin:0;background:var(--canvas);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}.vaga-page{max-width:980px;margin:0 auto;padding:32px 22px 70px}.vaga-back{display:inline-flex;align-items:center;gap:7px;color:var(--wine);font-weight:700;text-decoration:none;margin-bottom:22px}.vaga-card-detail{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 35px rgba(38,18,25,.07);overflow:hidden}.vaga-top{padding:28px 32px 24px;border-bottom:1px solid var(--line)}.vaga-company{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--wine);font-weight:800}.vaga-top h1{font-size:34px;line-height:1.12;letter-spacing:-.04em;margin:9px 0 12px}.vaga-sub{color:var(--muted);font-size:15px}.vaga-content{padding:28px 32px}.vaga-facts{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:30px}.fact{padding:14px;border:1px solid var(--line);border-radius:10px;background:#fcfbfc}.fact small{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}.fact strong{font-size:14px}.vaga-section{margin-top:26px}.vaga-section h2{font-size:18px;margin:0 0 9px}.vaga-section p{color:#4f4850;line-height:1.65;white-space:pre-line;margin:0}.vaga-actions{display:flex;gap:10px;flex-wrap:wrap;padding:22px 32px;border-top:1px solid var(--line);background:#fcfbfc}.vaga-btn{border:0;border-radius:8px;padding:13px 18px;font-weight:800;font-size:14px;cursor:pointer;background:var(--wine);color:#fff}.vaga-btn.secondary{background:#fff;color:var(--wine);border:1px solid #d8c8ce}.vaga-btn:disabled{opacity:.65;cursor:wait}.estado{padding:60px 20px;text-align:center;color:var(--muted)}@media(max-width:700px){.vaga-page{padding:18px 12px 40px}.vaga-top,.vaga-content{padding:22px 18px}.vaga-top h1{font-size:27px}.vaga-facts{grid-template-columns:repeat(2,1fr)}.vaga-actions{padding:18px;flex-direction:column}.vaga-btn{width:100%;min-height:48px}}
+</style></head>
 <body>
-<p>Carregando…</p>
+<main class="vaga-page"><a class="vaga-back" href="/candidato/index.html">← Voltar para vagas</a><div id="conteudo" class="estado">Carregando detalhes da vaga…</div></main>
 <script>
-  const qs = new URLSearchParams(location.search);
-  const v = qs.get('vaga');
-  const s = qs.get('slug');
-  if (v) {
-    // Registrar vaga_visualizada antes do redirect
-    if (window.vagiasTrack) window.vagiasTrack('vaga_visualizada', { vaga_id: parseInt(v), metadata: { origem: 'redirect' } });
-    const u = '/candidato/?vaga=' + encodeURIComponent(v) + (s ? '&slug=' + encodeURIComponent(s) : '');
-    setTimeout(function() { location.replace(u); }, 50);
-  }
-</script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/candidato/sw.js', { scope: '/candidato/' })
-          .then(r => console.log('[PWA] SW registrado:', r.scope))
-          .catch(e => console.warn('[PWA] SW falhou:', e.message));
-      });
-    }
-  </script>
-<script src="../_shared/analytics.js"></script>
-  <script src="candidato-shell.js?v=candidato-shell-v18"></script>
-</body>
-</html>
+const API='https://recrutamento-api-novo.onrender.com';
+const qs=new URLSearchParams(location.search);const id=Number(qs.get('vaga'));const slug=qs.get('slug');
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=(a,b,s)=>a&&b?`R$ ${Number(a).toLocaleString('pt-BR')} - R$ ${Number(b).toLocaleString('pt-BR')}`:(s||'A combinar');
+function urlDetalhe(){return slug?API+'/api/public/empresa/'+encodeURIComponent(slug)+'/vagas/'+id:API+'/api/vagas/'+id}
+function irLogin(){location.href='/candidato/index.html'}
+async function carregar(){if(!id){conteudo.innerHTML='<div class="estado">Vaga não encontrada.</div>';return}try{const r=await fetch(urlDetalhe());const d=await r.json();if(!r.ok)throw Error();const v=d.vaga||d;document.title=(v.titulo||'Vaga')+' · VagasIO';conteudo.innerHTML=`<article class="vaga-card-detail"><header class="vaga-top"><div class="vaga-company">${esc(v.empresa||v.empresa_nome||slug||'Empresa')}</div><h1>${esc(v.titulo||'Vaga')}</h1><div class="vaga-sub">${esc([v.cidade,v.estado].filter(Boolean).join(' · ')||'Localização não informada')}</div></header><div class="vaga-content"><div class="vaga-facts"><div class="fact"><small>Contrato</small><strong>${esc(v.tipo_contrato||'—')}</strong></div><div class="fact"><small>Nível</small><strong>${esc(v.nivel||'—')}</strong></div><div class="fact"><small>Área</small><strong>${esc(v.area||'—')}</strong></div><div class="fact"><small>Salário</small><strong>${esc(money(v.salario_min,v.salario_max,v.salario))}</strong></div></div><section class="vaga-section"><h2>Descrição</h2><p>${esc(v.descricao||'Sem descrição')}</p></section><section class="vaga-section"><h2>Requisitos</h2><p>${esc(v.requisitos||'Não informado')}</p></section><section class="vaga-section"><h2>Benefícios</h2><p>${esc(v.beneficios||'Não informado')}</p></section></div><footer class="vaga-actions"><button class="vaga-btn" id="candidatar">Candidatar-se</button><button class="vaga-btn secondary" id="favoritar">☆ Favoritar</button></footer></article>`;document.getElementById('candidatar').onclick=()=>candidatar(id);document.getElementById('favoritar').onclick=()=>favoritar(id);if(window.vagiasTrack)window.vagiasTrack('vaga_visualizada',{vaga_id:id,metadata:{origem:'pagina'}})}catch(e){conteudo.innerHTML='<div class="estado">Não foi possível carregar esta vaga. Tente novamente.</div>'}}
+async function candidatar(vagaId){const token=localStorage.getItem('candidato_token');if(!token){irLogin();return}const b=document.getElementById('candidatar');b.disabled=true;b.textContent='Enviando…';try{const r=await fetch(API+'/api/candidato/candidatar/'+vagaId,{method:'POST',headers:{Authorization:'Bearer '+token}});const d=await r.json();if(r.ok){b.textContent='Candidatura enviada';b.style.background='#2e7d32'}else{b.disabled=false;b.textContent=d.erro||'Não foi possível candidatar-se'}}catch(e){b.disabled=false;b.textContent='Tentar novamente'}}
+async function favoritar(vagaId){const token=localStorage.getItem('candidato_token');if(!token){irLogin();return}const b=document.getElementById('favoritar');b.disabled=true;try{const r=await fetch(API+'/api/candidato/favoritos/'+vagaId,{method:'POST',headers:{Authorization:'Bearer '+token}});if(r.ok){b.textContent='✓ Favoritada';b.style.color='#2e7d32'}else{b.disabled=false}}catch(e){b.disabled=false}}
+carregar();
+</script><script src="candidato-shell.js?v=candidato-shell-v19"></script>
+</body></html>

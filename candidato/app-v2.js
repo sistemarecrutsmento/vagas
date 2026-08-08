@@ -368,15 +368,9 @@ async function carregarVagas() {
         const sMin = Number(v.salario_min) || null;
         const sMax = Number(v.salario_max) || null;
         const salTexto = (sMin && sMax) ? `R$ ${sMin.toLocaleString('pt-BR')} - R$ ${sMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
-        return `<div class="vaga-card" role="button" tabindex="0" data-vaga-id="${Number(v.id)}" style="cursor:pointer;"><div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div><h3>${escapeHtml(v.titulo)}</h3><div class="vaga-tags">${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}${v.cidade ? `<span class="tag">${escapeHtml(v.cidade)}</span>` : ''}</div><div class="salario">${escapeHtml(salTexto)}</div><div class="footer"><span class="data">${formatarData(v.criada_em)}</span><span class="cta">Ver detalhes →</span></div></div>`;
+        const slug = CANDIDATO_EMPRESA_SLUG ? '&slug=' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) : '';
+        return `<a class="vaga-card" href="/candidato/vaga.html?vaga=${Number(v.id)}${slug}" data-vaga-id="${Number(v.id)}"><div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div><h3>${escapeHtml(v.titulo)}</h3><div class="vaga-tags">${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}${v.cidade ? `<span class="tag">${escapeHtml(v.cidade)}</span>` : ''}</div><div class="salario">${escapeHtml(salTexto)}</div><div class="footer"><span class="data">${formatarData(v.criada_em)}</span><span class="cta">Ver detalhes →</span></div></a>`;
       }).join('');
-      grid.querySelectorAll('[data-vaga-id]').forEach(card => {
-        const abrir = () => abrirDetalhes(card.dataset.vagaId);
-        card.addEventListener('click', abrir);
-        card.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); }
-        });
-      });
       if (limiteVagas < vagas.length || podeCarregarMais) {
         const mais = document.createElement('button');
         mais.type = 'button';
