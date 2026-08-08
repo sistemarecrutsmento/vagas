@@ -440,7 +440,7 @@ document.querySelectorAll('#modal-detalhes .det-accordion-toggle').forEach(toggl
 
 function abrirDetalhes(id) {
   const modalInicial = document.getElementById('modal-detalhes');
-  ['det-titulo','det-empresa','det-local','det-area-badge','det-contrato','det-nivel','det-area','det-salario'].forEach(k => { const el = document.getElementById(k); if (el) el.textContent = 'Carregando…'; });
+  ['det-titulo','det-empresa','det-local','det-area-badge','det-contrato','det-nivel','det-area','det-salario','det-contrato-meta','det-nivel-meta','det-area-meta','det-salario-meta'].forEach(k => { const el = document.getElementById(k); if (el) el.textContent = 'Carregando…'; });
   const beneficioInicial = document.getElementById('det-bloco-beneficios');
   if (beneficioInicial) beneficioInicial.hidden = false;
   document.querySelectorAll('#modal-detalhes .det-accordion-toggle').forEach(t => t.setAttribute('aria-expanded', 'true'));
@@ -472,6 +472,10 @@ function abrirDetalhes(id) {
         : temMax ? formatarSalario(v.salario_max)
         : 'Não informado';
       setTxt('det-salario', sal);
+      setTxt('det-contrato-meta', v.tipo_contrato || 'Não informado');
+      setTxt('det-nivel-meta', v.nivel || 'Não informado');
+      setTxt('det-area-meta', v.area || 'Não informado');
+      setTxt('det-salario-meta', sal);
       setTxt('det-descricao', v.descricao, 'Descrição não informada');
       renderDetalheTexto('det-requisitos', v.requisitos, 'Requisitos não informados');
       // O endpoint pode não retornar benefícios; nesse caso, mantém a seção e informa a ausência.
