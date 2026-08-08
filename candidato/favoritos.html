@@ -148,7 +148,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/candidato/sw.js', { scope: '/candidato/' })
+        navigator.serviceWorker.register('/candidato/sw.js?rev=35', { scope: '/candidato/' })
           .then(r => console.log('[PWA] SW registrado:', r.scope))
           .catch(e => console.warn('[PWA] SW falhou:', e.message));
       });
