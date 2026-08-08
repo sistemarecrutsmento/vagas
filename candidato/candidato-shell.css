@@ -16,8 +16,6 @@ body.drawer-aberto { overflow: hidden; }
 body:not(.candidate-shell-frame) > .candidate-shell-frame {
   display: block; width: 100%; min-height: calc(100vh - 130px); border: 0; background: transparent;
 }
-/* O conteúdo real roda no iframe; evita que o modal original oculto do shell apareça duplicado. */
-body:not(.candidate-shell-frame) > #modal-detalhes { display: none !important; }
 body.candidate-shell-frame { min-height: 100vh; }
 body.candidate-shell-frame > script, body.candidate-shell-frame > link { display: none; }
 body > header.candidate-header {
