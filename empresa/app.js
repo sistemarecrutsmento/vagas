@@ -608,6 +608,7 @@ function abrirModalVaga(vaga) {
   document.getElementById('v-salario-min').value = vaga?.salario_min || '';
   document.getElementById('v-salario-max').value = vaga?.salario_max || '';
   document.getElementById('v-tipo').value = vaga?.tipo_contrato || 'CLT';
+  carregarFiliaisVaga(Array.isArray(vaga?.filial_ids) ? vaga.filial_ids : []);
   document.getElementById('v-status').value = vaga?.status || 'publicada';
   document.getElementById('v-descricao').value = vaga?.descricao || '';
   document.getElementById('v-requisitos').value = vaga?.requisitos || '';
@@ -726,6 +727,19 @@ function safeExternalUrl(value) {
   } catch (_) { return ''; }
 }
 
+async function carregarFiliaisVaga(selecionadas = []) {
+  const select = document.getElementById('v-filiais');
+  if (!select) return;
+  select.innerHTML = '<option disabled>Carregando Filiais...</option>';
+  try {
+    const r = await fetch(API + '/api/empresa/usuarios', { headers: { 'Authorization': 'Bearer ' + token } });
+    const d = await r.json();
+    const filiais = (d.usuarios || []).filter(u => u.role === 'viewer' && u.ativo !== false);
+    select.innerHTML = filiais.length ? filiais.map(u => `<option value="${Number(u.id)}" ${selecionadas.map(Number).includes(Number(u.id)) ? 'selected' : ''}>${escapeHtml(u.nome || u.email)}</option>`).join('') : '<option disabled>Nenhuma Filial cadastrada</option>';
+  } catch (_) { select.innerHTML = '<option disabled>Não foi possível carregar as Filiais</option>'; }
+}
+function filiaisSelecionadasVaga() { return [...(document.getElementById('v-filiais')?.selectedOptions || [])].map(o => Number(o.value)).filter(Number.isInteger); }
+
 async function editarVaga(id) {
   try {
     const r = await fetch(API + '/api/empresa/vagas/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
@@ -750,7 +764,8 @@ async function salvarVaga() {
     status: document.getElementById('v-status').value,
     descricao: document.getElementById('v-descricao').value,
     requisitos: document.getElementById('v-requisitos').value,
-    beneficios: document.getElementById('v-beneficios').value
+    beneficios: document.getElementById('v-beneficios').value,
+    filial_ids: filiaisSelecionadasVaga()
   };
   const salMin = document.getElementById('v-salario-min').value;
   const salMax = document.getElementById('v-salario-max').value;
