@@ -439,6 +439,14 @@ document.querySelectorAll('#modal-detalhes .det-accordion-toggle').forEach(toggl
 });
 
 function abrirDetalhes(id) {
+  const modalInicial = document.getElementById('modal-detalhes');
+  ['det-titulo','det-empresa','det-local','det-area-badge','det-contrato','det-nivel','det-area','det-salario'].forEach(k => { const el = document.getElementById(k); if (el) el.textContent = 'Carregando…'; });
+  const beneficioInicial = document.getElementById('det-bloco-beneficios');
+  if (beneficioInicial) beneficioInicial.hidden = false;
+  document.querySelectorAll('#modal-detalhes .det-accordion-toggle').forEach(t => t.setAttribute('aria-expanded', 'true'));
+  document.body.classList.add('detalhes-aberto');
+  if (modalInicial) modalInicial.classList.add('aberto');
+  if (window.top !== window.self) window.parent.postMessage({ type: 'candidate-modal', open: true }, '*');
   const detalheUrl = CANDIDATO_EMPRESA_SLUG
     ? API + '/api/public/empresa/' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) + '/vagas/' + id
     : API + '/api/vagas/' + id;
@@ -505,7 +513,10 @@ function abrirDetalhes(id) {
       // Analytics: vaga visualizada
       if (window.vagiasTrack) window.vagiasTrack('vaga_visualizada', { vaga_id: id, metadata: { origem: 'portal' } });
     })
-    .catch(() => showCandidateFeedback('Não foi possível carregar os detalhes desta vaga. Tente novamente.'));
+    .catch(() => {
+      const el = document.getElementById('det-descricao');
+      if (el) el.textContent = 'Não foi possível carregar os detalhes desta vaga. Tente novamente.';
+    });
 }
 
 function atualizarBotaoCandidatar(vagaId) {
