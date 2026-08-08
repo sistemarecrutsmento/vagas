@@ -2,14 +2,14 @@
   'use strict';
 
   const API = 'https://recrutamento-api-novo.onrender.com';
-  const legacyToken = localStorage.getItem('saas_token');
-  if (!localStorage.getItem('admin_token') && legacyToken) {
-    localStorage.setItem('admin_token', legacyToken);
+  const legacyToken = SaaSAuthStore.getLegacy();
+  if (!SaaSAuthStore.hasAccess() && legacyToken) {
+    SaaSAuthStore.setSession({ token: legacyToken });
   }
-  const token = localStorage.getItem('admin_token');
+  const token = SaaSAuthStore.getAccess();
 
   function clearSession() {
-    ['admin_token', 'saas_token', 'admin_refresh', 'admin_usuario'].forEach(k => localStorage.removeItem(k));
+    SaaSAuthStore.clearSession();
   }
 
   function goLogin() {
@@ -97,7 +97,7 @@
           await fetch(API + '/api/auth/logout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-            body: JSON.stringify({ refreshToken: localStorage.getItem('admin_refresh') || null })
+            body: JSON.stringify({ refreshToken: SaaSAuthStore.getRefresh() || null })
           });
         } catch (_) { /* logout local continua mesmo sem resposta da API */ }
         goLogin();
