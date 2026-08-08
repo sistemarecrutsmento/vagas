@@ -1055,6 +1055,7 @@ async function loginEntrar(btn) {
         localStorage.setItem('candidato_refresh', data.refreshToken);
       }
       localStorage.setItem('candidato_email', emailLogado);
+      window.dispatchEvent(new Event('candidate-auth-changed'));
       await checarPerfil();
       fecharModal('login');
       atualizarHeaderUsuario();
@@ -1116,6 +1117,7 @@ async function processarRetornoSocial() {
     localStorage.setItem('candidato_token', tokenCandidato);
     localStorage.setItem('candidato_email', emailLogado);
     if (data.refreshToken) localStorage.setItem('candidato_refresh', data.refreshToken);
+    window.dispatchEvent(new Event('candidate-auth-changed'));
     await checarPerfil();
     atualizarHeaderUsuario();
     if (!cadastroCompleto) abrirModal('cad');

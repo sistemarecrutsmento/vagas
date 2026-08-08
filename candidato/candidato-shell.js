@@ -8,6 +8,12 @@
   // ao redirecionar. A detecção pelo contexto evita shells aninhados.
   const frameMode = url.searchParams.get('candidate_shell') === 'frame' || window.top !== window.self;
   const authenticated = !!localStorage.getItem('candidato_token');
+  // O login acontece dentro da página pública. Como o shell é avaliado antes
+  // do envio do formulário, ele precisa reavaliar a autenticação sem exigir
+  // que o usuário recarregue manualmente.
+  window.addEventListener('candidate-auth-changed', () => {
+    if (localStorage.getItem('candidato_token')) location.reload();
+  });
   const currentFile = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const titles = {
     index: 'Vagas', painel: 'Meu perfil', perfil: 'Meu perfil', entrevistas: 'Entrevistas',
