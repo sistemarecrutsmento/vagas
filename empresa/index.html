@@ -1193,5 +1193,31 @@
 <script src="app.js?v=relatorios-centro-inteligencia-6"></script>
 <script src="chat-rh-flutuante.js?v=empresa-rh-chat-3"></script>
 <script src="chat-candidatos-flutuante.js?v=empresa-candidato-chat-2"></script>
+<script>
+// Fallback direto do login: não depende do interceptor de sessões.
+window.fazerLogin = async function() {
+  const email = document.getElementById('login-email')?.value?.trim() || '';
+  const senha = document.getElementById('login-senha')?.value || '';
+  const btn = document.getElementById('btn-entrar');
+  const alertBox = document.getElementById('alert-login');
+  if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
+  if (alertBox) alertBox.innerHTML = '';
+  try {
+    const r = await fetch('https://recrutamento-api-novo.onrender.com/api/auth/login-empresa', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, senha}) });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && data.token) {
+      localStorage.setItem('empresa_token', data.token);
+      if (data.refresh_token) localStorage.setItem('empresa_refresh', data.refresh_token);
+      if (data.usuario) localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
+      token = data.token;
+      if (typeof mostrarApp === 'function') mostrarApp();
+      return;
+    }
+    if (alertBox) alertBox.innerHTML = '<div class="alert alert-erro">' + (data.erro || 'E-mail ou senha inválidos') + '</div>';
+  } catch (_) {
+    if (alertBox) alertBox.innerHTML = '<div class="alert alert-erro">Não foi possível conectar ao servidor</div>';
+  } finally { if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; } }
+};
+</script>
 </body>
 </html>
