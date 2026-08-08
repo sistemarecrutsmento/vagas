@@ -36,9 +36,7 @@ async function fazerLogin() {
     }
     if (r.ok && data.token) {
       token = data.token;
-      localStorage.setItem('empresa_token', data.token);
-      if (data.refreshToken) localStorage.setItem('empresa_refresh', data.refreshToken);
-      if (data.usuario) localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
+      localStorage.setItem('empresa_token', token);
       mostrarApp();
     } else {
       document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao entrar'}</div>`;
@@ -1559,17 +1557,7 @@ function dashOpenVaga(id){const n=dashValidId(id);if(n)dashNavigate('vagas',{vag
 function dashOpenStage(stage){const n=dashValidId(stage);if(n)dashNavigate('candidatos',{etapa:n});}
 function dashApplyOfficialState(){const q=dashApplyQuery();if(q.page==='vagas'){const st=document.getElementById('vagas-filtro-status');if(st)st.value=vagasState.status||'';}if(q.page==='candidatos'){const st=document.getElementById('candidatos-filtro-vaga');if(st)st.value=candidatosState.vaga||'';document.querySelectorAll('#candidatos-stage-filters button').forEach(b=>b.classList.toggle('ativo',String(b.dataset.etapa||'')===String(candidatosState.etapa||'')));}if(q.page==='contratacoes'){const st=document.getElementById('contratacoes-filtro-status');if(st)st.value=contratacoesState.status||'';}}
 function irPara(page,opts={}){const el=document.getElementById('page-'+page);if(!el)return;window.__empresaInternalPage=page;if(!opts.keepQuery)history.replaceState(null,'','?'+dashQuery(page,opts.query||{}).toString());dashApplyQuery();dashApplyOfficialState();document.querySelectorAll('.page').forEach(p=>p.classList.remove('ativo'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('ativo'));el.classList.add('ativo');document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('ativo');document.getElementById('aside')?.classList.remove('aberto');document.getElementById('app')?.classList.remove('aside-aberto');if(page==='dashboard'){carregarDashboard();return;}if(page==='vagas'){carregarVagasAdmin();return;}if(page==='candidatos'){carregarCandidatos();return;}if(page==='candidaturas'){carregarCandidaturas();return;}if(page==='propostas'){carregarPropostas();return;}if(page==='contratacoes'){carregarContratacoes();return;}if(page==='talentos'){carregarBancoTalentos();return;}if(page==='relatorios'){carregarRelatorios();return;}if(page==='configuracoes'){carregarConfiguracoes();return;}if(page==='equipe'){carregarEquipe();return;}if(page==='agenda'){carregarAgenda('hoje');}if(page==='analisar'){carregarAnalisarEmbed();}}
-function mostrarApp(){
-  const loginPage=document.getElementById('login-page');
-  const app=document.getElementById('app');
-  if(loginPage) loginPage.style.display='none';
-  if(app){app.classList.add('logado');app.style.display='';}
-  try{carregarUsuarioSidebar();}catch(e){console.error('[empresa] erro ao carregar usuário da barra lateral',e);}
-  try{if(typeof dashApplyQuery==='function') dashApplyQuery();}catch(e){console.error('[empresa] erro ao aplicar query do dashboard',e);}
-  try{if(typeof dashApplyOfficialState==='function') dashApplyOfficialState();}catch(e){console.error('[empresa] erro ao aplicar estado oficial',e);}
-  try{const q=typeof dashReadQuery==='function'?dashReadQuery():{};const allowed=['dashboard','vagas','candidatos','candidaturas','propostas','contratacoes','talentos','relatorios','agenda','equipe','configuracoes','analisar'];irPara(allowed.includes(q.page)?q.page:'dashboard',{keepQuery:true});}catch(e){console.error('[empresa] erro ao abrir dashboard',e);}
-  try{carregarContadorNotificacoes();}catch(e){console.error('[empresa] erro ao carregar notificações',e);}
-}
+function mostrarApp(){document.getElementById('login-page').style.display='none';document.getElementById('app').classList.add('logado');carregarUsuarioSidebar();dashApplyQuery();const q=dashReadQuery();const allowed=['dashboard','vagas','candidatos','candidaturas','propostas','contratacoes','talentos','relatorios','agenda','equipe','configuracoes','analisar'];irPara(allowed.includes(q.page)?q.page:'dashboard',{keepQuery:true});carregarContadorNotificacoes();}
 async function carregarDashboardV2(){await carregarDashboardBase();}
 document.addEventListener('keydown',dashboardModalKeydown);
 document.addEventListener('click',e=>{
