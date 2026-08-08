@@ -338,7 +338,7 @@ async function carregarProposta(candidaturaId) {
   if (!bloco) return;
   bloco.innerHTML = '<div class="spinner"></div>';
   try {
-    const r = await fetchAuth(API + '/api/candidato/candidatura/ + candidaturaId + '/proposta', {
+    const r = await fetchAuth(API + '/api/candidato/candidatura/' + candidaturaId + '/proposta', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
     if (r.status === 401) { logout(); return; }
