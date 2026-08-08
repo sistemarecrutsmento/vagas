@@ -20,8 +20,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // ===== AUTH =====
 async function fazerLogin() {
-  const email = document.getElementById('login-email').value;
+  const email = document.getElementById('login-email').value.trim();
   const senha = document.getElementById('login-senha').value;
+  const button = document.getElementById('btn-entrar');
+  const alertBox = document.getElementById('alert-login');
+  if (!email || !senha) {
+    if (alertBox) alertBox.innerHTML = '<div class="alert alert-erro">Informe e-mail e senha.</div>';
+    return;
+  }
+  if (button) { button.disabled = true; button.textContent = 'Entrando...'; }
+  if (alertBox) alertBox.innerHTML = '<div class="alert">Verificando seus dados...</div>';
   try {
     const r = await fetch(API + '/api/auth/login-empresa', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -31,6 +39,9 @@ async function fazerLogin() {
     if (r.ok && data.requer_2fa && data.pending_token) {
       mostrarLogin2fa(data.pending_token);
       return;
+    }
+    if (r.ok && data.requer_2fa && !data.pending_token) {
+      throw new Error('A verificação em duas etapas não foi iniciada. Recarregue a página e tente novamente.');
     }
     if (r.ok && data.token) {
       token = data.token;
@@ -49,7 +60,12 @@ async function fazerLogin() {
       document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao entrar'}</div>`;
     }
   } catch (e) {
-    document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">Erro de conexão</div>`;
+    if (alertBox) alertBox.innerHTML = `<div class="alert alert-erro">${escapeHtml(e.message || 'Erro de conexão')}</div>`;
+  } finally {
+    if (button && document.getElementById('login-page')?.style.display !== 'none') {
+      button.disabled = false;
+      button.textContent = 'Entrar';
+    }
   }
 }
 
