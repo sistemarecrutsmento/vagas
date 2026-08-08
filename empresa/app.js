@@ -71,15 +71,18 @@ async function fazerLogin() {
 }
 
 function sair() {
-  // Revoga o refresh token no backend e limpa access + refresh localmente.
-  // O logout anterior removia apenas empresa_token; o authInit o renovava
-  // imediatamente e o usuário continuava logado.
-  if (typeof window.authLogout === 'function') {
-    window.authLogout();
-    return;
+  // Limpa a sessão ANTES de aguardar a rede. Assim, mesmo se o Render
+  // demorar no endpoint de logout, o authInit não consegue renovar a sessão.
+  const refresh = localStorage.getItem('empresa_refresh');
+  if (refresh) {
+    fetch(API + '/api/auth/logout', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: refresh }), __native: true
+    }).catch(() => {});
   }
-  ['empresa_token', 'empresa_refresh', 'empresa_usuario'].forEach(k => localStorage.removeItem(k));
-  location.reload();
+  if (window.authTokens?.clearSessionAll) window.authTokens.clearSessionAll();
+  else ['empresa_token', 'empresa_refresh', 'empresa_usuario'].forEach(k => localStorage.removeItem(k));
+  window.location.replace('index.html?logout=' + Date.now());
 }
 
 function mostrarLogin2fa(pendingToken) {
