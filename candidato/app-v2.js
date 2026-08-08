@@ -463,14 +463,20 @@ function abrirDetalhes(id) {
       setTxt('det-nivel', v.nivel || 'Não informado');
       setTxt('det-area', v.area || 'Não informado');
       setTxt('det-area-badge', v.area || 'Área não informada');
-      const salMin = Number(v.salario_min) || null;
-      const salMax = Number(v.salario_max) || null;
-      const sal = (salMin && salMax) ? `R$ ${salMin.toLocaleString('pt-BR')} - R$ ${salMax.toLocaleString('pt-BR')}` : (v.salario || 'Não informado');
+      const temMin = v.salario_min !== null && v.salario_min !== undefined && String(v.salario_min).trim() !== '';
+      const temMax = v.salario_max !== null && v.salario_max !== undefined && String(v.salario_max).trim() !== '';
+      const formatarSalario = valor => `R$ ${Number(valor).toLocaleString('pt-BR')}`;
+      const sal = temMin && temMax
+        ? `${formatarSalario(v.salario_min)} - ${formatarSalario(v.salario_max)}`
+        : temMin ? formatarSalario(v.salario_min)
+        : temMax ? formatarSalario(v.salario_max)
+        : 'Não informado';
       setTxt('det-salario', sal);
-      setTxt('det-descricao', v.descricao || 'Sem descrição');
+      setTxt('det-descricao', v.descricao, 'Descrição não informada');
       renderDetalheTexto('det-requisitos', v.requisitos, 'Requisitos não informados');
+      // O endpoint pode não retornar benefícios; nesse caso, mantém a seção e informa a ausência.
       const blocoBeneficios = document.getElementById('det-bloco-beneficios');
-      if (blocoBeneficios) blocoBeneficios.hidden = !String(v.beneficios || '').trim();
+      if (blocoBeneficios) blocoBeneficios.hidden = false;
       renderDetalheTexto('det-beneficios', v.beneficios, 'Benefícios não informados');
       // Processo seletivo (vem do admin em 'etapas' como JSON [{nome:"..."}])
       const procEl = document.getElementById('det-processo');
