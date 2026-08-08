@@ -32,6 +32,13 @@
   window.fetch = async function(url, opts = {}) {
     const apiUrl = typeof url === 'string' && url.startsWith('http') ? url : url;
 
+    // Login e refresh são endpoints públicos: nunca podem ser interceptados
+    // pelo authFetch, senão uma tentativa de login pode entrar no fluxo de
+    // refresh de uma sessão antiga e ser redirecionada antes de concluir.
+    if (apiUrl.includes('/api/auth/login-empresa') || apiUrl.includes('/api/auth/refresh')) {
+      return originalFetch(url, opts);
+    }
+
     // Se a request tem Authorization manual ou é uma chamada recursiva
     // (authFetch já vai chamar originalFetch via __nativeFetch)
     if (opts && opts.__native) {
