@@ -1957,7 +1957,7 @@ async function toggleFavoritar() {
   if (!tokenCandidato || !_vagaFavoritaId) { abrirModal('login'); return; }
   const method = _isFavorito ? 'DELETE' : 'POST';
   try {
-    const r = await fetchAuth(API + '/api/candidato/favoritos/ + _vagaFavoritaId, {
+    const r = await fetchAuth(API + '/api/candidato/favoritos/' + _vagaFavoritaId, {
       method,
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
@@ -1976,7 +1976,7 @@ async function carregarMatchCandidato(vagaId) {
   const det = document.getElementById('match-detalhes');
   if (!bloco || !tokenCandidato) return;
   try {
-    const r = await fetchAuth(API + '/api/candidato/vagas/ + vagaId + '/match', {
+    const r = await fetchAuth(API + '/api/candidato/vagas/' + vagaId + '/match', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
     if (!r.ok) { bloco.style.display = 'none'; return; }
