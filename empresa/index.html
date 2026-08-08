@@ -1190,7 +1190,7 @@
 
 <script src="auth-helper.js?v=empresa-admin-restore3"></script>
 <script src="empresa-auth-patch.js?v=empresa-admin-restore3"></script>
-<script src="app.js?v=relatorios-centro-inteligencia-6"></script>
+<script src="app.js?v=relatorios-centro-inteligencia-7"></script>
 <script src="chat-rh-flutuante.js?v=empresa-rh-chat-4"></script>
 <script src="chat-candidatos-flutuante.js?v=empresa-candidato-chat-3"></script>
 <script>
@@ -1205,9 +1205,14 @@ window.fazerLogin = async function() {
   try {
     const r = await fetch('https://recrutamento-api-novo.onrender.com/api/auth/login-empresa', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, senha}) });
     const data = await r.json().catch(() => ({}));
+    if (r.ok && data.requer_2fa && data.pending_token) {
+      window.__empresaPending2FA = data.pending_token;
+      if (alertBox) alertBox.innerHTML = '<div class="alert" style="background:#fff8e1;color:#5d4500;border:1px solid #e6c84f"><b>Verificação em duas etapas</b><br>Digite o código de 6 dígitos do seu aplicativo autenticador.<br><input id="empresa-2fa-codigo" inputmode="numeric" maxlength="10" style="width:100%;margin-top:10px;padding:10px;border:1px solid #ccc;border-radius:6px" placeholder="Código de segurança"><button type="button" class="btn btn-primary" style="margin-top:10px" onclick="verificar2faEmpresa()">Confirmar código</button></div>';
+      return;
+    }
     if (r.ok && data.token) {
       localStorage.setItem('empresa_token', data.token);
-      if (data.refresh_token) localStorage.setItem('empresa_refresh', data.refresh_token);
+      if (data.refreshToken) localStorage.setItem('empresa_refresh', data.refreshToken);
       if (data.usuario) localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
       token = data.token;
       if (typeof mostrarApp === 'function') mostrarApp();
@@ -1217,6 +1222,20 @@ window.fazerLogin = async function() {
   } catch (_) {
     if (alertBox) alertBox.innerHTML = '<div class="alert alert-erro">Não foi possível conectar ao servidor</div>';
   } finally { if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; } }
+};
+window.verificar2faEmpresa = async function() {
+  const codigo = document.getElementById('empresa-2fa-codigo')?.value?.trim() || '';
+  const alertBox = document.getElementById('alert-login');
+  try {
+    const r = await fetch('https://recrutamento-api-novo.onrender.com/api/empresa/2fa/verificar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ pending_token: window.__empresaPending2FA, codigo }) });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.token) { if (alertBox) alertBox.innerHTML = '<div class="alert alert-erro">' + (data.erro || 'Código inválido') + '</div>'; return; }
+    localStorage.setItem('empresa_token', data.token);
+    if (data.refreshToken) localStorage.setItem('empresa_refresh', data.refreshToken);
+    if (data.usuario) localStorage.setItem('empresa_usuario', JSON.stringify(data.usuario));
+    token = data.token;
+    if (typeof mostrarApp === 'function') mostrarApp();
+  } catch (_) { if (alertBox) alertBox.innerHTML = '<div class="alert alert-erro">Não foi possível verificar o código</div>'; }
 };
 </script>
 </body>
