@@ -254,7 +254,7 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
   .candidate-footer-logo { width: 128px; height: 62px; }
   .candidate-footer p { font-size: 10px; }
   .candidate-home .modal-overlay { align-items: flex-end; padding: 8px 8px max(8px,env(safe-area-inset-bottom)); }
-  .candidate-home .modal { width: 100%; max-height: calc(100dvh - 16px); border-radius: 17px 17px 12px 12px; overflow: hidden auto; }
+  .candidate-home .modal { width: 100%; max-width: none; max-height: calc(100dvh - 16px); border-radius: 17px 17px 12px 12px; overflow: hidden auto; }
   .candidate-home .modal-header { padding: 14px 16px 11px; }
   .candidate-home .modal-body { padding: 17px 16px max(20px,env(safe-area-inset-bottom)); }
   .candidate-home .modal-close { width: 42px; height: 42px; }
