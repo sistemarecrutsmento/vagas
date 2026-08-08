@@ -420,7 +420,7 @@ async function carregarPaginaCandidato() {
   if (!tokenCandidato) return;
   let perfil = null;
   try {
-    const r = await fetch(API + '/api/candidato/perfil', {
+    const r = await fetchAuth(API + '/api/candidato/perfil', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
     if (r.status === 401) { logout(); return; }
@@ -522,7 +522,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     // Fase 9: verifica se onboarding foi concluído
     try {
-      const ro = await fetch(API + '/api/candidato/onboarding', {
+      const ro = await fetchAuth(API + '/api/candidato/onboarding', {
         headers: { 'Authorization': 'Bearer ' + tokenCandidato }
       });
       if (ro.ok) {
