@@ -88,6 +88,17 @@
   // backend/API or page-specific functionality is rewritten.
   const frame = document.createElement('iframe');
   frame.className = 'candidate-shell-frame'; frame.title = titleFor(currentFile); frame.setAttribute('aria-label', 'Conteúdo do portal do candidato');
+  const resizeFrame = () => {
+    try {
+      const doc = frame.contentDocument;
+      frame.style.height = Math.max(window.innerHeight - 130, doc.documentElement.scrollHeight, doc.body.scrollHeight) + 'px';
+    } catch (_) {}
+  };
+  window.addEventListener('message', e => {
+    if (e.source !== frame.contentWindow || !e.data || e.data.type !== 'candidate-modal') return;
+    if (window.matchMedia('(max-width: 640px)').matches && e.data.open) frame.style.height = Math.max(window.innerHeight - 130, 520) + 'px';
+    else resizeFrame();
+  });
   const cleanCurrent = () => { const u = new URL(location.href); u.searchParams.delete('candidate_shell'); return u.pathname + u.search + u.hash; };
   const frameURL = path => { const u = new URL(path, location.origin); u.searchParams.set('candidate_shell', 'frame'); return u.pathname + u.search + u.hash; };
   const original = [...document.body.children].filter(el => el !== header && el !== subheader && el !== overlay && el !== sidebar);
@@ -101,7 +112,7 @@
     try {
       const doc = frame.contentDocument;
       doc.addEventListener('click', e => { const a = e.target.closest && e.target.closest('a'); if (!a || a.target === '_blank' || !a.href) return; const u = new URL(a.href, location.origin); if (u.origin !== location.origin || !u.pathname.startsWith(ROOT) || a.hasAttribute('download')) return; e.preventDefault(); const path = u.pathname + u.search + u.hash; history.pushState({}, '', path); loadFrame(path); }, true);
-      frame.style.height = Math.max(window.innerHeight - 130, doc.documentElement.scrollHeight, doc.body.scrollHeight) + 'px';
+      resizeFrame();
     } catch (_) {}
   });
   window.addEventListener('popstate', () => loadFrame(cleanCurrent()));

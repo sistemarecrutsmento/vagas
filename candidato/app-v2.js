@@ -317,7 +317,8 @@ async function carregarVagas() {
         if (/^[A-Za-z]{2}$/.test(cidade)) params.set('estado', cidade.toUpperCase());
         else params.set('cidade', cidade);
       }
-      if (categoriaAtiva) params.set('area', categoriaAtiva);
+      // A área é filtrada localmente para funcionar também quando a API retorna
+      // nomes equivalentes (por exemplo, "Operações" e "Operacional").
       if (params.toString()) url += '?' + params;
       const ctrl = new AbortController();
       const timeoutId = setTimeout(() => ctrl.abort(), 30000);
@@ -325,6 +326,18 @@ async function carregarVagas() {
       clearTimeout(timeoutId);
       const data = await r.json();
       vagas = data.vagas || [];
+      if (categoriaAtiva) {
+        const normalizar = valor => String(valor || '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const area = normalizar(categoriaAtiva);
+        const equivalencias = {
+          'operacional': ['operacional', 'operacao', 'operacoes'],
+          'administracao / gestao': ['administrativo', 'administracao', 'gestao'],
+          'atendimento / vendas': ['atendimento', 'vendas'],
+          'saude / farmacia': ['saude', 'farmacia']
+        };
+        const termos = equivalencias[area] || [area];
+        vagas = vagas.filter(v => termos.some(t => normalizar(v.area).includes(t)));
+      }
     }
     window.vagas = vagas;
     if (vagas.length === 0) {
@@ -351,7 +364,7 @@ async function carregarVagas() {
       if (limiteVagas < vagas.length) {
         const mais = document.createElement('button');
         mais.type = 'button';
-        mais.className = 'btn btn-outline';
+        mais.className = 'btn-ver-mais';
         mais.textContent = 'Ver mais';
         mais.style.cssText = 'grid-column:1/-1;justify-self:center;margin:8px auto 0;min-width:140px;';
         mais.addEventListener('click', () => { limiteVagas += 20; renderVagas(); });
@@ -429,6 +442,7 @@ function abrirDetalhes(id) {
         if (bm) bm.style.display = 'none';
       }
       document.getElementById('modal-detalhes').classList.add('aberto');
+      if (window.top !== window.self) window.parent.postMessage({ type: 'candidate-modal', open: true }, '*');
       // Analytics: vaga visualizada
       if (window.vagiasTrack) window.vagiasTrack('vaga_visualizada', { vaga_id: id, metadata: { origem: 'portal' } });
     })
@@ -542,6 +556,7 @@ function abrirModal(id) {
 function fecharModal(id) {
   const modal = document.getElementById('modal-' + id);
   if (modal) modal.classList.remove('aberto');
+  if (id === 'detalhes' && window.top !== window.self) window.parent.postMessage({ type: 'candidate-modal', open: false }, '*');
 }
 
 // ===== WIZARD DE CADASTRO (4 ETAPAS) =====
