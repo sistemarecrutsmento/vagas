@@ -4,7 +4,9 @@
 
   const ROOT = '/candidato/';
   const url = new URL(location.href);
-  const frameMode = url.searchParams.get('candidate_shell') === 'frame';
+  // Dentro do shell persistente, páginas internas podem perder o parâmetro
+  // ao redirecionar. A detecção pelo contexto evita shells aninhados.
+  const frameMode = url.searchParams.get('candidate_shell') === 'frame' || window.top !== window.self;
   const authenticated = !!localStorage.getItem('candidato_token');
   const currentFile = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const titles = {

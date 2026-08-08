@@ -81,7 +81,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v14">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v15">
 </head>
 <body>
 
@@ -183,7 +183,8 @@ async function carregar() {
 
     const prog = Math.round((det.progresso || 0) * 100);
 
-    document.getElementById('titulo').textContent = det.vaga_titulo || 'Candidatura';
+    const titulo = document.getElementById('titulo');
+    if (titulo) titulo.textContent = det.vaga_titulo || 'Candidatura';
 
     let html = `
       <div class="card">
@@ -253,6 +254,6 @@ window.addEventListener('DOMContentLoaded', async () => {
       });
     }
   </script>
-  <script src="candidato-shell.js?v=candidato-shell-v14"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v15"></script>
 </body>
 </html>
