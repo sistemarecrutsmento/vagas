@@ -336,10 +336,15 @@ async function carregarVagas() {
       const sMin = Number(v.salario_min) || null;
       const sMax = Number(v.salario_max) || null;
       const salTexto = (sMin && sMax) ? `R$ ${sMin.toLocaleString('pt-BR')} - R$ ${sMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
-      const base = CANDIDATO_EMPRESA_SLUG ? '/candidato/' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) + '/' : '/candidato/';
-      const detalhe = base + '?vaga=' + encodeURIComponent(v.id) + (CANDIDATO_EMPRESA_SLUG ? '&slug=' + encodeURIComponent(CANDIDATO_EMPRESA_SLUG) : '');
-      return `<a class="vaga-card" href="${detalhe}" style="text-decoration:none;color:inherit;display:block;"><div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div><h3>${escapeHtml(v.titulo)}</h3><div class="vaga-tags">${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}${v.cidade ? `<span class="tag">${escapeHtml(v.cidade)}</span>` : ''}</div><div class="salario">${escapeHtml(salTexto)}</div><div class="footer"><span class="data">${formatarData(v.criada_em)}</span><span class="cta">Ver detalhes →</span></div></a>`;
+      return `<div class="vaga-card" role="button" tabindex="0" data-vaga-id="${Number(v.id)}" style="cursor:pointer;"><div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div><h3>${escapeHtml(v.titulo)}</h3><div class="vaga-tags">${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}${v.cidade ? `<span class="tag">${escapeHtml(v.cidade)}</span>` : ''}</div><div class="salario">${escapeHtml(salTexto)}</div><div class="footer"><span class="data">${formatarData(v.criada_em)}</span><span class="cta">Ver detalhes →</span></div></div>`;
     }).join('');
+    grid.querySelectorAll('[data-vaga-id]').forEach(card => {
+      const abrir = () => abrirDetalhes(card.dataset.vagaId);
+      card.addEventListener('click', abrir);
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); }
+      });
+    });
     if (contador) contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;"><div class="empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 21 19H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Não foi possível carregar as vagas</h3><p>O servidor pode estar iniciando. Tente novamente.</p><button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="carregarVagas()">Tentar novamente</button></div>`;
