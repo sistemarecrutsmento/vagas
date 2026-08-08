@@ -269,6 +269,10 @@
 <!-- Toast (substitui alert) -->
 <div class="toast" id="toast"></div>
 
+<script src="auth-helper.js?v=etapa2_2026_07_27"></script>
+<script>
+    setStorageKeys('candidato_token', 'candidato_refresh');
+</script>
 <script>
     const API = "https://recrutamento-api-novo.onrender.com";
   // === UTILITÁRIOS ===
@@ -304,7 +308,7 @@
       return;
     }
     try {
-      const r = await fetch(API + '/api/candidato/perfil', {
+      const r = await authFetch(API + '/api/candidato/perfil', {
         headers: { 'Authorization': 'Bearer ' + tokenCandidato }
       });
       if (r.status === 401 || r.status === 403) { logout(); return; }
@@ -323,7 +327,7 @@
   async function carregarEntrevistas() {
     if (!tokenCandidato) return;
     try {
-      const r = await fetch(API + '/api/candidato/entrevistas', {
+      const r = await authFetch(API + '/api/candidato/entrevistas', {
         headers: { 'Authorization': 'Bearer ' + tokenCandidato }
       });
       if (r.status === 401 || r.status === 403) { logout(); return; }
