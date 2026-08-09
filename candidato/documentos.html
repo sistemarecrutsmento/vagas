@@ -58,7 +58,7 @@
   .doc-conteudo { flex: 1; min-width: 0; }
   .doc-label { font-weight: 600; font-size: 14px; color: var(--preto); margin-bottom: 2px; }
   .doc-extra { font-size: 12px; color: var(--cinza); }
-  .doc-extra a { color: var(--azul); text-decoration: underline; }
+  .doc-extra a, .doc-extra .btn-arquivo { color: var(--azul); text-decoration: underline; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
   .doc-extra.justificativa { color: var(--vermelho); margin-top: 4px; }
   .doc-status { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; flex-shrink: 0; }
   .doc-status.s-pendente { background: var(--amarelo-bg); color: var(--amarelo); }
@@ -242,6 +242,22 @@ function render() {
   document.getElementById('conteudo').innerHTML = html;
 }
 
+async function abrirArquivoDocumento(docId) {
+  if (!candidaturaId || !TOKEN || !docId) return;
+  try {
+    const r = await fetch(`${API}/api/candidatura/${candidaturaId}/documentos/${encodeURIComponent(docId)}/arquivo`, {
+      headers: { Authorization: `Bearer ${TOKEN}` }
+    });
+    if (!r.ok) throw new Error('download');
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank', 'noopener');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (_) {
+    alert('Não foi possível abrir o arquivo. Verifique sua sessão e tente novamente.');
+  }
+}
+
 function renderDoc(doc) {
   const ex = docsExistentes[doc.tipo];
   const status = ex ? ex.status : null;
@@ -268,7 +284,7 @@ function renderDoc(doc) {
     if (ex) html += `<button type="button" class="arq-limpar" onclick="arquivoLimpar('${doc.tipo}')" title="Remover">×</button>`;
     html += `</div>`;
     if (ex && ex.arquivo_url) {
-      html += `<div class="doc-extra"><a href="${ex.arquivo_url}" target="_blank" rel="noopener">👁️ Ver arquivo enviado</a></div>`;
+      html += `<div class="doc-extra"><button type="button" class="btn-arquivo" onclick="abrirArquivoDocumento(${ex.id})">👁️ Ver arquivo enviado</button></div>`;
     }
   }
 
