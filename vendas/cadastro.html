@@ -226,6 +226,8 @@
     font-size: 12px; color: var(--cinza-500);
     margin-bottom: 10px;
   }
+  .plano-preco { color: var(--vinho); font-size: 22px; font-weight: 800; margin: 8px 0 4px; }
+  .plano-teste { color: var(--vinho-claro); font-size: 11px; font-weight: 700; margin-bottom: 8px; }
   .plano-feats {
     font-size: 12.5px; color: var(--cinza-700);
     list-style: none;
@@ -244,6 +246,14 @@
     padding: 3px 8px; border-radius: 10px;
     text-transform: uppercase; letter-spacing: 0.5px;
   }
+
+  .modal-politica { display:none; position:fixed; inset:0; z-index:100; align-items:center; justify-content:center; padding:20px; background:rgba(16,5,11,.68); }
+  .modal-politica.aberta { display:flex; }
+  .modal-caixa { width:min(760px,100%); height:min(78vh,680px); display:flex; flex-direction:column; overflow:hidden; border-radius:var(--radius-lg); background:var(--branco); box-shadow:0 20px 70px rgba(54,9,28,.3); }
+  .modal-topo { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; color:var(--branco); background:var(--vinho-escuro); }
+  .modal-topo strong { font-size:16px; }
+  .modal-fechar { border:0; color:var(--branco); background:transparent; font-size:26px; line-height:1; cursor:pointer; }
+  .modal-conteudo { flex:1; border:0; width:100%; }
 
   /* ============== ALERTAS ============== */
   .alerta {
@@ -486,40 +496,33 @@
     <!-- STEP 2: PLANO -->
     <div class="step-painel" data-painel="2" style="display:none;">
       <h2>Escolha o plano ideal</h2>
-      <p class="sub">Você pode mudar de plano a qualquer momento. Todos os planos têm 7 dias grátis.</p>
+      <p class="sub">Você pode mudar de plano a qualquer momento. Todos os planos têm 30 dias grátis.</p>
 
       <div class="planos-grid">
         <div class="plano-card" data-plano="essencial" onclick="selecionarPlano(this)">
           <div class="plano-titulo">Essencial</div>
-          <div class="plano-sub">Para pequenas empresas</div>
+          <div class="plano-sub">Ideal para empresas que estão começando a organizar seu recrutamento.</div>
+          <div class="plano-preco">R$ 149/mês</div>
+          <div class="plano-teste">30 dias grátis</div>
           <ul class="plano-feats">
-            <li>Até 3 usuários</li>
-            <li>5 vagas ativas</li>
-            <li>Pipeline básico</li>
-            <li>Suporte por e-mail</li>
+            <li>5 usuários</li><li>Vagas ilimitadas</li><li>Pipeline de candidatos</li><li>Comunicação com candidatos</li><li>Agendamento de entrevistas</li><li>Relatórios básicos</li>
           </ul>
         </div>
         <div class="plano-card selecionado" data-plano="profissional" onclick="selecionarPlano(this)">
           <div class="plano-badge">Mais escolhido</div>
           <div class="plano-titulo">Profissional</div>
-          <div class="plano-sub">Para empresas em crescimento</div>
+          <div class="plano-sub">Para empresas que precisam de mais recursos e controle.</div>
+          <div class="plano-preco">R$ 249/mês</div>
           <ul class="plano-feats">
-            <li>Até 10 usuários</li>
-            <li>30 vagas ativas</li>
-            <li>Pipeline customizado</li>
-            <li>Chat e entrevistas</li>
-            <li>Suporte prioritário</li>
+            <li>10 usuários</li><li>Tudo do plano Essencial</li><li>Relatórios avançados</li><li>Documentos e propostas</li><li>Agenda integrada</li><li>Etiquetas e filtros</li><li>Exportação de dados</li>
           </ul>
         </div>
         <div class="plano-card" data-plano="enterprise" onclick="selecionarPlano(this)">
           <div class="plano-titulo">Enterprise</div>
-          <div class="plano-sub">Para grandes operações</div>
+          <div class="plano-sub">Para operações maiores e necessidades específicas.</div>
+          <div class="plano-preco">R$ 399/mês</div>
           <ul class="plano-feats">
-            <li>Usuários ilimitados</li>
-            <li>Vagas ilimitadas</li>
-            <li>Multi-unidade</li>
-            <li>API dedicada</li>
-            <li>Suporte 24/7</li>
+            <li>Usuários ilimitados</li><li>Tudo do plano Profissional</li><li>Configurações personalizadas</li><li>Permissões avançadas</li><li>Integrações sob demanda</li><li>Suporte prioritário</li><li>Onboarding dedicado</li>
           </ul>
         </div>
       </div>
@@ -549,8 +552,9 @@
           <input type="text" id="admin_cargo" placeholder="Ex: Gerente de RH" maxlength="60" />
         </div>
         <div class="field">
-          <label>Celular <span class="opc">(opcional)</span></label>
-          <input type="text" id="admin_celular" placeholder="(11) 99999-9999" maxlength="20" />
+          <label>Telefone <span class="req">*</span></label>
+          <input type="text" id="admin_celular" placeholder="(11) 99999-9999" maxlength="20" required />
+          <span class="field-erro">Informe um telefone válido</span>
         </div>
         <div class="field full">
           <label>E-mail de acesso <span class="req">*</span></label>
@@ -570,7 +574,7 @@
       </div>
 
       <div class="alerta info" style="margin-top:20px;">
-        <span>Ao continuar, você concorda com os <a href="/termos-de-uso.html" target="_blank" rel="noopener">termos de uso</a> e a <a href="/politica-de-privacidade.html" target="_blank" rel="noopener">política de privacidade</a>.</span>
+        <span>Ao continuar, você concorda com os <a href="#" onclick="abrirPolitica('Termos de Uso','/termos-de-uso.html'); return false;">termos de uso</a> e a <a href="#" onclick="abrirPolitica('Política de Privacidade','/politica-de-privacidade.html'); return false;">política de privacidade</a>.</span>
       </div>
 
       <div class="botoes">
@@ -592,7 +596,25 @@
   <section class="prova-social"><span>EMPRESAS QUE CONFIAM NO VAGASIO</span><div class="logos-fake"><b>nex<span>a</span></b><b>orbita</b><b>VERDE<span>MAR</span></b><b>atlas</b></div></section>
 </div>
 
+<div class="modal-politica" id="modal-politica" role="dialog" aria-modal="true" aria-labelledby="modal-politica-titulo" onclick="if(event.target===this) fecharPolitica()">
+  <div class="modal-caixa">
+    <div class="modal-topo"><strong id="modal-politica-titulo">Termos de Uso</strong><button class="modal-fechar" type="button" onclick="fecharPolitica()" aria-label="Fechar">×</button></div>
+    <iframe class="modal-conteudo" id="modal-politica-frame" title="Conteúdo da política"></iframe>
+  </div>
+</div>
+
 <script>
+  function abrirPolitica(titulo, url) {
+    document.getElementById('modal-politica-titulo').textContent = titulo;
+    document.getElementById('modal-politica-frame').src = url;
+    document.getElementById('modal-politica').classList.add('aberta');
+    document.body.style.overflow = 'hidden';
+  }
+  function fecharPolitica() {
+    document.getElementById('modal-politica').classList.remove('aberta');
+    document.getElementById('modal-politica-frame').src = '';
+    document.body.style.overflow = '';
+  }
   // ===== CONFIG =====
   const API_BASE = 'https://recrutamento-api-novo.onrender.com';
 
@@ -656,11 +678,15 @@
 
   function validarStep3() {
     const admin_nome = $('#admin_nome').value.trim();
+    const admin_celular = $('#admin_celular').value.trim();
     const admin_email = $('#admin_email').value.trim();
     const admin_senha = $('#admin_senha').value;
     const admin_senha_confirma = $('#admin_senha_confirma').value;
     let ok = true;
     if (!admin_nome) { marcarErro('admin_nome'); ok = false; } else desmarcarErro('admin_nome');
+    if (!admin_celular || admin_celular.replace(/\D/g, '').length < 10) {
+      marcarErro('admin_celular'); ok = false;
+    } else desmarcarErro('admin_celular');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(admin_email)) {
       marcarErro('admin_email'); ok = false;
     } else desmarcarErro('admin_email');
