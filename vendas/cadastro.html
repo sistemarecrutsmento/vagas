@@ -76,7 +76,13 @@
   .garantia-icone { font-size: 21px; margin-bottom: 6px; }
   .garantia strong { display: block; color: var(--vinho-escuro); font-size: 13px; margin-bottom: 3px; }
   .garantia span { display: block; color: var(--cinza-500); font-size: 11px; line-height: 1.35; }
-  @media (max-width: 640px) { .garantias { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .garantias { grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 20px 0 0; }
+    .garantia { padding: 9px 5px; border-radius: 8px; }
+    .garantia-icone { font-size: 16px; margin-bottom: 3px; }
+    .garantia strong { font-size: 10px; line-height: 1.2; margin-bottom: 2px; }
+    .garantia span { font-size: 9px; line-height: 1.2; }
+  }
 
   /* ============== CONTAINER ============== */
   .container {
@@ -346,12 +352,6 @@
     <p>Em poucos minutos você terá um ambiente exclusivo para gerenciar vagas, candidatos e contratações da sua empresa.</p>
   </div>
 
-  <section class="garantias" aria-label="Vantagens do cadastro">
-    <div class="garantia"><div class="garantia-icone">🔒</div><strong>Ambiente seguro</strong><span>Seus dados protegidos com criptografia</span></div>
-    <div class="garantia"><div class="garantia-icone">⚡</div><strong>Configuração rápida</strong><span>Em poucos minutos você está pronto para usar</span></div>
-    <div class="garantia"><div class="garantia-icone">✓</div><strong>Sem compromisso</strong><span>30 dias grátis para testar todos os recursos</span></div>
-  </section>
-
   <!-- STEPPER -->
   <div class="stepper">
     <div class="step ativo" data-step="1">
@@ -516,6 +516,12 @@
     </div>
 
   </div><!-- /card -->
+
+  <section class="garantias" aria-label="Vantagens do cadastro">
+    <div class="garantia"><div class="garantia-icone">🔒</div><strong>Ambiente seguro</strong><span>Seus dados protegidos com criptografia</span></div>
+    <div class="garantia"><div class="garantia-icone">⚡</div><strong>Configuração rápida</strong><span>Em poucos minutos está pronto para começar</span></div>
+    <div class="garantia"><div class="garantia-icone">✓</div><strong>Sem compromisso</strong><span>30 dias grátis para testar todos os planos</span></div>
+  </section>
 
   <p class="rodape">
     Já tem conta? <a href="/empresa/login">Entrar no painel</a>
