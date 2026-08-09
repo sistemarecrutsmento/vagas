@@ -1770,8 +1770,8 @@
       try {
         let pdfUrl = null;
         if (file) {
-          if (file.type !== 'application/pdf') {
-            alert('Apenas arquivos PDF são aceitos.');
+          if (file.type !== 'application/pdf' || file.size > 6 * 1024 * 1024) {
+            alert('Apenas arquivos PDF de até 6 MB são aceitos.');
             if (btn) { btn.disabled = false; btn.textContent = '📨 Enviar Proposta'; }
             return;
           }
@@ -1786,7 +1786,7 @@
         const r = await fetch(API + '/api/empresa/candidatura/' + _propostaCandId + '/proposta', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + localStorage.getItem('empresa_token'), 'Content-Type': 'application/json' },
-          body: JSON.stringify({ texto, pdf_url: pdfUrl })
+          body: JSON.stringify({ texto, pdf_url: pdfUrl, pdf_nome: file ? file.name : null })
         });
         const data = await r.json();
         if (!r.ok) throw new Error(data.erro || 'Erro ao enviar');
