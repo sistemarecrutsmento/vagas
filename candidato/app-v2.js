@@ -1055,8 +1055,8 @@ async function loginEntrar(btn) {
         localStorage.setItem('candidato_refresh', data.refreshToken);
       }
       localStorage.setItem('candidato_email', emailLogado);
-      await checarPerfil();
       window.dispatchEvent(new Event('candidate-auth-changed'));
+      await checarPerfil();
       fecharModal('login');
       atualizarHeaderUsuario();
       if (!cadastroCompleto) {
@@ -1117,8 +1117,8 @@ async function processarRetornoSocial() {
     localStorage.setItem('candidato_token', tokenCandidato);
     localStorage.setItem('candidato_email', emailLogado);
     if (data.refreshToken) localStorage.setItem('candidato_refresh', data.refreshToken);
-    await checarPerfil();
     window.dispatchEvent(new Event('candidate-auth-changed'));
+    await checarPerfil();
     atualizarHeaderUsuario();
     if (!cadastroCompleto) abrirModal('cad');
   } catch (e) {
@@ -1927,7 +1927,7 @@ async function carregarFavoritoStatus(vagaId) {
   const btn = document.getElementById('btn-favoritar');
   if (!btn || !tokenCandidato) return;
   try {
-    const r = await fetchAuth(API + '/api/candidato/favoritos', {
+    const r = await fetch(API + '/api/candidato/favoritos', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
     const d = await r.json();
@@ -1957,7 +1957,7 @@ async function toggleFavoritar() {
   if (!tokenCandidato || !_vagaFavoritaId) { abrirModal('login'); return; }
   const method = _isFavorito ? 'DELETE' : 'POST';
   try {
-    const r = await fetchAuth(API + '/api/candidato/favoritos/' + _vagaFavoritaId, {
+    const r = await fetch(API + '/api/candidato/favoritos/' + _vagaFavoritaId, {
       method,
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
@@ -1976,7 +1976,7 @@ async function carregarMatchCandidato(vagaId) {
   const det = document.getElementById('match-detalhes');
   if (!bloco || !tokenCandidato) return;
   try {
-    const r = await fetchAuth(API + '/api/candidato/vagas/' + vagaId + '/match', {
+    const r = await fetch(API + '/api/candidato/vagas/' + vagaId + '/match', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
     if (!r.ok) { bloco.style.display = 'none'; return; }

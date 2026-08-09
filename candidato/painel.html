@@ -205,7 +205,7 @@
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v19">
+  <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v18">
 </head>
 <body>
 
@@ -420,7 +420,7 @@ async function carregarPaginaCandidato() {
   if (!tokenCandidato) return;
   let perfil = null;
   try {
-    const r = await fetchAuth(API + '/api/candidato/perfil', {
+    const r = await fetch(API + '/api/candidato/perfil', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
     if (r.status === 401) { logout(); return; }
@@ -522,7 +522,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     // Fase 9: verifica se onboarding foi concluído
     try {
-      const ro = await fetchAuth(API + '/api/candidato/onboarding', {
+      const ro = await fetch(API + '/api/candidato/onboarding', {
         headers: { 'Authorization': 'Bearer ' + tokenCandidato }
       });
       if (ro.ok) {
@@ -549,6 +549,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   </script>
 <script src="../_shared/analytics.js"></script>
-  <script src="candidato-shell.js?v=candidato-shell-v19"></script>
+  <script src="candidato-shell.js?v=candidato-shell-v18"></script>
 </body>
 </html>

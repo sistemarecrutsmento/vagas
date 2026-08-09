@@ -144,7 +144,7 @@ async function carregarPaginaPerfil() {
   let perfil = null;
   let experiencias = [];
   try {
-    const r = await fetchAuth(API + '/api/candidato/perfil', {
+    const r = await fetch(API + '/api/candidato/perfil', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
     if (r.status === 401) { logout(); return; }

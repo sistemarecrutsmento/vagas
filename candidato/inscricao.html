@@ -175,7 +175,7 @@ function statusClass(s) {
 async function carregarInscricao() {
   try {
     // 1) Buscar todas as candidaturas do candidato
-    const r = await fetchAuth(API + '/api/candidato/candidaturas', {
+    const r = await fetch(API + '/api/candidato/candidaturas', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
     if (r.status === 401) { logout(); return; }
@@ -338,7 +338,7 @@ async function carregarProposta(candidaturaId) {
   if (!bloco) return;
   bloco.innerHTML = '<div class="spinner"></div>';
   try {
-    const r = await fetchAuth(API + '/api/candidato/candidatura/' + candidaturaId + '/proposta', {
+    const r = await fetch(API + '/api/candidato/candidatura/' + candidaturaId + '/proposta', {
       headers: { 'Authorization': 'Bearer ' + tokenCandidato }
     });
     if (r.status === 401) { logout(); return; }
@@ -416,7 +416,7 @@ async function responderProposta(candidaturaId, acao) {
   const body = acao === 'aceitar' ? {} : { motivo: motivoFinal };
 
   try {
-    const r = await fetchAuth(endpoint, {
+    const r = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + tokenCandidato, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
