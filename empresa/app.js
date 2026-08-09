@@ -603,7 +603,7 @@ function baixarFotoVaga(vagaId) {
   section('Descrição',v.descricao||'Sem descrição',8);
   section('Requisitos',v.requisitos||'Não informado',7);
   section('Benefícios',v.beneficios||'Não informado',6);
-  y=Math.min(y,1780); text('Candidate-se pelo portal do candidato',margin,y,24,muted,'600'); text('vagasio.com.br',margin,y+38,26,wine,'800');
+  y=Math.min(y,1780); text('Candidate-se pelo portal do candidato',margin,y,24,muted,'600'); text('vagasio.com.br/candidato',margin,y+38,26,wine,'800');
   canvas.toBlob(blob=>{if(!blob)return;const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`vaga-${String(v.titulo||'oportunidade').toLowerCase().replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'') || v.id}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);},'image/png');
 }
 window.baixarFotoVaga = baixarFotoVaga;
