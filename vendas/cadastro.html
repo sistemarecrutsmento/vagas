@@ -348,6 +348,7 @@
   .header h1 { color: #fff; font-size: 38px; }
   .header h1 .grad { background: linear-gradient(135deg,#fff 0 42%,#C14A7A 75%); -webkit-background-clip: text; background-clip: text; }
   .header p { color: rgba(255,255,255,.86); margin: 0; }
+  .desktop-only { display: block; }
   .stepper { max-width: 455px; margin: 0 auto 22px; padding: 16px 24px; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
   .card { max-width: 646px; margin: 0 auto; padding: 32px; box-shadow: 0 8px 28px rgba(30,10,18,.08); border: 0; }
   .garantias { max-width: 646px; margin: 20px auto 0; }
@@ -377,6 +378,7 @@
     .header { margin-bottom: 22px; }
     .header h1 { font-size: 29px; }
     .header p { font-size: 14px; }
+    .desktop-only { display: none; }
     .stepper { padding: 13px 10px; margin-bottom: 14px; }
     .card { padding: 22px 16px; border-radius: 12px; }
     .card-heading { gap: 11px; align-items:flex-start; }
@@ -456,13 +458,14 @@
           <span class="field-erro">Informe o nome da empresa</span>
         </div>
         <div class="field">
-          <label>CNPJ <span class="opc">(opcional)</span></label>
-          <input type="text" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18" />
-          <span class="field-erro">CNPJ deve ter 14 dígitos</span>
+          <label>CNPJ <span class="req">*</span></label>
+          <input type="text" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18" required />
+          <span class="field-erro">Informe um CNPJ válido com 14 dígitos</span>
         </div>
         <div class="field">
-          <label>Telefone <span class="opc">(opcional)</span></label>
-          <input type="text" id="telefone" placeholder="(11) 99999-9999" maxlength="20" />
+          <label>Telefone <span class="req">*</span></label>
+          <input type="text" id="telefone" placeholder="(11) 99999-9999" maxlength="20" required />
+          <span class="field-erro">Informe um telefone válido</span>
         </div>
         <div class="field full">
           <label>E-mail principal <span class="req">*</span></label>
@@ -636,10 +639,10 @@
       } else desmarcarErro('empresa_nome');
       const telefone = $('#telefone').value.trim();
       const email_principal = $('#email_principal').value.trim();
-      if (cnpj && cnpj.replace(/\D/g, '').length !== 14) {
+      if (!cnpj || cnpj.replace(/\D/g, '').length !== 14) {
         marcarErro('cnpj'); ok = false;
       } else desmarcarErro('cnpj');
-      if (telefone && telefone.replace(/\D/g, '').length < 10) {
+      if (!telefone || telefone.replace(/\D/g, '').length < 10) {
         marcarErro('telefone'); ok = false;
       } else desmarcarErro('telefone');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_principal)) {
