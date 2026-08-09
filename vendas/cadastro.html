@@ -59,19 +59,24 @@
     display: flex; align-items: center; justify-content: space-between;
   }
   .logo {
-    display: flex; align-items: center; gap: 10px;
-    font-weight: 800; font-size: 20px; color: var(--vinho-escuro);
-    text-decoration: none;
+    display: flex; align-items: center; text-decoration: none;
   }
-  .logo-quad {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--vinho), var(--vinho-claro));
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--branco); font-weight: 900; font-size: 18px;
+  .logo-img { display: block; width: 150px; height: auto; }
+  .topo-link { color: var(--cinza-700); font-weight: 500; font-size: 14px; }
+
+  .garantias {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin: 0 0 30px;
+  }
+  .garantia {
+    background: var(--branco); border: 1px solid var(--cinza-200);
+    border-radius: var(--radius-md); padding: 16px 12px; text-align: center;
     box-shadow: var(--sombra-sm);
   }
-  .topo-link { color: var(--cinza-700); font-weight: 500; font-size: 14px; }
+  .garantia-icone { font-size: 21px; margin-bottom: 6px; }
+  .garantia strong { display: block; color: var(--vinho-escuro); font-size: 13px; margin-bottom: 3px; }
+  .garantia span { display: block; color: var(--cinza-500); font-size: 11px; line-height: 1.35; }
+  @media (max-width: 640px) { .garantias { grid-template-columns: 1fr; } }
 
   /* ============== CONTAINER ============== */
   .container {
@@ -327,9 +332,8 @@
 
 <header class="topo">
   <div class="topo-interno">
-    <a href="/" class="logo">
-      <span class="logo-quad">V</span>
-      <span>Vagas.io</span>
+    <a href="/" class="logo" aria-label="Vagas.io — início">
+      <img class="logo-img" src="/assets/logo-vagasio-combr.jpg" alt="Vagas.io.com.br" />
     </a>
     <a href="/" class="topo-link">← Voltar para o site</a>
   </div>
@@ -341,6 +345,12 @@
     <h1>Crie sua <span class="grad">plataforma</span> de recrutamento</h1>
     <p>Em poucos minutos você terá um ambiente exclusivo para gerenciar vagas, candidatos e contratações da sua empresa.</p>
   </div>
+
+  <section class="garantias" aria-label="Vantagens do cadastro">
+    <div class="garantia"><div class="garantia-icone">🔒</div><strong>Ambiente seguro</strong><span>Seus dados protegidos com criptografia</span></div>
+    <div class="garantia"><div class="garantia-icone">⚡</div><strong>Configuração rápida</strong><span>Em poucos minutos você está pronto para usar</span></div>
+    <div class="garantia"><div class="garantia-icone">✓</div><strong>Sem compromisso</strong><span>30 dias grátis para testar todos os recursos</span></div>
+  </section>
 
   <!-- STEPPER -->
   <div class="stepper">
