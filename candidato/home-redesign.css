@@ -94,7 +94,7 @@ body.candidate-home textarea { -webkit-tap-highlight-color: transparent; }
 .candidate-vagas-section .vaga-card .salario { margin-bottom: 12px; color: var(--wine); font-size: 13px; }
 .candidate-vagas-section .vaga-card .footer { padding-top: 12px; border-color: #eee8eb; }
 .candidate-vagas-section .vaga-card .data { font-size: 11px; color: #958b91; }
-.candidate-vagas-section .vaga-card .cta { font-size: 11px; color: var(--wine); }
+.candidate-vagas-section .vaga-card .cta { font-size: 11px; color: var(--wine); }.candidate-vagas-section .vaga-share-btn { flex:0 0 auto; width:27px; height:27px; padding:0; border:1px solid #d8c8ce; border-radius:6px; color:var(--wine); background:#fff; font-size:16px; line-height:1; cursor:pointer; }.candidate-vagas-section .vaga-share-btn:hover { background:#fbf3f5; border-color:var(--wine); }
 
 .candidate-benefits { padding: 48px 0; background: var(--wine); color: #fff; }
 .benefits-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; }

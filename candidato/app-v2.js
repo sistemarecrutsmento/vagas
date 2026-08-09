@@ -361,6 +361,18 @@ async function carregarVagas() {
       if (contador) contador.textContent = '0 vagas encontradas';
       return;
     }
+    const compartilharVaga = async v => {
+      const titulo = v?.titulo || 'uma vaga';
+      const empresa = v?.empresa || v?.empresa_nome || 'uma empresa';
+      const url = `${location.origin}/candidato/index.html?vaga=${encodeURIComponent(v?.id || '')}`;
+      const texto = `Confira a vaga para ${titulo}, na empresa ${empresa}. Ver detalhes em: ${url}`;
+      try {
+        if (navigator.share) { await navigator.share({ title: titulo, text: texto, url }); }
+        else if (navigator.clipboard) { await navigator.clipboard.writeText(texto); alert('Mensagem copiada. Agora é só colar no WhatsApp, Mensagens ou outro chat.'); }
+        else { window.prompt('Copie a mensagem para compartilhar:', texto); }
+      } catch (_) {}
+    };
+    window.compartilharVaga = compartilharVaga;
     let limiteVagas = 20;
     const renderVagas = () => {
       const pagina = vagas.slice(0, limiteVagas);
@@ -368,8 +380,11 @@ async function carregarVagas() {
         const sMin = Number(v.salario_min) || null;
         const sMax = Number(v.salario_max) || null;
         const salTexto = (sMin && sMax) ? `R$ ${sMin.toLocaleString('pt-BR')} - R$ ${sMax.toLocaleString('pt-BR')}` : (v.salario || 'A combinar');
-        return `<div class="vaga-card" role="button" tabindex="0" data-vaga-id="${Number(v.id)}"><div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div><h3>${escapeHtml(v.titulo)}</h3><div class="vaga-tags">${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}${v.cidade ? `<span class="tag">${escapeHtml(v.cidade)}</span>` : ''}</div><div class="salario">${escapeHtml(salTexto)}</div><div class="footer"><span class="data">${formatarData(v.criada_em)}</span><span class="cta">Ver detalhes →</span></div></div>`;
+        return `<div class="vaga-card" role="button" tabindex="0" data-vaga-id="${Number(v.id)}"><div class="empresa">${escapeHtml(v.empresa || 'Empresa')}</div><h3>${escapeHtml(v.titulo)}</h3><div class="vaga-tags">${v.area ? `<span class="tag">${escapeHtml(v.area)}</span>` : ''}${v.modalidade ? `<span class="tag">${escapeHtml(v.modalidade)}</span>` : ''}${v.cidade ? `<span class="tag">${escapeHtml(v.cidade)}</span>` : ''}</div><div class="salario">${escapeHtml(salTexto)}</div><div class="footer"><span class="data">${formatarData(v.criada_em)}</span><span class="cta">Ver detalhes →</span><button type="button" class="vaga-share-btn" data-share-vaga="${Number(v.id)}" aria-label="Compartilhar vaga" title="Compartilhar vaga">↗</button></div></div>`;
       }).join('');
+      grid.querySelectorAll('[data-share-vaga]').forEach(btn => {
+        btn.addEventListener('click', e => { e.stopPropagation(); const vaga = vagas.find(x => String(x.id) === btn.dataset.shareVaga); compartilharVaga(vaga); });
+      });
       grid.querySelectorAll('[data-vaga-id]').forEach(card => {
         const abrir = () => abrirDetalhes(card.dataset.vagaId);
         card.addEventListener('click', abrir);
@@ -1998,4 +2013,9 @@ async function carregarMatchCandidato(vagaId) {
   } catch (e) { if (bloco) bloco.style.display = 'none'; }
 }
 
+async function compartilharVagaSelecionada() {
+  if (!vagaSelecionada) return;
+  if (window.compartilharVaga) return window.compartilharVaga(vagaSelecionada);
+}
+window.compartilharVagaSelecionada = compartilharVagaSelecionada;
 window.toggleFavoritar = toggleFavoritar;

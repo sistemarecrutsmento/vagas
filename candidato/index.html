@@ -310,7 +310,7 @@
     .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--vinho); color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background-size: cover; background-position: center; flex-shrink: 0; }
     .user-info { display: flex; align-items: center; gap: 10px; }
   </style>
-  <link rel="stylesheet" href="/candidato/home-redesign.css?v=home-candidate-13">
+  <link rel="stylesheet" href="/candidato/home-redesign.css?v=home-candidate-14">
   <link rel="stylesheet" href="/candidato/mobile-detail-fix.css?v=detail-mobile-10">
   <script src="/candidato/chat-uploader.js"></script>
   <link rel="manifest" href="/candidato/manifest.json">
@@ -449,6 +449,7 @@
     <div class="modal-footer detalhe-acoes">
       <button class="btn btn-primary" id="btn-candidatar">Candidatar-se a esta vaga</button>
       <button class="btn btn-secondary" id="btn-favoritar" onclick="toggleFavoritar()"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> Favoritar</button>
+      <button class="btn btn-secondary" id="btn-compartilhar-vaga" onclick="compartilharVagaSelecionada()"><span aria-hidden="true">↗</span> Compartilhar</button>
       <button class="det-voltar" type="button" onclick="fecharModal('detalhes')">← Voltar para a lista</button>
     </div>
   </div>
@@ -638,7 +639,7 @@
 
 
 <script src="/candidato/auth-helper.js?v=etapa2_2026_07_27"></script>
-<script src="/candidato/app-v2.js?v=portal-candidate-redesign-17"></script>
+<script src="/candidato/app-v2.js?v=portal-candidate-redesign-18"></script>
 <script src="/candidato/modals.js?v=portal-candidate-redesign-17"></script>
   <script>
     if ('serviceWorker' in navigator) {
