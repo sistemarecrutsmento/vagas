@@ -337,13 +337,30 @@
   .topo-link { color: #fff; }
   .container { max-width: 1180px; margin: -112px auto 0; padding: 0 24px 80px; position: relative; }
   .header { text-align: left; max-width: 620px; margin: 0 0 34px; color: #fff; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(224,75,113,.72); border-radius: 999px; color: #fff; padding: 8px 14px; font-size: 12px; font-weight: 600; margin-bottom: 22px; }
+  .hero-badge svg { color: #e04b71; }
   .header h1 { color: #fff; font-size: 38px; }
   .header h1 .grad { background: linear-gradient(135deg,#fff 0 42%,#d73d67 75%); -webkit-background-clip: text; background-clip: text; }
   .header p { color: rgba(255,255,255,.86); margin: 0; }
   .stepper { max-width: 455px; margin: 0 auto 22px; padding: 16px 24px; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
   .card { max-width: 646px; margin: 0 auto; padding: 32px; box-shadow: 0 8px 28px rgba(30,10,18,.08); border: 0; }
   .garantias { max-width: 646px; margin: 20px auto 0; }
-  .btn-primario { background: linear-gradient(135deg,#8b001f,#ba092f); }
+  .card-heading { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .card-heading-icon { width:58px; height:58px; flex:0 0 58px; display:grid; place-items:center; color:#8b001f; background:#faeef1; border-radius:50%; }
+  .card-heading h2 { margin:0 0 3px; }
+  .card-heading .sub { margin:0; }
+  .eyebrow { color:#8b001f; font-size:10px; font-weight:800; letter-spacing:.12em; margin-bottom:3px; }
+  .email-ajuda { display:flex; align-items:center; gap:6px; color:var(--cinza-500); font-size:11px; margin-top:7px; }
+  .email-ajuda svg { color:#8b001f; flex:0 0 auto; }
+  .seguranca { text-align:center; margin:26px auto 0; color:var(--cinza-700); }
+  .seguranca-icone { width:32px; height:32px; margin:0 auto 7px; display:grid; place-items:center; color:#8b001f; background:#faeef1; border-radius:50%; }
+  .seguranca strong { display:block; color:var(--preto); font-size:13px; }
+  .seguranca p { margin:3px 0 0; color:var(--cinza-500); font-size:12px; }
+  .rodape { padding:21px 0 25px; }
+  .rodape .seta { color:#8b001f; font-weight:700; margin-left:7px; }
+  .prova-social { border-top:1px solid var(--cinza-200); text-align:center; padding:26px 0 0; color:#aaa; font-size:10px; letter-spacing:.14em; }
+  .logos-fake { display:flex; justify-content:center; align-items:center; gap:40px; margin-top:15px; color:#b6b6b6; font-size:17px; letter-spacing:0; filter:grayscale(1); }
+  .logos-fake span { color:#999; }
   @media (max-width: 640px) {
     .topo { padding: 16px 0 86px; }
     .topo-interno { padding: 0 16px; }
@@ -354,6 +371,13 @@
     .header p { font-size: 14px; }
     .stepper { padding: 13px 10px; margin-bottom: 14px; }
     .card { padding: 22px 16px; border-radius: 12px; }
+    .card-heading { gap: 11px; align-items:flex-start; }
+    .card-heading-icon { width:44px; height:44px; flex-basis:44px; }
+    .eyebrow { font-size:9px; }
+    .card-heading h2 { font-size:19px; }
+    .card-heading .sub { font-size:12px; line-height:1.4; }
+    .email-ajuda { font-size:10px; }
+    .logos-fake { gap:14px; font-size:13px; flex-wrap:wrap; }
   }
 </style>
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
@@ -373,7 +397,8 @@
 <div class="container">
 
   <div class="header">
-    <h1>Crie sua <span class="grad">plataforma</span> de recrutamento</h1>
+    <div class="hero-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m13 2-9 12h7l-1 8 9-12h-7l1-8Z"/></svg>Criação rápida e segura</div>
+    <h1>Crie sua plataforma<br><span class="grad">de recrutamento</span></h1>
     <p>Em poucos minutos você terá um ambiente exclusivo para gerenciar vagas, candidatos e contratações da sua empresa.</p>
   </div>
 
@@ -405,27 +430,27 @@
 
     <!-- STEP 1: EMPRESA -->
     <div class="step-painel" data-painel="1">
-      <h2>Dados da empresa</h2>
-      <p class="sub">Essas informações aparecem no painel e nos e-mails da sua equipe.</p>
+      <div class="card-heading"><div class="card-heading-icon"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h1m4 0h1M9 11h1m4 0h1M9 15h1m4 0h1M10 21v-4h4v4"/></svg></div><div><div class="eyebrow">DADOS DA EMPRESA</div><h2>Dados da empresa</h2><p class="sub">Essas informações aparecem no painel e nos e-mails da sua equipe.</p></div></div>
 
       <div class="form-grid">
         <div class="field full">
           <label>Nome da empresa <span class="req">*</span></label>
-          <input type="text" id="empresa_nome" placeholder="Ex: Empresa Exemplo" maxlength="80" />
+          <input type="text" id="empresa_nome" placeholder="Ex.: Aroeira G Fitness" maxlength="80" />
           <span class="field-erro">Informe o nome da empresa</span>
         </div>
         <div class="field">
-          <label>CNPJ <span class="req">*</span></label>
+          <label>CNPJ <span class="opc">(opcional)</span></label>
           <input type="text" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18" />
           <span class="field-erro">CNPJ deve ter 14 dígitos</span>
         </div>
         <div class="field">
-          <label>Telefone <span class="req">*</span></label>
+          <label>Telefone <span class="opc">(opcional)</span></label>
           <input type="text" id="telefone" placeholder="(11) 99999-9999" maxlength="20" />
         </div>
         <div class="field full">
           <label>E-mail principal <span class="req">*</span></label>
           <input type="email" id="email_principal" placeholder="contato@empresa.com.br" />
+          <small class="email-ajuda"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a8 8 0 0 1 8 8v4a2 2 0 0 1-2 2h-1v-6h1v-2a6 6 0 0 0-12 0v2h1v6H6a2 2 0 0 1-2-2v-4a8 8 0 0 1 8-8Z"/><path d="M9 21h6"/></svg>Usaremos este e-mail para enviar informações importantes sobre sua conta.</small>
         </div>
       </div>
 
@@ -477,10 +502,6 @@
             <li>Suporte 24/7</li>
           </ul>
         </div>
-      </div>
-
-      <div class="alerta info">
-        <span>Não é necessário cadastrar nenhuma forma de pagamento nesta etapa. Você terá 30 dias gratuitos para testar o sistema e conhecer todos os recursos disponíveis.</span>
       </div>
 
       <div class="botoes">
@@ -542,15 +563,13 @@
 
   </div><!-- /card -->
 
-  <section class="garantias" aria-label="Vantagens do cadastro">
-    <div class="garantia"><div class="garantia-icone">🔒</div><strong>Ambiente seguro</strong><span>Seus dados protegidos com criptografia</span></div>
-    <div class="garantia"><div class="garantia-icone">⚡</div><strong>Configuração rápida</strong><span>Em poucos minutos está pronto para começar</span></div>
-    <div class="garantia"><div class="garantia-icone">✓</div><strong>Sem compromisso</strong><span>30 dias grátis para testar todos os planos</span></div>
+  <section class="seguranca" aria-label="Segurança dos dados">
+    <div class="seguranca-icone"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+    <strong>Seus dados estão seguros</strong>
+    <p>Todas as informações são protegidas com criptografia de ponta.</p>
   </section>
-
-  <p class="rodape">
-    Já tem conta? <a href="/empresa/login">Entrar no painel</a>
-  </p>
+  <p class="rodape">Já tem uma conta? <a href="/empresa/login">Entrar no painel</a><span class="seta">→</span></p>
+  <section class="prova-social"><span>EMPRESAS QUE CONFIAM NO VAGASIO</span><div class="logos-fake"><b>nex<span>a</span></b><b>orbita</b><b>VERDE<span>MAR</span></b><b>atlas</b></div></section>
 </div>
 
 <script>
@@ -600,10 +619,10 @@
       } else desmarcarErro('empresa_nome');
       const telefone = $('#telefone').value.trim();
       const email_principal = $('#email_principal').value.trim();
-      if (cnpj.replace(/\D/g, '').length !== 14) {
+      if (cnpj && cnpj.replace(/\D/g, '').length !== 14) {
         marcarErro('cnpj'); ok = false;
       } else desmarcarErro('cnpj');
-      if (telefone.replace(/\D/g, '').length < 10) {
+      if (telefone && telefone.replace(/\D/g, '').length < 10) {
         marcarErro('telefone'); ok = false;
       } else desmarcarErro('telefone');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_principal)) {
