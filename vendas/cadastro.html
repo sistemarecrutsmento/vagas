@@ -11,25 +11,25 @@
 <style>
   /* ============== PALETA OFICIAL VAGAS.IO ============== */
   :root {
-    --vinho: #72001F;
-    --vinho-escuro: #28000D;
-    --vinho-claro: #B8325A;
-    --vinho-bg: rgba(114,47,55,0.08);
-    --vinho-bg-2: rgba(114,47,55,0.12);
+    --vinho: #720F35;
+    --vinho-escuro: #3A0A1D;
+    --vinho-claro: #C14A7A;
+    --vinho-bg: rgba(148,19,74,.08);
+    --vinho-bg-2: rgba(193,74,122,.12);
     --branco: #FFFFFF;
-    --preto: #1A1A1A;
-    --cinza-900: #1A1A1A;
-    --cinza-700: #4A4A4A;
-    --cinza-500: #6B6B6B;
-    --cinza-300: #D5D5D5;
-    --cinza-200: #E5E5E5;
-    --cinza-100: #F0F2F7;
-    --cinza-50:  #FAF8F9;
-    --verde: #28A745;
-    --vermelho: #C62828;
-    --sombra-sm: 0 1px 2px rgba(74,31,37,0.05);
-    --sombra-md: 0 4px 12px rgba(74,31,37,0.08);
-    --sombra-lg: 0 12px 40px rgba(74,31,37,0.12);
+    --preto: #211A1D;
+    --cinza-900: #211A1D;
+    --cinza-700: #71666B;
+    --cinza-500: #71666B;
+    --cinza-300: #E7DCE1;
+    --cinza-200: #E7DCE1;
+    --cinza-100: #F6EEF1;
+    --cinza-50:  #FBF8F9;
+    --verde: #8A3D5C;
+    --vermelho: #B3265B;
+    --sombra-sm: 0 1px 2px rgba(54,9,28,.05);
+    --sombra-md: 0 4px 12px rgba(54,9,28,.08);
+    --sombra-lg: 0 12px 40px rgba(54,9,28,.12);
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
@@ -331,39 +331,39 @@
     .botoes .btn { width: 100%; justify-content: center; }
   }
   /* ============== LAYOUT DE REFERÊNCIA ============== */
-  .topo { background: radial-gradient(ellipse at 84% 12%, rgba(184,50,90,.30), transparent 29%), radial-gradient(ellipse at 61% 100%, rgba(114,0,31,.58), transparent 42%), linear-gradient(118deg, #28000D 0%, #72001F 48%, #28000D 100%); border: 0; padding: 22px 0 118px; position: relative; z-index: 1; overflow: hidden; width:100%; max-width:none; }
+  .topo { background: radial-gradient(ellipse at 84% 12%, rgba(193,74,122,.30), transparent 29%), radial-gradient(ellipse at 61% 100%, rgba(58,10,29,.58), transparent 42%), linear-gradient(118deg, #3A0A1D 0%, #720F35 48%, #3A0A1D 100%); border: 0; padding: 22px 0 118px; position: relative; z-index: 1; overflow: hidden; width:100%; max-width:none; }
   .topo::after { content:none; }
   .hero-art { position:absolute; inset:0; pointer-events:none; opacity:.9; }
   .hero-art svg { position:absolute; right:6%; top:28px; width:410px; height:250px; overflow:visible; }
   .hero-art .orb { fill:url(#orb); opacity:.44; }
-  .hero-art .line { fill:none; stroke:#B8325A; stroke-opacity:.2; stroke-width:1.2; }
-  .hero-art .dot { fill:#B8325A; opacity:.32; }
+  .hero-art .line { fill:none; stroke:#C14A7A; stroke-opacity:.2; stroke-width:1.2; }
+  .hero-art .dot { fill:#C14A7A; opacity:.32; }
   .topo-interno { max-width: 1180px; }
   .logo-img { width: 150px; height: auto; }
   .topo-link { color: #fff; }
   .container { max-width: 1180px; margin: -58px auto 0; padding: 0 24px 80px; position: relative; z-index: 3; }
   .header { text-align: left; max-width: 620px; margin: 0 0 34px; color: #fff; }
-  .hero-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(184,50,90,.72); border-radius: 999px; color: #fff; padding: 8px 14px; font-size: 12px; font-weight: 600; margin-bottom: 22px; }
-  .hero-badge svg { color: #B8325A; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(193,74,122,.72); border-radius: 999px; color: #fff; padding: 8px 14px; font-size: 12px; font-weight: 600; margin-bottom: 22px; }
+  .hero-badge svg { color: #C14A7A; }
   .header h1 { color: #fff; font-size: 38px; }
-  .header h1 .grad { background: linear-gradient(135deg,#fff 0 42%,#B8325A 75%); -webkit-background-clip: text; background-clip: text; }
+  .header h1 .grad { background: linear-gradient(135deg,#fff 0 42%,#C14A7A 75%); -webkit-background-clip: text; background-clip: text; }
   .header p { color: rgba(255,255,255,.86); margin: 0; }
   .stepper { max-width: 455px; margin: 0 auto 22px; padding: 16px 24px; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
   .card { max-width: 646px; margin: 0 auto; padding: 32px; box-shadow: 0 8px 28px rgba(30,10,18,.08); border: 0; }
   .garantias { max-width: 646px; margin: 20px auto 0; }
   .card-heading { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
-  .card-heading-icon { width:58px; height:58px; flex:0 0 58px; display:grid; place-items:center; color:#72001F; background:#FAF8F9; border-radius:50%; }
+  .card-heading-icon { width:58px; height:58px; flex:0 0 58px; display:grid; place-items:center; color:#720F35; background:#FBF8F9; border-radius:50%; }
   .card-heading h2 { margin:0 0 3px; }
   .card-heading .sub { margin:0; }
-  .eyebrow { color:#72001F; font-size:10px; font-weight:800; letter-spacing:.12em; margin-bottom:3px; }
+  .eyebrow { color:#720F35; font-size:10px; font-weight:800; letter-spacing:.12em; margin-bottom:3px; }
   .email-ajuda { display:flex; align-items:center; gap:6px; color:var(--cinza-500); font-size:11px; margin-top:7px; }
-  .email-ajuda svg { color:#72001F; flex:0 0 auto; }
+  .email-ajuda svg { color:#720F35; flex:0 0 auto; }
   .seguranca { text-align:center; margin:26px auto 0; color:var(--cinza-700); }
-  .seguranca-icone { width:32px; height:32px; margin:0 auto 7px; display:grid; place-items:center; color:#72001F; background:#FAF8F9; border-radius:50%; }
+  .seguranca-icone { width:32px; height:32px; margin:0 auto 7px; display:grid; place-items:center; color:#720F35; background:#FBF8F9; border-radius:50%; }
   .seguranca strong { display:block; color:var(--preto); font-size:13px; }
   .seguranca p { margin:3px 0 0; color:var(--cinza-500); font-size:12px; }
   .rodape { padding:21px 0 25px; }
-  .rodape .seta { color:#72001F; font-weight:700; margin-left:7px; }
+  .rodape .seta { color:#720F35; font-weight:700; margin-left:7px; }
   .prova-social { border-top:1px solid var(--cinza-200); text-align:center; padding:26px 0 0; color:#aaa; font-size:10px; letter-spacing:.14em; }
   .logos-fake { display:flex; justify-content:center; align-items:center; gap:40px; margin-top:15px; color:#b6b6b6; font-size:17px; letter-spacing:0; filter:grayscale(1); }
   .logos-fake span { color:#999; }
@@ -407,7 +407,7 @@
   </div>
   <div class="hero-art" aria-hidden="true">
     <svg viewBox="0 0 410 250" fill="none">
-      <defs><radialGradient id="orb" cx="35%" cy="30%" r="75%"><stop stop-color="#B8325A"/><stop offset="1" stop-color="#72001F" stop-opacity="0"/></radialGradient></defs>
+      <defs><radialGradient id="orb" cx="35%" cy="30%" r="75%"><stop stop-color="#C14A7A"/><stop offset="1" stop-color="#720F35" stop-opacity="0"/></radialGradient></defs>
       <path class="orb" d="M306 13c47 13 91 55 91 103s-38 81-83 91c-46 10-87-10-96-47-9-37 15-91 42-121 14-16 29-31 46-26Z"/>
       <path class="line" d="M223 50c43-30 116-26 157 13 42 39 52 106 13 146-39 40-118 48-167 12-49-36-74-116-3-171Z"/>
       <path class="line" d="M253 25c38-12 88 7 111 42 23 35 18 84-9 113-27 29-76 39-113 21-37-18-59-65-45-103 9-25 31-49 56-73Z"/>
