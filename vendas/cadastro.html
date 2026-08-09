@@ -330,6 +330,31 @@
     .botoes { flex-direction: column-reverse; }
     .botoes .btn { width: 100%; justify-content: center; }
   }
+  /* ============== LAYOUT DE REFERÊNCIA ============== */
+  .topo { background: radial-gradient(circle at 78% 10%, rgba(114,0,35,.45), transparent 30%), linear-gradient(120deg, #170509 0%, #260810 52%, #100307 100%); border: 0; padding: 22px 0 132px; position: relative; }
+  .topo-interno { max-width: 1180px; }
+  .logo-img { filter: brightness(0) invert(1); mix-blend-mode: screen; width: 150px; }
+  .topo-link { color: #fff; }
+  .container { max-width: 1180px; margin: -112px auto 0; padding: 0 24px 80px; position: relative; }
+  .header { text-align: left; max-width: 620px; margin: 0 0 34px; color: #fff; }
+  .header h1 { color: #fff; font-size: 38px; }
+  .header h1 .grad { background: linear-gradient(135deg,#fff 0 42%,#d73d67 75%); -webkit-background-clip: text; background-clip: text; }
+  .header p { color: rgba(255,255,255,.86); margin: 0; }
+  .stepper { max-width: 455px; margin: 0 auto 22px; padding: 16px 24px; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+  .card { max-width: 646px; margin: 0 auto; padding: 32px; box-shadow: 0 8px 28px rgba(30,10,18,.08); border: 0; }
+  .garantias { max-width: 646px; margin: 20px auto 0; }
+  .btn-primario { background: linear-gradient(135deg,#8b001f,#ba092f); }
+  @media (max-width: 640px) {
+    .topo { padding: 16px 0 86px; }
+    .topo-interno { padding: 0 16px; }
+    .logo-img { width: 125px; }
+    .container { margin-top: -68px; padding: 0 12px 50px; }
+    .header { margin-bottom: 22px; }
+    .header h1 { font-size: 29px; }
+    .header p { font-size: 14px; }
+    .stepper { padding: 13px 10px; margin-bottom: 14px; }
+    .card { padding: 22px 16px; border-radius: 12px; }
+  }
 </style>
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
@@ -386,7 +411,7 @@
       <div class="form-grid">
         <div class="field full">
           <label>Nome da empresa <span class="req">*</span></label>
-          <input type="text" id="empresa_nome" placeholder="Ex: Aroeira G Fitness" maxlength="80" />
+          <input type="text" id="empresa_nome" placeholder="Ex: Empresa Exemplo" maxlength="80" />
           <span class="field-erro">Informe o nome da empresa</span>
         </div>
         <div class="field">
