@@ -331,7 +331,7 @@
       <span class="logo-quad">V</span>
       <span>Vagas.io</span>
     </a>
-    <a href="/vendas" class="topo-link">← Voltar para vendas</a>
+    <a href="/" class="topo-link">← Voltar para o site</a>
   </div>
 </header>
 
@@ -380,16 +380,16 @@
           <span class="field-erro">Informe o nome da empresa</span>
         </div>
         <div class="field">
-          <label>CNPJ <span class="opc">(opcional)</span></label>
+          <label>CNPJ <span class="req">*</span></label>
           <input type="text" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18" />
           <span class="field-erro">CNPJ deve ter 14 dígitos</span>
         </div>
         <div class="field">
-          <label>Telefone <span class="opc">(opcional)</span></label>
+          <label>Telefone <span class="req">*</span></label>
           <input type="text" id="telefone" placeholder="(11) 99999-9999" maxlength="20" />
         </div>
         <div class="field full">
-          <label>E-mail principal <span class="opc">(opcional)</span></label>
+          <label>E-mail principal <span class="req">*</span></label>
           <input type="email" id="email_principal" placeholder="contato@empresa.com.br" />
         </div>
       </div>
@@ -445,7 +445,7 @@
       </div>
 
       <div class="alerta info">
-        <span><strong>Beta gratuito:</strong> nesta fase de lançamento, todos os planos estão liberados sem cobrança. Você poderá configurar pagamentos depois.</span>
+        <span>Não é necessário cadastrar nenhuma forma de pagamento nesta etapa. Você terá 30 dias gratuitos para testar o sistema e conhecer todos os recursos disponíveis.</span>
       </div>
 
       <div class="botoes">
@@ -494,7 +494,7 @@
       </div>
 
       <div class="alerta info" style="margin-top:20px;">
-        <span>Ao continuar, você concorda com os termos de uso e a política de privacidade.</span>
+        <span>Ao continuar, você concorda com os <a href="/termos-de-uso.html" target="_blank" rel="noopener">termos de uso</a> e a <a href="/politica-de-privacidade.html" target="_blank" rel="noopener">política de privacidade</a>.</span>
       </div>
 
       <div class="botoes">
@@ -557,10 +557,18 @@
       if (empresa_nome.length < 2) {
         marcarErro('empresa_nome'); ok = false;
       } else desmarcarErro('empresa_nome');
-      if (cnpj && cnpj.replace(/\D/g, '').length !== 14) {
+      const telefone = $('#telefone').value.trim();
+      const email_principal = $('#email_principal').value.trim();
+      if (cnpj.replace(/\D/g, '').length !== 14) {
         marcarErro('cnpj'); ok = false;
       } else desmarcarErro('cnpj');
-      if (!ok) mostrarAlerta('Preencha os campos corretamente.', 'erro');
+      if (telefone.replace(/\D/g, '').length < 10) {
+        marcarErro('telefone'); ok = false;
+      } else desmarcarErro('telefone');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_principal)) {
+        marcarErro('email_principal'); ok = false;
+      } else desmarcarErro('email_principal');
+      if (!ok) mostrarAlerta('Preencha os campos obrigatórios corretamente.', 'erro');
       return ok;
     }
     return true;
