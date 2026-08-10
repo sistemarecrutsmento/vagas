@@ -192,7 +192,7 @@ app.get('/api/_debug-email-teste', async (req, res) => {
   try {
     const result = await enviarEmail({
       to,
-      subject: 'Teste de e-mail - Vagas.io',
+      subject: 'Teste de e-mail - VagasIO',
       html: '<p>Se você está lendo isso, o sistema de e-mail tá funcionando! ✅</p>'
     });
     res.json({ ok: true, info, result });
