@@ -1,4 +1,4 @@
-// Vagas.io — Analytics Client v1 (Fase 14)
+// VagasIO — Analytics Client v1 (Fase 14)
 // Fire-and-forget: erros NUNCA bloqueiam o fluxo principal.
 (function() {
   'use strict';
