@@ -51,6 +51,29 @@ body{background:var(--room-bg)}
  .call-control,.call-control.danger{height:46px;font-size:15px}
  .call-control span{font-size:7px}
 }
+
+/* Mobile pre-join overflow fix v3 */
+@media(max-width:700px){
+ html,body{width:100%;max-width:100%;overflow-x:hidden}
+ .prejoin-screen{display:block;width:100%;max-width:100%;min-height:100dvh;padding:14px 10px;overflow-x:hidden}
+ .prejoin-card{display:block;width:100%;max-width:100%;min-width:0;margin:0;padding:0;background:transparent;border:0;box-shadow:none;overflow:visible}
+ .prejoin-card .preview-card,.prejoin-card .join-panel{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+ .prejoin-card .preview-card{height:min(58vw,330px);min-height:220px;aspect-ratio:auto;margin:0}
+ .prejoin-card .preview-card video{width:100%;height:100%;min-width:0;min-height:0}
+ .prejoin-card .join-panel{display:block;margin-top:12px;padding:18px 14px;overflow:hidden}
+ .prejoin-card .join-panel h2{font-size:18px;line-height:1.25}
+ .prejoin-card .join-panel .intro{max-width:100%;font-size:13px;overflow-wrap:anywhere;word-break:normal}
+ .prejoin-card .field-grid,.prejoin-card .field,.prejoin-card select,.prejoin-card .primary,.prejoin-card .status{width:100%;max-width:100%;min-width:0}
+ .prejoin-card .field select{font-size:14px}
+ .prejoin-card .status{height:auto;min-height:21px;overflow-wrap:anywhere;word-break:break-word;white-space:normal}
+ .prejoin-card #retry-media{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+}
+@media(max-width:380px){
+ .prejoin-screen{padding:10px 8px}
+ .prejoin-card .preview-card{height:56vw;min-height:190px}
+ .prejoin-card .join-panel{padding:16px 12px}
+ .prejoin-card .join-panel h2{font-size:17px}
+}
 </style>
 </head>
 <body><div class="prejoin-screen" id="prejoin-screen"><div class="prejoin-card"><section class="preview-card" id="prejoin-preview" aria-label="Prévia da sua câmera"><video id="local" autoplay muted playsinline></video><div class="preview-empty" id="preview-empty"><div><span aria-hidden="true">◉</span><p>A prévia da câmera aparecerá aqui</p></div></div><div class="preview-status" id="preview-status">Prévia</div><span class="preview-label">Você</span></section><section class="join-panel" aria-labelledby="join-title"><h2 id="join-title">Pronto para entrar?</h2><p class="intro">Você entrará como <strong id="role-label">participante</strong>. Confira seus dispositivos antes da entrevista.</p><div class="field-grid"><div class="field"><label for="camera-select">Câmera</label><select id="camera-select"><option value="">Câmera padrão</option></select></div><div class="field"><label for="mic-select">Microfone</label><select id="mic-select"><option value="">Microfone padrão</option></select></div></div><button class="primary" id="join" type="button">Entrar na reunião</button><div class="status" id="status" role="status" aria-live="polite">Verificando autorização…</div><button id="retry-media" type="button" style="display:none;margin-top:10px">Tentar novamente</button></section></div></div><section class="call-room" id="call-room" aria-label="Sala de videochamada"><header class="call-header"><a class="call-brand" href="#" aria-label="VagasIO"><span class="brand-mark">V</span><span>Vagas<em>IO</em></span></a><div class="call-title"><strong id="meeting-title">Entrevista VagasIO</strong><small><span id="call-role">Participante</span> · <span id="call-timer">00:00</span></small></div><div class="call-meta"><button class="call-icon" id="meeting-info" type="button" aria-label="Informações da reunião">ⓘ</button><button class="call-icon" id="meeting-menu" type="button" aria-label="Mais opções">⋮</button><button class="call-leave" id="leave" type="button">Sair</button></div></header><main class="call-stage"><div class="video-grid" id="video-grid"><article class="video-tile remote" id="remote-tile"><video id="remote" autoplay playsinline></video><div class="tile-avatar" id="remote-avatar">CA</div><span class="tile-label" id="remote-label">Candidato</span><span class="tile-speaking" id="remote-speaking" hidden>Falando</span></article><article class="video-tile local" id="local-tile"><video id="local-call-video" autoplay muted playsinline></video><div class="tile-avatar" id="local-avatar">EU</div><span class="tile-label" id="local-label">Você</span><span class="tile-speaking" id="local-speaking" hidden>Falando</span></article></div><aside class="call-panel" id="chat-panel" aria-label="Chat"><div class="call-panel-head"><strong>Chat da entrevista</strong><button id="chat-close" type="button" aria-label="Fechar chat">×</button></div><div class="chat-messages" id="chat-messages"><p>Nenhuma mensagem ainda.</p></div><form class="chat-compose" id="chat-form"><input id="chat-input" autocomplete="off" placeholder="Escreva uma mensagem..."><button type="submit">Enviar</button></form></aside><aside class="call-panel" id="info-panel" aria-label="Informações da reunião"><div class="call-panel-head"><strong>Informações</strong><button id="info-close" type="button">×</button></div><div class="chat-messages"><p id="meeting-info-text">Entrevista VagasIO</p><p>Chamada protegida e vinculada a esta entrevista.</p></div></aside></main><footer class="room-controls"><button class="call-control active" id="camera-toggle" type="button" aria-pressed="true" aria-label="Desativar câmera">🎥<span>Câmera</span></button><button class="call-control active" id="mic-toggle" type="button" aria-pressed="true" aria-label="Desativar microfone">🎤<span>Microfone</span></button><button class="call-control" id="share-screen" type="button" aria-label="Compartilhar tela">🖥️<span>Tela</span></button><button class="call-control" id="chat-open" type="button" aria-label="Abrir chat">💬<span>Chat</span></button><button class="call-control danger" id="end" type="button" disabled aria-label="Encerrar chamada">☎<span>Encerrar</span></button></footer></section><script>
