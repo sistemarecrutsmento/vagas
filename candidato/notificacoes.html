@@ -51,8 +51,10 @@ main { max-width: 800px; margin: 24px auto; padding: 0 24px; }
     <span id="contador" style="margin-left:auto;color:#888;font-size:14px"></span>
   </div>
   <div class="feed" id="feed">Carregando…</div>
+  <div id="push-ajuda" style="display:none;margin:14px 0;padding:14px;border-radius:10px;background:#fff4e5;color:#5c3b00">As notificações estão bloqueadas neste navegador. Para ativá-las, toque no ícone de configurações ao lado do endereço do site, abra <b>Permissões</b> → <b>Notificações</b> e selecione <b>Permitir</b>. Depois, recarregue a página.</div>
 </main>
 <script>
+if ('Notification' in window && Notification.permission === 'denied') document.getElementById('push-ajuda').style.display='block';
 const API = 'https://recrutamento-api-novo.onrender.com';
 function getToken() { return localStorage.getItem('candidato_token'); }
 let cache = [];
