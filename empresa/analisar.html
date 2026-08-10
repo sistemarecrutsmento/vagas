@@ -375,7 +375,7 @@
             '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
               '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
               '<div><strong style="color:#166534;">📍 Local:</strong><br>' + escapeHtml(ativa.local || '—') + '</div>' +
-              (ativa.video_room_id || ativa.video_provider === 'vagasio' ? '<div style="grid-column: 1 / -1; margin-top:4px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;"><strong style="color:#166534;">🎥 Videochamada VagasIO</strong><br><button type="button" onclick="entrarVideoEmpresa(' + ativa.id + ')" style="margin-top:8px; padding:10px 16px; background:#16A34A; color:white; border:0; border-radius:6px; font-weight:600; cursor:pointer;">Entrar na videochamada VagasIO</button></div>' : ativa.link_reuniao ? '<div style="grid-column: 1 / -1;"><strong style="color:#166534;">🔗 Google Meet (fallback):</strong> <a href="' + safeUrl(ativa.link_reuniao) + '" target="_blank" style="color:#7C3AED;">' + safeUrl(ativa.link_reuniao) + '</a></div>' : '') +
+              (ativa.video_room_id || ativa.video_provider === 'vagasio' ? '<div style="grid-column: 1 / -1; margin-top:4px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;"><strong style="color:#166534;">🎥 Videochamada VagasIO</strong><br><button type="button" onclick="entrarVideoEmpresa(' + ativa.id + ')" style="margin-top:8px; padding:10px 16px; background:#16A34A; color:white; border:0; border-radius:6px; font-weight:600; cursor:pointer;">Entrar na videochamada VagasIO</button></div>' : '') +
             '</div>' +
             '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:12px; color:#166534; border:1px solid #BBF7D0;">' +
               '💡 Esta entrevista já está visível na aba <strong>📅 Agenda</strong> do seu Dashboard.' +
@@ -695,26 +695,20 @@
           weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
           hour: '2-digit', minute: '2-digit'
         });
-        // A sala autenticada VagasIO sempre vence qualquer link legado do Meet.
+        // A sala autenticada VagasIO é o único provedor online ativo.
         const isVagasio = !!e.video_room_id || e.video_provider === 'vagasio';
-        const isOnline = isVagasio || !!e.link_reuniao;
+        const isOnline = isVagasio || /online|videochamada/i.test(e.local || '');
         const blocoFormato = isVagasio
           ? '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
               '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🎥 Videochamada VagasIO:</div>' +
               '<button type="button" onclick="sessionStorage.setItem(\'vagasio_video_interview_id\',\'' + e.id + '\'); location.href=\'video-call.html\';" style="padding:10px 16px; background:#16A34A; color:white; border:0; border-radius:6px; font-weight:600; cursor:pointer;">Entrar na videochamada VagasIO</button>' +
             '</div>'
-          : isOnline
-          ? '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
-              '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Google Meet (fallback):</div>' +
-              '<div style="display:flex; gap:8px; align-items:center;">' +
-                '<a href="' + safeUrl(e.link_reuniao) + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + safeUrl(e.link_reuniao) + '</a>' +
-                '<button type="button" onclick="navigator.clipboard.writeText(\'' + safeUrl(e.link_reuniao) + '\').then(function(b){b.textContent=\'✅ Copiado!\'; setTimeout(function(){b.textContent=\'📋 Copiar\';}, 2000)})" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
-              '</div>' +
-            '</div>'
-          : '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +
+          : (isOnline
+            ? '<div style="margin-top:12px; padding:12px; background:#FFF7ED; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;"><strong>⚠️ Sala VagasIO indisponível</strong><br><span style="font-size:13px;">Esta videochamada não pode ser iniciada até a sala autenticada ser criada.</span></div>'
+            : '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +
               '<div style="font-size:12px; font-weight:600; margin-bottom:6px;">📍 Endereço:</div>' +
               '<div style="font-size:14px; white-space:pre-wrap;">' + (e.local || '').replace(/^Presencial\s*—\s*/, '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
-            '</div>';
+            '</div>');
 
         cardEntrevistaJaAgendada =
           '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #16A34A; background: #F0FDF4;">' +
@@ -724,7 +718,7 @@
             '</div>' +
             '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
               '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
-              '<div><strong style="color:#166534;">' + (isVagasio ? '🎥 Formato:</strong><br>Videochamada VagasIO' : isOnline ? '🔗 Formato:</strong><br>Google Meet (fallback)' : '📍 Formato:</strong><br>Presencial') + '</div>' +
+              '<div><strong style="color:#166534;">' + (isVagasio ? '🎥 Formato:</strong><br>Videochamada VagasIO' : isOnline ? '🔗 Formato:</strong><br>Videochamada VagasIO' : '📍 Formato:</strong><br>Presencial') + '</div>' +
             '</div>' +
             blocoFormato +
             (e.observacoes ? '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:13px; color:#166534; border:1px solid #BBF7D0;"><strong>💬 Observações:</strong> ' + escapeHtml(e.observacoes) + '</div>' : '') +
@@ -741,7 +735,7 @@
             '<h2 style="margin:0;">📅 Agendar Entrevista</h2>' +
             '<span style="font-size:11px; background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:999px; font-weight:700;">NOVA</span>' +
           '</div>' +
-          '<p style="font-size:13px; color:#666; margin-bottom:16px;">Defina a data, hora e formato. Para entrevistas online o sistema cria uma <strong>Videochamada VagasIO</strong> autenticada para esta candidatura. O Google Meet fica disponível apenas como fallback.</p>' +
+          '<p style="font-size:13px; color:#666; margin-bottom:16px;">Defina a data, hora e formato. Para entrevistas online o sistema cria uma <strong>Videochamada VagasIO</strong> autenticada para esta candidatura. O A sala VagasIO é obrigatória para entrevistas online.</p>' +
           '<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:16px;">' +
             '<div>' +
               '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Data e Hora</label>' +
@@ -772,7 +766,7 @@
           '</div>' +
           // Aviso online — só aparece se for online
           '<div id="entrevista-online-msg" style="background:#EDE9FE; border:1px solid #C4B5FD; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#5B21B6;">' +
-            '🎥 <strong>Videochamada VagasIO:</strong> ao confirmar, o sistema cria uma sala autenticada vinculada à candidatura e envia as instruções de acesso ao candidato e recrutador. O Meet só aparece se a sala não puder ser criada.' +
+            '🎥 <strong>Videochamada VagasIO:</strong> ao confirmar, o sistema cria uma sala autenticada vinculada à candidatura e envia as instruções de acesso ao candidato e recrutador. O A sala VagasIO é obrigatória para entrevistas online.' +
           '</div>' +
           '<div style="margin-bottom:16px;">' +
             '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Observações (opcional)</label>' +
@@ -961,7 +955,7 @@
       }
     }
 
-    // Alterna entre Online (Meet) e Presencial (campo de endereço)
+    // Alterna entre Online (VagasIO) e Presencial (campo de endereço)
     function alternarFormatoEntrevista() {
       const formato = document.getElementById('entrevista-formato').value;
       const enderecoBox = document.getElementById('entrevista-endereco-box');
@@ -1017,13 +1011,13 @@
       }
 
       const isOnline = formatoVal === 'online';
-      const btnOriginalText = isOnline ? '⏳ Gerando Meet...' : '⏳ Salvando...';
+      const btnOriginalText = isOnline ? '⏳ Criando sala VagasIO...' : '⏳ Salvando...';
 
       try {
         btn.disabled = true;
         btn.innerHTML = btnOriginalText;
 
-        // Monta o body. Para online: NÃO envia link_reuniao (backend gera).
+        // Monta o body. Para online: a sala VagasIO é criada pelo backend.
         // Para presencial: envia o local com endereço (sem link).
         const body = {
           candidatura_id: candidaturaId,
@@ -1033,7 +1027,7 @@
           local: isOnline ? 'Videochamada VagasIO' : ('Presencial — ' + enderecoVal.trim()),
           observacoes: obsVal || (isOnline ? 'Entrevista online via Videochamada VagasIO.' : 'Entrevista presencial.')
         };
-        // Só envia link_reuniao se o backend precisar gerar (não envia nada, deixa gerar)
+        // A sala VagasIO é resolvida pelo backend; entrevistas presenciais não têm sala.
         if (!isOnline) {
           // presencial: não envia link, backend não vai gerar
           body.link_reuniao = null;
@@ -1048,11 +1042,11 @@
         const res = await r.json();
         if (!r.ok) throw new Error(res.erro || 'Falha ao agendar');
 
-        // Pega o link gerado pelo backend (Meet) e o local salvo
-        const linkGerado = (res.entrevista && res.entrevista.link_reuniao) || '';
+        // Sala VagasIO e local salvo; historical external links are not activated
+        const linkGerado = ''; // historical link_reuniao is never an active video provider
         const videoRoomId = (res.video && res.video.room_id) || (res.entrevista && res.entrevista.video_room_id) || '';
         const localSalvo = (res.entrevista && res.entrevista.local) || (isOnline ? 'Videochamada VagasIO' : ('Presencial — ' + enderecoVal.trim()));
-        const isPresencialFinal = !linkGerado && !videoRoomId;
+        const isPresencialFinal = !videoRoomId && !isOnline;
 
         // Troca o card pelo modo de confirmação (sem recarregar a página!)
         const dataFmt = new Date(dataVal).toLocaleString('pt-BR', {
@@ -1060,19 +1054,10 @@
           hour: '2-digit', minute: '2-digit'
         });
 
-        // Bloco do formato: link Meet (online) OU endereço (presencial)
+        // Bloco do formato: sala VagasIO (online) OU endereço (presencial)
         let blocoFormato = '';
         if (videoRoomId) {
           blocoFormato = '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;"><div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🎥 Videochamada VagasIO:</div><button type="button" onclick="entrarVideoEmpresa(' + res.entrevista.id + ')" style="padding:10px 16px; background:#16A34A; color:white; border:0; border-radius:6px; font-weight:600; cursor:pointer;">Entrar na videochamada VagasIO</button></div>';
-        } else if (linkGerado) {
-          blocoFormato =
-            '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
-              '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Google Meet (fallback):</div>' +
-              '<div style="display:flex; gap:8px; align-items:center;">' +
-                '<a href="' + linkGerado + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + linkGerado + '</a>' +
-                '<button type="button" onclick="navigator.clipboard.writeText(\'' + linkGerado + '\').then(()=>this.textContent=\'✅ Copiado!\')" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
-              '</div>' +
-            '</div>';
         } else {
           blocoFormato =
             '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +

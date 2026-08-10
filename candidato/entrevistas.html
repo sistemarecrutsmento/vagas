@@ -464,27 +464,27 @@
       if (cd) countdown = `<div class="countdown ${cd.classe}">${cd.txt}</div>`;
     }
 
-    // Badge do formato (Online/Presencial) — detectado pelo link_reuniao OU pelo texto do local
+    // Badge do formato (Online/Presencial) — sala VagasIO autenticada ou texto do local
     const isVagasio = !!e.video_room_id;
-    const isOnline = isVagasio || !!e.link_reuniao || /online|videochamada/i.test(e.local || '');
+    const isOnline = isVagasio || /online|videochamada/i.test(e.local || '');
     const isPresencial = !isOnline && e.local;
     const formatoBadge = isOnline
-      ? (isVagasio ? '<span style="background:#EAF7F1; color:#166534; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">🎥 VIDEOCHAMADA VAGASIO</span>' : '<span style="background:#EDE9FE; color:#5B21B6; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">🎥 GOOGLE MEET (FALLBACK)</span>')
+      ? (isVagasio ? '<span style="background:#EAF7F1; color:#166534; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">🎥 VIDEOCHAMADA VAGASIO</span>' : '<span style="background:#EDE9FE; color:#5B21B6; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">🎥 VIDEOCHAMADA VAGASIO</span>')
       : (isPresencial
           ? '<span style="background:#FED7AA; color:#9A3412; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">📍 PRESENCIAL</span>'
           : '');
 
-    // Botões (Online = Meet, Presencial = texto "Ver endereço")
+    // Botões (videochamada VagasIO ou entrevista presencial)
     const btnEntrarCls = isOnline
       ? (podeEntrar ? 'btn btn-entrar' : 'btn btn-entrar disabled')
       : 'btn btn-entrar';
     const btnEntrarTxt = isOnline
-      ? (isVagasio ? (passada ? '📹 Rever videochamada' : (podeEntrar ? '📹 Entrar na videochamada VagasIO' : '🔒 Sala fechada')) : (passada ? '📹 Rever Meet (fallback)' : (podeEntrar ? '📹 Entrar no Meet (fallback)' : '🔒 Sala fechada')))
+      ? (isVagasio ? (passada ? '📹 Rever videochamada' : (podeEntrar ? '📹 Entrar na videochamada VagasIO' : '🔒 Sala fechada')) : (passada ? '📹 Rever videochamada VagasIO' : (podeEntrar ? '📹 Entrar na videochamada VagasIO' : '🔒 Sala fechada')))
       : '📍 Ver endereço';
     const btnEntrarExtra = isVagasio
       ? 'onclick="entrarVideo(' + e.id + '); return false;"'
       : (isOnline ? (passada ? '' : (podeEntrar ? '' : 'onclick="return false;" aria-disabled="true"')) : 'onclick="mostrarEndereco(event, ' + e.id + '); return false;"');
-    const btnEntrarHref = isVagasio ? '#' : (isOnline ? (e.link_reuniao || '#') : '#');
+    const btnEntrarHref = '#';
 
     return `
       <article class="entrevista ${cls}">
@@ -511,15 +511,9 @@
           ${countdown}
           ${e.observacoes ? `<div class="observacoes"><strong>📝 Recado do recrutador:</strong> ${escapeHtml(e.observacoes)}</div>` : ''}
           <div class="acoes">
-            ${videoFeatureEnabled && isOnline ? `<button type="button" class="btn btn-entrar" onclick="entrarVideo(${Number(e.id)})">📹 Entrar na videochamada</button>` : ''}
-            <a href="${btnEntrarHref}" target="_blank" rel="noopener"
-               class="${btnEntrarCls}" ${btnEntrarExtra}>
-              ${btnEntrarTxt}
-            </a>
-            ${!passada && e.link_reuniao && !isVagasio ? `
-              <button class="btn btn-copiar btn-sm" onclick="copiarLink('${e.link_reuniao}')">
-                🔗 Copiar link do Meet (fallback)
-              </button>` : ''}
+            ${isVagasio && videoFeatureEnabled ? `<button type="button" class="btn btn-entrar" onclick="entrarVideo(${Number(e.id)})">📹 Entrar na videochamada VagasIO</button>` : ''}
+            ${isOnline && !isVagasio ? `<span class="btn btn-entrar disabled" aria-disabled="true">⚠️ Sala VagasIO indisponível</span>` : ''}
+            ${!isOnline ? `<span class="btn btn-entrar" aria-disabled="true">📍 Entrevista presencial</span>` : ''}
           </div>
         </div>
       </article>`;
@@ -549,27 +543,6 @@
       </div>
     `;
     document.body.appendChild(overlay);
-  }
-
-  // === AÇÕES ===
-  function copiarLink(link) {
-    if (!link || link === '#') {
-      showToast('Link ainda não disponível', '⚠️');
-      return;
-    }
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(link)
-        .then(() => showToast('Link copiado pra área de transferência', '🔗'))
-        .catch(() => fallback(link));
-    } else { fallback(link); }
-  }
-  function fallback(link) {
-    const t = document.createElement('textarea');
-    t.value = link; t.style.position = 'fixed'; t.style.opacity = '0';
-    document.body.appendChild(t); t.select();
-    try { document.execCommand('copy'); showToast('Link copiado!', '🔗'); }
-    catch (e) { prompt('Copia esse link:', link); }
-    document.body.removeChild(t);
   }
 
   // === INIT ===
