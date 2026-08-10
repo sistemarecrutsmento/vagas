@@ -230,7 +230,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="VagasIO">
+  <meta name="apple-mobile-web-app-title" content="Vagas.io">
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
@@ -289,6 +289,12 @@
 
   let tokenCandidato = localStorage.getItem('candidato_token');
   let emailLogado = localStorage.getItem('candidato_email');
+  let videoFeatureEnabled = false;
+  async function carregarVideoConfig() {
+    if (!tokenCandidato) return;
+    try { const r=await fetch(API+'/api/video/config',{headers:{Authorization:'Bearer '+tokenCandidato},cache:'no-store'}); if(r.ok){const c=await r.json(); videoFeatureEnabled=c.enabled===true && /^wss:\/\//i.test(c.signalUrl||'');} } catch (_) { videoFeatureEnabled=false; }
+  }
+  function entrarVideo(id) { if (!videoFeatureEnabled) return; sessionStorage.setItem('vagasio_video_interview_id',String(id)); location.href='video-call.html'; }
 
 
   // === DADOS DO CANDIDATO ===
@@ -458,6 +464,15 @@
       if (cd) countdown = `<div class="countdown ${cd.classe}">${cd.txt}</div>`;
     }
 
+    // Badge do formato (Online/Presencial) — detectado pelo link_reuniao OU pelo texto do local
+    const isOnline = !!e.link_reuniao || /online/i.test(e.local || '');
+    const isPresencial = !isOnline && e.local;
+    const formatoBadge = isOnline
+      ? '<span style="background:#EDE9FE; color:#5B21B6; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">🎥 ONLINE • GOOGLE MEET</span>'
+      : (isPresencial
+          ? '<span style="background:#FED7AA; color:#9A3412; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">📍 PRESENCIAL</span>'
+          : '');
+
     // Botões (Online = Meet, Presencial = texto "Ver endereço")
     const btnEntrarCls = isOnline
       ? (podeEntrar ? 'btn btn-entrar' : 'btn btn-entrar disabled')
@@ -469,15 +484,6 @@
       ? (passada ? '' : (podeEntrar ? '' : 'onclick="return false;" aria-disabled="true"'))
       : 'onclick="mostrarEndereco(event, ' + e.id + '); return false;"';
     const btnEntrarHref = isOnline ? (e.link_reuniao || '#') : '#';
-
-    // Badge do formato (Online/Presencial) — detectado pelo link_reuniao OU pelo texto do local
-    const isOnline = !!e.link_reuniao || /online/i.test(e.local || '');
-    const isPresencial = !isOnline && e.local;
-    const formatoBadge = isOnline
-      ? '<span style="background:#EDE9FE; color:#5B21B6; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">🎥 ONLINE • GOOGLE MEET</span>'
-      : (isPresencial
-          ? '<span style="background:#FED7AA; color:#9A3412; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">📍 PRESENCIAL</span>'
-          : '');
 
     return `
       <article class="entrevista ${cls}">
@@ -504,6 +510,7 @@
           ${countdown}
           ${e.observacoes ? `<div class="observacoes"><strong>📝 Recado do recrutador:</strong> ${escapeHtml(e.observacoes)}</div>` : ''}
           <div class="acoes">
+            ${videoFeatureEnabled && isOnline ? `<button type="button" class="btn btn-entrar" onclick="entrarVideo(${Number(e.id)})">📹 Entrar na videochamada</button>` : ''}
             <a href="${btnEntrarHref}" target="_blank" rel="noopener"
                class="${btnEntrarCls}" ${btnEntrarExtra}>
               ${btnEntrarTxt}
@@ -567,6 +574,7 @@
   // === INIT ===
   document.addEventListener('DOMContentLoaded', () => {
     carregarCandidato();
+    carregarVideoConfig();
     carregarEntrevistas();
     // Atualiza a cada 30s pra countdown ficar certo
     setInterval(() => {
