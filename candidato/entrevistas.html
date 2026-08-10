@@ -464,7 +464,7 @@
       if (cd) countdown = `<div class="countdown ${cd.classe}">${cd.txt}</div>`;
     }
 
-    // Badge do formato (Online/Presencial) — detectado pelo link_reuniao OU pelo texto do local
+    // Badge do formato (Online/Presencial) — sala VagasIO autenticada ou texto do local
     const isVagasio = !!e.video_room_id;
     const isOnline = isVagasio || /online|videochamada/i.test(e.local || '');
     const isPresencial = !isOnline && e.local;
@@ -474,7 +474,7 @@
           ? '<span style="background:#FED7AA; color:#9A3412; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">📍 PRESENCIAL</span>'
           : '');
 
-    // Botões (Online = Meet, Presencial = texto "Ver endereço")
+    // Botões (videochamada VagasIO ou entrevista presencial)
     const btnEntrarCls = isOnline
       ? (podeEntrar ? 'btn btn-entrar' : 'btn btn-entrar disabled')
       : 'btn btn-entrar';
@@ -511,8 +511,9 @@
           ${countdown}
           ${e.observacoes ? `<div class="observacoes"><strong>📝 Recado do recrutador:</strong> ${escapeHtml(e.observacoes)}</div>` : ''}
           <div class="acoes">
-            ${videoFeatureEnabled && isOnline ? `<button type="button" class="btn btn-entrar" onclick="entrarVideo(${Number(e.id)})">📹 Entrar na videochamada</button>` : ''}
-            ${!isVagasio && !isOnline ? `<span class="btn btn-entrar" aria-disabled="true">📍 Entrevista presencial</span>` : ''}
+            ${isVagasio && videoFeatureEnabled ? `<button type="button" class="btn btn-entrar" onclick="entrarVideo(${Number(e.id)})">📹 Entrar na videochamada VagasIO</button>` : ''}
+            ${isOnline && !isVagasio ? `<span class="btn btn-entrar disabled" aria-disabled="true">⚠️ Sala VagasIO indisponível</span>` : ''}
+            ${!isOnline ? `<span class="btn btn-entrar" aria-disabled="true">📍 Entrevista presencial</span>` : ''}
           </div>
         </div>
       </article>`;
