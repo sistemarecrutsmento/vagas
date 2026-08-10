@@ -703,10 +703,12 @@
               '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🎥 Videochamada VagasIO:</div>' +
               '<button type="button" onclick="sessionStorage.setItem(\'vagasio_video_interview_id\',\'' + e.id + '\'); location.href=\'video-call.html\';" style="padding:10px 16px; background:#16A34A; color:white; border:0; border-radius:6px; font-weight:600; cursor:pointer;">Entrar na videochamada VagasIO</button>' +
             '</div>'
-          : '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +
+          : (isOnline
+            ? '<div style="margin-top:12px; padding:12px; background:#FFF7ED; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;"><strong>⚠️ Sala VagasIO indisponível</strong><br><span style="font-size:13px;">Esta videochamada não pode ser iniciada até a sala autenticada ser criada.</span></div>'
+            : '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +
               '<div style="font-size:12px; font-weight:600; margin-bottom:6px;">📍 Endereço:</div>' +
               '<div style="font-size:14px; white-space:pre-wrap;">' + (e.local || '').replace(/^Presencial\s*—\s*/, '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
-            '</div>';
+            '</div>');
 
         cardEntrevistaJaAgendada =
           '<div class="card" id="card-agendamento-entrevista" style="border-top: 4px solid #16A34A; background: #F0FDF4;">' +
