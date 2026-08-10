@@ -177,6 +177,7 @@
 </script>
   <script>
     const API = 'https://recrutamento-api-novo.onrender.com';
+    function entrarVideoEmpresa(id) { sessionStorage.setItem('vagasio_video_interview_id', String(id)); location.href = 'video-call.html'; }
     async function fetchEmpresaComTimeout(url, options = {}, timeoutMs = 15000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -374,7 +375,7 @@
             '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
               '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
               '<div><strong style="color:#166534;">📍 Local:</strong><br>' + escapeHtml(ativa.local || '—') + '</div>' +
-              (ativa.link_reuniao ? '<div style="grid-column: 1 / -1;"><strong style="color:#166534;">🔗 Link:</strong> <a href="' + safeUrl(ativa.link_reuniao) + '" target="_blank" style="color:#7C3AED;">' + safeUrl(ativa.link_reuniao) + '</a></div>' : '') +
+              (ativa.video_room_id || ativa.video_provider === 'vagasio' ? '<div style="grid-column: 1 / -1; margin-top:4px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;"><strong style="color:#166534;">🎥 Videochamada VagasIO</strong><br><button type="button" onclick="entrarVideoEmpresa(' + ativa.id + ')" style="margin-top:8px; padding:10px 16px; background:#16A34A; color:white; border:0; border-radius:6px; font-weight:600; cursor:pointer;">Entrar na videochamada VagasIO</button></div>' : '') +
             '</div>' +
             '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:12px; color:#166534; border:1px solid #BBF7D0;">' +
               '💡 Esta entrevista já está visível na aba <strong>📅 Agenda</strong> do seu Dashboard.' +
@@ -694,14 +695,13 @@
           weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
           hour: '2-digit', minute: '2-digit'
         });
-        const isOnline = !!e.link_reuniao;
-        const blocoFormato = isOnline
+        // A sala autenticada VagasIO é o único provedor online ativo.
+        const isVagasio = !!e.video_room_id || e.video_provider === 'vagasio';
+        const isOnline = isVagasio || /online|videochamada/i.test(e.local || '');
+        const blocoFormato = isVagasio
           ? '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
-              '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Link do Google Meet:</div>' +
-              '<div style="display:flex; gap:8px; align-items:center;">' +
-                '<a href="' + safeUrl(e.link_reuniao) + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + safeUrl(e.link_reuniao) + '</a>' +
-                '<button type="button" onclick="navigator.clipboard.writeText(\'' + safeUrl(e.link_reuniao) + '\').then(function(b){b.textContent=\'✅ Copiado!\'; setTimeout(function(){b.textContent=\'📋 Copiar\';}, 2000)})" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
-              '</div>' +
+              '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🎥 Videochamada VagasIO:</div>' +
+              '<button type="button" onclick="sessionStorage.setItem(\'vagasio_video_interview_id\',\'' + e.id + '\'); location.href=\'video-call.html\';" style="padding:10px 16px; background:#16A34A; color:white; border:0; border-radius:6px; font-weight:600; cursor:pointer;">Entrar na videochamada VagasIO</button>' +
             '</div>'
           : '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +
               '<div style="font-size:12px; font-weight:600; margin-bottom:6px;">📍 Endereço:</div>' +
@@ -716,7 +716,7 @@
             '</div>' +
             '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
               '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
-              '<div><strong style="color:#166534;">' + (isOnline ? '🎥 Formato:</strong><br>Online (Google Meet)' : '📍 Formato:</strong><br>Presencial') + '</div>' +
+              '<div><strong style="color:#166534;">' + (isVagasio ? '🎥 Formato:</strong><br>Videochamada VagasIO' : isOnline ? '🔗 Formato:</strong><br>Videochamada VagasIO' : '📍 Formato:</strong><br>Presencial') + '</div>' +
             '</div>' +
             blocoFormato +
             (e.observacoes ? '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:13px; color:#166534; border:1px solid #BBF7D0;"><strong>💬 Observações:</strong> ' + escapeHtml(e.observacoes) + '</div>' : '') +
@@ -733,7 +733,7 @@
             '<h2 style="margin:0;">📅 Agendar Entrevista</h2>' +
             '<span style="font-size:11px; background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:999px; font-weight:700;">NOVA</span>' +
           '</div>' +
-          '<p style="font-size:13px; color:#666; margin-bottom:16px;">Defina a data, hora e formato. Para entrevistas online o sistema gera o link do <strong>Google Meet</strong> automaticamente.</p>' +
+          '<p style="font-size:13px; color:#666; margin-bottom:16px;">Defina a data, hora e formato. Para entrevistas online o sistema cria uma <strong>Videochamada VagasIO</strong> autenticada para esta candidatura. O A sala VagasIO é obrigatória para entrevistas online.</p>' +
           '<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:16px;">' +
             '<div>' +
               '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Data e Hora</label>' +
@@ -752,7 +752,7 @@
             '<div>' +
               '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Formato</label>' +
               '<select id="entrevista-formato" onchange="alternarFormatoEntrevista()" style="width:100%; padding:10px; border:1px solid #DDD; border-radius:8px;">' +
-                '<option value="online">🎥 Online (Google Meet)</option>' +
+                '<option value="online">🎥 Videochamada VagasIO</option>' +
                 '<option value="presencial">📍 Presencial</option>' +
               '</select>' +
             '</div>' +
@@ -764,7 +764,7 @@
           '</div>' +
           // Aviso online — só aparece se for online
           '<div id="entrevista-online-msg" style="background:#EDE9FE; border:1px solid #C4B5FD; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#5B21B6;">' +
-            '🎥 <strong>Google Meet automático:</strong> ao confirmar, o sistema cria a sala de videoconferência e envia o link por e-mail pro candidato + recrutador.' +
+            '🎥 <strong>Videochamada VagasIO:</strong> ao confirmar, o sistema cria uma sala autenticada vinculada à candidatura e envia as instruções de acesso ao candidato e recrutador. O A sala VagasIO é obrigatória para entrevistas online.' +
           '</div>' +
           '<div style="margin-bottom:16px;">' +
             '<label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">Observações (opcional)</label>' +
@@ -953,7 +953,7 @@
       }
     }
 
-    // Alterna entre Online (Meet) e Presencial (campo de endereço)
+    // Alterna entre Online (VagasIO) e Presencial (campo de endereço)
     function alternarFormatoEntrevista() {
       const formato = document.getElementById('entrevista-formato').value;
       const enderecoBox = document.getElementById('entrevista-endereco-box');
@@ -1009,7 +1009,7 @@
       }
 
       const isOnline = formatoVal === 'online';
-      const btnOriginalText = isOnline ? '⏳ Gerando Meet...' : '⏳ Salvando...';
+      const btnOriginalText = isOnline ? '⏳ Criando sala VagasIO...' : '⏳ Salvando...';
 
       try {
         btn.disabled = true;
@@ -1022,8 +1022,8 @@
           etapa: etapaNum,
           data_hora: dataVal,
           duracao_minutos: parseInt(duracaoVal),
-          local: isOnline ? 'Online (Google Meet)' : ('Presencial — ' + enderecoVal.trim()),
-          observacoes: obsVal || (isOnline ? 'Entrevista online via Google Meet.' : 'Entrevista presencial.')
+          local: isOnline ? 'Videochamada VagasIO' : ('Presencial — ' + enderecoVal.trim()),
+          observacoes: obsVal || (isOnline ? 'Entrevista online via Videochamada VagasIO.' : 'Entrevista presencial.')
         };
         // Só envia link_reuniao se o backend precisar gerar (não envia nada, deixa gerar)
         if (!isOnline) {
@@ -1040,10 +1040,11 @@
         const res = await r.json();
         if (!r.ok) throw new Error(res.erro || 'Falha ao agendar');
 
-        // Pega o link gerado pelo backend (Meet) e o local salvo
-        const linkGerado = (res.entrevista && res.entrevista.link_reuniao) || '';
-        const localSalvo = (res.entrevista && res.entrevista.local) || (isOnline ? 'Online (Google Meet)' : ('Presencial — ' + enderecoVal.trim()));
-        const isPresencialFinal = !linkGerado;
+        // Sala VagasIO e local salvo; historical Meet links are not activated
+        const linkGerado = ''; // historical link_reuniao is never an active video provider
+        const videoRoomId = (res.video && res.video.room_id) || (res.entrevista && res.entrevista.video_room_id) || '';
+        const localSalvo = (res.entrevista && res.entrevista.local) || (isOnline ? 'Videochamada VagasIO' : ('Presencial — ' + enderecoVal.trim()));
+        const isPresencialFinal = !videoRoomId && !isOnline;
 
         // Troca o card pelo modo de confirmação (sem recarregar a página!)
         const dataFmt = new Date(dataVal).toLocaleString('pt-BR', {
@@ -1053,15 +1054,8 @@
 
         // Bloco do formato: link Meet (online) OU endereço (presencial)
         let blocoFormato = '';
-        if (linkGerado) {
-          blocoFormato =
-            '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;">' +
-              '<div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🔗 Link do Google Meet (gerado automaticamente):</div>' +
-              '<div style="display:flex; gap:8px; align-items:center;">' +
-                '<a href="' + linkGerado + '" target="_blank" style="flex:1; padding:10px; background:#F0FDF4; border:1px solid #16A34A; border-radius:6px; color:#166534; font-family:monospace; font-size:13px; word-break:break-all; text-decoration:none;">' + linkGerado + '</a>' +
-                '<button type="button" onclick="navigator.clipboard.writeText(\'' + linkGerado + '\').then(()=>this.textContent=\'✅ Copiado!\')" style="background:#16A34A; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:600; cursor:pointer; white-space:nowrap;">📋 Copiar</button>' +
-              '</div>' +
-            '</div>';
+        if (videoRoomId) {
+          blocoFormato = '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;"><div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🎥 Videochamada VagasIO:</div><button type="button" onclick="entrarVideoEmpresa(' + res.entrevista.id + ')" style="padding:10px 16px; background:#16A34A; color:white; border:0; border-radius:6px; font-weight:600; cursor:pointer;">Entrar na videochamada VagasIO</button></div>';
         } else {
           blocoFormato =
             '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #FED7AA; border-radius:8px; color:#9A3412;">' +
@@ -1078,12 +1072,12 @@
             '</div>' +
             '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; font-size:14px;">' +
               '<div><strong style="color:#166534;">📅 Data e Hora:</strong><br>' + dataFmt + '</div>' +
-              '<div><strong style="color:#166534;">🎥 Formato:</strong><br>' + (isPresencialFinal ? '📍 Presencial' : '🎥 Online (Google Meet)') + '</div>' +
+              '<div><strong style="color:#166534;">🎥 Formato:</strong><br>' + (isPresencialFinal ? '📍 Presencial' : '🎥 Videochamada VagasIO') + '</div>' +
             '</div>' +
             blocoFormato +
             (obsVal ? '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:13px; color:#166534; border:1px solid #BBF7D0;"><strong>💬 Observações:</strong> ' + obsVal.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' : '') +
             '<div style="margin-top:12px; padding:10px; background:#FFF; border-radius:6px; font-size:12px; color:#166534; border:1px solid #BBF7D0;">' +
-              (isPresencialFinal ? '📧 Candidato verá o endereço no painel dele. Aparece também na aba <strong>📅 Agenda</strong>.' : '📧 Candidato recebeu o convite do Google Meet por e-mail. Aparece também na aba <strong>📅 Agenda</strong>.') +
+              (isPresencialFinal ? '📧 Candidato verá o endereço no painel dele. Aparece também na aba <strong>📅 Agenda</strong>.' : '📧 Candidato recebeu as instruções da Videochamada VagasIO por e-mail. Aparece também na aba <strong>📅 Agenda</strong>.') +
             '</div>' +
           '</div>';
 
