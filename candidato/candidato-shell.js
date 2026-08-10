@@ -124,3 +124,6 @@
   window.addEventListener('popstate', () => loadFrame(cleanCurrent()));
   loadFrame(cleanCurrent());
 })();
+
+// Web Push: carregado no shell para aparecer em qualquer tela autenticada.
+if (!document.querySelector('script[data-vagas-push]')) { const ps=document.createElement('script'); ps.src='push.js?v=push-v3'; ps.dataset.vagasPush='1'; document.head.appendChild(ps); }
