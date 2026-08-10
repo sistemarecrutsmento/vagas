@@ -1,6 +1,6 @@
 {
-  "name": "Vagas.io — Portal do Candidato",
-  "short_name": "Vagas.io",
+  "name": "VagasIO — Portal do Candidato",
+  "short_name": "VagasIO",
   "description": "Encontre vagas, acompanhe candidaturas e avance na sua carreira.",
   "start_url": "/candidato/painel.html",
   "scope": "/candidato/",
