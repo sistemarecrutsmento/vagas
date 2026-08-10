@@ -1,4 +1,4 @@
-// Vagas.io — Service Worker v1 (Fase 14 PWA)
+// VagasIO — Service Worker v1 (Fase 14 PWA)
 // Estratégias:
 //   • assets estáticos (CSS/JS/ícones/imagens): cache-first
 //   • páginas HTML públicas: network-first
@@ -137,7 +137,7 @@ self.addEventListener('fetch', event => {
 // ─── Web Push ───────────────────────────────────────────────────────────────
 self.addEventListener('push', event => {
   let data = {}; try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data?.text() || 'Nova atualização' }; }
-  event.waitUntil(self.registration.showNotification(data.title || 'Vagas.io', { body: data.body || 'Você tem uma nova atualização.', icon: '/candidato/icons/icon-192.png', badge: '/candidato/icons/icon-192.png', data: { url: data.url || '/candidato/notificacoes.html' } }));
+  event.waitUntil(self.registration.showNotification(data.title || 'VagasIO', { body: data.body || 'Você tem uma nova atualização.', icon: '/candidato/icons/icon-192.png', badge: '/candidato/icons/icon-192.png', data: { url: data.url || '/candidato/notificacoes.html' } }));
 });
 self.addEventListener('notificationclick', event => { event.notification.close(); const url = event.notification.data?.url || '/candidato/notificacoes.html'; event.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => { for (const c of list) if ('focus' in c) { c.navigate(url); return c.focus(); } return clients.openWindow(url); })); });
 
@@ -149,7 +149,7 @@ function offlineFallback(request) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Offline · Vagas.io</title>
+  <title>Offline · VagasIO</title>
   <style>
     body{font-family:-apple-system,sans-serif;background:#722F37;color:#fff;
          display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;}
