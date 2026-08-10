@@ -465,10 +465,11 @@
     }
 
     // Badge do formato (Online/Presencial) — detectado pelo link_reuniao OU pelo texto do local
-    const isOnline = !!e.link_reuniao || /online/i.test(e.local || '');
+    const isVagasio = !!e.video_room_id;
+    const isOnline = isVagasio || !!e.link_reuniao || /online|videochamada/i.test(e.local || '');
     const isPresencial = !isOnline && e.local;
     const formatoBadge = isOnline
-      ? '<span style="background:#EDE9FE; color:#5B21B6; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">🎥 ONLINE • GOOGLE MEET</span>'
+      ? (isVagasio ? '<span style="background:#EAF7F1; color:#166534; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">🎥 VIDEOCHAMADA VAGASIO</span>' : '<span style="background:#EDE9FE; color:#5B21B6; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">🎥 GOOGLE MEET (FALLBACK)</span>')
       : (isPresencial
           ? '<span style="background:#FED7AA; color:#9A3412; font-size:10px; padding:3px 8px; border-radius:999px; font-weight:700; letter-spacing:0.3px;">📍 PRESENCIAL</span>'
           : '');
@@ -478,12 +479,12 @@
       ? (podeEntrar ? 'btn btn-entrar' : 'btn btn-entrar disabled')
       : 'btn btn-entrar';
     const btnEntrarTxt = isOnline
-      ? (passada ? '📹 Rever sala' : (podeEntrar ? '📹 Entrar no Meet' : '🔒 Sala fechada'))
+      ? (isVagasio ? (passada ? '📹 Rever videochamada' : (podeEntrar ? '📹 Entrar na videochamada VagasIO' : '🔒 Sala fechada')) : (passada ? '📹 Rever Meet (fallback)' : (podeEntrar ? '📹 Entrar no Meet (fallback)' : '🔒 Sala fechada')))
       : '📍 Ver endereço';
-    const btnEntrarExtra = isOnline
-      ? (passada ? '' : (podeEntrar ? '' : 'onclick="return false;" aria-disabled="true"'))
-      : 'onclick="mostrarEndereco(event, ' + e.id + '); return false;"';
-    const btnEntrarHref = isOnline ? (e.link_reuniao || '#') : '#';
+    const btnEntrarExtra = isVagasio
+      ? 'onclick="entrarVideo(' + e.id + '); return false;"'
+      : (isOnline ? (passada ? '' : (podeEntrar ? '' : 'onclick="return false;" aria-disabled="true"')) : 'onclick="mostrarEndereco(event, ' + e.id + '); return false;"');
+    const btnEntrarHref = isVagasio ? '#' : (isOnline ? (e.link_reuniao || '#') : '#');
 
     return `
       <article class="entrevista ${cls}">
@@ -515,9 +516,9 @@
                class="${btnEntrarCls}" ${btnEntrarExtra}>
               ${btnEntrarTxt}
             </a>
-            ${!passada && e.link_reuniao ? `
+            ${!passada && e.link_reuniao && !isVagasio ? `
               <button class="btn btn-copiar btn-sm" onclick="copiarLink('${e.link_reuniao}')">
-                🔗 Copiar link do Meet
+                🔗 Copiar link do Meet (fallback)
               </button>` : ''}
           </div>
         </div>
