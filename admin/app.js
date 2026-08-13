@@ -498,7 +498,7 @@ async function carregarEquipe() {
 function abrirModalRecrutador() {
   document.getElementById('membro-nome').value = '';
   document.getElementById('membro-email').value = '';
-  document.getElementById('membro-senha').value = 'mudar123';
+  document.getElementById('membro-senha').value = '';
   abrirModal('novo-membro');
   setTimeout(() => document.getElementById('membro-nome').focus(), 100);
 }
@@ -536,7 +536,7 @@ function abrirModalEmpresa() {
   document.getElementById('emp-email').value = '';
   document.getElementById('emp-user-nome').value = '';
   document.getElementById('emp-user-email').value = '';
-  document.getElementById('emp-user-senha').value = 'mudar123';
+  document.getElementById('emp-user-senha').value = '';
   abrirModal('nova-empresa');
   setTimeout(() => document.getElementById('emp-nome').focus(), 100);
 }
@@ -557,7 +557,7 @@ async function salvarNovaEmpresa() {
   const payload = { nome, cnpj, telefone, email_principal };
   // Se preenchou pelo menos nome+email do usuário, inclui (senha tem default)
   if (userNome && userEmail) {
-    payload.usuario = { nome: userNome, email: userEmail, senha: userSenha || 'mudar123', cargo: 'admin' };
+    payload.usuario = { nome: userNome, email: userEmail, senha: userSenha || '', cargo: 'admin' };
   }
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
@@ -933,10 +933,10 @@ async function carregarAgenda(periodo) {
             <div class="agenda-vaga">📋 ${e.vaga_titulo || 'Vaga'} <span style="color:#888;">• Etapa ${e.etapa} (${etapaNome})</span></div>
             <div class="agenda-meta">
               ${e.link_reuniao
-                ? `🎥 Online (Google Meet) • <a href="${e.link_reuniao}" target="_blank" style="color:#16A34A; font-weight:600;">🔗 Entrar no Meet</a>`
+                ? `🎥 Online (VagasIO) • <a href="${e.link_reuniao}" target="_blank" style="color:#16A34A; font-weight:600;">🔗 Entrar na videochamada VagasIO</a>`
                 : (e.local
                     ? `📍 ${e.local}`
-                    : '🎥 Online (Google Meet)')}
+                    : '🎥 Online (VagasIO)')}
               ${e.observacoes ? `<div style="margin-top:6px; color:#666; font-style:italic;">"${e.observacoes}"</div>` : ''}
             </div>
           </div>
@@ -2795,9 +2795,9 @@ async function abrirVagasFechadasSemContratacao() {
       const local = (v.cidade || '') + (v.estado ? ' / ' + v.estado : '');
       const fechadaEm = v.fechada_em ? new Date(v.fechada_em).toLocaleDateString('pt-BR') : '—';
       return `<tr>
-        <td><strong>${v.titulo}</strong></td>
-        <td>${v.empresa || '—'}</td>
-        <td>${local || '—'}</td>
+        <td><strong>${escapeHtml(v.titulo)}</strong></td>
+        <td>${escapeHtml(v.empresa || '—')}</td>
+        <td>${escapeHtml(local || '—')}</td>
         <td>${v.total_candidatos || 0}</td>
         <td><span class="status-badge status-fechada">Fechada</span></td>
         <td>${fechadaEm}</td>
@@ -2845,8 +2845,8 @@ async function abrirVagaCands(vagaId) {
       }).join('');
     info.innerHTML = `
       <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div><strong>Empresa:</strong> ${data.vaga.empresa || '—'}</div>
-        <div><strong>Local:</strong> ${data.vaga.cidade || '—'}${data.vaga.estado ? '/' + data.vaga.estado : ''}</div>
+        <div><strong>Empresa:</strong> ${escapeHtml(data.vaga.empresa || '—')}</div>
+        <div><strong>Local:</strong> ${escapeHtml(data.vaga.cidade || '—')}${data.vaga.estado ? '/' + escapeHtml(data.vaga.estado) : ''}</div>
         <div><strong>Total de candidatos:</strong> ${candidaturasVagaCache.length}</div>
         <div><strong>Criada em:</strong> ${formatarData(data.vaga.criada_em)}</div>
       </div>
@@ -2868,10 +2868,10 @@ async function abrirVagaCands(vagaId) {
       const idxZero = numEtapa - 1;
       const etapaNome = (etapasArr[idxZero] && (typeof etapasArr[idxZero] === 'string' ? etapasArr[idxZero] : etapasArr[idxZero].nome)) || `Etapa ${numEtapa}`;
       return `<tr>
-        <td><strong>${c.nome || '—'}</strong></td>
-        <td>${c.email || '—'}</td>
-        <td>${c.cidade ? (c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td>
-        <td>${numEtapa}. ${etapaNome}</td>
+        <td><strong>${escapeHtml(c.nome || '—')}</strong></td>
+        <td>${escapeHtml(c.email || '—')}</td>
+        <td>${c.cidade ? escapeHtml(c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td>
+        <td>${numEtapa}. ${escapeHtml(etapaNome)}</td>
         <td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : c.status}</span></td>
         <td>${formatarData(c.criada_em)}</td>
         <td>
@@ -2936,12 +2936,12 @@ async function verCandidatura(id) {
     const c = data.candidatura;
     container.innerHTML = `
       <div class="det-grid">
-        <div class="det-item"><div class="det-label">Candidato</div><div class="det-value">${c.nome || '—'}</div></div>
-        <div class="det-item"><div class="det-label">E-mail</div><div class="det-value">${c.email || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Celular</div><div class="det-value">${c.celular || '—'}</div></div>
-        <div class="det-item"><div class="det-label">CPF</div><div class="det-value">${c.cpf || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Vaga</div><div class="det-value">${c.titulo || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Empresa</div><div class="det-value">${c.empresa || '—'}</div></div>
+        <div class="det-item"><div class="det-label">Candidato</div><div class="det-value">${escapeHtml(c.nome || '—')}</div></div>
+        <div class="det-item"><div class="det-label">E-mail</div><div class="det-value">${escapeHtml(c.email || '—')}</div></div>
+        <div class="det-item"><div class="det-label">Celular</div><div class="det-value">${escapeHtml(c.celular || '—')}</div></div>
+        <div class="det-item"><div class="det-label">CPF</div><div class="det-value">${escapeHtml(c.cpf || '—')}</div></div>
+        <div class="det-item"><div class="det-label">Vaga</div><div class="det-value">${escapeHtml(c.titulo || '—')}</div></div>
+        <div class="det-item"><div class="det-label">Empresa</div><div class="det-value">${escapeHtml(c.empresa || '—')}</div></div>
         <div class="det-item"><div class="det-label">Status</div><div class="det-value"><span class="badge ${c.status === 'contratado' ? 'badge-ativa' : (c.status === 'reprovado' || c.status === 'rejeitado') ? 'badge-fechada' : c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente'}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : c.status}</span></div></div>
         <div class="det-item"><div class="det-label">Criada em</div><div class="det-value">${formatarData(c.criada_em)}</div></div>
       </div>
@@ -2950,9 +2950,9 @@ async function verCandidatura(id) {
         ${(c.historico && c.historico.length > 0)
           ? '<ul style="list-style:none;padding:0;">' + c.historico.map(h => {
               const d = h.data ? new Date(h.data).toLocaleString('pt-BR') : '';
-              const m = h.mensagem ? '<br><em style="color:var(--cinza-medio);">' + h.mensagem + '</em>' : '';
-              const p = h.por ? '<br><small>por ' + h.por + '</small>' : '';
-              return '<li style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#f9f9f9;"><strong>' + (h.etapa || h.status) + '</strong> [' + h.status + '] — ' + d + p + m + '</li>';
+              const m = h.mensagem ? '<br><em style="color:var(--cinza-medio);">' + escapeHTML(h.mensagem) + '</em>' : '';
+              const p = h.por ? '<br><small>por ' + escapeHTML(h.por) + '</small>' : '';
+              return '<li style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#f9f9f9;"><strong>' + escapeHTML(h.etapa || h.status) + '</strong> [' + escapeHTML(h.status) + '] — ' + d + p + m + '</li>';
             }).join('') + '</ul>'
           : '<p style="color:var(--cinza-medio);">Nenhuma movimentação ainda.</p>'}
       </div>
