@@ -1,9 +1,9 @@
 // ============================================
 // ADMIN — Painel de Recrutamento
-// Conecta com backend: https://recrutamento-api-novo.onrender.com
+// Usa a configuração de ambiente carregada em runtime
 // ============================================
 
-const API = 'https://recrutamento-api-novo.onrender.com';
+const API = window.VAGASIO_API_BASE;
 let token = null;
 let vagaEmEdicao = null;
 
@@ -3023,23 +3023,24 @@ async function abrirHistorico(candidaturaId) {
       <div id="lista">Carregando…</div>
       <script>
         const cid = ${candidaturaId};
-        const API = 'https://recrutamento-api-novo.onrender.com';
+        const API = window.VAGASIO_API_BASE;
         const t = localStorage.getItem('admin_token');
         fetch(API + '/api/empresa/candidaturas/' + cid + '/historico', { headers: { 'Authorization': 'Bearer ' + t }})
           .then(r => r.json())
           .then(d => {
             const el = document.getElementById('lista');
+            const safe = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
             if (!d.eventos || d.eventos.length === 0) {
               el.innerHTML = '<p class="vazio">Nenhuma movimentação registrada ainda.</p>';
               return;
             }
             el.innerHTML = d.eventos.map(e => \`
               <div class="ev">
-                <strong>\${e.de_etapa || 'início'} → \${e.para_etapa || 'final'}</strong>
-                <small> · status: \${e.de_status || '?'} → \${e.para_status || '?'}</small><br>
-                <small>\${new Date(e.data).toLocaleString('pt-BR')}</small>
-                \${e.autor_nome ? '<br><small>por: ' + e.autor_nome + ' (' + (e.autor_role || e.autor_tipo) + ')</small>' : ''}
-                \${e.mensagem ? '<br><em>' + e.mensagem + '</em>' : ''}
+                <strong>\${safe(e.de_etapa || 'início')} → \${safe(e.para_etapa || 'final')}</strong>
+                <small> · status: \${safe(e.de_status || '?')} → \${safe(e.para_status || '?')}</small><br>
+                <small>\${safe(new Date(e.data).toLocaleString('pt-BR'))}</small>
+                \${e.autor_nome ? '<br><small>por: ' + safe(e.autor_nome) + ' (' + safe(e.autor_role || e.autor_tipo) + ')</small>' : ''}
+                \${e.mensagem ? '<br><em>' + safe(e.mensagem) + '</em>' : ''}
               </div>
             \`).join('');
           })
