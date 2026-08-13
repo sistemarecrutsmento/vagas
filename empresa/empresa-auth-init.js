@@ -51,7 +51,7 @@
     // Fallback manual
     const refresh = localStorage.getItem('empresa_refresh');
     if (refresh) {
-      fetch('https://recrutamento-api-novo.onrender.com/api/auth/logout', {
+      fetch(window.VAGASIO_API_BASE + '/api/auth/logout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: refresh })
