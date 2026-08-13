@@ -1,9 +1,9 @@
 // ============================================
 // ADMIN — Painel de Recrutamento
-// Conecta com backend: https://recrutamento-api-novo.onrender.com
+// Usa a configuração de ambiente carregada em runtime
 // ============================================
 
-const API = 'https://recrutamento-api-novo.onrender.com';
+const API = window.VAGASIO_API_BASE;
 let token = null;
 let vagaEmEdicao = null;
 
@@ -498,7 +498,7 @@ async function carregarEquipe() {
 function abrirModalRecrutador() {
   document.getElementById('membro-nome').value = '';
   document.getElementById('membro-email').value = '';
-  document.getElementById('membro-senha').value = 'mudar123';
+  document.getElementById('membro-senha').value = '';
   abrirModal('novo-membro');
   setTimeout(() => document.getElementById('membro-nome').focus(), 100);
 }
@@ -536,7 +536,7 @@ function abrirModalEmpresa() {
   document.getElementById('emp-email').value = '';
   document.getElementById('emp-user-nome').value = '';
   document.getElementById('emp-user-email').value = '';
-  document.getElementById('emp-user-senha').value = 'mudar123';
+  document.getElementById('emp-user-senha').value = '';
   abrirModal('nova-empresa');
   setTimeout(() => document.getElementById('emp-nome').focus(), 100);
 }
@@ -557,7 +557,7 @@ async function salvarNovaEmpresa() {
   const payload = { nome, cnpj, telefone, email_principal };
   // Se preenchou pelo menos nome+email do usuário, inclui (senha tem default)
   if (userNome && userEmail) {
-    payload.usuario = { nome: userNome, email: userEmail, senha: userSenha || 'mudar123', cargo: 'admin' };
+    payload.usuario = { nome: userNome, email: userEmail, senha: userSenha || '', cargo: 'admin' };
   }
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   try {
@@ -720,8 +720,8 @@ function renderVincularVagas() {
     libDiv.innerHTML = liberadas.map(v => `
       <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid #16a34a; background:#f0fdf4; border-radius:6px; margin-bottom:6px;">
         <div>
-          <div style="font-weight:600; color:#15803d;">${v.titulo}</div>
-          <div style="font-size:12px; color:#666;">${v.empresa || ''} ${v.cidade ? '• ' + v.cidade : ''}</div>
+          <div style="font-weight:600; color:#15803d;">${escapeHtml(v.titulo)}</div>
+          <div style="font-size:12px; color:#666;">${escapeHtml(v.empresa || '')} ${v.cidade ? '• ' + escapeHtml(v.cidade) : ''}</div>
         </div>
         <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="desvincularVagaEmpresa(${v.id})">❌ Remover</button>
       </div>
@@ -929,14 +929,14 @@ async function carregarAgenda(periodo) {
             <div class="agenda-duracao">${e.duracao_minutos || 60}min</div>
           </div>
           <div class="agenda-info">
-            <div class="agenda-candidato">${e.candidato_nome || '—'}</div>
-            <div class="agenda-vaga">📋 ${e.vaga_titulo || 'Vaga'} <span style="color:#888;">• Etapa ${e.etapa} (${etapaNome})</span></div>
+            <div class="agenda-candidato">${escapeHtml(e.candidato_nome || '—')}</div>
+            <div class="agenda-vaga">📋 ${escapeHtml(e.vaga_titulo || 'Vaga')} <span style="color:#888;">• Etapa ${e.etapa} (${escapeHtml(etapaNome)})</span></div>
             <div class="agenda-meta">
               ${e.link_reuniao
-                ? `🎥 Online (Google Meet) • <a href="${e.link_reuniao}" target="_blank" style="color:#16A34A; font-weight:600;">🔗 Entrar no Meet</a>`
+                ? `🎥 Online (VagasIO) • <a href="${e.link_reuniao}" target="_blank" style="color:#16A34A; font-weight:600;">🔗 Entrar na videochamada VagasIO</a>`
                 : (e.local
                     ? `📍 ${e.local}`
-                    : '🎥 Online (Google Meet)')}
+                    : '🎥 Online (VagasIO)')}
               ${e.observacoes ? `<div style="margin-top:6px; color:#666; font-style:italic;">"${e.observacoes}"</div>` : ''}
             </div>
           </div>
@@ -1542,8 +1542,8 @@ const chartH = 220; // deve bater com CSS
                 <div class="card-bg-icon">💼</div>
                 <div class="vaga-card-header">
                   <div class="vaga-card-info">
-                    <div class="vaga-card-title">${v.titulo || '—'}</div>
-                    <div class="vaga-card-empresa">${v.empresa || ''}</div>
+                    <div class="vaga-card-title">${escapeHtml(v.titulo || '—')}</div>
+                    <div class="vaga-card-empresa">${escapeHtml(v.empresa || '')}</div>
                   </div>
                   <div class="vaga-card-pct-badge" style="color:${cor};background:${cor}15">${pct}% do total</div>
                 </div>
@@ -2741,10 +2741,10 @@ async function carregarCandidaturas() {
       return `
         <div class="vaga-cand-card" onclick="abrirVagaCands(${v.id})" style="cursor:pointer">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-            <h3 style="margin:0;font-size:16px;color:var(--vinho)">${v.titulo}</h3>
-            <span class="badge ${statusBadge}">${v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status}</span>
+            <h3 style="margin:0;font-size:16px;color:var(--vinho)">${escapeHtml(v.titulo)}</h3>
+            <span class="badge ${statusBadge}">${escapeHtml(v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status)}</span>
           </div>
-          <div style="font-size:13px;color:var(--cinza-medio);margin-bottom:12px">${v.empresa || '—'} • ${v.cidade || ''}${v.estado ? '/' + v.estado : ''}</div>
+          <div style="font-size:13px;color:var(--cinza-medio);margin-bottom:12px">${escapeHtml(v.empresa || '—')} • ${escapeHtml(v.cidade || '')}${v.estado ? '/' + escapeHtml(v.estado) : ''}</div>
           <div class="vaga-cand-stats">
             <div class="vaga-cand-stat">
               <div class="vaga-cand-stat-num">${v.total_ativas || 0}</div>
@@ -2795,9 +2795,9 @@ async function abrirVagasFechadasSemContratacao() {
       const local = (v.cidade || '') + (v.estado ? ' / ' + v.estado : '');
       const fechadaEm = v.fechada_em ? new Date(v.fechada_em).toLocaleDateString('pt-BR') : '—';
       return `<tr>
-        <td><strong>${v.titulo}</strong></td>
-        <td>${v.empresa || '—'}</td>
-        <td>${local || '—'}</td>
+        <td><strong>${escapeHtml(v.titulo)}</strong></td>
+        <td>${escapeHtml(v.empresa || '—')}</td>
+        <td>${escapeHtml(local || '—')}</td>
         <td>${v.total_candidatos || 0}</td>
         <td><span class="status-badge status-fechada">Fechada</span></td>
         <td>${fechadaEm}</td>
@@ -2845,8 +2845,8 @@ async function abrirVagaCands(vagaId) {
       }).join('');
     info.innerHTML = `
       <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div><strong>Empresa:</strong> ${data.vaga.empresa || '—'}</div>
-        <div><strong>Local:</strong> ${data.vaga.cidade || '—'}${data.vaga.estado ? '/' + data.vaga.estado : ''}</div>
+        <div><strong>Empresa:</strong> ${escapeHtml(data.vaga.empresa || '—')}</div>
+        <div><strong>Local:</strong> ${escapeHtml(data.vaga.cidade || '—')}${data.vaga.estado ? '/' + escapeHtml(data.vaga.estado) : ''}</div>
         <div><strong>Total de candidatos:</strong> ${candidaturasVagaCache.length}</div>
         <div><strong>Criada em:</strong> ${formatarData(data.vaga.criada_em)}</div>
       </div>
@@ -2868,10 +2868,10 @@ async function abrirVagaCands(vagaId) {
       const idxZero = numEtapa - 1;
       const etapaNome = (etapasArr[idxZero] && (typeof etapasArr[idxZero] === 'string' ? etapasArr[idxZero] : etapasArr[idxZero].nome)) || `Etapa ${numEtapa}`;
       return `<tr>
-        <td><strong>${c.nome || '—'}</strong></td>
-        <td>${c.email || '—'}</td>
-        <td>${c.cidade ? (c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td>
-        <td>${numEtapa}. ${etapaNome}</td>
+        <td><strong>${escapeHtml(c.nome || '—')}</strong></td>
+        <td>${escapeHtml(c.email || '—')}</td>
+        <td>${c.cidade ? escapeHtml(c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td>
+        <td>${numEtapa}. ${escapeHtml(etapaNome)}</td>
         <td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : c.status}</span></td>
         <td>${formatarData(c.criada_em)}</td>
         <td>
@@ -2936,12 +2936,12 @@ async function verCandidatura(id) {
     const c = data.candidatura;
     container.innerHTML = `
       <div class="det-grid">
-        <div class="det-item"><div class="det-label">Candidato</div><div class="det-value">${c.nome || '—'}</div></div>
-        <div class="det-item"><div class="det-label">E-mail</div><div class="det-value">${c.email || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Celular</div><div class="det-value">${c.celular || '—'}</div></div>
-        <div class="det-item"><div class="det-label">CPF</div><div class="det-value">${c.cpf || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Vaga</div><div class="det-value">${c.titulo || '—'}</div></div>
-        <div class="det-item"><div class="det-label">Empresa</div><div class="det-value">${c.empresa || '—'}</div></div>
+        <div class="det-item"><div class="det-label">Candidato</div><div class="det-value">${escapeHtml(c.nome || '—')}</div></div>
+        <div class="det-item"><div class="det-label">E-mail</div><div class="det-value">${escapeHtml(c.email || '—')}</div></div>
+        <div class="det-item"><div class="det-label">Celular</div><div class="det-value">${escapeHtml(c.celular || '—')}</div></div>
+        <div class="det-item"><div class="det-label">CPF</div><div class="det-value">${escapeHtml(c.cpf || '—')}</div></div>
+        <div class="det-item"><div class="det-label">Vaga</div><div class="det-value">${escapeHtml(c.titulo || '—')}</div></div>
+        <div class="det-item"><div class="det-label">Empresa</div><div class="det-value">${escapeHtml(c.empresa || '—')}</div></div>
         <div class="det-item"><div class="det-label">Status</div><div class="det-value"><span class="badge ${c.status === 'contratado' ? 'badge-ativa' : (c.status === 'reprovado' || c.status === 'rejeitado') ? 'badge-fechada' : c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente'}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : c.status}</span></div></div>
         <div class="det-item"><div class="det-label">Criada em</div><div class="det-value">${formatarData(c.criada_em)}</div></div>
       </div>
@@ -2950,9 +2950,9 @@ async function verCandidatura(id) {
         ${(c.historico && c.historico.length > 0)
           ? '<ul style="list-style:none;padding:0;">' + c.historico.map(h => {
               const d = h.data ? new Date(h.data).toLocaleString('pt-BR') : '';
-              const m = h.mensagem ? '<br><em style="color:var(--cinza-medio);">' + h.mensagem + '</em>' : '';
-              const p = h.por ? '<br><small>por ' + h.por + '</small>' : '';
-              return '<li style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#f9f9f9;"><strong>' + (h.etapa || h.status) + '</strong> [' + h.status + '] — ' + d + p + m + '</li>';
+              const m = h.mensagem ? '<br><em style="color:var(--cinza-medio);">' + escapeHTML(h.mensagem) + '</em>' : '';
+              const p = h.por ? '<br><small>por ' + escapeHTML(h.por) + '</small>' : '';
+              return '<li style="padding:10px;border-left:3px solid var(--vinho);margin-bottom:8px;background:#f9f9f9;"><strong>' + escapeHTML(h.etapa || h.status) + '</strong> [' + escapeHTML(h.status) + '] — ' + d + p + m + '</li>';
             }).join('') + '</ul>'
           : '<p style="color:var(--cinza-medio);">Nenhuma movimentação ainda.</p>'}
       </div>
@@ -3023,23 +3023,24 @@ async function abrirHistorico(candidaturaId) {
       <div id="lista">Carregando…</div>
       <script>
         const cid = ${candidaturaId};
-        const API = 'https://recrutamento-api-novo.onrender.com';
+        const API = window.VAGASIO_API_BASE;
         const t = localStorage.getItem('admin_token');
         fetch(API + '/api/empresa/candidaturas/' + cid + '/historico', { headers: { 'Authorization': 'Bearer ' + t }})
           .then(r => r.json())
           .then(d => {
             const el = document.getElementById('lista');
+            const safe = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
             if (!d.eventos || d.eventos.length === 0) {
               el.innerHTML = '<p class="vazio">Nenhuma movimentação registrada ainda.</p>';
               return;
             }
             el.innerHTML = d.eventos.map(e => \`
               <div class="ev">
-                <strong>\${e.de_etapa || 'início'} → \${e.para_etapa || 'final'}</strong>
-                <small> · status: \${e.de_status || '?'} → \${e.para_status || '?'}</small><br>
-                <small>\${new Date(e.data).toLocaleString('pt-BR')}</small>
-                \${e.autor_nome ? '<br><small>por: ' + e.autor_nome + ' (' + (e.autor_role || e.autor_tipo) + ')</small>' : ''}
-                \${e.mensagem ? '<br><em>' + e.mensagem + '</em>' : ''}
+                <strong>\${safe(e.de_etapa || 'início')} → \${safe(e.para_etapa || 'final')}</strong>
+                <small> · status: \${safe(e.de_status || '?')} → \${safe(e.para_status || '?')}</small><br>
+                <small>\${safe(new Date(e.data).toLocaleString('pt-BR'))}</small>
+                \${e.autor_nome ? '<br><small>por: ' + safe(e.autor_nome) + ' (' + safe(e.autor_role || e.autor_tipo) + ')</small>' : ''}
+                \${e.mensagem ? '<br><em>' + safe(e.mensagem) + '</em>' : ''}
               </div>
             \`).join('');
           })

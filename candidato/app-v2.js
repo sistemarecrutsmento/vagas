@@ -1,10 +1,10 @@
 // ============================================
 // VagasIO — Front-end do Candidato
-// Conecta com backend: https://recrutamento-api-novo.onrender.com
+// Usa a configuração de ambiente carregada em runtime
 // Fluxo: Cadastro/Login com e-mail + senha (sem código de verificação)
 // ============================================
 
-const API = 'https://recrutamento-api-novo.onrender.com';
+const API = window.VAGASIO_API_BASE;
 let categoriaAtiva = '';
 let vagaSelecionada = null;
 let emailLogado = null;
