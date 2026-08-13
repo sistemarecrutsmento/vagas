@@ -720,8 +720,8 @@ function renderVincularVagas() {
     libDiv.innerHTML = liberadas.map(v => `
       <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid #16a34a; background:#f0fdf4; border-radius:6px; margin-bottom:6px;">
         <div>
-          <div style="font-weight:600; color:#15803d;">${v.titulo}</div>
-          <div style="font-size:12px; color:#666;">${v.empresa || ''} ${v.cidade ? '• ' + v.cidade : ''}</div>
+          <div style="font-weight:600; color:#15803d;">${escapeHtml(v.titulo)}</div>
+          <div style="font-size:12px; color:#666;">${escapeHtml(v.empresa || '')} ${v.cidade ? '• ' + escapeHtml(v.cidade) : ''}</div>
         </div>
         <button class="btn btn-sec btn-sm" style="color:var(--vermelho,#b91c1c);" onclick="desvincularVagaEmpresa(${v.id})">❌ Remover</button>
       </div>
@@ -929,8 +929,8 @@ async function carregarAgenda(periodo) {
             <div class="agenda-duracao">${e.duracao_minutos || 60}min</div>
           </div>
           <div class="agenda-info">
-            <div class="agenda-candidato">${e.candidato_nome || '—'}</div>
-            <div class="agenda-vaga">📋 ${e.vaga_titulo || 'Vaga'} <span style="color:#888;">• Etapa ${e.etapa} (${etapaNome})</span></div>
+            <div class="agenda-candidato">${escapeHtml(e.candidato_nome || '—')}</div>
+            <div class="agenda-vaga">📋 ${escapeHtml(e.vaga_titulo || 'Vaga')} <span style="color:#888;">• Etapa ${e.etapa} (${escapeHtml(etapaNome)})</span></div>
             <div class="agenda-meta">
               ${e.link_reuniao
                 ? `🎥 Online (VagasIO) • <a href="${e.link_reuniao}" target="_blank" style="color:#16A34A; font-weight:600;">🔗 Entrar na videochamada VagasIO</a>`
@@ -1542,8 +1542,8 @@ const chartH = 220; // deve bater com CSS
                 <div class="card-bg-icon">💼</div>
                 <div class="vaga-card-header">
                   <div class="vaga-card-info">
-                    <div class="vaga-card-title">${v.titulo || '—'}</div>
-                    <div class="vaga-card-empresa">${v.empresa || ''}</div>
+                    <div class="vaga-card-title">${escapeHtml(v.titulo || '—')}</div>
+                    <div class="vaga-card-empresa">${escapeHtml(v.empresa || '')}</div>
                   </div>
                   <div class="vaga-card-pct-badge" style="color:${cor};background:${cor}15">${pct}% do total</div>
                 </div>
@@ -2741,10 +2741,10 @@ async function carregarCandidaturas() {
       return `
         <div class="vaga-cand-card" onclick="abrirVagaCands(${v.id})" style="cursor:pointer">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-            <h3 style="margin:0;font-size:16px;color:var(--vinho)">${v.titulo}</h3>
-            <span class="badge ${statusBadge}">${v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status}</span>
+            <h3 style="margin:0;font-size:16px;color:var(--vinho)">${escapeHtml(v.titulo)}</h3>
+            <span class="badge ${statusBadge}">${escapeHtml(v.status === 'publicada' ? 'Publicada' : v.status === 'pausada' ? 'Pausada' : v.status === 'fechada' ? 'Fechada' : v.status)}</span>
           </div>
-          <div style="font-size:13px;color:var(--cinza-medio);margin-bottom:12px">${v.empresa || '—'} • ${v.cidade || ''}${v.estado ? '/' + v.estado : ''}</div>
+          <div style="font-size:13px;color:var(--cinza-medio);margin-bottom:12px">${escapeHtml(v.empresa || '—')} • ${escapeHtml(v.cidade || '')}${v.estado ? '/' + escapeHtml(v.estado) : ''}</div>
           <div class="vaga-cand-stats">
             <div class="vaga-cand-stat">
               <div class="vaga-cand-stat-num">${v.total_ativas || 0}</div>
