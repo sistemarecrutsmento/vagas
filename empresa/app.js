@@ -1267,6 +1267,8 @@ function triagemIaEnfileirar(id) {
 function triagemIaProcessarFila() {
   while (triagemIaAtivas < TRIAGEM_IA_CONCORRENCIA && triagemIaFila.length) {
     const id = triagemIaFila.shift();
+    // Marca antes de iniciar a Promise para impedir duas chamadas no mesmo tick.
+    triagemIaEmAndamento.set(id, true);
     triagemIaAtivas++;
     const trabalho = executarAnaliseIa(id, false, true).catch(() => null).finally(() => {
       triagemIaAtivas--;
