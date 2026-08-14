@@ -1323,7 +1323,7 @@ function renderCandidaturasVagaTable() {
     const score = scoreIa(c);
     const iaCell = score === null
       ? (c.analise_ia?.status === 'erro' ? '<span class="triagem-ia-muted">IA indisponível</span>' : '<span class="triagem-ia-muted"><span class="spinner spinner-inline"></span> Analisando…</span>')
-      : `<span class="triagem-ia-score">${score}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span></span>`;
+      : `<span class="triagem-ia-score">${score}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span><small class="triagem-ia-status">${escapeHtml(triagemIaStatus(c.analise_ia))}</small></span>`;
     return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${iaCell}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 Ver IA</button></div></td></tr>`;
   }).join('');
 }
