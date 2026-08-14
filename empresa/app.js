@@ -1,9 +1,9 @@
 // ============================================
 // ADMIN — Painel de Recrutamento
-// Conecta com backend: https://recrutamento-api-novo.onrender.com
+// Usa a configuração de ambiente carregada em runtime
 // ============================================
 
-const API = 'https://recrutamento-api-novo.onrender.com';
+const API = window.VAGASIO_API_BASE;
 let token = null;
 let vagaEmEdicao = null;
 // Internal-only VagasIO video preview. VagasIO is the only online method.
@@ -232,10 +232,18 @@ function selecionarEntrevista(id){agendaState.selectedId=id;renderAgendaUpcoming
 function renderAgendaAttention(){const box=document.getElementById('agenda-attention-list'),all=agendaState.events,now=new Date(),items=[];all.filter(e=>e.status==='agendada'&&new Date(e.data_hora)>=now).slice(0,2).forEach(e=>items.push(`<div class="agenda-attention-item"><svg class="dash-svg"><use href="#icon-bell"></use></svg><span><strong>${escapeHtml(e.candidato_nome||'Candidato')} aguarda confirmação</strong>${agendaTime(e.data_hora)} · ${escapeHtml(e.vaga_titulo||'Vaga')}</span></div>`));const conflicts=all.filter((e,i)=>all.some((x,j)=>i<j&&agendaSameDay(e.data_hora,x.data_hora)&&new Date(e.data_hora)<new Date(x.data_hora)+(Number(x.duracao_minutos||60)*60000)&&new Date(x.data_hora)<new Date(e.data_hora)+(Number(e.duracao_minutos||60)*60000)));if(conflicts.length)items.push('<div class="agenda-attention-item"><svg class="dash-svg"><use href="#icon-filter"></use></svg><span><strong>Conflito de agenda detectado</strong>Há entrevistas sobrepostas.</span></div>');if(box)box.innerHTML=items.length?items.join(''):'<div class="agenda-empty-small">Nenhuma atenção pendente.</div>';const count=document.getElementById('agenda-attention-count');if(count)count.textContent=items.length;}
 function renderAgendaDetailEmpty(){const panel=document.getElementById('agenda-detail-panel');if(panel)panel.innerHTML='<div class="agenda-detail-empty"><svg class="dash-svg"><use href="#icon-calendar"></use></svg><strong>Entrevista selecionada</strong><span>Selecione um compromisso para ver os detalhes.</span></div>';}
 async function loadAgendaDetail(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));const panel=document.getElementById('agenda-detail-panel');if(!e||!panel)return;panel.classList.add('aberto');panel.innerHTML='<div class="agenda-detail-empty"><span class="spinner"></span><span>Carregando detalhes...</span></div>';try{const headers={'Authorization':'Bearer '+token};let cand={},candidatura=null;const reqs=[];if(e.candidato_id)reqs.push(fetch(API+'/api/empresa/candidatos/'+e.candidato_id,{headers}));if(e.candidatura_id)reqs.push(fetch(API+'/api/empresa/candidatura/'+e.candidatura_id,{headers}));const rs=await Promise.all(reqs);if(rs[0]){const d=await rs[0].json();cand=d.candidato||d;}if(rs[1])candidatura=await rs[1].json();agendaDetailsCache[id]={cand,candidatura};renderAgendaDetail(e,cand,candidatura);}catch(_){renderAgendaDetail(e,{},null);}}
-function renderAgendaDetail(e,c,candidatura){const stage=Number(candidatura?.etapa_atual||e.etapa||1),progress=Math.round(stage/7*100),steps=['Inscrição','Triagem','RH','Gestor','Proposta','Coleta Docs','Contratação'].map((name,i)=>{const n=i+1,cl=n<stage?'done':n===stage?'current':'';return `<div class="agenda-step ${cl}"><span class="agenda-step-dot">${n<stage?'✓':n}</span><span>${name}${n===stage?' — Atual':''}</span><small>${n<stage?'Concluída':n===stage?'Em andamento':'Pendente'}</small></div>`;}).join('');const link=e.video_room_id ? '<span class="agenda-link">Videochamada VagasIO disponível</span>' : '<span class="agenda-link">Link não informado</span>';const note=e.observacoes?`<div class="agenda-note">${escapeHtml(e.observacoes)}</div>`:'<div class="agenda-note">Nenhuma nota registrada para esta entrevista.</div>';const panel=document.getElementById('agenda-detail-panel');panel.innerHTML=`<div class="agenda-detail-content"><div class="agenda-detail-head"><span class="agenda-detail-avatar">${escapeHtml(agendaInitials(c.nome||e.candidato_nome))}</span><div class="agenda-detail-head-copy"><h3>${escapeHtml(c.nome||e.candidato_nome||'Candidato')}</h3><p>${escapeHtml(e.vaga_titulo||'Vaga')} · ${escapeHtml(agendaEtapaNome(e.etapa))}</p><span class="agenda-detail-status">${agendaStatusText(e.status)}</span></div><button class="agenda-detail-close" type="button" aria-label="Fechar detalhes" onclick="fecharAgendaDetalhe()">×</button></div><div class="agenda-detail-actions"><button class="primary" type="button" ${empresaVideoFeature && e.video_room_id?'onclick="entrarVideoEmpresa('+Number(e.id)+')"':'disabled'}>${empresaVideoFeature && e.video_room_id?'Entrar na videochamada':'Sem sala de vídeo'}</button><button type="button" onclick="reagendarEntrevista(${e.id})">Reagendar</button><button type="button" onclick="agendaMaisAcoes(${e.id})">Mais ações</button></div><section class="agenda-detail-section"><h4>Detalhes da entrevista</h4><div class="agenda-detail-info"><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Data e hora</strong>${agendaDateLong(e.data_hora)} às ${agendaTime(e.data_hora)}</span></div><div class="agenda-info-row">${candidatoSvg('arrow-up')}<span><strong>Duração</strong>${Number(e.duracao_minutos||60)} minutos</span></div><div class="agenda-info-row">${candidatoSvg('user')}<span><strong>Entrevistador</strong>Não informado no registro</span></div><div class="agenda-info-row">${candidatoSvg('file')}<span><strong>Tipo</strong>Entrevista com ${escapeHtml(agendaEtapaNome(e.etapa))}</span></div><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Formato</strong>${escapeHtml(agendaMode(e))}${e.local?` · ${escapeHtml(e.local)}`:''}</span></div><div class="agenda-info-row">${candidatoSvg('message')}<span><strong>Link / local</strong>${link}</span></div></div></section><section class="agenda-detail-section"><h4>Etapas do processo <span style="float:right">${stage} de 7</span></h4><div class="agenda-detail-progress"><span>Progresso</span><strong>${stage} de 7</strong></div><div class="agenda-detail-progress-bar"><i style="width:${progress}%"></i></div><div class="agenda-detail-steps">${steps}</div></section><section class="agenda-detail-section"><h4>Notas da entrevista</h4>${note}</section></div>`;}
+function renderAgendaDetail(e,c,candidatura){const stage=Number(candidatura?.etapa_atual||e.etapa||1),progress=Math.round(stage/7*100),steps=['Inscrição','Triagem','RH','Gestor','Proposta','Coleta Docs','Contratação'].map((name,i)=>{const n=i+1,cl=n<stage?'done':n===stage?'current':'';return `<div class="agenda-step ${cl}"><span class="agenda-step-dot">${n<stage?'✓':n}</span><span>${name}${n===stage?' — Atual':''}</span><small>${n<stage?'Concluída':n===stage?'Em andamento':'Pendente'}</small></div>`;}).join('');const link=e.video_room_id ? `<button type="button" class="agenda-link agenda-link-button" onclick="entrarVideoEmpresa(${Number(e.id)})">🎥 Entrar na videochamada</button>` : (e.link_reuniao ? `<a class="agenda-link" href="${safeExternalUrl(e.link_reuniao)}" target="_blank" rel="noopener">Abrir link da entrevista</a>` : '<span class="agenda-link">Link não informado</span>');const note=e.observacoes?`<div class="agenda-note">${escapeHtml(e.observacoes)}</div>`:'<div class="agenda-note">Nenhuma nota registrada para esta entrevista.</div>';const panel=document.getElementById('agenda-detail-panel');panel.innerHTML=`<div class="agenda-detail-content"><div class="agenda-detail-head"><span class="agenda-detail-avatar">${escapeHtml(agendaInitials(c.nome||e.candidato_nome))}</span><div class="agenda-detail-head-copy"><h3>${escapeHtml(c.nome||e.candidato_nome||'Candidato')}</h3><p>${escapeHtml(e.vaga_titulo||'Vaga')} · ${escapeHtml(agendaEtapaNome(e.etapa))}</p><span class="agenda-detail-status">${agendaStatusText(e.status)}</span></div><button class="agenda-detail-close" type="button" aria-label="Fechar detalhes" onclick="fecharAgendaDetalhe()">×</button></div><div class="agenda-detail-actions"><button class="primary" type="button" ${empresaVideoFeature && e.video_room_id?'onclick="entrarVideoEmpresa('+Number(e.id)+')"':'disabled'}>${empresaVideoFeature && e.video_room_id?'Entrar na videochamada':'Sem sala de vídeo'}</button><button type="button" onclick="reagendarEntrevista(${e.id})">Reagendar</button><button type="button" onclick="agendaMaisAcoes(${e.id})">Mais ações</button></div><section class="agenda-detail-section"><h4>Detalhes da entrevista</h4><div class="agenda-detail-info"><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Data e hora</strong>${agendaDateLong(e.data_hora)} às ${agendaTime(e.data_hora)}</span></div><div class="agenda-info-row">${candidatoSvg('arrow-up')}<span><strong>Duração</strong>${Number(e.duracao_minutos||60)} minutos</span></div><div class="agenda-info-row">${candidatoSvg('user')}<span><strong>Entrevistador</strong>Não informado no registro</span></div><div class="agenda-info-row">${candidatoSvg('file')}<span><strong>Tipo</strong>Entrevista com ${escapeHtml(agendaEtapaNome(e.etapa))}</span></div><div class="agenda-info-row">${candidatoSvg('calendar')}<span><strong>Formato</strong>${escapeHtml(agendaMode(e))}${e.local?` · ${escapeHtml(e.local)}`:''}</span></div><div class="agenda-info-row">${candidatoSvg('message')}<span><strong>Link / local</strong>${link}</span></div></div></section><section class="agenda-detail-section"><h4>Etapas do processo <span style="float:right">${stage} de 7</span></h4><div class="agenda-detail-progress"><span>Progresso</span><strong>${stage} de 7</strong></div><div class="agenda-detail-progress-bar"><i style="width:${progress}%"></i></div><div class="agenda-detail-steps">${steps}</div></section><section class="agenda-detail-section"><h4>Notas da entrevista</h4>${note}</section></div>`;}
 function fecharAgendaDetalhe(){agendaState.selectedId=null;document.getElementById('agenda-detail-panel')?.classList.remove('aberto');renderAgendaUpcoming();renderAgendaCalendar();renderAgendaDetailEmpty();}
-async function reagendarEntrevista(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));if(!e)return;const next=prompt('Nova data e hora (AAAA-MM-DD HH:MM):',new Date(new Date(e.data_hora).getTime()+86400000).toISOString().slice(0,16).replace('T',' '));if(!next)return;const duration=prompt('Duração em minutos:',String(e.duracao_minutos||60));if(!confirm(`Confirmar reagendamento para ${next}?`))return;try{const r=await fetch(API+'/api/empresa/entrevista/'+id,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({data_hora:next,duracao_minutos:Number(duration)||60})});if(!r.ok)throw new Error('Não foi possível reagendar');await carregarAgenda('todas');selecionarEntrevista(id);}catch(err){alert(err.message);}}
-function agendaMaisAcoes(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));if(!e)return;const action=prompt('Digite uma ação: confirmar, concluir ou cancelar','confirmar');if(action==='confirmar')atualizarEntrevista(id,'confirmada');else if(action==='concluir')atualizarEntrevista(id,'realizada');else if(action==='cancelar'&&confirm('Cancelar esta entrevista?'))atualizarEntrevista(id,'cancelada');}
+function abrirAgendaModal({titulo,body,confirmText='Salvar',onConfirm}){
+  document.getElementById('agenda-modal')?.remove();
+  const modal=document.createElement('div'); modal.id='agenda-modal'; modal.innerHTML=`<div style="position:fixed;inset:0;z-index:3000;display:grid;place-items:center;padding:18px;background:rgba(42,19,29,.42)"><div role="dialog" aria-modal="true" style="width:min(430px,100%);padding:20px;border:1px solid #EADDE2;border-radius:14px;background:#fff;box-shadow:0 18px 50px rgba(42,19,29,.22)"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px"><h3 style="margin:0;color:#722F37;font-size:16px">${titulo}</h3><button type="button" data-close style="border:0;background:transparent;font-size:22px;color:#8A7E85;cursor:pointer">×</button></div><div>${body}</div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px"><button type="button" data-close style="padding:9px 14px;border:1px solid #DCCBD2;border-radius:7px;background:#fff;color:#722F37;font-weight:700;cursor:pointer">Cancelar</button><button type="button" data-confirm style="padding:9px 14px;border:0;border-radius:7px;background:#722F37;color:#fff;font-weight:700;cursor:pointer">${confirmText}</button></div></div></div>`;
+  document.body.appendChild(modal); modal.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>modal.remove()); modal.querySelector('[data-confirm]').onclick=async()=>{const ok=await onConfirm(modal);if(ok!==false)modal.remove();};
+}
+function agendaDateInputValue(value){const d=new Date(value);const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;}
+async function reagendarEntrevista(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));if(!e)return;abrirAgendaModal({titulo:'Reagendar entrevista',body:`<label style="display:grid;gap:6px;color:#4C3B44;font-size:12px;font-weight:700">Data e hora<input name="data" type="datetime-local" value="${agendaDateInputValue(e.data_hora)}" required style="padding:10px;border:1px solid #DCCBD2;border-radius:7px"></label><label style="display:grid;gap:6px;margin-top:12px;color:#4C3B44;font-size:12px;font-weight:700">Duração<select name="duracao" style="padding:10px;border:1px solid #DCCBD2;border-radius:7px"><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">60 minutos</option><option value="90">90 minutos</option><option value="120">120 minutos</option></select></label>`,confirmText:'Salvar novo horário',onConfirm:async modal=>{const data=modal.querySelector('[name=data]').value,duracao=Number(modal.querySelector('[name=duracao]').value)||60;if(!data){modal.querySelector('[name=data]').focus();return false;}try{const r=await fetch(API+'/api/empresa/entrevista/'+id,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({data_hora:data,duracao_minutos:duracao})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.erro||'Não foi possível reagendar');await carregarAgenda('todas');selecionarEntrevista(id);return true;}catch(err){showAgendaMessage(err.message,'erro');return false;}}});}
+function agendaMaisAcoes(id){const e=agendaState.events.find(x=>Number(x.id)===Number(id));if(!e)return;abrirAgendaModal({titulo:'Mais ações',body:`<div style="display:grid;gap:8px"><button type="button" data-action="confirmada" style="padding:12px;border:1px solid #DCCBD2;border-radius:8px;background:#fff;text-align:left;color:#4C3B44;font-weight:700;cursor:pointer">✅ Marcar como confirmada</button><button type="button" data-action="realizada" style="padding:12px;border:1px solid #DCCBD2;border-radius:8px;background:#fff;text-align:left;color:#4C3B44;font-weight:700;cursor:pointer">✔️ Marcar como realizada</button><button type="button" data-action="cancelada" style="padding:12px;border:1px solid #FCA5A5;border-radius:8px;background:#FFF5F5;text-align:left;color:#991B1B;font-weight:700;cursor:pointer">🗑️ Cancelar entrevista</button></div>`,confirmText:'Aplicar ação',onConfirm:async modal=>{const action=modal.querySelector('[data-action].ativo')?.dataset.action;if(!action){showAgendaMessage('Escolha uma ação antes de continuar.','erro');return false;}if(action==='cancelada'&&!window.confirm('Cancelar esta entrevista?'))return false;await atualizarEntrevista(id,action);return true;}});const modal=document.getElementById('agenda-modal');modal?.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{modal.querySelectorAll('[data-action]').forEach(x=>x.classList.remove('ativo'));b.classList.add('ativo');});}
+function showAgendaMessage(message,tipo='info'){const box=document.createElement('div');box.textContent=message;box.style.cssText='position:fixed;right:18px;bottom:18px;z-index:4000;padding:12px 16px;border-radius:9px;background:'+(tipo==='erro'?'#FEE2E2':'#DCFCE7')+';color:'+(tipo==='erro'?'#991B1B':'#166534')+';box-shadow:0 8px 25px rgba(42,19,29,.16);font-weight:700;font-size:13px';document.body.appendChild(box);setTimeout(()=>box.remove(),3500);}
+
 function limparFiltrosAgenda(){agendaState.search='';agendaState.status='';agendaState.etapa='';const s=document.getElementById('agenda-filtro-status'),e=document.getElementById('agenda-filtro-etapa'),q=document.getElementById('entrevistas-busca');if(s)s.value='';if(e)e.value='';if(q)q.value='';renderAgenda();}
 function bindAgendaControls(){if(window.__agendaControlsBound)return;window.__agendaControlsBound=true;if(window.innerWidth<=700){agendaState.view='dia';document.querySelectorAll('.agenda-view-tabs button').forEach(b=>b.classList.toggle('ativo',b.dataset.view==='dia'));}document.getElementById('entrevistas-busca')?.addEventListener('input',e=>{agendaState.search=e.target.value;renderAgenda();});document.getElementById('agenda-lista-periodo')?.addEventListener('change',e=>{agendaState.listPeriod=e.target.value;renderAgendaUpcoming();});document.getElementById('agenda-filtro-status')?.addEventListener('change',e=>{agendaState.status=e.target.value;renderAgenda();});document.getElementById('agenda-filtro-etapa')?.addEventListener('change',e=>{agendaState.etapa=e.target.value;renderAgenda();});document.getElementById('entrevistas-filtros-btn')?.addEventListener('click',e=>{const p=document.getElementById('entrevistas-filtros-advanced');const open=p.hasAttribute('hidden');if(open)p.removeAttribute('hidden');else p.setAttribute('hidden','');e.currentTarget.setAttribute('aria-expanded',String(open));});document.querySelectorAll('.agenda-view-tabs button').forEach(b=>b.addEventListener('click',()=>{agendaState.view=b.dataset.view;document.querySelectorAll('.agenda-view-tabs button').forEach(x=>x.classList.toggle('ativo',x===b));renderAgendaCalendar();}));}
 bindAgendaControls();
@@ -1195,6 +1203,44 @@ async function abrirCurriculo(id) {
 let vagaAtualCands = null;
 let candidaturaAtual = null;
 let candidaturasVagaCache = [];
+let candidaturasVagaView = [];
+let candidatosVagaOrigem = 'candidaturas';
+
+function renderCandidaturasVagaTable() {
+  const tb = document.querySelector('#vaga-cands-internal-table tbody');
+  if (!tb) return;
+  const etapa = document.getElementById('cands-vaga-filtro-etapa')?.value || '';
+  const ordem = document.getElementById('cands-vaga-filtro-ordem')?.value || 'recentes';
+  const filtroIa = document.getElementById('cands-vaga-filtro-ia')?.value || '';
+  const scoreIa = c => c.analise_ia && Number.isFinite(Number(c.analise_ia.score)) ? Number(c.analise_ia.score) : null;
+  const rows = candidaturasVagaCache.filter(c => {
+    if (etapa && String(c.etapa_atual || 1) !== String(etapa)) return false;
+    const score = scoreIa(c), resultado = c.analise_ia?.resultado_json;
+    if (filtroIa === 'analisadas' && score === null) return false;
+    if (filtroIa === 'pendentes' && score !== null) return false;
+    if (filtroIa === 'atencao' && !(resultado && Array.isArray(resultado.pontos_atencao) && resultado.pontos_atencao.length)) return false;
+    return true;
+  }).slice().sort((a,b) => {
+    const da = new Date(a.criada_em || 0).getTime(), db = new Date(b.criada_em || 0).getTime();
+    const sa = scoreIa(a), sb = scoreIa(b);
+    if (ordem === 'ia-maior' || ordem === 'ia-menor') {
+      if (sa === null && sb !== null) return 1; if (sb === null && sa !== null) return -1;
+      return ordem === 'ia-maior' ? (sb || 0) - (sa || 0) : (sa || 0) - (sb || 0);
+    }
+    return ordem === 'antigas' ? da - db : db - da;
+  });
+  candidaturasVagaView = rows;
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="8" class="empty">Nenhuma candidatura encontrada com estes filtros.</td></tr>'; return; }
+  const etapasArr = Array.isArray(vagaAtualCands?.etapas) ? vagaAtualCands.etapas : [];
+  tb.innerHTML = rows.map(c => {
+    const badge = c.status === 'contratado' ? 'badge-ativa' : (c.status === 'rejeitado' || c.status === 'reprovado') ? 'badge-fechada' : (c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente');
+    const numEtapa = Number(c.etapa_atual || 1);
+    const etapaNome = (etapasArr[numEtapa - 1] && (typeof etapasArr[numEtapa - 1] === 'string' ? etapasArr[numEtapa - 1] : etapasArr[numEtapa - 1].nome)) || `Etapa ${numEtapa}`;
+    const score = scoreIa(c);
+    const iaCell = score === null ? '<span class="triagem-ia-muted">Não analisada</span>' : `<span class="triagem-ia-score">${score}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span></span>`;
+    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${escapeHtml(c.email || '—')}</td><td>${c.cidade ? escapeHtml(c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : escapeHtml(c.status || '')}</span></td><td>${iaCell}</td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 ${score === null ? 'Analisar IA' : 'Ver IA'}</button></div></td></tr>`;
+  }).join('');
+}
 
 async function carregarCandidaturas() {
   const grid = document.getElementById('vagas-cands-grid');
@@ -1256,7 +1302,7 @@ function irParaPagina(page) {
 async function abrirVagaCands(vagaId) {
   irParaPagina('candidatos-vaga');
   const tb = document.querySelector('#vaga-cands-internal-table tbody');
-  tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
+  tb.innerHTML = '<tr><td colspan="8" class="empty"><div class="spinner"></div></td></tr>';
   try {
     const r = await fetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', { headers: { 'Authorization': 'Bearer ' + token } });
     if (!r.ok) {
@@ -1271,9 +1317,25 @@ async function abrirVagaCands(vagaId) {
     data.candidaturas = data.candidatos || data.candidaturas || [];
     vagaAtualCands = data.vaga;
     candidaturasVagaCache = data.candidaturas;
+    candidaturasVagaView = candidaturasVagaCache.slice();
+    const filtroBox = document.getElementById('cands-vaga-filtros');
+    const filtroEtapa = document.getElementById('cands-vaga-filtro-etapa');
+    const filtroOrdem = document.getElementById('cands-vaga-filtro-ordem');
+    if (filtroBox) filtroBox.hidden = false;
+    let etapasFiltro = data.vaga.etapas;
+    try { if (typeof etapasFiltro === 'string') etapasFiltro = JSON.parse(etapasFiltro); } catch (_) { etapasFiltro = []; }
+    if (!Array.isArray(etapasFiltro)) etapasFiltro = [];
+    if (filtroEtapa) {
+      filtroEtapa.innerHTML = '<option value="">Todas as etapas</option>' + etapasFiltro.map((e, i) => `<option value="${i + 1}">${i + 1}. ${escapeHtml(typeof e === 'string' ? e : e?.nome || `Etapa ${i + 1}`)}</option>`).join('');
+      filtroEtapa.onchange = renderCandidaturasVagaTable;
+    }
+    if (filtroOrdem) filtroOrdem.onchange = renderCandidaturasVagaTable;
+    const filtroIa = document.getElementById('cands-vaga-filtro-ia');
+    if (filtroIa) filtroIa.onchange = renderCandidaturasVagaTable;
 
     document.getElementById('cands-vaga-titulo').textContent = '👥 ' + (data.vaga.titulo || '') + ' — Candidatos';
     document.getElementById('cands-vaga-voltar').onclick = () => irParaPagina('candidaturas');
+    candidatosVagaOrigem = 'candidaturas';
     const info = document.getElementById('cands-vaga-info');
     info.innerHTML = `
       <div style="display:flex;gap:24px;flex-wrap:wrap">
@@ -1287,29 +1349,7 @@ async function abrirVagaCands(vagaId) {
       tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum candidato para esta vaga.</td></tr>';
       return;
     }
-    tb.innerHTML = candidaturasVagaCache.map(c => {
-      const badge = c.status === 'contratado' ? 'badge-ativa' : (c.status === 'rejeitado' || c.status === 'reprovado') ? 'badge-fechada' : (c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente');
-      // Resolve nome da etapa (etapa_atual é 1-based: 1=Inscrição, 2=Triagem, ...)
-      // O campo 'etapas' vem na VAGA, não na candidatura.
-      let etapasArr = [];
-      const fonteEtapas = data.vaga && data.vaga.etapas ? data.vaga.etapas : null;
-      try { etapasArr = typeof fonteEtapas === 'string' ? JSON.parse(fonteEtapas) : fonteEtapas; } catch(e) {}
-      if (!Array.isArray(etapasArr)) etapasArr = [];
-      const numEtapa = c.etapa_atual || 1;  // 1-based
-      const idxZero = numEtapa - 1;
-      const etapaNome = (etapasArr[idxZero] && (typeof etapasArr[idxZero] === 'string' ? etapasArr[idxZero] : etapasArr[idxZero].nome)) || `Etapa ${numEtapa}`;
-      return `<tr>
-        <td><strong>${escapeHtml(c.nome || '—')}</strong></td>
-        <td>${escapeHtml(c.email || '—')}</td>
-        <td>${c.cidade ? (escapeHtml(c.cidade + (c.estado ? '/' + c.estado : ''))) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td>
-        <td>${numEtapa}. ${escapeHtml(etapaNome)}</td>
-        <td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : escapeHtml(c.status || '')}</span></td>
-        <td>${formatarData(c.criada_em)}</td>
-        <td>
-          <a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a>
-        </td>
-      </tr>`;
-    }).join('');
+    renderCandidaturasVagaTable();
   } catch (e) {
     tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</td></tr>';
   }
@@ -1325,13 +1365,15 @@ function carregarAnalisarEmbed() {
     frame.removeAttribute('src');
     return;
   }
-  const src = 'analisar.html?id=' + encodeURIComponent(id) + '&embed=1&v=empresa-analisar-7';
+  const src = 'analisar.html?id=' + encodeURIComponent(id) + '&embed=1&v=empresa-analisar-8';
   if (frame.getAttribute('src') !== src) frame.src = src;
 }
 function analisarCandidatura(id) {
   const n = Number(id);
   if (!Number.isInteger(n) || n <= 0) return;
-  dashNavigate('analisar', { candidatura_id: n });
+  const query = { candidatura_id: n };
+  if (vagaAtualCands?.id) { query.voltar_para = 'candidatos-vaga'; query.voltar_vaga_id = vagaAtualCands.id; }
+  dashNavigate('analisar', query);
 }
 
 async function acaoCandidatura(id, acao) {
@@ -1364,6 +1406,33 @@ async function acaoCandidatura(id, acao) {
 function escapeHTML(s) {
   if (!s) return '';
   return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+
+function triagemIaResultado(analise) {
+  let resultado = analise?.resultado_json;
+  if (typeof resultado === 'string') { try { resultado = JSON.parse(resultado); } catch (_) { resultado = {}; } }
+  return resultado && typeof resultado === 'object' ? resultado : {};
+}
+function triagemIaNivel(nivel) { return ({ alta: 'Alta', moderada: 'Moderada', baixa: 'Baixa' }[String(nivel || '').toLowerCase()] || 'Não informado'); }
+function triagemIaStatus(analise) { return analise?.status === 'concluida' ? 'Concluída' : analise?.status === 'processando' ? 'Em processamento' : analise?.status === 'erro' ? 'Erro' : 'Não analisada'; }
+function renderAnaliseIaBox(id, analise, erro = '') {
+  const box = document.getElementById('triagem-ia-detalhes'); if (!box) return;
+  if (erro) { box.innerHTML = `<div class="alert alert-erro">${escapeHtml(erro)}</div><button type="button" class="btn btn-primary" onclick="executarAnaliseIa(${id},true)">Tentar novamente</button>`; return; }
+  if (!analise) { box.innerHTML = `<p class="triagem-ia-muted">Ainda não há análise para esta candidatura.</p><button type="button" class="btn btn-primary" onclick="executarAnaliseIa(${id},false)">🤖 Executar análise IA</button><p class="triagem-ia-muted" style="margin-top:8px">A análise é um apoio à revisão humana e não rejeita nem aprova candidatos automaticamente.</p>`; return; }
+  const resultado = triagemIaResultado(analise), score = Number(analise.score), reqs = Array.isArray(resultado.requisitos) ? resultado.requisitos : [], pontos = Array.isArray(resultado.pontos_atencao) ? resultado.pontos_atencao : [],
+    scoreText = Number.isFinite(score) ? `${Math.round(score)}%` : '—';
+  box.innerHTML = `<div class="triagem-ia-box"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><strong>🤖 Compatibilidade: ${scoreText}</strong> <span class="triagem-ia-muted">(${escapeHtml(triagemIaNivel(analise.nivel_compatibilidade))})</span><div class="triagem-ia-meter" style="width:180px;margin-top:8px"><i style="width:${Number.isFinite(score) ? Math.max(0,Math.min(100,score)) : 0}%"></i></div></div><span class="triagem-ia-muted">Status: ${escapeHtml(triagemIaStatus(analise))}</span></div>${resultado.resumo ? `<p style="margin:12px 0">${escapeHtml(resultado.resumo)}</p>` : ''}<h4 style="margin:14px 0 7px">Requisitos e evidências</h4>${reqs.length ? reqs.map(r => `<div class="triagem-ia-requirement"><strong>${escapeHtml(r.descricao || 'Requisito')} <span class="triagem-ia-muted">· ${escapeHtml(String(r.status || '').replaceAll('_',' '))}</span></strong>${r.justificativa ? `<div class="triagem-ia-muted">${escapeHtml(r.justificativa)}</div>` : ''}${(r.evidencias || []).map(e => `<div class="triagem-ia-evidence">• ${escapeHtml(e.descricao || '')} <span class="triagem-ia-muted">(${escapeHtml(e.fonte || 'dados disponíveis')})</span></div>`).join('')}</div>`).join('') : '<p class="triagem-ia-muted">Nenhum requisito retornado.</p>'}${pontos.length ? `<h4 style="margin:14px 0 7px">Pontos de atenção</h4><ul>${pontos.map(p => `<li>${escapeHtml(p.descricao || '')}</li>`).join('')}</ul>` : ''}${resultado.avisos?.length ? `<p class="triagem-ia-muted" style="margin-top:10px">${resultado.avisos.map(a => escapeHtml(a)).join(' · ')}</p>` : ''}<div class="triagem-ia-actions" style="margin-top:14px"><button type="button" class="btn btn-sec" onclick="executarAnaliseIa(${id},true)">Reanalisar</button><span class="triagem-ia-muted">Resultado informativo; a decisão permanece com a equipe.</span></div></div>`;
+}
+async function abrirAnaliseIa(id) {
+  const container = document.getElementById('candidatura-detalhes'); if (!container) return;
+  abrirModal('candidatura'); container.innerHTML = `<h3>🤖 Análise IA da candidatura</h3><div id="triagem-ia-detalhes"><div class="empty"><div class="spinner"></div> Carregando análise...</div></div>`;
+  try { const r = await fetch(API + '/api/empresa/candidatura/' + id + '/analise-ia', { headers: { 'Authorization': 'Bearer ' + token } }); const d = await r.json().catch(() => ({})); if (r.status === 404) return renderAnaliseIaBox(id, null); if (!r.ok) throw new Error(d.erro || 'Não foi possível buscar a análise'); renderAnaliseIaBox(id, d.analise); }
+  catch (e) { renderAnaliseIaBox(id, null, e.message || 'Erro ao buscar análise'); }
+}
+async function executarAnaliseIa(id, reanalisar) {
+  const box = document.getElementById('triagem-ia-detalhes'); if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div> Executando análise com revisão de requisitos e evidências...</div>';
+  try { const path = reanalisar ? '/analise-ia/reanalisar' : '/analise-ia'; const r = await fetch(API + '/api/empresa/candidatura/' + id + path, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: '{}' }); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.erro || 'Não foi possível concluir a análise'); const c = candidaturasVagaCache.find(x => Number(x.id) === Number(id)); if (c) { c.analise_ia = d.analise; renderCandidaturasVagaTable(); } renderAnaliseIaBox(id, d.analise); }
+  catch (e) { renderAnaliseIaBox(id, null, e.message || 'Erro ao executar análise'); }
 }
 
 async function verCandidatura(id) {
