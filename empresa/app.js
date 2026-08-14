@@ -1211,18 +1211,34 @@ function renderCandidaturasVagaTable() {
   if (!tb) return;
   const etapa = document.getElementById('cands-vaga-filtro-etapa')?.value || '';
   const ordem = document.getElementById('cands-vaga-filtro-ordem')?.value || 'recentes';
-  const rows = candidaturasVagaCache.filter(c => !etapa || String(c.etapa_atual || 1) === String(etapa)).slice().sort((a,b) => {
+  const filtroIa = document.getElementById('cands-vaga-filtro-ia')?.value || '';
+  const scoreIa = c => c.analise_ia && Number.isFinite(Number(c.analise_ia.score)) ? Number(c.analise_ia.score) : null;
+  const rows = candidaturasVagaCache.filter(c => {
+    if (etapa && String(c.etapa_atual || 1) !== String(etapa)) return false;
+    const score = scoreIa(c), resultado = c.analise_ia?.resultado_json;
+    if (filtroIa === 'analisadas' && score === null) return false;
+    if (filtroIa === 'pendentes' && score !== null) return false;
+    if (filtroIa === 'atencao' && !(resultado && Array.isArray(resultado.pontos_atencao) && resultado.pontos_atencao.length)) return false;
+    return true;
+  }).slice().sort((a,b) => {
     const da = new Date(a.criada_em || 0).getTime(), db = new Date(b.criada_em || 0).getTime();
+    const sa = scoreIa(a), sb = scoreIa(b);
+    if (ordem === 'ia-maior' || ordem === 'ia-menor') {
+      if (sa === null && sb !== null) return 1; if (sb === null && sa !== null) return -1;
+      return ordem === 'ia-maior' ? (sb || 0) - (sa || 0) : (sa || 0) - (sb || 0);
+    }
     return ordem === 'antigas' ? da - db : db - da;
   });
   candidaturasVagaView = rows;
-  if (!rows.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhuma candidatura encontrada com estes filtros.</td></tr>'; return; }
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="8" class="empty">Nenhuma candidatura encontrada com estes filtros.</td></tr>'; return; }
   const etapasArr = Array.isArray(vagaAtualCands?.etapas) ? vagaAtualCands.etapas : [];
   tb.innerHTML = rows.map(c => {
     const badge = c.status === 'contratado' ? 'badge-ativa' : (c.status === 'rejeitado' || c.status === 'reprovado') ? 'badge-fechada' : (c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente');
     const numEtapa = Number(c.etapa_atual || 1);
     const etapaNome = (etapasArr[numEtapa - 1] && (typeof etapasArr[numEtapa - 1] === 'string' ? etapasArr[numEtapa - 1] : etapasArr[numEtapa - 1].nome)) || `Etapa ${numEtapa}`;
-    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${escapeHtml(c.email || '—')}</td><td>${c.cidade ? escapeHtml(c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : escapeHtml(c.status || '')}</span></td><td>${formatarData(c.criada_em)}</td><td><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a></td></tr>`;
+    const score = scoreIa(c);
+    const iaCell = score === null ? '<span class="triagem-ia-muted">Não analisada</span>' : `<span class="triagem-ia-score">${score}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span></span>`;
+    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${escapeHtml(c.email || '—')}</td><td>${c.cidade ? escapeHtml(c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : escapeHtml(c.status || '')}</span></td><td>${iaCell}</td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 ${score === null ? 'Analisar IA' : 'Ver IA'}</button></div></td></tr>`;
   }).join('');
 }
 
@@ -1286,7 +1302,7 @@ function irParaPagina(page) {
 async function abrirVagaCands(vagaId) {
   irParaPagina('candidatos-vaga');
   const tb = document.querySelector('#vaga-cands-internal-table tbody');
-  tb.innerHTML = '<tr><td colspan="7" class="empty"><div class="spinner"></div></td></tr>';
+  tb.innerHTML = '<tr><td colspan="8" class="empty"><div class="spinner"></div></td></tr>';
   try {
     const r = await fetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', { headers: { 'Authorization': 'Bearer ' + token } });
     if (!r.ok) {
@@ -1299,6 +1315,20 @@ async function abrirVagaCands(vagaId) {
     const vagaData = await vagaResp.json().catch(() => ({}));
     data.vaga = vagaData.vaga || vagaData;
     data.candidaturas = data.candidatos || data.candidaturas || [];
+    // The API returns only the current, tenant-scoped analysis projection;
+    // keep the full result behind the explicit detail endpoint.
+    data.candidaturas = data.candidaturas.map(c => ({
+      ...c,
+      analise_ia: c.analise_ia_id ? {
+        id: c.analise_ia_id,
+        status: c.analise_ia_status,
+        score: c.analise_ia_score,
+        nivel_compatibilidade: c.analise_ia_nivel,
+        resultado_json: c.analise_ia_resultado_json,
+        versao: c.analise_ia_versao,
+        criada_em: c.analise_ia_criada_em
+      } : null
+    }));
     vagaAtualCands = data.vaga;
     candidaturasVagaCache = data.candidaturas;
     candidaturasVagaView = candidaturasVagaCache.slice();
@@ -1314,6 +1344,8 @@ async function abrirVagaCands(vagaId) {
       filtroEtapa.onchange = renderCandidaturasVagaTable;
     }
     if (filtroOrdem) filtroOrdem.onchange = renderCandidaturasVagaTable;
+    const filtroIa = document.getElementById('cands-vaga-filtro-ia');
+    if (filtroIa) filtroIa.onchange = renderCandidaturasVagaTable;
 
     document.getElementById('cands-vaga-titulo').textContent = '👥 ' + (data.vaga.titulo || '') + ' — Candidatos';
     document.getElementById('cands-vaga-voltar').onclick = () => irParaPagina('candidaturas');
