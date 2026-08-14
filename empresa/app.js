@@ -15,7 +15,7 @@ async function fetchEmpresaAuth(url, options = {}) {
   const opts = { ...options, headers: { ...(options.headers || {}), 'Authorization': 'Bearer ' + token } };
   let response = await fetch(url, opts);
   if (response.status !== 401) return response;
-  const storedRefresh = refreshToken || localStorage.getItem('empresa_refresh_token');
+  const storedRefresh = refreshToken || localStorage.getItem('empresa_refresh_token') || localStorage.getItem('empresa_refresh');
   if (!storedRefresh) return response;
   const rr = await fetch(API + '/api/auth/refresh', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -26,7 +26,7 @@ async function fetchEmpresaAuth(url, options = {}) {
   token = rd.token;
   refreshToken = rd.refreshToken || storedRefresh;
   localStorage.setItem('empresa_token', token);
-  if (rd.refreshToken) localStorage.setItem('empresa_refresh_token', rd.refreshToken);
+  if (rd.refreshToken) { localStorage.setItem('empresa_refresh_token', rd.refreshToken); localStorage.setItem('empresa_refresh', rd.refreshToken); }
   return fetch(url, { ...opts, headers: { ...(opts.headers || {}), 'Authorization': 'Bearer ' + token } });
 }
 // Internal-only VagasIO video preview. VagasIO is the only online method.
@@ -77,7 +77,7 @@ async function fazerLogin() {
       token = data.token;
       refreshToken = data.refreshToken || null;
       localStorage.setItem('empresa_token', token);
-      if (refreshToken) localStorage.setItem('empresa_refresh_token', refreshToken);
+      if (refreshToken) { localStorage.setItem('empresa_refresh_token', refreshToken); localStorage.setItem('empresa_refresh', refreshToken); }
       mostrarApp();
     } else {
       document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao entrar'}</div>`;
