@@ -1205,6 +1205,38 @@ let candidaturaAtual = null;
 let candidaturasVagaCache = [];
 let candidaturasVagaView = [];
 let candidatosVagaOrigem = 'candidaturas';
+// Automatic IA triage: one request per candidature, bounded globally in this tab.
+const triagemIaFila = [];
+const triagemIaEmAndamento = new Map();
+const triagemIaUltimaTentativa = new Map();
+let triagemIaAtivas = 0;
+const TRIAGEM_IA_CONCORRENCIA = 2;
+const TRIAGEM_IA_RETRY_MS = 30000;
+
+function triagemIaEnfileirar(id) {
+  const n = Number(id);
+  if (!Number.isInteger(n) || n <= 0 || triagemIaEmAndamento.has(n)) return;
+  const agora = Date.now();
+  if (agora - (triagemIaUltimaTentativa.get(n) || 0) < TRIAGEM_IA_RETRY_MS) return;
+  triagemIaUltimaTentativa.set(n, agora);
+  triagemIaFila.push(n);
+  triagemIaProcessarFila();
+}
+function triagemIaProcessarFila() {
+  while (triagemIaAtivas < TRIAGEM_IA_CONCORRENCIA && triagemIaFila.length) {
+    const id = triagemIaFila.shift();
+    triagemIaAtivas++;
+    const trabalho = executarAnaliseIa(id, false, true).catch(() => null).finally(() => {
+      triagemIaAtivas--;
+      triagemIaEmAndamento.delete(id);
+      triagemIaProcessarFila();
+    });
+    triagemIaEmAndamento.set(id, trabalho);
+  }
+}
+function iniciarTriagemIaAutomatica() {
+  candidaturasVagaCache.filter(c => !c.analise_ia || c.analise_ia.status === 'erro').forEach(c => triagemIaEnfileirar(c.id));
+}
 
 function renderCandidaturasVagaTable() {
   const tb = document.querySelector('#vaga-cands-internal-table tbody');
@@ -1237,8 +1269,10 @@ function renderCandidaturasVagaTable() {
     const numEtapa = Number(c.etapa_atual || 1);
     const etapaNome = (etapasArr[numEtapa - 1] && (typeof etapasArr[numEtapa - 1] === 'string' ? etapasArr[numEtapa - 1] : etapasArr[numEtapa - 1].nome)) || `Etapa ${numEtapa}`;
     const score = scoreIa(c);
-    const iaCell = score === null ? '<span class="triagem-ia-muted">Não analisada</span>' : `<span class="triagem-ia-score">${score}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span></span>`;
-    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${escapeHtml(c.email || '—')}</td><td>${c.cidade ? escapeHtml(c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : escapeHtml(c.status || '')}</span></td><td>${iaCell}</td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 ${score === null ? 'Analisar IA' : 'Ver IA'}</button></div></td></tr>`;
+    const iaCell = score === null
+      ? (c.analise_ia?.status === 'erro' ? '<span class="triagem-ia-muted">IA indisponível</span>' : '<span class="triagem-ia-muted"><span class="spinner spinner-inline"></span> Analisando…</span>')
+      : `<span class="triagem-ia-score">${score}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span></span>`;
+    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${escapeHtml(c.email || '—')}</td><td>${c.cidade ? escapeHtml(c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : escapeHtml(c.status || '')}</span></td><td>${iaCell}</td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 Ver IA</button></div></td></tr>`;
   }).join('');
 }
 
@@ -1364,6 +1398,8 @@ async function abrirVagaCands(vagaId) {
       return;
     }
     renderCandidaturasVagaTable();
+    // Existing projections are shown immediately; only missing visible rows are generated.
+    setTimeout(iniciarTriagemIaAutomatica, 250);
   } catch (e) {
     tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</td></tr>';
   }
@@ -1420,6 +1456,33 @@ async function acaoCandidatura(id, acao) {
 function escapeHTML(s) {
   if (!s) return '';
   return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+
+function triagemIaResultado(analise) {
+  let resultado = analise?.resultado_json;
+  if (typeof resultado === 'string') { try { resultado = JSON.parse(resultado); } catch (_) { resultado = {}; } }
+  return resultado && typeof resultado === 'object' ? resultado : {};
+}
+function triagemIaNivel(nivel) { return ({ alta: 'Alta', moderada: 'Moderada', baixa: 'Baixa' }[String(nivel || '').toLowerCase()] || 'Não informado'); }
+function triagemIaStatus(analise) { return analise?.status === 'concluida' ? 'Concluída' : analise?.status === 'processando' ? 'Em processamento' : analise?.status === 'erro' ? 'Erro' : 'Não analisada'; }
+function renderAnaliseIaBox(id, analise, erro = '') {
+  const box = document.getElementById('triagem-ia-detalhes'); if (!box) return;
+  if (erro) { box.innerHTML = `<div class="alert alert-erro">${escapeHtml(erro)}</div><button type="button" class="btn btn-primary" onclick="executarAnaliseIa(${id},true)">Tentar novamente</button>`; return; }
+  if (!analise) { box.innerHTML = `<div class="empty"><div class="spinner"></div> Gerando análise de compatibilidade…</div><p class="triagem-ia-muted" style="margin-top:8px">A análise é um apoio à revisão humana e não rejeita nem aprova candidatos automaticamente.</p>`; return; }
+  const resultado = triagemIaResultado(analise), score = Number(analise.score), reqs = Array.isArray(resultado.requisitos) ? resultado.requisitos : [], pontos = Array.isArray(resultado.pontos_atencao) ? resultado.pontos_atencao : [],
+    scoreText = Number.isFinite(score) ? `${Math.round(score)}%` : '—';
+  box.innerHTML = `<div class="triagem-ia-box"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><strong>🤖 Compatibilidade: ${scoreText}</strong> <span class="triagem-ia-muted">(${escapeHtml(triagemIaNivel(analise.nivel_compatibilidade))})</span><div class="triagem-ia-meter" style="width:180px;margin-top:8px"><i style="width:${Number.isFinite(score) ? Math.max(0,Math.min(100,score)) : 0}%"></i></div></div><span class="triagem-ia-muted">Status: ${escapeHtml(triagemIaStatus(analise))}</span></div>${resultado.resumo ? `<p style="margin:12px 0">${escapeHtml(resultado.resumo)}</p>` : ''}<h4 style="margin:14px 0 7px">Requisitos e evidências</h4>${reqs.length ? reqs.map(r => `<div class="triagem-ia-requirement"><strong>${escapeHtml(r.descricao || 'Requisito')} <span class="triagem-ia-muted">· ${escapeHtml(String(r.status || '').replaceAll('_',' '))}</span></strong>${r.justificativa ? `<div class="triagem-ia-muted">${escapeHtml(r.justificativa)}</div>` : ''}${(r.evidencias || []).map(e => `<div class="triagem-ia-evidence">• ${escapeHtml(e.descricao || '')} <span class="triagem-ia-muted">(${escapeHtml(e.fonte || 'dados disponíveis')})</span></div>`).join('')}</div>`).join('') : '<p class="triagem-ia-muted">Nenhum requisito retornado.</p>'}${pontos.length ? `<h4 style="margin:14px 0 7px">Pontos de atenção</h4><ul>${pontos.map(p => `<li>${escapeHtml(p.descricao || '')}</li>`).join('')}</ul>` : ''}${resultado.avisos?.length ? `<p class="triagem-ia-muted" style="margin-top:10px">${resultado.avisos.map(a => escapeHtml(a)).join(' · ')}</p>` : ''}<div class="triagem-ia-actions" style="margin-top:14px"><button type="button" class="btn btn-sec" onclick="executarAnaliseIa(${id},true)">Reanalisar</button><span class="triagem-ia-muted">Resultado informativo; a decisão permanece com a equipe.</span></div></div>`;
+}
+async function abrirAnaliseIa(id) {
+  const container = document.getElementById('candidatura-detalhes'); if (!container) return;
+  abrirModal('candidatura'); container.innerHTML = `<h3>🤖 Análise IA da candidatura</h3><div id="triagem-ia-detalhes"><div class="empty"><div class="spinner"></div> Carregando análise...</div></div>`;
+  try { const r = await fetch(API + '/api/empresa/candidatura/' + id + '/analise-ia', { headers: { 'Authorization': 'Bearer ' + token } }); const d = await r.json().catch(() => ({})); if (r.status === 404) { renderAnaliseIaBox(id, null); triagemIaEnfileirar(id); return; } if (!r.ok) throw new Error(d.erro || 'Não foi possível buscar a análise'); renderAnaliseIaBox(id, d.analise); }
+  catch (_) { renderAnaliseIaBox(id, null, 'Não foi possível carregar a análise agora. Tente novamente.'); }
+}
+async function executarAnaliseIa(id, reanalisar, automatico = false) {
+  const box = document.getElementById('triagem-ia-detalhes'); if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div> Gerando análise de compatibilidade…</div>';
+  try { const path = reanalisar ? '/analise-ia/reanalisar' : '/analise-ia'; const r = await fetch(API + '/api/empresa/candidatura/' + id + path, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: '{}' }); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.erro || 'Não foi possível concluir a análise'); const c = candidaturasVagaCache.find(x => Number(x.id) === Number(id)); if (c) { c.analise_ia = d.analise; renderCandidaturasVagaTable(); } renderAnaliseIaBox(id, d.analise); return d.analise; }
+  catch (e) { const c = candidaturasVagaCache.find(x => Number(x.id) === Number(id)); if (c) { c.analise_ia = { status: 'erro' }; renderCandidaturasVagaTable(); } if (!automatico) renderAnaliseIaBox(id, null, 'Não foi possível concluir a análise agora. Tente novamente.'); throw e; }
 }
 
 async function verCandidatura(id) {
