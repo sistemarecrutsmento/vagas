@@ -63,7 +63,8 @@
         }
         if (!data.token) throw new Error('A API não retornou uma sessão válida.');
         SaaSAuthStore.setSession({ token: data.token, refreshToken: data.refreshToken, usuario: data.usuario });
-        window.location.replace('dashboard.html');
+        window.VAGASIO_API_BASE = API;
+        try { const fs = await fetch(API + '/api/admin/face/status', { headers: { Authorization: 'Bearer ' + data.token } }); const face = await fs.json().catch(() => ({})); window.location.replace(face.enrolled ? 'face-validation.html' : 'face-enrollment.html'); } catch (_) { window.location.replace('face-enrollment.html'); }
       } catch (error) {
         erro.textContent = error.message || 'Erro ao entrar.';
         erro.style.display = 'block';
