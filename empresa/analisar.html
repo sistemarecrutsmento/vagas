@@ -158,7 +158,7 @@
   </script>
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-</head>
+<script src="../_shared/runtime-config.js"></script></head>
 <body>
   <div class="container">
     <div id="content">
@@ -176,7 +176,7 @@
   }
 </script>
   <script>
-    const API = 'https://recrutamento-api-novo.onrender.com';
+    const API = window.VAGASIO_API_BASE;
     function entrarVideoEmpresa(id) { sessionStorage.setItem('vagasio_video_interview_id', String(id)); location.href = 'video-call.html'; }
     async function fetchEmpresaComTimeout(url, options = {}, timeoutMs = 15000) {
       const controller = new AbortController();
@@ -265,6 +265,15 @@
           return;
         }
         candidatura = data.candidatura || data;
+        // Garante que a entrevista persista no primeiro render após F5,
+        // mesmo quando a resposta principal vier sem o array completo.
+        try {
+          const er = await fetchEmpresaComTimeout(API + '/api/empresa/candidatura/' + id + '/entrevistas', request);
+          if (er.ok) {
+            const ed = await er.json();
+            candidatura.entrevistas = ed.entrevistas || candidatura.entrevistas || [];
+          }
+        } catch (_) { /* a renderização principal continua disponível */ }
       } catch (e) {
         content.innerHTML = '<div class="card"><div class="alert alert-erro">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</div></div>';
         return;
@@ -1017,7 +1026,7 @@
         btn.disabled = true;
         btn.innerHTML = btnOriginalText;
 
-        // Monta o body. Para online: a sala VagasIO é criada pelo backend.
+        // Monta o body. Para online: NÃO envia link_reuniao (backend gera).
         // Para presencial: envia o local com endereço (sem link).
         const body = {
           candidatura_id: candidaturaId,
@@ -1027,7 +1036,7 @@
           local: isOnline ? 'Videochamada VagasIO' : ('Presencial — ' + enderecoVal.trim()),
           observacoes: obsVal || (isOnline ? 'Entrevista online via Videochamada VagasIO.' : 'Entrevista presencial.')
         };
-        // A sala VagasIO é resolvida pelo backend; entrevistas presenciais não têm sala.
+        // Só envia link_reuniao se o backend precisar gerar (não envia nada, deixa gerar)
         if (!isOnline) {
           // presencial: não envia link, backend não vai gerar
           body.link_reuniao = null;
@@ -1042,7 +1051,7 @@
         const res = await r.json();
         if (!r.ok) throw new Error(res.erro || 'Falha ao agendar');
 
-        // Sala VagasIO e local salvo; historical external links are not activated
+        // Sala VagasIO e local salvo; historical Meet links are not activated
         const linkGerado = ''; // historical link_reuniao is never an active video provider
         const videoRoomId = (res.video && res.video.room_id) || (res.entrevista && res.entrevista.video_room_id) || '';
         const localSalvo = (res.entrevista && res.entrevista.local) || (isOnline ? 'Videochamada VagasIO' : ('Presencial — ' + enderecoVal.trim()));
@@ -1054,7 +1063,7 @@
           hour: '2-digit', minute: '2-digit'
         });
 
-        // Bloco do formato: sala VagasIO (online) OU endereço (presencial)
+        // Bloco do formato: link Meet (online) OU endereço (presencial)
         let blocoFormato = '';
         if (videoRoomId) {
           blocoFormato = '<div style="margin-top:12px; padding:12px; background:#FFF; border:1px solid #BBF7D0; border-radius:8px;"><div style="font-size:12px; color:#166534; font-weight:600; margin-bottom:6px;">🎥 Videochamada VagasIO:</div><button type="button" onclick="entrarVideoEmpresa(' + res.entrevista.id + ')" style="padding:10px 16px; background:#16A34A; color:white; border:0; border-radius:6px; font-weight:600; cursor:pointer;">Entrar na videochamada VagasIO</button></div>';
@@ -1094,7 +1103,8 @@
     // Removido: carregarChat, renderChat, enviarMensagemChat, mostrarNotificacaoChat, iniciarPollingChat
 
     async function acao(id, acao) {
-      const labels = { 'reprovar': 'reprovar este candidato?', 'aprovar-triagem': 'aprovar este candidato na triagem curricular?', 'reabrir': 'reabrir esta candidatura?' };
+      const labels = { 'avancar': 'avançar este candidato para a próxima etapa?', 'reprovar': 'reprovar este candidato?', 'aprovar-triagem': 'aprovar este candidato na triagem curricular?', 'reabrir': 'reabrir esta candidatura?' };
+      if (!labels[acao]) return alert('Ação não reconhecida. Recarregue a candidatura e tente novamente.');
       if (!confirm('Tem certeza que deseja ' + labels[acao])) return;
       try {
         const token = localStorage.getItem('empresa_token');
