@@ -5,7 +5,30 @@
 
 const API = window.VAGASIO_API_BASE;
 let token = null;
+let refreshToken = null;
 let vagaEmEdicao = null;
+
+// Access tokens are short-lived. Keep the refresh token only in localStorage
+// (the backend rotates and invalidates it on use) and transparently renew once
+// for authenticated IA requests, avoiding stale-tab 401s without weakening API RBAC.
+async function fetchEmpresaAuth(url, options = {}) {
+  const opts = { ...options, headers: { ...(options.headers || {}), 'Authorization': 'Bearer ' + token } };
+  let response = await fetch(url, opts);
+  if (response.status !== 401) return response;
+  const storedRefresh = refreshToken || localStorage.getItem('empresa_refresh_token');
+  if (!storedRefresh) return response;
+  const rr = await fetch(API + '/api/auth/refresh', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken: storedRefresh })
+  });
+  const rd = await rr.json().catch(() => ({}));
+  if (!rr.ok || !rd.token) return response;
+  token = rd.token;
+  refreshToken = rd.refreshToken || storedRefresh;
+  localStorage.setItem('empresa_token', token);
+  if (rd.refreshToken) localStorage.setItem('empresa_refresh_token', rd.refreshToken);
+  return fetch(url, { ...opts, headers: { ...(opts.headers || {}), 'Authorization': 'Bearer ' + token } });
+}
 // Internal-only VagasIO video preview. VagasIO is the only online method.
 let empresaVideoFeature = false;
 async function carregarVideoConfigEmpresa(){
@@ -30,6 +53,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const saved = localStorage.getItem('empresa_token');
   if (saved) {
     token = saved;
+    refreshToken = localStorage.getItem('empresa_refresh_token');
     await carregarVideoConfigEmpresa();
     mostrarApp();
   }
@@ -51,7 +75,9 @@ async function fazerLogin() {
     }
     if (r.ok && data.token) {
       token = data.token;
+      refreshToken = data.refreshToken || null;
       localStorage.setItem('empresa_token', token);
+      if (refreshToken) localStorage.setItem('empresa_refresh_token', refreshToken);
       mostrarApp();
     } else {
       document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao entrar'}</div>`;
@@ -63,6 +89,7 @@ async function fazerLogin() {
 
 function sair() {
   localStorage.removeItem('empresa_token');
+  localStorage.removeItem('empresa_refresh_token');
   location.reload();
 }
 
@@ -944,7 +971,7 @@ function renderCandidatos() {
 async function hidratarAnalisesCandidatos(rows) {
   const headers={'Authorization':'Bearer '+token}; const fila=rows.map(c=>Number(c.ultima_candidatura_id)).filter(id=>Number.isInteger(id)&&id>0);
   let cursor=0;
-  async function worker(){ while(cursor<fila.length){ const id=fila[cursor++]; if(candidatosAnaliseIaCache.has(id)) continue; try { const r=await fetch(API+'/api/empresa/candidatura/'+id+'/analise-ia',{headers}); const d=await r.json().catch(()=>({})); if(r.ok && d.analise){ candidatosAnaliseIaCache.set(id,d.analise); } else if(r.status===404){ candidatosAnaliseIaCache.set(id,{status:'processando'}); triagemIaEnfileirar(id); } else { candidatosAnaliseIaCache.set(id,{status:'erro'}); } } catch(_){ candidatosAnaliseIaCache.set(id,{status:'erro'}); } renderCandidatos(); } }
+  async function worker(){ while(cursor<fila.length){ const id=fila[cursor++]; if(candidatosAnaliseIaCache.has(id)) continue; try { const r=await fetchEmpresaAuth(API+'/api/empresa/candidatura/'+id+'/analise-ia',{headers}); const d=await r.json().catch(()=>({})); if(r.ok && d.analise){ candidatosAnaliseIaCache.set(id,d.analise); } else if(r.status===404){ candidatosAnaliseIaCache.set(id,{status:'processando'}); triagemIaEnfileirar(id); } else { candidatosAnaliseIaCache.set(id,{status:'erro'}); } } catch(_){ candidatosAnaliseIaCache.set(id,{status:'erro'}); } renderCandidatos(); } }
   await Promise.all([worker(),worker(),worker()]);
 }
 function atualizarAnaliseIaNasListas(id, analise) { const n=Number(id); if(n>0)candidatosAnaliseIaCache.set(n,analise); const c=candidaturasVagaCache.find(x=>Number(x.id)===n); if(c)c.analise_ia=analise; renderCandidatos(); if(c)renderCandidaturasVagaTable(); }
@@ -1488,12 +1515,12 @@ function renderAnaliseIaBox(id, analise, erro = '') {
 async function abrirAnaliseIa(id) {
   const container = document.getElementById('candidatura-detalhes'); if (!container) return;
   abrirModal('candidatura'); container.innerHTML = `<h3>🤖 Análise IA da candidatura</h3><div id="triagem-ia-detalhes"><div class="empty"><div class="spinner"></div> Carregando análise...</div></div>`;
-  try { const r = await fetch(API + '/api/empresa/candidatura/' + id + '/analise-ia', { headers: { 'Authorization': 'Bearer ' + token } }); const d = await r.json().catch(() => ({})); if (r.status === 404) { renderAnaliseIaBox(id, null); triagemIaEnfileirar(id); return; } if (!r.ok) throw new Error(d.erro || 'Não foi possível buscar a análise'); renderAnaliseIaBox(id, d.analise); }
+  try { const r = await fetchEmpresaAuth(API + '/api/empresa/candidatura/' + id + '/analise-ia'); const d = await r.json().catch(() => ({})); if (r.status === 404) { renderAnaliseIaBox(id, null); triagemIaEnfileirar(id); return; } if (!r.ok) throw new Error(d.erro || 'Não foi possível buscar a análise'); renderAnaliseIaBox(id, d.analise); }
   catch (_) { renderAnaliseIaBox(id, null, 'Não foi possível carregar a análise agora. Tente novamente.'); }
 }
 async function executarAnaliseIa(id, reanalisar, automatico = false) {
   const box = document.getElementById('triagem-ia-detalhes'); if (box) box.innerHTML = '<div class="empty"><div class="spinner"></div> Gerando análise de compatibilidade…</div>';
-  try { const path = reanalisar ? '/analise-ia/reanalisar' : '/analise-ia'; const r = await fetch(API + '/api/empresa/candidatura/' + id + path, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: '{}' }); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.erro || 'Não foi possível concluir a análise'); atualizarAnaliseIaNasListas(id,d.analise); renderAnaliseIaBox(id, d.analise); return d.analise; }
+  try { const path = reanalisar ? '/analise-ia/reanalisar' : '/analise-ia'; const r = await fetchEmpresaAuth(API + '/api/empresa/candidatura/' + id + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.erro || 'Não foi possível concluir a análise'); atualizarAnaliseIaNasListas(id,d.analise); renderAnaliseIaBox(id, d.analise); return d.analise; }
   catch (e) { const c = candidaturasVagaCache.find(x => Number(x.id) === Number(id)); if (c) c.analise_ia = { status: 'erro' }; candidatosAnaliseIaCache.set(Number(id),{status:'erro'}); renderCandidatos(); if (c) renderCandidaturasVagaTable(); if (!automatico) renderAnaliseIaBox(id, null, 'Não foi possível concluir a análise agora. Tente novamente.'); throw e; }
 }
 
