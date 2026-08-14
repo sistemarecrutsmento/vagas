@@ -34,7 +34,7 @@
 
 (function() {
   const VERSION = '3.0';
-  const API = 'https://recrutamento-api-novo.onrender.com';
+  const API = window.VAGASIO_API_BASE;
 
   // Defaults (admin). Candidato/empresa sobrescrevem com setStorageKeys()
   let ACCESS_KEY = 'admin_token';
@@ -55,10 +55,19 @@
   // Token storage
   // -------------------------------------------------------------------------
   function getAccess() { return localStorage.getItem(ACCESS_KEY); }
-  function getRefresh() { return localStorage.getItem(REFRESH_KEY); }
+  // Older empresa login builds used empresa_refresh_token. Read it as a
+  // compatibility alias and immediately converge on the canonical key via
+  // setTokens(), without weakening backend validation or accepting JWT refreshes.
+  function getRefresh() {
+    return localStorage.getItem(REFRESH_KEY) ||
+      (ACCESS_KEY === 'empresa_token' ? localStorage.getItem('empresa_refresh_token') : null);
+  }
   function setTokens(access, refresh) {
     if (access) localStorage.setItem(ACCESS_KEY, access);
-    if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+    if (refresh) {
+      localStorage.setItem(REFRESH_KEY, refresh);
+      if (ACCESS_KEY === 'empresa_token') localStorage.removeItem('empresa_refresh_token');
+    }
   }
   function clearTokens() {
     localStorage.removeItem(ACCESS_KEY);
