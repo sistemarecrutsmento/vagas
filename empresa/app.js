@@ -1252,8 +1252,11 @@ const triagemIaFila = [];
 const triagemIaEmAndamento = new Map();
 const triagemIaUltimaTentativa = new Map();
 let triagemIaAtivas = 0;
-const TRIAGEM_IA_CONCORRENCIA = 2;
-const TRIAGEM_IA_RETRY_MS = 30000;
+let triagemIaProximaExecucao = 0;
+let triagemIaTimer = null;
+const TRIAGEM_IA_CONCORRENCIA = 1;
+const TRIAGEM_IA_INTERVAL_MS = 12000;
+const TRIAGEM_IA_RETRY_MS = 60000;
 
 function triagemIaEnfileirar(id) {
   const n = Number(id);
@@ -1265,18 +1268,23 @@ function triagemIaEnfileirar(id) {
   triagemIaProcessarFila();
 }
 function triagemIaProcessarFila() {
-  while (triagemIaAtivas < TRIAGEM_IA_CONCORRENCIA && triagemIaFila.length) {
-    const id = triagemIaFila.shift();
-    // Marca antes de iniciar a Promise para impedir duas chamadas no mesmo tick.
-    triagemIaEmAndamento.set(id, true);
-    triagemIaAtivas++;
-    const trabalho = executarAnaliseIa(id, false, true).catch(() => null).finally(() => {
-      triagemIaAtivas--;
-      triagemIaEmAndamento.delete(id);
-      triagemIaProcessarFila();
-    });
-    triagemIaEmAndamento.set(id, trabalho);
+  if (triagemIaAtivas >= TRIAGEM_IA_CONCORRENCIA || !triagemIaFila.length) return;
+  const agora = Date.now();
+  if (agora < triagemIaProximaExecucao) {
+    if (!triagemIaTimer) triagemIaTimer = setTimeout(() => { triagemIaTimer = null; triagemIaProcessarFila(); }, triagemIaProximaExecucao - agora);
+    return;
   }
+  const id = triagemIaFila.shift();
+  // Marca antes de iniciar a Promise para impedir duas chamadas no mesmo tick.
+  triagemIaEmAndamento.set(id, true);
+  triagemIaAtivas++;
+  triagemIaProximaExecucao = Date.now() + TRIAGEM_IA_INTERVAL_MS;
+  const trabalho = executarAnaliseIa(id, false, true).catch(() => null).finally(() => {
+    triagemIaAtivas--;
+    triagemIaEmAndamento.delete(id);
+    triagemIaProcessarFila();
+  });
+  triagemIaEmAndamento.set(id, trabalho);
 }
 function iniciarTriagemIaAutomatica() {
   candidaturasVagaCache.filter(c => !c.analise_ia || c.analise_ia.status === 'erro').forEach(c => triagemIaEnfileirar(c.id));
