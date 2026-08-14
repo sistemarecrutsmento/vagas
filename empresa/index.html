@@ -750,16 +750,6 @@
 .intelligence-filters{grid-template-columns:repeat(8,minmax(90px,1fr))}.relatorio-chart-panel{grid-column:1/-1;border:0;box-shadow:none}.relatorio-chart-panel .relatorio-chart-wrap{height:210px}.relatorio-chart-legend{display:flex;gap:8px;flex-wrap:wrap;padding:8px 0}.relatorio-chart-legend button{border:0;background:#faf7f8;color:#75656d;padding:5px 8px;border-radius:5px;font:inherit;font-size:8px;cursor:pointer}.relatorio-chart-legend button.ativo{color:#722f37;font-weight:700}.relatorio-chart-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}.chart-data-table{border-top:1px solid #eee7ea;padding-top:7px;color:#70636a;font-size:8px}.chart-data-table summary{cursor:pointer;color:#722f37}.chart-data-row{display:grid;grid-template-columns:80px repeat(4,1fr);gap:6px;padding:5px 0;border-bottom:1px solid #f2edef}.chart-data-row span{font-size:7px}.relatorio-chart-empty{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;color:#92858c;font-size:8px;text-align:center}.relatorio-chart-empty strong{color:#55434c;font-size:10px}.relatorio-chart-empty span{max-width:280px}@media(max-width:1199px){.intelligence-filters{grid-template-columns:repeat(4,minmax(90px,1fr))}}@media(max-width:700px){.intelligence-filters{grid-template-columns:repeat(2,minmax(90px,1fr))}.chart-data-row{grid-template-columns:65px repeat(2,1fr)}}
 @media print{body.imprimindo-relatorios *{visibility:hidden!important}body.imprimindo-relatorios #page-relatorios,body.imprimindo-relatorios #page-relatorios *{visibility:visible!important}body.imprimindo-relatorios #page-relatorios{position:absolute;left:0;top:0;width:100%;background:#fff!important;padding:16px!important}body.imprimindo-relatorios .sidebar,body.imprimindo-relatorios .topbar,body.imprimindo-relatorios .intelligence-actions,body.imprimindo-relatorios .intelligence-filters,body.imprimindo-relatorios .intelligence-tabs{display:none!important}body.imprimindo-relatorios .intelligence-content-grid{display:block!important}body.imprimindo-relatorios .intelligence-panel{break-inside:avoid;margin-bottom:10px;box-shadow:none!important}body.imprimindo-relatorios .relatorio-chart-panel{display:block!important}body.imprimindo-relatorios .relatorio-chart-wrap{height:230px!important}body.imprimindo-relatorios .chart-data-table{display:block!important}body.imprimindo-relatorios .chart-data-table summary{display:none!important}body.imprimindo-relatorios .intelligence-kpis{grid-template-columns:repeat(4,1fr)!important}}
 
-
-    .triagem-ia-box { margin:16px 0; padding:14px; border:1px solid #ead9b0; border-radius:10px; background:#fffdf7; }
-    .triagem-ia-score { display:inline-flex; align-items:center; gap:7px; font-weight:800; color:#8a5a00; }
-    .triagem-ia-meter { display:inline-block; width:90px; height:7px; border-radius:9px; background:#eee; overflow:hidden; vertical-align:middle; }
-    .triagem-ia-meter i { display:block; height:100%; background:#c8942e; }
-    .triagem-ia-muted { color:var(--cinza-medio); font-size:12px; }
-    .triagem-ia-requirement { padding:9px 0; border-top:1px solid #eee; }
-    .triagem-ia-requirement strong { display:block; }
-    .triagem-ia-evidence { margin:4px 0 0 18px; color:#555; font-size:12px; }
-    .triagem-ia-actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
 </style>
   <script src="../candidato/chat-uploader.js"></script>
 <style>
@@ -969,12 +959,12 @@
       <div id="cands-vaga-info" style="background:var(--cinza);padding:14px;border-radius:8px;margin-bottom:16px;font-size:13px"></div>
       <div id="cands-vaga-filtros" class="cands-vaga-filtros" hidden>
         <label>Etapa<select id="cands-vaga-filtro-etapa"><option value="">Todas as etapas</option></select></label>
-        <label>Ordenar por<select id="cands-vaga-filtro-ordem"><option value="recentes">Candidaturas mais recentes</option><option value="antigas">Candidaturas mais antigas</option></select></label>
+        <label>Ordenar por<select id="cands-vaga-filtro-ordem"><option value="recentes">Candidaturas mais recentes</option><option value="antigas">Candidaturas mais antigas</option><option value="ia-maior">Maior compatibilidade IA</option><option value="ia-menor">Menor compatibilidade IA</option></select></label><label>IA<select id="cands-vaga-filtro-ia"><option value="">Todas</option><option value="analisadas">Analisadas</option><option value="pendentes">Não analisadas</option><option value="atencao">Com pontos de atenção</option></select></label>
       </div>
       <div class="tabela-wrap tabela-scroll">
         <table id="vaga-cands-internal-table">
-          <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead>
-          <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
+          <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Compatibilidade IA</th><th>Data</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="8" class="empty">Carregando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -1051,7 +1041,7 @@
       <div id="vaga-cands-info" style="background:var(--cinza);padding:14px;border-radius:8px;margin-bottom:16px;font-size:13px"></div>
       <div class="tabela-wrap">
         <table id="vaga-cands-table">
-          <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead>
+          <thead><tr><th>Candidato</th><th>Email</th><th>Cidade</th><th>Etapa</th><th>Status</th><th>Compatibilidade IA</th><th>Data</th><th>Ações</th></tr></thead>
           <tbody><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
         </table>
       </div>
