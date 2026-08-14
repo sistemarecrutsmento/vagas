@@ -1262,7 +1262,7 @@ function renderCandidaturasVagaTable() {
     return ordem === 'antigas' ? da - db : db - da;
   });
   candidaturasVagaView = rows;
-  if (!rows.length) { tb.innerHTML = '<tr><td colspan="8" class="empty">Nenhuma candidatura encontrada com estes filtros.</td></tr>'; return; }
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">Nenhuma candidatura encontrada com estes filtros.</td></tr>'; return; }
   const etapasArr = Array.isArray(vagaAtualCands?.etapas) ? vagaAtualCands.etapas : [];
   tb.innerHTML = rows.map(c => {
     const badge = c.status === 'contratado' ? 'badge-ativa' : (c.status === 'rejeitado' || c.status === 'reprovado') ? 'badge-fechada' : (c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente');
@@ -1272,7 +1272,7 @@ function renderCandidaturasVagaTable() {
     const iaCell = score === null
       ? (c.analise_ia?.status === 'erro' ? '<span class="triagem-ia-muted">IA indisponível</span>' : '<span class="triagem-ia-muted"><span class="spinner spinner-inline"></span> Analisando…</span>')
       : `<span class="triagem-ia-score">${score}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span></span>`;
-    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${escapeHtml(c.email || '—')}</td><td>${c.cidade ? escapeHtml(c.cidade + (c.estado ? '/' + c.estado : '')) : '<span style="color:var(--cinza-medio)">Não informada</span>'}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td><span class="badge ${badge}">${c.status === 'em_analise' ? 'Em análise' : c.status === 'em_andamento' ? 'Em andamento' : c.status === 'contratado' ? 'Contratado' : c.status === 'reprovado' ? 'Reprovado' : c.status === 'rejeitado' ? 'Rejeitado' : c.status === 'aprovado' ? 'Aprovado' : escapeHtml(c.status || '')}</span></td><td>${iaCell}</td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 Ver IA</button></div></td></tr>`;
+    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${iaCell}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 Ver IA</button></div></td></tr>`;
   }).join('');
 }
 
@@ -1336,12 +1336,12 @@ function irParaPagina(page) {
 async function abrirVagaCands(vagaId) {
   irParaPagina('candidatos-vaga');
   const tb = document.querySelector('#vaga-cands-internal-table tbody');
-  tb.innerHTML = '<tr><td colspan="8" class="empty"><div class="spinner"></div></td></tr>';
+  tb.innerHTML = '<tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr>';
   try {
     const r = await fetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', { headers: { 'Authorization': 'Bearer ' + token } });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
-      tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + escapeHtml(err.erro || String(r.status)) + '</td></tr>';
+      tb.innerHTML = '<tr><td colspan="5" class="empty">Erro: ' + escapeHtml(err.erro || String(r.status)) + '</td></tr>';
       return;
     }
     const data = await r.json();
@@ -1394,14 +1394,14 @@ async function abrirVagaCands(vagaId) {
       </div>`;
 
     if (candidaturasVagaCache.length === 0) {
-      tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum candidato para esta vaga.</td></tr>';
+      tb.innerHTML = '<tr><td colspan="5" class="empty">Nenhum candidato para esta vaga.</td></tr>';
       return;
     }
     renderCandidaturasVagaTable();
     // Existing projections are shown immediately; only missing visible rows are generated.
     setTimeout(iniciarTriagemIaAutomatica, 250);
   } catch (e) {
-    tb.innerHTML = '<tr><td colspan="7" class="empty">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</td></tr>';
+    tb.innerHTML = '<tr><td colspan="5" class="empty">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</td></tr>';
   }
 }
 
