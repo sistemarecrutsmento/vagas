@@ -75,10 +75,12 @@
       #vaga-cands-internal-table td:nth-child(4) { font-size: 13px; }
       #vaga-cands-internal-table td:nth-child(5)::before { content: '🏷 Status: '; color: var(--cinza-medio); }
       #vaga-cands-internal-table td:nth-child(5) { font-size: 13px; }
-      #vaga-cands-internal-table td:nth-child(6)::before { content: '📅 Data: '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(6)::before { content: '🤖 IA: '; color: var(--cinza-medio); }
       #vaga-cands-internal-table td:nth-child(6) { font-size: 12px; color: var(--cinza-medio); }
-      #vaga-cands-internal-table td:nth-child(7) { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--borda); text-align: right; }
-      #vaga-cands-internal-table td:nth-child(7) .btn-ver { padding: 8px 16px; }
+      #vaga-cands-internal-table td:nth-child(7)::before { content: '📅 Data: '; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(7) { font-size: 12px; color: var(--cinza-medio); }
+      #vaga-cands-internal-table td:nth-child(8) { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--borda); text-align: right; }
+      #vaga-cands-internal-table td:nth-child(8) .btn-ver { padding: 8px 16px; }
     }
     /* Sidebar */
     aside { width: 240px; background: var(--vinho); color: var(--branco); padding: 24px 0; flex-shrink: 0; display: flex; flex-direction: column; min-height: 100vh; }
@@ -150,8 +152,9 @@
     #vaga-cands-internal-table th:nth-child(3), #vaga-cands-internal-table td:nth-child(3) { width: 13%; }
     #vaga-cands-internal-table th:nth-child(4), #vaga-cands-internal-table td:nth-child(4) { width: 14%; }
     #vaga-cands-internal-table th:nth-child(5), #vaga-cands-internal-table td:nth-child(5) { width: 14%; }
-    #vaga-cands-internal-table th:nth-child(6), #vaga-cands-internal-table td:nth-child(6) { width: 12%; white-space: nowrap; }
-    #vaga-cands-internal-table th:nth-child(7), #vaga-cands-internal-table td:nth-child(7) { width: 10%; }
+    #vaga-cands-internal-table th:nth-child(6), #vaga-cands-internal-table td:nth-child(6) { width: 14%; white-space: nowrap; }
+    #vaga-cands-internal-table th:nth-child(7), #vaga-cands-internal-table td:nth-child(7) { width: 10%; white-space: nowrap; }
+    #vaga-cands-internal-table th:nth-child(8), #vaga-cands-internal-table td:nth-child(8) { width: 17%; }
     #vaga-cands-internal-table th { white-space: nowrap; }
     #vaga-cands-internal-table .badge { white-space: nowrap; display: inline-block; }
     #vaga-cands-internal-table th:last-child, #vaga-cands-internal-table td:last-child { text-align: right; }
@@ -231,6 +234,15 @@
     .cands-vaga-filtros { display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin:0 0 14px; padding:12px; border:1px solid var(--cinza); border-radius:10px; background:#fff; }
     .cands-vaga-filtros label { display:grid; gap:5px; color:var(--cinza-escuro); font-size:12px; font-weight:700; }
     .cands-vaga-filtros select { min-width:210px; padding:9px 11px; border:1px solid #DDD; border-radius:7px; background:#fff; color:var(--cinza-escuro); }
+    .triagem-ia-box { margin:16px 0; padding:14px; border:1px solid #ead9b0; border-radius:10px; background:#fffdf7; }
+    .triagem-ia-score { display:inline-flex; align-items:center; gap:7px; font-weight:800; color:#8a5a00; }
+    .triagem-ia-meter { display:inline-block; width:90px; height:7px; border-radius:9px; background:#eee; overflow:hidden; vertical-align:middle; }
+    .triagem-ia-meter i { display:block; height:100%; background:#c8942e; }
+    .triagem-ia-muted { color:var(--cinza-medio); font-size:12px; }
+    .triagem-ia-requirement { padding:9px 0; border-top:1px solid #eee; }
+    .triagem-ia-requirement strong { display:block; }
+    .triagem-ia-evidence { margin:4px 0 0 18px; color:#555; font-size:12px; }
+    .triagem-ia-actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
     .vaga-cand-card { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 18px; transition: transform .15s, box-shadow .15s; cursor: pointer; position: relative; }
     .vaga-cand-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); border-color: var(--vinho); }
     .vaga-cand-card h3 { font-size: 16px; color: var(--preto); margin-bottom: 4px; }
@@ -959,7 +971,8 @@
       <div id="cands-vaga-info" style="background:var(--cinza);padding:14px;border-radius:8px;margin-bottom:16px;font-size:13px"></div>
       <div id="cands-vaga-filtros" class="cands-vaga-filtros" hidden>
         <label>Etapa<select id="cands-vaga-filtro-etapa"><option value="">Todas as etapas</option></select></label>
-        <label>Ordenar por<select id="cands-vaga-filtro-ordem"><option value="recentes">Candidaturas mais recentes</option><option value="antigas">Candidaturas mais antigas</option><option value="ia-maior">Maior compatibilidade IA</option><option value="ia-menor">Menor compatibilidade IA</option></select></label><label>IA<select id="cands-vaga-filtro-ia"><option value="">Todas</option><option value="analisadas">Analisadas</option><option value="pendentes">Não analisadas</option><option value="atencao">Com pontos de atenção</option></select></label>
+        <label>Ordenar por<select id="cands-vaga-filtro-ordem"><option value="recentes">Candidaturas mais recentes</option><option value="antigas">Candidaturas mais antigas</option><option value="ia-maior">Compatibilidade IA (maior)</option><option value="ia-menor">Compatibilidade IA (menor)</option></select></label>
+        <label>Filtro IA<select id="cands-vaga-filtro-ia"><option value="">Todas</option><option value="analisadas">Já analisadas</option><option value="pendentes">Ainda não analisadas</option><option value="atencao">Com pontos de atenção</option></select></label>
       </div>
       <div class="tabela-wrap tabela-scroll">
         <table id="vaga-cands-internal-table">
@@ -1197,7 +1210,7 @@
 
 <script src="auth-helper.js?v=empresa-admin-restore2"></script>
 <script src="empresa-auth-patch.js?v=empresa-admin-restore2"></script>
-<script src="app.js?v=empresa-ai-auto-20260814"></script>
+<script src="app.js?v=empresa-functional-d83-20260809"></script>
 <script src="relatorios-aprovado.js?v=relatorios-aprovado-20260808-4"></script>
 <script src="chat-rh-flutuante.js?v=empresa-rh-chat-2"></script>
 <script src="chat-candidatos-flutuante.js?v=empresa-candidato-chat-1"></script>
