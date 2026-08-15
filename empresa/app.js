@@ -83,7 +83,7 @@ async function fazerLogin() {
       if (refreshToken) localStorage.setItem('empresa_refresh', refreshToken);
       mostrarApp();
     } else {
-      document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao entrar'}</div>`;
+      document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">${escapeHtml(data.erro || 'Erro ao entrar')}</div>`;
     }
   } catch (e) {
     document.getElementById('alert-login').innerHTML = `<div class="alert alert-erro">Erro de conexão</div>`;
@@ -890,7 +890,7 @@ async function salvarVaga() {
       fecharModal('vaga');
       carregarVagasAdmin();
     } else {
-      document.getElementById('alert-vaga').innerHTML = `<div class="alert alert-erro">${data.erro || 'Erro ao salvar'}</div>`;
+      document.getElementById('alert-vaga').innerHTML = `<div class="alert alert-erro">${escapeHtml(data.erro || 'Erro ao salvar')}</div>`;
     }
   } catch {
     document.getElementById('alert-vaga').innerHTML = '<div class="alert alert-erro">Erro de conexão</div>';
