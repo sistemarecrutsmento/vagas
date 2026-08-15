@@ -421,6 +421,22 @@ async function carregarVagas() {
     renderVagas();
     if (contador) contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
+    // Se a API respondeu, mas algum cartão antigo falhar ao renderizar, ainda
+    // mostramos as vagas em modo seguro usando nós DOM (sem depender de HTML).
+    if (Array.isArray(vagas) && vagas.length) {
+      grid.replaceChildren();
+      vagas.slice(0, 20).forEach(v => {
+        const card = document.createElement('button');
+        card.type = 'button'; card.className = 'vaga-card';
+        card.style.cssText = 'text-align:left;width:100%;cursor:pointer';
+        const empresa = document.createElement('div'); empresa.className = 'empresa'; empresa.textContent = v.empresa || 'Empresa';
+        const titulo = document.createElement('h3'); titulo.textContent = v.titulo || 'Vaga';
+        const meta = document.createElement('div'); meta.className = 'salario'; meta.textContent = v.cidade || v.area || 'Ver detalhes';
+        card.append(empresa, titulo, meta); card.addEventListener('click', () => abrirDetalhes(v.id)); grid.appendChild(card);
+      });
+      if (contador) contador.textContent = `${vagas.length} vagas encontradas`;
+      return;
+    }
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;"><div class="empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 21 19H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Não foi possível carregar as vagas</h3><p>O servidor pode estar iniciando. Tente novamente.</p><button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="carregarVagas()">Tentar novamente</button></div>`;
     if (contador) contador.textContent = 'Não foi possível carregar';
   }
