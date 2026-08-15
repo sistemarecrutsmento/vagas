@@ -151,7 +151,7 @@ async function fazerLogin() {
       return;
     } else {
       console.warn('[login] falhou:', r.status, data);
-      if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + (data.erro || ('Erro ' + r.status)) + '</div>';
+      if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + escapeHtml(data.erro || ('Erro ' + r.status)) + '</div>';
       btn.disabled = false;
       btn.textContent = textoOriginal;
       return;
@@ -251,7 +251,7 @@ async function verificar2FA() {
       setTimeout(() => mostrarApp(), 200);
       return;
     }
-    if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + (data.erro || 'Código inválido') + '</div>';
+    if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + escapeHtml(data.erro || 'Código inválido') + '</div>';
     btn.disabled = false;
     btn.textContent = txtOriginal;
   } catch (e) {
@@ -311,7 +311,7 @@ async function reenviar2FA() {
       if (alertEl) alertEl.innerHTML = '<div class="alert alert-ok">📩 Código reenviado</div>';
       iniciarCooldownReenviar();
     } else {
-      if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + (data.erro || 'Erro ao reenviar') + '</div>';
+      if (alertEl) alertEl.innerHTML = '<div class="alert alert-erro">' + escapeHtml(data.erro || 'Erro ao reenviar') + '</div>';
       btn.style.pointerEvents = 'auto';
       btn.style.opacity = '1';
     }
@@ -1187,7 +1187,7 @@ async function abrirModalCandidatosEtapa(etapaNum, etapaNome) {
     });
     const data = await r.json();
     if (!r.ok) {
-      body.innerHTML = '<div class="alert-erro">' + (data.erro || 'Erro ao carregar') + '</div>';
+      body.innerHTML = '<div class="alert-erro">' + escapeHtml(data.erro || 'Erro ao carregar') + '</div>';
       return;
     }
     if (!data.candidaturas || data.candidaturas.length === 0) {
