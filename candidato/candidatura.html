@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detalhes da Candidatura — VagasIO</title>
-<link rel="stylesheet" href="/_shared/global.css">
+<title>Detalhes da Candidatura — Vagas.io</title>
+<link rel="stylesheet" href="../_shared/global.css">
 <style>
   :root { --gold: #c8a96a; --dark: #1a1a1a; }
   * { box-sizing: border-box; }
@@ -77,12 +77,12 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="VagasIO">
+  <meta name="apple-mobile-web-app-title" content="Vagas.io">
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
   <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v18">
-</head>
+<script src="../_shared/runtime-config.js"></script></head>
 <body>
 
 <div class="header">
@@ -104,7 +104,7 @@
 <script>
 setStorageKeys('candidato_token', 'candidato_refresh');
 
-const API = 'https://recrutamento-api-novo.onrender.com';
+const API = window.VAGASIO_API_BASE;
 const cid = new URLSearchParams(location.search).get('id');
 
 function escapeHtml(s) {
