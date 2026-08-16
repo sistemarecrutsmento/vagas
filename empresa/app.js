@@ -1298,7 +1298,7 @@ function renderCandidaturasVagaTable() {
   const filtroIa = document.getElementById('cands-vaga-filtro-ia')?.value || '';
   const scoreIa = c => c.analise_ia && Number.isFinite(Number(c.analise_ia.score)) ? Number(c.analise_ia.score) : null;
   const rows = candidaturasVagaCache.filter(c => {
-    if (etapa && String(c.etapa_atual || 1) !== String(etapa)) return false;
+    if (etapa && String(Number(c.etapa_atual ?? 0) + 1) !== String(etapa)) return false;
     const score = scoreIa(c), resultado = c.analise_ia?.resultado_json;
     if (filtroIa === 'analisadas' && score === null) return false;
     if (filtroIa === 'pendentes' && score !== null) return false;
@@ -1314,17 +1314,18 @@ function renderCandidaturasVagaTable() {
     return ordem === 'antigas' ? da - db : db - da;
   });
   candidaturasVagaView = rows;
-  if (!rows.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">Nenhuma candidatura encontrada com estes filtros.</td></tr>'; return; }
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Nenhuma candidatura encontrada com estes filtros.</td></tr>'; return; }
   const etapasArr = Array.isArray(vagaAtualCands?.etapas) ? vagaAtualCands.etapas : [];
   tb.innerHTML = rows.map(c => {
     const badge = c.status === 'contratado' ? 'badge-ativa' : (c.status === 'rejeitado' || c.status === 'reprovado') ? 'badge-fechada' : (c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente');
-    const numEtapa = Number(c.etapa_atual || 1);
-    const etapaNome = (etapasArr[numEtapa - 1] && (typeof etapasArr[numEtapa - 1] === 'string' ? etapasArr[numEtapa - 1] : etapasArr[numEtapa - 1].nome)) || `Etapa ${numEtapa}`;
+    const numEtapa = Number(c.etapa_atual ?? 0) + 1;
+    const etapaIndex = numEtapa - 1;
+    const etapaNome = (etapasArr[etapaIndex] && (typeof etapasArr[etapaIndex] === 'string' ? etapasArr[etapaIndex] : etapasArr[etapaIndex].nome)) || `Etapa ${numEtapa}`;
     const score = scoreIa(c);
     const iaCell = score === null
       ? (c.analise_ia?.status === 'erro' ? '<span class="triagem-ia-muted">IA indisponível</span>' : '<span class="triagem-ia-muted"><span class="spinner spinner-inline"></span> Analisando…</span>')
       : `<span class="triagem-ia-score">${score}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span><small class="triagem-ia-status">${escapeHtml(triagemIaStatus(c.analise_ia))}</small></span>`;
-    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${iaCell}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 Ver IA</button></div></td></tr>`;
+    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${iaCell}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td><span class="badge ${badge}">${escapeHtml(candidatoStatusText(c.status))}</span></td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 Ver IA</button></div></td></tr>`;
   }).join('');
 }
 
@@ -1388,12 +1389,12 @@ function irParaPagina(page) {
 async function abrirVagaCands(vagaId) {
   irParaPagina('candidatos-vaga');
   const tb = document.querySelector('#vaga-cands-internal-table tbody');
-  tb.innerHTML = '<tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr>';
+  tb.innerHTML = '<tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>';
   try {
     const r = await fetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', { headers: { 'Authorization': 'Bearer ' + token } });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
-      tb.innerHTML = '<tr><td colspan="5" class="empty">Erro: ' + escapeHtml(err.erro || String(r.status)) + '</td></tr>';
+      tb.innerHTML = '<tr><td colspan="6" class="empty">Erro: ' + escapeHtml(err.erro || String(r.status)) + '</td></tr>';
       return;
     }
     const data = await r.json();
@@ -1446,14 +1447,14 @@ async function abrirVagaCands(vagaId) {
       </div>`;
 
     if (candidaturasVagaCache.length === 0) {
-      tb.innerHTML = '<tr><td colspan="5" class="empty">Nenhum candidato para esta vaga.</td></tr>';
+      tb.innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato para esta vaga.</td></tr>';
       return;
     }
     renderCandidaturasVagaTable();
     // Existing projections are shown immediately; only missing visible rows are generated.
     setTimeout(iniciarTriagemIaAutomatica, 250);
   } catch (e) {
-    tb.innerHTML = '<tr><td colspan="5" class="empty">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</td></tr>';
+    tb.innerHTML = '<tr><td colspan="6" class="empty">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</td></tr>';
   }
 }
 

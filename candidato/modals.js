@@ -208,7 +208,7 @@
         <h3 class="wizard-titulo">Endereço</h3>
         <p class="wizard-subtitulo">Para encontrar vagas perto de você.</p>
         <div class="form-row">
-          <div class="form-group"><label>CEP</label><input type="text" id="w3-cep" placeholder="00000-000" maxlength="9"></div>
+          <div class="form-group"><label>CEP</label><input type="text" id="w3-cep" placeholder="00000-000" maxlength="9" onblur="buscarCepWizard()"></div>
           <div class="form-group"><label>Cidade *</label><input type="text" id="w3-cidade"></div>
         </div>
         <div class="form-row">
@@ -778,7 +778,7 @@
       return;
     }
     try {
-      const r = await fetch('https://recrutamento-api-novo.onrender.com/api/notificacoes?limit=50', {
+      const r = await fetch(window.VAGASIO_API_BASE + '/api/notificacoes?limit=50', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
       const raw = await r.json();
