@@ -708,6 +708,19 @@ function bindVagasControls() {
 }
 bindVagasControls();
 
+async function carregarFiliaisVaga(vaga){
+  const sel=document.getElementById('v-filiais'); if(!sel) return;
+  sel.innerHTML='<option value="">Todas as filiais</option><option disabled>Carregando…</option>';
+  try{
+    const r=await fetchEmpresaAuth(API+'/api/empresa/equipe',{headers:{}}); const d=await r.json();
+    const rows=(d.usuarios||d.equipe||d.empresaUsuarios||d.empresa_usuarios||[]).filter(u=>String(u.role||u.perfil||'')==='viewer' && u.ativo!==false);
+    sel.innerHTML='<option value="">Todas as filiais</option>'+rows.map(u=>`<option value="${Number(u.id)}">${escapeHtml(u.nome||u.email||('Filial '+u.id))}</option>`).join('');
+    const ids=Array.isArray(vaga?.filial_ids)?vaga.filial_ids.map(Number):[];
+    if(ids.length===1) sel.value=String(ids[0]);
+    if(ids.length>1) sel.dataset.multipleIds=ids.join(',');
+  }catch(e){ sel.innerHTML='<option value="">Não foi possível carregar as filiais</option>'; }
+}
+
 function abrirModalVaga(vaga) {
   vagaEmEdicao = vaga || null;
   document.getElementById('vaga-modal-titulo').textContent = vaga ? 'Editar vaga' : 'Nova vaga';
@@ -742,6 +755,7 @@ function abrirModalVaga(vaga) {
   renderEtapasVaga();
   document.getElementById('alert-vaga').innerHTML = '';
   abrirModal('vaga');
+  carregarFiliaisVaga(vaga);
 }
 
 let _etapasVagaTemp = [];
@@ -870,6 +884,8 @@ async function salvarVaga() {
   if (salMin) body.salario_min = parseFloat(salMin);
   if (salMax) body.salario_max = parseFloat(salMax);
   // Etapas (já estão montadas no hidden como JSON array de {nome})
+  const filialSelect = document.getElementById('v-filiais');
+  if (filialSelect) { const ids = filialSelect.dataset.multipleIds ? filialSelect.dataset.multipleIds.split(',').map(Number).filter(Boolean) : (filialSelect.value ? [Number(filialSelect.value)] : []); body.filial_ids = ids; }
   const etapasVal = document.getElementById('v-etapas').value;
   if (etapasVal) {
     try { body.etapas = JSON.parse(etapasVal); } catch (e) { /* ignora */ }
@@ -979,10 +995,22 @@ async function hidratarAnalisesCandidatos(rows) {
 }
 function atualizarAnaliseIaNasListas(id, analise) { const n=Number(id); if(n>0)candidatosAnaliseIaCache.set(n,analise); const c=candidaturasVagaCache.find(x=>Number(x.id)===n); if(c)c.analise_ia=analise; renderCandidatos(); if(c)renderCandidaturasVagaTable(); }
 function candidatoIaCell(c) { const a=candidatosAnaliseIaCache.get(Number(c.ultima_candidatura_id)); const score=Number(a?.score); if(Number.isFinite(score)) return `<span class="triagem-ia-score" title="${escapeHtml(triagemIaStatus(a))}">${Math.round(score)}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span></span>`; if(a?.status==='erro') return '<span class="triagem-ia-muted">IA indisponível</span>'; return '<span class="triagem-ia-muted"><span class="spinner spinner-inline"></span> Analisando…</span>'; }
-function renderCandidatoRow(c) { const stage=Number(c.ultima_etapa||1); const candidaturaId=Number(c.ultima_candidatura_id)||0; return `<tr data-candidato-id="${c.id}" onclick="analisarCandidatura(${candidaturaId})"><td><input type="checkbox" class="candidato-check" data-id="${c.id}" aria-label="Selecionar ${escapeHtml(c.nome||'candidato')}" onclick="event.stopPropagation();atualizarSelecaoCandidatos()"></td><td><span class="candidato-row-main">${candidatoAvatar(c)}<span class="candidato-row-copy"><strong>${escapeHtml(c.nome||'Candidato')}</strong><small>${escapeHtml(c.email||'—')}</small></span></span></td><td><span class="candidato-vaga">${escapeHtml(c.ultima_vaga_titulo||'—')}<small>${escapeHtml([c.cidade,c.estado].filter(Boolean).join('/')||'')}</small></span></td><td>${candidatoIaCell(c)}</td><td><span class="candidato-stage-badge candidato-stage-${stage}">${candidatoEtapaNome(stage)}</span></td><td><span class="candidato-date"><strong>${candidatoData(c.criada_em)}</strong><small>${candidatoStatusText(c.ultimo_status)}</small></span></td><td><span class="candidato-date"><strong>${escapeHtml(candidatoUltimaAtividade(c))}</strong><small>${c.ultimo_status==='contratado'?'Contratação concluída':'Atualização do processo'}</small></span></td><td><span class="candidato-row-actions"><button type="button" aria-label="Ver análise do candidato" onclick="event.stopPropagation();analisarCandidatura(${candidaturaId})"><svg class="dash-svg"><use href="#icon-user"></use></svg></button><button type="button" aria-label="Mais ações" onclick="event.stopPropagation();analisarCandidatura(${candidaturaId})">•••</button></span></td></tr>`; }
-function renderCandidatoMobile(c) { const stage=Number(c.ultima_etapa||1); const candidaturaId=Number(c.ultima_candidatura_id)||0; return `<article class="candidato-mobile-card" data-candidato-id="${c.id}" onclick="analisarCandidatura(${candidaturaId})">${candidatoAvatar(c)}<div class="candidato-mobile-copy"><strong>${escapeHtml(c.nome||'Candidato')}</strong><small>${escapeHtml(c.email||'—')}</small><div class="candidato-mobile-meta"><span>${escapeHtml(candidatoEtapaNome(stage))}</span><span>${escapeHtml(c.ultima_vaga_titulo||'Sem vaga')}</span></div></div><span class="candidato-mobile-action"><svg class="dash-svg"><use href="#icon-user"></use></svg></span></article>`; }
+function renderCandidatoRow(c) { const stage=Number(c.ultima_etapa||1); const candidaturaId=Number(c.ultima_candidatura_id)||0; return `<tr data-candidato-id="${c.id}" onclick="analisarCandidatura(${candidaturaId})"><td><input type="checkbox" class="candidato-check" data-id="${c.id}" data-candidatura-id="${candidaturaId}" aria-label="Selecionar ${escapeHtml(c.nome||'candidato')}" onclick="event.stopPropagation();atualizarSelecaoCandidatos()"></td><td><span class="candidato-row-main">${candidatoAvatar(c)}<span class="candidato-row-copy"><strong>${escapeHtml(c.nome||'Candidato')}</strong><small>${escapeHtml(c.email||'—')}</small></span></span></td><td><span class="candidato-vaga">${escapeHtml(c.ultima_vaga_titulo||'—')}<small>${escapeHtml([c.cidade,c.estado].filter(Boolean).join('/')||'')}</small></span></td><td>${candidatoIaCell(c)}</td><td><span class="candidato-stage-badge candidato-stage-${stage}">${candidatoEtapaNome(stage)}</span></td><td><span class="candidato-status-badge">${escapeHtml(candidatoStatusText(c.ultimo_status))}</span></td><td><span class="candidato-date"><strong>${candidatoData(c.criada_em)}</strong><small>Inscrição</small></span></td><td><span class="candidato-date"><strong>${escapeHtml(candidatoUltimaAtividade(c))}</strong><small>${c.ultimo_status==='contratado'?'Contratação concluída':'Atualização do processo'}</small></span></td><td><span class="candidato-row-actions"><button type="button" aria-label="Ver análise do candidato" onclick="event.stopPropagation();analisarCandidatura(${candidaturaId})">Ver</button><button type="button" aria-label="Mais ações" onclick="event.stopPropagation();analisarCandidatura(${candidaturaId})">•••</button></span></td></tr>`; }
+
 function renderCandidatosPagination(pages) { const box=document.getElementById('candidatos-paginacao-controles');if(!box)return;let html=`<button type="button" ${candidatosState.page<=1?'disabled':''} onclick="irPaginaCandidatos(${candidatosState.page-1})">‹</button>`;for(let i=1;i<=pages;i++){if(pages>7&&i>2&&i<pages-1&&Math.abs(i-candidatosState.page)>1){if(i===3)html+='<span>…</span>';continue;}html+=`<button type="button" class="${i===candidatosState.page?'ativo':''}" onclick="irPaginaCandidatos(${i})">${i}</button>`;}html+=`<button type="button" ${candidatosState.page>=pages?'disabled':''} onclick="irPaginaCandidatos(${candidatosState.page+1})">›</button>`;box.innerHTML=html; }
 function irPaginaCandidatos(page){const pages=Math.max(1,Math.ceil(candidatosTotal/candidatosState.limite));if(page<1||page>pages)return;candidatosState.page=page;carregarCandidatos();}
+async function executarAcaoEmLoteCandidatos(acao){
+  const ids=[...document.querySelectorAll('.candidato-check:checked')].map(x=>Number(x.dataset.candidaturaId||0)).filter(Boolean);
+  if(!ids.length) return;
+  const labels={avancar:'avançar',reprovar:'reprovar',reabrir:'reabrir'};
+  if(!confirm(`Confirmar ${labels[acao]||acao} para ${ids.length} candidato(s)?`)) return;
+  const resultados=await Promise.allSettled(ids.map(id=>fetchEmpresaAuth(API+'/api/empresa/candidatura/'+id+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao})})));
+  const falhas=resultados.filter(r=>r.status==='rejected').length+resultados.filter(r=>r.status==='fulfilled'&&!r.value.ok).length;
+  alert(falhas?`${ids.length-falhas} candidato(s) atualizado(s). ${falhas} não puderam ser atualizados.`:`${ids.length} candidato(s) atualizado(s) com sucesso.`);
+  limparSelecaoCandidatos(); carregarCandidatos();
+}
+function limparSelecaoCandidatos(){document.querySelectorAll('.candidato-check').forEach(x=>x.checked=false);const all=document.getElementById('candidatos-selecionar-todos');if(all)all.checked=false;atualizarSelecaoCandidatos();}
+
 function atualizarSelecaoCandidatos(){const checks=[...document.querySelectorAll('.candidato-check:checked')];const bar=document.getElementById('candidatos-selection-bar');const count=document.getElementById('candidatos-selecionados-count');if(count)count.textContent=checks.length;if(bar)bar.hidden=!checks.length;}
 function limparSelecaoCandidatos(){document.querySelectorAll('.candidato-check').forEach(c=>c.checked=false);atualizarSelecaoCandidatos();const all=document.getElementById('candidatos-selecionar-todos');if(all)all.checked=false;}
 function limparFiltrosCandidatos(){Object.assign(candidatosState,{search:'',etapa:'',vaga:'',status:'',cidade:'',estado:'',area:'',page:1});['candidatos-busca-top','candidatos-busca','candidatos-filtro-cidade','candidatos-filtro-estado'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['candidatos-filtro-vaga','candidatos-filtro-status','candidatos-filtro-area'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});document.querySelectorAll('#candidatos-stage-filters button').forEach(b=>b.classList.toggle('ativo',b.dataset.etapa===''));carregarCandidatos();}
@@ -1298,7 +1326,7 @@ function renderCandidaturasVagaTable() {
   const filtroIa = document.getElementById('cands-vaga-filtro-ia')?.value || '';
   const scoreIa = c => c.analise_ia && Number.isFinite(Number(c.analise_ia.score)) ? Number(c.analise_ia.score) : null;
   const rows = candidaturasVagaCache.filter(c => {
-    if (etapa && String(Number(c.etapa_atual ?? 0) + 1) !== String(etapa)) return false;
+    if (etapa && String(c.etapa_atual || 1) !== String(etapa)) return false;
     const score = scoreIa(c), resultado = c.analise_ia?.resultado_json;
     if (filtroIa === 'analisadas' && score === null) return false;
     if (filtroIa === 'pendentes' && score !== null) return false;
@@ -1318,14 +1346,13 @@ function renderCandidaturasVagaTable() {
   const etapasArr = Array.isArray(vagaAtualCands?.etapas) ? vagaAtualCands.etapas : [];
   tb.innerHTML = rows.map(c => {
     const badge = c.status === 'contratado' ? 'badge-ativa' : (c.status === 'rejeitado' || c.status === 'reprovado') ? 'badge-fechada' : (c.status === 'aprovado' ? 'badge-ativa' : 'badge-pendente');
-    const numEtapa = Number(c.etapa_atual ?? 0) + 1;
-    const etapaIndex = numEtapa - 1;
-    const etapaNome = (etapasArr[etapaIndex] && (typeof etapasArr[etapaIndex] === 'string' ? etapasArr[etapaIndex] : etapasArr[etapaIndex].nome)) || `Etapa ${numEtapa}`;
+    const numEtapa = Number(c.etapa_atual || 1);
+    const etapaNome = (etapasArr[numEtapa - 1] && (typeof etapasArr[numEtapa - 1] === 'string' ? etapasArr[numEtapa - 1] : etapasArr[numEtapa - 1].nome)) || `Etapa ${numEtapa}`;
     const score = scoreIa(c);
     const iaCell = score === null
       ? (c.analise_ia?.status === 'erro' ? '<span class="triagem-ia-muted">IA indisponível</span>' : '<span class="triagem-ia-muted"><span class="spinner spinner-inline"></span> Analisando…</span>')
       : `<span class="triagem-ia-score">${score}% <span class="triagem-ia-meter"><i style="width:${Math.max(0,Math.min(100,score))}%"></i></span><small class="triagem-ia-status">${escapeHtml(triagemIaStatus(c.analise_ia))}</small></span>`;
-    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${iaCell}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td><span class="badge ${badge}">${escapeHtml(candidatoStatusText(c.status))}</span></td><td>${formatarData(c.criada_em)}</td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 Ver IA</button></div></td></tr>`;
+    return `<tr><td><strong>${escapeHtml(c.nome || '—')}</strong></td><td>${iaCell}</td><td>${numEtapa}. ${escapeHtml(etapaNome)}</td><td><span class="cands-vaga-status">${escapeHtml(candidatoStatusText(c.status))}</span></td><td class="cands-vaga-date"><strong>${formatarData(c.criada_em)}</strong><small>Inscrição</small></td><td><div class="triagem-ia-actions"><a class="btn-ver" href="javascript:void(0)" onclick="analisarCandidatura(${c.id})">👁 Ver</a><button type="button" class="btn btn-ver-ia btn-sec" onclick="abrirAnaliseIa(${c.id})">🤖 Ver IA</button></div></td></tr>`;
   }).join('');
 }
 
@@ -1389,12 +1416,12 @@ function irParaPagina(page) {
 async function abrirVagaCands(vagaId) {
   irParaPagina('candidatos-vaga');
   const tb = document.querySelector('#vaga-cands-internal-table tbody');
-  tb.innerHTML = '<tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>';
+  tb.innerHTML = '<tr><td colspan="5" class="empty"><div class="spinner"></div></td></tr>';
   try {
     const r = await fetch(API + '/api/empresa/vagas/' + vagaId + '/candidatos', { headers: { 'Authorization': 'Bearer ' + token } });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
-      tb.innerHTML = '<tr><td colspan="6" class="empty">Erro: ' + escapeHtml(err.erro || String(r.status)) + '</td></tr>';
+      tb.innerHTML = '<tr><td colspan="5" class="empty">Erro: ' + escapeHtml(err.erro || String(r.status)) + '</td></tr>';
       return;
     }
     const data = await r.json();
@@ -1447,14 +1474,14 @@ async function abrirVagaCands(vagaId) {
       </div>`;
 
     if (candidaturasVagaCache.length === 0) {
-      tb.innerHTML = '<tr><td colspan="6" class="empty">Nenhum candidato para esta vaga.</td></tr>';
+      tb.innerHTML = '<tr><td colspan="5" class="empty">Nenhum candidato para esta vaga.</td></tr>';
       return;
     }
     renderCandidaturasVagaTable();
     // Existing projections are shown immediately; only missing visible rows are generated.
     setTimeout(iniciarTriagemIaAutomatica, 250);
   } catch (e) {
-    tb.innerHTML = '<tr><td colspan="6" class="empty">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</td></tr>';
+    tb.innerHTML = '<tr><td colspan="5" class="empty">Erro: ' + escapeHtml(e.message || 'Erro interno') + '</td></tr>';
   }
 }
 
@@ -1476,6 +1503,7 @@ function analisarCandidatura(id) {
   if (!Number.isInteger(n) || n <= 0) return;
   const query = { candidatura_id: n };
   if (vagaAtualCands?.id) { query.voltar_para = 'candidatos-vaga'; query.voltar_vaga_id = vagaAtualCands.id; }
+  else if (String(location.search||'').includes('page=candidatos')) { query.voltar_para = 'vagas'; }
   dashNavigate('analisar', query);
 }
 
