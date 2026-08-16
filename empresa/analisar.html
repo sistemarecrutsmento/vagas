@@ -177,7 +177,7 @@
 </script>
   <script>
     const API = window.VAGASIO_API_BASE;
-    function entrarVideoEmpresa(id) { sessionStorage.setItem('vagasio_video_interview_id', String(id)); location.href = 'video-call.html'; }
+    function entrarVideoEmpresa(id) { sessionStorage.setItem('vagasio_video_interview_id', String(id)); sessionStorage.setItem('vagasio_video_other_name', String(window.__activeCandidateName || 'Candidato')); location.href = 'video-call.html'; }
     async function fetchEmpresaComTimeout(url, options = {}, timeoutMs = 15000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -251,7 +251,7 @@
         return;
       }
 
-      let candidatura;
+      let candidatura; window.__activeCandidateName = 'Candidato';
       try {
         const request = { headers: { 'Authorization': 'Bearer ' + token }, __native: true };
         const r = await fetchEmpresaComTimeout(API + '/api/empresa/candidatura/' + id, request);
@@ -264,7 +264,7 @@
           content.innerHTML = '<div class="card"><div class="alert alert-erro">' + escapeHtml(data.erro || 'Erro ao carregar') + '</div></div>';
           return;
         }
-        candidatura = data.candidatura || data;
+        candidatura = data.candidatura || data; window.__activeCandidateName = candidatura?.candidato?.nome || candidatura?.nome || candidatura?.candidato_nome || 'Candidato';
         // Garante que a entrevista persista no primeiro render após F5,
         // mesmo quando a resposta principal vier sem o array completo.
         try {
