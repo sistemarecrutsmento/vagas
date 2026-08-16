@@ -769,7 +769,7 @@ function wizardImportarCurriculo(input) {
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.erro || 'Não foi possível ler o currículo.');
-      wizardCurriculoArquivo = { base64, nome: file.name, tipo: file.type || 'application/pdf' };
+      wizardCurriculoArquivo = { base64, nome: file.name, tipo: file.type || 'application/pdf', dados_importados: data.estrutura || data.dados || null, diagnostico: data.diagnostico || null };
       window.__curriculoDiagnostico = data.diagnostico || null;
       preencherFormularioComCurriculo(data.dados || {});
       if (status) status.textContent = 'Currículo lido. Confira os dados e complete o que estiver em branco.';
@@ -962,7 +962,9 @@ async function wizardFinalizar() {
   const dados = {
     ...(wizardEtapa1.dados || {}),
     experiencias: wizardExps,
-    competencias
+    competencias,
+    // Mantém o PDF original junto do cadastro; o backend valida e persiste sem expô-lo no perfil.
+    ...(wizardCurriculoArquivo ? { curriculo_arquivo: wizardCurriculoArquivo } : {})
   };
 
   const btn = document.querySelector('#wizard-etapa-5 .btn-primary');
