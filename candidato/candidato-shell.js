@@ -125,5 +125,4 @@
   loadFrame(cleanCurrent());
 })();
 
-// Web Push: carregado no shell para aparecer em qualquer tela autenticada.
-if (!document.querySelector('script[data-vagas-push]')) { const ps=document.createElement('script'); ps.src='push.js?v=push-v6'; ps.dataset.vagasPush='1'; document.head.appendChild(ps); }
+window.addEventListener('message', (event) => { if (event.origin === window.location.origin && event.data?.type === 'candidate-auth-changed') location.reload(); });
