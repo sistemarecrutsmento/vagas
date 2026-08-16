@@ -80,6 +80,8 @@
     .etapa.atual { background: var(--vinho); color: var(--branco); font-weight: 600; }
     .etapa .num { font-size: 11px; opacity: 0.8; margin-bottom: 2px; }
     .acoes { display: flex; gap: 12px; padding: 20px; background: var(--branco); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    /* Filial/viewer é estritamente leitura: não apresentar controles acionáveis. */
+    body.viewer-readonly button:not(.btn-voltar), body.viewer-readonly form button { display: none !important; }
     .aviso-etapa { flex: 1; text-align: center; color: var(--cinza-medio); font-size: 14px; padding: 12px; background: #F9F6F0; border-radius: 8px; border-left: 3px solid var(--vinho-claro); }
     .btn { padding: 12px 24px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; flex: 1; }
     .btn-aprovar { background: #16A34A; color: white; }
@@ -174,6 +176,17 @@
   function getEmpresaToken() {
     try { return localStorage.getItem('empresa_token') || ''; } catch (_) { return ''; }
   }
+  // Role is signed in the JWT by login-empresa. Never use a client role to
+  // authorize requests; this is only presentation (the API remains authoritative).
+  function getEmpresaRole() {
+    try {
+      const p = getEmpresaToken().split('.')[1];
+      if (!p) return '';
+      return JSON.parse(atob(p.replace(/-/g, '+').replace(/_/g, '/'))).role || '';
+    } catch (_) { return ''; }
+  }
+  window.__empresaRole = getEmpresaRole();
+  if (window.__empresaRole === 'viewer') document.body.classList.add('viewer-readonly');
 </script>
   <script>
     const API = window.VAGASIO_API_BASE;
