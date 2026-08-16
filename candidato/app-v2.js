@@ -1,3 +1,4 @@
+function avisarShellAuthCandidato(){ try { window.top.postMessage({type:'candidate-auth-changed'}, window.location.origin); } catch(_) {} }
 // ============================================
 // VagasIO — Front-end do Candidato
 // Usa a configuração de ambiente carregada em runtime
@@ -5,6 +6,18 @@
 // ============================================
 
 const API = window.VAGASIO_API_BASE;
+async function fetchCandidatoAuth(url, options={}){
+  const access=localStorage.getItem('candidato_token')||tokenCandidato||'';
+  const refresh=localStorage.getItem('candidato_refresh')||'';
+  const first=await fetch(url,{...options,headers:{...(options.headers||{}),Authorization:'Bearer '+access}});
+  if(first.status!==401||!refresh)return first;
+  const rr=await fetch(API+'/api/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:refresh})});
+  const rd=await rr.json().catch(()=>({}));
+  if(!rr.ok||!rd.token)return first;
+  localStorage.setItem('candidato_token',rd.token);if(rd.refreshToken)localStorage.setItem('candidato_refresh',rd.refreshToken);tokenCandidato=rd.token;
+  return fetch(url,{...options,headers:{...(options.headers||{}),Authorization:'Bearer '+rd.token}});
+}
+window.fetchCandidatoAuth=fetchCandidatoAuth;
 let categoriaAtiva = '';
 let vagaSelecionada = null;
 let emailLogado = null;
@@ -421,22 +434,6 @@ async function carregarVagas() {
     renderVagas();
     if (contador) contador.textContent = `${vagas.length} vaga${vagas.length !== 1 ? 's' : ''} encontrada${vagas.length !== 1 ? 's' : ''}`;
   } catch (e) {
-    // Se a API respondeu, mas algum cartão antigo falhar ao renderizar, ainda
-    // mostramos as vagas em modo seguro usando nós DOM (sem depender de HTML).
-    if (Array.isArray(vagas) && vagas.length) {
-      grid.replaceChildren();
-      vagas.slice(0, 20).forEach(v => {
-        const card = document.createElement('button');
-        card.type = 'button'; card.className = 'vaga-card';
-        card.style.cssText = 'text-align:left;width:100%;cursor:pointer';
-        const empresa = document.createElement('div'); empresa.className = 'empresa'; empresa.textContent = v.empresa || 'Empresa';
-        const titulo = document.createElement('h3'); titulo.textContent = v.titulo || 'Vaga';
-        const meta = document.createElement('div'); meta.className = 'salario'; meta.textContent = v.cidade || v.area || 'Ver detalhes';
-        card.append(empresa, titulo, meta); card.addEventListener('click', () => abrirDetalhes(v.id)); grid.appendChild(card);
-      });
-      if (contador) contador.textContent = `${vagas.length} vagas encontradas`;
-      return;
-    }
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#C00;"><div class="empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 21 19H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Não foi possível carregar as vagas</h3><p>O servidor pode estar iniciando. Tente novamente.</p><button class="btn btn-primary" style="width:auto;margin-top:16px" onclick="carregarVagas()">Tentar novamente</button></div>`;
     if (contador) contador.textContent = 'Não foi possível carregar';
   }
@@ -748,6 +745,34 @@ function wizardPreencherManual() {
   wizardIrPara(2);
 }
 
+async function buscarCep(cepValue, prefix='w3-') {
+  const raw = String(cepValue ?? (document.getElementById(prefix+'cep')?.value || '')).replace(/\D/g,'');
+  if (raw.length !== 8) return false;
+  const statusEl = document.getElementById(prefix+'cep-status');
+  if (statusEl) statusEl.textContent = 'Consultando CEP…';
+  try {
+    const r = await fetch('https://viacep.com.br/ws/' + raw + '/json/', { cache:'no-store' });
+    const d = await r.json();
+    if (!r.ok || d.erro) throw new Error('CEP não encontrado');
+    const set=(id,v)=>{const el=document.getElementById(prefix+id);if(el && v) el.value=v;};
+    set('logradouro',d.logradouro); set('bairro',d.bairro); set('cidade',d.localidade); set('estado',d.uf);
+    if (statusEl) statusEl.textContent = 'Endereço localizado. Confira o número e complemento.';
+    return true;
+  } catch(e) {
+    if (statusEl) statusEl.textContent = 'Não foi possível localizar o CEP. Preencha o endereço manualmente.';
+    return false;
+  }
+}
+window.buscarCep = buscarCep;
+function bindCepAutoPreenchimento(){
+  const el=document.getElementById('w3-cep');
+  if(!el || el.dataset.cepBound==='1') return;
+  el.dataset.cepBound='1';
+  el.addEventListener('input',()=>{ if(el.value.replace(/\D/g,'').length===8) buscarCep(el.value,'w3-'); });
+  el.addEventListener('blur',()=>buscarCep(el.value,'w3-'));
+}
+window.addEventListener('DOMContentLoaded', bindCepAutoPreenchimento);
+
 function wizardImportarCurriculo(input) {
   const file = input?.files?.[0];
   if (!file) return;
@@ -838,6 +863,7 @@ function wizardEtapa2Validar() {
   const sexo = document.getElementById('w2-sexo')?.value;
   const celular = document.getElementById('w2-celular')?.value.trim();
   const acessibilidade = document.getElementById('w2-acessibilidade')?.value || null;
+  const termos = document.getElementById('w2-termos')?.checked !== false;
   const politica = document.getElementById('w2-politica')?.checked;
   const comunicacoes = document.getElementById('w2-comunicacoes')?.checked || false;
   const banco = document.getElementById('w2-banco')?.checked;
@@ -848,6 +874,7 @@ function wizardEtapa2Validar() {
   if (!dataNasc) return showCandidateFeedback('Informe sua data de nascimento.');
   if (!sexo) return showCandidateFeedback('Selecione o sexo.');
   if (!celular || celular.replace(/\D/g, '').length < 10) return showCandidateFeedback('Informe um celular válido.');
+  if (!termos) return showCandidateFeedback('Você precisa aceitar os Termos de Uso.');
   if (!politica) return showCandidateFeedback('Você precisa aceitar a Política de Privacidade.');
 
   // E-mail vem do cadastro (etapa 1) ou do candidato logado
@@ -963,7 +990,7 @@ async function wizardFinalizar() {
     ...(wizardEtapa1.dados || {}),
     experiencias: wizardExps,
     competencias,
-    // Mantém o PDF original junto do cadastro; o backend valida e persiste sem expô-lo no perfil.
+    // Keep the original PDF and parsed snapshot for the backend persistence flow.
     ...(wizardCurriculoArquivo ? { curriculo_arquivo: wizardCurriculoArquivo } : {})
   };
 
@@ -995,6 +1022,7 @@ async function wizardFinalizar() {
       tokenCandidato = dc.token;
       emailLogado = dc.candidato.email;
       localStorage.setItem('candidato_token', tokenCandidato);
+      avisarShellAuthCandidato();
       // ETAPA 2: salva refresh token para auto-refresh
       if (dc.refreshToken) {
         localStorage.setItem('candidato_refresh', dc.refreshToken);
@@ -1083,6 +1111,7 @@ async function loginEntrar(btn) {
       tokenCandidato = data.token;
       emailLogado = data.candidato.email;
       localStorage.setItem('candidato_token', tokenCandidato);
+      avisarShellAuthCandidato();
       // ETAPA 2: salva refresh token para auto-refresh
       if (data.refreshToken) {
         localStorage.setItem('candidato_refresh', data.refreshToken);
@@ -1148,6 +1177,7 @@ async function processarRetornoSocial() {
     tokenCandidato = data.token;
     emailLogado = data.candidato.email;
     localStorage.setItem('candidato_token', tokenCandidato);
+    avisarShellAuthCandidato();
     localStorage.setItem('candidato_email', emailLogado);
     if (data.refreshToken) localStorage.setItem('candidato_refresh', data.refreshToken);
     window.dispatchEvent(new Event('candidate-auth-changed'));
