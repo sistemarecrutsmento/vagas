@@ -6,8 +6,8 @@
 //   • offline fallback: página amigável
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE_NAME   = 'vagasio-v38';
-const CACHE_STATIC = 'vagasio-static-v21';
+const CACHE_NAME   = 'vagasio-v37';
+const CACHE_STATIC = 'vagasio-static-v20';
 
 // Assets estáticos que podem ser cacheados (sem dados privados)
 const STATIC_ASSETS = [
@@ -70,11 +70,6 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
-
-  // O backend fica em outro domínio. Não deixe este Service Worker
-  // interceptar requisições cross-origin da API; o navegador deve fazer
-  // diretamente o CORS para evitar falhas de rede/cache no portal público.
-  if (url.origin !== self.location.origin) return;
 
   // Ignorar requisições não-HTTP (chrome-extension, etc.)
   if (!url.protocol.startsWith('http')) return;
