@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meu perfil — VagasIO</title>
+<title>Meu perfil — Vagas.io</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--preto); line-height: 1.5; }
@@ -106,12 +106,12 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="VagasIO">
+  <meta name="apple-mobile-web-app-title" content="Vagas.io">
   <link rel="apple-touch-icon" href="/candidato/icons/icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
   <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v18">
-</head>
+<script src="../_shared/runtime-config.js"></script></head>
 <body>
 
 
@@ -144,9 +144,7 @@ async function carregarPaginaPerfil() {
   let perfil = null;
   let experiencias = [];
   try {
-    const r = await fetch(API + '/api/candidato/perfil', {
-      headers: { 'Authorization': 'Bearer ' + tokenCandidato }
-    });
+    const r = await (typeof window.fetchCandidatoAuth === 'function' ? window.fetchCandidatoAuth(API + '/api/candidato/perfil', { headers: { 'Authorization': 'Bearer ' + tokenCandidato } }) : fetch(API + '/api/candidato/perfil', { headers: { 'Authorization': 'Bearer ' + tokenCandidato } }));
     if (r.status === 401) { logout(); return; }
     const d = await r.json();
     perfil = d.candidato;
