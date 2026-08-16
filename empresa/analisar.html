@@ -369,8 +369,9 @@
         const entrevistas = data.entrevistas || [];
         if (entrevistas.length === 0) return;
 
-        // Pega a mais recente que ainda está agendada (status='agendada')
-        const ativa = entrevistas.find(e => e.status === 'agendada') || entrevistas[0];
+        // Never fall back to a cancelled/old record: only the current scheduled interview is renderable.
+        const ativa = entrevistas.find(e => String(e.status || '').toLowerCase() === 'agendada');
+        if (!ativa) return;
         // Converte data_hora pra formato do input datetime-local (YYYY-MM-DDTHH:MM)
         const d = new Date(ativa.data_hora);
         const pad = n => String(n).padStart(2, '0');
@@ -706,7 +707,7 @@
 
       // Card de agendamento de entrevista (jul/2026)
       // Se já existe entrevista ativa pra essa etapa → mostra card de confirmação (read-only)
-      const entrevistaAtiva = (c.entrevistas || []).find(e => Number(e.etapa) === etapaAtualBanco && e.status !== 'cancelada');
+      const entrevistaAtiva = (c.entrevistas || []).find(e => Number(e.etapa) === etapaAtualBanco && String(e.status || '').toLowerCase() === 'agendada');
       const podeAgendarAqui = (idxEtapaRH >= 0 && (idxEtapaRH + 1) === etapaAtual) || (idxEtapaGestor >= 0 && (idxEtapaGestor + 1) === etapaAtual);
 
       // === Card READ-ONLY da entrevista já agendada (com botão "❌ Falhou") ===
