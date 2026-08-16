@@ -235,7 +235,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
   <link rel="stylesheet" href="/candidato/candidato-shell.css?v=candidato-shell-v18">
-</head>
+<script src="../_shared/runtime-config.js"></script></head>
 <body>
 
 
@@ -270,7 +270,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    const API = "https://recrutamento-api-novo.onrender.com";
+    const API = window.VAGASIO_API_BASE;
   // === UTILITÁRIOS ===
   const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
   const DIAS = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
@@ -294,7 +294,7 @@
     if (!tokenCandidato) return;
     try { const r=await fetch(API+'/api/video/config',{headers:{Authorization:'Bearer '+tokenCandidato},cache:'no-store'}); if(r.ok){const c=await r.json(); videoFeatureEnabled=c.enabled===true && /^wss:\/\//i.test(c.signalUrl||'');} } catch (_) { videoFeatureEnabled=false; }
   }
-  function entrarVideo(id) { if (!videoFeatureEnabled) return; sessionStorage.setItem('vagasio_video_interview_id',String(id)); location.href='video-call.html'; }
+  function entrarVideo(id) { if (!videoFeatureEnabled) return; const e=(window.__entrevistas||[]).find(x=>Number(x.id)===Number(id)); sessionStorage.setItem('vagasio_video_interview_id',String(id)); sessionStorage.setItem('vagasio_video_other_name', String(e?.entrevistadores?.[0]?.nome || e?.vaga_empresa || 'Recrutador')); location.href='video-call.html'; }
 
 
   // === DADOS DO CANDIDATO ===
@@ -392,7 +392,7 @@
   }
 
   // === RENDERIZAÇÃO ===
-  function renderizar(lista) {
+  function renderizar(lista) { window.__entrevistas=lista||[];
     const cont = document.getElementById('conteudo');
     const kpiStrip = document.getElementById('kpi-strip');
 
@@ -543,6 +543,27 @@
       </div>
     `;
     document.body.appendChild(overlay);
+  }
+
+  // === AÇÕES ===
+  function copiarLink(link) {
+    if (!link || link === '#') {
+      showToast('Link ainda não disponível', '⚠️');
+      return;
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(link)
+        .then(() => showToast('Link copiado pra área de transferência', '🔗'))
+        .catch(() => fallback(link));
+    } else { fallback(link); }
+  }
+  function fallback(link) {
+    const t = document.createElement('textarea');
+    t.value = link; t.style.position = 'fixed'; t.style.opacity = '0';
+    document.body.appendChild(t); t.select();
+    try { document.execCommand('copy'); showToast('Link copiado!', '🔗'); }
+    catch (e) { prompt('Copia esse link:', link); }
+    document.body.removeChild(t);
   }
 
   // === INIT ===
