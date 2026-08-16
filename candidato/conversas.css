@@ -124,3 +124,7 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sa
   .conv-panel-head h2 { font-size: 13px; }
   .conv-panel-head p { display: none; } /* esconde empresa+etapa, só mostra título */
 }
+
+/* Correção PDF 2026-08-16: quando aberto dentro do shell, não duplica o título e respeita a altura real do viewport mobile. */
+body.candidate-shell-frame .conv-list-head{display:none;}
+@media (max-width:768px){.chat-shell{height:calc(100dvh - 112px);min-height:0;overflow:hidden}.conv-list,.conv-panel{height:100%;inset:0}.conv-msgs{min-height:0}.conv-input{padding-bottom:max(8px,env(safe-area-inset-bottom));}}
