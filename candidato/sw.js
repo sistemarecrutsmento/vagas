@@ -6,8 +6,8 @@
 //   • offline fallback: página amigável
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE_NAME   = 'vagasio-v37';
-const CACHE_STATIC = 'vagasio-static-v20';
+const CACHE_NAME   = 'vagasio-v38';
+const CACHE_STATIC = 'vagasio-static-v21';
 
 // Assets estáticos que podem ser cacheados (sem dados privados)
 const STATIC_ASSETS = [
@@ -73,6 +73,17 @@ self.addEventListener('fetch', event => {
 
   // Ignorar requisições não-HTTP (chrome-extension, etc.)
   if (!url.protocol.startsWith('http')) return;
+
+  // Videochamada: nunca servir HTML/CSS/JS de cache (evita telas antigas/duplicadas).
+  // A autorização continua sempre no backend; somente a camada de apresentação é
+  // invalidada aqui.
+  if (request.method === 'GET' && (/\/video-call(?:\.html)?$/i.test(url.pathname) ||
+      /\/_shared\/video-call\.(?:css|js)$/i.test(url.pathname))) {
+    event.respondWith(fetch(request, { cache: 'no-store' }).catch(() =>
+      new Response('Videochamada indisponível offline', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
+    ));
+    return;
+  }
 
   // 1. NEVER CACHE: APIs, tokens, dados privados → network-only
   if (NEVER_CACHE.some(p => p.test(url.pathname) || p.test(url.href))) {
