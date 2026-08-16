@@ -186,7 +186,9 @@
           <div id="w2-areas-contador" style="margin-top:6px;font-size:12px;color:#666;">0 de 5 selecionadas</div>
         </div>
         <div class="form-group">
-          <label class="check-label"><input type="checkbox" id="w2-politica" required> Li e aceito a Política de Privacidade do VagasIO.</label>
+          <label class="check-label"><input type="checkbox" id="w2-termos" required> Li e aceito os <a href="#" class="aceite-link" onclick="abrirAceiteModal('termos');return false;">Termos de Uso</a>.</label>
+          <label class="check-label"><input type="checkbox" id="w2-politica" required> Li e aceito a <a href="#" class="aceite-link" onclick="abrirAceiteModal('privacidade');return false;">Política de Privacidade</a> do VagasIO.</label>
+          <label class="check-label"><input type="checkbox" id="w2-cookies"> Concordo com o uso de <a href="#" class="aceite-link" onclick="abrirAceiteModal('cookies');return false;">Cookies</a> para o funcionamento do portal.</label>
         </div>
         <div class="form-group">
           <label class="check-label"><input type="checkbox" id="w2-comunicacoes"> Desejo receber comunicações sobre novas vagas e atualizações.</label>
@@ -208,7 +210,7 @@
         <h3 class="wizard-titulo">Endereço</h3>
         <p class="wizard-subtitulo">Para encontrar vagas perto de você.</p>
         <div class="form-row">
-          <div class="form-group"><label>CEP</label><input type="text" id="w3-cep" placeholder="00000-000" maxlength="9" onblur="buscarCepWizard()"></div>
+          <div class="form-group"><label>CEP</label><input type="text" id="w3-cep" placeholder="00000-000" maxlength="9"></div>
           <div class="form-group"><label>Cidade *</label><input type="text" id="w3-cidade"></div>
         </div>
         <div class="form-row">
@@ -820,5 +822,22 @@
         <p class="notif-vazio-sub">${escHtml(e.message)}</p>
       </div>`;
     }
+  };
+})();
+
+
+// Modal informativo dos três aceites do cadastro. O texto usa somente as informações
+// funcionais já apresentadas no próprio fluxo; não substitui a política jurídica oficial.
+(function(){
+  const textos={
+    termos:{titulo:'Termos de Uso',corpo:'Ao aceitar os Termos de Uso, você confirma que utilizará o Portal VagasIO de forma responsável e de acordo com as regras apresentadas no cadastro. O aceite é registrado junto ao seu cadastro.'},
+    privacidade:{titulo:'Política de Privacidade',corpo:'Esta seção explica que os dados fornecidos no cadastro e no currículo são utilizados para manter seu perfil, permitir candidaturas e viabilizar o contato relacionado aos processos seletivos do VagasIO.'},
+    cookies:{titulo:'Política de Cookies',corpo:'Cookies e recursos de armazenamento do navegador podem ser utilizados para manter sua sessão, preferências e funcionamento básico do Portal VagasIO.'}
+  };
+  window.abrirAceiteModal=function(tipo){
+    const d=textos[tipo]||textos.termos;
+    let el=document.getElementById('modal-aceite-legal');
+    if(!el){el=document.createElement('div');el.id='modal-aceite-legal';el.className='modal-overlay';el.innerHTML='<div class="modal modal-large" role="dialog" aria-modal="true" aria-labelledby="aceite-legal-titulo"><div class="modal-header"><h3 id="aceite-legal-titulo"></h3><button class="modal-close" type="button" aria-label="Fechar">×</button></div><div class="modal-body"><p id="aceite-legal-corpo" style="line-height:1.65;color:#4d4248"></p><p style="margin-top:14px;font-size:12px;color:#8c7d84">O aceite realizado no cadastro é vinculado à sua conta e pode ser revisado nas configurações do perfil.</p></div><div class="modal-footer"><button class="btn btn-primary" type="button">Fechar</button></div></div>';document.body.appendChild(el);el.querySelector('.modal-close').onclick=()=>el.classList.remove('aberto');el.querySelector('.modal-footer button').onclick=()=>el.classList.remove('aberto');}
+    el.querySelector('#aceite-legal-titulo').textContent=d.titulo;el.querySelector('#aceite-legal-corpo').textContent=d.corpo;el.classList.add('aberto');
   };
 })();
