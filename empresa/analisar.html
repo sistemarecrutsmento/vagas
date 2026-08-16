@@ -1108,10 +1108,10 @@
       if (!confirm('Tem certeza que deseja ' + labels[acao])) return;
       try {
         const token = localStorage.getItem('empresa_token');
-        const r = await fetch(API + '/api/empresa/candidatura/' + id + '/status', {
+        const r = await fetch(API + '/api/empresa/candidatura/' + id + '/acao', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ acao: acao === 'aprovar-triagem' ? 'avancar' : acao })
+          body: JSON.stringify({ acao: acao === 'aprovar-triagem' ? 'avancar' : acao, comentario: '' })
         });
         const data = await r.json();
         if (r.ok) {

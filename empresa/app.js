@@ -1004,7 +1004,7 @@ async function executarAcaoEmLoteCandidatos(acao){
   if(!ids.length) return;
   const labels={avancar:'avançar',reprovar:'reprovar',reabrir:'reabrir'};
   if(!confirm(`Confirmar ${labels[acao]||acao} para ${ids.length} candidato(s)?`)) return;
-  const resultados=await Promise.allSettled(ids.map(id=>fetchEmpresaAuth(API+'/api/empresa/candidatura/'+id+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao})})));
+  const resultados=await Promise.allSettled(ids.map(id=>fetchEmpresaAuth(API+'/api/empresa/candidatura/'+id+'/acao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao, comentario: ''})})));
   const falhas=resultados.filter(r=>r.status==='rejected').length+resultados.filter(r=>r.status==='fulfilled'&&!r.value.ok).length;
   alert(falhas?`${ids.length-falhas} candidato(s) atualizado(s). ${falhas} não puderam ser atualizados.`:`${ids.length} candidato(s) atualizado(s) com sucesso.`);
   limparSelecaoCandidatos(); carregarCandidatos();
@@ -1515,10 +1515,10 @@ async function acaoCandidatura(id, acao) {
   };
   if (!confirm(mensagens[acao])) return;
   try {
-    const r = await fetch(API + '/api/empresa/candidatura/' + id + '/status', {
+    const r = await fetch(API + '/api/empresa/candidatura/' + id + '/acao', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ acao })
+      body: JSON.stringify({ acao, comentario: '' })
     });
     const data = await r.json();
     if (!r.ok) { alert('Erro: ' + (data.erro || 'Não foi possível atualizar')); return; }
