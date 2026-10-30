@@ -4,20 +4,20 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#722f37"><meta name="description" content="Certus by VagasIO — ambiente demonstrativo separado da plataforma autenticada.">
   <title>Certus by VagasIO — demonstração separada</title>
-  <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js?v=20261030b" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=20261030-polish1">
+  <script src="./app.js?v=20261030-polish1" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar" aria-label="Navegação principal">
-      <a class="brand" href="#dashboard" aria-label="Certus início"><span class="brand-mark">C</span><span><strong>CERTUS</strong><small>by VagasIO</small></span></a>
-      <div class="workspace"><span class="workspace-label">AMBIENTE DE DEMONSTRAÇÃO</span><button class="company-switch" type="button"><span class="company-icon">A</span><span><strong>Acme Serviços</strong><small>Conta demonstrativa</small></span><span class="chevron">⌄</span></button></div>
+      <a class="brand" href="#dashboard" aria-label="Certus início"><img class="brand-logo" src="./certus-logo-color.png" alt="Certus by VagasIO"></a>
+      <div class="workspace"><span class="workspace-label">AMBIENTE DE DEMONSTRAÇÃO</span><div class="company-switch" aria-label="Empresa demonstrativa"><span class="company-icon">A</span><span><strong>Acme Serviços</strong><small>Conta demonstrativa</small></span><span class="chevron">Demo</span></div></div>
       <nav class="nav-list" id="nav-list">
         <span class="nav-label">GESTÃO</span>
         <button class="nav-item active" data-view="dashboard"><span class="nav-icon">▦</span>Visão geral</button>
-        <button class="nav-item" data-view="employees"><span class="nav-icon">♙</span>Funcionários <span class="nav-count">24</span></button>
+        <button class="nav-item" data-view="employees"><span class="nav-icon">♙</span>Funcionários <span class="nav-count">8</span></button>
         <button class="nav-item" data-view="records"><span class="nav-icon">◷</span>Registros de ponto</button>
-        <button class="nav-item" data-view="requests"><span class="nav-icon">▤</span>Ajustes <span class="nav-count alert-count">3</span></button>
+        <button class="nav-item" data-view="requests"><span class="nav-icon">▤</span>Ajustes <span class="nav-count alert-count">2</span></button>
         <button class="nav-item" data-view="schedules"><span class="nav-icon">▦</span>Jornadas</button>
         <button class="nav-item" data-view="branches"><span class="nav-icon">⌖</span>Filiais e equipes</button>
         <span class="nav-label nav-label-spaced">ANÁLISES</span>
@@ -26,11 +26,11 @@
         <button class="nav-item" data-view="devices"><span class="nav-icon">▣</span>Terminais</button>
         <button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span>Configurações</button>
       </nav>
-      <div class="sidebar-bottom"><div class="help-box"><span class="help-icon">?</span><div><strong>Central de ajuda</strong><small>Conheça o Certus</small></div><span>↗</span></div><button class="profile-button"><span class="avatar avatar-wine">FJ</span><span><strong>Fabio Júnior</strong><small>Administrador demo</small></span><span class="more">···</span></button></div>
+      <div class="sidebar-bottom"><div class="help-box"><span class="help-icon">i</span><div><strong>Exemplo demonstrativo</strong><small>Os dados não são reais</small></div></div><div class="profile-button"><span class="avatar avatar-wine">FJ</span><span><strong>Fabio Júnior</strong><small>Administrador demo</small></span><span class="more">Demo</span></div></div>
     </aside>
     <div class="mobile-overlay" id="mobile-overlay"></div>
     <main class="main-area">
-      <header class="topbar"><button class="icon-button menu-toggle" id="menu-toggle" aria-label="Abrir menu">☰</button><div class="crumb"><span>Acme Serviços</span><span class="crumb-sep">/</span><strong id="crumb-current">Visão geral</strong></div><div class="top-actions"><span class="demo-chip"><i></i> Demonstração</span><button class="icon-button notification-button" aria-label="Notificações">♧<b></b></button><span class="top-avatar">FJ</span></div></header>
+      <header class="topbar"><button class="icon-button menu-toggle" id="menu-toggle" aria-label="Abrir menu">☰</button><div class="crumb"><span>Acme Serviços</span><span class="crumb-sep">/</span><strong id="crumb-current">Visão geral</strong></div><div class="top-actions"><span class="demo-chip"><i></i> Demonstração</span><span class="icon-button notification-button" role="img" aria-label="Notificações indisponíveis nesta demonstração" title="Notificações desativadas">♧</span><span class="top-avatar">FJ</span></div></header>
       <section class="demo-notice" role="note"><span class="notice-symbol">i</span><p><strong>Ambiente demonstrativo.</strong> Dados fictícios; ações ficam neste navegador. Sem autenticação, API, biometria, geolocalização ou validade como registro oficial de ponto.</p><button id="dismiss-notice" aria-label="Fechar aviso">×</button></section>
       <div id="view-root" class="view-root" tabindex="-1"></div>
       <footer class="footer"><span>Certus by VagasIO <span class="footer-dot">·</span> versão demonstrativa 0.1</span><span>Dados fictícios <span class="footer-dot">·</span> não usar para folha ou obrigações legais</span></footer>
