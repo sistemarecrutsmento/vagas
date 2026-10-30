@@ -6,3 +6,5 @@
 .brand-logo{filter:drop-shadow(0 0 1px #fff)}.side .brand-logo{width:188px}.login-card .brand-logo{width:242px}.footer-brand{background:#722f37}.footer-brand img{width:172px}.text-button{display:inline-block;border:0;background:transparent;color:#722f37;padding:6px 0;text-decoration:underline;font-size:13px}
 
 .login-links{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}.login-links a,.login-links .text-button{font-size:13px}.recovery-box{margin-top:10px}.recovery-box[hidden]{display:none}.recovery-box form{display:grid;gap:10px}.recovery-box label{display:grid;gap:7px;font-size:13px}.recovery-box input{padding:10px;border:1px solid #dcd5d8;border-radius:8px}.brand-logo{object-fit:contain}
+
+.login-links{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.login-links a{color:#722f37;font-size:13px}.recovery-box{margin-top:12px;padding:12px;border:1px solid #eee4e7;border-radius:10px;background:#faf7f8}.recovery-box[hidden]{display:none}.recovery-box form{display:grid;gap:8px}.recovery-box label{display:grid;gap:6px}.recovery-box input{padding:10px;border:1px solid #ddd3d7;border-radius:8px}
