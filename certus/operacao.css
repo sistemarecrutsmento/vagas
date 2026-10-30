@@ -46,3 +46,4 @@
 /* Manager/editor schedule grid and compact responsive controls. */
 .schedule-summary p{overflow-wrap:anywhere}.schedule-summary b{font-weight:700}.employee-link-needed .primary{margin-top:16px;min-height:44px}.side nav button{overflow-wrap:anywhere}.menu-toggle{color:#722f37}.side .logout{margin-top:0}.side-help{font-size:11px}
 @media(max-width:760px){.side .org b{display:block}.side nav button{flex:none}.main>header #identity{max-width:38%;white-space:normal}.main .dashboard-grid .toolbar{flex-direction:column}.employee-link-needed .primary{width:100%}}
+.template-note{padding:9px 10px;border-radius:9px;background:#fff9ed;border:1px solid #f0e5d0;color:#6c5a37!important;font-size:12px!important}
