@@ -177,3 +177,8 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
 .main footer .footer-brand img{display:block;width:100%;height:auto;max-height:52px;object-fit:contain;filter:none!important}
 @media(max-width:760px){.face-dialog{width:min(92vw,420px);max-width:calc(100vw - 20px);max-height:calc(100dvh - max(16px,env(safe-area-inset-top)) - 16px)}.face-dialog-card{max-height:calc(100dvh - max(16px,env(safe-area-inset-top)) - 16px);padding:16px 14px;border-radius:18px}.face-description{font-size:11px;margin:6px 0 10px}.face-camera-ring{width:min(68vw,38dvh,290px);min-width:min(200px,68vw);border-width:4px;margin-bottom:10px}.face-progress{font-size:10px}.main footer .footer-brand{width:132px}.main footer .footer-brand img{max-height:44px}}
 @media(max-height:620px){.face-dialog-card{padding:12px}.face-description{margin:4px 0 7px;font-size:10px}.face-camera-ring{width:min(56vw,34dvh,240px);min-width:min(170px,56vw);margin-bottom:7px}.face-cancel{min-height:38px;margin-top:4px}}
+
+/* O atalho de senha fica abaixo da lista principal do colaborador */
+.side nav.account-menu{margin-top:14px;padding-top:12px;border-top:1px solid #e9e1e4}
+.side nav.account-menu button{min-height:44px}
+@media(max-width:920px){.side nav.account-menu{margin-top:12px;padding-top:10px;border-top:1px solid #ffffff35}.side nav.account-menu button{min-height:44px;color:#f2e9ec}.side nav.account-menu button:hover,.side nav.account-menu button.active{color:#fff;background:#ffffff12}}
