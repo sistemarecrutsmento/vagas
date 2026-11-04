@@ -1,4 +1,4 @@
-const VERSION='certus-static-v4';
+const VERSION='certus-static-v5';
 const SHELL=['./','./index.html','./manifest.json','./operacao.css','./operacao.js','./pwa.js','./certus-logo-color.png','./certus-logo-white.png','./icon-192.png','./icon-512.png','./cartilha-maxclean.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('certus-static-')&&key!==VERSION).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
