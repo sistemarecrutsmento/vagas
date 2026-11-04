@@ -155,3 +155,25 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
 }
 @media(min-width:761px){.worker-header-avatar{display:none}.worker-record-list{display:none}.worker-record-table{display:block}.worker-page{padding-top:2px}.worker-next-wrap{margin-top:2px}}
 @media(max-width:380px){.main>header #identity{max-width:27%;flex-basis:27%;font-size:9px}.worker-welcome h2{font-size:19px}.worker-shift-summary strong{font-size:11px}.worker-time-point{min-width:43px}}
+
+/* Captura facial automática: visor redondo e contido na viewport */
+.face-dialog{width:min(92vw,460px);max-width:calc(100vw - 20px);max-height:calc(100dvh - 20px);overflow:visible}
+.face-dialog-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;width:100%;max-height:calc(100dvh - 20px);overflow:auto;padding:clamp(16px,4vw,24px);border:1px solid #ece8ea;border-top:4px solid #650025;border-radius:20px;background:#fff;box-shadow:0 18px 54px #17111730;text-align:center}
+.face-close{position:absolute;top:10px;right:10px;width:40px;height:40px;min-height:40px;display:grid;place-items:center;border:1px solid #eee8ea;border-radius:50%;background:#fff;color:#650025;font-size:23px;line-height:1}
+.face-eyebrow{margin:2px 40px 5px;color:#650025;font-size:9px;font-weight:800;letter-spacing:.12em}
+.face-dialog-card h2{margin:0;color:#29272a;font-size:clamp(17px,4vw,20px)}
+.face-description{max-width:360px;margin:7px 0 12px;color:#777;font-size:12px;line-height:1.45}
+.face-camera-ring{position:relative;display:grid;place-items:center;width:min(68vw,42dvh,320px);min-width:min(220px,68vw);aspect-ratio:1/1;margin:0 auto 12px;overflow:hidden;border:5px solid #f0e5e9;border-radius:50%;background:#171417;box-shadow:0 0 0 1px #65002524}
+.face-camera-ring:before{position:absolute;z-index:2;inset:4%;border:1px solid #ffffff50;border-radius:50%;content:"";pointer-events:none}
+.face-camera-ring #face-camera{position:absolute;inset:0;overflow:hidden;border-radius:50%}
+.face-camera-ring video{display:block;width:100%;height:100%;min-height:0!important;max-height:none!important;aspect-ratio:1/1;object-fit:cover;object-position:center;background:#171417;border-radius:50%;margin:0;transform:scaleX(-1)}
+.face-guide{position:absolute;z-index:3;left:50%;top:50%;width:55%;height:69%;transform:translate(-50%,-50%);border:2px solid #fff9;border-radius:48% 48% 45% 45%;box-shadow:0 0 0 999px #17141708;pointer-events:none}
+.face-progress{display:flex;align-items:center;justify-content:center;gap:8px;min-height:30px;width:100%;color:#625960;font-size:11px;line-height:1.35}
+.face-pulse{position:relative;width:9px;height:9px;flex:none;border-radius:50%;background:#650025}
+.face-pulse:after{position:absolute;inset:-4px;border:1px solid #65002560;border-radius:50%;content:"";animation:facePulse 1.5s ease-out infinite}
+@keyframes facePulse{0%{transform:scale(.7);opacity:1}100%{transform:scale(1.9);opacity:0}}
+.face-cancel{width:min(100%,260px);min-height:42px;margin-top:8px;border:1px solid #e7dbe0;background:#fff;color:#650025;border-radius:10px;font-weight:700}
+.main footer .footer-brand{display:flex;align-items:center;justify-content:center;width:150px;min-height:0;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.main footer .footer-brand img{display:block;width:100%;height:auto;max-height:52px;object-fit:contain;filter:none!important}
+@media(max-width:760px){.face-dialog{width:min(92vw,420px);max-width:calc(100vw - 20px);max-height:calc(100dvh - max(16px,env(safe-area-inset-top)) - 16px)}.face-dialog-card{max-height:calc(100dvh - max(16px,env(safe-area-inset-top)) - 16px);padding:16px 14px;border-radius:18px}.face-description{font-size:11px;margin:6px 0 10px}.face-camera-ring{width:min(68vw,38dvh,290px);min-width:min(200px,68vw);border-width:4px;margin-bottom:10px}.face-progress{font-size:10px}.main footer .footer-brand{width:132px}.main footer .footer-brand img{max-height:44px}}
+@media(max-height:620px){.face-dialog-card{padding:12px}.face-description{margin:4px 0 7px;font-size:10px}.face-camera-ring{width:min(56vw,34dvh,240px);min-width:min(170px,56vw);margin-bottom:7px}.face-cancel{min-height:38px;margin-top:4px}}
