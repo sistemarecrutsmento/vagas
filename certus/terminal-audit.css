@@ -15,3 +15,5 @@ body{background:#f5f4f5;color:#262126}.topbar{background:#50001f;color:#fff;bord
 
 /* Shared kiosk: single action button */
 .punch-grid{grid-template-columns:minmax(0,1fr);max-width:560px;margin-inline:auto}.punch{min-height:84px;flex-direction:row;gap:12px;border-radius:14px}.punch .icon{background:#fff;color:#50001f}
+
+.terminal-history{display:grid;gap:10px;max-width:560px;margin:14px auto}.latest-mark{display:grid;gap:4px;padding:12px 14px;background:#fff;border:1px solid #e9e6e8;border-radius:12px;color:#262126}.latest-mark b{font-size:12px;color:#50001f}.latest-mark span{font-size:13px;line-height:1.4}.terminal-history .secondary{min-height:44px}.history-modal{max-width:min(100% - 16px,560px)}.history-list{max-height:min(58vh,520px);overflow:auto}.history-list ol{list-style:none;padding:0;margin:12px 0;display:grid;gap:8px}.history-list li{display:grid;gap:3px;padding:10px 12px;border:1px solid #eee6e9;border-radius:10px;background:#fff}.history-list li b{font-size:13px}.history-list li span,.history-list>p{font-size:12px;color:#756b72}.camera-status{text-align:center;color:#6f666d;font-size:13px;margin:10px 0 0}
