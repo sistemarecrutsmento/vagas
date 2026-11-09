@@ -170,3 +170,8 @@
  .records-layout{grid-template-columns:minmax(0,1fr) minmax(25%,66px)!important;gap:2px!important}
  .extract-table th,.extract-table td{font-size:4px!important;padding:2px 1px!important}
 }
+
+/* Keep a computer monitor's landscape ratio at every viewport size. */
+.laptop-screen{aspect-ratio:16/9!important}
+@media(max-width:760px){.laptop-screen{aspect-ratio:16/9!important}}
+@media(max-width:390px){.laptop-screen{aspect-ratio:16/9!important}}
