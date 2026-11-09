@@ -97,3 +97,27 @@
  .records-sidebar nav span{font-size:3.1px}
  .records-table th,.records-table td{font-size:2.8px}
 }
+
+/* Mobile presentation: keep the management laptop and employee phone side by side. */
+@media(max-width:760px){
+ .showcase{padding:42px 10px 38px}
+ .devices-stage{display:grid!important;grid-template-columns:minmax(0,1fr) clamp(112px,30vw,178px)!important;align-items:center!important;gap:clamp(8px,2.5vw,16px)!important;min-height:0;max-width:100%;overflow:visible}
+ .laptop{width:100%;min-width:0;padding-bottom:36px}
+ .laptop-screen{width:100%;aspect-ratio:1.35!important}
+ .desktop-app{min-width:0}
+ .device-caption{left:0;bottom:0}
+ .device-caption .caption-icon{width:23px;height:23px}
+ .device-caption b{font-size:9px}.device-caption small{font-size:7px}
+ .phone{width:290px;max-width:none;justify-self:center;align-self:center;zoom:.48}
+ .phone-caption{bottom:-39px}
+ .trust-strip{margin-top:46px}
+}
+@media(max-width:430px){
+ .showcase{padding-left:8px;padding-right:8px}
+ .devices-stage{grid-template-columns:minmax(0,1fr) minmax(100px,29vw)!important;gap:7px!important}
+ .phone{zoom:.38}
+ .laptop{padding-bottom:32px}
+ .laptop-screen{aspect-ratio:1.25!important}
+ .device-caption .caption-icon{width:20px;height:20px}
+ .device-caption b{font-size:8px}.device-caption small{font-size:6px}
+}
