@@ -50,3 +50,22 @@
  .devices{grid-template-columns:minmax(0,2.7fr) minmax(0,.78fr)!important;gap:4px!important}
  .phone-device{zoom:.34!important}
 }
+
+/* Final polish: readable date columns and captions outside device frames. */
+.records table{min-width:650px!important;table-layout:fixed!important}
+.records th,.records td{white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important}
+.records th:nth-child(1){width:78px!important}.records th:nth-child(2){width:46px!important}.records th:nth-child(3){width:92px!important}.records th:nth-child(4){width:176px!important}.records th:nth-child(5){width:104px!important}.records th:nth-child(6){width:92px!important}.records th:nth-child(7){width:120px!important}
+.computer-device{padding-bottom:0!important;display:flex!important;flex-direction:column!important}
+.computer-base{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;height:16px!important;margin:-1px -4% 0!important;flex:none!important}
+.computer-device>.device-label{position:static!important;left:auto!important;bottom:auto!important;margin:10px 0 0 2%!important}
+.phone-device{padding-bottom:0!important;display:flex!important;flex-direction:column!important}
+.phone-device>.phone-frame{flex:none!important}
+.phone-device>.device-label{position:static!important;left:auto!important;bottom:auto!important;margin:10px 0 0 2%!important}
+@media(max-width:760px){
+ .records table{min-width:540px!important}
+ .computer-base{height:9px!important;margin-top:-1px!important}
+ .computer-device>.device-label,.phone-device>.device-label{margin-top:7px!important}
+ .phone-device{zoom:.40!important}
+ .computer-device{padding-bottom:0!important}
+}
+@media(max-width:390px){.phone-device{zoom:.34!important}.records table{min-width:520px!important}}
