@@ -19,3 +19,34 @@
  .phone-device{padding-bottom:31px!important}
  .phone-device>.device-label{bottom:2px!important}
 }
+
+/* Give the monitor enough physical area for a desktop-sized workspace; retain normal device ratios. */
+.demonstration{padding-left:clamp(12px,2vw,30px)!important;padding-right:clamp(12px,2vw,30px)!important}
+.section-intro,.devices,.disclaimer{max-width:1400px!important}
+.devices{grid-template-columns:minmax(0,2.7fr) minmax(0,.78fr)!important;gap:clamp(14px,2vw,30px)!important;align-items:center!important}
+.monitor{aspect-ratio:16/9!important}
+.desktop-app{grid-template-columns:clamp(145px,17%,190px) minmax(0,1fr)!important}
+.workspace-header{min-height:52px!important}
+.workspace-scroll{overflow:auto!important;min-height:0!important}
+.records-and-detail{grid-template-columns:minmax(0,1fr) minmax(185px,25%)!important;align-items:start!important}
+.table-scroll{overflow:auto!important;max-height:clamp(180px,30vh,410px)!important;scrollbar-width:thin;scrollbar-color:#b9adb3 #f6f3f4}
+.records table{min-width:600px!important;table-layout:fixed!important}
+.records th,.records td{overflow-wrap:anywhere!important;white-space:normal!important}
+.day-detail{min-width:0!important}
+.phone-device{width:min(100%,290px)!important;filter:drop-shadow(0 16px 25px #0007)}
+.phone-frame{width:100%!important}
+.phone-screen{aspect-ratio:290/570!important;height:auto!important;min-height:0!important}
+@media(max-width:760px){
+ .devices{grid-template-columns:minmax(0,2.7fr) minmax(0,.78fr)!important;gap:clamp(6px,1.6vw,10px)!important;align-items:center!important}
+ .monitor{aspect-ratio:16/9!important}
+ .desktop-app{grid-template-columns:clamp(48px,16vw,72px) minmax(0,1fr)!important}
+ .records-and-detail{grid-template-columns:minmax(0,1fr) minmax(0,24%)!important;gap:2px!important}
+ .records table{min-width:500px!important}
+ .table-scroll{max-height:clamp(100px,23vh,190px)!important;min-height:80px!important}
+ .phone-device{width:290px!important;max-width:none!important;zoom:.40!important;justify-self:center!important}
+ .phone-screen{aspect-ratio:290/570!important;height:570px!important}
+}
+@media(max-width:390px){
+ .devices{grid-template-columns:minmax(0,2.7fr) minmax(0,.78fr)!important;gap:4px!important}
+ .phone-device{zoom:.34!important}
+}
