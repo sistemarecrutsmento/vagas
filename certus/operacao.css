@@ -296,3 +296,54 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
 #content .table-wrap-accounts th:nth-child(7),#content .table-wrap-accounts td:nth-child(7){min-width:150px}
 #content .table-wrap-accounts th:nth-child(8),#content .table-wrap-accounts td:nth-child(8){min-width:155px}
 #content .table-wrap-accounts td:last-child{line-height:1.9}
+
+
+/* Espelho mensal em tela: grade de consulta harmonizada; a impressão A4 mantém seu layout específico. */
+@media screen{
+ #content .timesheet-document-table{
+   max-width:100%;
+   overflow-x:auto;
+   border:1px solid #e5dadd;
+   border-radius:12px;
+   background:#fff;
+   box-shadow:0 5px 18px #3b15200a;
+   overscroll-behavior-inline:contain;
+   scrollbar-width:thin;
+   scrollbar-color:#c9b5bb #f7f3f4;
+ }
+ #content .timesheet-document-table table{
+   min-width:1060px;
+   border-collapse:separate;
+   border-spacing:0;
+   background:#fff;
+ }
+ #content .timesheet-document-table th{
+   padding:12px 11px;
+   background:linear-gradient(180deg,#faf5f6 0%,#f2e8eb 100%);
+   color:#542a35;
+   border:0;
+   border-bottom:1px solid #e5d5da;
+   font-size:10px;
+   font-weight:750;
+   line-height:1.4;
+   letter-spacing:.035em;
+   vertical-align:bottom;
+ }
+ #content .timesheet-document-table td{
+   padding:11px;
+   color:#393238;
+   border:0;
+   border-bottom:1px solid #f0eaec;
+   font-size:11px;
+   line-height:1.45;
+   vertical-align:top;
+ }
+ #content .timesheet-document-table tbody tr:nth-child(even){background:#fbf9fa}
+ #content .timesheet-document-table tbody tr:hover{background:#f7eff1}
+ #content .timesheet-document-table tbody tr:last-child td{border-bottom:0}
+ #content .timesheet-document-table .timesheet-period-total{border-color:#e5dadd;border-radius:10px;overflow:hidden;background:#fff}
+ #content .timesheet-document-table .timesheet-period-total>div{padding:9px 7px;border-color:#eee6e8}
+ #content .timesheet-document-table .timesheet-period-total small{font-size:9px;line-height:1.35}
+ #content .timesheet-document-table .timesheet-period-total b{font-size:12px;color:#50001f}
+ #content .timesheet-document-table .timesheet-observations{border-color:#e5dadd;border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.45}
+}
