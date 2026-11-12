@@ -33,3 +33,32 @@ body{background:var(--terminal-paper)}
 .terminal-footer{padding:14px 10px;color:#837c86}
 @media(max-width:650px){.topbar{min-height:141px;padding:24px 14px 35px;gap:8px}.topbar .brand{gap:8px}.topbar .brand-logo{width:132px;max-height:43px}.topbar .brand>div{padding-left:9px}.topbar .brand>div strong{font-size:10px}.topbar .brand>div small{font-size:9px}.topbar .device{max-width:31vw;padding:7px 9px;gap:7px}.topbar .device b{font-size:10px}.topbar .device small{font-size:9px}.topbar .settings{width:34px;height:34px;font-size:17px}.kiosk-content{padding:0 15px 24px;margin-top:-2px}.kiosk-panel{padding:17px 14px 17px;border-radius:26px}.welcome h1{font-size:30px}.welcome>p:last-child{font-size:13px}.clock-card{margin:21px auto 15px;padding-top:53px;min-height:131px}.time{font-size:clamp(45px,12vw,61px)}.date{font-size:13px}.server-time-label{font-size:11px;margin-top:11px}.punch{min-height:84px;padding:0 14px;gap:12px;border-radius:18px}.punch .icon{width:48px;height:48px}.punch b{font-size:15px}.punch .action-chevron{padding-left:13px}.latest-mark{min-height:76px;padding:9px 11px;gap:11px}.latest-clock{width:50px;height:50px}.latest-copy{padding-left:11px}.latest-mark .latest-copy>span{font-size:13px}.terminal-history .secondary{min-height:54px;font-size:14px;position:relative}}
 @media(max-width:365px){.topbar{padding-inline:10px}.topbar .brand-logo{width:112px}.topbar .brand>div{padding-left:7px}.topbar .brand>div strong{font-size:9px}.topbar .device{max-width:30vw;padding:6px}.topbar .settings{width:31px;height:31px}.kiosk-content{padding-inline:11px}.kiosk-panel{padding-inline:11px}.welcome h1{font-size:27px}.punch b{font-size:14px}.clock-card{padding-inline:8px}.latest-mark .latest-copy>span{font-size:12px}}
+
+@media(max-width:650px){
+  .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;column-gap:7px;row-gap:0;min-height:136px;padding:18px 12px 32px}
+  .topbar .brand{grid-column:1;min-width:0;width:100%;gap:7px;overflow:hidden}
+  .topbar .brand-logo{flex:0 1 auto;width:clamp(88px,27vw,112px);max-height:36px}
+  .topbar .brand>div{min-width:0;padding-left:7px}
+  .topbar .brand>div strong{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .brand>div small{font-size:9px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .topbar .device{grid-column:2;max-width:clamp(78px,25vw,110px);min-width:0;margin:0;padding:6px 7px;gap:6px}
+  .topbar .device>span:last-child{min-width:0;overflow:hidden}
+  .topbar .device b,.topbar .device small{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px}
+  .topbar .settings{grid-column:3;width:32px;height:32px;margin:0;font-size:16px}
+  .kiosk-content{padding-top:0;margin-top:-2px}.kiosk-panel{padding-top:16px}
+  .welcome h1{font-size:clamp(26px,7.5vw,30px)}.clock-card{width:100%;padding-left:9px;padding-right:9px}
+  .time{font-size:clamp(42px,11.5vw,58px);letter-spacing:-.04em}.date{font-size:clamp(11px,3.4vw,13px);white-space:normal}
+  .terminal-history .secondary{padding-left:40px;padding-right:40px}.terminal{padding-bottom:74px}
+}
+@media(max-width:365px){
+  .topbar{padding-left:9px;padding-right:9px;column-gap:5px}.topbar .brand{gap:5px}
+  .topbar .brand-logo{width:clamp(84px,26vw,96px);max-height:33px}.topbar .brand>div{padding-left:5px}
+  .topbar .brand>div strong{font-size:9px}.topbar .brand>div small{font-size:8px}
+  .topbar .device{max-width:clamp(74px,24vw,86px);padding:5px}.topbar .device b,.topbar .device small{font-size:8px}
+  .topbar .settings{width:30px;height:30px}.kiosk-content{padding-left:10px;padding-right:10px}.kiosk-panel{padding-left:10px;padding-right:10px}
+  .welcome h1{font-size:26px}.time{font-size:clamp(40px,11vw,46px)}.punch{padding-left:11px;padding-right:11px;gap:9px}
+  .punch b{font-size:13px}.punch .action-chevron{padding-left:9px}.latest-mark .latest-copy>span{font-size:11.5px;overflow-wrap:anywhere}
+}
+@media(max-height:600px) and (max-width:650px){.topbar{min-height:112px;padding-top:11px;padding-bottom:24px}.kiosk-content{padding-top:0}.clock-card{margin-top:16px;padding-top:47px;min-height:116px}.clock-symbol{width:54px;height:54px}}
+
+@media(display-mode:standalone){.certus-install-button{display:none!important}.terminal{padding-bottom:12px}}
