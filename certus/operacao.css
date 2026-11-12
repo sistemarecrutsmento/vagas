@@ -206,3 +206,13 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
 
 .login .remember-login{display:flex;align-items:center;gap:9px;margin:12px 0 3px;font-weight:600}.login .remember-login input[type=checkbox]{width:18px;min-width:18px;height:18px;min-height:18px;margin:0;accent-color:#50001f}.login .remember-hint{display:block;margin:-1px 0 12px;color:#766e73;font-size:11px;line-height:1.45}
 .branch-access-list{border:1px solid var(--line,#d9d9df);border-radius:12px;padding:12px;display:grid;gap:8px;max-height:230px;overflow:auto}.branch-access-list legend{font-weight:700;padding:0 6px}.branch-access-option{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#faf8f9;cursor:pointer}.branch-access-option input{width:18px;height:18px;accent-color:#70002b}.overview-absence-note{grid-column:1/-1;margin:-4px 0 0}.stat:has(+ .overview-absence-note){min-width:0}
+
+
+/* Rascunho: rolar somente o painel principal em desktop; preservar menu drawer móvel. */
+@media(min-width:761px){
+ html,body{height:100%;min-height:100%;overflow:hidden}
+ #app{height:100dvh;min-height:0;overflow:hidden}
+ .layout{height:100dvh;min-height:0;max-height:100dvh;overflow:hidden;align-items:stretch}
+ .side{position:relative;inset:auto;top:auto;height:100dvh;max-height:100dvh;min-height:0;overflow-y:auto;overscroll-behavior:contain;align-self:stretch}
+ .main{height:100dvh;min-height:0;max-height:100dvh;overflow-y:auto;overflow-x:clip;overscroll-behavior-y:contain;scrollbar-gutter:stable;align-self:stretch}
+}
