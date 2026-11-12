@@ -33,3 +33,17 @@ body{background:var(--terminal-paper)}
 .terminal-footer{padding:14px 10px;color:#837c86}
 @media(max-width:650px){.topbar{min-height:141px;padding:24px 14px 35px;gap:8px}.topbar .brand{gap:8px}.topbar .brand-logo{width:132px;max-height:43px}.topbar .brand>div{padding-left:9px}.topbar .brand>div strong{font-size:10px}.topbar .brand>div small{font-size:9px}.topbar .device{max-width:31vw;padding:7px 9px;gap:7px}.topbar .device b{font-size:10px}.topbar .device small{font-size:9px}.topbar .settings{width:34px;height:34px;font-size:17px}.kiosk-content{padding:0 15px 24px;margin-top:-2px}.kiosk-panel{padding:17px 14px 17px;border-radius:26px}.welcome h1{font-size:30px}.welcome>p:last-child{font-size:13px}.clock-card{margin:21px auto 15px;padding-top:53px;min-height:131px}.time{font-size:clamp(45px,12vw,61px)}.date{font-size:13px}.server-time-label{font-size:11px;margin-top:11px}.punch{min-height:84px;padding:0 14px;gap:12px;border-radius:18px}.punch .icon{width:48px;height:48px}.punch b{font-size:15px}.punch .action-chevron{padding-left:13px}.latest-mark{min-height:76px;padding:9px 11px;gap:11px}.latest-clock{width:50px;height:50px}.latest-copy{padding-left:11px}.latest-mark .latest-copy>span{font-size:13px}.terminal-history .secondary{min-height:54px;font-size:14px;position:relative}}
 @media(max-width:365px){.topbar{padding-inline:10px}.topbar .brand-logo{width:112px}.topbar .brand>div{padding-left:7px}.topbar .brand>div strong{font-size:9px}.topbar .device{max-width:30vw;padding:6px}.topbar .settings{width:31px;height:31px}.kiosk-content{padding-inline:11px}.kiosk-panel{padding-inline:11px}.welcome h1{font-size:27px}.punch b{font-size:14px}.clock-card{padding-inline:8px}.latest-mark .latest-copy>span{font-size:12px}}
+
+
+/* Draft: prevent horizontal overflow across handset, tablet, and desktop widths. */
+html,body{width:100%;max-width:100%;min-width:0;overflow-x:clip}
+@supports not (overflow:clip){html,body{overflow-x:hidden}}
+.terminal{width:100%;max-width:100%;min-width:0;overflow-x:clip}
+.topbar{min-width:0;max-width:100%;overflow-x:clip}
+.kiosk-content,.kiosk-panel,.setup-card,.clock-card,.punch-grid,.terminal-history{min-width:0;max-width:100%}
+.kiosk-content{width:min(100%,680px);margin-inline:auto}
+.kiosk-panel,.clock-card,.latest-mark,.result{overflow-wrap:anywhere}
+img,video,canvas,svg{max-width:100%}
+#certus-install-app[hidden]{display:none!important}
+@media(display-mode:standalone), (display-mode:minimal-ui){#certus-install-app{display:none!important}}
+@media(max-width:650px){.topbar{width:100%;max-width:100%}.kiosk-content{width:100%;max-width:680px}}

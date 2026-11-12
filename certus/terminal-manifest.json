@@ -30,5 +30,12 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://vagasio.com.br/certus/terminal-manifest.json",
+      "id": "https://vagasio.com.br/certus/terminal.html"
+    }
   ]
 }
