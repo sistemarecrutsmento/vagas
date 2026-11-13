@@ -17,7 +17,8 @@ on:
       - '.github/workflows/certus-master-draft-tests.yml'
 jobs:
   master-ui:
-    runs-on: ubuntu-latest
+    # Pin to the newest supported runner for Playwright 1.55; ubuntu-latest moved to 26.04 and this version cannot install Chromium there.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
