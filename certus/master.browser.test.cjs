@@ -85,7 +85,7 @@ test('all 14 Master screens render using mocked authenticated API data', async()
     const names=['Dashboard Master','Empresas (Organizações)','Planos e assinaturas','Contratos e Testes','Financeiro e Cobranças','Central de Suporte','Monitoramento de Ponto','Terminais e Dispositivos','Implantação de Clientes','Configurações Globais','Recursos e Funcionalidades','Comunicados e Avisos','Acessos e Permissões','Auditoria e Logs'];
     const headings=['Visão geral da plataforma','Empresas','Planos e assinaturas','Contratos e testes','Financeiro e cobranças','Central de Suporte','Monitoramento de Ponto','Terminais e Dispositivos','Implantação de Clientes','Configurações Globais','Recursos e Funcionalidades','Comunicados e Avisos','Acessos e Permissões','Auditoria e Logs'];
     for(let i=0;i<names.length;i++){
-      await page.getByRole('button',{name:new RegExp(names[i])}).click();
+      await page.locator(`[data-page="${i}"]`).click();
       await page.locator('#content h1').filter({hasText:headings[i]}).waitFor();
     }
     assert.ok(requests.some(x=>x.path==='/api/master/dashboard'));
@@ -102,7 +102,7 @@ test('company selector, tabs, refresh and page-local table filter work',async()=
     await login(page);
     await page.getByRole('button',{name:/Empresas \(Organizações\)/}).click();
     await page.getByRole('heading',{name:'Empresas'}).waitFor();
-    await page.getByLabel('Empresa').waitFor();
+    await page.locator('#company-select').waitFor();
     await page.getByRole('tab',{name:'Lista de empresas'}).waitFor();
     await page.getByRole('tab',{name:'Visão em cartões'}).click();
     await page.getByText('Empresa Fixture').first().waitFor();
@@ -134,7 +134,7 @@ test('narrow viewport stays within screen, exposes horizontally scrollable navig
     await page.setViewportSize({width:390,height:844});
     await login(page);
     await page.getByRole('button',{name:/Auditoria e Logs/}).waitFor();
-    const dimensions=await page.evaluate(()=>({vw:innerWidth,sw:document.documentElement.scrollWidth,navScroll:document.querySelector('.nav-list').scrollWidth,navClient:document.querySelector('.nav-list').clientWidth}));
+    const dimensions=await page.evaluate(()=>({vw:innerWidth,sw:document.documentElement.scrollWidth,navScroll:document.querySelector('.nav-list').scrollWidth,navClient:document.querySelector('.nav-list').clientWidth,overflow:[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,id:e.id,className:typeof e.className==='string'?e.className:'',right:Math.round(e.getBoundingClientRect().right),width:Math.round(e.getBoundingClientRect().width)})).filter(e=>e.right>innerWidth+1).slice(0,12)}));
     assert.ok(dimensions.sw<=dimensions.vw+1,JSON.stringify(dimensions));
     assert.ok(dimensions.navScroll>=dimensions.navClient);
     await page.getByRole('button',{name:/Financeiro e Cobranças/}).click();
