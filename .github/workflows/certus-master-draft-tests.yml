@@ -1,0 +1,27 @@
+name: Certus Master release-candidate UI checks
+on:
+  push:
+    branches: [draft/master-release-candidate-20261113]
+    paths:
+      - 'certus/master.html'
+      - 'certus/master.integration.test.js'
+      - 'certus/master.browser.test.cjs'
+      - '.github/workflows/certus-master-draft-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'certus/master.html'
+      - 'certus/master.integration.test.js'
+      - 'certus/master.browser.test.cjs'
+      - '.github/workflows/certus-master-draft-tests.yml'
+jobs:
+  master-ui:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - run: node --test --test-reporter=spec certus/master.integration.test.js certus/master.browser.test.cjs
