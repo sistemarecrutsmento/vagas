@@ -34,17 +34,18 @@ const payloads = {
 };
 
 async function createPage() {
+  let origin;
   const server = http.createServer((req, res) => {
     if (req.url === '/certus/master.html') {
       res.writeHead(200, {'content-type':'text/html; charset=utf-8'});
-      return res.end(html.replace('<head>','<head><base href="http://127.0.0.1/certus/">'));
+      return res.end(html.replace('<head>','<head><base href="'+origin+'/certus/">'));
     }
     const asset = req.url === '/certus/certus-logo-color.png' ? 'certus-logo-color.png' : req.url === '/certus/certus-logo-white.png' ? 'certus-logo-white.png' : null;
     if (asset) { res.writeHead(200, {'content-type':'image/png'}); return res.end(fs.readFileSync(path.join(__dirname, asset))); }
     res.writeHead(404); res.end('Not found');
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const origin = `http://127.0.0.1:${server.address().port}`;
+  origin = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch({headless:true});
   const page = await browser.newPage({viewport:{width:1440,height:1000}});
   const requests=[]; const denied=[];
