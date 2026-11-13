@@ -1,1 +1,75 @@
-J3VzZSBzdHJpY3QnOwovLyBTdGF0aWMgc291cmNlLWNvbnRyYWN0IGNoZWNrcyBvbmx5OyBub3QgYSBicm93c2VyIG9yIGF1dGhlbnRpY2F0ZWQgQVBJIGludGVncmF0aW9uIHN1aXRlLgpjb25zdCB0ZXN0ID0gcmVxdWlyZSgnbm9kZTp0ZXN0Jyk7CmNvbnN0IGFzc2VydCA9IHJlcXVpcmUoJ25vZGU6YXNzZXJ0L3N0cmljdCcpOwpjb25zdCBmcyA9IHJlcXVpcmUoJ25vZGU6ZnMnKTsKCmNvbnN0IGh0bWwgPSBmcy5yZWFkRmlsZVN5bmMoJ2NlcnR1cy9tYXN0ZXIuaHRtbCcsICd1dGY4Jyk7CmNvbnN0IG1hdGNoID0gaHRtbC5tYXRjaCgvPHNjcmlwdD4oW1xzXFNdKj8pPFwvc2NyaXB0Pi8pOwphc3NlcnQub2sobWF0Y2gsICdlbWJlZGRlZCBNYXN0ZXIgc2NyaXB0IGV4aXN0cycpOwpjb25zdCBzY3JpcHQgPSBtYXRjaFsxXTsKCnRlc3QoJ2FsbCAxNCBuYXZpZ2F0aW9uIHNjcmVlbnMgcm91dGUgdG8gYSBkYXRhIHZpZXcnLCAoKSA9PiB7CiAgY29uc3Qgc3RhcnQgPSBzY3JpcHQuaW5kZXhPZignY29uc3QgbmF2PVsnKTsKICBjb25zdCBlbmQgPSBzY3JpcHQuaW5kZXhPZignXTsnLCBzdGFydCk7CiAgY29uc3QgbmF2ID0gc2NyaXB0LnNsaWNlKHN0YXJ0LCBlbmQpOwogIGFzc2VydC5lcXVhbCgobmF2Lm1hdGNoKC9cWycvZykgfHwgW10pLmxlbmd0aCwgMTQpOwogIGFzc2VydC5tYXRjaChzY3JpcHQsIC9iXC5vbmNsaWNrPVwoXCk9Plx7YWN0aXZlPU51bWJlclwoYlwuZGF0YXNldFwucGFnZVwpLyk7CiAgYXNzZXJ0Lm1hdGNoKHNjcmlwdCwgL2xvYWREYXRhXChhY3RpdmVcKS8pOwp9KTsKCnRlc3QoJ3JlYWQgcm91dGVzIG1hdGNoIHRoZSBNYXN0ZXIgQVBJIHN1cmZhY2UgYW5kIHJlcXVlc3RzIGNhcnJ5IGF1dGgvbm8tc3RvcmUnLCAoKSA9PiB7CiAgZm9yIChjb25zdCByb3V0ZSBvZiBbJy9hcGkvbWFzdGVyL2Rhc2hib2FyZCcsJy9hcGkvbWFzdGVyL292ZXJ2aWV3JywnL2FwaS9tYXN0ZXIvcGxhbnMnLCcvYXBpL21hc3Rlci9zdXBwb3J0L3RpY2tldHMnLCcvYXBpL21hc3Rlci9tb25pdG9yaW5nJywnL2FwaS9tYXN0ZXIvZGV2aWNlcycsJy9hcGkvbWFzdGVyL29uYm9hcmRpbmcnLCcvYXBpL21hc3Rlci9zZXR0aW5ncycsJy9hcGkvbWFzdGVyL2ZlYXR1cmVzJywnL2FwaS9tYXN0ZXIvYW5ub3VuY2VtZW50cycsJy9hcGkvbWFzdGVyL21lJywnL2FwaS9tYXN0ZXIvYXVkaXQtbG9nJywnL2FwaS9tYXN0ZXIvc2VjdXJpdHkvaW5jaWRlbnRzJ10pIGFzc2VydC5vayhzY3JpcHQuaW5jbHVkZXMocm91dGUpLCByb3V0ZSk7CiAgZm9yIChjb25zdCBzdWZmaXggb2YgWycvbW9uaXRvcmluZycsJ2NvbnRyYWN0cycsJ2ludm9pY2VzJywnc3Vic2NyaXB0aW9ucyddKSBhc3NlcnQub2soc2NyaXB0LmluY2x1ZGVzKHN1ZmZpeCksIHN1ZmZpeCk7CiAgYXNzZXJ0LmRvZXNOb3RNYXRjaChzY3JpcHQsL1wvc3VtbWFyeS8sJ211c3Qgbm90IGNhbGwgdGhlIG5vbmV4aXN0ZW50IGNvbXBhbnkgc3VtbWFyeSBlbmRwb2ludCcpOwogIGFzc2VydC5tYXRjaChzY3JpcHQsL0F1dGhvcml6YXRpb246J0JlYXJlciAnXCt0b2tlbi8pOwogIGFzc2VydC5tYXRjaChzY3JpcHQsL2NhY2hlOiduby1zdG9yZScvKTsKfSk7Cgp0ZXN0KCd0aGUgVUkgbmV2ZXIgaW52b2tlcyBvcGVyYXRpb25hbCB3cml0ZXM7IGl0cyBvbmx5IFBPU1QgaXMgbG9naW4nLCAoKSA9PiB7CiAgYXNzZXJ0LmVxdWFsKChzY3JpcHQubWF0Y2goL21ldGhvZDonUE9TVCcvZykgfHwgW10pLmxlbmd0aCwgMSk7CiAgYXNzZXJ0Lm1hdGNoKHNjcmlwdCwvXC9hcGlcL21hc3RlclwvYXV0aFwvbG9naW4vKTsKICBhc3NlcnQuZG9lc05vdE1hdGNoKHNjcmlwdCwvbWV0aG9kOicoPzpQVVR8UEFUQ0h8REVMRVRFKScvKTsKICBhc3NlcnQuZG9lc05vdE1hdGNoKHNjcmlwdCwvZGF0YS1pbmVydHxkYXRhLWRlbW8tdGFiLyk7Cn0pOwoKdGVzdCgnQVBJIGhvc3QgaXMgZml4ZWQsIHRva2VuIHJlbWFpbnMgaW4gbWVtb3J5LCB0ZW1wb3JhcnktcGFzc3dvcmQgbGluayBpcyBhdmFpbGFibGUnLCAoKSA9PiB7CiAgYXNzZXJ0Lm1hdGNoKHNjcmlwdCwvY29uc3QgQVBJPSdodHRwczpcL1wvY2VydHVzLWFwaVwub25yZW5kZXJcLmNvbScvKTsKICBhc3NlcnQuZG9lc05vdE1hdGNoKHNjcmlwdCwvVVJMU2VhcmNoUGFyYW1zXChsb2NhdGlvblwuc2VhcmNoXCkuKmdldFwoWyciXWFwaS8pOwogIGFzc2VydC5tYXRjaChzY3JpcHQsL2xldCB0b2tlbj1udWxsLyk7CiAgYXNzZXJ0Lm1hdGNoKHNjcmlwdCwvcGFzc3dvcmRfY2hhbmdlX3JlcXVpcmVkLyk7CiAgYXNzZXJ0Lm1hdGNoKHNjcmlwdCwvQVBJXCsnXC9tYXN0ZXItcGFzc3dvcmQtY2hhbmdlJy8pOwogIGFzc2VydC5tYXRjaChzY3JpcHQsL3Rva2VuPWRcLmFjY2Vzc190b2tlbi8pOwogIGFzc2VydC5tYXRjaChzY3JpcHQsL3JcLnN0YXR1cz09PTQwMVx8XHxyXC5zdGF0dXM9PT00MDNcKVx7dG9rZW49bnVsbC8pOwogIGFzc2VydC5tYXRjaChzY3JpcHQsL3Nob3dMb2dpblwoJ1Nlc3PDo28gZW5jZXJyYWRhXC4nLyk7CiAgYXNzZXJ0LmRvZXNOb3RNYXRjaChzY3JpcHQsL2xvY2FsU3RvcmFnZXxzZXNzaW9uU3RvcmFnZXxkb2N1bWVudFwuY29va2llLyk7Cn0pOwoKdGVzdCgnbG9hZGluZywgZW1wdHksIGVycm9yLCByZXRyeSwgc3RhbGUtcmVzcG9uc2UgcHJvdGVjdGlvbiBhbmQgbm8gZmFrZSBkYXRhJywgKCkgPT4gewogIGZvciAoY29uc3QgdCBvZiBbJ0NhcnJlZ2FuZG8gZGFkb3MgYXV0ZW50aWNhZG9zJywnTmVuaHVtIHJlZ2lzdHJvIHJldG9ybmFkbyBwZWxhIEFQSScsJ07Do28gZm9pIHBvc3PDrXZlbCBjYXJyZWdhciBvcyBkYWRvcycsJ1RlbnRhciBub3ZhbWVudGUnXSkgYXNzZXJ0Lm9rKHNjcmlwdC5pbmNsdWRlcyh0KSwgdCk7CiAgYXNzZXJ0Lm1hdGNoKHNjcmlwdCwvY29uc3QgcmVxdWVzdElkPVwrXCt2aWV3UmVxdWVzdC8pOwogIGFzc2VydC5tYXRjaChzY3JpcHQsL3JlcXVlc3RJZCE9PXZpZXdSZXF1ZXN0Lyk7CiAgZm9yIChjb25zdCBmYWtlIG9mIFsnRW1wcmVzYSBBdXJvcmEnLCdFbXByZXNhIEhvcml6b250ZScsJ0VtcHJlc2EgTnV2ZW0nLCcxMi44NDYnLCdSJCA4LjY0MCcsJzEuMjQ4Jywnc2FtcGxlUm93cycsJ2NoYXJ0LWJhcnMnXSkgYXNzZXJ0Lm9rKCFzY3JpcHQuaW5jbHVkZXMoZmFrZSksIGZha2UpOwp9KTsKCnRlc3QoJ3Vuc3VwcG9ydGVkIGVuZHBvaW50cyBhbmQgb3BlcmF0aW9uYWwvZmluYW5jaWFsIGd1YXJkcmFpbHMgYXJlIGV4cGxpY2l0JywgKCkgPT4gewogIGZvciAoY29uc3QgdCBvZiBbJ07Do28gaMOhIHJvdGFzIHBhcmEgbGlzdGFyIHVzdcOhcmlvcyBNYXN0ZXInLCdOw6NvIGV4aXN0ZSByb3RhIGRlIGF0dWFsaXphw6fDtWVzJywnTsOjbyBvZmVyZWNlIHVtYSByb3RhIHBhcmEgbGlzdGFyIGFzIHRhcmVmYXMnLCdyZWxhdMOzcmlvcyBhZ3JlZ2Fkb3MgZmluYW5jZWlyb3MnLCdQbGFub3Mgbm92b3MgaW5pY2lhbSBpbmF0aXZvcycsJ0NvbXVuaWNhZG9zIHBlcm1hbmVjZW0gZW0gcmFzY3VuaG8nLCduZW5odW0gcGFnYW1lbnRvIMOpIGluaWNpYWRvJywnbWVuc2FnZW5zIG7Do28gc8OjbyBlbnRyZWd1ZXMnXSkgYXNzZXJ0Lm9rKHNjcmlwdC50b0xvd2VyQ2FzZSgpLmluY2x1ZGVzKHQudG9Mb3dlckNhc2UoKSksIHQpOwp9KTsKCnRlc3QoJ3RhYnMsIGNvbXBhbnkgc2VsZWN0b3IsIHNlYXJjaCBhbmQgcmVmcmVzaCBhcmUgd2lyZWQgYW5kIGtleWJvYXJkIGFjY2Vzc2libGUnLCAoKSA9PiB7CiAgZm9yIChjb25zdCB0IG9mIFsnZGF0YS10YWInLCd0YWJGaWx0ZXIobGFzdEl0ZW1zKScsJ3NlbGVjdC5vbmNoYW5nZT0nLCdzZWFyY2gub25pbnB1dD0nLCdpZD0icmVmcmVzaCInLCdvbmNsaWNrPSgpPT5sb2FkRGF0YShpKScsJ0Fycm93UmlnaHQnLCdBcnJvd0xlZnQnLCdhcmlhLWNvbnRyb2xzPSJtYXN0ZXItdGFicGFuZWwiJywnYXJpYS1sYWJlbGxlZGJ5PSJtYXN0ZXItdGFiLSR7dGFiSW5kZXh9IiddKSBhc3NlcnQub2soc2NyaXB0LmluY2x1ZGVzKHQpLCB0KTsKfSk7Cgp0ZXN0KCdyZXNwb25zaXZlIGxheW91dCBhbmQgdGFibGUgcmVhZGFiaWxpdHkgcnVsZXMgZXhpc3QnLCAoKSA9PiB7CiAgZm9yIChjb25zdCB0IG9mIFsnQG1lZGlhKG1heC13aWR0aDoxMTAwcHgpJywnQG1lZGlhKG1heC13aWR0aDo3NjBweCknLCdvdmVyZmxvdzphdXRvJywncG9zaXRpb246c3RpY2t5O3RvcDowO2hlaWdodDoxMDBkdmgnLCdwb3NpdGlvbjpmaXhlZDtpbnNldDowIGF1dG8gMCAwJywndHJhbnNmb3JtOnRyYW5zbGF0ZVgoLTEwNSUpJywnLm5hdi1saXN0e2Rpc3BsYXk6Z3JpZCcsJ21pbi13aWR0aDo3MjBweCcsJy5kZW1vLXRhYmxleyddKSBhc3NlcnQub2soaHRtbC5pbmNsdWRlcyh0KSwgdCk7Cn0pOwoKdGVzdCgnbW9iaWxlIHNpZGViYXIgaXMgYSB2ZXJ0aWNhbCBkcmF3ZXIgYW5kIGRlc2t0b3Aga2VlcHMgdGhlIHdvcmtzcGFjZSBiZXNpZGUgaXQnLCgpPT57CiAgYXNzZXJ0Lm1hdGNoKGh0bWwsL2lkPVwib3Blbi1uYXZcIi8pOwogIGFzc2VydC5tYXRjaChodG1sLC9pZD1cIm1hc3Rlci1zaWRlYmFyXCIvKTsKICBhc3NlcnQubWF0Y2goc2NyaXB0LC9zZXREcmF3ZXJcKHRydWVcKS8pOwogIGFzc2VydC5tYXRjaChzY3JpcHQsL2VcLmtleT09PSdFc2NhcGUnLyk7CiAgYXNzZXJ0Lm1hdGNoKHNjcmlwdCwvY2xhc3NMaXN0XC50b2dnbGVcKCdpcy1vcGVuJyx2YWx1ZVwpLyk7CiAgYXNzZXJ0LmRvZXNOb3RNYXRjaChodG1sLC9cLm5hdi1saXN0XHtkaXNwbGF5OmZsZXhbXn1dKm92ZXJmbG93LXg6YXV0by8pOwogIGFzc2VydC5tYXRjaChodG1sLC9ncmlkLXRlbXBsYXRlLWNvbHVtbnM6MjUycHggbWlubWF4XCgwLDFmclwpLyk7Cn0pOwo=
+'use strict';
+// Static source-contract checks only; not a browser or authenticated API integration suite.
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+
+const html = fs.readFileSync('certus/master.html', 'utf8');
+const match = html.match(/<script>([\s\S]*?)<\/script>/);
+assert.ok(match, 'embedded Master script exists');
+const script = match[1];
+
+test('all 14 navigation screens route to a data view', () => {
+  const start = script.indexOf('const nav=[');
+  const end = script.indexOf('];', start);
+  const nav = script.slice(start, end);
+  assert.equal((nav.match(/\['/g) || []).length, 14);
+  assert.match(script, /b\.onclick=\(\)=>\{active=Number\(b\.dataset\.page\)/);
+  assert.match(script, /loadData\(active\)/);
+});
+
+test('read routes match the Master API surface and requests carry auth/no-store', () => {
+  for (const route of ['/api/master/dashboard','/api/master/overview','/api/master/plans','/api/master/support/tickets','/api/master/monitoring','/api/master/devices','/api/master/onboarding','/api/master/settings','/api/master/features','/api/master/announcements','/api/master/me','/api/master/audit-log','/api/master/security/incidents']) assert.ok(script.includes(route), route);
+  for (const suffix of ['/monitoring','contracts','invoices','subscriptions']) assert.ok(script.includes(suffix), suffix);
+  assert.doesNotMatch(script,/\/summary/,'must not call the nonexistent company summary endpoint');
+  assert.match(script,/Authorization:'Bearer '\+token/);
+  assert.match(script,/cache:'no-store'/);
+});
+
+test('the UI never invokes operational writes; its only POST is login', () => {
+  assert.equal((script.match(/method:'POST'/g) || []).length, 1);
+  assert.match(script,/\/api\/master\/auth\/login/);
+  assert.doesNotMatch(script,/method:'(?:PUT|PATCH|DELETE)'/);
+  assert.doesNotMatch(script,/data-inert|data-demo-tab/);
+});
+
+test('API host is fixed, token remains in memory, temporary-password link is available', () => {
+  assert.match(script,/const API='https:\/\/certus-api\.onrender\.com'/);
+  assert.doesNotMatch(script,/URLSearchParams\(location\.search\).*get\(['"]api/);
+  assert.match(script,/let token=null/);
+  assert.match(script,/password_change_required/);
+  assert.match(script,/API\+'\/master-password-change'/);
+  assert.match(script,/token=d\.access_token/);
+  assert.match(script,/r\.status===401\|\|r\.status===403\)\{token=null/);
+  assert.match(script,/showLogin\('Sessão encerrada\.'/);
+  assert.doesNotMatch(script,/localStorage|sessionStorage|document\.cookie/);
+});
+
+test('loading, empty, error, retry, stale-response protection and no fake data', () => {
+  for (const t of ['Carregando dados autenticados','Nenhum registro retornado pela API','Não foi possível carregar os dados','Tentar novamente']) assert.ok(script.includes(t), t);
+  assert.match(script,/const requestId=\+\+viewRequest/);
+  assert.match(script,/requestId!==viewRequest/);
+  for (const fake of ['Empresa Aurora','Empresa Horizonte','Empresa Nuvem','12.846','R$ 8.640','1.248','sampleRows','chart-bars']) assert.ok(!script.includes(fake), fake);
+});
+
+test('unsupported endpoints and operational/financial guardrails are explicit', () => {
+  for (const t of ['Não há rotas para listar usuários Master','Não existe rota de atualizações','Não oferece uma rota para listar as tarefas','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','mensagens não são entregues']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
+});
+
+test('tabs, company selector, search and refresh are wired and keyboard accessible', () => {
+  for (const t of ['data-tab','tabFilter(lastItems)','select.onchange=','search.oninput=','id="refresh"','onclick=()=>loadData(i)','ArrowRight','ArrowLeft','aria-controls="master-tabpanel"','aria-labelledby="master-tab-${tabIndex}"']) assert.ok(script.includes(t), t);
+});
+
+test('responsive layout and table readability rules exist', () => {
+  for (const t of ['@media(max-width:1100px)','@media(max-width:760px)','overflow:auto','position:sticky;top:0;height:100dvh','position:fixed;inset:0 auto 0 0','transform:translateX(-105%)','.nav-list{display:grid','min-width:720px','.demo-table{']) assert.ok(html.includes(t), t);
+});
+
+test('mobile sidebar is a vertical drawer and desktop keeps the workspace beside it',()=>{
+  assert.match(html,/id=\"open-nav\"/);
+  assert.match(html,/id=\"master-sidebar\"/);
+  assert.match(script,/setDrawer\(true\)/);
+  assert.match(script,/e\.key==='Escape'/);
+  assert.match(script,/classList\.toggle\('is-open',value\)/);
+  assert.doesNotMatch(html,/\.nav-list\{display:flex[^}]*overflow-x:auto/);
+  assert.match(html,/grid-template-columns:252px minmax\(0,1fr\)/);
+});
