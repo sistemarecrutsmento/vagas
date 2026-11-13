@@ -104,7 +104,7 @@ test('company selector, tabs, refresh and page-local table filter work',async()=
   try {
     await login(page);
     await page.getByRole('button',{name:/Empresas \(Organizações\)/}).click();
-    await page.getByRole('heading',{name:'Empresas'}).waitFor();
+    await page.getByRole('heading',{name:'Empresas',exact:true}).waitFor();
     await page.locator('#company-select').waitFor();
     await page.getByRole('tab',{name:'Visão em cartões'}).click();
     await page.getByText('Empresa Fixture').first().waitFor();
@@ -167,7 +167,7 @@ test('company detail uses the authenticated overview and never calls a nonexiste
   try {
     await login(page);
     await page.getByRole('button',{name:'Empresas (Organizações)',exact:true}).click();
-    await page.getByRole('heading',{name:'Empresas'}).waitFor();
+    await page.getByRole('heading',{name:'Empresas',exact:true}).waitFor();
     await page.locator('#company-select').selectOption(companyId);
     await page.getByText('Contagens fornecidas pelo resumo autenticado de empresas.').waitFor();
     assert.ok(requests.some(x=>x.path==='/api/master/overview'));
