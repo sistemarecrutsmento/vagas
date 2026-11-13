@@ -1,0 +1,28 @@
+name: Certus Master draft UI checks
+on:
+  push:
+    branches:
+      - draft/master-functional-dev-20261113
+    paths:
+      - 'certus/master.html'
+      - 'certus/master.integration.test.js'
+      - 'certus/master.browser.test.cjs'
+      - '.github/workflows/certus-master-draft-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'certus/master.html'
+      - 'certus/master.integration.test.js'
+      - 'certus/master.browser.test.cjs'
+      - '.github/workflows/certus-master-draft-tests.yml'
+jobs:
+  master-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - run: node --test certus/master.integration.test.js certus/master.browser.test.cjs
