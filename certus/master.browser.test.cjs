@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('playwright');
+const http = require('node:http');
 
 const html = fs.readFileSync(path.join(__dirname, 'master.html'), 'utf8');
 const companyId = '11111111-1111-4111-8111-111111111111';
@@ -33,30 +34,40 @@ const payloads = {
 };
 
 async function createPage() {
+  const server = http.createServer((req, res) => {
+    if (req.url !== '/certus/master.html') { res.writeHead(404); return res.end('Not found'); }
+    res.writeHead(200, {'content-type':'text/html; charset=utf-8'});
+    res.end(html.replace('<head>','<head><base href="http://127.0.0.1/certus/">'));
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const origin = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch({headless:true});
   const page = await browser.newPage({viewport:{width:1440,height:1000}});
-  const requests=[];
+  const requests=[]; const denied=[];
   await page.route('**/*', async route => {
     const requestUrl=route.request().url();
-    if(!requestUrl.startsWith('https://certus-api.onrender.com/')) return route.abort();
-    const req=route.request(); const url=new URL(req.url());
-    requests.push({method:req.method(),path:url.pathname+url.search});
+    if(requestUrl.startsWith(origin+'/')) return route.continue();
+    if(!requestUrl.startsWith('https://certus-api.onrender.com/')) { denied.push(requestUrl); return route.abort(); }
+    const req=route.request(); const url=new URL(requestUrl);
+    const path=url.pathname+url.search;
+    if(req.method()==='OPTIONS') return route.fulfill({status:204,headers:{'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'Authorization,Content-Type','Access-Control-Allow-Methods':'GET,POST,OPTIONS'}});
+    requests.push({method:req.method(),path});
     let body,status=200;
-    if(url.pathname==='/api/master/auth/login' && req.method()==='POST') body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
-    else if(url.pathname==='/api/master/auth/login' && req.postDataJSON()?.email==='temp@example.test') body={access_token:'temporary-token',password_change_required:true,user:{email:'temp@example.test',must_change_password:true}};
+    if(path==='/api/master/auth/login' && req.method()==='POST' && req.postDataJSON()?.email==='temp@example.test') body={access_token:'temporary-token',password_change_required:true,user:{email:'temp@example.test',must_change_password:true}};
+    else if(path==='/api/master/auth/login' && req.method()==='POST') body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
     else if(url.pathname==='/api/master/support/tickets/'+ticketId) body=payloads[`/api/master/support/tickets/${ticketId}`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/summary') body=payloads[`/api/master/companies/${companyId}/summary`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/subscriptions') body=payloads[`/api/master/companies/${companyId}/subscriptions`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/contracts') body=payloads[`/api/master/companies/${companyId}/contracts`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/invoices') body=payloads[`/api/master/companies/${companyId}/invoices`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/monitoring') body=payloads[`/api/master/companies/${companyId}/monitoring`];
-    else if(url.pathname==='/api/master/support/tickets/'+ticketId) body=payloads[`/api/master/support/tickets/${ticketId}`];
-    else body=payloads[url.pathname+url.search] || payloads[url.pathname] || {items:[]};
-    await route.fulfill({status,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Authorization,Content-Type','Access-Control-Allow-Methods':'GET,POST,OPTIONS'},body:JSON.stringify(body)});
+    else if(payloads[path] || payloads[url.pathname]) body=payloads[path] || payloads[url.pathname];
+    else { denied.push(requestUrl); return route.abort(); }
+    await route.fulfill({status,contentType:'application/json',headers:{'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'Authorization,Content-Type','Access-Control-Allow-Methods':'GET,POST,OPTIONS'},body:JSON.stringify(body)});
   });
-  await page.goto('https://vagasio.com.br/certus/master.html',{waitUntil:'domcontentloaded'});
-  await page.evaluate(html=>{document.documentElement.innerHTML=html.replace('<head>','<head><base href="https://vagasio.com.br/certus/">')},html);
-  return {browser,page,requests};
+  await page.goto(`${origin}/certus/master.html`,{waitUntil:'domcontentloaded'});
+  const cleanup=async()=>{ await browser.close(); await new Promise(resolve=>server.close(resolve)); };
+  return {browser,page,requests,denied,cleanup};
 }
 
 async function login(page,email='master@example.test') {
@@ -67,7 +78,7 @@ async function login(page,email='master@example.test') {
 }
 
 test('all 14 Master screens render using mocked authenticated API data', async()=>{
-  const {browser,page,requests}=await createPage();
+  const {browser,page,requests,denied,cleanup}=await createPage();
   try {
     await login(page);
     const names=['Dashboard Master','Empresas (Organizações)','Planos e assinaturas','Contratos e Testes','Financeiro e Cobranças','Central de Suporte','Monitoramento de Ponto','Terminais e Dispositivos','Implantação de Clientes','Configurações Globais','Recursos e Funcionalidades','Comunicados e Avisos','Acessos e Permissões','Auditoria e Logs'];
@@ -81,11 +92,12 @@ test('all 14 Master screens render using mocked authenticated API data', async()
     assert.ok(requests.some(x=>x.path==='/api/master/monitoring'));
     assert.ok(requests.some(x=>x.path==='/api/master/audit-log?limit=100'));
     assert.ok(requests.every(x=>x.method==='GET'||x.path==='/api/master/auth/login'));
-  } finally { await browser.close(); }
+    assert.deepEqual(denied,[],`unexpected non-fixture requests: ${denied.join(', ')}`);
+  } finally { await cleanup(); }
 });
 
 test('company selector, tabs, refresh and page-local table filter work',async()=>{
-  const {browser,page}=await createPage();
+  const {browser,page,cleanup}=await createPage();
   try {
     await login(page);
     await page.getByRole('button',{name:/Empresas \(Organizações\)/}).click();
@@ -96,11 +108,11 @@ test('company selector, tabs, refresh and page-local table filter work',async()=
     await page.getByRole('button',{name:'Lista de empresas'}).click();
     await page.getByRole('textbox',{name:'Filtrar registros desta tela'}).fill('sem-correspondência');
     await page.getByRole('button',{name:'↻ Atualizar'}).click();
-  } finally { await browser.close(); }
+  } finally { await cleanup(); }
 });
 
 test('temporary Master login exposes the required password-change link, with no token persisted',async()=>{
-  const {browser,page}=await createPage();
+  const {browser,page,cleanup}=await createPage();
   try {
     await page.getByLabel('E-mail Master').fill('temp@example.test');
     await page.getByLabel('Senha',{exact:true}).fill('fake-only-password');
@@ -109,11 +121,11 @@ test('temporary Master login exposes the required password-change link, with no 
     await link.waitFor();
     assert.match(await link.getAttribute('href'),/\/master-password-change$/);
     assert.equal(await page.evaluate(()=>localStorage.length+sessionStorage.length),0);
-  } finally { await browser.close(); }
+  } finally { await cleanup(); }
 });
 
 test('narrow viewport keeps page within screen and exposes horizontally scrollable navigation',async()=>{
-  const {browser,page}=await createPage();
+  const {browser,page,cleanup}=await createPage();
   try {
     await page.setViewportSize({width:390,height:844});
     await login(page);
@@ -123,36 +135,5 @@ test('narrow viewport keeps page within screen and exposes horizontally scrollab
     assert.ok(dimensions.navScroll>=dimensions.navClient);
     await page.getByRole('button',{name:/Financeiro e Cobranças/}).click();
     await page.getByRole('heading',{name:'Financeiro e cobranças'}).waitFor();
-  } finally { await browser.close(); }
+  } finally { await cleanup(); }
 });
-EOF
-cat > work/master-draft-tests.yml <<'EOF'
-name: Certus Master draft UI checks
-on:
-  push:
-    branches:
-      - draft/master-functional-dev-20261113
-    paths:
-      - 'certus/master.html'
-      - 'certus/master.integration.test.js'
-      - '.github/workflows/certus-master-draft-tests.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'certus/master.html'
-      - 'certus/master.integration.test.js'
-      - '.github/workflows/certus-master-draft-tests.yml'
-jobs:
-  master-ui:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm install --no-save playwright@1.55.0
-      - run: npx playwright install --with-deps chromium
-      - run: node --test certus/master.integration.test.js certus/master.browser.test.cjs
-EOF
-mkdir -p work/ui-test-draft && cp work/master.browser.test.cjs work/ui-test-draft/master.browser.test.cjs && cp work/master-draft-tests.yml work/ui-test-draft/certus-master-draft-tests.yml
-wc -c work/master.browser.test.cjs work/master-draft-tests.yml

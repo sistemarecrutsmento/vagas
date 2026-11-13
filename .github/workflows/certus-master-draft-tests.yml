@@ -1,9 +1,7 @@
-name: Certus Master draft UI checks
+name: Certus Master release-candidate UI checks
 on:
   push:
-    branches:
-      - draft/master-functional-dev-20261113
-      - draft/master-release-candidate-20261113
+    branches: [draft/master-release-candidate-20261113]
     paths:
       - 'certus/master.html'
       - 'certus/master.integration.test.js'
@@ -19,7 +17,6 @@ on:
 jobs:
   master-ui:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
