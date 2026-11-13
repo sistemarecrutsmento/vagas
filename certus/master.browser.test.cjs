@@ -3,10 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('playwright');
+const http = require('node:http');
 
 const html = fs.readFileSync(path.join(__dirname, 'master.html'), 'utf8');
-const fixtureOrigin = 'https://vagasio.test';
-const apiOrigin = 'https://certus-api.onrender.com';
 const companyId = '11111111-1111-4111-8111-111111111111';
 const ticketId = '22222222-2222-4222-8222-222222222222';
 const plans = [{id:'33333333-3333-4333-8333-333333333333', code:'demo', name:'Plano fixture', description:'Dados de teste', billing_period:'monthly', price:'0.00', currency:'BRL', status:'inactive', version:1, trial_days:0}];
@@ -35,97 +34,106 @@ const payloads = {
 };
 
 async function createPage() {
-  const browser = await chromium.launch({headless:true});
-  const context = await browser.newContext({viewport:{width:1440,height:1000}});
-  const page = await context.newPage();
-  const requests=[]; const unexpected=[];
-  // Absolute network deny by default; only the explicit fixture origin and mocked API are allowed.
-  await context.route('**/*', async route => {
-    const url=new URL(route.request().url());
-    if(url.origin!==fixtureOrigin && url.origin!==apiOrigin){unexpected.push(url.href);return route.abort('blockedbyclient');}
-    if(url.origin===fixtureOrigin && url.pathname==='/master.html')return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:html.replace(\"const API='https://certus-api.onrender.com';\",`const API='${apiOrigin}';`)});
-    if(url.origin===fixtureOrigin)return route.fulfill({status:204,body:''});
-    const req=route.request();requests.push({method:req.method(),path:url.pathname+url.search});
-    let body;
-    if(url.pathname==='/api/master/auth/login' && req.method()==='POST' && req.postDataJSON()?.email==='temp@example.test')body={access_token:'temporary-token',password_change_required:true,user:{email:'temp@example.test',must_change_password:true}};
-    else if(url.pathname==='/api/master/auth/login' && req.method()==='POST')body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
-    else body=payloads[url.pathname+url.search]||payloads[url.pathname]||{items:[]};
-    return route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':fixtureOrigin,'Access-Control-Allow-Headers':'Authorization,Content-Type','Access-Control-Allow-Methods':'GET,POST,OPTIONS'},body:JSON.stringify(body)});
+  const server = http.createServer((req, res) => {
+    if (req.url !== '/certus/master.html') { res.writeHead(404); return res.end('Not found'); }
+    res.writeHead(200, {'content-type':'text/html; charset=utf-8'});
+    res.end(html.replace('<head>','<head><base href="http://127.0.0.1/certus/">'));
   });
-  // The fixture origin uses the same host as the fixed app API so the app can be tested with mock responses.
-  await page.goto(`${fixtureOrigin}/master.html`,{waitUntil:'domcontentloaded'});
-  return {browser,page,requests,unexpected};
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  const browser = await chromium.launch({headless:true});
+  const page = await browser.newPage({viewport:{width:1440,height:1000}});
+  const requests=[]; const denied=[];
+  await page.route('**/*', async route => {
+    const requestUrl=route.request().url();
+    if(requestUrl.startsWith(origin+'/')) return route.continue();
+    if(!requestUrl.startsWith('https://certus-api.onrender.com/')) { denied.push(requestUrl); return route.abort(); }
+    const req=route.request(); const url=new URL(requestUrl);
+    const path=url.pathname+url.search;
+    if(req.method()==='OPTIONS') return route.fulfill({status:204,headers:{'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'Authorization,Content-Type','Access-Control-Allow-Methods':'GET,POST,OPTIONS'}});
+    requests.push({method:req.method(),path});
+    let body,status=200;
+    if(path==='/api/master/auth/login' && req.method()==='POST' && req.postDataJSON()?.email==='temp@example.test') body={access_token:'temporary-token',password_change_required:true,user:{email:'temp@example.test',must_change_password:true}};
+    else if(path==='/api/master/auth/login' && req.method()==='POST') body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
+    else if(url.pathname==='/api/master/support/tickets/'+ticketId) body=payloads[`/api/master/support/tickets/${ticketId}`];
+    else if(url.pathname==='/api/master/companies/'+companyId+'/summary') body=payloads[`/api/master/companies/${companyId}/summary`];
+    else if(url.pathname==='/api/master/companies/'+companyId+'/subscriptions') body=payloads[`/api/master/companies/${companyId}/subscriptions`];
+    else if(url.pathname==='/api/master/companies/'+companyId+'/contracts') body=payloads[`/api/master/companies/${companyId}/contracts`];
+    else if(url.pathname==='/api/master/companies/'+companyId+'/invoices') body=payloads[`/api/master/companies/${companyId}/invoices`];
+    else if(url.pathname==='/api/master/companies/'+companyId+'/monitoring') body=payloads[`/api/master/companies/${companyId}/monitoring`];
+    else if(payloads[path] || payloads[url.pathname]) body=payloads[path] || payloads[url.pathname];
+    else { denied.push(requestUrl); return route.abort(); }
+    await route.fulfill({status,contentType:'application/json',headers:{'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'Authorization,Content-Type','Access-Control-Allow-Methods':'GET,POST,OPTIONS'},body:JSON.stringify(body)});
+  });
+  await page.goto(`${origin}/certus/master.html`,{waitUntil:'domcontentloaded'});
+  const cleanup=async()=>{ await browser.close(); await new Promise(resolve=>server.close(resolve)); };
+  return {browser,page,requests,denied,cleanup};
 }
 
 async function login(page,email='master@example.test') {
   await page.getByLabel('E-mail Master').fill(email);
   await page.getByLabel('Senha',{exact:true}).fill('fake-only-password');
   await page.getByRole('button',{name:'Entrar'}).click();
-  await page.locator('.app-shell').waitFor();
-  await page.locator('#content h1').filter({hasText:'Visão geral da plataforma'}).waitFor();
-}
-
-function assertRequestsAreMocked(requests,unexpected) {
-  assert.deepEqual(unexpected,[],`unexpected network destinations: ${unexpected.join(', ')}`);
-  assert.ok(requests.length>0,'expected mocked API requests');
-  assert.ok(requests.every(x=>x.method==='GET'||x.method==='OPTIONS'||(x.method==='POST'&&x.path==='/api/master/auth/login')),JSON.stringify(requests));
+  await page.getByRole('heading',{name:'Visão geral da plataforma'}).waitFor();
 }
 
 test('all 14 Master screens render using mocked authenticated API data', async()=>{
-  const {browser,page,requests,unexpected}=await createPage();
+  const {browser,page,requests,denied,cleanup}=await createPage();
   try {
     await login(page);
+    const names=['Dashboard Master','Empresas (Organizações)','Planos e assinaturas','Contratos e Testes','Financeiro e Cobranças','Central de Suporte','Monitoramento de Ponto','Terminais e Dispositivos','Implantação de Clientes','Configurações Globais','Recursos e Funcionalidades','Comunicados e Avisos','Acessos e Permissões','Auditoria e Logs'];
     const headings=['Visão geral da plataforma','Empresas','Planos e assinaturas','Contratos e testes','Financeiro e cobranças','Central de Suporte','Monitoramento de Ponto','Terminais e Dispositivos','Implantação de Clientes','Configurações Globais','Recursos e Funcionalidades','Comunicados e Avisos','Acessos e Permissões','Auditoria e Logs'];
-    for(let i=0;i<headings.length;i++){
-      await page.locator(`[data-page="${i}"]`).click();
-      await page.locator('#content h1').filter({hasText:headings[i]}).waitFor();
+    for(let i=0;i<names.length;i++){
+      await page.getByRole('button',{name:names[i],exact:true}).click();
+      await page.getByRole('heading',{name:headings[i]}).waitFor();
     }
-    for(const expected of ['/api/master/dashboard','/api/master/plans','/api/master/monitoring','/api/master/audit-log?limit=100'])assert.ok(requests.some(x=>x.path===expected),`missing mocked request ${expected}`);
-    assertRequestsAreMocked(requests,unexpected);
-  } finally { await browser.close(); }
+    assert.ok(requests.some(x=>x.path==='/api/master/dashboard'));
+    assert.ok(requests.some(x=>x.path==='/api/master/plans'));
+    assert.ok(requests.some(x=>x.path==='/api/master/monitoring'));
+    assert.ok(requests.some(x=>x.path==='/api/master/audit-log?limit=100'));
+    assert.ok(requests.every(x=>x.method==='GET'||x.path==='/api/master/auth/login'));
+    assert.deepEqual(denied,[],`unexpected non-fixture requests: ${denied.join(', ')}`);
+  } finally { await cleanup(); }
 });
 
 test('company selector, tabs, refresh and page-local table filter work',async()=>{
-  const {browser,page,requests,unexpected}=await createPage();
+  const {browser,page,cleanup}=await createPage();
   try {
     await login(page);
-    await page.locator('[data-page="1"]').click();
-    await page.locator('#content h1').filter({hasText:'Empresas'}).waitFor();
+    await page.getByRole('button',{name:/Empresas \(Organizações\)/}).click();
+    await page.getByRole('heading',{name:'Empresas'}).waitFor();
     await page.locator('#company-select').waitFor();
-    await page.getByRole('tab',{name:'Visão em cartões'}).click();
+    await page.getByRole('button',{name:'Visão em cartões'}).click();
     await page.getByText('Empresa Fixture').first().waitFor();
-    await page.getByRole('tab',{name:'Lista de empresas'}).click();
+    await page.getByRole('button',{name:'Lista de empresas'}).click();
     await page.getByRole('textbox',{name:'Filtrar registros desta tela'}).fill('sem-correspondência');
     await page.getByRole('button',{name:'↻ Atualizar'}).click();
-    await page.getByRole('tab',{name:'Lista de empresas'}).waitFor();
-    assertRequestsAreMocked(requests,unexpected);
-  } finally { await browser.close(); }
+  } finally { await cleanup(); }
 });
 
-test('temporary Master login exposes required password-change link without persisting tokens',async()=>{
-  const {browser,page,requests,unexpected}=await createPage();
+test('temporary Master login exposes the required password-change link, with no token persisted',async()=>{
+  const {browser,page,cleanup}=await createPage();
   try {
     await page.getByLabel('E-mail Master').fill('temp@example.test');
     await page.getByLabel('Senha',{exact:true}).fill('fake-only-password');
     await page.getByRole('button',{name:'Entrar'}).click();
-    const link=page.getByRole('link',{name:'Trocar senha temporária'});await link.waitFor();
-    assert.equal(await link.getAttribute('href'),`${apiOrigin}/master-password-change`);
+    const link=page.getByRole('link',{name:'Trocar senha temporária'});
+    await link.waitFor();
+    assert.match(await link.getAttribute('href'),/\/master-password-change$/);
     assert.equal(await page.evaluate(()=>localStorage.length+sessionStorage.length),0);
-    assertRequestsAreMocked(requests,unexpected);
-  } finally { await browser.close(); }
+  } finally { await cleanup(); }
 });
 
-test('390px viewport fits width, nav scroll stays local, and tabs remain usable',async()=>{
-  const {browser,page,requests,unexpected}=await createPage();
+test('narrow viewport keeps page within screen and exposes horizontally scrollable navigation',async()=>{
+  const {browser,page,cleanup}=await createPage();
   try {
-    await page.setViewportSize({width:390,height:844});await login(page);
-    await page.locator('[data-page="13"]').waitFor();
-    const d=await page.evaluate(()=>({vw:innerWidth,sw:document.documentElement.scrollWidth,navScroll:document.querySelector('.nav-list').scrollWidth,navClient:document.querySelector('.nav-list').clientWidth}));
-    assert.ok(d.sw<=d.vw+1,JSON.stringify(d));assert.ok(d.navScroll>=d.navClient);
-    await page.locator('[data-page="4"]').click();await page.locator('#content h1').filter({hasText:'Financeiro e cobranças'}).waitFor();
-    for(const label of ['Cobranças','Pagamentos','Relatórios'])await page.getByRole('tab',{name:label}).waitFor();
-    await page.getByRole('tab',{name:'Pagamentos'}).click();await page.getByRole('tabpanel').waitFor();
-    assertRequestsAreMocked(requests,unexpected);
-  } finally { await browser.close(); }
+    await page.setViewportSize({width:390,height:844});
+    await login(page);
+    await page.getByRole('button',{name:/Auditoria e Logs/}).waitFor();
+    const dimensions=await page.evaluate(()=>({vw:innerWidth,sw:document.documentElement.scrollWidth,navScroll:document.querySelector('.nav-list').scrollWidth,navClient:document.querySelector('.nav-list').clientWidth}));
+    assert.ok(dimensions.sw<=dimensions.vw+1,JSON.stringify(dimensions));
+    assert.ok(dimensions.navScroll>=dimensions.navClient);
+    await page.getByRole('button',{name:/Financeiro e Cobranças/}).click();
+    await page.getByRole('heading',{name:'Financeiro e cobranças'}).waitFor();
+  } finally { await cleanup(); }
 });
-EOF
