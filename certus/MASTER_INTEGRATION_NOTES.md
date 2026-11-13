@@ -1,6 +1,6 @@
 # Certus Portal Master draft integration notes
 
-Status: implementation draft only, not approved for publication. This change is scoped to `certus/master.html` and its integration checks; it does not edit the root operational `master.html`.
+Status: implementation draft only, not approved for publication. This draft includes the 14-screen authenticated read-only UI, its static and mocked-browser tests, the draft-only workflow, and mobile layout corrections. The existing root operational `master.html` was not changed by this integration work.
 
 ## Screen coverage
 
@@ -23,10 +23,10 @@ Status: implementation draft only, not approved for publication. This change is 
 
 Removed `data-inert`, demo-tab hooks, sample organizations/KPIs, fabricated chart data and dead confirmation modal. Added authenticated no-store GET wrapper (token stays in memory), 401/403 handling, logout, loading/error/retry/empty states, company selection, functional tab filtering and page-local search, plus narrow viewport navigation and horizontally scrollable tables. No data-changing endpoint is called by the UI.
 
-`master.integration.test.js` is a set of source-contract checks (not browser behavior tests). `run_ui_tests.py` runs 10 independent source/endpoint/guardrail/responsive checks; JavaScript parsing used tree-sitter. The sandbox has no Node/browser runtime, so no DOM interaction, endpoint behavior, authenticated API, desktop/mobile screenshot, or end-to-end checks are claimed.
+`master.integration.test.js` provides source-contract checks. `master.browser.test.cjs` uses Playwright with a mocked API, blocks unexpected network, and exercises all 14 screens, company selection, tabs, refresh/search, password-change link and a 390px viewport. GitHub Actions run `43477491966` passed (install, Chromium setup, source tests and mocked browser tests). These are UI behavior tests against fixtures, not authenticated live API or deployed backend integration tests.
 
 ## Known blockers before publication
 
-Separate backend audit findings remain unresolved in PR #43 (being handled separately): duplicate `registerMasterOperationalRoutes` registration in `src/server.js`; audit writes outside tenant mutation transactions can report failure after a committed mutation; no per-key value validation in settings PUT; existing backend tests are primarily static source-pattern assertions without behavior/integration. No API code was changed here.
+API PR #43 is still open/unmerged. Its draft head `8337efdabdd3a7dbe3e04439a4041baf39e12404` has a successful CI run (install + `npm test`), including fixes for duplicate operational-route registration and strict per-key settings validation. Audit-write behavior and the scope of backend runtime/integration tests must still be reviewed in the full merge/deploy validation. The UI tests use mocked responses; live authenticated API tests were not run.
 
-No migrations were run, no database/data was changed, no production service/deploy was touched, no communications or financial side effects occurred, and no PR was merged.
+The migration was previously tested only within a rolled-back transaction; it was not applied persistently. No production data, services, or deployment were changed. No customer communications or financial side effects were triggered. No PR was merged.
