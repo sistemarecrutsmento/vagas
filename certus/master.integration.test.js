@@ -20,7 +20,8 @@ test('all 14 navigation screens route to a data view', () => {
 
 test('read routes match the Master API surface and requests carry auth/no-store', () => {
   for (const route of ['/api/master/dashboard','/api/master/overview','/api/master/plans','/api/master/support/tickets','/api/master/monitoring','/api/master/devices','/api/master/onboarding','/api/master/settings','/api/master/features','/api/master/announcements','/api/master/me','/api/master/audit-log','/api/master/security/incidents']) assert.ok(script.includes(route), route);
-  for (const suffix of ['/summary','/monitoring','contracts','invoices','subscriptions']) assert.ok(script.includes(suffix), suffix);
+  for (const suffix of ['/monitoring','contracts','invoices','subscriptions']) assert.ok(script.includes(suffix), suffix);
+  assert.doesNotMatch(script,/\/summary/,'must not call the nonexistent company summary endpoint');
   assert.match(script,/Authorization:'Bearer '\+token/);
   assert.match(script,/cache:'no-store'/);
 });
@@ -60,5 +61,15 @@ test('tabs, company selector, search and refresh are wired and keyboard accessib
 });
 
 test('responsive layout and table readability rules exist', () => {
-  for (const t of ['@media(max-width:950px)','@media(max-width:700px)','overflow-x:auto','.nav-list{display:flex','min-width:680px','.demo-table{font-size:12px']) assert.ok(html.includes(t), t);
+  for (const t of ['@media(max-width:1100px)','@media(max-width:760px)','overflow:auto','position:sticky;top:0;height:100dvh','position:fixed;inset:0 auto 0 0','transform:translateX(-105%)','.nav-list{display:grid','min-width:720px','.demo-table{']) assert.ok(html.includes(t), t);
+});
+
+test('mobile sidebar is a vertical drawer and desktop keeps the workspace beside it',()=>{
+  assert.match(html,/id=\"open-nav\"/);
+  assert.match(html,/id=\"master-sidebar\"/);
+  assert.match(script,/setDrawer\(true\)/);
+  assert.match(script,/e\.key==='Escape'/);
+  assert.match(script,/classList\.toggle\('is-open',value\)/);
+  assert.doesNotMatch(html,/\.nav-list\{display:flex[^}]*overflow-x:auto/);
+  assert.match(html,/grid-template-columns:252px minmax\(0,1fr\)/);
 });

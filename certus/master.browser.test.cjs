@@ -14,7 +14,6 @@ const payloads = {
   '/api/master/dashboard': {as_of:'2026-01-01T12:00:00Z',period:'current_calendar_month',companies:{total:1,active:1,trial:0,suspended:0},employees:1,terminals:{total:1,online:1},finance:{collected_month:0,receivable:0},support:{open:1},pending_adjustments:0,subscriptions:{active:0},incidents:{critical:0}},
   '/api/master/overview': {items:companies,total:1,active:1,trial:0,suspended:0},
   '/api/master/plans': {items:plans},
-  [`/api/master/companies/${companyId}/summary`]: {company:companies[0],branches:{total:1},employees:{total:1},users:{total:2},devices:{total:1},clock_events:{total:3}},
   [`/api/master/companies/${companyId}/subscriptions`]: {items:[]},
   [`/api/master/companies/${companyId}/contracts`]: {items:[]},
   [`/api/master/companies/${companyId}/invoices`]: {items:[{id:'44444444-4444-4444-8444-444444444444',invoice_number:'INV-FIXTURE',status:'draft',amount:0,currency:'BRL',due_at:'2026-01-15',created_at:'2026-01-01'}]},
@@ -61,7 +60,6 @@ async function createPage() {
     if(path==='/api/master/auth/login' && req.method()==='POST' && req.postDataJSON()?.email==='temp@example.test') body={access_token:'temporary-token',password_change_required:true,user:{email:'temp@example.test',must_change_password:true}};
     else if(path==='/api/master/auth/login' && req.method()==='POST') body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
     else if(url.pathname==='/api/master/support/tickets/'+ticketId) body=payloads[`/api/master/support/tickets/${ticketId}`];
-    else if(url.pathname==='/api/master/companies/'+companyId+'/summary') body=payloads[`/api/master/companies/${companyId}/summary`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/subscriptions') body=payloads[`/api/master/companies/${companyId}/subscriptions`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/contracts') body=payloads[`/api/master/companies/${companyId}/contracts`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/invoices') body=payloads[`/api/master/companies/${companyId}/invoices`];
@@ -106,7 +104,7 @@ test('company selector, tabs, refresh and page-local table filter work',async()=
   try {
     await login(page);
     await page.getByRole('button',{name:/Empresas \(Organizações\)/}).click();
-    await page.getByRole('heading',{name:'Empresas'}).waitFor();
+    await page.getByRole('heading',{name:'Empresas',exact:true}).waitFor();
     await page.locator('#company-select').waitFor();
     await page.getByRole('tab',{name:'Visão em cartões'}).click();
     await page.getByText('Empresa Fixture').first().waitFor();
@@ -129,16 +127,61 @@ test('temporary Master login exposes the required password-change link, with no 
   } finally { await cleanup(); }
 });
 
-test('narrow viewport keeps page within screen and exposes horizontally scrollable navigation',async()=>{
+test('mobile uses a vertical off-canvas sidebar drawer without page overflow',async()=>{
   const {browser,page,cleanup}=await createPage();
   try {
     await page.setViewportSize({width:390,height:844});
     await login(page);
-    await page.getByRole('button',{name:/Auditoria e Logs/}).waitFor();
-    const dimensions=await page.evaluate(()=>({vw:innerWidth,sw:document.documentElement.scrollWidth,navScroll:document.querySelector('.nav-list').scrollWidth,navClient:document.querySelector('.nav-list').clientWidth}));
-    assert.ok(dimensions.sw<=dimensions.vw+1,JSON.stringify(dimensions));
-    assert.ok(dimensions.navScroll>=dimensions.navClient);
+    const before=await page.evaluate(()=>({vw:innerWidth,sw:document.documentElement.scrollWidth,sidePosition:getComputedStyle(document.querySelector('.app-side')).position,navDisplay:getComputedStyle(document.querySelector('.nav-list')).display,sidebarX:document.querySelector('.app-side').getBoundingClientRect().x,menuWidth:document.querySelector('#open-nav').getBoundingClientRect().width}));
+    assert.ok(before.sw<=before.vw+1,JSON.stringify(before));
+    assert.equal(before.sidePosition,'fixed');
+    assert.equal(before.navDisplay,'grid');
+    assert.ok(before.sidebarX<0,JSON.stringify(before));
+    assert.ok(before.menuWidth>=38,JSON.stringify(before));
+    await page.getByRole('button',{name:'Abrir menu'}).click();
+    assert.ok(await page.locator('.app-side').evaluate(el=>el.classList.contains('is-open')));
     await page.getByRole('button',{name:/Financeiro e Cobranças/}).click();
     await page.getByRole('heading',{name:'Financeiro e cobranças'}).waitFor();
+    assert.ok(!(await page.locator('.app-side').evaluate(el=>el.classList.contains('is-open'))));
+    const after=await page.evaluate(()=>({vw:innerWidth,sw:document.documentElement.scrollWidth}));
+    assert.ok(after.sw<=after.vw+1,JSON.stringify(after));
   } finally { await cleanup(); }
+});
+
+test('desktop keeps a left sidebar and top-aligned workspace without centering the content',async()=>{
+  const {browser,page,cleanup}=await createPage();
+  try {
+    await page.setViewportSize({width:1440,height:900});
+    await login(page);
+    const d=await page.evaluate(()=>{const s=document.querySelector('.app-side').getBoundingClientRect(),m=document.querySelector('.app-main').getBoundingClientRect(),c=document.querySelector('#content').getBoundingClientRect();return{vw:innerWidth,sw:document.documentElement.scrollWidth,sidebarX:s.x,sidebarW:s.width,mainX:m.x,contentY:c.y}});
+    assert.ok(d.sw<=d.vw+1,JSON.stringify(d));
+    assert.equal(d.sidebarX,0);
+    assert.ok(d.sidebarW>=240&&d.sidebarW<=270,JSON.stringify(d));
+    assert.ok(d.mainX>=d.sidebarW,JSON.stringify(d));
+    assert.ok(d.contentY<140,JSON.stringify(d));
+  } finally { await cleanup(); }
+});
+
+test('company detail uses the authenticated overview and never calls a nonexistent summary route',async()=>{
+  const {browser,page,requests,cleanup}=await createPage();
+  try {
+    await login(page);
+    await page.getByRole('button',{name:'Empresas (Organizações)',exact:true}).click();
+    await page.getByRole('heading',{name:'Empresas',exact:true}).waitFor();
+    await page.locator('#company-select').selectOption(companyId);
+    await page.getByText('Contagens fornecidas pelo resumo autenticado de empresas.').waitFor();
+    assert.ok(requests.some(x=>x.path==='/api/master/overview'));
+    assert.ok(!requests.some(x=>x.path.includes('/summary')));
+  } finally { await cleanup(); }
+});
+
+
+test('mobile sidebar opens as vertical drawer, closes on selection, with no overflow',async()=>{
+ const {browser,page,cleanup}=await createPage();
+ try{await page.setViewportSize({width:390,height:844});await login(page);const d=await page.evaluate(()=>({vw:innerWidth,sw:document.documentElement.scrollWidth,position:getComputedStyle(document.querySelector('.app-side')).position,navDisplay:getComputedStyle(document.querySelector('.nav-list')).display,x:document.querySelector('.app-side').getBoundingClientRect().x,menu:document.querySelector('#open-nav').getBoundingClientRect().width}));assert.ok(d.sw<=d.vw+1,JSON.stringify(d));assert.equal(d.position,'fixed');assert.equal(d.navDisplay,'grid');assert.ok(d.x<0,JSON.stringify(d));assert.ok(d.menu>=38);await page.getByRole('button',{name:'Abrir menu'}).click();assert.ok(await page.locator('.app-side').evaluate(x=>x.classList.contains('is-open')));await page.getByRole('button',{name:/Financeiro e Cobranças/}).click();await page.getByRole('heading',{name:'Financeiro e cobranças'}).waitFor();assert.ok(!(await page.locator('.app-side').evaluate(x=>x.classList.contains('is-open'))));}finally{await cleanup()}
+});
+
+test('desktop sidebar is flush left and workspace is top aligned beside it',async()=>{
+ const {browser,page,cleanup}=await createPage();
+ try{await page.setViewportSize({width:1440,height:900});await login(page);const d=await page.evaluate(()=>{const s=document.querySelector('.app-side').getBoundingClientRect(),m=document.querySelector('.app-main').getBoundingClientRect(),c=document.querySelector('#content').getBoundingClientRect();return{vw:innerWidth,sw:document.documentElement.scrollWidth,sx:s.x,swid:s.width,mx:m.x,cy:c.y}});assert.ok(d.sw<=d.vw+1,JSON.stringify(d));assert.equal(d.sx,0);assert.ok(d.swid>=240&&d.swid<=270,JSON.stringify(d));assert.ok(d.mx>=d.swid,JSON.stringify(d));assert.ok(d.cy<140,JSON.stringify(d));}finally{await cleanup()}
 });
