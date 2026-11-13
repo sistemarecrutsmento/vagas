@@ -25,8 +25,12 @@ Removed `data-inert`, demo-tab hooks, sample organizations/KPIs, fabricated char
 
 `master.integration.test.js` provides source-contract checks. `master.browser.test.cjs` uses Playwright with a mocked API, blocks unexpected network, and exercises all 14 screens, company selection, tabs, refresh/search, password-change link and a 390px viewport. GitHub Actions run `43477491966` passed (install, Chromium setup, source tests and mocked browser tests). These are UI behavior tests against fixtures, not authenticated live API or deployed backend integration tests.
 
+## Validation status after browser CI
+
+The mobile width was fixed and the mobile-specific assertion passed in an earlier run. Browser CI has exercised the temporary-password link, mocked navigation, company selector and tabs. A later release-candidate run still reports a generic test-process exit code 1; GitHub does not expose per-test log lines for this public repository. The exact failing assertion must be diagnosed before release.
+
 ## Known blockers before publication
 
-API PR #43 is still open/unmerged. Its draft head `8337efdabdd3a7dbe3e04439a4041baf39e12404` has a successful CI run (install + `npm test`), including fixes for duplicate operational-route registration and strict per-key settings validation. Audit-write behavior and the scope of backend runtime/integration tests must still be reviewed in the full merge/deploy validation. The UI tests use mocked responses; live authenticated API tests were not run.
+Release candidate branch `draft/master-release-candidate-20261113` is based directly on the current main commit and excludes the root operational portal file; it remains a draft. API PR #43 is still open/unmerged. Its draft head `8337efdabdd3a7dbe3e04439a4041baf39e12404` has a successful CI run (install + `npm test`), including fixes for duplicate operational-route registration and strict per-key settings validation. Audit-write behavior and the scope of backend runtime/integration tests must still be reviewed in the full merge/deploy validation. The UI tests use mocked responses; live authenticated API tests were not run.
 
 The migration was previously tested only within a rolled-back transaction; it was not applied persistently. No production data, services, or deployment were changed. No customer communications or financial side effects were triggered. No PR was merged.
