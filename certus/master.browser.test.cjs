@@ -35,9 +35,13 @@ const payloads = {
 
 async function createPage() {
   const server = http.createServer((req, res) => {
-    if (req.url !== '/certus/master.html') { res.writeHead(404); return res.end('Not found'); }
-    res.writeHead(200, {'content-type':'text/html; charset=utf-8'});
-    res.end(html.replace('<head>','<head><base href="http://127.0.0.1/certus/">'));
+    if (req.url === '/certus/master.html') {
+      res.writeHead(200, {'content-type':'text/html; charset=utf-8'});
+      return res.end(html.replace('<head>','<head><base href="http://127.0.0.1/certus/">'));
+    }
+    const asset = req.url === '/certus/certus-logo-color.png' ? 'certus-logo-color.png' : req.url === '/certus/certus-logo-white.png' ? 'certus-logo-white.png' : null;
+    if (asset) { res.writeHead(200, {'content-type':'image/png'}); return res.end(fs.readFileSync(path.join(__dirname, asset))); }
+    res.writeHead(404); res.end('Not found');
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const origin = `http://127.0.0.1:${server.address().port}`;
@@ -103,9 +107,9 @@ test('company selector, tabs, refresh and page-local table filter work',async()=
     await page.getByRole('button',{name:/Empresas \(Organizações\)/}).click();
     await page.getByRole('heading',{name:'Empresas'}).waitFor();
     await page.locator('#company-select').waitFor();
-    await page.getByRole('button',{name:'Visão em cartões'}).click();
+    await page.getByRole('tab',{name:'Visão em cartões'}).click();
     await page.getByText('Empresa Fixture').first().waitFor();
-    await page.getByRole('button',{name:'Lista de empresas'}).click();
+    await page.getByRole('tab',{name:'Lista de empresas'}).click();
     await page.getByRole('textbox',{name:'Filtrar registros desta tela'}).fill('sem-correspondência');
     await page.getByRole('button',{name:'↻ Atualizar'}).click();
   } finally { await cleanup(); }
