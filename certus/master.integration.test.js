@@ -53,7 +53,7 @@ test('loading, empty, error, retry, stale-response protection and no fake data',
 });
 
 test('unsupported endpoints and operational/financial guardrails are explicit', () => {
-  for (const t of ['Não há rotas para listar usuários Master','Não existe rota de atualizações','Não oferece uma rota para listar as tarefas','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','mensagens não são entregues']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
+  for (const t of ['Não há rotas para listar usuários Master','Não existe rota de atualizações','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','mensagens não são entregues']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
 });
 
 test('tabs, company selector, search and refresh are wired and keyboard accessible', () => {
@@ -85,4 +85,9 @@ test('onboarding screen calls the company/project-scoped read-only tasks endpoin
  assert.match(script,/\/api\/master\/companies\/['"]\+encodeURIComponent\(project\.company_id\).*\/tasks/);
  assert.match(script,/Tarefas da implantação selecionada/);
  assert.match(script,/Nenhuma tarefa foi criada, concluída ou editada/);
+});
+
+test('onboarding task detail is project and tenant scoped, read-only and rendered by Master',()=>{
+ assert.match(script,/\/api\/master\/companies\/:id\/onboarding\/:projectId\/tasks/);
+ assert.match(script,/Tarefas da implantação selecionada/);
 });

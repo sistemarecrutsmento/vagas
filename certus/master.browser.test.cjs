@@ -22,7 +22,8 @@ const payloads = {
   '/api/master/monitoring': {as_of:'2026-01-01T12:00:00Z',window:'rolling_24h',items:[{...companies[0],events:{events_24h:0,pending_24h:0,review_24h:0,rejected_24h:0},devices:{total:1,online:1}}],definitions:{events:'Eventos fixture',online:'Dados fixture'}},
   [`/api/master/companies/${companyId}/monitoring`]: {company:companies[0],events:[],devices:[]},
   '/api/master/devices': {items:[{id:'55555555-5555-4555-8555-555555555555',company_id:companyId,company_name:'Empresa Fixture',label:'Terminal fixture',status:'active',online:true,app_version:'test',created_at:'2026-01-01'}],note:'Fixture somente leitura'},
-  '/api/master/onboarding': {items:[{company_id:companyId,company_name:'Empresa Fixture',status:'in_progress',progress:0,task_count:0,completed_tasks:0,created_at:'2026-01-01'}]},
+  '/api/master/onboarding': {items:[{id:'66666666-6666-4666-8666-666666666666',company_id:companyId,company_name:'Empresa Fixture',status:'in_progress',progress:0,task_count:1,completed_tasks:0,created_at:'2026-01-01'}]},
+  [`/api/master/companies/${companyId}/onboarding/66666666-6666-4666-8666-666666666666/tasks`]: {project:{id:'66666666-6666-4666-8666-666666666666',status:'in_progress'},items:[{id:'77777777-7777-4777-8777-777777777777',sort_order:1,title:'Tarefa fixture',status:'pending'}]},
   '/api/master/settings': {items:[],editable_keys:[],note:'Fixture somente leitura'},
   '/api/master/features': {items:[],note:'Fixture somente leitura'},
   '/api/master/announcements': {items:[]},
@@ -88,12 +89,14 @@ test('all 14 Master screens render using mocked authenticated API data', async()
     const headings=['Visão geral da plataforma','Empresas','Planos e assinaturas','Contratos e testes','Financeiro e cobranças','Central de Suporte','Monitoramento de Ponto','Terminais e Dispositivos','Implantação de Clientes','Configurações Globais','Recursos e Funcionalidades','Comunicados e Avisos','Acessos e Permissões','Auditoria e Logs'];
     for(let i=0;i<names.length;i++){
       await page.getByRole('button',{name:names[i],exact:true}).click();
-      await page.getByRole('heading',{name:headings[i]}).waitFor();
+      await page.getByRole('heading',{name:headings[i],exact:true}).waitFor();
+      if(i===8)await page.getByRole('heading',{name:'Tarefas da implantação selecionada'}).waitFor();
     }
     assert.ok(requests.some(x=>x.path==='/api/master/dashboard'));
     assert.ok(requests.some(x=>x.path==='/api/master/plans'));
     assert.ok(requests.some(x=>x.path==='/api/master/monitoring'));
-    assert.ok(requests.some(x=>x.path==='/api/master/audit-log?limit=100'));
+    assert.ok(requests.some(x=>x.path==='/api/master/security/incidents'));
+    assert.ok(requests.some(x=>x.path===`/api/master/companies/${companyId}/onboarding/66666666-6666-4666-8666-666666666666/tasks`));
     assert.ok(requests.every(x=>x.method==='GET'||x.path==='/api/master/auth/login'));
     assert.deepEqual(denied,[],`unexpected non-fixture requests: ${denied.join(', ')}`);
   } finally { await cleanup(); }
