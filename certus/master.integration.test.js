@@ -53,7 +53,7 @@ test('loading, empty, error, retry, stale-response protection and no fake data',
 });
 
 test('unsupported endpoints and operational/financial guardrails are explicit', () => {
-  for (const t of ['Não há rotas para listar usuários Master','Não existe rota de atualizações','Não oferece uma rota para listar as tarefas','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','mensagens não são entregues']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
+  for (const t of ['Não há rotas para listar usuários Master','Não existe rota de atualizações','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','mensagens não são entregues']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
 });
 
 test('tabs, company selector, search and refresh are wired and keyboard accessible', () => {
@@ -80,4 +80,14 @@ test('global settings expose only backend-allowlisted typed configuration and au
  for(const key of ['platform.name','platform.contact_email','platform.default_locale','platform.default_timezone','security.session_idle_minutes','notifications.master_email_enabled'])assert.ok(html.includes(key),key);
  assert.match(html,/audit_note,expected_version/);
  assert.match(html,/operational_effect|não são aplicados automaticamente/);
+});
+test('onboarding screen calls the company/project-scoped read-only tasks endpoint and does not write',()=>{
+ assert.match(script,/\/api\/master\/companies\/['"]\+encodeURIComponent\(project\.company_id\).*\/tasks/);
+ assert.match(script,/Tarefas da implantação selecionada/);
+ assert.match(script,/Nenhuma tarefa foi criada, concluída ou editada/);
+});
+
+test('onboarding task detail is project and tenant scoped, read-only and rendered by Master',()=>{
+ assert.match(script,/onboarding\/['"]\+encodeURIComponent\(project\.id\)\+['"]\/tasks/);
+ assert.match(script,/Tarefas da implantação selecionada/);
 });
