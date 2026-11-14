@@ -88,6 +88,6 @@ test('onboarding screen calls the company/project-scoped read-only tasks endpoin
 });
 
 test('onboarding task detail is project and tenant scoped, read-only and rendered by Master',()=>{
- assert.match(script,/\/api\/master\/companies\/:id\/onboarding\/:projectId\/tasks/);
+ assert.match(script,/onboarding\/['"]\+encodeURIComponent\(project\.id\)\+['"]\/tasks/);
  assert.match(script,/Tarefas da implantação selecionada/);
 });
