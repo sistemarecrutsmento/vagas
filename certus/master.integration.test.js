@@ -73,3 +73,11 @@ test('mobile sidebar is a vertical drawer and desktop keeps the workspace beside
   assert.doesNotMatch(html,/\.nav-list\{display:flex[^}]*overflow-x:auto/);
   assert.match(html,/grid-template-columns:252px minmax\(0,1fr\)/);
 });
+
+test('global settings expose only backend-allowlisted typed configuration and audited save',()=>{
+ assert.match(html,/globalSettingsEditor\(lastItems,editKeys\)/);
+ assert.match(html,/apiWrite\('\/api\/master\/settings\/'\+encodeURIComponent\(key\),'PUT'/);
+ for(const key of ['platform.name','platform.contact_email','platform.default_locale','platform.default_timezone','security.session_idle_minutes','notifications.master_email_enabled'])assert.ok(html.includes(key),key);
+ assert.match(html,/audit_note,expected_version/);
+ assert.match(html,/operational_effect|não são aplicados automaticamente/);
+});
