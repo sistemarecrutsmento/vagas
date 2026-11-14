@@ -81,3 +81,8 @@ test('global settings expose only backend-allowlisted typed configuration and au
  assert.match(html,/audit_note,expected_version/);
  assert.match(html,/operational_effect|não são aplicados automaticamente/);
 });
+test('onboarding screen calls the company/project-scoped read-only tasks endpoint and does not write',()=>{
+ assert.match(script,/\/api\/master\/companies\/['"]\+encodeURIComponent\(project\.company_id\).*\/tasks/);
+ assert.match(script,/Tarefas da implantação selecionada/);
+ assert.match(script,/Nenhuma tarefa foi criada, concluída ou editada/);
+});
