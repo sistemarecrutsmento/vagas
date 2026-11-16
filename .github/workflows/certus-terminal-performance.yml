@@ -1,0 +1,23 @@
+name: Certus shared terminal performance checks
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'certus/terminal.js'
+      - 'certus/terminal.performance.test.cjs'
+      - '.github/workflows/certus-terminal-performance.yml'
+  push:
+    branches: ['zapia/certus-terminal-first-punch-performance-20261116']
+    paths:
+      - 'certus/terminal.js'
+      - 'certus/terminal.performance.test.cjs'
+      - '.github/workflows/certus-terminal-performance.yml'
+jobs:
+  terminal-performance:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test --test-reporter=spec certus/terminal.performance.test.cjs
