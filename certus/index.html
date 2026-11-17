@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="./operacao.css?v=master-support-mode-v28-20261117">
 <link rel="stylesheet" href="./operacao-mobile.css?v=certus-timesheet-20261104-v2">
 </head>
-<body><div id="app"><main class="login"><section class="card login-card">Carregando Certus…</section></main></div><script src="./operacao.js?v=master-support-mode-v28-20261117"></script><script src="./pwa.js" defer></script>
+<body><script>window.__certusBootErrors=[];window.addEventListener('error',e=>window.__certusBootErrors.push('JS: '+(e.message||e.target?.src||'erro')+' · '+(e.filename||'')+':'+(e.lineno||'')));window.addEventListener('unhandledrejection',e=>window.__certusBootErrors.push('Promise: '+String(e.reason?.stack||e.reason)));</script><div id="app"><main class="login"><section class="card login-card">Carregando Certus…</section></main></div><script src="./operacao.js?v=master-support-mode-v28-20261117" onerror="window.__certusBootErrors.push('APP SCRIPT FAILED')"></script><script>setTimeout(()=>{const app=document.querySelector('#app');if(app?.innerText.includes('Carregando Certus')){app.innerHTML='<main class="login"><section class="card login-card"><h1>Falha ao iniciar o Certus</h1><p role="alert">'+(window.__certusBootErrors.join('\n')||'O código da página não concluiu a inicialização.')+'</p><button onclick="location.reload()">Recarregar</button></section></main>'}},5000)</script><script src="./pwa.js" defer></script>
 </body>
 </html>
 
