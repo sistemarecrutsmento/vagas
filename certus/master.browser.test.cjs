@@ -58,10 +58,11 @@ async function createPage() {
     const req=route.request(); const url=new URL(requestUrl);
     const path=url.pathname+url.search;
     if(req.method()==='OPTIONS') return route.fulfill({status:204,headers:{'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'Authorization,Content-Type','Access-Control-Allow-Methods':'GET,POST,OPTIONS'}});
-    requests.push({method:req.method(),path});
+    requests.push({method:req.method(),path,postData:req.postData()});
     let body,status=200;
     if(path==='/api/master/auth/login' && req.method()==='POST' && req.postDataJSON()?.email==='temp@example.test') body={access_token:'temporary-token',password_change_required:true,user:{email:'temp@example.test',must_change_password:true}};
     else if(url.pathname==='/api/master/companies/'+companyId+'/accounts' && req.method()==='GET') body=payloads[`/api/master/companies/${companyId}/accounts`];
+    else if(url.pathname==='/api/master/companies/'+companyId+'/management-session' && req.method()==='POST') body={access_token:'company-support-token-fixture',token_type:'Bearer',expires_in:1800,support_session:true,company:companies[0],user:{id:'master-fixture',email:'master@example.test',name:'Master Fixture',role:'company_admin',company:companies[0],support_session:true},message:'Acesso temporário fixture'};
     else if(path==='/api/master/accounts' && req.method()==='POST'){const posted=req.postDataJSON()||{};assert.equal(posted.email,'suportecertusbyvagasio@gmail.com');assert.equal(posted.display_name,'Suporte Certus');assert.equal(posted.temporary_password,'CI-only-temporary-password');body={item:{email:posted.email,display_name:posted.display_name,status:'active',must_change_password:true},message:'Conta Master global fixture'}}
     else if(path==='/api/master/auth/login' && req.method()==='POST') body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
     else if(url.pathname==='/api/master/support/tickets/'+ticketId) body=payloads[`/api/master/support/tickets/${ticketId}`];
@@ -225,5 +226,22 @@ test('global Master can inspect a selected company user list without credentials
   assert.ok(!requests.some(x=>x.method==='POST'&&x.path.includes('/accounts/')));
   assert.ok((await page.locator('#master-company-accounts').innerText()).includes('Colaborador Fixture'));
   assert.ok((await page.locator('#master-company-accounts').innerText()).includes('Consulta Master autenticada'));
+ }finally{await cleanup()}
+});
+
+test('Master can start a temporary company manager session without creating a company account',async()=>{
+ const {browser,page,requests,cleanup}=await createPage();
+ try{
+  await login(page);
+  await page.getByRole('button',{name:'Acessos e Permissões',exact:true}).click();
+  await page.getByRole('heading',{name:'Contas Master globais'}).waitFor();
+  await page.locator('#company-select').selectOption(companyId);
+  await page.getByText('Colaborador Fixture').waitFor();
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:'Abrir como gestão nesta empresa'}).click();
+  await page.waitForURL('**/index.html?master-session=1');
+  const call=requests.find(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/management-session`);
+  assert.ok(call);assert.deepEqual(JSON.parse(call.postData||'{}'),{});
+  assert.ok(!requests.some(x=>x.path.includes('/memberships')));
  }finally{await cleanup()}
 });
