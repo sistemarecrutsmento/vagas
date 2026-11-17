@@ -99,6 +99,7 @@ test('all 14 Master screens render using mocked authenticated API data', async()
     assert.ok(requests.some(x=>x.path==='/api/master/dashboard'));
     assert.ok(requests.some(x=>x.path==='/api/master/plans'));
     assert.ok(requests.some(x=>x.path==='/api/master/monitoring'));
+    await page.getByRole('heading',{name:'Incidentes de segurança'}).waitFor();
     assert.ok(requests.some(x=>x.path==='/api/master/security/incidents'));
     assert.ok(requests.some(x=>x.path===`/api/master/companies/${companyId}/onboarding/66666666-6666-4666-8666-666666666666/tasks`));
     assert.ok(requests.every(x=>x.method==='GET'||x.path==='/api/master/auth/login'||(x.method==='POST'&&x.path==='/api/master/accounts')));
