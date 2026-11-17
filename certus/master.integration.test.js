@@ -30,7 +30,7 @@ test('the UI limits writes to Master login and explicitly submitted global accou
   assert.equal((script.match(/method:'POST'/g) || []).length, 1);
   assert.match(script,/\/api\/master\/auth\/login/);
   assert.match(script,/apiWrite\('\/api\/master\/accounts','POST'/);
-  assert.match(script,/Não são adicionadas às empresas/);
+  assert.match(script,/Não são adicionadas a nenhuma empresa/);
   assert.doesNotMatch(script,/method:'(?:PUT|PATCH|DELETE)'/);
   assert.doesNotMatch(script,/data-inert|data-demo-tab/);
 });
@@ -98,7 +98,7 @@ test('Master account form creates a global account only after submit and lists e
  assert.match(script,/apiGet\('\/api\/master\/accounts'\)/);
  assert.match(script,/id=\"master-account-form\"/);
  assert.match(script,/apiWrite\('\/api\/master\/accounts','POST',\{email,display_name,temporary_password\}\)/);
- assert.match(script,/Não são adicionadas às empresas/);
+ assert.match(script,/Não são adicionadas a nenhuma empresa/);
  assert.match(script,/Troca de senha pendente/);
  assert.match(script,/master-account-password-confirm/);
  assert.match(script,/As senhas iniciais não coincidem/);
@@ -107,7 +107,7 @@ test('Master account form creates a global account only after submit and lists e
 test('Master users can select a company and inspect safe individual account metadata without impersonation',()=>{
  assert.match(script,/apiGet\('\/api\/master\/companies\/'\+encodeURIComponent\(selectedCompany\)\+'\/accounts'\)/);
  assert.match(script,/Contas individuais das empresas/);
- assert.match(script,/password_hash|Senhas/);
+ assert.match(script,/senhas ou tokens/);
  assert.match(script,/Somente leitura/);
  assert.doesNotMatch(script,/impersonate|become-user/);
 });
