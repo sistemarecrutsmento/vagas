@@ -117,3 +117,7 @@ test('Master support entry restores session before asynchronous persistence and 
   assert.match(companyPortalScript,/certus_master_return/);
   assert.match(companyPortalScript,/persistent=token&&user\?null:await Promise\.race\(\[loadPersistentSession\(\),new Promise\(resolve=>setTimeout\(\(\)=>resolve\(null\),3000\)\)\]\)/);
 });
+
+test('support session opens shell from its signed company profile without blocking on /api/me hydration',()=>{
+  assert.match(companyPortalScript,/if\(user\.support_session\)\{shell\(\);return\}/);
+});
