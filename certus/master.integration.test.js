@@ -103,3 +103,11 @@ test('Master account form creates a global account only after submit and lists e
  assert.match(script,/master-account-password-confirm/);
  assert.match(script,/As senhas iniciais não coincidem/);
 });
+
+test('Master users can select a company and inspect safe individual account metadata without impersonation',()=>{
+ assert.match(script,/apiGet\('\/api\/master\/companies\/'\+encodeURIComponent\(selectedCompany\)\+'\/accounts'\)/);
+ assert.match(script,/Contas individuais das empresas/);
+ assert.match(script,/password_hash|Senhas/);
+ assert.match(script,/Somente leitura/);
+ assert.doesNotMatch(script,/impersonate|become-user/);
+});
