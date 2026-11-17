@@ -218,7 +218,8 @@ test('global Master can inspect a selected company user list without credentials
   await page.getByRole('button',{name:'Acessos e Permissões',exact:true}).click();
   await page.getByRole('heading',{name:'Contas Master globais'}).waitFor();
   await page.locator('#company-select').selectOption(companyId);
-  await page.getByText('Colaborador Fixture').waitFor();
+  await page.waitForTimeout(500);
+  await page.getByText('Colaborador Fixture').waitFor({timeout:5000}).catch(async()=>{throw new Error('Missing user list: '+await page.locator('#master-company-accounts').innerText()+' requests '+JSON.stringify(requests.slice(-5)))});
   assert.ok(requests.some(x=>x.method==='GET'&&x.path===`/api/master/companies/${companyId}/accounts`));
   assert.ok(!requests.some(x=>x.method==='POST'&&x.path.includes('/accounts/')));
   assert.ok((await page.locator('#master-company-accounts').innerText()).includes('Colaborador Fixture'));
