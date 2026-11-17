@@ -100,4 +100,6 @@ test('Master account form creates a global account only after submit and lists e
  assert.match(script,/apiWrite\('\/api\/master\/accounts','POST',\{email,display_name,temporary_password\}\)/);
  assert.match(script,/Não são adicionadas às empresas/);
  assert.match(script,/Troca de senha pendente/);
+ assert.match(script,/master-account-password-confirm/);
+ assert.match(script,/As senhas iniciais não coincidem/);
 });

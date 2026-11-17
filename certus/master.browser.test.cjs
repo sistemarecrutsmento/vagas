@@ -60,7 +60,7 @@ async function createPage() {
     requests.push({method:req.method(),path});
     let body,status=200;
     if(path==='/api/master/auth/login' && req.method()==='POST' && req.postDataJSON()?.email==='temp@example.test') body={access_token:'temporary-token',password_change_required:true,user:{email:'temp@example.test',must_change_password:true}};
-    else if(path==='/api/master/accounts' && req.method()==='POST'){const posted=req.postDataJSON()||{};assert.equal(posted.email,'suportecertusbyvagasio@gmail.com');assert.equal(posted.display_name,'Suporte Certus');assert.equal(posted.temporary_password,'CI-only-temporary-password');body={item:{email:posted.email,display_name:posted.display_name,status:'active',must_change_password:true},message:'Conta global fixture'}};
+    else if(path==='/api/master/accounts' && req.method()==='POST'){const posted=req.postDataJSON()||{};assert.equal(posted.email,'suportecertusbyvagasio@gmail.com');assert.equal(posted.display_name,'Suporte Certus');assert.equal(posted.temporary_password,'CI-only-temporary-password');body={item:{email:posted.email,display_name:posted.display_name,status:'active',must_change_password:true},message:'Conta Master global fixture'}};
     else if(path==='/api/master/auth/login' && req.method()==='POST') body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
     else if(url.pathname==='/api/master/support/tickets/'+ticketId) body=payloads[`/api/master/support/tickets/${ticketId}`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/subscriptions') body=payloads[`/api/master/companies/${companyId}/subscriptions`];
@@ -200,8 +200,9 @@ test('Master account creation posts only on explicit submit and stays outside te
   assert.ok((await page.locator('body').innerText()).includes('master@example.test'));
   await page.locator('#master-account-email').fill('suportecertusbyvagasio@gmail.com');
   await page.locator('#master-account-password').fill('CI-only-temporary-password');
+  await page.locator('#master-account-password-confirm').fill('CI-only-temporary-password');
   await page.getByRole('button',{name:'Criar conta Master global'}).click();
-  await page.getByText('Conta global fixture').waitFor();
+  await page.getByText('Conta Master global fixture').waitFor();
   assert.ok(requests.some(x=>x.method==='POST'&&x.path==='/api/master/accounts'));
   assert.ok(!requests.some(x=>x.path.includes('/memberships')||x.path.includes('/companies/')));
   assert.equal(await page.evaluate(()=>localStorage.length+sessionStorage.length),0);
