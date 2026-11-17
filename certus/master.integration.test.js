@@ -115,5 +115,5 @@ test('Master users can select a company and inspect safe individual account meta
 const companyPortalScript=fs.readFileSync('certus/operacao.js','utf8');
 test('Master support entry restores session before asynchronous persistence and skips employee refresh storage',()=>{
   assert.match(companyPortalScript,/certus_master_return/);
-  assert.match(companyPortalScript,/persistent=user\?\.support_session\?null:await loadPersistentSession\(\)/);
+  assert.match(companyPortalScript,/persistent=token&&user\?null:await Promise\.race\(\[loadPersistentSession\(\),new Promise\(resolve=>setTimeout\(\(\)=>resolve\(null\),3000\)\)\]\)/);
 });
