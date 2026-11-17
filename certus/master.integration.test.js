@@ -131,3 +131,11 @@ test('company-portal Master logout returns to the Master login even without a sa
  assert.match(companyPortalScript,/const returnToMaster=user\?\.company_portal_master===true/);
  assert.match(companyPortalScript,/location\.replace\('master\.html\?returned-from-support=1&login=1'\)/);
 });
+
+test('company portal JavaScript parses and Master support banner is interpolated safely',()=>{
+ const vm=require('node:vm');
+ assert.doesNotThrow(()=>new vm.Script(companyPortalScript), 'company portal script must parse before publishing');
+ assert.match(companyPortalScript,/const supportBanner=user\.support_session\?/);
+ assert.match(companyPortalScript,/\$\{supportBanner\}/);
+ assert.doesNotMatch(companyPortalScript,/\$\{user\.support_session\?'<div class=/);
+});
