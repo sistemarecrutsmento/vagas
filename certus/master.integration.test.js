@@ -44,7 +44,9 @@ test('API host is fixed, token remains in memory, temporary-password link is ava
   assert.match(script,/token=d\.access_token/);
   assert.match(script,/r\.status===401\|\|r\.status===403\)\{token=null/);
   assert.match(script,/showLogin\('Sessão encerrada\.'/);
-  assert.doesNotMatch(script,/localStorage|sessionStorage|document\.cookie/);
+  assert.doesNotMatch(script,/localStorage|document\.cookie/);
+  assert.match(script,/sessionStorage\.setItem\('certus_master_return'/);
+  assert.match(script,/sessionStorage\.removeItem\('certus_token'/);
 });
 
 test('loading, empty, error, retry, stale-response protection and no fake data', () => {

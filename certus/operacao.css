@@ -216,12 +216,3 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
  .side{position:relative;inset:auto;top:auto;height:100dvh;max-height:100dvh;min-height:0;overflow-y:auto;overscroll-behavior:contain;align-self:stretch}
  .main{height:100dvh;min-height:0;max-height:100dvh;overflow-y:auto;overflow-x:clip;overscroll-behavior-y:contain;scrollbar-gutter:stable;align-self:stretch}
 }
-
-/* Temporary, audited Master company-access banner */
-.support-session-banner{position:sticky;top:0;z-index:80;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 18px;background:#fff8e8;border:1px solid #edc86b;border-radius:12px;color:#4f3a00;box-shadow:0 4px 14px rgba(28,22,5,.08)}
-.support-session-banner strong{font-size:.94rem}.support-session-banner span{flex:1;min-width:220px;font-size:.9rem}.support-session-banner button{white-space:nowrap}
-@media(max-width:640px){.support-session-banner{top:0;padding:11px;gap:8px;border-radius:0 0 10px 10px}.support-session-banner span{flex-basis:100%;min-width:0}.support-session-banner button{width:100%}}
-
-.support-session-banner{position:sticky;top:0;z-index:80;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 18px;background:#fff8e8;border:1px solid #edc86b;border-radius:12px;color:#4f3a00;box-shadow:0 4px 14px rgba(28,22,5,.08)}
-.support-session-banner strong{font-size:.94rem}.support-session-banner span{flex:1;min-width:220px;font-size:.9rem}.support-session-banner button{white-space:nowrap}
-@media(max-width:640px){.support-session-banner{top:0;padding:11px;gap:8px;border-radius:0 0 10px 10px}.support-session-banner span{flex-basis:100%;min-width:0}.support-session-banner button{width:100%}}
