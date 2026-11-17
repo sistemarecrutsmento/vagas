@@ -121,3 +121,8 @@ test('Master support entry restores session before asynchronous persistence and 
 test('support session opens shell from its signed company profile without blocking on /api/me hydration',()=>{
   assert.match(companyPortalScript,/if\(user\.support_session\)\{shell\(\);return\}/);
 });
+
+test('company portal preserves temporary Master support controls after /api/me profile hydration',()=>{
+ assert.match(companyPortalScript,/support_session:user\?\.support_session===true/);
+ assert.match(companyPortalScript,/company_portal_master:user\?\.company_portal_master===true/);
+});
