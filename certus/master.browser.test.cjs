@@ -28,6 +28,8 @@ const payloads = {
   '/api/master/features': {items:[],note:'Fixture somente leitura'},
   '/api/master/announcements': {items:[]},
   '/api/master/me': {user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}},
+  '/api/master/accounts': {items:[{id:'master-fixture',display_name:'Master Fixture',email:'master@example.test',status:'active',must_change_password:false,created_at:'2026-01-01'}],note:'Fixture global'},
+  [`/api/master/companies/${companyId}/accounts`]: {company:companies[0],items:[{id:'88888888-8888-4888-8888-888888888888',email:'employee@example.test',display_name:'Colaborador Fixture',status:'active',must_change_password:false,role:'employee',employee_id:'99999999-9999-4999-8999-999999999999',employee_name:'Pessoa Fixture',employee_number:'F-001',branch_name:'Filial Fixture'}],note:'Consulta Master autenticada. Senhas, hashes, tokens e dados de autenticação não são retornados.'},
   '/api/master/audit-log?limit=20': {items:[]},
   '/api/master/audit-log?limit=100': {items:[]},
   '/api/master/security/incidents': {items:[]},
@@ -59,6 +61,8 @@ async function createPage() {
     requests.push({method:req.method(),path});
     let body,status=200;
     if(path==='/api/master/auth/login' && req.method()==='POST' && req.postDataJSON()?.email==='temp@example.test') body={access_token:'temporary-token',password_change_required:true,user:{email:'temp@example.test',must_change_password:true}};
+    else if(url.pathname==='/api/master/companies/'+companyId+'/accounts' && req.method()==='GET') body=payloads[`/api/master/companies/${companyId}/accounts`];
+    else if(path==='/api/master/accounts' && req.method()==='POST'){const posted=req.postDataJSON()||{};assert.equal(posted.email,'suportecertusbyvagasio@gmail.com');assert.equal(posted.display_name,'Suporte Certus');assert.equal(posted.temporary_password,'CI-only-temporary-password');body={item:{email:posted.email,display_name:posted.display_name,status:'active',must_change_password:true},message:'Conta Master global fixture'}}
     else if(path==='/api/master/auth/login' && req.method()==='POST') body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
     else if(url.pathname==='/api/master/support/tickets/'+ticketId) body=payloads[`/api/master/support/tickets/${ticketId}`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/subscriptions') body=payloads[`/api/master/companies/${companyId}/subscriptions`];
@@ -95,9 +99,10 @@ test('all 14 Master screens render using mocked authenticated API data', async()
     assert.ok(requests.some(x=>x.path==='/api/master/dashboard'));
     assert.ok(requests.some(x=>x.path==='/api/master/plans'));
     assert.ok(requests.some(x=>x.path==='/api/master/monitoring'));
+    await page.getByRole('heading',{name:'Incidentes de segurança'}).waitFor();
     assert.ok(requests.some(x=>x.path==='/api/master/security/incidents'));
     assert.ok(requests.some(x=>x.path===`/api/master/companies/${companyId}/onboarding/66666666-6666-4666-8666-666666666666/tasks`));
-    assert.ok(requests.every(x=>x.method==='GET'||x.path==='/api/master/auth/login'));
+    assert.ok(requests.every(x=>x.method==='GET'||x.path==='/api/master/auth/login'||(x.method==='POST'&&x.path==='/api/master/accounts')));
     assert.deepEqual(denied,[],`unexpected non-fixture requests: ${denied.join(', ')}`);
   } finally { await cleanup(); }
 });
@@ -187,4 +192,38 @@ test('mobile sidebar opens as vertical drawer, closes on selection, with no over
 test('desktop sidebar is flush left and workspace is top aligned beside it',async()=>{
  const {browser,page,cleanup}=await createPage();
  try{await page.setViewportSize({width:1440,height:900});await login(page);const d=await page.evaluate(()=>{const s=document.querySelector('.app-side').getBoundingClientRect(),m=document.querySelector('.app-main').getBoundingClientRect(),c=document.querySelector('#content').getBoundingClientRect();return{vw:innerWidth,sw:document.documentElement.scrollWidth,sx:s.x,swid:s.width,mx:m.x,cy:c.y}});assert.ok(d.sw<=d.vw+1,JSON.stringify(d));assert.equal(d.sx,0);assert.ok(d.swid>=240&&d.swid<=270,JSON.stringify(d));assert.ok(d.mx>=d.swid,JSON.stringify(d));assert.ok(d.cy<140,JSON.stringify(d));}finally{await cleanup()}
+});
+
+test('Master account creation posts only on explicit submit and stays outside tenant accounts',async()=>{
+ const {browser,page,requests,cleanup}=await createPage();
+ try{
+  await login(page);
+  await page.getByRole('button',{name:'Acessos e Permissões',exact:true}).click();
+  await page.getByRole('heading',{name:'Contas Master globais'}).waitFor();
+  assert.ok((await page.locator('body').innerText()).includes('master@example.test'));
+  await page.locator('#master-account-email').fill('suportecertusbyvagasio@gmail.com');
+  await page.locator('#master-account-password').fill('CI-only-temporary-password');
+  await page.locator('#master-account-password-confirm').fill('CI-only-temporary-password');
+  await page.getByRole('button',{name:'Criar conta Master global'}).click();
+  await page.getByText('Conta Master global fixture').waitFor();
+  assert.ok(requests.some(x=>x.method==='POST'&&x.path==='/api/master/accounts'));
+  assert.ok(!requests.some(x=>x.path.includes('/memberships')||x.path.includes('/companies/')));
+  assert.equal(await page.evaluate(()=>localStorage.length+sessionStorage.length),0);
+ }finally{await cleanup()}
+});
+
+test('global Master can inspect a selected company user list without credentials or tenant session switching',async()=>{
+ const {browser,page,requests,cleanup}=await createPage();
+ try{
+  await login(page);
+  await page.getByRole('button',{name:'Acessos e Permissões',exact:true}).click();
+  await page.getByRole('heading',{name:'Contas Master globais'}).waitFor();
+  await page.locator('#company-select').selectOption(companyId);
+  await page.waitForTimeout(500);
+  await page.getByText('Colaborador Fixture').waitFor({timeout:5000}).catch(async()=>{throw new Error('Missing user list: '+await page.locator('#master-company-accounts').innerText()+' requests '+JSON.stringify(requests.slice(-5)))});
+  assert.ok(requests.some(x=>x.method==='GET'&&x.path===`/api/master/companies/${companyId}/accounts`));
+  assert.ok(!requests.some(x=>x.method==='POST'&&x.path.includes('/accounts/')));
+  assert.ok((await page.locator('#master-company-accounts').innerText()).includes('Colaborador Fixture'));
+  assert.ok((await page.locator('#master-company-accounts').innerText()).includes('Consulta Master autenticada'));
+ }finally{await cleanup()}
 });
