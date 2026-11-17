@@ -126,3 +126,8 @@ test('company portal preserves temporary Master support controls after /api/me p
  assert.match(companyPortalScript,/support_session:user\?\.support_session===true/);
  assert.match(companyPortalScript,/company_portal_master:user\?\.company_portal_master===true/);
 });
+
+test('company-portal Master logout returns to the Master login even without a saved prior Master browser session',()=>{
+ assert.match(companyPortalScript,/const returnToMaster=user\?\.company_portal_master===true/);
+ assert.match(companyPortalScript,/location\.replace\('master\.html\?returned-from-support=1&login=1'\)/);
+});
