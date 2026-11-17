@@ -1,4 +1,4 @@
-const VERSION='certus-static-v24-master-support-20261117';
+const VERSION='certus-static-v25-master-support-directstart-20261117';
 const SHELL=['./','./index.html','./manifest.json','./operacao.css?v=master-support-mode-20261117-v1','./operacao-mobile.css','./operacao.js?v=master-support-mode-20261117-v1','./operacao.js','./maxclean-onboarding.js','./pwa.js','./certus-logo-color.png','./certus-logo-white.png','./icon-192.png','./icon-512.png','./cartilha-maxclean.html','./cartilha-colaborador-maxclean.html','./terminal.html','./terminal.js?v=20261112-disconnect-guidance-v1','./terminal-audit.css?v=20261112-layout-install-v1','./terminal-pwa.js?v=20261112-install-detect-v1','./terminal-manifest.json?v=20261112-related-apps-v1'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('certus-static-')&&key!==VERSION).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
