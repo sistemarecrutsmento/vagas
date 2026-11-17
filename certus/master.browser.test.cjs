@@ -218,11 +218,10 @@ test('global Master can inspect a selected company user list without credentials
   await page.getByRole('button',{name:'Acessos e Permissões',exact:true}).click();
   await page.getByRole('heading',{name:'Contas Master globais'}).waitFor();
   await page.locator('#company-select').selectOption(companyId);
-  await page.locator('#master-company-accounts').waitFor();
-  await page.getByText('Carregando contas autenticadas…').waitFor();
+  await page.getByText('Colaborador Fixture').waitFor();
   assert.ok(requests.some(x=>x.method==='GET'&&x.path===`/api/master/companies/${companyId}/accounts`));
   assert.ok(!requests.some(x=>x.method==='POST'&&x.path.includes('/accounts/')));
-  assert.ok((await page.locator('#master-company-accounts').innerText()).includes('Contas individuais das empresas'));
-  await page.getByRole('alert').waitFor();
+  assert.ok((await page.locator('#master-company-accounts').innerText()).includes('Colaborador Fixture'));
+  assert.ok((await page.locator('#master-company-accounts').innerText()).includes('Consulta Master autenticada'));
  }finally{await cleanup()}
 });
