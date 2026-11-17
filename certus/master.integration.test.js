@@ -26,9 +26,11 @@ test('read routes match the Master API surface and requests carry auth/no-store'
   assert.match(script,/cache:'no-store'/);
 });
 
-test('the UI never invokes operational writes; its only POST is login', () => {
+test('the UI limits writes to Master login and explicitly submitted global account creation', () => {
   assert.equal((script.match(/method:'POST'/g) || []).length, 1);
   assert.match(script,/\/api\/master\/auth\/login/);
+  assert.match(script,/apiWrite\('\/api\/master\/accounts','POST'/);
+  assert.match(script,/Não são adicionadas às empresas/);
   assert.doesNotMatch(script,/method:'(?:PUT|PATCH|DELETE)'/);
   assert.doesNotMatch(script,/data-inert|data-demo-tab/);
 });
@@ -53,7 +55,7 @@ test('loading, empty, error, retry, stale-response protection and no fake data',
 });
 
 test('unsupported endpoints and operational/financial guardrails are explicit', () => {
-  for (const t of ['Não há rotas para listar usuários Master','Não existe rota de atualizações','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','mensagens não são entregues']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
+  for (const t of ['Contas Master globais','Não existe rota de atualizações','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','mensagens não são entregues']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
 });
 
 test('tabs, company selector, search and refresh are wired and keyboard accessible', () => {
@@ -90,4 +92,12 @@ test('onboarding screen calls the company/project-scoped read-only tasks endpoin
 test('onboarding task detail is project and tenant scoped, read-only and rendered by Master',()=>{
  assert.match(script,/onboarding\/['"]\+encodeURIComponent\(project\.id\)\+['"]\/tasks/);
  assert.match(script,/Tarefas da implantação selecionada/);
+});
+
+test('Master account form creates a global account only after submit and lists existing Master users',()=>{
+ assert.match(script,/apiGet\('\/api\/master\/accounts'\)/);
+ assert.match(script,/id=\"master-account-form\"/);
+ assert.match(script,/apiWrite\('\/api\/master\/accounts','POST',\{email,display_name,temporary_password\}\)/);
+ assert.match(script,/Não são adicionadas às empresas/);
+ assert.match(script,/Troca de senha pendente/);
 });
