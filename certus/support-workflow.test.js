@@ -78,3 +78,11 @@ test('company help center follows the supplied desktop and mobile reference layo
  assert.match(css,/@media\(max-width:760px\)[\s\S]*help-grid>\.help-main-panel\{grid-column:1\/-1;grid-row:2\}/);
  assert.match(css,/help-center \.help-dropzone/);assert.match(company,/dropzone\.classList\.add\('is-dragging'\)/);
 });
+
+test('support center uses semantically named consistent SVG icons, not ambiguous glyphs',()=>{
+ assert.match(company,/function helpIcon\(name,size=20\)/);
+ for(const name of ['search','bell','help','headset','file','clock','message','check','layers','users','calendar','wallet','monitor','sliders','upload','send','alert','paperclip'])assert.match(company,new RegExp(name+":"));
+ assert.match(company,/helpIcon\(helpCategoryIcon\(c\.slug\),18\)/);
+ assert.match(company,/helpIcon\(\(\{open:'file',progress:'clock',waiting:'message',resolved:'check',total:'layers'\}\)\[kind\],21\)/);
+ assert.doesNotMatch(company,/helpCategoryIcon\(slug\)\{return \(\{login:'♙'/);
+});
