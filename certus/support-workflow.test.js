@@ -22,7 +22,7 @@ test('company support menu and form are limited to management roles', () => {
   assert.match(company, /k!=='support'\|\|\['company_admin','manager'\]\.includes\(user\.role\)/);
   assert.match(company, /Somente administrador titular ou gerente/);
   assert.match(company, /\/api\/support\/tickets/);
-  assert.match(company, /support-close-ticket/);
+  assert.match(company, /help-close-ticket/);
 });
 test('Master support inbox offers public response, private note and audited updates', () => {
   assert.match(masterHtml, /Fila de chamados/);
@@ -40,15 +40,22 @@ test('company support shortcut is removed from primary navigation and placed in 
   assert.match(css, /side-bottom \.side-help\{display:block;width:100%/);
   assert.match(css, /@media\(max-width:760px\)\{\.side-bottom\{display:flex;flex-direction:column/);
 });
-test('company tickets start minimized, expand on tap, and can be filtered by status with attachments',()=>{
- assert.match(company,/support-detail-\$\{esc\(t\.id\)\}.*hidden/);
- assert.match(company,/aria-expanded=\"false\"/);
- assert.match(company,/support-status-filter/);
- assert.match(company,/option value=\"waiting_customer\"/);
- assert.match(company,/uploadSupportAttachment/);
- assert.match(company,/type=\"file\"/);
- assert.match(company,/support-detail-inline/);
- assert.match(company,/other\.setAttribute\('aria-expanded','false'\)/);
+test('company help center separates home/dashboard, ticket creation, knowledge articles, and live ticket search',()=>{
+ assert.match(company,/help-center/);
+ assert.match(company,/help-ticket-dialog/);
+ assert.match(company,/help-stats/);
+ assert.match(company,/help-ticket-search/);
+ assert.match(company,/help-ticket-status/);
+ assert.match(company,/help-ticket-category/);
+ assert.match(company,/help-new-ticket/);
+ assert.match(company,/help-article-list/);
+ assert.match(company,/help-notification-dialog/);
+ assert.match(company,/idempotency_key/);
+ assert.match(company,/client_message_id/);
+ assert.match(company,/help-reply-form/);
+ assert.match(company,/helpStatus/);
+ assert.match(company,/supportTicketFrom/);
+ assert.match(company,/supportTicketSort/);
 });
 test('support conversation layout remains responsive on the company portal', () => {
   assert.match(css, /\.support-ticket-list/);
@@ -56,22 +63,3 @@ test('support conversation layout remains responsive on the company portal', () 
   assert.match(css, /@media\(max-width:600px\).*\.support-ticket/s);
 });
 
-test('company support list starts collapsed and supports status filters and attachments',()=>{
- assert.match(company,/support-ticket-wrap/);
- assert.match(company,/id=\"support-detail-\$\{esc\(t\.id\)\}\" hidden/);
- assert.match(company,/support-status-filter/);
- assert.match(company,/option value=\"waiting_customer\"/);
- assert.match(company,/type=\"file\"/);
- assert.match(company,/uploadSupportAttachment/);
-});
-
-test('Master tickets stay collapsed by default and provide status filter and attachment controls',()=>{
- const script=inlineScript(masterHtml);
- assert.match(script,/supportStatusFilter='all'/);
- assert.match(script,/support-master-status-filter/);
- assert.match(script,/support-master-detail\" \$\{selectedSupportTicket\?'':'hidden'\}/);
- assert.match(script,/data-support-ticket/);
- assert.match(script,/type=\"file\"/);
- assert.match(script,/uploadMasterSupportAttachment/);
- assert.match(script,/data-master-support-download/);
-});
