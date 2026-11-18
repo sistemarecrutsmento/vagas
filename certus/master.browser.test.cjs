@@ -29,6 +29,7 @@ const payloads = {
   '/api/master/announcements': {items:[]},
   '/api/master/me': {user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}},
   '/api/master/accounts': {items:[{id:'master-fixture',display_name:'Master Fixture',email:'master@example.test',status:'active',must_change_password:false,created_at:'2026-01-01'}],note:'Fixture global'},
+  '/api/master/support/categories': {items:[{id:'category-fixture',slug:'general',name:'Dúvidas gerais',status:'active'}]},
   [`/api/master/companies/${companyId}/accounts`]: {company:companies[0],items:[{id:'88888888-8888-4888-8888-888888888888',email:'employee@example.test',display_name:'Colaborador Fixture',status:'active',must_change_password:false,role:'employee',employee_id:'99999999-9999-4999-8999-999999999999',employee_name:'Pessoa Fixture',employee_number:'F-001',branch_name:'Filial Fixture'}],note:'Consulta Master autenticada. Senhas, hashes, tokens e dados de autenticação não são retornados.'},
   '/api/master/audit-log?limit=20': {items:[]},
   '/api/master/audit-log?limit=100': {items:[]},
