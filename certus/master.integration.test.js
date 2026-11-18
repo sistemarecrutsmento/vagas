@@ -102,6 +102,13 @@ test('Master account form creates a global account only after submit and lists e
  assert.match(script,/As senhas iniciais não coincidem/);
 });
 
+test('Master operational screens do not claim all modules are read-only',()=>{
+ assert.doesNotMatch(script,/Somente leitura\. Nenhuma alteração, cobrança, marcação, mensagem ou comunicação foi executada/);
+ assert.doesNotMatch(script,/Operações de escrita permanecem desabilitadas/);
+ assert.match(script,/Ações disponíveis neste módulo seguem as permissões da API/);
+ assert.match(script,/master-company-status-save/);
+});
+
 test('Master access view uses published company-admin reset routes, not missing directory APIs',()=>{
  assert.match(script,/admin-accounts/);
  assert.match(script,/reset-password/);
