@@ -105,10 +105,13 @@ test('Master account form creates a global account only after submit and lists e
 test('Master access view uses published company-admin reset routes, not missing directory APIs',()=>{
  assert.match(script,/admin-accounts/);
  assert.match(script,/reset-password/);
- assert.match(script,/Administradores titulares/);
+ assert.match(script,/Acessos da empresa/);
+ assert.match(script,/apiGet\('\/api\/master\/companies\/'\+encodeURIComponent\(selectedCompany\)\+'\/accounts'\)/);
+ assert.match(script,/apiWrite\('\/api\/master\/companies\/'\+encodeURIComponent\(selectedCompany\)\+'\/management-session','POST'/);
+ assert.match(script,/certus_master_return/);
  assert.match(script,/temporary_password/);
  assert.match(script,/revoga sessões/);
- assert.doesNotMatch(script,/apiGet\('\/api\/master\/companies\/.*\/accounts'/);
+ assert.match(script,/apiGet\('\/api\/master\/companies\/'.*\/accounts/);
 });
 
 const companyPortalScript=fs.readFileSync('certus/operacao.js','utf8');
