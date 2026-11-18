@@ -9,6 +9,7 @@ const html = fs.readFileSync(path.join(__dirname, 'master.html'), 'utf8');
 const companyId = '11111111-1111-4111-8111-111111111111';
 const ticketId = '22222222-2222-4222-8222-222222222222';
 const plans = [{id:'33333333-3333-4333-8333-333333333333', code:'demo', name:'Plano fixture', description:'Dados de teste', billing_period:'monthly', price:'0.00', currency:'BRL', status:'inactive', version:1, trial_days:0}];
+const invoiceRows=[{id:'44444444-4444-4444-8444-444444444444',invoice_number:'INV-FIXTURE',status:'draft',amount:10,currency:'BRL',due_at:'2026-12-01',created_at:'2026-01-01',metadata:{}}];
 const companies = [{id:companyId,name:'Empresa Fixture',slug:'empresa-fixture',status:'active',users:2,employees:1,branches:1,clock_events:3,pending_adjustments:0}];
 const payloads = {
   '/api/master/dashboard': {as_of:'2026-01-01T12:00:00Z',period:'current_calendar_month',companies:{total:1,active:1,trial:0,suspended:0},employees:1,terminals:{total:1,online:1},finance:{collected_month:0,receivable:0},support:{open:1},pending_adjustments:0,subscriptions:{active:0},incidents:{critical:0}},
@@ -16,7 +17,7 @@ const payloads = {
   '/api/master/plans': {items:plans},
   [`/api/master/companies/${companyId}/subscriptions`]: {items:[]},
   [`/api/master/companies/${companyId}/contracts`]: {items:[]},
-  [`/api/master/companies/${companyId}/invoices`]: {items:[{id:'44444444-4444-4444-8444-444444444444',invoice_number:'INV-FIXTURE',status:'draft',amount:0,currency:'BRL',due_at:'2026-01-15',created_at:'2026-01-01'}]},
+  [`/api/master/companies/${companyId}/invoices`]: {items:invoiceRows},
   '/api/master/support/tickets': {items:[{id:ticketId,company_id:companyId,company_name:'Empresa Fixture',protocol:'CS-FIXTURE',subject:'Chamado fixture',description:'Somente dados simulados',category:'general',priority:'normal',status:'open',created_at:'2026-01-01'}]},
   [`/api/master/support/tickets/${ticketId}`]: {ticket:{id:ticketId,company_id:companyId,protocol:'CS-FIXTURE',subject:'Chamado fixture',description:'Somente dados simulados',category:'general',priority:'normal',status:'open',created_at:'2026-01-01'},messages:[]},
   '/api/master/monitoring': {as_of:'2026-01-01T12:00:00Z',window:'rolling_24h',items:[{...companies[0],events:{events_24h:0,pending_24h:0,review_24h:0,rejected_24h:0},devices:{total:1,online:1}}],definitions:{events:'Eventos fixture',online:'Dados fixture'}},
@@ -72,6 +73,7 @@ async function createPage() {
     else if(path==='/api/master/auth/login' && req.method()==='POST') body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
     else if(url.pathname===`/api/master/companies/${companyId}/contracts` && req.method()==='POST'){assert.equal(req.postDataJSON().status,'draft');body={item:{id:'contract-fixture'},note:'Rascunho criado'}}
     else if(url.pathname===`/api/master/companies/${companyId}/invoices` && req.method()==='POST'){assert.equal(req.postDataJSON().amount,10);body={item:{id:'invoice-draft',status:'draft'},note:'Nenhuma cobrança enviada'}}
+    else if(url.pathname===`/api/master/companies/${companyId}/invoices/44444444-4444-4444-8444-444444444444/infinitepay-link` && req.method()==='POST'){assert.ok(req.postDataJSON().audit_note.length>=8);body={item:{...invoiceRows[0],status:'open',provider:'infinitepay',payment_reference:'https://buy.infinitepay.io/fixture'},checkout_url:'https://buy.infinitepay.io/fixture',note:'Fixture'};invoiceRows[0]={...invoiceRows[0],status:'open',provider:'infinitepay',payment_reference:'https://buy.infinitepay.io/fixture'}}
     else if(url.pathname===`/api/master/companies/${companyId}/invoices/invoice-fixture` && req.method()==='PATCH'){assert.ok(req.postDataJSON().audit_note.length>=8);body={item:{id:'invoice-fixture',status:req.postDataJSON().status}}}
     else if(url.pathname==='/api/master/announcements' && req.method()==='POST'){assert.equal(req.postDataJSON().status,undefined);body={item:{id:'announcement-fixture',status:'draft'},note:'Rascunho'}}
     else if(url.pathname==='/api/master/features' && req.method()==='POST'){body={item:{feature_key:'fixture.only'},note:'Catálogo'}}
@@ -108,6 +110,7 @@ test('all 14 Master screens render using mocked authenticated API data', async()
       await page.getByRole('button',{name:names[i],exact:true}).click();
       await page.getByRole('heading',{name:headings[i],exact:true}).waitFor();
       assert.doesNotMatch(await page.locator('#master-tabpanel').innerText(),/Somente leitura\. Nenhuma alteração, cobrança, marcação, mensagem ou comunicação foi executada/);
+      assert.match(await page.locator('#master-footnote').innerText(),/ações disponíveis ficam nos controles de cada seção/i);
       if(i===1)assert.ok((await page.locator('#master-tabpanel').innerText()).includes('Atualizar estado'));
       if(i===8)await page.getByRole('heading',{name:/Tarefas · Empresa Fixture/}).waitFor();
     }
@@ -219,6 +222,18 @@ test('Master accesses only company administrators for password reset, with expli
 
 test('Master draft workflows remain local and never trigger payment or outbound announcement sends',async()=>{
  const {browser,page,requests,denied,cleanup}=await createPage();try{await login(page);await page.getByRole('button',{name:'Contratos e Testes',exact:true}).click();await page.locator('#company-select').waitFor();await page.locator('summary').filter({hasText:'Novo contrato (rascunho)'}).click();await page.locator('#master-contract-form [name=title]').fill('Fixture draft');await page.locator('#master-contract-form [name=audit_note]').fill('CI-only audit reason');await page.locator('#master-contract-form button[type=submit]').click();assert.ok(requests.some(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/contracts`));await page.getByRole('button',{name:'Financeiro e Cobranças'}).click();await page.locator('#company-select').waitFor();await page.locator('summary').filter({hasText:'Novo rascunho de cobrança'}).click();await page.locator('#master-invoice-form [name=invoice_number]').fill('INV-CI');await page.locator('#master-invoice-form [name=amount]').fill('10');await page.locator('#master-invoice-form [name=due_at]').fill('2026-12-01');await page.locator('#master-invoice-form [name=audit_note]').fill('CI-only audit reason');await page.locator('#master-invoice-form button[type=submit]').click();assert.ok(requests.some(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/invoices`));assert.ok(!requests.some(x=>/payment|charge|asaas|mercadopago/i.test(x.path)));await page.getByRole('button',{name:'Comunicados e Avisos'}).click();await page.locator('summary').filter({hasText:'Novo comunicado (rascunho)'}).click();await page.locator('#master-announcement-form [name=title]').fill('Fixture message');await page.locator('#master-announcement-form [name=body]').fill('No outbound send');await page.locator('#master-announcement-form [name=audit_note]').fill('CI-only audit reason');await page.locator('#master-announcement-form button[type=submit]').click();assert.ok(requests.some(x=>x.method==='POST'&&x.path==='/api/master/announcements'));assert.ok(!requests.some(x=>/publish|broadcast|email|whatsapp/i.test(x.path)));assert.deepEqual(denied,[])}finally{await cleanup()}
+});
+
+test('InfinitePay checkout is only created on explicit confirmation; link is displayed for draft invoice',async()=>{
+ const {browser,page,requests,cleanup}=await createPage();try{
+  await login(page);await page.getByRole('button',{name:'Financeiro e Cobranças',exact:true}).click();await page.locator('#company-select').selectOption(companyId);
+  await page.getByRole('button',{name:'Gerar link InfinitePay'}).waitFor();
+  page.on('dialog',async d=>{if(d.type()==='prompt')await d.accept('CI-only payment link reason');else await d.accept()});
+  await page.getByRole('button',{name:'Gerar link InfinitePay'}).click();
+  assert.ok(requests.some(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/invoices/44444444-4444-4444-8444-444444444444/infinitepay-link`));
+  await page.getByRole('link',{name:'Abrir checkout'}).waitFor();
+  assert.equal(await page.locator('a[href="https://buy.infinitepay.io/fixture"]').getAttribute('rel'),'noopener noreferrer');
+ }finally{await cleanup()}
 });
 
 test('company admin reset does not create company membership or expose credential hashes',async()=>{
