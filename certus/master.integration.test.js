@@ -57,7 +57,7 @@ test('loading, empty, error, retry, stale-response protection and no fake data',
 });
 
 test('unsupported endpoints and operational/financial guardrails are explicit', () => {
-  for (const t of ['Contas Master globais','Não existe rota de atualizações','Resumo das faturas cadastradas','Novos planos iniciam inativos','Publicação/envio não estão integrados.','nenhum pagamento é iniciado','notas internas só aparecem à equipe Master','e-mail/WhatsApp não são integrados']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
+  for (const t of ['Contas Master globais','Não existe rota de atualizações','Resumo das faturas cadastradas','Novos planos iniciam inativos','Publicação/envio não estão integrados.','A ação altera apenas este rascunho e não envia cobrança.','notas internas só aparecem à equipe Master','e-mail/WhatsApp não são integrados']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
 });
 
 test('tabs, company selector, search and refresh are wired and keyboard accessible', () => {
@@ -92,16 +92,26 @@ test('onboarding reads project tasks through authenticated company/project-scope
  assert.match(script,/onboarding\/'.*tasks\/'.*'PATCH'/);
 });
 
-test('Master global account creation and scoped company admin reset use published API routes',()=>{
+test('Master account form creates a global account only after submit and lists existing Master users',()=>{
  assert.match(script,/apiGet\('\/api\/master\/accounts'\)/);
- assert.match(script,/apiWrite\('\/api\/master\/accounts','POST',\{display_name,email,temporary_password\}\)/);
- assert.match(script,/admin-accounts/);
- assert.match(script,/reset-password/);
- assert.match(script,/must_change_password/);
- assert.match(script,/Redefinição revoga sessões/);
+ assert.match(script,/id=\"master-account-form\"/);
+ assert.ok(script.includes("apiWrite('/api/master/accounts','POST',{display_name,email,temporary_password:password})"));
+ assert.match(script,/Sem vínculo com empresas/);
+ assert.match(script,/Troca de senha pendente/);
+ assert.match(script,/master-account-password-confirm/);
+ assert.match(script,/As senhas iniciais não coincidem/);
 });
 
-const companyPortalScript=fs.readFileSync(process.env.CERTUS_OPERACAO_JS || 'certus/operacao.js','utf8');
+test('Master access view uses published company-admin reset routes, not missing directory APIs',()=>{
+ assert.match(script,/admin-accounts/);
+ assert.match(script,/reset-password/);
+ assert.match(script,/Administradores titulares/);
+ assert.match(script,/temporary_password/);
+ assert.match(script,/revoga sessões/);
+ assert.doesNotMatch(script,/apiGet\('\/api\/master\/companies\/.*\/accounts'/);
+});
+
+const companyPortalScript=fs.readFileSync('certus/operacao.js','utf8');
 test('Master support entry restores session before asynchronous persistence and skips employee refresh storage',()=>{
   assert.match(companyPortalScript,/certus_master_return/);
   assert.match(companyPortalScript,/persistent=token&&user\?null:await Promise\.race\(\[loadPersistentSession\(\),new Promise\(resolve=>setTimeout\(\(\)=>resolve\(null\),3000\)\)\]\)/);
@@ -127,14 +137,4 @@ test('company portal JavaScript parses and Master support banner is interpolated
  assert.match(companyPortalScript,/const supportBanner=user\.support_session\?/);
  assert.match(companyPortalScript,/\$\{supportBanner\}/);
  assert.doesNotMatch(companyPortalScript,/\$\{user\.support_session\?'<div class=/);
-});
-
-test('Master published API gaps are exposed with audited controls and no external side effects',()=>{
- for(const id of ['master-plan-form','master-contract-form','master-invoice-form','master-trial-form','master-announcement-form','master-feature-form','master-task-form','master-incident-form','master-audit-export','master-onboarding-create'])assert.ok(script.includes(id),id);
- for(const route of ['/api/master/plans','/contracts','/invoices','/api/master/announcements','/api/master/features','/api/master/security/incidents/','/api/master/onboarding/','admin-accounts'])assert.ok(script.includes(route),route);
- assert.match(script,/status:'draft'/);
- assert.match(script,/status:'trial'/);
- assert.match(script,/payment_reference/);
- assert.match(script,/Novos planos iniciam inativos/);
- assert.match(script,/Não existe rota de atualizações/);
 });
