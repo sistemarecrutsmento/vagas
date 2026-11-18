@@ -108,6 +108,7 @@ test('all 14 Master screens render using mocked authenticated API data', async()
       await page.getByRole('button',{name:names[i],exact:true}).click();
       await page.getByRole('heading',{name:headings[i],exact:true}).waitFor();
       assert.doesNotMatch(await page.locator('#master-tabpanel').innerText(),/Somente leitura\. Nenhuma alteração, cobrança, marcação, mensagem ou comunicação foi executada/);
+      assert.match(await page.locator('#master-footnote').innerText(),/ações disponíveis ficam nos controles de cada seção/i);
       if(i===1)assert.ok((await page.locator('#master-tabpanel').innerText()).includes('Atualizar estado'));
       if(i===8)await page.getByRole('heading',{name:/Tarefas · Empresa Fixture/}).waitFor();
     }
