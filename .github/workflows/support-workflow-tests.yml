@@ -1,0 +1,26 @@
+name: Certus support workflow tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'certus/operacao.js'
+      - 'certus/operacao.css'
+      - 'certus/master.html'
+      - 'certus/support-workflow.test.js'
+      - '.github/workflows/support-workflow-tests.yml'
+  pull_request:
+    paths:
+      - 'certus/operacao.js'
+      - 'certus/operacao.css'
+      - 'certus/master.html'
+      - 'certus/support-workflow.test.js'
+      - '.github/workflows/support-workflow-tests.yml'
+jobs:
+  support-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test certus/support-workflow.test.js
