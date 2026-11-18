@@ -57,7 +57,7 @@ test('loading, empty, error, retry, stale-response protection and no fake data',
 });
 
 test('unsupported endpoints and operational/financial guardrails are explicit', () => {
-  for (const t of ['Contas Master globais','Não existe rota de atualizações','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','notas internas só aparecem à equipe Master','sem envio por e-mail ou WhatsApp']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
+  for (const t of ['Contas Master globais','Não existe rota de atualizações','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','notas internas só aparecem à equipe Master','e-mail/WhatsApp não são integrados']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
 });
 
 test('tabs, company selector, search and refresh are wired and keyboard accessible', () => {
