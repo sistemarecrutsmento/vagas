@@ -50,7 +50,7 @@ test('API host is fixed, token remains in memory, temporary-password link is ava
 });
 
 test('loading, empty, error, retry, stale-response protection and no fake data', () => {
-  for (const t of ['Carregando dados autenticados','Nenhum registro retornado pela API','Não foi possível carregar os dados','Tentar novamente']) assert.ok(script.includes(t), t);
+  for (const t of ['Carregando dados autenticados','Nenhum endpoint conectado','Não foi possível carregar os dados','Tentar novamente']) assert.ok(script.includes(t), t);
   assert.match(script,/const requestId=\+\+viewRequest/);
   assert.match(script,/requestId!==viewRequest/);
   for (const fake of ['Empresa Aurora','Empresa Horizonte','Empresa Nuvem','12.846','R$ 8.640','1.248','sampleRows','chart-bars']) assert.ok(!script.includes(fake), fake);
@@ -106,6 +106,8 @@ test('Master operational screens do not claim all modules are read-only',()=>{
  assert.doesNotMatch(script,/Somente leitura\. Nenhuma alteração, cobrança, marcação, mensagem ou comunicação foi executada/);
  assert.doesNotMatch(script,/Operações de escrita permanecem desabilitadas/);
  assert.match(script,/Ações disponíveis neste módulo seguem as permissões da API/);
+ assert.match(script,/data-master-infinitepay/);
+ assert.match(script,/INFINITEPAY_API_KEY|InfinitePay/i);
  assert.match(script,/master-company-status-save/);
 });
 

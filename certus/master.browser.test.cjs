@@ -53,7 +53,7 @@ async function createPage() {
   const browser = await chromium.launch({headless:true});
   const page = await browser.newPage({viewport:{width:1440,height:1000}});
   const runtimeErrors=[];page.on('pageerror',err=>{runtimeErrors.push(err.stack||err.message);console.error('MASTER_BROWSER_RUNTIME',err.stack||err.message)});page.on('console',msg=>{if(msg.type()==='error')console.error('MASTER_BROWSER_CONSOLE',msg.text())});
-  const requests=[]; const denied=[];
+  const requests=[]; const denied=[]; const invoiceRows=structuredClone(payloads[`/api/master/companies/${companyId}/invoices`].items);
   await page.route('**/*', async route => {
     const requestUrl=route.request().url();
     if(requestUrl.startsWith(origin+'/')) return route.continue();
@@ -72,6 +72,7 @@ async function createPage() {
     else if(path==='/api/master/auth/login' && req.method()==='POST') body={access_token:'fixture-token',token_type:'Bearer',user:{id:'master-fixture',name:'Master Fixture',email:'master@example.test',role:'master'}};
     else if(url.pathname===`/api/master/companies/${companyId}/contracts` && req.method()==='POST'){assert.equal(req.postDataJSON().status,'draft');body={item:{id:'contract-fixture'},note:'Rascunho criado'}}
     else if(url.pathname===`/api/master/companies/${companyId}/invoices` && req.method()==='POST'){assert.equal(req.postDataJSON().amount,10);body={item:{id:'invoice-draft',status:'draft'},note:'Nenhuma cobrança enviada'}}
+    else if(url.pathname===`/api/master/companies/${companyId}/invoices/44444444-4444-4444-8444-444444444444/infinitepay-link` && req.method()==='POST'){assert.ok(req.postDataJSON().audit_note.length>=8);invoiceRows[0]={...invoiceRows[0],status:'open',provider:'infinitepay',payment_reference:'https://buy.infinitepay.io/fixture'};body={item:invoiceRows[0],checkout_url:invoiceRows[0].payment_reference,note:'Fixture link'}}
     else if(url.pathname===`/api/master/companies/${companyId}/invoices/invoice-fixture` && req.method()==='PATCH'){assert.ok(req.postDataJSON().audit_note.length>=8);body={item:{id:'invoice-fixture',status:req.postDataJSON().status}}}
     else if(url.pathname==='/api/master/announcements' && req.method()==='POST'){assert.equal(req.postDataJSON().status,undefined);body={item:{id:'announcement-fixture',status:'draft'},note:'Rascunho'}}
     else if(url.pathname==='/api/master/features' && req.method()==='POST'){body={item:{feature_key:'fixture.only'},note:'Catálogo'}}
@@ -79,7 +80,7 @@ async function createPage() {
     else if(url.pathname==='/api/master/support/tickets/'+ticketId) body=payloads[`/api/master/support/tickets/${ticketId}`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/subscriptions') body=payloads[`/api/master/companies/${companyId}/subscriptions`];
     else if(url.pathname==='/api/master/companies/'+companyId+'/contracts') body=payloads[`/api/master/companies/${companyId}/contracts`];
-    else if(url.pathname==='/api/master/companies/'+companyId+'/invoices') body=payloads[`/api/master/companies/${companyId}/invoices`];
+    else if(url.pathname==='/api/master/companies/'+companyId+'/invoices') body={items:invoiceRows};
     else if(url.pathname==='/api/master/companies/'+companyId+'/monitoring') body=payloads[`/api/master/companies/${companyId}/monitoring`];
     else if(payloads[path] || payloads[url.pathname]) body=payloads[path] || payloads[url.pathname];
     else { denied.push(requestUrl); return route.abort(); }
@@ -108,7 +109,7 @@ test('all 14 Master screens render using mocked authenticated API data', async()
       await page.getByRole('button',{name:names[i],exact:true}).click();
       await page.getByRole('heading',{name:headings[i],exact:true}).waitFor();
       assert.doesNotMatch(await page.locator('#master-tabpanel').innerText(),/Somente leitura\. Nenhuma alteração, cobrança, marcação, mensagem ou comunicação foi executada/);
-      assert.match(await page.locator('#master-footnote').innerText(),/ações disponíveis ficam nos controles de cada seção/i);
+      assert.match(await page.locator('#master-footnote').innerText(),/ações habilitadas estão nos controles da seção/i);
       if(i===1)assert.ok((await page.locator('#master-tabpanel').innerText()).includes('Atualizar estado'));
       if(i===8)await page.getByRole('heading',{name:/Tarefas · Empresa Fixture/}).waitFor();
     }
@@ -129,7 +130,7 @@ test('company selector, tabs, refresh and page-local table filter work',async()=
     await login(page);
     await page.getByRole('button',{name:/Empresas \(Organizações\)/}).click();
     await page.getByRole('heading',{name:'Empresas',exact:true}).waitFor();
-    await page.locator('#company-select').waitFor();
+    try{await page.locator('#company-select').waitFor({timeout:5000})}catch(e){throw new Error(`Company selector missing. Requests=${JSON.stringify(requests.slice(-6))}; panel=${(await page.locator('#content').innerText()).slice(0,500)}; ${e.message}`)}
     await page.getByRole('tab',{name:'Visão em cartões'}).click();
     await page.getByText('Empresa Fixture').first().waitFor();
     await page.getByRole('tab',{name:'Lista de empresas'}).click();
@@ -192,7 +193,7 @@ test('company detail uses the authenticated overview and never calls a nonexiste
     await login(page);
     await page.getByRole('button',{name:'Empresas (Organizações)',exact:true}).click();
     await page.getByRole('heading',{name:'Empresas',exact:true}).waitFor();
-    await page.locator('#company-select').selectOption(companyId);
+    try{await page.locator('#company-select').selectOption(companyId,{timeout:5000})}catch(e){throw new Error(`Company selector unavailable. Requests=${JSON.stringify(requests.slice(-6))}; panel=${(await page.locator('#content').innerText()).slice(0,500)}; ${e.message}`)}
     await page.getByText('Contagens fornecidas pelo resumo autenticado de empresas.').waitFor();
     assert.ok(requests.some(x=>x.path==='/api/master/overview'));
     assert.ok(!requests.some(x=>x.path.includes('/summary')));
@@ -216,6 +217,17 @@ test('Master creates a global account only after explicit submit',async()=>{
 
 test('Master accesses only company administrators for password reset, with explicit warning/audit reason',async()=>{
  const {browser,page,requests,cleanup}=await createPage();try{await login(page);await page.getByRole('button',{name:'Acessos e Permissões',exact:true}).click();await page.locator('#company-select').selectOption(companyId);await page.getByText('Admin Fixture').waitFor();await page.getByText('Employee Fixture').waitFor();assert.ok(requests.some(x=>x.path===`/api/master/companies/${companyId}/accounts`));page.on('dialog',async d=>{await d.accept('CI approved audit reason')});await page.getByRole('button',{name:'Redefinir senha',exact:false}).click();await page.getByText('CI-only-one-time-password').waitFor();assert.ok(requests.some(x=>x.method==='GET'&&x.path===`/api/master/companies/${companyId}/admin-accounts`));assert.ok(requests.some(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/admin-accounts/admin-fixture/reset-password`))}finally{await cleanup()}
+});
+
+test('InfinitePay checkout is created only after explicit confirmation and opens the returned checkout',async()=>{
+ const {browser,page,requests,cleanup}=await createPage();try{
+  await login(page);await page.getByRole('button',{name:'Financeiro e Cobranças',exact:true}).click();await page.locator('#company-select').selectOption(companyId);
+  await page.getByRole('button',{name:'Gerar link InfinitePay'}).waitFor();
+  page.on('dialog',async d=>{if(d.type()==='prompt')await d.accept('CI-only payment audit reason');else await d.accept()});
+  await page.getByRole('button',{name:'Gerar link InfinitePay'}).click();
+  assert.ok(requests.some(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/invoices/44444444-4444-4444-8444-444444444444/infinitepay-link`));
+  const checkout=page.locator('a[href="https://buy.infinitepay.io/fixture"]').first();await checkout.waitFor();assert.equal(await checkout.getAttribute('rel'),'noopener noreferrer');
+ }finally{await cleanup()}
 });
 
 test('Master draft workflows remain local and never trigger payment or outbound announcement sends',async()=>{
