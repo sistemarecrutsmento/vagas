@@ -40,7 +40,7 @@ test('Master creates an InfinitePay checkout only after confirmation and display
   await page.goto(`${origin}/certus/master.html`,{waitUntil:'domcontentloaded'});
   await page.getByLabel('E-mail Master').fill('master@example.test');await page.getByLabel('Senha',{exact:true}).fill('fake-only-password');await page.getByRole('button',{name:'Entrar'}).click();
   await page.getByRole('heading',{name:'Visão geral da plataforma'}).waitFor();await page.getByRole('button',{name:'Financeiro e Cobranças',exact:true}).click();
-  await page.getByRole('button',{name:'Gerar link InfinitePay'}).waitFor();assert.equal(calls.filter(c=>c.path.endsWith('/infinitepay-link')).length,0);
+  await page.locator('#company-select').waitFor();await page.locator('#company-select').selectOption(companyId);await page.getByRole('button',{name:'Gerar link InfinitePay'}).waitFor();assert.equal(calls.filter(c=>c.path.endsWith('/infinitepay-link')).length,0);
   page.on('dialog',async d=>{if(d.type()==='prompt')await d.accept('CI-only payment audit reason');else await d.accept()});
   await page.getByRole('button',{name:'Gerar link InfinitePay'}).click();
   assert.ok(calls.some(c=>c.method==='POST'&&c.path===`/api/master/companies/${companyId}/invoices/${invoiceId}/infinitepay-link`));
