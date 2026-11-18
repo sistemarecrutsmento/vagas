@@ -40,8 +40,37 @@ test('company support shortcut is removed from primary navigation and placed in 
   assert.match(css, /side-bottom \.side-help\{display:block;width:100%/);
   assert.match(css, /@media\(max-width:760px\)\{\.side-bottom\{display:flex;flex-direction:column/);
 });
+test('company tickets start minimized, expand on tap, and can be filtered by status with attachments',()=>{
+ assert.match(company,/support-detail-\$\{esc\(t\.id\)\}.*hidden/);
+ assert.match(company,/aria-expanded=\"false\"/);
+ assert.match(company,/support-status-filter/);
+ assert.match(company,/option value=\"waiting_customer\"/);
+ assert.match(company,/uploadSupportAttachment/);
+ assert.match(company,/type=\"file\"/);
+ assert.match(company,/support-detail-inline/);
+});
 test('support conversation layout remains responsive on the company portal', () => {
   assert.match(css, /\.support-ticket-list/);
   assert.match(css, /\.support-messages/);
   assert.match(css, /@media\(max-width:600px\).*\.support-ticket/s);
+});
+
+test('company support list starts collapsed and supports status filters and attachments',()=>{
+ assert.match(company,/support-ticket-wrap/);
+ assert.match(company,/id=\"support-detail-\$\{esc\(t\.id\)\}\" hidden/);
+ assert.match(company,/support-status-filter/);
+ assert.match(company,/option value=\"waiting_customer\"/);
+ assert.match(company,/type=\"file\"/);
+ assert.match(company,/uploadSupportAttachment/);
+});
+
+test('Master tickets stay collapsed by default and provide status filter and attachment controls',()=>{
+ const script=inlineScript(masterHtml);
+ assert.match(script,/supportStatusFilter='all'/);
+ assert.match(script,/support-master-status-filter/);
+ assert.match(script,/support-master-detail\" \$\{selectedSupportTicket\?'':'hidden'\}/);
+ assert.match(script,/data-support-ticket/);
+ assert.match(script,/type=\"file\"/);
+ assert.match(script,/uploadMasterSupportAttachment/);
+ assert.match(script,/data-master-support-download/);
 });
