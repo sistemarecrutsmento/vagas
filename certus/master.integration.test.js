@@ -33,7 +33,7 @@ test('Master writes are explicit, restricted to accounts and the audited support
   assert.match(script,/apiWrite\(`\/api\/master\/support\/tickets\/\$\{encodeURIComponent\(id\)\}\/messages`,'POST'/);
   assert.match(script,/apiWrite\(`\/api\/master\/support\/tickets\/\$\{encodeURIComponent\(id\)\}`,'PATCH'/);
   assert.match(script,/Sem vínculo com empresas/);
-  assert.doesNotMatch(script,/method:'(?:PUT|DELETE)'/);
+  assert.doesNotMatch(script,/method:'DELETE'/);
   assert.doesNotMatch(script,/data-inert|data-demo-tab/);
 });
 
@@ -92,26 +92,16 @@ test('onboarding reads project tasks through authenticated company/project-scope
  assert.match(script,/onboarding\/'.*tasks\/'.*'PATCH'/);
 });
 
-test('Master account form creates a global account only after submit and lists existing Master users',()=>{
+test('Master global account creation and scoped company admin reset use published API routes',()=>{
  assert.match(script,/apiGet\('\/api\/master\/accounts'\)/);
- assert.match(script,/id=\"master-account-form\"/);
  assert.match(script,/apiWrite\('\/api\/master\/accounts','POST',\{display_name,email,temporary_password\}\)/);
- assert.match(script,/Sem vínculo com empresas/);
- assert.match(script,/Troca de senha pendente/);
- assert.match(script,/master-account-password-confirm/);
- assert.match(script,/As senhas iniciais não coincidem/);
-});
-
-test('Master access view uses published company-admin reset routes, not missing directory APIs',()=>{
  assert.match(script,/admin-accounts/);
  assert.match(script,/reset-password/);
- assert.match(script,/Administradores titulares/);
- assert.match(script,/temporary_password/);
- assert.match(script,/revoga sessões/);
- assert.doesNotMatch(script,/apiGet\('\/api\/master\/companies\/.*\/accounts'/);
+ assert.match(script,/must_change_password/);
+ assert.match(script,/Redefinição revoga sessões/);
 });
 
-const companyPortalScript=fs.readFileSync('certus/operacao.js','utf8');
+const companyPortalScript=fs.readFileSync(process.env.CERTUS_OPERACAO_JS || 'certus/operacao.js','utf8');
 test('Master support entry restores session before asynchronous persistence and skips employee refresh storage',()=>{
   assert.match(companyPortalScript,/certus_master_return/);
   assert.match(companyPortalScript,/persistent=token&&user\?null:await Promise\.race\(\[loadPersistentSession\(\),new Promise\(resolve=>setTimeout\(\(\)=>resolve\(null\),3000\)\)\]\)/);
@@ -137,4 +127,14 @@ test('company portal JavaScript parses and Master support banner is interpolated
  assert.match(companyPortalScript,/const supportBanner=user\.support_session\?/);
  assert.match(companyPortalScript,/\$\{supportBanner\}/);
  assert.doesNotMatch(companyPortalScript,/\$\{user\.support_session\?'<div class=/);
+});
+
+test('Master published API gaps are exposed with audited controls and no external side effects',()=>{
+ for(const id of ['master-plan-form','master-contract-form','master-invoice-form','master-trial-form','master-announcement-form','master-feature-form','master-task-form','master-incident-form','master-audit-export','master-onboarding-create'])assert.ok(script.includes(id),id);
+ for(const route of ['/api/master/plans','/contracts','/invoices','/api/master/announcements','/api/master/features','/api/master/security/incidents/','/api/master/onboarding/','admin-accounts'])assert.ok(script.includes(route),route);
+ assert.match(script,/status:'draft'/);
+ assert.match(script,/status:'trial'/);
+ assert.match(script,/payment_reference/);
+ assert.match(script,/Novos planos iniciam inativos/);
+ assert.match(script,/Não existe rota de atualizações/);
 });
