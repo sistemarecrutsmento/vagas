@@ -31,6 +31,15 @@ test('Master support inbox offers public response, private note and audited upda
   assert.match(masterHtml, /Justificativa para auditoria/);
   assert.match(masterHtml, /Respostas públicas ficam disponíveis no portal da empresa/);
 });
+test('company support shortcut is removed from primary navigation and placed in sidebar footer', () => {
+  assert.match(company, /\['dashboard','employees','records','requests','users'/);
+  assert.doesNotMatch(company, /\['dashboard','support','employees'/);
+  assert.match(company, /data-view=\"support\" class=\"side-help\"/);
+  assert.match(company, /<strong>Ajuda<\/strong><span>Abertura de chamados<\/span>/);
+  assert.match(company, /\['company_admin','manager'\]\.includes\(user\.role\)/);
+  assert.match(css, /side-bottom \.side-help\{display:block;width:100%/);
+  assert.match(css, /@media\(max-width:760px\)\{\.side-bottom\{display:flex;flex-direction:column/);
+});
 test('support conversation layout remains responsive on the company portal', () => {
   assert.match(css, /\.support-ticket-list/);
   assert.match(css, /\.support-messages/);
