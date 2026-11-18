@@ -73,7 +73,7 @@ test('company help center follows the supplied desktop and mobile reference layo
  assert.match(company,/help-dropzone/);
  assert.match(company,/dragover/);
  assert.match(css,/grid-template-columns:minmax\(0,\.92fr\) minmax\(0,1\.08fr\)/);
- assert.match(css,/help-grid>\.help-contact\{grid-column:1;grid-row:2\}/);
+ assert.match(css,/help-grid>\.help-contact\{grid-column:1;grid-row:2;[^}]*\}/);
  assert.match(css,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:760px\)[\s\S]*help-grid>\.help-main-panel\{grid-column:1\/-1;grid-row:2\}/);
  assert.match(css,/help-dropzone\.is-dragging/);
