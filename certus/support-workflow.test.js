@@ -48,6 +48,7 @@ test('company tickets start minimized, expand on tap, and can be filtered by sta
  assert.match(company,/uploadSupportAttachment/);
  assert.match(company,/type=\"file\"/);
  assert.match(company,/support-detail-inline/);
+ assert.match(company,/other\.setAttribute\('aria-expanded','false'\)/);
 });
 test('support conversation layout remains responsive on the company portal', () => {
   assert.match(css, /\.support-ticket-list/);
