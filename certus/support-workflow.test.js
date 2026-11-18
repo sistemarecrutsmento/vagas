@@ -42,7 +42,7 @@ test('company support shortcut is removed from primary navigation and placed in 
 });
 test('company help center separates home/dashboard, ticket creation, knowledge articles, and live ticket search',()=>{
  assert.match(company,/help-center/);
- assert.match(company,/help-ticket-dialog/);
+ assert.match(company,/id=\"support-new-form\"/);
  assert.match(company,/help-stats/);
  assert.match(company,/help-ticket-search/);
  assert.match(company,/help-ticket-status/);
@@ -63,3 +63,18 @@ test('support conversation layout remains responsive on the company portal', () 
   assert.match(css, /@media\(max-width:600px\).*\.support-ticket/s);
 });
 
+
+test('company help center follows the supplied desktop and mobile reference layout',()=>{
+ assert.match(company,/help-portal-topbar/);
+ assert.match(company,/id=\"help-global-search\"/);
+ assert.match(company,/id=\"help-new-ticket-panel\"/);
+ assert.match(company,/id=\"help-ticket-list\"/);
+ assert.match(company,/id=\"help-kb-panel\"/);
+ assert.match(company,/help-dropzone/);
+ assert.match(company,/dragover/);
+ assert.match(css,/grid-template-columns:minmax\(0,\.92fr\) minmax\(0,1\.08fr\)/);
+ assert.match(css,/help-grid>\.help-contact\{grid-column:1;grid-row:2\}/);
+ assert.match(css,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+ assert.match(css,/@media\(max-width:760px\)[\s\S]*help-grid>\.help-main-panel\{grid-column:1\/-1;grid-row:2\}/);
+ assert.match(css,/help-dropzone\.is-dragging/);
+});
