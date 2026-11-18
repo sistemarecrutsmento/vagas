@@ -21,17 +21,19 @@ test('all 14 navigation screens route to a data view', () => {
 test('read routes match the Master API surface and requests carry auth/no-store', () => {
   for (const route of ['/api/master/dashboard','/api/master/overview','/api/master/plans','/api/master/support/tickets','/api/master/monitoring','/api/master/devices','/api/master/onboarding','/api/master/settings','/api/master/features','/api/master/announcements','/api/master/me','/api/master/audit-log','/api/master/security/incidents']) assert.ok(script.includes(route), route);
   for (const suffix of ['/monitoring','contracts','invoices','subscriptions']) assert.ok(script.includes(suffix), suffix);
-  assert.doesNotMatch(script,/\/summary/,'must not call the nonexistent company summary endpoint');
+  assert.doesNotMatch(script,/apiGet\([^)]*\/api\/master\/companies\/[^)]*\/summary/,'must not call the nonexistent company summary endpoint');
   assert.match(script,/Authorization:'Bearer '\+token/);
   assert.match(script,/cache:'no-store'/);
 });
 
-test('the UI limits writes to Master login and explicitly submitted global account creation', () => {
-  assert.equal((script.match(/method:'POST'/g) || []).length, 1);
+test('Master writes are explicit, restricted to accounts and the audited support workflow', () => {
   assert.match(script,/\/api\/master\/auth\/login/);
   assert.match(script,/apiWrite\('\/api\/master\/accounts','POST'/);
+  assert.match(script,/apiWrite\('\/api\/master\/support\/tickets','POST'/);
+  assert.match(script,/apiWrite\(`\/api\/master\/support\/tickets\/\$\{encodeURIComponent\(id\)\}\/messages`,'POST'/);
+  assert.match(script,/apiWrite\(`\/api\/master\/support\/tickets\/\$\{encodeURIComponent\(id\)\}`,'PATCH'/);
   assert.match(script,/Não são adicionadas a nenhuma empresa/);
-  assert.doesNotMatch(script,/method:'(?:PUT|PATCH|DELETE)'/);
+  assert.doesNotMatch(script,/method:'(?:PUT|DELETE)'/);
   assert.doesNotMatch(script,/data-inert|data-demo-tab/);
 });
 
@@ -55,7 +57,7 @@ test('loading, empty, error, retry, stale-response protection and no fake data',
 });
 
 test('unsupported endpoints and operational/financial guardrails are explicit', () => {
-  for (const t of ['Contas Master globais','Não existe rota de atualizações','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','mensagens não são entregues']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
+  for (const t of ['Contas Master globais','Não existe rota de atualizações','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','notas internas só aparecem à equipe Master','sem envio por e-mail ou WhatsApp']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
 });
 
 test('tabs, company selector, search and refresh are wired and keyboard accessible', () => {
