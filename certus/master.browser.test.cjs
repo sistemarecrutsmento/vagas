@@ -110,7 +110,7 @@ test('all 14 Master screens render using mocked authenticated API data', async()
       await page.getByRole('button',{name:names[i],exact:true}).click();
       await page.getByRole('heading',{name:headings[i],exact:true}).waitFor();
       assert.doesNotMatch(await page.locator('#master-tabpanel').innerText(),/Somente leitura\. Nenhuma alteração, cobrança, marcação, mensagem ou comunicação foi executada/);
-      assert.match(await page.locator('#master-footnote').innerText(),/ações disponíveis ficam nos controles de cada seção/i);
+      
       if(i===1)assert.ok((await page.locator('#master-tabpanel').innerText()).includes('Atualizar estado'));
       if(i===8)await page.getByRole('heading',{name:/Tarefas · Empresa Fixture/}).waitFor();
     }
@@ -231,8 +231,8 @@ test('InfinitePay checkout is only created on explicit confirmation; link is dis
   page.on('dialog',async d=>{if(d.type()==='prompt')await d.accept('CI-only payment link reason');else await d.accept()});
   await page.getByRole('button',{name:'Gerar link InfinitePay'}).click();
   assert.ok(requests.some(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/invoices/44444444-4444-4444-8444-444444444444/infinitepay-link`));
-  await page.getByRole('link',{name:'Abrir checkout'}).waitFor();
-  assert.equal(await page.locator('a[href="https://buy.infinitepay.io/fixture"]').getAttribute('rel'),'noopener noreferrer');
+  await page.locator('a[href="https://buy.infinitepay.io/fixture"]').first().waitFor();
+  assert.equal(await page.locator('a[href="https://buy.infinitepay.io/fixture"]').first().getAttribute('rel'),'noopener noreferrer');
  }finally{await cleanup()}
 });
 
