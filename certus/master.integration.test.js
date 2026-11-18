@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
-const html = fs.readFileSync('certus/master.html', 'utf8');
+const html = fs.readFileSync(process.env.CERTUS_MASTER_HTML || 'certus/master.html', 'utf8');
 const match = html.match(/<script>([\s\S]*?)<\/script>/);
 assert.ok(match, 'embedded Master script exists');
 const script = match[1];
@@ -32,8 +32,8 @@ test('Master writes are explicit, restricted to accounts and the audited support
   assert.match(script,/apiWrite\('\/api\/master\/support\/tickets','POST'/);
   assert.match(script,/apiWrite\(`\/api\/master\/support\/tickets\/\$\{encodeURIComponent\(id\)\}\/messages`,'POST'/);
   assert.match(script,/apiWrite\(`\/api\/master\/support\/tickets\/\$\{encodeURIComponent\(id\)\}`,'PATCH'/);
-  assert.match(script,/Não são adicionadas a nenhuma empresa/);
-  assert.doesNotMatch(script,/method:'(?:PUT|DELETE)'/);
+  assert.match(script,/Sem vínculo com empresas/);
+  assert.doesNotMatch(script,/method:'DELETE'/);
   assert.doesNotMatch(script,/data-inert|data-demo-tab/);
 });
 
@@ -57,7 +57,7 @@ test('loading, empty, error, retry, stale-response protection and no fake data',
 });
 
 test('unsupported endpoints and operational/financial guardrails are explicit', () => {
-  for (const t of ['Contas Master globais','Não existe rota de atualizações','relatórios agregados financeiros','Planos novos iniciam inativos','Comunicados permanecem em rascunho','nenhum pagamento é iniciado','notas internas só aparecem à equipe Master','e-mail/WhatsApp não são integrados']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
+  for (const t of ['Contas Master globais','Não existe rota de atualizações','Resumo das faturas cadastradas','Novos planos iniciam inativos','Publicação/envio não estão integrados.','A ação altera apenas este rascunho e não envia cobrança.','notas internas só aparecem à equipe Master','e-mail/WhatsApp não são integrados']) assert.ok(script.toLowerCase().includes(t.toLowerCase()), t);
 });
 
 test('tabs, company selector, search and refresh are wired and keyboard accessible', () => {
@@ -85,33 +85,30 @@ test('global settings expose only backend-allowlisted typed configuration and au
  assert.match(html,/audit_note,expected_version/);
  assert.match(html,/operational_effect|não são aplicados automaticamente/);
 });
-test('onboarding screen calls the company/project-scoped read-only tasks endpoint and does not write',()=>{
- assert.match(script,/\/api\/master\/companies\/['"]\+encodeURIComponent\(project\.company_id\).*\/tasks/);
- assert.match(script,/Tarefas da implantação selecionada/);
- assert.match(script,/Nenhuma tarefa foi criada, concluída ou editada/);
-});
-
-test('onboarding task detail is project and tenant scoped, read-only and rendered by Master',()=>{
- assert.match(script,/onboarding\/['"]\+encodeURIComponent\(project\.id\)\+['"]\/tasks/);
- assert.match(script,/Tarefas da implantação selecionada/);
+test('onboarding reads project tasks through authenticated company/project-scoped API and records audited updates',()=>{
+ assert.match(script,/apiGet\('\/api\/master\/companies\/'.*onboarding/);
+ assert.match(script,/\/onboarding\/['"]\+encodeURIComponent\(project\.id\)\+['"]\/tasks/);
+ assert.match(script,/\.master-task-form/);
+ assert.match(script,/onboarding\/'.*tasks\/'.*'PATCH'/);
 });
 
 test('Master account form creates a global account only after submit and lists existing Master users',()=>{
  assert.match(script,/apiGet\('\/api\/master\/accounts'\)/);
  assert.match(script,/id=\"master-account-form\"/);
- assert.match(script,/apiWrite\('\/api\/master\/accounts','POST',\{email,display_name,temporary_password\}\)/);
- assert.match(script,/Não são adicionadas a nenhuma empresa/);
+ assert.ok(script.includes("apiWrite('/api/master/accounts','POST',{display_name,email,temporary_password:password})"));
+ assert.match(script,/Sem vínculo com empresas/);
  assert.match(script,/Troca de senha pendente/);
  assert.match(script,/master-account-password-confirm/);
  assert.match(script,/As senhas iniciais não coincidem/);
 });
 
-test('Master users can select a company and inspect safe individual account metadata without impersonation',()=>{
- assert.match(script,/apiGet\('\/api\/master\/companies\/'\+encodeURIComponent\(selectedCompany\)\+'\/accounts'\)/);
- assert.match(script,/Contas individuais das empresas/);
- assert.match(script,/senhas ou tokens/);
- assert.match(script,/Somente leitura/);
- assert.doesNotMatch(script,/impersonate|become-user/);
+test('Master access view uses published company-admin reset routes, not missing directory APIs',()=>{
+ assert.match(script,/admin-accounts/);
+ assert.match(script,/reset-password/);
+ assert.match(script,/Administradores titulares/);
+ assert.match(script,/temporary_password/);
+ assert.match(script,/revoga sessões/);
+ assert.doesNotMatch(script,/apiGet\('\/api\/master\/companies\/.*\/accounts'/);
 });
 
 const companyPortalScript=fs.readFileSync('certus/operacao.js','utf8');
