@@ -51,6 +51,7 @@ async function createPage() {
   origin = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch({headless:true});
   const page = await browser.newPage({viewport:{width:1440,height:1000}});
+  const runtimeErrors=[];page.on('pageerror',err=>{runtimeErrors.push(err.stack||err.message);console.error('MASTER_BROWSER_RUNTIME',err.stack||err.message)});page.on('console',msg=>{if(msg.type()==='error')console.error('MASTER_BROWSER_CONSOLE',msg.text())});
   const requests=[]; const denied=[];
   await page.route('**/*', async route => {
     const requestUrl=route.request().url();
@@ -84,11 +85,12 @@ async function createPage() {
   });
   await page.goto(`${origin}/certus/master.html`,{waitUntil:'domcontentloaded'});
   const cleanup=async()=>{ await browser.close(); await new Promise(resolve=>server.close(resolve)); };
-  return {browser,page,requests,denied,cleanup};
+  return {browser,page,requests,denied,runtimeErrors,cleanup};
 }
 
 async function login(page,email='master@example.test') {
-  await page.getByLabel('E-mail Master').fill(email);
+  try { await page.getByLabel('E-mail Master').fill(email); } catch (error) { throw new Error(`Master login form did not render; body=${(await page.locator('body').innerText().catch(()=>'' )).slice(0,1200)}; error=${error.message}`); }
+  
   await page.getByLabel('Senha',{exact:true}).fill('fake-only-password');
   await page.getByRole('button',{name:'Entrar'}).click();
   await page.getByRole('heading',{name:'Visão geral da plataforma'}).waitFor();
@@ -215,19 +217,16 @@ test('Master draft workflows remain local and never trigger payment or outbound 
  const {browser,page,requests,denied,cleanup}=await createPage();try{await login(page);await page.getByRole('button',{name:'Contratos e Testes',exact:true}).click();await page.locator('#company-select').waitFor();await page.locator('summary').filter({hasText:'Novo contrato (rascunho)'}).click();await page.locator('#master-contract-form [name=title]').fill('Fixture draft');await page.locator('#master-contract-form [name=audit_note]').fill('CI-only audit reason');await page.locator('#master-contract-form button[type=submit]').click();assert.ok(requests.some(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/contracts`));await page.getByRole('button',{name:'Financeiro e Cobranças'}).click();await page.locator('#company-select').waitFor();await page.locator('summary').filter({hasText:'Novo rascunho de cobrança'}).click();await page.locator('#master-invoice-form [name=invoice_number]').fill('INV-CI');await page.locator('#master-invoice-form [name=amount]').fill('10');await page.locator('#master-invoice-form [name=due_at]').fill('2026-12-01');await page.locator('#master-invoice-form [name=audit_note]').fill('CI-only audit reason');await page.locator('#master-invoice-form button[type=submit]').click();assert.ok(requests.some(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/invoices`));assert.ok(!requests.some(x=>/payment|charge|asaas|mercadopago/i.test(x.path)));await page.getByRole('button',{name:'Comunicados e Avisos'}).click();await page.locator('summary').filter({hasText:'Novo comunicado (rascunho)'}).click();await page.locator('#master-announcement-form [name=title]').fill('Fixture message');await page.locator('#master-announcement-form [name=body]').fill('No outbound send');await page.locator('#master-announcement-form [name=audit_note]').fill('CI-only audit reason');await page.locator('#master-announcement-form button[type=submit]').click();assert.ok(requests.some(x=>x.method==='POST'&&x.path==='/api/master/announcements'));assert.ok(!requests.some(x=>/publish|broadcast|email|whatsapp/i.test(x.path)));assert.deepEqual(denied,[])}finally{await cleanup()}
 });
 
-test('Master can start a temporary company manager session without creating a company account',async()=>{
- const {browser,page,requests,cleanup}=await createPage();
- try{
-  await login(page);
-  await page.getByRole('button',{name:'Acessos e Permissões',exact:true}).click();
-  await page.getByRole('heading',{name:'Contas Master globais'}).waitFor();
-  await page.locator('#company-select').selectOption(companyId);
-  await page.getByText('Colaborador Fixture').waitFor();
-  page.once('dialog',dialog=>dialog.accept());
-  await page.getByRole('button',{name:'Abrir como gestão nesta empresa'}).click();
-  await page.waitForURL('**/index.html?master-session=1');
-  const call=requests.find(x=>x.method==='POST'&&x.path===`/api/master/companies/${companyId}/management-session`);
-  assert.ok(call);assert.deepEqual(JSON.parse(call.postData||'{}'),{});
-  assert.ok(!requests.some(x=>x.path.includes('/memberships')));
+test('company admin reset does not create company membership or expose credential hashes',async()=>{
+ const {browser,page,requests,cleanup}=await createPage();try{
+  await login(page);await page.getByRole('button',{name:'Acessos e Permissões',exact:true}).click();
+  await page.locator('#company-select').selectOption(companyId);await page.getByText('Admin Fixture').waitFor();
+  const before=await page.locator('#master-company-admins').innerText();assert.ok(before.includes('admin@example.test'));
+  page.on('dialog',async d=>{await d.accept('Approved support password reset CI')});
+  await page.getByRole('button',{name:'Redefinir senha',exact:false}).click();
+  await page.getByText('CI-only-one-time-password').waitFor();
+  const sent=requests.find(x=>x.method==='POST'&&x.path.endsWith('/admin-accounts/admin-fixture/reset-password'));
+  assert.ok(sent);assert.deepEqual(JSON.parse(sent.postData),{note:'Approved support password reset CI'});
+  assert.ok(!requests.some(x=>/membership|password_hash|credential/i.test(x.path)));
  }finally{await cleanup()}
 });
