@@ -278,3 +278,5 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
  .help-center .help-contact button{width:100%}
 }
 @media(max-width:380px){.main.help-main-shell>header{left:7px}.help-center{margin:0 -10px;padding-left:9px;padding-right:9px}.help-center .help-portal-topbar{margin-left:-9px;margin-right:-9px;padding-left:46px}}
+
+.help-center .help-dropzone.is-dragging{border-color:var(--help-wine);background:#f9eaf0;box-shadow:inset 0 0 0 1px var(--help-wine)}
