@@ -150,3 +150,18 @@ test('company portal JavaScript parses and Master support banner is interpolated
  assert.match(companyPortalScript,/\$\{supportBanner\}/);
  assert.doesNotMatch(companyPortalScript,/\$\{user\.support_session\?'<div class=/);
 });
+
+test('Master UI exposes audited manual monthly subscription and PIX entry without creating a checkout',()=>{
+ const html=fs.readFileSync('certus/master.html','utf8');
+ assert.match(html,/Lançar assinatura e pagamento manual/);
+ assert.match(html,/name="first_payment_date" type="date" value="2026-11-10"/);
+ assert.match(html,/name="due_day" type="number" min="1" max="28" value="10"/);
+ assert.match(html,/payment_method:'pix_manual'/);
+ assert.match(html,/subscriptions\/manual-payment/);
+ assert.match(html,/não há consulta nem confirmação bancária automática/);
+});
+
+test('Master page script parses with the manual payment form template',()=>{
+ const vm=require('node:vm');
+ assert.doesNotThrow(()=>new vm.Script(script),'Master page script must parse before publishing');
+});
