@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#551b2b">
+  <title>Certus — laboratório de prova de vida (teste)</title>
+  <style>
+    :root{color-scheme:light;--wine:#551b2b;--wine2:#7a263b;--gold:#d1a64a;--ink:#241a1d;--muted:#675d60;--line:#e7dfe1;--bg:#f7f4f4;--ok:#17643a;--bad:#9b2435}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}header{background:var(--wine);color:#fff;padding:18px max(18px,calc((100vw - 900px)/2));border-bottom:4px solid var(--gold)}header strong{font-size:1.05rem}main{max-width:900px;margin:22px auto;padding:0 16px 36px}.flag{display:inline-block;background:#fff1d4;color:#654500;border:1px solid #e5c66f;border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:700}.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:16px;box-shadow:0 8px 24px #38131b0a}h1{font-size:clamp(1.5rem,4vw,2rem);line-height:1.2;margin:10px 0}h2{font-size:1.12rem;margin:0 0 8px}.subtle{color:var(--muted)}.notice{border-left:4px solid var(--gold);background:#fffaf0;padding:12px 14px;border-radius:8px}.privacy{display:grid;gap:8px;margin:14px 0}.privacy div{display:flex;gap:10px;align-items:flex-start}.privacy b{color:var(--wine)}.camera-wrap{position:relative;width:min(100%,620px);margin:14px auto 8px;background:#171316;border-radius:12px;overflow:hidden;aspect-ratio:4/3}.camera-wrap video{width:100%;height:100%;display:block;object-fit:cover}.camera-wrap .overlay{position:absolute;inset:8% 22%;border:2px solid #ffffff9c;border-radius:48% 48% 42% 42%;pointer-events:none}.camera-wrap .cam-state{position:absolute;bottom:10px;left:10px;right:10px;text-align:center;background:#160f12c9;color:white;padding:8px;border-radius:8px;font-weight:650}.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:16px 0}.consent{max-width:620px;margin:12px auto;color:var(--muted)}.consent label{display:flex;gap:10px;align-items:flex-start}.consent input{margin-top:5px;accent-color:var(--wine);width:18px;height:18px;flex:none}button{border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;background:var(--wine);color:white}button.secondary{background:white;color:var(--wine);border:1px solid var(--wine)}button:disabled{opacity:.5;cursor:not-allowed}#status{min-height:52px;text-align:center;font-size:1.05rem;font-weight:650;margin:12px auto;max-width:620px}#status.ok{color:var(--ok)}#status.error{color:var(--bad)}.steps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}.step{border:1px solid var(--line);border-radius:99px;padding:4px 12px;background:#faf8f8;color:var(--muted);font-size:.9rem}.step.active{border-color:var(--gold);background:#fff5d8;color:#503600;font-weight:700}.step.done{border-color:#9fceb2;background:#eef8f1;color:var(--ok)}details{margin-top:12px}summary{cursor:pointer;color:var(--wine);font-weight:700}footer{font-size:.9rem;color:var(--muted);padding:4px 2px 20px}noscript{display:block;margin:20px;color:var(--bad)}@media(max-width:560px){main{margin:14px auto;padding:0 12px 26px}.panel{padding:16px}.camera-wrap{aspect-ratio:3/4;max-height:65vh}.controls button{flex:1}.overlay{inset:12% 18%}}
+  </style>
+</head>
+<body>
+  <header><strong>CERTUS <span aria-hidden="true">|</span> laboratório de biometria</strong></header>
+  <main>
+    <span class="flag">PROTÓTIPO DE TESTE — NÃO É PONTO VÁLIDO</span>
+    <h1>Teste experimental de prova de vida</h1>
+    <p class="subtle">Desafio local de piscar e virar o rosto. Esta página não está conectada ao login, cadastro facial, API, banco de dados nem às marcações de ponto da Certus.</p>
+
+    <section class="panel" aria-labelledby="test-about">
+      <h2 id="test-about">O que este teste faz (e o que não faz)</h2>
+      <p class="notice"><b>É um protótipo heurístico.</b> Não tem validação anti-spoof independente e pode ser enganado por vídeo ou por outras técnicas. Não deve ser usado para confirmar identidade, presença ou jornada de trabalho.</p>
+      <div class="privacy">
+        <div><b>✓</b><span>A câmera é analisada nesta página, no aparelho. Nenhum quadro, foto, vídeo, localização ou modelo facial é enviado ou salvo por este protótipo.</span></div>
+        <div><b>✓</b><span>O protótipo baixa o código e os modelos faciais de serviços públicos de distribuição (jsDelivr/GitHub); esses pedidos expõem ao provedor dados normais de conexão, como IP.</span></div>
+        <div><b>!</b><span>Use somente o próprio rosto ou participantes que aceitaram participar. Não use nomes, documentos, rosto ou ponto de funcionários reais nesta rodada.</span></div>
+      </div>
+      <details><summary>Limitações e privacidade</summary><p>O sistema combina detecção de rosto e movimentos simples em sequência aleatória. É uma checagem experimental de interação, não uma prova criptográfica nem um detector robusto de ataques. A câmera só inicia após marcar o consentimento de teste e autorizar o navegador. Ao parar ou fechar a página, a transmissão da câmera é encerrada. As imagens não são deliberadamente persistidas ou enviadas pela lógica desta página; o navegador e os serviços externos continuam sujeitos às suas próprias políticas.</p></details>
+    </section>
+
+    <section class="panel" aria-label="Teste da câmera">
+      <div class="camera-wrap"><video id="camera" autoplay muted playsinline aria-label="Prévia local da câmera"></video><div class="overlay" aria-hidden="true"></div><div class="cam-state" id="cam-state">Câmera desligada</div></div>
+      <div class="consent"><label><input id="local-consent" type="checkbox"><span>Entendi que é um teste experimental local, não devo usar dados de funcionários e aceito ativar minha câmera apenas para esta demonstração.</span></label></div>
+      <div class="controls"><button id="start" type="button" disabled>Iniciar teste</button><button id="stop" class="secondary" type="button" disabled>Encerrar câmera</button></div>
+      <div id="steps" class="steps" aria-label="Etapas do desafio"></div>
+      <div id="status" role="status" aria-live="polite">Marque a caixa de consentimento para habilitar o teste.</div>
+    </section>
+
+    <section class="panel">
+      <h2>Como interpretar o resultado</h2>
+      <p>“Concluído” significa somente que o navegador observou os dois movimentos esperados dentro dos limites programados. Não significa que a pessoa foi identificada, que não houve fraude, nem que uma marcação foi registrada.</p>
+      <p class="subtle">A página não contém botão de ponto, cadastro de face ou envio ao servidor. Para virar uma funcionalidade do Certus seriam necessários, no mínimo, testes com ataques simulados, dispositivos e condições diversas, avaliação de acessibilidade e falsos resultados, análise jurídica/LGPD, revisão de segurança e mudanças separadas no backend.</p>
+    </section>
+    <footer>Versão inicial isolada para experimentação — Certus. Não usar em operação real.</footer>
+  </main>
+  <noscript>Ative JavaScript para usar a demonstração. Nenhuma marcação poderá ser feita por esta página.</noscript>
+  <script src="./core.js"></script>
+  <script>
+  (() => {
+    'use strict';
+    const core = window.CertusFaceLivenessCore;
+    const video = document.getElementById('camera');
+    const statusEl = document.getElementById('status');
+    const camState = document.getElementById('cam-state');
+    const consent = document.getElementById('local-consent');
+    const startButton = document.getElementById('start');
+    const stopButton = document.getElementById('stop');
+    const stepsEl = document.getElementById('steps');
+    let stream = null;
+    let running = false;
+    let modelsReady = null;
+    let runToken = 0;
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const say = (text, tone = '') => { statusEl.textContent = text; statusEl.className = tone; };
+    const sayCamera = text => { camState.textContent = text; };
+
+    function renderSteps(sequence, current = -1, complete = false) {
+      stepsEl.replaceChildren();
+      if (!sequence.length) return;
+      sequence.forEach((item, index) => {
+        const pill = document.createElement('span');
+        pill.className = `step${index < current || complete ? ' done' : index === current ? ' active' : ''}`;
+        pill.textContent = item.type === 'blink' ? 'Piscar' : `Virar para ${item.side} da tela`;
+        stepsEl.append(pill);
+      });
+    }
+
+    async function loadModels() {
+      if (modelsReady) return modelsReady;
+      modelsReady = new Promise((resolve, reject) => {
+        if (window.faceapi) return resolve(window.faceapi);
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/dist/face-api.js';
+        script.async = true;
+        script.onload = () => window.faceapi ? resolve(window.faceapi) : reject(Error('Biblioteca facial indisponível.'));
+        script.onerror = () => reject(Error('Não foi possível baixar a biblioteca de teste.'));
+        document.head.append(script);
+      }).then(async faceapi => {
+        const modelUrl = 'https://cdn.jsdelivr.net/gh/vladmandic/face-api/model';
+        await Promise.all([
+          faceapi.nets.ssdMobilenetv1.loadFromUri(modelUrl),
+          faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl)
+        ]);
+        return faceapi;
+      }).catch(error => { modelsReady = null; throw error; });
+      return modelsReady;
+    }
+
+    function releaseCamera() {
+      if (stream) stream.getTracks().forEach(track => track.stop());
+      stream = null;
+      video.srcObject = null;
+    }
+
+    function stop(message = 'Câmera encerrada. Nenhuma marcação foi registrada.') {
+      running = false;
+      runToken++;
+      releaseCamera();
+      startButton.disabled = !consent.checked;
+      stopButton.disabled = true;
+      sayCamera('Câmera desligada');
+      say(message);
+    }
+
+    async function start() {
+      if (!consent.checked || running) return;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        say('O navegador não oferece câmera segura nesta página. Abra por HTTPS ou em localhost.', 'error');
+        return;
+      }
+      startButton.disabled = true;
+      running = true;
+      stopButton.disabled = false;
+      const token = ++runToken;
+      say('Solicitando acesso à câmera…');
+      try {
+        const requestedStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
+        if (!running || runToken !== token) { requestedStream.getTracks().forEach(track => track.stop()); return; }
+        stream = requestedStream;
+        video.srcObject = stream;
+        await video.play();
+        sayCamera('Carregando modelo de teste…');
+        await loadModels();
+        if (!running || runToken !== token) return;
+        sayCamera('Posicione o rosto dentro do contorno');
+        say('Centralize o rosto e olhe para a câmera. O desafio aleatório começará quando o rosto estiver visível.');
+        await runChallenge(token);
+      } catch (error) {
+        if (runToken !== token) return;
+        stop(error && error.name === 'NotAllowedError' ? 'Acesso à câmera não autorizado. Nenhum teste foi executado.' : (error.message || 'Não foi possível iniciar a câmera.'));
+        statusEl.className = 'error';
+      }
+    }
+
+    async function runChallenge(token) {
+      const faceapi = await loadModels();
+      const sequence = core.createChallengeSequence();
+      renderSteps(sequence);
+      const startedAt = Date.now();
+      let stage = 0;
+      let challengeAt = 0;
+      let openFrames = 0;
+      let blinkArmed = false;
+      let eyeWasClosed = false;
+      let turnFrames = 0;
+      let active = false;
+      while (running && runToken === token && stage < sequence.length && Date.now() - startedAt < 45000) {
+        if (!video.videoWidth || !video.videoHeight) { await sleep(150); continue; }
+        let detections;
+        try {
+          detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.65 })).withFaceLandmarks();
+        } catch (_) {
+          sayCamera('Analisando localmente…'); await sleep(180); continue;
+        }
+        if (!core.isOneGoodFace(detections, video.videoWidth)) {
+          sayCamera(detections.length > 1 ? 'Deixe apenas um rosto visível' : 'Centralize o rosto dentro do contorno');
+          say('É preciso detectar somente um rosto, bem enquadrado e iluminado.');
+          openFrames = 0; blinkArmed = false; eyeWasClosed = false; turnFrames = 0; active = false;
+          await sleep(170); continue;
+        }
+        sayCamera('Rosto detectado — análise local');
+        const item = sequence[stage];
+        if (!active) { active = true; challengeAt = Date.now(); openFrames = 0; blinkArmed = false; eyeWasClosed = false; turnFrames = 0; renderSteps(sequence, stage); }
+        if (item.type === 'blink') {
+          const ear = core.averageEyeAspectRatio(detections[0].landmarks.positions);
+          if (Number.isFinite(ear) && ear > 0.22) {
+            openFrames++;
+            if (openFrames >= 2) blinkArmed = true;
+            if (blinkArmed && eyeWasClosed && Date.now() - challengeAt >= 650) {
+              say('Piscar detectado.');
+              stage++; active = false; await sleep(500); continue;
+            }
+            eyeWasClosed = false;
+          } else if (blinkArmed && Number.isFinite(ear) && ear < 0.18 && Date.now() - challengeAt >= 650) {
+            eyeWasClosed = true;
+          }
+          say(`Etapa ${stage + 1} de 2: pisque naturalmente.`);
+        } else {
+          const offset = core.noseOffset(detections[0].landmarks.positions);
+          turnFrames = core.isTurnDetected(offset, item.side) ? turnFrames + 1 : 0;
+          if (turnFrames >= 3 && Date.now() - challengeAt >= 650) {
+            say('Movimento de cabeça detectado.');
+            stage++; active = false; await sleep(500); continue;
+          }
+          say(`Etapa ${stage + 1} de 2: vire o rosto para a ${item.side} da tela e volte ao centro.`);
+        }
+        await sleep(130);
+      }
+      if (runToken !== token) return;
+      if (running && stage === sequence.length) {
+        renderSteps(sequence, stage, true);
+        sayCamera('Teste concluído — câmera encerrada');
+        say('Desafio concluído neste aparelho. Isto não prova identidade nem presença e não registrou ponto.', 'ok');
+        running = false;
+        releaseCamera();
+        startButton.disabled = !consent.checked;
+        stopButton.disabled = true;
+        return;
+      }
+      if (running && Date.now() - startedAt >= 45000) {
+        sayCamera('Tempo esgotado — câmera encerrada');
+        say('Tempo esgotado. Inicie um novo teste se quiser tentar novamente.', 'error');
+        running = false;
+        releaseCamera();
+        startButton.disabled = !consent.checked;
+        stopButton.disabled = true;
+      }
+    }
+
+    consent.addEventListener('change', () => {
+      startButton.disabled = !consent.checked || running;
+      if (!consent.checked && running) stop('Consentimento removido. Câmera encerrada.');
+      else if (!consent.checked && !running) say('Marque a caixa de consentimento para habilitar o teste.');
+      else if (consent.checked && !running) say('Consentimento registrado apenas nesta página. Pronto para iniciar quando você quiser.');
+    });
+    startButton.addEventListener('click', start);
+    stopButton.addEventListener('click', () => stop());
+    window.addEventListener('pagehide', () => { if (stream) stream.getTracks().forEach(track => track.stop()); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && running) stop('Teste interrompido porque a página saiu de foco.'); });
+  })();
+  </script>
+</body>
+</html>
