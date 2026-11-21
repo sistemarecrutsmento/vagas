@@ -4,42 +4,59 @@
   if (root) root.CertusFaceLivenessCore = api;
 })(typeof window !== 'undefined' ? window : globalThis, function () {
   'use strict';
-  const EYE_LEFT = [36, 37, 38, 39, 40, 41];
-  const EYE_RIGHT = [42, 43, 44, 45, 46, 47];
-  const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-
-  function eyeAspectRatio(points, indices) {
-    if (!Array.isArray(points) || indices.some(i => !points[i])) return NaN;
-    const p = indices.map(i => points[i]);
-    const width = distance(p[0], p[3]);
-    if (!Number.isFinite(width) || width <= 0) return NaN;
-    return (distance(p[1], p[5]) + distance(p[2], p[4])) / (2 * width);
-  }
-
-  function averageEyeAspectRatio(points) {
-    const a = eyeAspectRatio(points, EYE_LEFT);
-    const b = eyeAspectRatio(points, EYE_RIGHT);
-    return Number.isFinite(a) && Number.isFinite(b) ? (a + b) / 2 : NaN;
-  }
-
-  function noseOffset(points) {
-    if (!Array.isArray(points) || !points[30] || !points[36] || !points[45]) return NaN;
-    const span = Math.abs(points[45].x - points[36].x);
-    if (!Number.isFinite(span) || span <= 0) return NaN;
-    const eyeCenter = (points[36].x + points[45].x) / 2;
-    return (points[30].x - eyeCenter) / span;
-  }
-
-  function isTurnDetected(offset, side, threshold = 0.075) {
-    if (!Number.isFinite(offset)) return false;
-    return side === 'esquerda' ? offset <= -threshold : side === 'direita' && offset >= threshold;
-  }
 
   function median(values) {
     const valid = Array.isArray(values) ? values.filter(Number.isFinite).sort((a, b) => a - b) : [];
     if (!valid.length) return NaN;
     const mid = Math.floor(valid.length / 2);
     return valid.length % 2 ? valid[mid] : (valid[mid - 1] + valid[mid]) / 2;
+  }
+
+  function categoryScore(categories, name) {
+    if (!Array.isArray(categories)) return NaN;
+    const found = categories.find(item => item && item.categoryName === name);
+    const value = found && Number(found.score);
+    return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : NaN;
+  }
+
+  function eyeBlinkScores(categories) {
+    return {
+      left: categoryScore(categories, 'eyeBlinkLeft'),
+      right: categoryScore(categories, 'eyeBlinkRight')
+    };
+  }
+
+  function noseOffset(landmarks) {
+    if (!Array.isArray(landmarks) || !landmarks[1] || !landmarks[33] || !landmarks[263]) return NaN;
+    const eyeSpan = Math.abs(landmarks[263].x - landmarks[33].x);
+    if (!Number.isFinite(eyeSpan) || eyeSpan <= 0) return NaN;
+    return (landmarks[1].x - (landmarks[33].x + landmarks[263].x) / 2) / eyeSpan;
+  }
+
+  function faceBounds(landmarks) {
+    if (!Array.isArray(landmarks) || landmarks.length < 100) return null;
+    const xs = landmarks.map(point => point && Number(point.x)).filter(Number.isFinite);
+    const ys = landmarks.map(point => point && Number(point.y)).filter(Number.isFinite);
+    if (xs.length < 100 || ys.length < 100) return null;
+    const left = Math.min(...xs), right = Math.max(...xs);
+    const top = Math.min(...ys), bottom = Math.max(...ys);
+    return { left, right, top, bottom, width: right - left, height: bottom - top,
+      centerX: (left + right) / 2, centerY: (top + bottom) / 2 };
+  }
+
+  function isFaceWellFramed(landmarks) {
+    const box = faceBounds(landmarks);
+    return Boolean(box && box.width >= 0.16 && box.height >= 0.18 && box.width <= 0.94 && box.height <= 0.96 && box.centerX >= 0.08 && box.centerX <= 0.92 && box.centerY >= 0.08 && box.centerY <= 0.92);
+  }
+
+  function isBlinkClosed(scores, baseline, margin = 0.24, floor = 0.48) {
+    if (!scores || !baseline || !Number.isFinite(scores.left) || !Number.isFinite(scores.right) || !Number.isFinite(baseline.left) || !Number.isFinite(baseline.right)) return false;
+    return scores.left >= Math.max(floor, baseline.left + margin) && scores.right >= Math.max(floor, baseline.right + margin);
+  }
+
+  function isEyesReopened(scores, baseline, margin = 0.16, cap = 0.5) {
+    if (!scores || !baseline || !Number.isFinite(scores.left) || !Number.isFinite(scores.right) || !Number.isFinite(baseline.left) || !Number.isFinite(baseline.right)) return false;
+    return scores.left <= Math.min(cap, baseline.left + margin) && scores.right <= Math.min(cap, baseline.right + margin);
   }
 
   function hasTurnedFrom(offset, baseline, threshold = 0.075) {
@@ -50,25 +67,9 @@
     return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset - baseline) <= tolerance;
   }
 
-  function isClosedRelativeTo(ear, openBaseline, ratio = 0.82) {
-    return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear <= openBaseline * ratio;
-  }
-
-  function isReopenedRelativeTo(ear, openBaseline, ratio = 0.90) {
-    return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear >= openBaseline * ratio;
-  }
-
   function createChallengeSequence(random = Math.random) {
-    const first = random() < 0.5 ? 'blink' : 'turn';
-    return first === 'blink' ? [{ type: 'blink' }, { type: 'turn' }] : [{ type: 'turn' }, { type: 'blink' }];
+    return random() < 0.5 ? [{ type: 'blink' }, { type: 'turn' }] : [{ type: 'turn' }, { type: 'blink' }];
   }
 
-  function isOneGoodFace(detections, videoWidth) {
-    if (!Array.isArray(detections) || detections.length !== 1) return false;
-    const d = detections[0];
-    const box = d && d.detection && d.detection.box;
-    return Boolean(box && Number(d.detection.score) >= 0.55 && Number(videoWidth) > 0 && box.width / videoWidth >= 0.12);
-  }
-
-  return { eyeAspectRatio, averageEyeAspectRatio, noseOffset, isTurnDetected, isCentered, median, hasTurnedFrom, hasReturnedTo, isClosedRelativeTo, isReopenedRelativeTo, createChallengeSequence, isOneGoodFace };
+  return { median, categoryScore, eyeBlinkScores, noseOffset, faceBounds, isFaceWellFramed, isBlinkClosed, isEyesReopened, hasTurnedFrom, hasReturnedTo, createChallengeSequence };
 });

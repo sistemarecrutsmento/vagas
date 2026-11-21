@@ -3,323 +3,101 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#551b2b">
-  <title>Certus — laboratório de prova de vida (teste)</title>
+  <meta name="theme-color" content="#35131e">
+  <meta name="description" content="Laboratório isolado para avaliar leitura local de movimentos faciais em navegador.">
+  <title>Certus | Laboratório de biometria</title>
   <style>
-    :root{color-scheme:light;--wine:#551b2b;--wine2:#7a263b;--gold:#d1a64a;--ink:#241a1d;--muted:#675d60;--line:#e7dfe1;--bg:#f7f4f4;--ok:#17643a;--bad:#9b2435}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}header{background:var(--wine);color:#fff;padding:18px max(18px,calc((100vw - 900px)/2));border-bottom:4px solid var(--gold)}header strong{font-size:1.05rem}main{max-width:900px;margin:22px auto;padding:0 16px 36px}.flag{display:inline-block;background:#fff1d4;color:#654500;border:1px solid #e5c66f;border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:700}.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:16px;box-shadow:0 8px 24px #38131b0a}h1{font-size:clamp(1.5rem,4vw,2rem);line-height:1.2;margin:10px 0}h2{font-size:1.12rem;margin:0 0 8px}.subtle{color:var(--muted)}.notice{border-left:4px solid var(--gold);background:#fffaf0;padding:12px 14px;border-radius:8px}.privacy{display:grid;gap:8px;margin:14px 0}.privacy div{display:flex;gap:10px;align-items:flex-start}.privacy b{color:var(--wine)}.camera-wrap{position:relative;width:min(100%,620px);margin:14px auto 8px;background:#171316;border-radius:12px;overflow:hidden;aspect-ratio:4/3}.camera-wrap video{width:100%;height:100%;display:block;object-fit:cover;transform:scaleX(-1)}.camera-wrap .overlay{position:absolute;inset:8% 22%;border:2px solid #ffffff9c;border-radius:48% 48% 42% 42%;pointer-events:none}.camera-wrap .cam-state{position:absolute;bottom:10px;left:10px;right:10px;text-align:center;background:#160f12c9;color:white;padding:8px;border-radius:8px;font-weight:650}.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:16px 0}.consent{max-width:620px;margin:12px auto;color:var(--muted)}.consent label{display:flex;gap:10px;align-items:flex-start}.consent input{margin-top:5px;accent-color:var(--wine);width:18px;height:18px;flex:none}button{border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;background:var(--wine);color:white}button.secondary{background:white;color:var(--wine);border:1px solid var(--wine)}button:disabled{opacity:.5;cursor:not-allowed}#status{min-height:52px;text-align:center;font-size:1.05rem;font-weight:650;margin:12px auto;max-width:620px}#status.ok{color:var(--ok)}#status.error{color:var(--bad)}.steps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}.step{border:1px solid var(--line);border-radius:99px;padding:4px 12px;background:#faf8f8;color:var(--muted);font-size:.9rem}.step.active{border-color:var(--gold);background:#fff5d8;color:#503600;font-weight:700}.step.done{border-color:#9fceb2;background:#eef8f1;color:var(--ok)}details{margin-top:12px}summary{cursor:pointer;color:var(--wine);font-weight:700}footer{font-size:.9rem;color:var(--muted);padding:4px 2px 20px}noscript{display:block;margin:20px;color:var(--bad)}@media(max-width:560px){main{margin:14px auto;padding:0 12px 26px}.panel{padding:16px}.camera-wrap{aspect-ratio:3/4;max-height:65vh}.controls button{flex:1}.overlay{inset:12% 18%}}
+    :root{color-scheme:light;--wine:#35131e;--wine2:#572332;--gold:#caa452;--ink:#21181b;--muted:#71686b;--line:#e8e1e3;--paper:#fff;--bg:#f5f2f3;--ok:#17633e;--warn:#8a5c00;--bad:#a12d3d;--shadow:0 14px 40px #31111b0c}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}header{background:var(--wine);color:#fff;border-bottom:3px solid var(--gold)}.head{max-width:1120px;margin:auto;padding:15px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-weight:800;letter-spacing:.04em}.brand span{color:#dfc47f}.head-tag{border:1px solid #ffffff55;border-radius:99px;padding:5px 10px;color:#f6e9c4;font-size:.78rem;font-weight:700;letter-spacing:.06em}main{max-width:1120px;margin:28px auto;padding:0 20px 36px}.eyebrow{color:var(--wine2);font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(1.8rem,4vw,2.65rem);line-height:1.12;margin:8px 0 10px;letter-spacing:-.03em}.intro{max-width:760px;color:var(--muted);margin:0}.notice{margin:19px 0 20px;background:#fffaf0;border:1px solid #ead7a6;border-left:4px solid var(--gold);border-radius:12px;padding:14px 16px;color:#51421f}.notice strong{color:#3d3016}.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr);gap:18px;align-items:start}.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:19px}.card h2{font-size:1.05rem;margin:0 0 12px}.cam-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.cam-head h2{margin:0}.live{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.83rem;font-weight:650}.dot{width:9px;height:9px;background:#a8a2a4;border-radius:50%}.live.active .dot{background:#25a76a;box-shadow:0 0 0 4px #25a76a20}.camera{position:relative;width:100%;aspect-ratio:4/3;background:#171316;border-radius:13px;overflow:hidden;display:grid;place-items:center}.camera video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}.camera .guide{position:absolute;left:50%;top:50%;width:min(47%,240px);height:82%;transform:translate(-50%,-50%);border:2px solid #ffffffa8;border-radius:48% 48% 43% 43%;box-shadow:0 0 0 1000px #140f1450;pointer-events:none}.camera .cam-label{position:absolute;left:12px;right:12px;bottom:12px;padding:9px 12px;border-radius:9px;background:#1d171bd9;color:white;text-align:center;font-size:.88rem;font-weight:700}.camera-placeholder{color:#d5ced0;text-align:center;padding:20px}.camera-placeholder b{display:block;color:white;margin-bottom:4px}.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.consent{display:flex;align-items:flex-start;gap:10px;color:var(--muted);font-size:.9rem;margin:13px 0 0}.consent input{width:19px;height:19px;margin:2px 0 0;accent-color:var(--wine);flex:none}button{border:0;border-radius:10px;padding:11px 17px;background:var(--wine);color:white;font:inherit;font-weight:750;cursor:pointer;min-height:46px}button.secondary{background:white;border:1px solid #bbaeb2;color:var(--wine)}button:disabled{opacity:.48;cursor:not-allowed}.controls button:first-child{flex:1}.result-box{min-height:104px;border:1px solid var(--line);border-radius:12px;background:#faf8f8;padding:14px}.result-title{display:flex;align-items:center;gap:8px;font-weight:800;margin-bottom:5px}.state-icon{width:24px;height:24px;border-radius:50%;background:#eee9eb;color:var(--wine);display:grid;place-items:center;font-size:.85rem}.result-box p{margin:0;color:var(--muted);font-size:.92rem}.result-box[data-tone="ok"]{border-color:#b7d9c5;background:#f2faf5}.result-box[data-tone="ok"] .state-icon{background:#d8efe1;color:var(--ok)}.result-box[data-tone="warn"]{border-color:#ead7a6;background:#fffcf4}.result-box[data-tone="error"]{border-color:#edc7cd;background:#fff6f7}.result-box[data-tone="error"] .state-icon{background:#f9e1e4;color:var(--bad)}.steps{display:grid;gap:9px;margin:14px 0}.step{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;color:var(--muted);font-size:.9rem}.step .num{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:#f0edef;color:#62595d;font-weight:800;font-size:.8rem;flex:none}.step.active{border-color:#d7bd7d;background:#fffaf0;color:var(--wine);font-weight:700}.step.active .num{background:#f2e3b7;color:var(--wine)}.step.done{border-color:#b7d9c5;background:#f2faf5;color:var(--ok)}.step.done .num{background:#d8efe1;color:var(--ok)}.small-note{font-size:.83rem;color:var(--muted);margin:12px 0 0}.diagnostics{margin-top:15px;border-top:1px solid var(--line);padding-top:12px}.diagnostics summary{cursor:pointer;color:var(--wine2);font-weight:750;font-size:.88rem}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.metric{border:1px solid var(--line);border-radius:10px;padding:9px 10px}.metric label{display:block;color:var(--muted);font-size:.75rem}.metric strong{font-variant-numeric:tabular-nums;font-size:.9rem}.fineprint{font-size:.84rem;color:var(--muted);margin-top:17px}.fineprint p{margin:8px 0}.safe{color:var(--ok);font-weight:700}footer{max-width:1120px;margin:auto;padding:0 20px 28px;color:var(--muted);font-size:.82rem}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:780px){main{margin:20px auto;padding:0 14px 28px}.head{padding:13px 15px}.layout{grid-template-columns:1fr;gap:13px}.card{padding:15px;border-radius:15px}.camera{aspect-ratio:3/4;max-height:66vh}.camera .guide{height:78%;width:min(58%,260px)}.controls button{flex:1}.fineprint{padding:0 2px}footer{padding:0 14px 24px}}
   </style>
 </head>
 <body>
-  <header><strong>CERTUS <span aria-hidden="true">|</span> laboratório de biometria</strong></header>
-  <main>
-    <span class="flag">PROTÓTIPO DE TESTE — NÃO É PONTO VÁLIDO</span>
-    <h1>Teste experimental de prova de vida</h1>
-    <p class="subtle">Prévia da câmera espelhada para ficar mais natural no celular; a direção dos movimentos não afeta a checagem, que compara o rosto à sua posição inicial. A página não está conectada ao login, cadastro facial, API, banco de dados nem às marcações de ponto da Certus.</p>
+<header><div class="head"><div class="brand">CERTUS <span>／</span> LAB BIOMETRIA</div><div class="head-tag">AMBIENTE ISOLADO · TESTE</div></div></header>
+<main>
+  <div class="eyebrow">Estudo experimental · análise no navegador</div>
+  <h1>Laboratório de movimentos faciais</h1>
+  <p class="intro">Esta rodada testa se o celular acompanha movimentos guiados usando um detector facial diferente. O objetivo é diagnosticar a captura — não validar identidade, presença ou jornada.</p>
+  <div class="notice"><strong>Importante:</strong> detectar uma piscada ou uma virada não prova que há uma pessoa real diante da câmera. Fotos, vídeos e injeções de imagem ainda podem enganar este tipo de demonstração. Não use em registros de ponto nem com dados de funcionários.</div>
 
-    <section class="panel" aria-labelledby="test-about">
-      <h2 id="test-about">O que este teste faz (e o que não faz)</h2>
-      <p class="notice"><b>É um protótipo heurístico.</b> Não tem validação anti-spoof independente e pode ser enganado por vídeo ou por outras técnicas. Não deve ser usado para confirmar identidade, presença ou jornada de trabalho.</p>
-      <div class="privacy">
-        <div><b>✓</b><span>A câmera é analisada nesta página, no aparelho. Nenhum quadro, foto, vídeo, localização ou modelo facial é enviado ou salvo por este protótipo.</span></div>
-        <div><b>✓</b><span>O protótipo baixa o código e os modelos faciais de serviços públicos de distribuição (jsDelivr/GitHub); esses pedidos expõem ao provedor dados normais de conexão, como IP.</span></div>
-        <div><b>!</b><span>Use somente o próprio rosto ou participantes que aceitaram participar. Não use nomes, documentos, rosto ou ponto de funcionários reais nesta rodada.</span></div>
+  <div class="layout">
+    <section class="card" aria-labelledby="capture-title">
+      <div class="cam-head"><h2 id="capture-title">Captura local</h2><div class="live" id="live-indicator"><span class="dot"></span><span id="live-text">Câmera desligada</span></div></div>
+      <div class="camera"><video id="camera" autoplay muted playsinline aria-label="Prévia local da câmera"></video><div class="guide" aria-hidden="true"></div><div class="cam-label" id="cam-label"><span class="camera-placeholder"><b>Pronto para iniciar</b>A prévia aparece aqui depois da autorização.</span></div></div>
+      <label class="consent"><input id="consent" type="checkbox"><span>Entendi que é uma demonstração experimental, usarei apenas meu rosto ou de participante que aceitou, e não usarei dados de funcionários.</span></label>
+      <div class="controls"><button id="start" type="button" disabled>Iniciar diagnóstico</button><button id="stop" class="secondary" type="button" disabled>Encerrar câmera</button></div>
+      <div class="fineprint"><span class="safe">✓</span> O vídeo é analisado localmente e não é gravado nem enviado pela página. O navegador baixa biblioteca e modelo públicos; esses pedidos podem revelar ao distribuidor dados de conexão, como IP.</div>
+    </section>
+
+    <aside class="card" aria-labelledby="status-title">
+      <h2 id="status-title">Etapas e diagnóstico</h2>
+      <div class="result-box" id="result-box" data-tone="">
+        <div class="result-title"><span class="state-icon" id="state-icon">i</span><span id="state-title">Aguardando início</span></div>
+        <p id="status" role="status" aria-live="polite">Marque o consentimento para habilitar o teste.</p>
       </div>
-      <details><summary>Limitações e privacidade</summary><p>O sistema combina detecção de rosto e movimentos simples em sequência aleatória. É uma checagem experimental de interação, não uma prova criptográfica nem um detector robusto de ataques. A câmera só inicia após marcar o consentimento de teste e autorizar o navegador. Ao parar ou fechar a página, a transmissão da câmera é encerrada. As imagens não são deliberadamente persistidas ou enviadas pela lógica desta página; o navegador e os serviços externos continuam sujeitos às suas próprias políticas.</p></details>
-    </section>
-
-    <section class="panel" aria-label="Teste da câmera">
-      <div class="camera-wrap"><video id="camera" autoplay muted playsinline aria-label="Prévia local da câmera"></video><div class="overlay" aria-hidden="true"></div><div class="cam-state" id="cam-state">Câmera desligada</div></div>
-      <div class="consent"><label><input id="local-consent" type="checkbox"><span>Entendi que é um teste experimental local, não devo usar dados de funcionários e aceito ativar minha câmera apenas para esta demonstração.</span></label></div>
-      <div class="controls"><button id="start" type="button" disabled>Iniciar teste</button><button id="stop" class="secondary" type="button" disabled>Encerrar câmera</button></div>
-      <div id="steps" class="steps" aria-label="Etapas do desafio"></div>
-      <div id="status" role="status" aria-live="polite">Marque a caixa de consentimento para habilitar o teste.</div>
-    </section>
-
-    <section class="panel">
-      <h2>Como interpretar o resultado</h2>
-      <p>“Concluído” significa somente que o navegador observou os dois movimentos esperados dentro dos limites programados. Não significa que a pessoa foi identificada, que não houve fraude, nem que uma marcação foi registrada.</p>
-      <p class="subtle">A página não contém botão de ponto, cadastro de face ou envio ao servidor. Para virar uma funcionalidade do Certus seriam necessários, no mínimo, testes com ataques simulados, dispositivos e condições diversas, avaliação de acessibilidade e falsos resultados, análise jurídica/LGPD, revisão de segurança e mudanças separadas no backend.</p>
-    </section>
-    <footer>Versão inicial isolada para experimentação — Certus. Não usar em operação real.</footer>
-  </main>
-  <noscript>Ative JavaScript para usar a demonstração. Nenhuma marcação poderá ser feita por esta página.</noscript>
-  <script>
-  // Inlined to avoid browser/CDN caching the page and helper at different versions.
-  window.CertusFaceLivenessCore = (() => {
-    const EYE_LEFT = [36, 37, 38, 39, 40, 41];
-    const EYE_RIGHT = [42, 43, 44, 45, 46, 47];
-    const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-    function eyeAspectRatio(points, indices) {
-      if (!Array.isArray(points) || indices.some(i => !points[i])) return NaN;
-      const p = indices.map(i => points[i]), width = distance(p[0], p[3]);
-      return Number.isFinite(width) && width > 0 ? (distance(p[1],p[5]) + distance(p[2],p[4])) / (2 * width) : NaN;
+      <div class="steps" id="steps" aria-label="Etapas do teste"></div>
+      <p class="small-note" id="prompt-note">Dica: use boa luz frontal, segure o telefone estável e deixe o rosto inteiro dentro do contorno.</p>
+      <details class="diagnostics"><summary>Leituras do detector (teste)</summary><div class="metrics">
+        <div class="metric"><label>Rosto</label><strong id="m-face">—</strong></div>
+        <div class="metric"><label>Enquadramento</label><strong id="m-frame">—</strong></div>
+        <div class="metric"><label>Piscar · olho esquerdo</label><strong id="m-blink-left">—</strong></div>
+        <div class="metric"><label>Piscar · olho direito</label><strong id="m-blink-right">—</strong></div>
+        <div class="metric"><label>Movimento lateral</label><strong id="m-turn">—</strong></div>
+        <div class="metric"><label>Motor</label><strong id="m-engine">Não carregado</strong></div>
+      </div></details>
+      <div class="fineprint"><p><strong>O que “concluído” quer dizer:</strong> somente que o detector observou os movimentos solicitados nesta sessão.</p><p>Não existe validação anti-spoof, correspondência de identidade, gravação de ponto ou conexão com API, cadastro ou banco da Certus. A versão não está aprovada para operação.</p></div>
+    </aside>
+  </div>
+</main>
+<footer>Laboratório independente e descartável · Certus · Não usar para decisões de trabalho ou controle de acesso.</footer>
+<script>
+(function(root){
+  'use strict';
+  function median(values){const a=Array.isArray(values)?values.filter(Number.isFinite).sort((x,y)=>x-y):[];if(!a.length)return NaN;const m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2;}
+  function categoryScore(categories,name){if(!Array.isArray(categories))return NaN;const found=categories.find(x=>x&&x.categoryName===name);const n=found&&Number(found.score);return Number.isFinite(n)?Math.max(0,Math.min(1,n)):NaN;}
+  function eyeBlinkScores(categories){return{left:categoryScore(categories,'eyeBlinkLeft'),right:categoryScore(categories,'eyeBlinkRight')};}
+  function noseOffset(points){if(!Array.isArray(points)||!points[1]||!points[33]||!points[263])return NaN;const span=Math.abs(points[263].x-points[33].x);return Number.isFinite(span)&&span>0?(points[1].x-(points[33].x+points[263].x)/2)/span:NaN;}
+  function faceBounds(points){if(!Array.isArray(points)||points.length<100)return null;const xs=points.map(p=>p&&Number(p.x)).filter(Number.isFinite),ys=points.map(p=>p&&Number(p.y)).filter(Number.isFinite);if(xs.length<100||ys.length<100)return null;const left=Math.min(...xs),right=Math.max(...xs),top=Math.min(...ys),bottom=Math.max(...ys);return{left,right,top,bottom,width:right-left,height:bottom-top,centerX:(left+right)/2,centerY:(top+bottom)/2};}
+  function isFaceWellFramed(points){const b=faceBounds(points);return Boolean(b&&b.width>=.16&&b.height>=.18&&b.width<=.94&&b.height<=.96&&b.centerX>=.08&&b.centerX<=.92&&b.centerY>=.08&&b.centerY<=.92);}
+  function isBlinkClosed(s,b,margin=.24,floor=.48){return Boolean(s&&b&&Number.isFinite(s.left)&&Number.isFinite(s.right)&&Number.isFinite(b.left)&&Number.isFinite(b.right)&&s.left>=Math.max(floor,b.left+margin)&&s.right>=Math.max(floor,b.right+margin));}
+  function isEyesReopened(s,b,margin=.16,cap=.5){return Boolean(s&&b&&Number.isFinite(s.left)&&Number.isFinite(s.right)&&Number.isFinite(b.left)&&Number.isFinite(b.right)&&s.left<=Math.min(cap,b.left+margin)&&s.right<=Math.min(cap,b.right+margin));}
+  function hasTurnedFrom(n,b,t=.075){return Number.isFinite(n)&&Number.isFinite(b)&&Math.abs(n-b)>=t;}
+  function hasReturnedTo(n,b,t=.055){return Number.isFinite(n)&&Number.isFinite(b)&&Math.abs(n-b)<=t;}
+  function createChallengeSequence(random=Math.random){return random()<.5?[{type:'blink'},{type:'turn'}]:[{type:'turn'},{type:'blink'}];}
+  root.CertusFaceLivenessCore={median,categoryScore,eyeBlinkScores,noseOffset,faceBounds,isFaceWellFramed,isBlinkClosed,isEyesReopened,hasTurnedFrom,hasReturnedTo,createChallengeSequence};
+})(window);
+</script>
+<script type="module">
+(() => {
+  'use strict';
+  const core=window.CertusFaceLivenessCore, video=document.getElementById('camera');
+  const status=document.getElementById('status'), stateTitle=document.getElementById('state-title'), icon=document.getElementById('state-icon');
+  const resultBox=document.getElementById('result-box'), camLabel=document.getElementById('cam-label'), live=document.getElementById('live-indicator'), liveText=document.getElementById('live-text');
+  const consent=document.getElementById('consent'), startButton=document.getElementById('start'), stopButton=document.getElementById('stop'), stepsEl=document.getElementById('steps');
+  const metrics={face:document.getElementById('m-face'),frame:document.getElementById('m-frame'),left:document.getElementById('m-blink-left'),right:document.getElementById('m-blink-right'),turn:document.getElementById('m-turn'),engine:document.getElementById('m-engine')};
+  let stream=null, landmarker=null, running=false, generation=0, lastVideoTime=-1, visionModule=null;
+  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  function setStatus(title,text,tone=''){stateTitle.textContent=title;status.textContent=text;icon.textContent=tone==='ok'?'✓':tone==='error'?'!':'i';resultBox.dataset.tone=tone;}
+  function setCameraLabel(text){camLabel.textContent=text;}
+  function releaseCamera(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;live.classList.remove('active');liveText.textContent='Câmera desligada';}
+  function renderSteps(sequence,stage=-1,complete=false){stepsEl.replaceChildren();sequence.forEach((item,index)=>{const row=document.createElement('div');row.className='step'+(complete||index<stage?' done':index===stage?' active':'');const number=document.createElement('span');number.className='num';number.textContent=complete||index<stage?'✓':String(index+1);const label=document.createElement('span');label.textContent=item.type==='blink'?'Fechar e reabrir os olhos':'Virar e voltar ao centro';row.append(number,label);stepsEl.append(row);});}
+  async function createDetector(){metrics.engine.textContent='Carregando…';if(!visionModule)visionModule=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.3/vision_bundle.mjs');const FilesetResolver=visionModule.FilesetResolver,FaceLandmarker=visionModule.FaceLandmarker;const vision=await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.3/wasm');let lastError;for(const delegate of ['GPU','CPU']){try{landmarker=await FaceLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-tasks/face_landmarker/face_landmarker_v2_with_blendshapes.task',delegate},runningMode:'VIDEO',numFaces:2,outputFaceBlendshapes:true,minFaceDetectionConfidence:.55,minFacePresenceConfidence:.5,minTrackingConfidence:.5});metrics.engine.textContent=delegate==='GPU'?'GPU pronto':'CPU pronto';return landmarker;}catch(error){lastError=error;if(landmarker){try{landmarker.close();}catch(_){}landmarker=null;}}}throw lastError||new Error('Não foi possível carregar o detector.');}
+  function closeDetector(){if(landmarker){try{landmarker.close();}catch(_){}landmarker=null;}metrics.engine.textContent='Encerrado';}
+  function stop(message='Teste interrompido. Câmera encerrada.'){running=false;generation++;releaseCamera();closeDetector();startButton.disabled=!consent.checked;stopButton.disabled=true;setCameraLabel('Câmera desligada');setStatus('Sessão encerrada',message);}
+  function fmt(value){return Number.isFinite(value)?`${Math.round(value*100)}%`:'—';}
+  function resetMetrics(){for(const key of ['face','frame','left','right','turn'])metrics[key].textContent='—';}
+  async function start(){if(!consent.checked||running)return;if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){setStatus('Câmera indisponível','Abra esta página em um navegador com HTTPS e permissão de câmera.','error');return;}startButton.disabled=true;stopButton.disabled=false;running=true;const token=++generation;resetMetrics();setStatus('Preparando detector','Baixando o motor e o modelo de análise facial para este aparelho.');setCameraLabel('Carregando modelo de teste…');liveText.textContent='Preparando';try{await createDetector();if(!running||token!==generation)return;setStatus('Aguardando câmera','O modelo está pronto. Agora o navegador pedirá acesso à câmera.');const requested=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'user'},width:{ideal:720},height:{ideal:1280}},audio:false});if(!running||token!==generation){requested.getTracks().forEach(t=>t.stop());return;}stream=requested;video.srcObject=stream;await video.play();await new Promise(resolve=>{if(video.readyState>=2)resolve();else video.addEventListener('loadeddata',resolve,{once:true});});if(!running||token!==generation)return;live.classList.add('active');liveText.textContent='Análise local ativa';setCameraLabel('Centralize o rosto no contorno');setStatus('Ajuste o enquadramento','Olhe para a câmera, mantenha o rosto inteiro dentro do oval e aguarde a detecção.');await runChallenge(token);}catch(error){if(token!==generation)return;running=false;generation++;releaseCamera();closeDetector();startButton.disabled=!consent.checked;stopButton.disabled=true;const text=error&&error.name==='NotAllowedError'?'O acesso à câmera foi negado. Nenhum teste foi executado.':error&&error.name==='NotFoundError'?'Este aparelho não disponibilizou uma câmera.':'Não consegui iniciar o teste. Verifique a conexão para baixar o modelo e tente novamente.';setCameraLabel('Não foi possível iniciar');setStatus('Falha ao iniciar',text,'error');}}
+  async function runChallenge(token){const sequence=core.createChallengeSequence();renderSteps(sequence);const startAt=Date.now();let stage=0,faceState='nenhum rosto detectado',active=false,neutral=[],turnBaseline=null,turned=false,turnFrames=0,centerFrames=0,blinkL=[],blinkR=[],blinkBase=null,closedFrames=0,closedAt=0,frameCount=0;let fpsAt=Date.now();while(running&&generation===token&&stage<sequence.length&&Date.now()-startAt<80000){if(video.readyState<2||video.currentTime===lastVideoTime){await delay(35);continue;}lastVideoTime=video.currentTime;let result;try{result=landmarker.detectForVideo(video,performance.now());}catch(_){faceState='falha ao processar imagem';setCameraLabel('Falha ao processar — encerre e tente de novo');setStatus('Erro de processamento','O navegador não conseguiu analisar este quadro. Encerre a câmera e tente novamente.','error');await delay(120);continue;}frameCount++;const now=Date.now();if(now-fpsAt>=1000){metrics.engine.textContent=`${metrics.engine.textContent.split(' · ')[0]} · ${frameCount} q/s`;frameCount=0;fpsAt=now;}
+      const faces=(result&&result.faceLandmarks)||[];metrics.face.textContent=faces.length===1?'1 rosto':faces.length?`${faces.length} rostos`:'não localizado';if(faces.length!==1){faceState=faces.length>1?'mais de um rosto':'nenhum rosto detectado';metrics.frame.textContent='—';setCameraLabel(faces.length>1?'Deixe apenas um rosto visível':'Aproxime-se e melhore a iluminação');setStatus('Aguardando um rosto',faces.length>1?'Deixe somente uma pessoa visível.':'Aproxime o telefone e deixe todo o rosto dentro do contorno.');await delay(35);continue;}
+      const points=faces[0],bounds=core.faceBounds(points),wellFramed=core.isFaceWellFramed(points);faceState='rosto localizado';metrics.frame.textContent=wellFramed?'adequado':'ajustar';if(!wellFramed){setCameraLabel('Ajuste o rosto dentro do contorno');setStatus('Ajuste o enquadramento','Afaste ou aproxime um pouco o telefone e centralize o rosto.');await delay(35);continue;}setCameraLabel('Rosto localizado · análise no aparelho');const item=sequence[stage];if(!active){active=true;currentStage=stage;neutral=[];turnBaseline=null;turned=false;turnFrames=0;centerFrames=0;blinkL=[];blinkR=[];blinkBase=null;closedFrames=0;closedAt=0;renderSteps(sequence,stage);}
+      if(item.type==='blink'){const blend=(result&&result.faceBlendshapes&&result.faceBlendshapes[0]&&result.faceBlendshapes[0].categories)||[],scores=core.eyeBlinkScores(blend);metrics.left.textContent=fmt(scores.left);metrics.right.textContent=fmt(scores.right);if(blinkBase===null){if(Number.isFinite(scores.left)&&Number.isFinite(scores.right)&&scores.left<.55&&scores.right<.55){blinkL.push(scores.left);blinkR.push(scores.right);}setCameraLabel(`Calibrando olhos ${blinkL.length}/18`);setStatus('Calibrando os olhos',`Olhe para a câmera e mantenha os olhos abertos. ${blinkL.length} de 18 amostras.`);if(blinkL.length>=18){blinkBase={left:core.median(blinkL),right:core.median(blinkR)};setCameraLabel('Calibrado · faça o movimento solicitado');setStatus('Agora feche e abra os olhos','Feche os dois olhos por um instante e reabra. A leitura aparece nos indicadores.');}await delay(45);continue;}const closed=core.isBlinkClosed(scores,blinkBase),reopened=core.isEyesReopened(scores,blinkBase);if(closed){closedFrames++;if(closedFrames>=2&&!closedAt){closedAt=now;setCameraLabel('Fechamento dos olhos detectado');setStatus('Fechamento detectado','Agora reabra os olhos para concluir esta etapa.');}}else if(closedAt){const elapsed=now-closedAt;if(reopened&&elapsed>=80&&elapsed<3500){stage++;active=false;renderSteps(sequence,stage);setStatus('Movimento observado','Fechamento e reabertura foram observados.');await delay(250);continue;}if(elapsed>=3500){closedAt=0;closedFrames=0;setStatus('Tente mais uma vez','Não consegui confirmar a reabertura. Feche e reabra os olhos naturalmente.','warn');}}else{closedFrames=0;const high=Math.max(scores.left||0,scores.right||0);setStatus('Aguardando o movimento',`Indicadores: esquerdo ${fmt(scores.left)} · direito ${fmt(scores.right)}. Feche e reabra os olhos.`);if(high>.3)setCameraLabel('Detectando movimento dos olhos…');}}
+      else{const offset=core.noseOffset(points);metrics.turn.textContent=Number.isFinite(offset)?`${offset>=0?'+':''}${offset.toFixed(3)}`:'—';if(!Number.isFinite(offset)){await delay(40);continue;}if(turnBaseline===null){neutral.push(offset);setCameraLabel(`Calibrando posição central ${neutral.length}/12`);setStatus('Calibrando posição central','Olhe reto para a câmera e mantenha a cabeça estável.');if(neutral.length>=12){turnBaseline=core.median(neutral);setStatus('Vire um pouco a cabeça','Vire para qualquer lado e depois volte a olhar reto.');setCameraLabel('Pronto · vire para qualquer lado');}await delay(45);continue;}if(!turned){turnFrames=core.hasTurnedFrom(offset,turnBaseline,.065)?turnFrames+1:0;if(turnFrames>=2){turned=true;centerFrames=0;setCameraLabel('Virada detectada · volte ao centro');setStatus('Virada detectada','Agora volte a olhar reto para a câmera.');}}else{centerFrames=core.hasReturnedTo(offset,turnBaseline,.075)?centerFrames+1:0;if(centerFrames>=2){stage++;active=false;renderSteps(sequence,stage);setStatus('Movimento observado','Virada e retorno foram observados.');await delay(250);continue;}}if(!turned)setStatus('Aguardando a virada','Vire um pouco para qualquer lado; volte ao centro depois.');}}
+      await delay(35);
     }
-    function averageEyeAspectRatio(points) {
-      const a = eyeAspectRatio(points, EYE_LEFT), b = eyeAspectRatio(points, EYE_RIGHT);
-      return Number.isFinite(a) && Number.isFinite(b) ? (a + b) / 2 : NaN;
-    }
-    function noseOffset(points) {
-      if (!Array.isArray(points) || !points[30] || !points[36] || !points[45]) return NaN;
-      const span = Math.abs(points[45].x - points[36].x);
-      return Number.isFinite(span) && span > 0 ? (points[30].x - (points[36].x + points[45].x) / 2) / span : NaN;
-    }
-    function isTurnDetected(offset, side, threshold = 0.075) {
-      return Number.isFinite(offset) && (side === 'esquerda' ? offset <= -threshold : side === 'direita' && offset >= threshold);
-    }
-    function isCentered(offset, threshold = 0.045) { return Number.isFinite(offset) && Math.abs(offset) < threshold; }
-    function median(values) {
-      const valid = Array.isArray(values) ? values.filter(Number.isFinite).sort((a,b)=>a-b) : [];
-      if (!valid.length) return NaN;
-      const mid = Math.floor(valid.length / 2);
-      return valid.length % 2 ? valid[mid] : (valid[mid-1] + valid[mid]) / 2;
-    }
-    function hasTurnedFrom(offset, baseline, threshold = 0.075) { return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset-baseline) >= threshold; }
-    function hasReturnedTo(offset, baseline, tolerance = 0.055) { return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset-baseline) <= tolerance; }
-    function isClosedRelativeTo(ear, openBaseline, ratio = 0.82) { return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear <= openBaseline * ratio; }
-    function isReopenedRelativeTo(ear, openBaseline, ratio = 0.90) { return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear >= openBaseline * ratio; }
-    function createChallengeSequence(random = Math.random) { return random() < 0.5 ? [{type:'blink'},{type:'turn'}] : [{type:'turn'},{type:'blink'}]; }
-    function isOneGoodFace(detections, videoWidth) {
-      if (!Array.isArray(detections) || detections.length !== 1) return false;
-      const d = detections[0], box = d && d.detection && d.detection.box;
-      return Boolean(box && Number(d.detection.score) >= 0.55 && Number(videoWidth) > 0 && box.width / videoWidth >= 0.12);
-    }
-    return {eyeAspectRatio,averageEyeAspectRatio,noseOffset,isTurnDetected,isCentered,median,hasTurnedFrom,hasReturnedTo,isClosedRelativeTo,isReopenedRelativeTo,createChallengeSequence,isOneGoodFace};
-  })();
-  (() => {
-    'use strict';
-    const core = window.CertusFaceLivenessCore;
-    const video = document.getElementById('camera');
-    const statusEl = document.getElementById('status');
-    const camState = document.getElementById('cam-state');
-    const consent = document.getElementById('local-consent');
-    const startButton = document.getElementById('start');
-    const stopButton = document.getElementById('stop');
-    const stepsEl = document.getElementById('steps');
-    let stream = null;
-    let running = false;
-    let modelsReady = null;
-    let runToken = 0;
-    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const say = (text, tone = '') => { statusEl.textContent = text; statusEl.className = tone; };
-    const sayCamera = text => { camState.textContent = text; };
-
-    function renderSteps(sequence, current = -1, complete = false) {
-      stepsEl.replaceChildren();
-      if (!sequence.length) return;
-      sequence.forEach((item, index) => {
-        const pill = document.createElement('span');
-        pill.className = `step${index < current || complete ? ' done' : index === current ? ' active' : ''}`;
-        pill.textContent = item.type === 'blink' ? 'Piscar' : 'Virar e voltar ao centro';
-        stepsEl.append(pill);
-      });
-    }
-
-    async function loadModels() {
-      if (modelsReady) return modelsReady;
-      modelsReady = new Promise((resolve, reject) => {
-        if (window.faceapi) return resolve(window.faceapi);
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/dist/face-api.js';
-        script.async = true;
-        script.onload = () => window.faceapi ? resolve(window.faceapi) : reject(Error('Biblioteca facial indisponível.'));
-        script.onerror = () => reject(Error('Não foi possível baixar a biblioteca de teste.'));
-        document.head.append(script);
-      }).then(async faceapi => {
-        const modelUrl = 'https://cdn.jsdelivr.net/gh/vladmandic/face-api/model';
-        await Promise.all([
-          faceapi.nets.ssdMobilenetv1.loadFromUri(modelUrl),
-          faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl)
-        ]);
-        return faceapi;
-      }).catch(error => { modelsReady = null; throw error; });
-      return modelsReady;
-    }
-
-    function releaseCamera() {
-      if (stream) stream.getTracks().forEach(track => track.stop());
-      stream = null;
-      video.srcObject = null;
-    }
-
-    function stop(message = 'Câmera encerrada. Nenhuma marcação foi registrada.') {
-      running = false;
-      runToken++;
-      releaseCamera();
-      startButton.disabled = !consent.checked;
-      stopButton.disabled = true;
-      sayCamera('Câmera desligada');
-      say(message);
-    }
-
-    async function start() {
-      if (!consent.checked || running) return;
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        say('O navegador não oferece câmera segura nesta página. Abra por HTTPS ou em localhost.', 'error');
-        return;
-      }
-      startButton.disabled = true;
-      running = true;
-      stopButton.disabled = false;
-      const token = ++runToken;
-      say('Solicitando acesso à câmera…');
-      try {
-        const requestedStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
-        if (!running || runToken !== token) { requestedStream.getTracks().forEach(track => track.stop()); return; }
-        stream = requestedStream;
-        video.srcObject = stream;
-        await video.play();
-        sayCamera('Carregando modelo de teste…');
-        await loadModels();
-        if (!running || runToken !== token) return;
-        sayCamera('Posicione o rosto dentro do contorno');
-        say('Centralize o rosto e olhe para a câmera. O desafio aleatório começará quando o rosto estiver visível.');
-        await runChallenge(token);
-      } catch (error) {
-        if (runToken !== token) return;
-        stop(error && error.name === 'NotAllowedError' ? 'Acesso à câmera não autorizado. Nenhum teste foi executado.' : (error.message || 'Não foi possível iniciar a câmera.'));
-        statusEl.className = 'error';
-      }
-    }
-
-    async function runChallenge(token) {
-      const faceapi = await loadModels();
-      const sequence = core.createChallengeSequence();
-      renderSteps(sequence);
-      const startedAt = Date.now();
-      let stage = 0;
-      let lastDetectionState = 'nenhum rosto ainda';
-      let challengeAt = 0;
-      let blinkSamples = [];
-      let blinkBaseline = null;
-      let blinkClosedAt = 0;
-      let eyeWasClosed = false;
-      let turnFrames = 0;
-      let centerFrames = 0;
-      let turnCaptured = false;
-      let neutralSamples = [];
-      let turnBaseline = null;
-      let active = false;
-      while (running && runToken === token && stage < sequence.length && Date.now() - startedAt < 90000) {
-        if (!video.videoWidth || !video.videoHeight) { await sleep(150); continue; }
-        let detections;
-        try {
-          detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.55 })).withFaceLandmarks();
-        } catch (error) {
-          lastDetectionState = 'erro na análise facial';
-          sayCamera('Erro ao analisar — tente reiniciar');
-          say('O modelo facial encontrou um erro durante a análise. Encerre e inicie o teste novamente.');
-          await sleep(250); continue;
-        }
-        if (!core.isOneGoodFace(detections, video.videoWidth)) {
-          lastDetectionState = detections.length > 1 ? 'mais de um rosto visível' : detections.length === 0 ? 'nenhum rosto detectado' : 'rosto pequeno ou imagem pouco nítida';
-          sayCamera(detections.length > 1 ? 'Deixe apenas um rosto visível' : detections.length === 0 ? 'Não localizei um rosto' : 'Aproxime e ilumine o rosto');
-          say(detections.length > 1 ? 'Deixe só o seu rosto visível.' : detections.length === 0 ? 'Não estou encontrando um rosto. Aproxime-se, deixe o rosto inteiro dentro do oval e melhore a luz.' : 'Encontrei uma imagem pouco nítida ou um rosto pequeno. Aproxime o telefone e melhore a luz.');
-          blinkSamples = []; blinkBaseline = null; blinkClosedAt = 0; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; neutralSamples = []; turnBaseline = null; active = false;
-          await sleep(170); continue;
-        }
-        lastDetectionState = 'rosto detectado';
-        sayCamera('Rosto detectado — análise local');
-        const item = sequence[stage];
-        if (!active) { active = true; challengeAt = Date.now(); blinkSamples = []; blinkBaseline = null; blinkClosedAt = 0; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; neutralSamples = []; turnBaseline = null; renderSteps(sequence, stage); }
-        if (item.type === 'blink') {
-          const ear = core.averageEyeAspectRatio(detections[0].landmarks.positions);
-          if (blinkBaseline === null) {
-            if (Number.isFinite(ear) && ear > 0.10 && ear < 0.75) blinkSamples.push(ear);
-            const eyeText = Number.isFinite(ear) ? `Olhos detectados (${Math.round(ear * 100)}).` : 'Não localizei os pontos dos olhos.';
-            sayCamera(`Calibrando olhos ${blinkSamples.length}/9…`);
-            say(`Etapa ${stage + 1} de 2: ${eyeText} Olhe para a câmera e mantenha os olhos abertos.`);
-            if (blinkSamples.length >= 9) {
-              blinkBaseline = core.median(blinkSamples);
-              challengeAt = Date.now();
-              sayCamera('Pronto — pisque uma vez');
-            }
-            await sleep(130); continue;
-          }
-          if (!eyeWasClosed && core.isClosedRelativeTo(ear, blinkBaseline)) {
-            eyeWasClosed = true;
-            blinkClosedAt = Date.now();
-            sayCamera('Olhos fechados — mantenha por um instante');
-            say('Detectei o fechamento. Mantenha os olhos fechados por um segundo e depois abra.');
-          } else if (eyeWasClosed && Number.isFinite(ear)) {
-            const closedFor = Date.now() - blinkClosedAt;
-            if (core.isReopenedRelativeTo(ear, blinkBaseline) && closedFor >= 250 && closedFor <= 4000) {
-              say('Fechou e abriu os olhos — movimento detectado.');
-              stage++; active = false; await sleep(500); continue;
-            }
-            if (closedFor > 4000) { eyeWasClosed = false; sayCamera('Pode tentar fechar novamente'); say('Não confirmei a reabertura. Feche os olhos por um segundo e abra outra vez.'); }
-          } else if (!Number.isFinite(ear)) {
-            sayCamera('Olhos não localizados — centralize o rosto');
-          }
-          const relative = Number.isFinite(ear) ? Math.round(100 * ear / blinkBaseline) : 0;
-          if (!eyeWasClosed && Number.isFinite(ear)) sayCamera(`Olhos detectados — abertura ${relative}% da calibração`);
-          if (!eyeWasClosed) say(`Etapa ${stage + 1} de 2: feche os olhos por um segundo e depois abra. (${relative}% da abertura inicial)`);
-          else if (eyeWasClosed && Number.isFinite(ear) && Date.now() - blinkClosedAt < 250) say('Segure os olhos fechados por um instante e então abra.');
-        } else {
-          const offset = core.noseOffset(detections[0].landmarks.positions);
-          if (!Number.isFinite(offset)) { await sleep(130); continue; }
-          if (turnBaseline === null) {
-            neutralSamples.push(offset);
-            sayCamera('Calibrando posição neutra…');
-            say(`Etapa ${stage + 1} de 2: olhe reto para a câmera e mantenha a cabeça parada.`);
-            if (neutralSamples.length >= 7) {
-              turnBaseline = core.median(neutralSamples);
-              challengeAt = Date.now();
-              sayCamera('Pronto — vire para qualquer lado');
-            }
-            await sleep(150); continue;
-          }
-          if (!turnCaptured) {
-            turnFrames = core.hasTurnedFrom(offset, turnBaseline) ? turnFrames + 1 : 0;
-            if (turnFrames >= 3 && Date.now() - challengeAt >= 650) {
-              turnCaptured = true; centerFrames = 0; turnFrames = 0;
-              say('Movimento detectado. Agora volte a olhar reto para a câmera.');
-            }
-          } else {
-            centerFrames = core.hasReturnedTo(offset, turnBaseline) ? centerFrames + 1 : 0;
-            if (centerFrames >= 3) {
-              say('Virada e retorno à sua posição inicial detectados.');
-              stage++; active = false; await sleep(500); continue;
-            }
-          }
-          say(turnCaptured ? `Etapa ${stage + 1} de 2: volte a olhar reto para a câmera.` : `Etapa ${stage + 1} de 2: vire um pouco o rosto para qualquer lado e volte a olhar reto.`);
-        }
-        await sleep(130);
-      }
-      if (runToken !== token) return;
-      if (running && stage === sequence.length) {
-        renderSteps(sequence, stage, true);
-        sayCamera('Teste concluído — câmera encerrada');
-        say('Desafio concluído neste aparelho. Isto não prova identidade nem presença e não registrou ponto.', 'ok');
-        running = false;
-        releaseCamera();
-        startButton.disabled = !consent.checked;
-        stopButton.disabled = true;
-        return;
-      }
-      if (running && Date.now() - startedAt >= 90000) {
-        sayCamera('Tempo esgotado — câmera encerrada');
-        const item = sequence[stage];
-        const reason = lastDetectionState !== 'rosto detectado' ? `Diagnóstico: ${lastDetectionState}.` : item && item.type === 'blink' && blinkBaseline === null ? 'Rosto localizado, mas não consegui calibrar os olhos; mantenha o rosto inteiro dentro do oval e melhore a luz.' : item && item.type === 'blink' && !eyeWasClosed ? 'Rosto e olhos localizados, mas não detectei o fechamento; mantenha os olhos fechados por um segundo.' : item && item.type === 'blink' ? 'Detectei o fechamento, mas não consegui confirmar a reabertura.' : 'Rosto localizado, mas não detectei a virada e o retorno ao centro.';
-        say(`Tempo esgotado. ${reason} Tente novamente com o rosto centralizado e boa iluminação.`, 'error');
-        running = false;
-        releaseCamera();
-        startButton.disabled = !consent.checked;
-        stopButton.disabled = true;
-      }
-    }
-
-    consent.addEventListener('change', () => {
-      startButton.disabled = !consent.checked || running;
-      if (!consent.checked && running) stop('Consentimento removido. Câmera encerrada.');
-      else if (!consent.checked && !running) say('Marque a caixa de consentimento para habilitar o teste.');
-      else if (consent.checked && !running) say('Consentimento registrado apenas nesta página. Pronto para iniciar quando você quiser.');
-    });
-    startButton.addEventListener('click', start);
-    stopButton.addEventListener('click', () => stop());
-    window.addEventListener('pagehide', () => { if (stream) stream.getTracks().forEach(track => track.stop()); });
-    document.addEventListener('visibilitychange', () => { if (document.hidden && running) stop('Teste interrompido porque a página saiu de foco.'); });
-  })();
-  </script>
+    if(!running||generation!==token)return;if(stage===sequence.length){renderSteps(sequence,stage,true);releaseCamera();closeDetector();running=false;startButton.disabled=!consent.checked;stopButton.disabled=true;setCameraLabel('Movimentos observados · câmera encerrada');setStatus('Teste de movimentos concluído','O navegador observou os movimentos pedidos. Isto não comprova prova de vida, identidade ou presença.','ok');return;}
+    if(Date.now()-startAt>=80000){const reason=faceState!=='rosto localizado'?`Diagnóstico: ${faceState}.`:'O desafio não foi concluído dentro do tempo.';releaseCamera();closeDetector();running=false;startButton.disabled=!consent.checked;stopButton.disabled=true;setCameraLabel('Tempo esgotado · câmera encerrada');setStatus('Teste não concluído',`${reason} Veja os indicadores do detector, melhore a luz e tente novamente.`,'error');}}
+  consent.addEventListener('change',()=>{startButton.disabled=!consent.checked||running;if(!consent.checked&&!running)setStatus('Aguardando início','Marque o consentimento para habilitar o teste.');else if(consent.checked&&!running)setStatus('Pronto para iniciar','O detector só será baixado depois que você tocar em iniciar.');});
+  startButton.addEventListener('click',start);stopButton.addEventListener('click',()=>stop());window.addEventListener('pagehide',()=>{if(stream)stream.getTracks().forEach(t=>t.stop());if(landmarker)try{landmarker.close();}catch(_){}});document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)stop('A página saiu de foco. A câmera foi encerrada.');});
+})();
+</script>
 </body>
 </html>
