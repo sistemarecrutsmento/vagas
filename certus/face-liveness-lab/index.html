@@ -153,6 +153,8 @@
       let blinkArmed = false;
       let eyeWasClosed = false;
       let turnFrames = 0;
+      let centerFrames = 0;
+      let turnCaptured = false;
       let active = false;
       while (running && runToken === token && stage < sequence.length && Date.now() - startedAt < 45000) {
         if (!video.videoWidth || !video.videoHeight) { await sleep(150); continue; }
@@ -165,12 +167,12 @@
         if (!core.isOneGoodFace(detections, video.videoWidth)) {
           sayCamera(detections.length > 1 ? 'Deixe apenas um rosto visível' : 'Centralize o rosto dentro do contorno');
           say('É preciso detectar somente um rosto, bem enquadrado e iluminado.');
-          openFrames = 0; blinkArmed = false; eyeWasClosed = false; turnFrames = 0; active = false;
+          openFrames = 0; blinkArmed = false; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; active = false;
           await sleep(170); continue;
         }
         sayCamera('Rosto detectado — análise local');
         const item = sequence[stage];
-        if (!active) { active = true; challengeAt = Date.now(); openFrames = 0; blinkArmed = false; eyeWasClosed = false; turnFrames = 0; renderSteps(sequence, stage); }
+        if (!active) { active = true; challengeAt = Date.now(); openFrames = 0; blinkArmed = false; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; renderSteps(sequence, stage); }
         if (item.type === 'blink') {
           const ear = core.averageEyeAspectRatio(detections[0].landmarks.positions);
           if (Number.isFinite(ear) && ear > 0.22) {
@@ -187,12 +189,20 @@
           say(`Etapa ${stage + 1} de 2: pisque naturalmente.`);
         } else {
           const offset = core.noseOffset(detections[0].landmarks.positions);
-          turnFrames = core.isTurnDetected(offset, item.side) ? turnFrames + 1 : 0;
-          if (turnFrames >= 3 && Date.now() - challengeAt >= 650) {
-            say('Movimento de cabeça detectado.');
-            stage++; active = false; await sleep(500); continue;
+          if (!turnCaptured) {
+            turnFrames = core.isTurnDetected(offset, item.side) ? turnFrames + 1 : 0;
+            if (turnFrames >= 3 && Date.now() - challengeAt >= 650) {
+              turnCaptured = true; centerFrames = 0; turnFrames = 0;
+              say('Virada detectada. Agora volte ao centro.');
+            }
+          } else {
+            centerFrames = core.isCentered(offset) ? centerFrames + 1 : 0;
+            if (centerFrames >= 3) {
+              say('Virada e retorno ao centro detectados.');
+              stage++; active = false; await sleep(500); continue;
+            }
           }
-          say(`Etapa ${stage + 1} de 2: vire o rosto para a ${item.side} da tela e volte ao centro.`);
+          say(turnCaptured ? `Etapa ${stage + 1} de 2: volte o rosto ao centro.` : `Etapa ${stage + 1} de 2: vire o rosto para a ${item.side} da tela e volte ao centro.`);
         }
         await sleep(130);
       }

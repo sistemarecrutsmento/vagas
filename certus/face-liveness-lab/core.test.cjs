@@ -25,6 +25,8 @@ test('nose offset is normalized to eye span and turn side is directional', () =>
   assert.equal(left, -0.1);
   assert.equal(core.isTurnDetected(left, 'esquerda'), true);
   assert.equal(core.isTurnDetected(left, 'direita'), false);
+  assert.equal(core.isCentered(0.01), true);
+  assert.equal(core.isCentered(-0.1), false);
 });
 
 test('challenge set has one blink and one unpredictable turn direction/order', () => {

@@ -35,6 +35,10 @@
     return side === 'esquerda' ? offset <= -threshold : side === 'direita' && offset >= threshold;
   }
 
+  function isCentered(offset, threshold = 0.045) {
+    return Number.isFinite(offset) && Math.abs(offset) < threshold;
+  }
+
   function createChallengeSequence(random = Math.random) {
     const turn = random() < 0.5 ? 'esquerda' : 'direita';
     const first = random() < 0.5 ? 'blink' : 'turn';
@@ -48,5 +52,5 @@
     return Boolean(box && Number(d.detection.score) >= 0.70 && Number(videoWidth) > 0 && box.width / videoWidth >= 0.18);
   }
 
-  return { eyeAspectRatio, averageEyeAspectRatio, noseOffset, isTurnDetected, createChallengeSequence, isOneGoodFace };
+  return { eyeAspectRatio, averageEyeAspectRatio, noseOffset, isTurnDetected, isCentered, createChallengeSequence, isOneGoodFace };
 });
