@@ -76,13 +76,13 @@
     }
     function hasTurnedFrom(offset, baseline, threshold = 0.075) { return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset-baseline) >= threshold; }
     function hasReturnedTo(offset, baseline, tolerance = 0.055) { return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset-baseline) <= tolerance; }
-    function isClosedRelativeTo(ear, openBaseline, ratio = 0.72) { return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear <= openBaseline * ratio; }
-    function isReopenedRelativeTo(ear, openBaseline, ratio = 0.86) { return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear >= openBaseline * ratio; }
+    function isClosedRelativeTo(ear, openBaseline, ratio = 0.82) { return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear <= openBaseline * ratio; }
+    function isReopenedRelativeTo(ear, openBaseline, ratio = 0.90) { return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear >= openBaseline * ratio; }
     function createChallengeSequence(random = Math.random) { return random() < 0.5 ? [{type:'blink'},{type:'turn'}] : [{type:'turn'},{type:'blink'}]; }
     function isOneGoodFace(detections, videoWidth) {
       if (!Array.isArray(detections) || detections.length !== 1) return false;
       const d = detections[0], box = d && d.detection && d.detection.box;
-      return Boolean(box && Number(d.detection.score) >= 0.70 && Number(videoWidth) > 0 && box.width / videoWidth >= 0.18);
+      return Boolean(box && Number(d.detection.score) >= 0.55 && Number(videoWidth) > 0 && box.width / videoWidth >= 0.12);
     }
     return {eyeAspectRatio,averageEyeAspectRatio,noseOffset,isTurnDetected,isCentered,median,hasTurnedFrom,hasReturnedTo,isClosedRelativeTo,isReopenedRelativeTo,createChallengeSequence,isOneGoodFace};
   })();
@@ -188,6 +188,7 @@
       renderSteps(sequence);
       const startedAt = Date.now();
       let stage = 0;
+      let lastDetectionState = 'nenhum rosto ainda';
       let challengeAt = 0;
       let blinkSamples = [];
       let blinkBaseline = null;
@@ -199,29 +200,35 @@
       let neutralSamples = [];
       let turnBaseline = null;
       let active = false;
-      while (running && runToken === token && stage < sequence.length && Date.now() - startedAt < 45000) {
+      while (running && runToken === token && stage < sequence.length && Date.now() - startedAt < 90000) {
         if (!video.videoWidth || !video.videoHeight) { await sleep(150); continue; }
         let detections;
         try {
-          detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.65 })).withFaceLandmarks();
-        } catch (_) {
-          sayCamera('Analisando localmente…'); await sleep(180); continue;
+          detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.55 })).withFaceLandmarks();
+        } catch (error) {
+          lastDetectionState = 'erro na análise facial';
+          sayCamera('Erro ao analisar — tente reiniciar');
+          say('O modelo facial encontrou um erro durante a análise. Encerre e inicie o teste novamente.');
+          await sleep(250); continue;
         }
         if (!core.isOneGoodFace(detections, video.videoWidth)) {
-          sayCamera(detections.length > 1 ? 'Deixe apenas um rosto visível' : 'Centralize o rosto dentro do contorno');
-          say('É preciso detectar somente um rosto, bem enquadrado e iluminado.');
+          lastDetectionState = detections.length > 1 ? 'mais de um rosto visível' : detections.length === 0 ? 'nenhum rosto detectado' : 'rosto pequeno ou imagem pouco nítida';
+          sayCamera(detections.length > 1 ? 'Deixe apenas um rosto visível' : detections.length === 0 ? 'Não localizei um rosto' : 'Aproxime e ilumine o rosto');
+          say(detections.length > 1 ? 'Deixe só o seu rosto visível.' : detections.length === 0 ? 'Não estou encontrando um rosto. Aproxime-se, deixe o rosto inteiro dentro do oval e melhore a luz.' : 'Encontrei uma imagem pouco nítida ou um rosto pequeno. Aproxime o telefone e melhore a luz.');
           blinkSamples = []; blinkBaseline = null; blinkClosedAt = 0; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; neutralSamples = []; turnBaseline = null; active = false;
           await sleep(170); continue;
         }
+        lastDetectionState = 'rosto detectado';
         sayCamera('Rosto detectado — análise local');
         const item = sequence[stage];
         if (!active) { active = true; challengeAt = Date.now(); blinkSamples = []; blinkBaseline = null; blinkClosedAt = 0; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; neutralSamples = []; turnBaseline = null; renderSteps(sequence, stage); }
         if (item.type === 'blink') {
           const ear = core.averageEyeAspectRatio(detections[0].landmarks.positions);
           if (blinkBaseline === null) {
-            if (Number.isFinite(ear) && ear > 0.17) blinkSamples.push(ear);
-            sayCamera('Calibrando abertura dos olhos…');
-            say(`Etapa ${stage + 1} de 2: olhe para a câmera e mantenha os olhos abertos por um instante.`);
+            if (Number.isFinite(ear) && ear > 0.10 && ear < 0.75) blinkSamples.push(ear);
+            const eyeText = Number.isFinite(ear) ? `Olhos detectados (${Math.round(ear * 100)}).` : 'Não localizei os pontos dos olhos.';
+            sayCamera(`Calibrando olhos ${blinkSamples.length}/9…`);
+            say(`Etapa ${stage + 1} de 2: ${eyeText} Olhe para a câmera e mantenha os olhos abertos.`);
             if (blinkSamples.length >= 9) {
               blinkBaseline = core.median(blinkSamples);
               challengeAt = Date.now();
@@ -232,16 +239,22 @@
           if (!eyeWasClosed && core.isClosedRelativeTo(ear, blinkBaseline)) {
             eyeWasClosed = true;
             blinkClosedAt = Date.now();
-            say('Fechamento detectado. Abra os olhos.');
+            sayCamera('Olhos fechados — mantenha por um instante');
+            say('Detectei o fechamento. Mantenha os olhos fechados por um segundo e depois abra.');
           } else if (eyeWasClosed && Number.isFinite(ear)) {
             const closedFor = Date.now() - blinkClosedAt;
-            if (core.isReopenedRelativeTo(ear, blinkBaseline) && closedFor <= 1800) {
-              say('Piscada detectada.');
+            if (core.isReopenedRelativeTo(ear, blinkBaseline) && closedFor >= 250 && closedFor <= 4000) {
+              say('Fechou e abriu os olhos — movimento detectado.');
               stage++; active = false; await sleep(500); continue;
             }
-            if (closedFor > 1800) { eyeWasClosed = false; say('Não consegui confirmar a piscada. Pisque naturalmente mais uma vez.'); }
+            if (closedFor > 4000) { eyeWasClosed = false; sayCamera('Pode tentar fechar novamente'); say('Não confirmei a reabertura. Feche os olhos por um segundo e abra outra vez.'); }
+          } else if (!Number.isFinite(ear)) {
+            sayCamera('Olhos não localizados — centralize o rosto');
           }
-          say(eyeWasClosed ? `Etapa ${stage + 1} de 2: abra os olhos.` : `Etapa ${stage + 1} de 2: pisque naturalmente uma vez.`);
+          const relative = Number.isFinite(ear) ? Math.round(100 * ear / blinkBaseline) : 0;
+          if (!eyeWasClosed && Number.isFinite(ear)) sayCamera(`Olhos detectados — abertura ${relative}% da calibração`);
+          if (!eyeWasClosed) say(`Etapa ${stage + 1} de 2: feche os olhos por um segundo e depois abra. (${relative}% da abertura inicial)`);
+          else if (eyeWasClosed && Number.isFinite(ear) && Date.now() - blinkClosedAt < 250) say('Segure os olhos fechados por um instante e então abra.');
         } else {
           const offset = core.noseOffset(detections[0].landmarks.positions);
           if (!Number.isFinite(offset)) { await sleep(130); continue; }
@@ -284,9 +297,11 @@
         stopButton.disabled = true;
         return;
       }
-      if (running && Date.now() - startedAt >= 45000) {
+      if (running && Date.now() - startedAt >= 90000) {
         sayCamera('Tempo esgotado — câmera encerrada');
-        say('Tempo esgotado. Inicie um novo teste se quiser tentar novamente.', 'error');
+        const item = sequence[stage];
+        const reason = lastDetectionState !== 'rosto detectado' ? `Diagnóstico: ${lastDetectionState}.` : item && item.type === 'blink' && blinkBaseline === null ? 'Rosto localizado, mas não consegui calibrar os olhos; mantenha o rosto inteiro dentro do oval e melhore a luz.' : item && item.type === 'blink' && !eyeWasClosed ? 'Rosto e olhos localizados, mas não detectei o fechamento; mantenha os olhos fechados por um segundo.' : item && item.type === 'blink' ? 'Detectei o fechamento, mas não consegui confirmar a reabertura.' : 'Rosto localizado, mas não detectei a virada e o retorno ao centro.';
+        say(`Tempo esgotado. ${reason} Tente novamente com o rosto centralizado e boa iluminação.`, 'error');
         running = false;
         releaseCamera();
         startButton.disabled = !consent.checked;

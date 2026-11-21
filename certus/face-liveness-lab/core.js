@@ -50,11 +50,11 @@
     return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset - baseline) <= tolerance;
   }
 
-  function isClosedRelativeTo(ear, openBaseline, ratio = 0.72) {
+  function isClosedRelativeTo(ear, openBaseline, ratio = 0.82) {
     return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear <= openBaseline * ratio;
   }
 
-  function isReopenedRelativeTo(ear, openBaseline, ratio = 0.86) {
+  function isReopenedRelativeTo(ear, openBaseline, ratio = 0.90) {
     return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear >= openBaseline * ratio;
   }
 
@@ -67,7 +67,7 @@
     if (!Array.isArray(detections) || detections.length !== 1) return false;
     const d = detections[0];
     const box = d && d.detection && d.detection.box;
-    return Boolean(box && Number(d.detection.score) >= 0.70 && Number(videoWidth) > 0 && box.width / videoWidth >= 0.18);
+    return Boolean(box && Number(d.detection.score) >= 0.55 && Number(videoWidth) > 0 && box.width / videoWidth >= 0.12);
   }
 
   return { eyeAspectRatio, averageEyeAspectRatio, noseOffset, isTurnDetected, isCentered, median, hasTurnedFrom, hasReturnedTo, isClosedRelativeTo, isReopenedRelativeTo, createChallengeSequence, isOneGoodFace };

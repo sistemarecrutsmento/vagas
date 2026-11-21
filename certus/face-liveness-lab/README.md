@@ -7,7 +7,7 @@
 - Solicita consentimento de teste e permissão de câmera antes de iniciar.
 - Carrega localmente no navegador Face API e modelos públicos de detecção facial e 68 pontos faciais.
 - A prévia de vídeo é espelhada visualmente, como um espelho, mas a análise continua sobre o vídeo original. A tarefa de virar não depende de esquerda/direita; compara o desvio em qualquer sentido com uma linha de base neutra e requer retorno.
-- Escolhe aleatoriamente a ordem das tarefas: um piscar e uma virada de cabeça para qualquer lado, seguida de retorno à posição neutra. Antes de pedir a piscada, calibra a abertura dos olhos em nove quadros e usa limiares relativos à abertura observada, em vez de um único valor absoluto.
+- Escolhe aleatoriamente a ordem das tarefas: um movimento de olhos — manter olhos abertos na calibração, fechar deliberadamente por cerca de um segundo e reabrir — e uma virada para qualquer lado seguida de retorno à posição neutra. Usa limiares relativos à abertura observada, não um valor absoluto, e mostra o estado da calibração/detecção. O tempo máximo é 90 segundos e, se expirar, mostra uma causa provável sem aprovar o teste.
 - Exige um único rosto com confiança e tamanho mínimos; termina por tempo esgotado; encerra a câmera ao parar, retirar o consentimento, sair da página ou perder foco.
 - Não tem gravação, armazenamento de imagem/modelo, GPS, endpoint de backend ou código de marcação. Não envia quadros da câmera pela lógica da página.
 - Baixar a biblioteca/modelos de CDN requer tráfego de rede normal, que pode revelar ao provedor o IP e metadados de conexão.
