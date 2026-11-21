@@ -5,13 +5,13 @@ Este roteiro testa estabilidade de captura e usabilidade, **não certifica PAD n
 ## A. Preparação
 
 - Anote modelo do aparelho, versão do sistema, navegador, data/hora aproximada e condição geral de luz; não associe a nomes.
-- Abra o laboratório por HTTPS; aceite o consentimento de demonstração. Espere a autochecagem do software indicar `7/7 OK`.
+- Abra o laboratório por HTTPS; aceite o consentimento de demonstração. Espere a autochecagem do software indicar `9/9 OK`.
 - No primeiro uso, aguarde baixar a biblioteca/modelo (cerca de 3,7 MB só do arquivo de modelo, além de WASM e biblioteca); os pedidos de rede revelam metadados normais de conexão aos distribuidores.
 - Dê permissão de câmera só para a sessão de teste. Use luz frontal suficiente, lente limpa e enquadre o rosto inteiro dentro do oval.
 
 ## B. Repetibilidade normal
 
-Faça cinco sessões consecutivas em condição semelhante, alternando a ordem aleatória dos movimentos. Em cada uma anote apenas: resultado, qual etapa falhou, indicador esquerdo/direito quando a etapa for a piscada, FPS mostrado e eventual mensagem. Não tente forçar a conclusão; execute a instrução normalmente.
+Faça cinco sessões consecutivas em condição semelhante. Cada sessão inclui piscar, virar/voltar e um gesto extra aleatório (abrir/fechar a boca ou sorrir/relaxar), com ordem aleatória. Continue até testar pelo menos uma vez cada gesto extra. Em cada uma anote apenas: resultado, qual etapa falhou, indicador esquerdo/direito na piscada, indicador de expressão no gesto extra, FPS e mensagem. Não tente forçar a conclusão; execute a instrução normalmente.
 
 Tabela para registro manual:
 
@@ -35,7 +35,7 @@ Faça uma ou mais sessões por condição; anote “concluiu/não concluiu” e 
 - com óculos usuais, se aplicável;
 - enquadramento ligeiramente fora do centro, para ver se a página orienta a corrigir sem concluir indevidamente.
 
-Observe se os valores de piscar esquerdo/direito variam plausivelmente ao fechar e abrir os olhos. Os números são scores do modelo, não probabilidade de identidade ou de autenticidade.
+Observe se os valores de piscar esquerdo/direito variam ao fechar/abrir os olhos e se o score de boca/sorriso responde ao gesto e volta ao calibrado quando relaxa. Os números são scores do modelo, não probabilidade de identidade ou autenticidade. Anote também se a calibração neutra e a instrução do gesto foram claras.
 
 ## D. Estados e interrupções
 

@@ -16,8 +16,8 @@
 <main>
   <div class="eyebrow">Estudo experimental · análise no navegador</div>
   <h1>Laboratório de movimentos faciais</h1>
-  <p class="intro">Esta rodada testa se o celular acompanha movimentos guiados usando um detector facial diferente. O objetivo é diagnosticar a captura — não validar identidade, presença ou jornada.</p>
-  <div class="notice"><strong>Importante:</strong> detectar uma piscada ou uma virada não prova que há uma pessoa real diante da câmera. Fotos, vídeos e injeções de imagem ainda podem enganar este tipo de demonstração. Não use em registros de ponto nem com dados de funcionários.</div>
+  <p class="intro">Esta rodada testa se o celular acompanha movimentos guiados usando um detector facial diferente. Cada sessão combina piscar, virar a cabeça e mais um gesto aleatório: abrir/fechar a boca ou sorrir/relaxar. O objetivo é diagnosticar a captura — não validar identidade, presença ou jornada.</p>
+  <div class="notice"><strong>Importante:</strong> detectar piscada, virada ou expressão não prova que há uma pessoa real diante da câmera. Fotos, vídeos e injeções de imagem ainda podem enganar este tipo de demonstração. Não use em registros de ponto nem com dados de funcionários.</div>
 
   <div class="layout">
     <section class="card" aria-labelledby="capture-title">
@@ -42,6 +42,7 @@
         <div class="metric"><label>Piscar · olho esquerdo</label><strong id="m-blink-left">—</strong></div>
         <div class="metric"><label>Piscar · olho direito</label><strong id="m-blink-right">—</strong></div>
         <div class="metric"><label>Movimento lateral</label><strong id="m-turn">—</strong></div>
+        <div class="metric"><label>Boca/sorriso</label><strong id="m-expression">—</strong></div>
         <div class="metric"><label>Motor</label><strong id="m-engine">Não carregado</strong></div>
         <div class="metric"><label>Autochecagem do software</label><strong id="m-selftest">Aguardando</strong></div>
       </div><p class="small-note">Autochecagem usa valores sintéticos; não testa câmera nem prova de vida.</p></details>
@@ -59,7 +60,7 @@
   </div>
 </main>
 <footer>Laboratório independente e descartável · Certus · Não usar para decisões de trabalho ou controle de acesso.</footer>
-<script src="./core.js?v=14" defer></script>
-<script src="./app.js?v=14" defer></script>
+<script src="./core.js?v=15" defer></script>
+<script src="./app.js?v=15" defer></script>
 </body>
 </html>

@@ -67,8 +67,47 @@
     return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset - baseline) <= tolerance;
   }
 
+  function expressionScores(categories) {
+    return {
+      jawOpen: categoryScore(categories, 'jawOpen'),
+      smileLeft: categoryScore(categories, 'mouthSmileLeft'),
+      smileRight: categoryScore(categories, 'mouthSmileRight')
+    };
+  }
+
+  function smileMean(scores) {
+    return scores && Number.isFinite(scores.smileLeft) && Number.isFinite(scores.smileRight)
+      ? (scores.smileLeft + scores.smileRight) / 2 : NaN;
+  }
+
+  function isExpressionActive(scores, baseline, type) {
+    if (!scores || !baseline) return false;
+    if (type === 'mouth') return Number.isFinite(scores.jawOpen) && Number.isFinite(baseline.jawOpen) && scores.jawOpen >= Math.max(0.35, baseline.jawOpen + 0.2);
+    if (type === 'smile') {
+      const current = smileMean(scores), neutral = smileMean(baseline);
+      return Number.isFinite(current) && Number.isFinite(neutral) && current >= Math.max(0.28, neutral + 0.16);
+    }
+    return false;
+  }
+
+  function isExpressionRelaxed(scores, baseline, type) {
+    if (!scores || !baseline) return false;
+    if (type === 'mouth') return Number.isFinite(scores.jawOpen) && Number.isFinite(baseline.jawOpen) && scores.jawOpen <= Math.min(0.3, baseline.jawOpen + 0.1);
+    if (type === 'smile') {
+      const current = smileMean(scores), neutral = smileMean(baseline);
+      return Number.isFinite(current) && Number.isFinite(neutral) && current <= Math.min(0.34, neutral + 0.1);
+    }
+    return false;
+  }
+
   function createChallengeSequence(random = Math.random) {
-    return random() < 0.5 ? [{ type: 'blink' }, { type: 'turn' }] : [{ type: 'turn' }, { type: 'blink' }];
+    const extra = random() < 0.5 ? 'mouth' : 'smile';
+    const sequence = [{ type: 'blink' }, { type: 'turn' }, { type: extra }];
+    for (let i = sequence.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
+    }
+    return sequence;
   }
 
   function runSelfTests() {
@@ -94,9 +133,15 @@
     check('retorno à posição inicial', hasReturnedTo(0.12, 0.1, 0.03));
     const blinkFirst = createChallengeSequence(() => 0.1).map(item => item.type).join(',');
     const turnFirst = createChallengeSequence(() => 0.9).map(item => item.type).join(',');
-    check('duas ordens do desafio', blinkFirst === 'blink,turn' && turnFirst === 'turn,blink');
+    check('sequência com 3 movimentos e extra válido', [blinkFirst, turnFirst].every(order => {
+      const types = order.split(',');
+      return types.length === 3 && types.includes('blink') && types.includes('turn') && (types.includes('mouth') || types.includes('smile'));
+    }));
+    const neutral = { jawOpen: 0.05, smileLeft: 0.04, smileRight: 0.06 };
+    check('gesto de abrir e fechar a boca', isExpressionActive({ jawOpen: 0.48 }, neutral, 'mouth') && isExpressionRelaxed({ jawOpen: 0.08 }, neutral, 'mouth'));
+    check('gesto de sorrir e relaxar', isExpressionActive({ smileLeft: 0.48, smileRight: 0.46 }, neutral, 'smile') && isExpressionRelaxed({ smileLeft: 0.08, smileRight: 0.1 }, neutral, 'smile'));
     return results;
   }
 
-  return { median, categoryScore, eyeBlinkScores, noseOffset, faceBounds, isFaceWellFramed, isBlinkClosed, isEyesReopened, hasTurnedFrom, hasReturnedTo, createChallengeSequence, runSelfTests };
+  return { median, categoryScore, eyeBlinkScores, expressionScores, isExpressionActive, isExpressionRelaxed, noseOffset, faceBounds, isFaceWellFramed, isBlinkClosed, isEyesReopened, hasTurnedFrom, hasReturnedTo, createChallengeSequence, runSelfTests };
 });

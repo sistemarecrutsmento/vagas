@@ -37,15 +37,35 @@ test('face framing accepts one sufficiently large centered face and rejects too-
   assert.equal(core.isFaceWellFramed([{x:.5,y:.5}]),false);
 });
 
-test('challenge order changes while each challenge appears exactly once', () => {
-  const firstBlink = core.createChallengeSequence(()=>.1);
-  const firstTurn = core.createChallengeSequence(()=>.9);
-  assert.deepEqual(firstBlink.map(x=>x.type),['blink','turn']);
-  assert.deepEqual(firstTurn.map(x=>x.type),['turn','blink']);
+test('challenge sequence contains the original movements and one randomized expression', () => {
+  const first = core.createChallengeSequence(()=>.1).map(x=>x.type);
+  const second = core.createChallengeSequence(()=>.9).map(x=>x.type);
+  for (const types of [first, second]) {
+    assert.equal(types.length, 3);
+    assert.equal(new Set(types).size, 3);
+    assert.ok(types.includes('blink'));
+    assert.ok(types.includes('turn'));
+    assert.ok(types.includes('mouth') || types.includes('smile'));
+  }
+  assert.notDeepEqual(first, second);
+});
+
+test('mouth and smile gestures require an active and relaxed reading', () => {
+  const neutral = { jawOpen: 0.05, smileLeft: 0.04, smileRight: 0.06 };
+  assert.deepEqual(core.expressionScores([
+    { categoryName: 'jawOpen', score: 0.42 },
+    { categoryName: 'mouthSmileLeft', score: 0.31 },
+    { categoryName: 'mouthSmileRight', score: 0.27 }
+  ]), { jawOpen: 0.42, smileLeft: 0.31, smileRight: 0.27 });
+  assert.equal(core.isExpressionActive({ jawOpen: 0.48 }, neutral, 'mouth'), true);
+  assert.equal(core.isExpressionRelaxed({ jawOpen: 0.08 }, neutral, 'mouth'), true);
+  assert.equal(core.isExpressionActive({ smileLeft: 0.48, smileRight: 0.46 }, neutral, 'smile'), true);
+  assert.equal(core.isExpressionRelaxed({ smileLeft: 0.08, smileRight: 0.1 }, neutral, 'smile'), true);
+  assert.equal(core.isExpressionActive({ smileLeft: 0.12, smileRight: 0.1 }, neutral, 'smile'), false);
 });
 
 test('browser self-checks cover core maths and challenge flow', () => {
   const checks = core.runSelfTests();
-  assert.equal(checks.length, 7);
+  assert.equal(checks.length, 9);
   assert.ok(checks.every(check => check.pass), JSON.stringify(checks));
 });

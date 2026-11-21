@@ -17,7 +17,7 @@
   const metrics = {
     face: document.getElementById('m-face'), frame: document.getElementById('m-frame'),
     left: document.getElementById('m-blink-left'), right: document.getElementById('m-blink-right'),
-    turn: document.getElementById('m-turn'), engine: document.getElementById('m-engine'),
+    turn: document.getElementById('m-turn'), expression: document.getElementById('m-expression'), engine: document.getElementById('m-engine'),
     selftest: document.getElementById('m-selftest')
   };
   const softwareChecks = core.runSelfTests();
@@ -60,7 +60,8 @@
       number.className = 'num';
       number.textContent = complete || index < stage ? '✓' : String(index + 1);
       const label = document.createElement('span');
-      label.textContent = item.type === 'blink' ? 'Fechar e reabrir os olhos' : 'Virar e voltar ao centro';
+      const labels = { blink: 'Fechar e reabrir os olhos', turn: 'Virar e voltar ao centro', mouth: 'Abrir e fechar a boca', smile: 'Sorrir e relaxar o rosto' };
+      label.textContent = labels[item.type] || 'Movimento facial';
       row.append(number, label);
       stepsEl.append(row);
     });
@@ -118,7 +119,7 @@
   }
 
   function resetMetrics() {
-    ['face', 'frame', 'left', 'right', 'turn'].forEach(key => { metrics[key].textContent = '—'; });
+    ['face', 'frame', 'left', 'right', 'turn', 'expression'].forEach(key => { metrics[key].textContent = '—'; });
   }
 
   function formatPercent(value) {
@@ -140,6 +141,7 @@
     stopButton.disabled = false;
     running = true;
     const token = ++generation;
+    lastVideoTime = -1;
     resetMetrics();
     setStatus('Preparando detector', 'Baixando o motor e o modelo de análise facial para este aparelho.');
     setCameraLabel('Carregando modelo de teste…');
@@ -201,6 +203,11 @@
     let blinkBaseline = null;
     let closedFrames = 0;
     let closedAt = 0;
+    let expressionSamples = [];
+    let expressionBaseline = null;
+    let expressionActiveFrames = 0;
+    let expressionSeen = false;
+    let expressionRelaxFrames = 0;
     let frameCount = 0;
     let fpsAt = Date.now();
 
@@ -267,6 +274,11 @@
         blinkBaseline = null;
         closedFrames = 0;
         closedAt = 0;
+        expressionSamples = [];
+        expressionBaseline = null;
+        expressionActiveFrames = 0;
+        expressionSeen = false;
+        expressionRelaxFrames = 0;
         renderSteps(sequence, stage, false);
       }
 
@@ -321,7 +333,7 @@
           setStatus('Aguardando o movimento', 'Indicadores: esquerdo ' + formatPercent(scores.left) + ' · direito ' + formatPercent(scores.right) + '. Feche e reabra os olhos.');
           if (Math.max(scores.left || 0, scores.right || 0) > 0.3) setCameraLabel('Detectando movimento dos olhos…');
         }
-      } else {
+      } else if (item.type === 'turn') {
         const offset = core.noseOffset(points);
         metrics.turn.textContent = Number.isFinite(offset) ? (offset >= 0 ? '+' : '') + offset.toFixed(3) : '—';
         if (!Number.isFinite(offset)) {
@@ -360,6 +372,54 @@
           }
         }
         if (!turned) setStatus('Aguardando a virada', 'Vire um pouco para qualquer lado; volte ao centro depois.');
+      } else {
+        const blendshapes = result.faceBlendshapes && result.faceBlendshapes[0] && result.faceBlendshapes[0].categories || [];
+        const scores = core.expressionScores(blendshapes);
+        const score = item.type === 'mouth' ? scores.jawOpen : (Number.isFinite(scores.smileLeft) && Number.isFinite(scores.smileRight) ? (scores.smileLeft + scores.smileRight) / 2 : NaN);
+        metrics.expression.textContent = formatPercent(score);
+        if (expressionBaseline === null) {
+          const neutralMouth = Number.isFinite(scores.jawOpen) && scores.jawOpen < 0.5;
+          const neutralSmile = Number.isFinite(scores.smileLeft) && Number.isFinite(scores.smileRight) && scores.smileLeft < 0.6 && scores.smileRight < 0.6;
+          if (neutralMouth && neutralSmile) expressionSamples.push(scores);
+          setCameraLabel('Calibrando expressão ' + expressionSamples.length + '/12');
+          setStatus('Calibrando expressão neutra', 'Relaxe o rosto e olhe para a câmera. ' + expressionSamples.length + ' de 12 amostras.');
+          if (expressionSamples.length >= 12) {
+            expressionBaseline = {
+              jawOpen: core.median(expressionSamples.map(sample => sample.jawOpen)),
+              smileLeft: core.median(expressionSamples.map(sample => sample.smileLeft)),
+              smileRight: core.median(expressionSamples.map(sample => sample.smileRight))
+            };
+            const prompt = item.type === 'mouth' ? 'Agora abra a boca e depois feche.' : 'Agora sorria e depois relaxe o rosto.';
+            setCameraLabel('Calibrado · faça o gesto solicitado');
+            setStatus(item.type === 'mouth' ? 'Abra e feche a boca' : 'Sorria e relaxe', prompt + ' Faça o movimento naturalmente.');
+          }
+          await delay(45);
+          continue;
+        }
+        const activeGesture = core.isExpressionActive(scores, expressionBaseline, item.type);
+        const relaxed = core.isExpressionRelaxed(scores, expressionBaseline, item.type);
+        if (!expressionSeen) {
+          expressionActiveFrames = activeGesture ? expressionActiveFrames + 1 : 0;
+          if (expressionActiveFrames >= 2) {
+            expressionSeen = true;
+            expressionRelaxFrames = 0;
+            setCameraLabel(item.type === 'mouth' ? 'Abertura detectada · feche a boca' : 'Sorriso detectado · relaxe o rosto');
+            setStatus('Gesto detectado', item.type === 'mouth' ? 'Agora feche a boca para concluir.' : 'Agora relaxe o rosto para concluir.');
+          } else {
+            setCameraLabel('Aguardando expressão solicitada');
+            setStatus('Aguardando o gesto', item.type === 'mouth' ? 'Abra a boca naturalmente.' : 'Sorria naturalmente.');
+          }
+        } else {
+          expressionRelaxFrames = relaxed ? expressionRelaxFrames + 1 : 0;
+          if (expressionRelaxFrames >= 2) {
+            stage++;
+            active = false;
+            renderSteps(sequence, stage, false);
+            setStatus('Movimento observado', item.type === 'mouth' ? 'Abertura e fechamento da boca foram observados.' : 'Sorriso e relaxamento foram observados.');
+            await delay(250);
+            continue;
+          }
+        }
       }
       await delay(35);
     }
