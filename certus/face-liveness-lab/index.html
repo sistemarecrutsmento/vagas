@@ -44,8 +44,48 @@
     <footer>Versão inicial isolada para experimentação — Certus. Não usar em operação real.</footer>
   </main>
   <noscript>Ative JavaScript para usar a demonstração. Nenhuma marcação poderá ser feita por esta página.</noscript>
-  <script src="./core.js"></script>
   <script>
+  // Inlined to avoid browser/CDN caching the page and helper at different versions.
+  window.CertusFaceLivenessCore = (() => {
+    const EYE_LEFT = [36, 37, 38, 39, 40, 41];
+    const EYE_RIGHT = [42, 43, 44, 45, 46, 47];
+    const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+    function eyeAspectRatio(points, indices) {
+      if (!Array.isArray(points) || indices.some(i => !points[i])) return NaN;
+      const p = indices.map(i => points[i]), width = distance(p[0], p[3]);
+      return Number.isFinite(width) && width > 0 ? (distance(p[1],p[5]) + distance(p[2],p[4])) / (2 * width) : NaN;
+    }
+    function averageEyeAspectRatio(points) {
+      const a = eyeAspectRatio(points, EYE_LEFT), b = eyeAspectRatio(points, EYE_RIGHT);
+      return Number.isFinite(a) && Number.isFinite(b) ? (a + b) / 2 : NaN;
+    }
+    function noseOffset(points) {
+      if (!Array.isArray(points) || !points[30] || !points[36] || !points[45]) return NaN;
+      const span = Math.abs(points[45].x - points[36].x);
+      return Number.isFinite(span) && span > 0 ? (points[30].x - (points[36].x + points[45].x) / 2) / span : NaN;
+    }
+    function isTurnDetected(offset, side, threshold = 0.075) {
+      return Number.isFinite(offset) && (side === 'esquerda' ? offset <= -threshold : side === 'direita' && offset >= threshold);
+    }
+    function isCentered(offset, threshold = 0.045) { return Number.isFinite(offset) && Math.abs(offset) < threshold; }
+    function median(values) {
+      const valid = Array.isArray(values) ? values.filter(Number.isFinite).sort((a,b)=>a-b) : [];
+      if (!valid.length) return NaN;
+      const mid = Math.floor(valid.length / 2);
+      return valid.length % 2 ? valid[mid] : (valid[mid-1] + valid[mid]) / 2;
+    }
+    function hasTurnedFrom(offset, baseline, threshold = 0.075) { return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset-baseline) >= threshold; }
+    function hasReturnedTo(offset, baseline, tolerance = 0.055) { return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset-baseline) <= tolerance; }
+    function isClosedRelativeTo(ear, openBaseline, ratio = 0.72) { return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear <= openBaseline * ratio; }
+    function isReopenedRelativeTo(ear, openBaseline, ratio = 0.86) { return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear >= openBaseline * ratio; }
+    function createChallengeSequence(random = Math.random) { return random() < 0.5 ? [{type:'blink'},{type:'turn'}] : [{type:'turn'},{type:'blink'}]; }
+    function isOneGoodFace(detections, videoWidth) {
+      if (!Array.isArray(detections) || detections.length !== 1) return false;
+      const d = detections[0], box = d && d.detection && d.detection.box;
+      return Boolean(box && Number(d.detection.score) >= 0.70 && Number(videoWidth) > 0 && box.width / videoWidth >= 0.18);
+    }
+    return {eyeAspectRatio,averageEyeAspectRatio,noseOffset,isTurnDetected,isCentered,median,hasTurnedFrom,hasReturnedTo,isClosedRelativeTo,isReopenedRelativeTo,createChallengeSequence,isOneGoodFace};
+  })();
   (() => {
     'use strict';
     const core = window.CertusFaceLivenessCore;
