@@ -32,7 +32,7 @@ Para uma implantação real, comparar SDKs especializados, pedir proposta e rela
 - Sintaxe JavaScript, estrutura HTML, separação do controlador e ausência de rotas/solicitações de integração de ponto verificadas estaticamente.
 - Na versão anterior, o usuário testou no próprio celular e enviou captura da tela de sucesso dos dois movimentos; isso demonstra funcionamento observado naquela sessão, não segurança/PAD e não valida a nova troca de motor.
 - Na versão MediaPipe, navegador de automação carregou a aplicação e chegou ao pedido de câmera; aquele ambiente respondeu `NotFoundError`, sem dispositivo. Portanto não há validação física desta versão nem sessão de desafio com MediaPipe confirmada.
-- A sintaxe de HTML/JavaScript e os recursos públicos do modelo/biblioteca foram verificados por HTTP. A suíte `node --test core.test.cjs` está preparada, mas a execução em Node não foi possível neste ambiente. A nova autochecagem aparece na interface e será exercitada no navegador ao abrir a página; ela verifica matemática sintética, não câmera, viés ou PAD.
+- A sintaxe de HTML/JavaScript e os recursos públicos do modelo/biblioteca foram verificados por HTTP. A autochecagem sintética da versão atual foi executada no navegador e mostrou `7/7 OK`; depois o carregamento do modelo chegou à solicitação de câmera e parou por falta de dispositivo neste navegador. A suíte `node --test core.test.cjs` está preparada, mas a execução em Node não foi possível neste ambiente. A autochecagem verifica matemática sintética, não câmera, viés ou PAD.
 
 ## Teste cuidadoso
 
