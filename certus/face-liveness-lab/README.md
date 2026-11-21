@@ -6,7 +6,8 @@
 
 - Solicita consentimento de teste e permissão de câmera antes de iniciar.
 - Carrega localmente no navegador Face API e modelos públicos de detecção facial e 68 pontos faciais.
-- Escolhe aleatoriamente a ordem das tarefas e o lado do movimento: um piscar e uma virada de cabeça.
+- A prévia de vídeo é espelhada visualmente, como um espelho, mas a análise continua sobre o vídeo original. A tarefa de virar não depende de esquerda/direita; compara o desvio em qualquer sentido com uma linha de base neutra e requer retorno.
+- Escolhe aleatoriamente a ordem das tarefas: um piscar e uma virada de cabeça para qualquer lado, seguida de retorno à posição neutra. Antes de pedir a piscada, calibra a abertura dos olhos em nove quadros e usa limiares relativos à abertura observada, em vez de um único valor absoluto.
 - Exige um único rosto com confiança e tamanho mínimos; termina por tempo esgotado; encerra a câmera ao parar, retirar o consentimento, sair da página ou perder foco.
 - Não tem gravação, armazenamento de imagem/modelo, GPS, endpoint de backend ou código de marcação. Não envia quadros da câmera pela lógica da página.
 - Baixar a biblioteca/modelos de CDN requer tráfego de rede normal, que pode revelar ao provedor o IP e metadados de conexão.
@@ -28,11 +29,12 @@ Os testes cobrem a geometria de EAR/virada, aleatoriedade da sequência e rejei�
 ## Casos manuais necessários antes de ampliar o teste
 
 1. Câmera negada, sem câmera, rede/CDN indisponível: não concluir, não criar registros e oferecer mensagem de erro clara.
-2. Nenhum rosto, dois rostos, rosto pequeno, fora de centro, pouca luz e uso com óculos: sem aprovação indevida; documentar taxa de falha e acessibilidade.
-3. Piscar real, virar para cada lado, sequência aleatória e retorno ao centro: conferir o que a interface pede versus o que detecta, em vários modelos de aparelho/câmera.
-4. Foto impressa, foto em outra tela, vídeo pré-gravado, vídeo com desafio adaptativo, câmera virtual/replay, injeção de quadros e movimento da tela/foto: o resultado deve ser tratado como facilmente contornável até testes independentes provarem o contrário.
-5. Encerrar, retirar consentimento, trocar de aba/fechar página: confirmar que todas as faixas de câmera param e que não resta captura ativa.
-6. Repetir em celulares modestos, conexões lentas, diferentes tons de pele, idades, mobilidade, condições visuais e de iluminação; medir falso aceite, falsa rejeição e desistência com protocolo e consentimento apropriados.
+2. Nenhum rosto, dois rostos, rosto pequeno, fora de centro, pouca luz, piscada curta e uso com óculos: conferir separadamente a prévia espelhada e os movimentos percebidos; sem aprovação indevida; documentar taxa de falha e acessibilidade.
+3. Para o desafio de movimento, manter o rosto reto e parado durante a calibração curta, virar moderadamente para qualquer lado e voltar à posição inicial. Não há comando de esquerda/direita: a direção e o espelhamento da prévia não devem mudar o resultado.
+4. Piscar real, sequência aleatória e retorno à posição inicial: conferir o que a interface pede versus o que detecta, em vários modelos de aparelho/câmera.
+5. Foto impressa, foto em outra tela, vídeo pré-gravado, vídeo com desafio adaptativo, câmera virtual/replay, injeção de quadros e movimento da tela/foto: o resultado deve ser tratado como facilmente contornável até testes independentes provarem o contrário.
+6. Encerrar, retirar consentimento, trocar de aba/fechar página: confirmar que todas as faixas de câmera param e que não resta captura ativa.
+7. Repetir em celulares modestos, conexões lentas, diferentes tons de pele, idades, mobilidade, condições visuais e de iluminação; medir falso aceite, falsa rejeição e desistência com protocolo e consentimento apropriados.
 
 ## Limites conhecidos
 

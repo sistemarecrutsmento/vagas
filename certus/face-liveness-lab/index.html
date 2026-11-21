@@ -7,7 +7,7 @@
   <title>Certus — laboratório de prova de vida (teste)</title>
   <style>
     :root{color-scheme:light;--wine:#551b2b;--wine2:#7a263b;--gold:#d1a64a;--ink:#241a1d;--muted:#675d60;--line:#e7dfe1;--bg:#f7f4f4;--ok:#17643a;--bad:#9b2435}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}header{background:var(--wine);color:#fff;padding:18px max(18px,calc((100vw - 900px)/2));border-bottom:4px solid var(--gold)}header strong{font-size:1.05rem}main{max-width:900px;margin:22px auto;padding:0 16px 36px}.flag{display:inline-block;background:#fff1d4;color:#654500;border:1px solid #e5c66f;border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:700}.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:16px;box-shadow:0 8px 24px #38131b0a}h1{font-size:clamp(1.5rem,4vw,2rem);line-height:1.2;margin:10px 0}h2{font-size:1.12rem;margin:0 0 8px}.subtle{color:var(--muted)}.notice{border-left:4px solid var(--gold);background:#fffaf0;padding:12px 14px;border-radius:8px}.privacy{display:grid;gap:8px;margin:14px 0}.privacy div{display:flex;gap:10px;align-items:flex-start}.privacy b{color:var(--wine)}.camera-wrap{position:relative;width:min(100%,620px);margin:14px auto 8px;background:#171316;border-radius:12px;overflow:hidden;aspect-ratio:4/3}.camera-wrap video{width:100%;height:100%;display:block;object-fit:cover}.camera-wrap .overlay{position:absolute;inset:8% 22%;border:2px solid #ffffff9c;border-radius:48% 48% 42% 42%;pointer-events:none}.camera-wrap .cam-state{position:absolute;bottom:10px;left:10px;right:10px;text-align:center;background:#160f12c9;color:white;padding:8px;border-radius:8px;font-weight:650}.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:16px 0}.consent{max-width:620px;margin:12px auto;color:var(--muted)}.consent label{display:flex;gap:10px;align-items:flex-start}.consent input{margin-top:5px;accent-color:var(--wine);width:18px;height:18px;flex:none}button{border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;background:var(--wine);color:white}button.secondary{background:white;color:var(--wine);border:1px solid var(--wine)}button:disabled{opacity:.5;cursor:not-allowed}#status{min-height:52px;text-align:center;font-size:1.05rem;font-weight:650;margin:12px auto;max-width:620px}#status.ok{color:var(--ok)}#status.error{color:var(--bad)}.steps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}.step{border:1px solid var(--line);border-radius:99px;padding:4px 12px;background:#faf8f8;color:var(--muted);font-size:.9rem}.step.active{border-color:var(--gold);background:#fff5d8;color:#503600;font-weight:700}.step.done{border-color:#9fceb2;background:#eef8f1;color:var(--ok)}details{margin-top:12px}summary{cursor:pointer;color:var(--wine);font-weight:700}footer{font-size:.9rem;color:var(--muted);padding:4px 2px 20px}noscript{display:block;margin:20px;color:var(--bad)}@media(max-width:560px){main{margin:14px auto;padding:0 12px 26px}.panel{padding:16px}.camera-wrap{aspect-ratio:3/4;max-height:65vh}.controls button{flex:1}.overlay{inset:12% 18%}}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}header{background:var(--wine);color:#fff;padding:18px max(18px,calc((100vw - 900px)/2));border-bottom:4px solid var(--gold)}header strong{font-size:1.05rem}main{max-width:900px;margin:22px auto;padding:0 16px 36px}.flag{display:inline-block;background:#fff1d4;color:#654500;border:1px solid #e5c66f;border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:700}.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:16px;box-shadow:0 8px 24px #38131b0a}h1{font-size:clamp(1.5rem,4vw,2rem);line-height:1.2;margin:10px 0}h2{font-size:1.12rem;margin:0 0 8px}.subtle{color:var(--muted)}.notice{border-left:4px solid var(--gold);background:#fffaf0;padding:12px 14px;border-radius:8px}.privacy{display:grid;gap:8px;margin:14px 0}.privacy div{display:flex;gap:10px;align-items:flex-start}.privacy b{color:var(--wine)}.camera-wrap{position:relative;width:min(100%,620px);margin:14px auto 8px;background:#171316;border-radius:12px;overflow:hidden;aspect-ratio:4/3}.camera-wrap video{width:100%;height:100%;display:block;object-fit:cover;transform:scaleX(-1)}.camera-wrap .overlay{position:absolute;inset:8% 22%;border:2px solid #ffffff9c;border-radius:48% 48% 42% 42%;pointer-events:none}.camera-wrap .cam-state{position:absolute;bottom:10px;left:10px;right:10px;text-align:center;background:#160f12c9;color:white;padding:8px;border-radius:8px;font-weight:650}.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:16px 0}.consent{max-width:620px;margin:12px auto;color:var(--muted)}.consent label{display:flex;gap:10px;align-items:flex-start}.consent input{margin-top:5px;accent-color:var(--wine);width:18px;height:18px;flex:none}button{border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;background:var(--wine);color:white}button.secondary{background:white;color:var(--wine);border:1px solid var(--wine)}button:disabled{opacity:.5;cursor:not-allowed}#status{min-height:52px;text-align:center;font-size:1.05rem;font-weight:650;margin:12px auto;max-width:620px}#status.ok{color:var(--ok)}#status.error{color:var(--bad)}.steps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}.step{border:1px solid var(--line);border-radius:99px;padding:4px 12px;background:#faf8f8;color:var(--muted);font-size:.9rem}.step.active{border-color:var(--gold);background:#fff5d8;color:#503600;font-weight:700}.step.done{border-color:#9fceb2;background:#eef8f1;color:var(--ok)}details{margin-top:12px}summary{cursor:pointer;color:var(--wine);font-weight:700}footer{font-size:.9rem;color:var(--muted);padding:4px 2px 20px}noscript{display:block;margin:20px;color:var(--bad)}@media(max-width:560px){main{margin:14px auto;padding:0 12px 26px}.panel{padding:16px}.camera-wrap{aspect-ratio:3/4;max-height:65vh}.controls button{flex:1}.overlay{inset:12% 18%}}
   </style>
 </head>
 <body>
@@ -15,7 +15,7 @@
   <main>
     <span class="flag">PROTÓTIPO DE TESTE — NÃO É PONTO VÁLIDO</span>
     <h1>Teste experimental de prova de vida</h1>
-    <p class="subtle">Desafio local de piscar e virar o rosto. Esta página não está conectada ao login, cadastro facial, API, banco de dados nem às marcações de ponto da Certus.</p>
+    <p class="subtle">Prévia da câmera espelhada para ficar mais natural no celular; a direção dos movimentos não afeta a checagem, que compara o rosto à sua posição inicial. A página não está conectada ao login, cadastro facial, API, banco de dados nem às marcações de ponto da Certus.</p>
 
     <section class="panel" aria-labelledby="test-about">
       <h2 id="test-about">O que este teste faz (e o que não faz)</h2>
@@ -70,7 +70,7 @@
       sequence.forEach((item, index) => {
         const pill = document.createElement('span');
         pill.className = `step${index < current || complete ? ' done' : index === current ? ' active' : ''}`;
-        pill.textContent = item.type === 'blink' ? 'Piscar' : `Virar para ${item.side} da tela`;
+        pill.textContent = item.type === 'blink' ? 'Piscar' : 'Virar e voltar ao centro';
         stepsEl.append(pill);
       });
     }
@@ -149,12 +149,15 @@
       const startedAt = Date.now();
       let stage = 0;
       let challengeAt = 0;
-      let openFrames = 0;
-      let blinkArmed = false;
+      let blinkSamples = [];
+      let blinkBaseline = null;
+      let blinkClosedAt = 0;
       let eyeWasClosed = false;
       let turnFrames = 0;
       let centerFrames = 0;
       let turnCaptured = false;
+      let neutralSamples = [];
+      let turnBaseline = null;
       let active = false;
       while (running && runToken === token && stage < sequence.length && Date.now() - startedAt < 45000) {
         if (!video.videoWidth || !video.videoHeight) { await sleep(150); continue; }
@@ -167,42 +170,66 @@
         if (!core.isOneGoodFace(detections, video.videoWidth)) {
           sayCamera(detections.length > 1 ? 'Deixe apenas um rosto visível' : 'Centralize o rosto dentro do contorno');
           say('É preciso detectar somente um rosto, bem enquadrado e iluminado.');
-          openFrames = 0; blinkArmed = false; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; active = false;
+          blinkSamples = []; blinkBaseline = null; blinkClosedAt = 0; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; neutralSamples = []; turnBaseline = null; active = false;
           await sleep(170); continue;
         }
         sayCamera('Rosto detectado — análise local');
         const item = sequence[stage];
-        if (!active) { active = true; challengeAt = Date.now(); openFrames = 0; blinkArmed = false; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; renderSteps(sequence, stage); }
+        if (!active) { active = true; challengeAt = Date.now(); blinkSamples = []; blinkBaseline = null; blinkClosedAt = 0; eyeWasClosed = false; turnFrames = 0; centerFrames = 0; turnCaptured = false; neutralSamples = []; turnBaseline = null; renderSteps(sequence, stage); }
         if (item.type === 'blink') {
           const ear = core.averageEyeAspectRatio(detections[0].landmarks.positions);
-          if (Number.isFinite(ear) && ear > 0.22) {
-            openFrames++;
-            if (openFrames >= 2) blinkArmed = true;
-            if (blinkArmed && eyeWasClosed && Date.now() - challengeAt >= 650) {
-              say('Piscar detectado.');
+          if (blinkBaseline === null) {
+            if (Number.isFinite(ear) && ear > 0.17) blinkSamples.push(ear);
+            sayCamera('Calibrando abertura dos olhos…');
+            say(`Etapa ${stage + 1} de 2: olhe para a câmera e mantenha os olhos abertos por um instante.`);
+            if (blinkSamples.length >= 9) {
+              blinkBaseline = core.median(blinkSamples);
+              challengeAt = Date.now();
+              sayCamera('Pronto — pisque uma vez');
+            }
+            await sleep(130); continue;
+          }
+          if (!eyeWasClosed && core.isClosedRelativeTo(ear, blinkBaseline)) {
+            eyeWasClosed = true;
+            blinkClosedAt = Date.now();
+            say('Fechamento detectado. Abra os olhos.');
+          } else if (eyeWasClosed && Number.isFinite(ear)) {
+            const closedFor = Date.now() - blinkClosedAt;
+            if (core.isReopenedRelativeTo(ear, blinkBaseline) && closedFor <= 1800) {
+              say('Piscada detectada.');
               stage++; active = false; await sleep(500); continue;
             }
-            eyeWasClosed = false;
-          } else if (blinkArmed && Number.isFinite(ear) && ear < 0.18 && Date.now() - challengeAt >= 650) {
-            eyeWasClosed = true;
+            if (closedFor > 1800) { eyeWasClosed = false; say('Não consegui confirmar a piscada. Pisque naturalmente mais uma vez.'); }
           }
-          say(`Etapa ${stage + 1} de 2: pisque naturalmente.`);
+          say(eyeWasClosed ? `Etapa ${stage + 1} de 2: abra os olhos.` : `Etapa ${stage + 1} de 2: pisque naturalmente uma vez.`);
         } else {
           const offset = core.noseOffset(detections[0].landmarks.positions);
+          if (!Number.isFinite(offset)) { await sleep(130); continue; }
+          if (turnBaseline === null) {
+            neutralSamples.push(offset);
+            sayCamera('Calibrando posição neutra…');
+            say(`Etapa ${stage + 1} de 2: olhe reto para a câmera e mantenha a cabeça parada.`);
+            if (neutralSamples.length >= 7) {
+              turnBaseline = core.median(neutralSamples);
+              challengeAt = Date.now();
+              sayCamera('Pronto — vire para qualquer lado');
+            }
+            await sleep(150); continue;
+          }
           if (!turnCaptured) {
-            turnFrames = core.isTurnDetected(offset, item.side) ? turnFrames + 1 : 0;
+            turnFrames = core.hasTurnedFrom(offset, turnBaseline) ? turnFrames + 1 : 0;
             if (turnFrames >= 3 && Date.now() - challengeAt >= 650) {
               turnCaptured = true; centerFrames = 0; turnFrames = 0;
-              say('Virada detectada. Agora volte ao centro.');
+              say('Movimento detectado. Agora volte a olhar reto para a câmera.');
             }
           } else {
-            centerFrames = core.isCentered(offset) ? centerFrames + 1 : 0;
+            centerFrames = core.hasReturnedTo(offset, turnBaseline) ? centerFrames + 1 : 0;
             if (centerFrames >= 3) {
-              say('Virada e retorno ao centro detectados.');
+              say('Virada e retorno à sua posição inicial detectados.');
               stage++; active = false; await sleep(500); continue;
             }
           }
-          say(turnCaptured ? `Etapa ${stage + 1} de 2: volte o rosto ao centro.` : `Etapa ${stage + 1} de 2: vire o rosto para a ${item.side} da tela e volte ao centro.`);
+          say(turnCaptured ? `Etapa ${stage + 1} de 2: volte a olhar reto para a câmera.` : `Etapa ${stage + 1} de 2: vire um pouco o rosto para qualquer lado e volte a olhar reto.`);
         }
         await sleep(130);
       }

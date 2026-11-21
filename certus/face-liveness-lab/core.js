@@ -35,14 +35,32 @@
     return side === 'esquerda' ? offset <= -threshold : side === 'direita' && offset >= threshold;
   }
 
-  function isCentered(offset, threshold = 0.045) {
-    return Number.isFinite(offset) && Math.abs(offset) < threshold;
+  function median(values) {
+    const valid = Array.isArray(values) ? values.filter(Number.isFinite).sort((a, b) => a - b) : [];
+    if (!valid.length) return NaN;
+    const mid = Math.floor(valid.length / 2);
+    return valid.length % 2 ? valid[mid] : (valid[mid - 1] + valid[mid]) / 2;
+  }
+
+  function hasTurnedFrom(offset, baseline, threshold = 0.075) {
+    return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset - baseline) >= threshold;
+  }
+
+  function hasReturnedTo(offset, baseline, tolerance = 0.055) {
+    return Number.isFinite(offset) && Number.isFinite(baseline) && Math.abs(offset - baseline) <= tolerance;
+  }
+
+  function isClosedRelativeTo(ear, openBaseline, ratio = 0.72) {
+    return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear <= openBaseline * ratio;
+  }
+
+  function isReopenedRelativeTo(ear, openBaseline, ratio = 0.86) {
+    return Number.isFinite(ear) && Number.isFinite(openBaseline) && openBaseline > 0 && ear >= openBaseline * ratio;
   }
 
   function createChallengeSequence(random = Math.random) {
-    const turn = random() < 0.5 ? 'esquerda' : 'direita';
     const first = random() < 0.5 ? 'blink' : 'turn';
-    return first === 'blink' ? [{ type: 'blink' }, { type: 'turn', side: turn }] : [{ type: 'turn', side: turn }, { type: 'blink' }];
+    return first === 'blink' ? [{ type: 'blink' }, { type: 'turn' }] : [{ type: 'turn' }, { type: 'blink' }];
   }
 
   function isOneGoodFace(detections, videoWidth) {
@@ -52,5 +70,5 @@
     return Boolean(box && Number(d.detection.score) >= 0.70 && Number(videoWidth) > 0 && box.width / videoWidth >= 0.18);
   }
 
-  return { eyeAspectRatio, averageEyeAspectRatio, noseOffset, isTurnDetected, isCentered, createChallengeSequence, isOneGoodFace };
+  return { eyeAspectRatio, averageEyeAspectRatio, noseOffset, isTurnDetected, isCentered, median, hasTurnedFrom, hasReturnedTo, isClosedRelativeTo, isReopenedRelativeTo, createChallengeSequence, isOneGoodFace };
 });
