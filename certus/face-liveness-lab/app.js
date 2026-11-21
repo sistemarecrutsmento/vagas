@@ -17,8 +17,13 @@
   const metrics = {
     face: document.getElementById('m-face'), frame: document.getElementById('m-frame'),
     left: document.getElementById('m-blink-left'), right: document.getElementById('m-blink-right'),
-    turn: document.getElementById('m-turn'), engine: document.getElementById('m-engine')
+    turn: document.getElementById('m-turn'), engine: document.getElementById('m-engine'),
+    selftest: document.getElementById('m-selftest')
   };
+  const softwareChecks = core.runSelfTests();
+  const softwareChecksPassed = softwareChecks.every(check => check.pass);
+  metrics.selftest.textContent = softwareChecks.filter(check => check.pass).length + '/' + softwareChecks.length + (softwareChecksPassed ? ' OK' : ' falhou');
+  metrics.selftest.style.color = softwareChecksPassed ? 'var(--ok)' : 'var(--bad)';
 
   let stream = null;
   let landmarker = null;
@@ -122,6 +127,10 @@
 
   async function start() {
     if (!consent.checked || running) return;
+    if (!softwareChecksPassed) {
+      setStatus('Autochecagem falhou', 'Esta versão não passou nos testes internos de lógica. A câmera não será iniciada.', 'error');
+      return;
+    }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus('Câmera indisponível', 'Abra esta página em um navegador com HTTPS e permissão de câmera.', 'error');
       return;

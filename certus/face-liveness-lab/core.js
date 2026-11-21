@@ -71,5 +71,32 @@
     return random() < 0.5 ? [{ type: 'blink' }, { type: 'turn' }] : [{ type: 'turn' }, { type: 'blink' }];
   }
 
-  return { median, categoryScore, eyeBlinkScores, noseOffset, faceBounds, isFaceWellFramed, isBlinkClosed, isEyesReopened, hasTurnedFrom, hasReturnedTo, createChallengeSequence };
+  function runSelfTests() {
+    const results = [];
+    const check = (name, condition) => results.push({ name, pass: Boolean(condition) });
+    const eyeScores = eyeBlinkScores([
+      { categoryName: 'eyeBlinkLeft', score: 0.08 },
+      { categoryName: 'eyeBlinkRight', score: 0.1 }
+    ]);
+    check('blendshapes dos dois olhos', eyeScores.left === 0.08 && eyeScores.right === 0.1);
+    check('fechamento bilateral', isBlinkClosed({ left: 0.7, right: 0.72 }, eyeScores));
+    check('reabertura bilateral', isEyesReopened({ left: 0.1, right: 0.12 }, eyeScores));
+    const points = Array.from({ length: 478 }, () => ({ x: 0.5, y: 0.5, z: 0 }));
+    points[1] = { x: 0.54, y: 0.5, z: 0 };
+    points[33] = { x: 0.3, y: 0.35, z: 0 };
+    points[263] = { x: 0.7, y: 0.35, z: 0 };
+    points[10] = { x: 0.5, y: 0.15, z: 0 };
+    points[152] = { x: 0.5, y: 0.85, z: 0 };
+    points[234] = { x: 0.2, y: 0.5, z: 0 };
+    points[454] = { x: 0.8, y: 0.5, z: 0 };
+    check('enquadramento sintético', isFaceWellFramed(points));
+    check('normalização da pose', Math.abs(noseOffset(points) - 0.1) < 1e-9);
+    check('retorno à posição inicial', hasReturnedTo(0.12, 0.1, 0.03));
+    const blinkFirst = createChallengeSequence(() => 0.1).map(item => item.type).join(',');
+    const turnFirst = createChallengeSequence(() => 0.9).map(item => item.type).join(',');
+    check('duas ordens do desafio', blinkFirst === 'blink,turn' && turnFirst === 'turn,blink');
+    return results;
+  }
+
+  return { median, categoryScore, eyeBlinkScores, noseOffset, faceBounds, isFaceWellFramed, isBlinkClosed, isEyesReopened, hasTurnedFrom, hasReturnedTo, createChallengeSequence, runSelfTests };
 });

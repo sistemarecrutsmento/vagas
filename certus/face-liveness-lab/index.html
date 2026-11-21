@@ -43,29 +43,23 @@
         <div class="metric"><label>Piscar · olho direito</label><strong id="m-blink-right">—</strong></div>
         <div class="metric"><label>Movimento lateral</label><strong id="m-turn">—</strong></div>
         <div class="metric"><label>Motor</label><strong id="m-engine">Não carregado</strong></div>
-      </div></details>
+        <div class="metric"><label>Autochecagem do software</label><strong id="m-selftest">Aguardando</strong></div>
+      </div><p class="small-note">Autochecagem usa valores sintéticos; não testa câmera nem prova de vida.</p></details>
+      <details class="diagnostics"><summary>Roteiro dos testes finais</summary>
+        <p class="small-note">O <a href="./FINAL_TEST_PROTOCOL.md">roteiro completo de aceitação</a> inclui folha para anotações sem dados faciais.</p>
+        <p class="small-note"><strong>1 · Repetibilidade:</strong> faça 5 sessões seguidas neste aparelho, anotando apenas concluído/não concluído, etapa, FPS e ambiente. Não grave imagens nem rostos.</p>
+        <p class="small-note"><strong>2 · Condições:</strong> repita com luz frontal e contraluz moderada, telefone um pouco mais perto/longe e, se usar normalmente, com óculos. Registre falhas e falsos bloqueios.</p>
+        <p class="small-note"><strong>3 · Segurança do desafio:</strong> apenas em aparelho próprio e sem dados reais, teste se foto impressa e vídeo exibido em outra tela conseguem concluir. Se algum passar, é evidência de que o protótipo não é PAD. Se nenhum passar, isso ainda não comprova segurança.</p>
+        <p class="small-note"><strong>4 · Falhas e privacidade:</strong> negue a câmera; durante o teste, encerre ou troque de aba. Confirme que não há conclusão indevida e que a câmera para. O modelo precisa de rede no primeiro carregamento.</p>
+        <p class="small-note"><strong>5 · Outros celulares:</strong> para fechar a rodada, repita em pelo menos 2 modelos diferentes. Não misture teste de usabilidade com avaliação de segurança certificada.</p>
+        <p class="small-note"><strong>Anote:</strong> aparelho/navegador, tentativa, iluminação/distância, etapa, conclusão, FPS e mensagem. Sem nome de participante, imagem, vídeo, template facial ou dado de RH.</p>
+      </details>
       <div class="fineprint"><p><strong>O que “concluído” quer dizer:</strong> somente que o detector observou os movimentos solicitados nesta sessão.</p><p>Não existe validação anti-spoof, correspondência de identidade, gravação de ponto ou conexão com API, cadastro ou banco da Certus. A versão não está aprovada para operação.</p></div>
     </aside>
   </div>
 </main>
 <footer>Laboratório independente e descartável · Certus · Não usar para decisões de trabalho ou controle de acesso.</footer>
-<script>
-(function(root){
-  'use strict';
-  function median(values){const a=Array.isArray(values)?values.filter(Number.isFinite).sort((x,y)=>x-y):[];if(!a.length)return NaN;const m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2;}
-  function categoryScore(categories,name){if(!Array.isArray(categories))return NaN;const found=categories.find(x=>x&&x.categoryName===name);const n=found&&Number(found.score);return Number.isFinite(n)?Math.max(0,Math.min(1,n)):NaN;}
-  function eyeBlinkScores(categories){return{left:categoryScore(categories,'eyeBlinkLeft'),right:categoryScore(categories,'eyeBlinkRight')};}
-  function noseOffset(points){if(!Array.isArray(points)||!points[1]||!points[33]||!points[263])return NaN;const span=Math.abs(points[263].x-points[33].x);return Number.isFinite(span)&&span>0?(points[1].x-(points[33].x+points[263].x)/2)/span:NaN;}
-  function faceBounds(points){if(!Array.isArray(points)||points.length<100)return null;const xs=points.map(p=>p&&Number(p.x)).filter(Number.isFinite),ys=points.map(p=>p&&Number(p.y)).filter(Number.isFinite);if(xs.length<100||ys.length<100)return null;const left=Math.min(...xs),right=Math.max(...xs),top=Math.min(...ys),bottom=Math.max(...ys);return{left,right,top,bottom,width:right-left,height:bottom-top,centerX:(left+right)/2,centerY:(top+bottom)/2};}
-  function isFaceWellFramed(points){const b=faceBounds(points);return Boolean(b&&b.width>=.16&&b.height>=.18&&b.width<=.94&&b.height<=.96&&b.centerX>=.08&&b.centerX<=.92&&b.centerY>=.08&&b.centerY<=.92);}
-  function isBlinkClosed(s,b,margin=.24,floor=.48){return Boolean(s&&b&&Number.isFinite(s.left)&&Number.isFinite(s.right)&&Number.isFinite(b.left)&&Number.isFinite(b.right)&&s.left>=Math.max(floor,b.left+margin)&&s.right>=Math.max(floor,b.right+margin));}
-  function isEyesReopened(s,b,margin=.16,cap=.5){return Boolean(s&&b&&Number.isFinite(s.left)&&Number.isFinite(s.right)&&Number.isFinite(b.left)&&Number.isFinite(b.right)&&s.left<=Math.min(cap,b.left+margin)&&s.right<=Math.min(cap,b.right+margin));}
-  function hasTurnedFrom(n,b,t=.075){return Number.isFinite(n)&&Number.isFinite(b)&&Math.abs(n-b)>=t;}
-  function hasReturnedTo(n,b,t=.055){return Number.isFinite(n)&&Number.isFinite(b)&&Math.abs(n-b)<=t;}
-  function createChallengeSequence(random=Math.random){return random()<.5?[{type:'blink'},{type:'turn'}]:[{type:'turn'},{type:'blink'}];}
-  root.CertusFaceLivenessCore={median,categoryScore,eyeBlinkScores,noseOffset,faceBounds,isFaceWellFramed,isBlinkClosed,isEyesReopened,hasTurnedFrom,hasReturnedTo,createChallengeSequence};
-})(window);
-</script>
-<script src="./app.js" defer></script>
+<script src="./core.js?v=14" defer></script>
+<script src="./app.js?v=14" defer></script>
 </body>
 </html>

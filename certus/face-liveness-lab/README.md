@@ -8,7 +8,8 @@
 - MediaPipe Face Landmarker (`@mediapipe/tasks-vision` 1.2.3), com landmarks 3D e scores de blendshape `eyeBlinkLeft`/`eyeBlinkRight`; tenta GPU e recua para CPU. Biblioteca e modelo só são requisitados depois de tocar em “Iniciar diagnóstico”.
 - Calibração local dos dois olhos, leitura percentual de cada olho, pose facial relativa à posição neutra, desafio de movimentos em ordem aleatória, diagnóstico em tela, limite de tempo e encerramento explícito da câmera.
 - O processamento da imagem fica no navegador. A página não grava nem envia quadros, vídeo, templates ou movimentos para um servidor próprio. Biblioteca, WASM e modelo são baixados de jsDelivr e Google Cloud Storage; esses provedores recebem as requisições e dados comuns de conexão, como IP. Isso deve constar em qualquer avaliação de privacidade.
-- `core.js` concentra funções puras de leitura e limiares; `core.test.cjs` contém testes unitários para blendshapes, calibração, enquadramento, pose e ordem do desafio; `app.js` cuida da sessão do navegador; `index.html` apresenta a demonstração.
+- `core.js` concentra funções puras e autochecagens sintéticas; `core.test.cjs` contém testes unitários para blendshapes, enquadramento, pose, ordem do desafio e autochecagem; `app.js` cuida da sessão; `index.html` apresenta a demonstração. A tela mostra o resultado agregado da autochecagem (7/7) sem usar câmera.
+- `FINAL_TEST_PROTOCOL.md` traz roteiro para cinco sessões repetidas, condições de captura, negações/interrupções, testes limitados com foto/vídeo e tabela de anotação que não inclui dados faciais.
 
 ## O que isto NÃO prova
 
@@ -29,7 +30,9 @@ Para uma implantação real, comparar SDKs especializados, pedir proposta e rela
 
 - Publicação estática no GitHub Pages verificada como `built`; HTML e `app.js` entregues com HTTP 200.
 - Sintaxe JavaScript, estrutura HTML, separação do controlador e ausência de rotas/solicitações de integração de ponto verificadas estaticamente.
-- No navegador de automação, a interface iniciou, carregou o motor/modelo e chegou ao pedido da câmera; esse navegador não disponibilizou câmera (`NotFoundError`). Portanto não houve teste de piscada, virada, resultado falso/verdadeiro ou câmera física. A suíte `node --test core.test.cjs` está escrita, mas sua execução precisa ocorrer num ambiente com Node.js; sintaxe aprovada não é resultado de execução dos testes.
+- Na versão anterior, o usuário testou no próprio celular e enviou captura da tela de sucesso dos dois movimentos; isso demonstra funcionamento observado naquela sessão, não segurança/PAD e não valida a nova troca de motor.
+- Na versão MediaPipe, navegador de automação carregou a aplicação e chegou ao pedido de câmera; aquele ambiente respondeu `NotFoundError`, sem dispositivo. Portanto não há validação física desta versão nem sessão de desafio com MediaPipe confirmada.
+- A sintaxe de HTML/JavaScript e os recursos públicos do modelo/biblioteca foram verificados por HTTP. A suíte `node --test core.test.cjs` está preparada, mas a execução em Node não foi possível neste ambiente. A nova autochecagem aparece na interface e será exercitada no navegador ao abrir a página; ela verifica matemática sintética, não câmera, viés ou PAD.
 
 ## Teste cuidadoso
 

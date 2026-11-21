@@ -43,3 +43,9 @@ test('challenge order changes while each challenge appears exactly once', () => 
   assert.deepEqual(firstBlink.map(x=>x.type),['blink','turn']);
   assert.deepEqual(firstTurn.map(x=>x.type),['turn','blink']);
 });
+
+test('browser self-checks cover core maths and challenge flow', () => {
+  const checks = core.runSelfTests();
+  assert.equal(checks.length, 7);
+  assert.ok(checks.every(check => check.pass), JSON.stringify(checks));
+});
