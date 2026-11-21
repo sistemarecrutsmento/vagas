@@ -1,45 +1,36 @@
-# Certus — protótipo isolado de prova de vida
+# Certus — laboratório isolado de leitura facial
 
-**Apenas laboratório. Não é um relógio de ponto, não verifica identidade e não pode aprovar ou gerar marcações.** Esta pasta é autônoma e não foi incluída nos links, no portal do colaborador, no terminal, na API, no serviço de sincronização offline ou no banco de dados da Certus.
+**Demonstração técnica, não um sistema de prova de vida/PAD e não um relógio de ponto.** A página é independente e não foi conectada ao login, cadastro facial, API, serviço offline ou banco de dados da Certus. Não utilizar para funcionários, identidade, presença, jornada, sanções ou controle de acesso.
 
-## O que há nesta primeira versão
+## Implementação desta rodada
 
-- Solicita consentimento de teste e permissão de câmera antes de iniciar.
-- Carrega localmente no navegador Face API e modelos públicos de detecção facial e 68 pontos faciais.
-- A prévia de vídeo é espelhada visualmente, como um espelho, mas a análise continua sobre o vídeo original. A tarefa de virar não depende de esquerda/direita; compara o desvio em qualquer sentido com uma linha de base neutra e requer retorno.
-- Usa MediaPipe Face Landmarker (478 landmarks 3D e blendshapes de piscar dos dois olhos), carregado somente após consentimento e início explícitos. Faz calibração local, verifica enquadramento, mede um fechamento/reabertura dos dois olhos e uma virada/retorno ao centro, em ordem aleatória. Os indicadores mostram leituras diagnósticas sem gravar vídeo. O limite é 80 segundos; expiração nunca aprova a sessão.
-- A biblioteca/modelo são baixados de jsDelivr e Google Cloud Storage: os provedores recebem pedidos de rede e dados normais de conexão (como IP). A lógica não envia quadros, vídeos, templates ou movimentos para um backend.
-- Isto é um teste de interação, não uma solução PAD certificada: um vídeo pré-gravado ou uma injeção de câmera pode imitar movimento. Não usar em ponto, identificação, sanção, controle de acesso ou com funcionários; não está integrado ao Certus. Para eventual uso real, avaliar SDK comercial e laboratório independente conforme ISO/IEC 30107-3:2023, threat model, desempenho demográfico, privacidade/LGPD, segurança e alternativa não biométrica.
-- Exige um único rosto com confiança e tamanho mínimos; termina por tempo esgotado; encerra a câmera ao parar, retirar o consentimento, sair da página ou perder foco.
-- Não tem gravação, armazenamento de imagem/modelo, GPS, endpoint de backend ou código de marcação. Não envia quadros da câmera pela lógica da página.
-- Baixar a biblioteca/modelos de CDN requer tráfego de rede normal, que pode revelar ao provedor o IP e metadados de conexão.
+- Interface de laboratório responsiva com prévia espelhada, consentimento explícito, enquadramento guiado, estados acessíveis e mensagens distintas para cada fase.
+- MediaPipe Face Landmarker (`@mediapipe/tasks-vision` 1.2.3), com landmarks 3D e scores de blendshape `eyeBlinkLeft`/`eyeBlinkRight`; tenta GPU e recua para CPU. Biblioteca e modelo só são requisitados depois de tocar em “Iniciar diagnóstico”.
+- Calibração local dos dois olhos, leitura percentual de cada olho, pose facial relativa à posição neutra, desafio de movimentos em ordem aleatória, diagnóstico em tela, limite de tempo e encerramento explícito da câmera.
+- O processamento da imagem fica no navegador. A página não grava nem envia quadros, vídeo, templates ou movimentos para um servidor próprio. Biblioteca, WASM e modelo são baixados de jsDelivr e Google Cloud Storage; esses provedores recebem as requisições e dados comuns de conexão, como IP. Isso deve constar em qualquer avaliação de privacidade.
+- `core.js` concentra funções puras de leitura e limiares; `core.test.cjs` contém testes unitários para blendshapes, calibração, enquadramento, pose e ordem do desafio; `app.js` cuida da sessão do navegador; `index.html` apresenta a demonstração.
 
-## Executar em ambiente de teste
+## O que isto NÃO prova
 
-Sirva esta pasta como site estático **local** (localhost) ou em um preview HTTPS controlado. `getUserMedia` não funciona em páginas sem contexto seguro. Não copie a pasta para o site público/produção nem a conecte aos fluxos de empregado. Compartilhe apenas com participantes de teste que consentiram e sem dados reais de RH.
+Os landmarks/blendshapes são uma estimativa de expressão e pose. Um desafio de piscar e virar a cabeça é apenas detecção de movimento: não detecta de forma robusta fotos, vídeos, máscaras, deepfakes, injeção de câmera ou replay adaptativo. O uso de uma biblioteca moderna melhora a instrumentação da captura, mas não converte a heurística em PAD. Os thresholds ainda não foram calibrados com dados de dispositivos e população, e não há medições de falsos aceites, falsas rejeições, viés ou desempenho.
 
-## Testes automatizados
+## Referências e trilha para uma solução real
 
-Com Node.js 18+:
+- MediaPipe Face Landmarker produz landmarks 3D, blendshape scores e matrizes de transformação; a documentação o descreve para landmarks, expressões e efeitos, não como certificação PAD: https://developers.google.com/edge/mediapipe/solutions/vision/face_landmarker
+- ISO/IEC 30107-3:2023 define princípios, métodos de avaliação e reporte de mecanismos PAD; não prescreve um algoritmo nem substitui avaliação de segurança global: https://www.iso.org/standard/79520.html
+- NIST FATE PAD publica avaliações de algoritmos de PAD e descreve riscos de apresentação como fotos e replay de vídeo: https://pages.nist.gov/frvt/html/frvt_pad.html
+- A LGPD define dado biométrico vinculado a pessoa natural como dado pessoal sensível (art. 5º, II): https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm
 
-```sh
-node --test core.test.cjs
-```
+Antes de qualquer uso operacional: threat model específico para o terminal/celular e vetores digitais; laboratório independente ISO/IEC 30107-3:2023 com PAIs e tentativas de replay/injeção; avaliação estatística de falso aceite/rejeição e diferenças demográficas; teste em aparelhos, luz, rede e acessibilidade; parecer de privacidade/LGPD, base legal, retenção, transparência e alternativa não biométrica; revisão de segurança; controles server-side, rate limiting, auditoria e fallback. Nenhum desses itens está feito por este protótipo.
 
-Os testes cobrem a geometria de EAR/virada, aleatoriedade da sequência e rejeição de zero/múltiplos rostos, baixa confiança e rosto pequeno. Eles não avaliam a eficácia anti-fraude, viés, falsos resultados, câmera física, compatibilidade ou segurança de produção.
+Para uma implantação real, comparar SDKs especializados, pedir proposta e relatório de testes independente, verificar escopo de certificação e vetores não cobertos, local de processamento/retensão, suboperadores, suporte e requisitos de infraestrutura. A FaceTec informa que o 3D Liveness é cobrado mensalmente por uso, exige mínimo mensal e deve rodar nos servidores do cliente; o preço é por cotação: https://www.facetec.com/pricing. Isso é um dado comercial do fornecedor, não validação independente do produto para o Certus.
 
-## Casos manuais necessários antes de ampliar o teste
+## Validação registrada
 
-1. Câmera negada, sem câmera, rede/CDN indisponível: não concluir, não criar registros e oferecer mensagem de erro clara.
-2. Nenhum rosto, dois rostos, rosto pequeno, fora de centro, pouca luz, piscada curta e uso com óculos: conferir separadamente a prévia espelhada e os movimentos percebidos; sem aprovação indevida; documentar taxa de falha e acessibilidade.
-3. Para o desafio de movimento, manter o rosto reto e parado durante a calibração curta, virar moderadamente para qualquer lado e voltar à posição inicial. Não há comando de esquerda/direita: a direção e o espelhamento da prévia não devem mudar o resultado.
-4. Piscar real, sequência aleatória e retorno à posição inicial: conferir o que a interface pede versus o que detecta, em vários modelos de aparelho/câmera.
-5. Foto impressa, foto em outra tela, vídeo pré-gravado, vídeo com desafio adaptativo, câmera virtual/replay, injeção de quadros e movimento da tela/foto: o resultado deve ser tratado como facilmente contornável até testes independentes provarem o contrário.
-6. Encerrar, retirar consentimento, trocar de aba/fechar página: confirmar que todas as faixas de câmera param e que não resta captura ativa.
-7. Repetir em celulares modestos, conexões lentas, diferentes tons de pele, idades, mobilidade, condições visuais e de iluminação; medir falso aceite, falsa rejeição e desistência com protocolo e consentimento apropriados.
+- Publicação estática no GitHub Pages verificada como `built`; HTML e `app.js` entregues com HTTP 200.
+- Sintaxe JavaScript, estrutura HTML, separação do controlador e ausência de rotas/solicitações de integração de ponto verificadas estaticamente.
+- No navegador de automação, a interface iniciou, carregou o motor/modelo e chegou ao pedido da câmera; esse navegador não disponibilizou câmera (`NotFoundError`). Portanto não houve teste de piscada, virada, resultado falso/verdadeiro ou câmera física. A suíte `node --test core.test.cjs` está escrita, mas sua execução precisa ocorrer num ambiente com Node.js; sintaxe aprovada não é resultado de execução dos testes.
 
-## Limites conhecidos
+## Teste cuidadoso
 
-Esta versão é uma heurística simples de landmarks, não um detector robusto de prova de vida. Um vídeo pode simular o piscar e um rosto em tela pode ser movido para imitar a virada. Thresholds não foram calibrados para população/aparelhos reais. A mensagem de conclusão não deve ser usada como evidência para pagamento, assiduidade, identidade, controle de acesso ou sanção trabalhista.
-
-Qualquer etapa posterior no Certus exigiria avaliação de ameaça e de privacidade/LGPD, revisão de segurança, acessibilidade e integração server-side com controles contra replay, isolamento por empresa, auditoria e fallback presencial/manual. Não há pedido de produção ou autorização para publicar o fluxo nesta etapa.
+Abra a versão HTTPS mais recente. Use apenas seu próprio rosto ou participante que consentiu; mantenha o rosto inteiro dentro do oval, com boa luz frontal. O navegador baixa aproximadamente alguns megabytes de modelo. Autorize a câmera apenas para essa sessão e encerre ao terminar. Não grave ou compartilhe material biométrico. O painel de indicadores serve para depuração, não é pontuação de segurança nem decisão de autenticidade.
