@@ -328,3 +328,4 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
 .late-interest-note{font-size:.9rem;color:#74183d;background:#fff7fa;border-left:3px solid #c5a45e;padding:10px 12px;border-radius:4px}
 
 .schedule-night-rules{border:1px solid #e4dce0;border-radius:10px;padding:14px;margin:14px 0}.schedule-night-rules legend{font-weight:700;padding:0 6px}.schedule-night-rules select{width:100%;min-height:42px;padding:9px;border:1px solid #cfc7cb;border-radius:7px;background:#fff}.schedule-night-rules .muted{font-size:.9rem}
+.manual-mark-actions{justify-content:space-between}.manual-mark-actions #manual-mark-abono{margin-right:auto}
