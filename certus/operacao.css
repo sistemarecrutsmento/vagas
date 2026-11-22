@@ -334,3 +334,8 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
 .records-calendar tbody tr.records-day-dsr{background:#f8f0f3}
 .records-calendar tbody tr.records-day-dsr td:first-child{box-shadow:inset 3px 0 #c58aa0}
 .records-calendar tbody tr.records-day-dsr:hover,.records-calendar tbody tr.records-day-dsr.selected{background:#f2e4ea}
+
+/* The selected timesheet day uses a calm green; DSR days remain pink when not selected. */
+.records-calendar tbody tr.records-day.selected:not(.records-day-abono):not(.records-day-abono-hours),
+.records-calendar tbody tr.records-day.selected:not(.records-day-abono):not(.records-day-abono-hours):hover{background:#e7f3e9}
+.records-calendar tbody tr.records-day.selected:not(.records-day-abono):not(.records-day-abono-hours) td:first-child{box-shadow:inset 3px 0 #5b9b69}
