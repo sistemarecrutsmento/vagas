@@ -329,3 +329,8 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
 
 .schedule-night-rules{border:1px solid #e4dce0;border-radius:10px;padding:14px;margin:14px 0}.schedule-night-rules legend{font-weight:700;padding:0 6px}.schedule-night-rules select{width:100%;min-height:42px;padding:9px;border:1px solid #cfc7cb;border-radius:7px;background:#fff}.schedule-night-rules .muted{font-size:.9rem}
 .manual-mark-actions{justify-content:space-between}.manual-mark-actions #manual-mark-abono{margin-right:auto}
+
+/* DSR is a paid weekly rest day: keep it visibly distinct in the timesheet. */
+.records-calendar tbody tr.records-day-dsr{background:#f8f0f3}
+.records-calendar tbody tr.records-day-dsr td:first-child{box-shadow:inset 3px 0 #c58aa0}
+.records-calendar tbody tr.records-day-dsr:hover,.records-calendar tbody tr.records-day-dsr.selected{background:#f2e4ea}
