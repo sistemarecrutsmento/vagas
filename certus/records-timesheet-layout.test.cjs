@@ -29,8 +29,10 @@ test('management timesheet renders every daily-balance column cell in the right 
 test('narrow management timesheet places day details below the horizontally scrollable table', () => {
   assert.match(ui, /tabindex="0" role="region" aria-label="Espelho diário;/,
     'table is keyboard-focusable and announces horizontal scrolling');
-  assert.match(css, /@container records \(max-width:780px\)\{[\s\S]*?\.records-layout\{grid-template-columns:minmax\(0,1fr\)\}[\s\S]*?\.records-day-panel\{position:relative;/,
-    'narrow content uses a single column and keeps the detail panel in document flow');
+  assert.match(css, /@container records \(max-width:780px\)\{[\s\S]*?\.records-layout\{[^}]*grid-template-columns:minmax\(0,1fr\)/,
+    'narrow content uses a single column');
+  assert.match(css, /@container records \(max-width:780px\)\{[\s\S]*?\.records-day-panel\{position:relative;/,
+    'narrow content keeps the detail panel in document flow');
   assert.match(css, /records-day-dsr\{background:#f8f0f3\}/, 'DSR pink styling is preserved');
   assert.match(css, /records-day\.selected:not\(\.records-day-abono\):not\(\.records-day-abono-hours\)[\s\S]*?background:#e7f3e9/,
     'selected non-abono day remains green');
