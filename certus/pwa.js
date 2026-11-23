@@ -1,5 +1,6 @@
 (()=>{'use strict';
 const errors=window.__certusBootErrors||(window.__certusBootErrors=[]);
+if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./service-worker.js').catch(e=>errors.push('Não foi possível ativar o modo offline: '+String(e?.message||e)));
 window.addEventListener('error',e=>errors.push(e.message||e.target?.src||'erro no script'));
 window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason?.stack||e.reason||'promise rejeitada')));
 setTimeout(()=>{
