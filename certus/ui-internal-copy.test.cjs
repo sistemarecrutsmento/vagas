@@ -23,6 +23,7 @@ test('shared terminal keeps offline implementation out of the visible portal',()
  assert.doesNotMatch(punch,/result\.textContent='[^']*(?:offline|fila|sincron|conexão voltou|análise da gestão)/i);
  assert.match(kiosk,/async function prepareTerminalOffline\(\)/);
  assert.match(kiosk,/async function syncTerminalOfflineMarks\(\)/);
+ assert.match(kiosk,/stableFrames<2[\s\S]*?finish\(resolve,descriptor\)/);
 });
 
 test('employee portal keeps offline capture internal and does not expose preparation, queue, or timestamp details',()=>{
