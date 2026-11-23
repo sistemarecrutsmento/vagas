@@ -36,10 +36,18 @@ test('recognition threshold and server-authoritative shared clock flow are not c
 });
 
 test('local offline storage is not reported as a successful server registration',()=>{
- assert.match(script,/id=\"offline-status\"/);
+ assert.doesNotMatch(script,/id=\"offline-status\"/);
  assert.match(script,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
- assert.match(script,/O Certus recebeu a marcação\. Aguarde a conferência da gestão\./);
+ assert.match(script,/O servidor confirmou todas as tentativas enviadas/);
  assert.match(script,/if\(!pending&&!alreadyRecorded\)throw/);
  assert.match(script,/error\.httpStatus=response\.status/);
  assert.match(script,/function offlineSyncFailureMessage\(error\)/);
+});
+
+test('queued punches never transmit on terminal boot or visibility resume; manual retry requires confirmation',()=>{
+ const home=script.slice(script.indexOf('function showHome'),script.indexOf('async function syncServerClock'));
+ assert.doesNotMatch(home,/syncTerminalOfflineMarks|Enviar pendências|offline-status/);
+ assert.match(script,/if\(regained\)syncTerminalOfflineMarks/);
+ assert.doesNotMatch(script,/visibilitychange[^;]*syncTerminalOfflineMarks/);
+ assert.match(script,/window\.confirm\(`Enviar \$\{pending\.length\} tentativa/);
 });
