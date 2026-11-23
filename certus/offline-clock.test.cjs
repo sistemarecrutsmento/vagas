@@ -16,7 +16,7 @@ test('offline queue stores only AES-GCM ciphertext and uses a non-extractable pe
   assert.match(ui, /generateKey\(\{name:'AES-GCM',length:256\},false,\['encrypt','decrypt'\]\)/);
   assert.match(ui, /crypto\.subtle\.encrypt\(\{name:'AES-GCM',iv\},key,plain\)/);
   assert.match(ui, /crypto\.subtle\.decrypt\(\{name:'AES-GCM',iv:new Uint8Array\(row\.iv\)\},key,row\.cipher\)/);
-  assert.match(ui, /queueOfflineMark\(mark\)/);
+  assert.match(ui, /queueOfflineMark\(await captureMark\(\)\)/);
 });
 
 test('offline resources and branch location are prepared automatically after online face verification', () => {
