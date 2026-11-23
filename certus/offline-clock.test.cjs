@@ -34,7 +34,10 @@ test('offline resources and branch location are prepared automatically after onl
 });
 
 test('failed network during punch preserves a local mark instead of losing the user action', () => {
-  assert.match(ui, /const saveOffline=async\(\)=>\{const queued=await readOfflineMarks\(\)/);
+  assert.match(ui, /const captureMark=async\(\)=>\{if\(capturedMark\)return capturedMark/);
+  assert.match(ui, /'Idempotency-Key':mark\.id/);
+  assert.match(ui, /await queueOfflineMark\(await captureMark\(\)\)/);
+  assert.match(ui, /const saveOffline=async\(\)=>\{await queueOfflineMark/);
   assert.match(ui, /e\?\.name==='TypeError'\|\|e\?\.name==='AbortError'\|\|!navigator\.onLine\)\{await saveOffline\(\);return\}/);
   assert.match(ui, /Marcação salva neste aparelho/);
   assert.match(ui, /horário do aparelho ainda não está confirmado/);
@@ -47,6 +50,8 @@ test('sync is ordered and idempotent, and local data is deleted only after expli
   const sync = ui.slice(start, end);
   assert.match(sync, /sort\(\(a,b\)=>Date\.parse\(a\.client_captured_at\)-Date\.parse\(b\.client_captured_at\)\)/);
   assert.match(sync, /'Idempotency-Key':x\.id/);
+  assert.match(sync, /alreadyRecorded=item\?\.validation_status==='validated'/);
+  assert.match(sync, /if\(!pendingReview&&!alreadyRecorded\)throw/);
   assert.ok(sync.indexOf('response.requires_review!==true||response.official_time_confirmed!==false') < sync.indexOf('await deleteOfflineMark(x.id)'), 'delete only after server confirms pending review without claiming official time');
   assert.match(sync, /catch\(e\)\{error=String\(e\?\.message/);
   assert.match(sync, /Envio interrompido/);
@@ -62,12 +67,12 @@ test('employee sees the distinction between unsent local marks and received mark
 
 test('service worker registers on HTTPS and caches only the pinned public face assets, never API responses', () => {
   assert.match(pwa, /navigator\.serviceWorker\.register\('\.\/service-worker\.js'\)/);
-  assert.match(sw, /const VERSION='certus-static-v46-offline-auto-20261122'/);
+  assert.match(sw, /const VERSION='certus-static-v47-offline-idempotent-20261122'/);
   assert.match(sw, /certus-face-assets-v1\.7\.15/);
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=offline-auto-v3-20261122/);
+  assert.match(html, /operacao\.js\?v=offline-auto-v4-20261122/);
 });
 
 test('offline queue retries when connectivity returns and when the active app resumes', () => {
