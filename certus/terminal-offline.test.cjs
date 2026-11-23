@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261123-private-ui-v1/);
+ assert.match(page,/terminal\.js\?v=20261123-stable-face-capture-v1/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -39,8 +39,8 @@ test('queued terminal punches sync automatically after connectivity returns or a
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v50-private-offline-ui-20261123/);
- assert.match(sw,/terminal\.js\?v=20261123-private-ui-v1/);
+ assert.match(sw,/certus-static-v51-stable-face-capture-20261123/);
+ assert.match(sw,/terminal\.js\?v=20261123-stable-face-capture-v1/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
