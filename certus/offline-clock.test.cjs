@@ -21,6 +21,7 @@ test('offline queue stores only AES-GCM ciphertext and uses a non-extractable pe
 
 test('offline preparation pins the face runtime, caches work-location and prevents an unprepared offline attempt', () => {
   assert.match(ui, /face-api@1\.7\.15\/dist\/face-api\.js/);
+  assert.match(ui, /async function faceStatus\(\)[\s\S]*?certus_face_profile:[\s\S]*?offline_cached:true/);
   assert.match(ui, /script\.crossOrigin='anonymous'/);
   assert.match(ui, /face-api@1\.7\.15\/model/);
   assert.match(ui, /id="prepare-offline-clock"/);
@@ -58,12 +59,12 @@ test('employee sees the distinction between unsent local marks and received mark
 
 test('service worker registers on HTTPS and caches only the pinned public face assets, never API responses', () => {
   assert.match(pwa, /navigator\.serviceWorker\.register\('\.\/service-worker\.js'\)/);
-  assert.match(sw, /const VERSION='certus-static-v44-offline-clock-queue-20261122'/);
+  assert.match(sw, /const VERSION='certus-static-v45-offline-clock-sync-20261122'/);
   assert.match(sw, /certus-face-assets-v1\.7\.15/);
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=offline-clock-queue-20261122/);
+  assert.match(html, /operacao\.js\?v=offline-clock-sync-v2-20261122/);
 });
 
 test('offline queue notice has responsive accessible styles', () => {
