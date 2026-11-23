@@ -18,7 +18,7 @@ const samples=[
  {id:'fixture-event-04',employee_id:employee.id,full_name:employee.full_name,event_type:'exit',occurred_at:'2026-11-20T17:30:00-03:00',source:'web',validation_status:'validated',branch_name:'Unidade Exemplo'}
 ];
 const branches=[{id:'30000000-0000-4000-8000-000000000001',name:'Unidade Exemplo',status:'active'}];
-const schedules=[{id:'40000000-0000-4000-8000-000000000001',name:'Administrativo · 6×1',status:'active'}];
+const schedules=[{id:'40000000-0000-4000-8000-000000000001',name:'Administrativo · 6×1',status:'active',rules:{workdays_per_week:6,weekly_work_minutes:2640,daily_schedule:{mon:{start:'08:00',end:'17:30',break_minutes:90},tue:{start:'08:00',end:'17:30',break_minutes:90},wed:{start:'08:00',end:'17:30',break_minutes:90},thu:{start:'08:00',end:'17:30',break_minutes:90},fri:{start:'08:00',end:'17:30',break_minutes:90},sat:{start:'08:00',end:'12:00',break_minutes:0},sun:{rest:true}}}}];
 const requests=[{id:'50000000-0000-4000-8000-000000000001',full_name:'Marina Oliveira Santos',requested_type:'entry',requested_at:'2026-11-20T08:00:00-03:00',status:'pending',reason:'Amostra demonstrativa.'}];
 
 function monthlyTimesheet(){
@@ -42,6 +42,11 @@ function fixture(pathname,role){
  if(pathname==='/api/clock-events')return {items:samples};
  if(pathname==='/api/adjustment-requests')return {items:requests};
  if(pathname==='/api/management/overview')return {item:{rate_percent:1.2,absent_minutes:45,scheduled_minutes:3750}};
+ if(pathname==='/api/bank-hours')return {items:[{id:employee.id,full_name:employee.full_name,employee_number:employee.employee_number,accrued_minutes:125,paid_minutes:0,bank_balance_minutes:125}],page:1,total:1,limit:20};
+ if(pathname==='/api/accounts')return {items:[{id:'account-fixture',display_name:'Marina Oliveira Santos',email:'marina.exemplo@example.com',role:'employee',employee_name:employee.full_name,employee_number:employee.employee_number,status:'active',branch_names:['Unidade Exemplo']}]};
+ if(pathname==='/api/devices')return {items:[{id:'device-fixture',label:'Terminal Exemplo',branch_name:'Unidade Exemplo',status:'active',last_seen_at:'2026-11-22T14:00:00-03:00'}]};
+ if(pathname==='/api/subscription')return {subscription:{status:'active',plan_name:'Demonstração',price_locked:0,billing_period:'monthly',employee_limit:10,plan_features:{limits:{employees:10,branches:1,shared_terminals:1}}},trial:{active:false}};
+ if(pathname==='/api/account/totp/status')return {enabled:true};
  if(pathname==='/api/employee/face-profile')return {registered:true,consented_at:'2026-11-01T12:00:00-03:00'};
  if(pathname==='/api/employee/work-location')return {branch_id:branches[0].id,branch_name:branches[0].name,latitude:-10.0,longitude:-38.0,geofence_radius_m:250};
  return {items:[]};
@@ -69,6 +74,32 @@ test('capture genuine Certus management and employee screens using only fictitio
   await page.goto(`${origin}/certus/`,{waitUntil:'domcontentloaded'});
   await page.getByRole('heading',{name:'Empresa Exemplo',exact:true}).waitFor({timeout:20000});
   await page.screenshot({path:'landing-captures/gestao-desktop.png',fullPage:false});
+  await page.setViewportSize({width:1600,height:1000});
+  const tourTabs=[
+   ['employees','Funcionários','tour-funcionarios.png'],
+   ['requests','Ajustes','tour-ajustes.png'],
+   ['users','Acessos de funcionários','tour-acessos.png'],
+   ['bank','Banco de horas','tour-banco-de-horas.png'],
+   ['schedules','Jornadas','tour-jornadas.png'],
+   ['terminals','Terminais e dispositivos','tour-terminais.png'],
+   ['reports','Relatórios e exportações','tour-relatorios.png'],
+   ['password','Segurança','tour-seguranca.png'],
+   ['settings','Configurações','tour-configuracoes.png'],
+   ['branches','Filiais','tour-filiais.png'],
+   ['anomalies','Inconsistências diárias','tour-inconsistencias.png'],
+   ['subscription','Assinatura','tour-assinatura.png']
+  ];
+  for(const [key,title,file] of tourTabs){
+   await page.locator(`#company-sidebar [data-view="${key}"]`).click();
+   await page.locator('#title').waitFor({timeout:10000});
+   assert.equal((await page.locator('#title').innerText()).trim(),title,`${key} should open its real management tab`);
+   await page.waitForTimeout(180);
+   assert.equal(await page.locator('#content [role="alert"]').count(),0,`${title} demo view should render without errors`);
+   await page.screenshot({path:`landing-captures/${file}`,fullPage:false});
+  }
+  await page.locator('#company-sidebar .side-help').click();
+  await page.locator('#content .help-center').waitFor({timeout:10000});
+  await page.screenshot({path:'landing-captures/tour-ajuda.png',fullPage:false});
   await page.setViewportSize({width:1600,height:1100});
   await page.getByRole('button',{name:'Registros de ponto',exact:true}).click();
   await page.getByRole('heading',{name:'Registros de Ponto',exact:true}).waitFor({timeout:10000});
@@ -80,6 +111,7 @@ test('capture genuine Certus management and employee screens using only fictitio
   await page.getByText('08:02',{exact:true}).waitFor();
   // Capture the screen at its ordinary UI scale; the full monthly grid remains scrollable just as in the real portal.
   await page.screenshot({path:'landing-captures/registros-desktop.png',fullPage:false});
+  await page.screenshot({path:'landing-captures/tour-registros-de-ponto.png',fullPage:false});
   await context.close();
 
   const employeeContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'America/Sao_Paulo',serviceWorkers:'block'});
@@ -97,9 +129,10 @@ test('capture genuine Certus management and employee screens using only fictitio
   await employeePage.getByRole('heading',{name:'Olá, Marina Oliveira Santos!'}).waitFor({timeout:20000});
   await employeePage.getByText('Rosto cadastrado.',{exact:true}).waitFor({timeout:10000}).catch(()=>{});
   await employeePage.screenshot({path:'landing-captures/colaborador-mobile.png',fullPage:false});
+  await employeePage.screenshot({path:'landing-captures/tour-portal-colaborador.png',fullPage:false});
   await employeeContext.close();
 
-  const terminalContext=await browser.newContext({viewport:{width:1024,height:768},timezoneId:'America/Sao_Paulo',serviceWorkers:'block'});
+  const terminalContext=await browser.newContext({viewport:{width:768,height:1024},timezoneId:'America/Sao_Paulo',serviceWorkers:'block'});
   await terminalContext.route('**/*',async route=>{
    const url=route.request().url();
    if(!url.startsWith('https://certus-api.onrender.com/'))return route.continue();
@@ -118,6 +151,7 @@ test('capture genuine Certus management and employee screens using only fictitio
   await terminalPage.getByRole('heading',{name:'Registre seu ponto'}).waitFor({timeout:20000});
   await terminalPage.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth||Promise.reject(new Error('tablet terminal should not overflow')));
   await terminalPage.screenshot({path:'landing-captures/terminal-tablet.png',fullPage:false});
+  await terminalPage.screenshot({path:'landing-captures/tour-terminal-compartilhado.png',fullPage:false});
   await terminalContext.close();
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 });
