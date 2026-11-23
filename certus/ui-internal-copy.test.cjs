@@ -18,10 +18,12 @@ const faceEnd=employee.indexOf("$$('[data-clock]').forEach(b=>b.onclick",faceSta
 const faceStatus=employee.slice(faceStart,faceEnd);
 
 test('shared terminal keeps offline implementation out of the visible portal',()=>{
- assert.match(home,/id=\"offline-status\"/);
- assert.match(kiosk,/Uma tentativa anterior de marcação está salva/);
- assert.match(kiosk,/O terminal está tentando enviá-la automaticamente/);
- assert.doesNotMatch(home,/Terminal preparado automaticamente|13 MB|pendente de análise da gestão|horário do aparelho[^\n]{0,30}confirmado|Este terminal ainda não terminou o preparo offline/);
+ assert.doesNotMatch(home,/offline-status/);
+ assert.match(home,/id=\"result\"/);
+ assert.doesNotMatch(home,/syncTerminalOfflineMarks|Enviar pendências|tentativa anterior de marcação/);
+ assert.match(kiosk,/Enviar pendências/);
+ assert.match(kiosk,/window.confirm/);
+ assert.doesNotMatch(home,/Terminal preparado automaticamente|13 MB|pendente de análise da gestão|horário do aparelho.{0,30}confirmado|Este terminal ainda não terminou o preparo offline/);
  assert.match(punch,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
  assert.match(kiosk,/function offlineSyncFailureMessage\(error\)/);
  assert.match(kiosk,/O aparelho está conectado, mas não conseguiu falar com o Certus/);
