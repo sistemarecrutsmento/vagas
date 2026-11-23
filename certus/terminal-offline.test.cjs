@@ -56,6 +56,8 @@ test('offline queue is never shown as successful before server confirmation',()=
 
 test('sync presents the real server or network failure and preserves the queued mark until accepted',()=>{
  assert.match(ui,/function offlineSyncFailureMessage\(error\)/);
+ assert.match(ui,/A tentativa anterior de marcação continua sem confirmação/);
+ assert.match(ui,/O Certus recusou a tentativa anterior de marcação/);
  assert.match(ui,/error\.httpStatus=response\.status/);
  assert.match(ui,/O aparelho está conectado, mas não conseguiu falar com o Certus/);
  assert.match(ui,/O Certus não reconheceu o rosto capturado/);
