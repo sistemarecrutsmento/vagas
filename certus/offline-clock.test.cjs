@@ -26,7 +26,7 @@ test('offline preparation pins the face runtime, caches work-location and preven
   assert.match(ui, /id="prepare-offline-clock"/);
   assert.match(ui, /api\('\/api\/employee\/work-location'\);if\(workplace\.latitude==null\|\|workplace\.longitude==null\|\|!workplace\.branch_id\)/);
   assert.match(ui, /sessionStorage\.setItem\('certus_workplace'/);
-  assert.match(ui, /if\(!navigator\.onLine\)\{const cached=JSON\.parse\(sessionStorage\.getItem\('certus_workplace'/);
+  assert.match(ui, /catch\(e\)\{const cached=JSON\.parse\(sessionStorage\.getItem\('certus_workplace'/);
 });
 
 test('failed network during punch preserves a local mark instead of losing the user action', () => {
@@ -50,7 +50,7 @@ test('sync is ordered and idempotent, and local data is deleted only after expli
 
 test('employee sees the distinction between unsent local marks and received marks awaiting management review', () => {
   assert.match(ui, /offlineQueueNotice/);
-  assert.match(ui, /Ainda neste aparelho/);
+  assert.match(ui, /marcação\(ões\) ainda neste aparelho/);
   assert.match(ui, /Aguardando análise da gestão/);
   assert.match(ui, /O horário do aparelho não está confirmado/);
   assert.match(ui, /data-offline-decision="approved"/);
