@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261123-sync-error-details-v1/);
+ assert.match(page,/terminal\.js\?v=20261123-entry-queue-context-v1/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -40,8 +40,8 @@ test('queued terminal punches sync automatically after connectivity returns or a
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v53-sync-error-details-20261123/);
- assert.match(sw,/terminal\.js\?v=20261123-sync-error-details-v1/);
+ assert.match(sw,/certus-static-v54-entry-queue-context-20261123/);
+ assert.match(sw,/terminal\.js\?v=20261123-entry-queue-context-v1/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
@@ -62,4 +62,14 @@ test('sync presents the real server or network failure and preserves the queued 
  assert.match(ui,/O Certus detectou uma possível batida duplicada/);
  assert.match(ui,/if\(!pending&&!alreadyRecorded\)throw/);
  assert.ok(ui.indexOf('if(!pending&&!alreadyRecorded)throw')<ui.indexOf('await deleteTerminalOfflineMark(mark.id)'));
+});
+
+test('opening the terminal identifies queued punches as older attempts and clears stale status when there is no queue',()=>{
+ assert.match(ui,/Uma tentativa anterior de marcação está salva/);
+ assert.match(ui,/tentativas anteriores de marcação salvas/);
+ assert.match(ui,/terminalPendingQueueStatus\(items\)/);
+ assert.match(ui,/if\(!items\.length\)\{setOfflineStatus\(''\);return\{sent:0,pending:0\}\}/);
+ assert.match(ui,/if\(terminalSyncPromise\)return;try\{const items=await readTerminalOfflineMarks\(\);if\(terminalSyncPromise\)return/);
+ const home=ui.slice(ui.indexOf('function showHome'),ui.indexOf('async function syncServerClock'));
+ assert.equal((home.match(/renderOfflineQueueStatus\(\)\.catch/g)||[]).length,1);
 });
