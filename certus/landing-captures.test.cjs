@@ -77,5 +77,25 @@ test('capture genuine Certus management and employee screens using only fictitio
   await employeePage.getByText('Rosto cadastrado.',{exact:true}).waitFor({timeout:10000}).catch(()=>{});
   await employeePage.screenshot({path:'landing-captures/colaborador-mobile.png',fullPage:false});
   await employeeContext.close();
+
+  const terminalContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'America/Sao_Paulo',serviceWorkers:'block'});
+  await terminalContext.route('**/*',async route=>{
+   const url=route.request().url();
+   if(!url.startsWith('https://certus-api.onrender.com/'))return route.continue();
+   const u=new URL(url),req=route.request(),headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Methods':'GET,POST,PATCH,DELETE,OPTIONS','Access-Control-Allow-Headers':'Authorization,Content-Type,Accept,X-Certus-Device,X-Certus-Device-Key,Idempotency-Key','Access-Control-Max-Age':'600'};
+   if(req.method()==='OPTIONS')return route.fulfill({status:204,headers});
+   let body={items:[]};
+   if(u.pathname==='/api/terminal/session')body={access_token:'synthetic-terminal-token',expires_in:14400,server_time:'2026-11-23T14:15:26-03:00',timezone:'America/Sao_Paulo',company_slug:'empresa-exemplo',device:{id:'fixture-device-id',label:'Terminal Exemplo',branch_name:'Unidade Exemplo'}};
+   else if(u.pathname==='/api/terminal/time')body={server_time:'2026-11-23T14:15:26-03:00',timezone:'America/Sao_Paulo'};
+   else if(u.pathname==='/api/terminal/offline-context')body={context:{device_id:'fixture-device-id',latitude:-10.0,longitude:-38.0,branch_id:branches[0].id,branch_name:'Unidade Exemplo',geofence_radius_m:250}};
+   return route.fulfill({status:200,contentType:'application/json',headers,body:JSON.stringify(body)});
+  });
+  await terminalContext.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  await terminalContext.addInitScript(()=>localStorage.setItem('certus.kiosk.v1',JSON.stringify({company_slug:'empresa-exemplo',device_id:'fixture-device-id',device_key:'synthetic-only-key'})));
+  const terminalPage=await terminalContext.newPage();
+  await terminalPage.goto(`${origin}/certus/terminal.html`,{waitUntil:'domcontentloaded'});
+  await terminalPage.getByRole('heading',{name:'Registre seu ponto'}).waitFor({timeout:20000});
+  await terminalPage.screenshot({path:'landing-captures/terminal-mobile.png',fullPage:false});
+  await terminalContext.close();
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 });
