@@ -19,13 +19,16 @@ test('offline queue stores only AES-GCM ciphertext and uses a non-extractable pe
   assert.match(ui, /queueOfflineMark\(mark\)/);
 });
 
-test('offline preparation pins the face runtime, caches work-location and prevents an unprepared offline attempt', () => {
+test('offline resources and branch location are prepared automatically after online face verification', () => {
   assert.match(ui, /face-api@1\.7\.15\/dist\/face-api\.js/);
   assert.match(ui, /async function faceStatus\(\)[\s\S]*?certus_face_profile:[\s\S]*?offline_cached:true/);
   assert.match(ui, /script\.crossOrigin='anonymous'/);
   assert.match(ui, /face-api@1\.7\.15\/model/);
-  assert.match(ui, /id="prepare-offline-clock"/);
-  assert.match(ui, /api\('\/api\/employee\/work-location'\);if\(workplace\.latitude==null\|\|workplace\.longitude==null\|\|!workplace\.branch_id\)/);
+  assert.match(ui, /async function prepareOfflineClock\(\)[\s\S]*?api\('\/api\/employee\/work-location'\)[\s\S]*?loadFaceApi\(\)/);
+  assert.match(ui, /if\(profile\.registered\)prepareOfflineClock\(\)\.catch/);
+  assert.doesNotMatch(ui, /prepare-offline-clock|Preparar marcação offline/);
+  assert.match(ui, /o Certus prepara automaticamente este aparelho/i);
+  assert.match(ui, /workplace\.latitude==null\|\|workplace\.longitude==null\|\|!workplace\.branch_id/);
   assert.match(ui, /sessionStorage\.setItem\('certus_workplace'/);
   assert.match(ui, /catch\(e\)\{const cached=JSON\.parse\(sessionStorage\.getItem\('certus_workplace'/);
 });
@@ -59,12 +62,18 @@ test('employee sees the distinction between unsent local marks and received mark
 
 test('service worker registers on HTTPS and caches only the pinned public face assets, never API responses', () => {
   assert.match(pwa, /navigator\.serviceWorker\.register\('\.\/service-worker\.js'\)/);
-  assert.match(sw, /const VERSION='certus-static-v45-offline-clock-sync-20261122'/);
+  assert.match(sw, /const VERSION='certus-static-v46-offline-auto-20261122'/);
   assert.match(sw, /certus-face-assets-v1\.7\.15/);
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=offline-clock-sync-v2-20261122/);
+  assert.match(html, /operacao\.js\?v=offline-auto-v3-20261122/);
+});
+
+test('offline queue retries when connectivity returns and when the active app resumes', () => {
+  assert.match(ui, /addEventListener\('online',[\s\S]*?syncOfflineClocks/);
+  assert.match(ui, /addEventListener\('visibilitychange',[\s\S]*?syncOfflineClocks/);
+  assert.match(ui, /setInterval\(\(\)=>\{if\(navigator\.onLine&&document\.visibilityState==='visible'\)syncOfflineClocks/);
 });
 
 test('offline queue notice has responsive accessible styles', () => {
