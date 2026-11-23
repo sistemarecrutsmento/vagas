@@ -26,6 +26,7 @@ test('shared terminal keeps offline implementation out of the visible portal',()
  assert.match(kiosk,/function offlineSyncFailureMessage\(error\)/);
  assert.match(kiosk,/O aparelho está conectado, mas não conseguiu falar com o Certus/);
  assert.match(kiosk,/O Certus não reconheceu o rosto capturado/);
+ assert.match(kiosk,/A tentativa anterior de marcação continua sem confirmação/);
  assert.doesNotMatch(punch,/result\.textContent='Marcação registrada com sucesso\.'/);
  assert.doesNotMatch(punch,/result\.textContent='[^']*(?:offline|fila|sincron|conexão voltou|análise da gestão)/i);
  assert.match(kiosk,/async function prepareTerminalOffline\(\)/);
