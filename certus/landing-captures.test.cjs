@@ -98,7 +98,7 @@ test('capture genuine Certus management and employee screens using only fictitio
   await employeePage.screenshot({path:'landing-captures/colaborador-mobile.png',fullPage:false});
   await employeeContext.close();
 
-  const terminalContext=await browser.newContext({viewport:{width:768,height:1024},timezoneId:'America/Sao_Paulo',serviceWorkers:'block'});
+  const terminalContext=await browser.newContext({viewport:{width:1024,height:768},timezoneId:'America/Sao_Paulo',serviceWorkers:'block'});
   await terminalContext.route('**/*',async route=>{
    const url=route.request().url();
    if(!url.startsWith('https://certus-api.onrender.com/'))return route.continue();
