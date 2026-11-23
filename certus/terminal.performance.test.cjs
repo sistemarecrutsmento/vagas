@@ -34,3 +34,10 @@ test('recognition threshold and server-authoritative shared clock flow are not c
  assert.match(script,/API\+'\/api\/terminal\/clock-events'/);
  assert.match(script,/API\+'\/api\/terminal\/session'/);
 });
+
+test('local offline storage is not reported as a successful server registration',()=>{
+ assert.match(script,/id=\"offline-status\"/);
+ assert.match(script,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
+ assert.match(script,/O Certus recebeu a marcação\. Aguarde a conferência da gestão\./);
+ assert.match(script,/if\(!pending&&!alreadyRecorded\)throw/);
+});
