@@ -22,7 +22,7 @@ const requests=[{id:'50000000-0000-4000-8000-000000000001',full_name:'Pessoa de 
 function fixture(pathname,role){
  if(pathname==='/api/me')return {id:role==='employee'?'employee-user-fixture':'admin-user-fixture',name:role==='employee'?'Pessoa de Exemplo':'Gestora de Demonstração',role,employee_id:role==='employee'?employee.id:undefined,employee_name:role==='employee'?employee.full_name:undefined,employee:role==='employee'?employee:undefined,company};
  if(pathname==='/api/subscription/access')return {is_owner:true,unlocked:true};
- if(pathname==='/api/employees')return {items:[employee]};
+ if(pathname==='/api/employees'||pathname==='/api/management/employees')return {items:[{...employee,anomaly_days:0}]};
  if(pathname==='/api/branches')return {items:branches};
  if(pathname==='/api/departments')return {items:[{id:'dept-fixture',name:'Operações'}]};
  if(pathname==='/api/schedules')return {items:schedules};
@@ -56,8 +56,9 @@ test('capture genuine Certus management and employee screens using only fictitio
   await page.goto(`${origin}/certus/`,{waitUntil:'domcontentloaded'});
   await page.getByRole('heading',{name:'Empresa Exemplo',exact:true}).waitFor({timeout:20000});
   await page.screenshot({path:'landing-captures/gestao-desktop.png',fullPage:true});
-  await page.setViewportSize({width:390,height:844});
-  await page.screenshot({path:'landing-captures/gestao-mobile.png',fullPage:true});
+  await page.getByRole('button',{name:'Registros de ponto',exact:true}).click();
+  await page.getByRole('heading',{name:'Registros de Ponto',exact:true}).waitFor({timeout:10000});
+  await page.screenshot({path:'landing-captures/registros-desktop.png',fullPage:true});
   await context.close();
 
   const employeeContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'America/Sao_Paulo',serviceWorkers:'block'});
@@ -74,7 +75,7 @@ test('capture genuine Certus management and employee screens using only fictitio
   await employeePage.goto(`${origin}/certus/`,{waitUntil:'domcontentloaded'});
   await employeePage.getByRole('heading',{name:'Olá, Pessoa de Exemplo!'}).waitFor({timeout:20000});
   await employeePage.getByText('Rosto cadastrado.',{exact:true}).waitFor({timeout:10000}).catch(()=>{});
-  await employeePage.screenshot({path:'landing-captures/colaborador-mobile.png',fullPage:true});
+  await employeePage.screenshot({path:'landing-captures/colaborador-mobile.png',fullPage:false});
   await employeeContext.close();
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 });
