@@ -78,8 +78,7 @@ test('capture genuine Certus management and employee screens using only fictitio
   assert.equal(await page.locator('.records-calendar tbody tr').count(),30,'monthly employee time-sheet should display the full fictional month');
   await page.locator('[data-records-day="2026-11-03"]').click();
   await page.getByText('08:02',{exact:true}).waitFor();
-  // Slightly zoom out the real screen so the month and totals are visible together in the monitor mockup.
-  await page.evaluate(()=>{document.body.style.zoom='0.68'});
+  // Capture the screen at its ordinary UI scale; the full monthly grid remains scrollable just as in the real portal.
   await page.screenshot({path:'landing-captures/registros-desktop.png',fullPage:false});
   await context.close();
 
