@@ -18,8 +18,10 @@ const faceEnd=employee.indexOf("$$('[data-clock]').forEach(b=>b.onclick",faceSta
 const faceStatus=employee.slice(faceStart,faceEnd);
 
 test('shared terminal keeps offline implementation out of the visible portal',()=>{
- assert.doesNotMatch(home,/offline-status|Terminal preparado automaticamente|13 MB|pendente de análise da gestão|horário do aparelho[^\n]{0,30}confirmado|Este terminal ainda não terminou o preparo offline/);
- assert.match(punch,/result\.textContent='Marcação registrada com sucesso\.'/);
+ assert.match(home,/id=\"offline-status\"/);
+ assert.doesNotMatch(home,/Terminal preparado automaticamente|13 MB|pendente de análise da gestão|horário do aparelho[^\n]{0,30}confirmado|Este terminal ainda não terminou o preparo offline/);
+ assert.match(punch,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
+ assert.doesNotMatch(punch,/result\.textContent='Marcação registrada com sucesso\.'/);
  assert.doesNotMatch(punch,/result\.textContent='[^']*(?:offline|fila|sincron|conexão voltou|análise da gestão)/i);
  assert.match(kiosk,/async function prepareTerminalOffline\(\)/);
  assert.match(kiosk,/async function syncTerminalOfflineMarks\(\)/);
