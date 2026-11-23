@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261123-entry-queue-context-v1/);
+ assert.match(page,/terminal\.js\?v=20261123-explicit-offline-sync-v1/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -29,49 +29,42 @@ test('offline terminal can open from its last saved device context and queue mar
  assert.match(ui,/client_captured_at:new Date\(\)\.toISOString\(\)/);
 });
 
-test('queued terminal punches sync automatically after connectivity returns or app resume, with stable idempotency',()=>{
- assert.match(ui,/addEventListener\('online',[\s\S]*?syncTerminalOfflineMarks/);
- assert.match(ui,/addEventListener\('visibilitychange',[\s\S]*?syncTerminalOfflineMarks/);
- assert.match(ui,/setInterval\(\(\)=>\{if\(view==='home'&&navigator\.onLine\)[\s\S]*?syncTerminalOfflineMarks/);
- assert.match(ui,/\/api\/terminal\/offline-clock-events/);
+test('existing offline marks are not synced just because terminal opens; retry requires reconnection or explicit confirmation',()=>{
+ const home=ui.slice(ui.indexOf('function showHome'),ui.indexOf('async function syncServerClock'));
+ assert.doesNotMatch(home,/syncTerminalOfflineMarks|offline-status|tentativa anterior/);
+ assert.match(ui,/addEventListener\('offline',\(\)=>\{terminalWasOffline=true/);
+ assert.match(ui,/if\(regained\)syncTerminalOfflineMarks\(\)\.catch/);
+ assert.doesNotMatch(ui,/visibilitychange[^;]*syncTerminalOfflineMarks/);
+ assert.doesNotMatch(ui,/setInterval\(\(\)=>\{if\(view==='home'[^}]*syncTerminalOfflineMarks/);
+ assert.match(ui,/textContent='Enviar pendências'/);
+ assert.match(ui,/window\.confirm\(`Enviar \$\{pending\.length\} tentativa/);
  assert.match(ui,/Idempotency-Key':mark\.id/);
  assert.match(ui,/data\.requires_review===true&&data\.official_time_confirmed===false/);
  assert.match(ui,/already_recorded===true/);
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v54-entry-queue-context-20261123/);
- assert.match(sw,/terminal\.js\?v=20261123-entry-queue-context-v1/);
+ assert.match(sw,/certus-static-v55-explicit-offline-sync-20261123/);
+ assert.match(sw,/terminal\.js\?v=20261123-explicit-offline-sync-v1/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
 
 test('offline queue is never shown as successful before server confirmation',()=>{
- assert.match(ui,/id=\"offline-status\"/);
+ assert.doesNotMatch(ui,/id=\"offline-status\"/);
  assert.match(ui,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
- assert.match(ui,/A marcação ainda não foi recebida pelo Certus/);
- assert.match(ui,/O Certus recebeu a marcação\. Aguarde a conferência da gestão\./);
+ assert.match(ui,/A tentativa anterior de marcação ainda não foi recebida pelo Certus/);
+ assert.match(ui,/O servidor confirmou todas as tentativas enviadas/);
  assert.doesNotMatch(ui,/result\.textContent='Marcação registrada com sucesso\.'/);
 });
 
-test('sync presents the real server or network failure and preserves the queued mark until accepted',()=>{
- assert.match(ui,/function offlineSyncFailureMessage\(error\)/);
- assert.match(ui,/A tentativa anterior de marcação continua sem confirmação/);
- assert.match(ui,/O Certus recusou a tentativa anterior de marcação/);
- assert.match(ui,/error\.httpStatus=response\.status/);
- assert.match(ui,/O aparelho está conectado, mas não conseguiu falar com o Certus/);
- assert.match(ui,/O Certus não reconheceu o rosto capturado/);
- assert.match(ui,/O Certus detectou uma possível batida duplicada/);
- assert.match(ui,/if\(!pending&&!alreadyRecorded\)throw/);
- assert.ok(ui.indexOf('if(!pending&&!alreadyRecorded)throw')<ui.indexOf('await deleteTerminalOfflineMark(mark.id)'));
-});
 
-test('opening the terminal identifies queued punches as older attempts and clears stale status when there is no queue',()=>{
- assert.match(ui,/Uma tentativa anterior de marcação está salva/);
- assert.match(ui,/tentativas anteriores de marcação salvas/);
- assert.match(ui,/terminalPendingQueueStatus\(items\)/);
- assert.match(ui,/if\(!items\.length\)\{setOfflineStatus\(''\);return\{sent:0,pending:0\}\}/);
- assert.match(ui,/if\(terminalSyncPromise\)return;try\{const items=await readTerminalOfflineMarks\(\);if\(terminalSyncPromise\)return/);
+
+
+test('no pending-queue notice or retry appears on the home screen before facial identification; manual retry is behind history confirmation',()=>{
  const home=ui.slice(ui.indexOf('function showHome'),ui.indexOf('async function syncServerClock'));
- assert.equal((home.match(/renderOfflineQueueStatus\(\)\.catch/g)||[]).length,1);
+ assert.doesNotMatch(home,/offline-status|renderOfflineQueueStatus|terminalPendingQueueStatus|Enviar pendências|syncTerminalOfflineMarks/);
+ assert.match(ui,/root\.querySelector\('#register-mark'\)\.onclick=e=>punch/);
+ assert.match(ui,/async function showHistory\(\)[\s\S]*?Enviar pendências[\s\S]*?window\.confirm/);
+ assert.match(ui,/if\(regained\)syncTerminalOfflineMarks/);
 });
