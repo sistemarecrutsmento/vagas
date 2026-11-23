@@ -59,6 +59,7 @@ test('sync is ordered and idempotent, and local data is deleted only after expli
 
 test('employee sees the distinction between unsent local marks and received marks awaiting management review', () => {
   assert.match(ui, /offlineQueueNotice/);
+  assert.doesNotMatch(ui, /offline-sync-now|Tentar enviar agora/);
   assert.match(ui, /marcação\(ões\) ainda neste aparelho/);
   assert.match(ui, /Aguardando análise da gestão/);
   assert.match(ui, /O horário do aparelho não está confirmado/);
@@ -67,12 +68,12 @@ test('employee sees the distinction between unsent local marks and received mark
 
 test('service worker registers on HTTPS and caches only the pinned public face assets, never API responses', () => {
   assert.match(pwa, /navigator\.serviceWorker\.register\('\.\/service-worker\.js'\)/);
-  assert.match(sw, /const VERSION='certus-static-v47-offline-idempotent-20261122'/);
+  assert.match(sw, /const VERSION='certus-static-v48-offline-auto-queue-20261122'/);
   assert.match(sw, /certus-face-assets-v1\.7\.15/);
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=offline-auto-v4-20261122/);
+  assert.match(html, /operacao\.js\?v=offline-auto-v5-20261122/);
 });
 
 test('offline queue retries when connectivity returns and when the active app resumes', () => {
