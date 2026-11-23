@@ -39,7 +39,8 @@ test('failed network during punch preserves a local mark instead of losing the u
   assert.match(ui, /await queueOfflineMark\(await captureMark\(\)\)/);
   assert.match(ui, /const saveOffline=async\(\)=>\{await queueOfflineMark/);
   assert.match(ui, /e\?\.name==='TypeError'\|\|e\?\.name==='AbortError'\|\|!navigator\.onLine\)\{await saveOffline\(\);return\}/);
-  assert.match(ui, /if\(offlineQueued\).*?message\('Marcação registrada com sucesso\.'/);
+  assert.match(ui, /if\(offlineQueued\).*?message\('A marcação ainda não foi confirmada pelo Certus/);
+  assert.doesNotMatch(ui, /if\(offlineQueued\).*?message\('Marcação registrada com sucesso\.'/);
 });
 
 test('sync is ordered and idempotent, and local data is deleted only after explicit pending-review response', () => {
@@ -56,6 +57,14 @@ test('sync is ordered and idempotent, and local data is deleted only after expli
   assert.match(sync, /Envio interrompido/);
 });
 
+test('employee portal never labels a locally queued punch as server-confirmed and identifies older pending attempts', () => {
+  assert.match(ui, /queuedMarks=await readOfflineMarks\(\)/);
+  assert.match(ui, /function employeeOfflineQueueNotice\(items\)/);
+  assert.match(ui, /Há uma tentativa anterior de marcação/);
+  assert.match(ui, /A marcação ainda não foi confirmada pelo Certus/);
+  assert.doesNotMatch(ui, /if\(offlineQueued\).*?message\('Marcação registrada com sucesso\.'/);
+});
+
 test('employee UI does not expose offline preparation, local-queue or review implementation details', () => {
   assert.doesNotMatch(ui, /offlineQueueNotice|offline-clock-notice|marcação\(ões\) ainda neste aparelho/);
   assert.doesNotMatch(ui, /O Certus tentará enviar|Sem conexão: os registros estão salvos localmente|horário do aparelho não está confirmado|Aguardando conexão|Aguardando análise da gestão/);
@@ -66,12 +75,12 @@ test('employee UI does not expose offline preparation, local-queue or review imp
 
 test('service worker registers on HTTPS and caches only the pinned public face assets, never API responses', () => {
   assert.match(pwa, /navigator\.serviceWorker\.register\('\.\/service-worker\.js'\)/);
-  assert.match(sw, /const VERSION='certus-static-v53-sync-error-details-20261123'/);
+  assert.match(sw, /const VERSION='certus-static-v54-entry-queue-context-20261123'/);
   assert.match(sw, /certus-face-assets-v1\.7\.15/);
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=offline-auto-v6-private-ui-20261123/);
+  assert.match(html, /operacao\.js\?v=offline-mark-status-v7-20261123/);
 });
 
 test('offline queue retries when connectivity returns and when the active app resumes', () => {
@@ -83,4 +92,7 @@ test('offline queue retries when connectivity returns and when the active app re
 test('employee interface contains no banner exposing offline queue mechanics', () => {
   assert.doesNotMatch(ui, /offline-clock-notice|offlineQueueNotice/);
   assert.match(ui, /role="status"/);
+  assert.match(ui, /Há uma tentativa anterior de marcação/);
+  assert.match(ui, /function employeeOfflineQueueNotice\(items\)/);
+  assert.match(ui, /queuedMarks=await readOfflineMarks\(\)/);
 });
