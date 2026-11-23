@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261123-truthful-offline-status-v1/);
+ assert.match(page,/terminal\.js\?v=20261123-sync-error-details-v1/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -40,8 +40,8 @@ test('queued terminal punches sync automatically after connectivity returns or a
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v52-truthful-offline-status-20261123/);
- assert.match(sw,/terminal\.js\?v=20261123-truthful-offline-status-v1/);
+ assert.match(sw,/certus-static-v53-sync-error-details-20261123/);
+ assert.match(sw,/terminal\.js\?v=20261123-sync-error-details-v1/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
@@ -52,4 +52,14 @@ test('offline queue is never shown as successful before server confirmation',()=
  assert.match(ui,/A marcação ainda não foi recebida pelo Certus/);
  assert.match(ui,/O Certus recebeu a marcação\. Aguarde a conferência da gestão\./);
  assert.doesNotMatch(ui,/result\.textContent='Marcação registrada com sucesso\.'/);
+});
+
+test('sync presents the real server or network failure and preserves the queued mark until accepted',()=>{
+ assert.match(ui,/function offlineSyncFailureMessage\(error\)/);
+ assert.match(ui,/error\.httpStatus=response\.status/);
+ assert.match(ui,/O aparelho está conectado, mas não conseguiu falar com o Certus/);
+ assert.match(ui,/O Certus não reconheceu o rosto capturado/);
+ assert.match(ui,/O Certus detectou uma possível batida duplicada/);
+ assert.match(ui,/if\(!pending&&!alreadyRecorded\)throw/);
+ assert.ok(ui.indexOf('if(!pending&&!alreadyRecorded)throw')<ui.indexOf('await deleteTerminalOfflineMark(mark.id)'));
 });

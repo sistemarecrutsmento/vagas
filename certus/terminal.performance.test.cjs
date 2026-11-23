@@ -40,4 +40,6 @@ test('local offline storage is not reported as a successful server registration'
  assert.match(script,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
  assert.match(script,/O Certus recebeu a marcação\. Aguarde a conferência da gestão\./);
  assert.match(script,/if\(!pending&&!alreadyRecorded\)throw/);
+ assert.match(script,/error\.httpStatus=response\.status/);
+ assert.match(script,/function offlineSyncFailureMessage\(error\)/);
 });
