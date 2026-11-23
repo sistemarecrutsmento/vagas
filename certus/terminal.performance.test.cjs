@@ -27,6 +27,10 @@ test('expired kiosk session renews safely and retry reuses the idempotency key',
 });
 test('recognition threshold and server-authoritative shared clock flow are not changed by UI optimization',()=>{
  assert.match(script,/if\(x\.detection\.score<\.7\)/);
+ assert.match(script,/let previous=null,stableFrames=0;[\s\S]*?stableFrames<2[\s\S]*?finish\(resolve,descriptor\)/);
+ assert.match(script,/video\.readyState<2\|\|!video\.videoWidth\|\|!video\.videoHeight/);
+ assert.match(script,/let previous=null,stableFrames=0;[\s\S]*?stableFrames<2[\s\S]*?finish\(resolve,descriptor\)/);
+ assert.match(script,/video\.readyState<2\|\|!video\.videoWidth\|\|!video\.videoHeight/);
  assert.match(script,/API\+'\/api\/terminal\/clock-events'/);
  assert.match(script,/API\+'\/api\/terminal\/session'/);
 });
