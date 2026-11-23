@@ -19,6 +19,8 @@ const faceStatus=employee.slice(faceStart,faceEnd);
 
 test('shared terminal keeps offline implementation out of the visible portal',()=>{
  assert.match(home,/id=\"offline-status\"/);
+ assert.match(kiosk,/Uma tentativa anterior de marcação está salva/);
+ assert.match(kiosk,/O terminal está tentando enviá-la automaticamente/);
  assert.doesNotMatch(home,/Terminal preparado automaticamente|13 MB|pendente de análise da gestão|horário do aparelho[^\n]{0,30}confirmado|Este terminal ainda não terminou o preparo offline/);
  assert.match(punch,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
  assert.match(kiosk,/function offlineSyncFailureMessage\(error\)/);
@@ -39,5 +41,8 @@ test('employee portal keeps offline capture internal and does not expose prepara
  assert.match(employee,/async function prepareOfflineClock\(\)/);
  assert.match(employee,/async function syncOfflineClocks/);
  assert.match(employee,/queueOfflineMark\(await captureMark\(\)\)/);
- assert.match(employee,/if\(offlineQueued\).*?message\('Marcação registrada com sucesso\.'/);
+ assert.match(employee,/Marcação ainda não foi confirmada pelo Certus/);
+ assert.match(employee,/function employeeOfflineQueueNotice\(items\)/);
+ assert.match(employee,/queuedMarks=await readOfflineMarks\(\)/);
+ assert.doesNotMatch(employee,/if\(offlineQueued\)\{await load\('worker'\);message\('Marcação registrada com sucesso\.'/);
 });
