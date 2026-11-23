@@ -39,7 +39,7 @@ test('queued terminal punches sync automatically after connectivity returns or a
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v49-shared-terminal-offline-20261122/);
+ assert.match(sw,/certus-static-v50-private-offline-ui-20261123/);
  assert.match(sw,/terminal\.js\?v=20261123-private-ui-v1/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
