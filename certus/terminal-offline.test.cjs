@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261122-offline-queue-v1/);
+ assert.match(page,/terminal\.js\?v=20261123-private-ui-v1/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -24,7 +24,7 @@ test('shared-terminal queue encrypts the face descriptor and location at rest us
 test('offline terminal can open from its last saved device context and queue marks without a session token',()=>{
  assert.match(ui,/showHome\(saved\.device,true\)/);
  assert.match(ui,/if\(!navigator\.onLine\)\{if\(!terminalOfflineContext\(\)\)throw Error/);
- assert.match(ui,/Marcação foi salva com segurança/);
+ assert.match(ui,/result\.textContent='Marcação registrada com sucesso\.'/);
  assert.match(ui,/client_captured_at:new Date\(\)\.toISOString\(\)/);
 });
 
@@ -39,8 +39,8 @@ test('queued terminal punches sync automatically after connectivity returns or a
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v49-shared-terminal-offline-20261122/);
- assert.match(sw,/terminal\.js\?v=20261122-offline-queue-v1/);
+ assert.match(sw,/certus-static-v50-private-offline-ui-20261123/);
+ assert.match(sw,/terminal\.js\?v=20261123-private-ui-v1/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
