@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context[\s\S]*?saveTerminalOfflineFaceCache/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261125-offline-roster-retry-v4/);
+ assert.match(page,/terminal\.js\?v=20261125-offline-roster-status-v5/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -28,11 +28,20 @@ test('shared-terminal queue and offline facial roster use encrypted IndexedDB wi
  assert.ok(ui.indexOf('if(!matched)throw Error')<ui.indexOf('await queueTerminalOfflineMark(queued)'));
 });
 
+test('face templates are saved before camera model download and preparation status is visible',()=>{
+ const prep=ui.slice(ui.indexOf('async function prepareTerminalOffline'),ui.indexOf('function offlineSyncFailureMessage'));
+ assert.ok(prep.indexOf('await saveTerminalOfflineFaceCache')<prep.indexOf('await loadFaceApi'));
+ assert.match(ui,/id=\"offline-prep-status\"/);
+ assert.match(prep,/setOfflinePreparationStatus\(`\$\{terminalFaceCache\.templates\.length\} cadastros faciais recebidos e guardados cifrados/);
+ assert.match(prep,/Modo offline preparado com/);
+});
+
 test('empty facial roster is not marked prepared; terminal retries and surfaces actionable setup error',()=>{
  assert.match(ui,/if\(!templates\.length\)\{await clearTerminalOfflineFaceCache/);
  assert.match(ui,/terminalOfflineReady=!!terminalFaceCache\?\.templates\?\.length/);
  assert.match(ui,/face_template_count===0/);
  assert.match(ui,/OFFLINE_FACE_REFRESH_MS=300000/);
+ assert.match(ui,/Date\.now\(\)-terminalOfflineCacheSyncedAt>=OFFLINE_FACE_REFRESH_MS/);
  assert.match(ui,/terminalOfflineTimer=setInterval\([\s\S]*?!terminalOfflineReady[\s\S]*?prepareTerminalOffline\(\)/);
  assert.match(ui,/Não há rostos consentidos e ativos preparados para esta filial/);
 });
@@ -63,8 +72,8 @@ test('offline history presents saved marks with automatic sync status and no ret
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v59-offline-roster-retry-20261125/);
- assert.match(sw,/terminal\.js\?v=20261125-offline-roster-retry-v4/);
+ assert.match(sw,/certus-static-v60-offline-roster-status-20261125/);
+ assert.match(sw,/terminal\.js\?v=20261125-offline-roster-status-v5/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });

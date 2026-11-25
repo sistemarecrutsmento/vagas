@@ -23,6 +23,10 @@ test('camera startup and model loading overlap, and offline capture can proceed 
  assert.match(script,/if\(!templates\.length\)\{[\s\S]*?throw Error/);
  assert.match(script,/terminalOfflineReady=!!terminalFaceCache\?\.templates\?\.length/);
  assert.match(script,/OFFLINE_FACE_REFRESH_MS=300000/);
+ assert.match(script,/Date\.now\(\)-terminalOfflineCacheSyncedAt>=OFFLINE_FACE_REFRESH_MS/);
+ const prep=script.slice(script.indexOf('async function prepareTerminalOffline'),script.indexOf('function offlineSyncFailureMessage'));
+ assert.ok(prep.indexOf('await saveTerminalOfflineFaceCache')<prep.indexOf('await loadFaceApi'));
+ assert.match(script,/setOfflinePreparationStatus/);
  assert.ok(script.indexOf('if(!matched)throw Error')<script.indexOf('await queueTerminalOfflineMark(queued)'));
 });
 test('expired kiosk session renews safely and retry reuses the idempotency key',()=>{
