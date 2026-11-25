@@ -18,6 +18,9 @@ test('camera startup and model loading overlap, and offline capture can proceed 
  assert.match(script,/const modelPromise=loadFaceApi\(\)/);
  assert.match(script,/Promise\.all\(\[camera\(\),currentLocation\(\)\]\)/);
  assert.match(script,/if\(!navigator\.onLine\)\{if\(!terminalOfflineContext\(\)\)throw Error/);
+ assert.match(script,/if\(!matched\)throw Error\('Não foi possível identificar o colaborador com segurança/);
+ assert.match(script,/expected_employee_id:matched\.employee_id/);
+ assert.ok(script.indexOf('if(!matched)throw Error')<script.indexOf('await queueTerminalOfflineMark(queued)'));
 });
 test('expired kiosk session renews safely and retry reuses the idempotency key',()=>{
  assert.match(script,/tokenExpiresAt=Date\.now\(\)\+\(Number\(d\.expires_in\)\|\|14400\)\*1000/);
@@ -39,6 +42,8 @@ test('recognition threshold and server-authoritative shared clock flow are not c
 test('local offline storage is not reported as a successful server registration',()=>{
  assert.doesNotMatch(script,/id=\"offline-status\"/);
  assert.match(script,/Marcação registrada/);
+ assert.match(script,/esc\(matched\.full_name\)/);
+ assert.doesNotMatch(script,/esc\(matched\?\.full_name\|\|'Colaborador'\)/);
  assert.match(script,/data\.requires_review===true&&data\.official_time_confirmed===false/);
  assert.match(script,/if\(!pending&&!alreadyRecorded\)throw/);
  assert.match(script,/error\.httpStatus=response\.status/);
