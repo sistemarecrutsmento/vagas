@@ -11,7 +11,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context[\s\S]*?saveTerminalOfflineFaceCache/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261125-offline-quiet-preparation-v9/);
+ assert.match(page,/terminal\.js\?v=20261125-local-face-identity-sync-v10/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -44,16 +44,17 @@ test('face templates are saved before camera model download; progress is silent 
  assert.doesNotMatch(prep,/Modo offline preparado com/);
 });
 
-test('successful offline transfer is immediately visible in the employee mirror with its unconfirmed time label',()=>{
- assert.match(ui,/A marcação foi recebida pelo Certus e aparece no espelho como offline; o horário ainda não foi confirmado pelo servidor/);
+test('successful offline sync goes to the employee profile without waiting for managerial review of identity',()=>{
  assert.match(ui,/function showTerminalSyncNotice/);
- assert.match(ui,/pendingReview\?`\$\{sent\} marcação/);
+ assert.match(ui,/sincronizada/);
+ assert.match(ui,/horário capturado offline continua identificado como não confirmado pelo servidor/);
+ assert.doesNotMatch(ui,/recebida\(s\) pela gestão para conferência/);
 });
 
-test('sync failures stay visible and retry automatically without deleting queued mark',()=>{
- assert.match(ui,/terminalSyncRetryAt=Date\.now\(\)\+\(e\?\.httpStatus>=400&&e\?\.httpStatus<500\?60000:15000\)/);
+test('sync failures stay visible, keep the local queue, and do not block other identified attempts',()=>{
+ assert.match(ui,/terminalSyncRetryAt=Math\.max\(terminalSyncRetryAt,Date\.now\(\)\+\(e\?\.httpStatus>=400&&e\?\.httpStatus<500\?60000:15000\)\)/);
  assert.match(ui,/terminalOfflineTimer=setInterval\([\s\S]*?Date\.now\(\)>=terminalSyncRetryAt\)syncTerminalOfflineMarks\(\)/);
- assert.match(ui,/error=offlineSyncFailureMessage\(e\);[\s\S]*?showTerminalSyncNotice\(error,true\);break/);
+ assert.match(ui,/error=offlineSyncFailureMessage\(e\);[\s\S]*?showTerminalSyncNotice\(error,true\);if\(e\?\.httpStatus>=400&&e\?\.httpStatus<500\)continue;break/);
  assert.ok(ui.indexOf('showTerminalSyncNotice(error,true)')<ui.indexOf('await deleteTerminalOfflineMark(mark.id)') || ui.indexOf('await deleteTerminalOfflineMark(mark.id)')<ui.indexOf('showTerminalSyncNotice(error,true)'));
 });
 
@@ -82,8 +83,8 @@ test('queued marks sync automatically after browser online event and after detec
  assert.match(ui,/if\(view==='home'&&navigator\.onLine&&config&&\(terminalWasOffline\|\|terminalNetworkLost\)\)reconnectTerminalAndSync\(\)/);
  assert.match(ui,/document\.addEventListener\('visibilitychange',[\s\S]*?terminalWasOffline\|\|terminalNetworkLost[\s\S]*?reconnectTerminalAndSync/);
  assert.match(ui,/Idempotency-Key':mark\.id/);
- assert.match(ui,/data\.requires_review===true&&data\.official_time_confirmed===false/);
- assert.match(ui,/already_recorded===true/);
+ assert.match(ui,/data\.item\?\.employee_id[^;]*mark\.expected_employee_id/);
+ assert.match(ui,/data\.item\?\.idempotency_key===mark\.id/);
 });
 
 test('offline history presents saved marks with automatic sync status and no retry button',()=>{
@@ -93,8 +94,8 @@ test('offline history presents saved marks with automatic sync status and no ret
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v64-offline-quiet-preparation-20261125/);
- assert.match(sw,/terminal\.js\?v=20261125-offline-quiet-preparation-v9/);
+ assert.match(sw,/certus-static-v65-local-face-identity-sync-20261125/);
+ assert.match(sw,/terminal\.js\?v=20261125-local-face-identity-sync-v10/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
@@ -104,8 +105,8 @@ test('offline UI confirms local registration without pretending the server has c
  assert.match(ui,/Marcação registrada/);
  assert.match(ui,/Offline, aguardando sincronização/);
  assert.match(ui,/Aguardando sincronização/);
- assert.match(ui,/data\.requires_review===true&&data\.official_time_confirmed===false/);
- assert.match(ui,/O servidor não confirmou o recebimento; a marcação continua salva neste terminal/);
+ assert.match(ui,/data\.item\?\.employee_id[^;]*mark\.expected_employee_id/);
+ assert.match(ui,/O servidor não confirmou o recebimento para o colaborador identificado; a marcação continua salva neste terminal/);
 });
 
 
@@ -123,10 +124,18 @@ test('offline punch is shown immediately as a registered local mark and appears 
  assert.match(ui,/async function loadRecent\(\)[\s\S]*?local_employee_name[\s\S]*?localStamp\(local\.client_captured_at\)/);
  assert.match(ui,/async function showHistory\(\)[\s\S]*?Aguardando sincronização/);
  assert.match(ui,/await queueTerminalOfflineMark\(queued\)/);
- assert.match(ui,/data\.requires_review===true&&data\.official_time_confirmed===false/);
+ assert.match(ui,/data\.item\?\.employee_id[^;]*mark\.expected_employee_id/);
 });
 
 test('hidden status cards do not leave empty gold lines or reserve vertical space',()=>{
  assert.match(css,/\.result\[hidden\]\{display:none!important\}/);
  assert.match(ui,/function setOfflinePreparationStatus\([\s\S]*?state!=='error'[\s\S]*?el\.hidden=true/);
+});
+
+test('sync reuses the employee match made offline, strips descriptor before upload, and accepts received pending-time marks',()=>{
+ assert.match(ui,/const\{face_descriptor,\.\.\.syncPayload\}=mark;if\(!syncPayload\.expected_employee_id&&syncPayload\.local_employee_id\)syncPayload\.expected_employee_id=syncPayload\.local_employee_id/);
+ assert.match(ui,/data\.item\?\.device_id===config\.device_id[\s\S]*?data\.item\?\.employee_id[\s\S]*?mark\.expected_employee_id/);
+ assert.match(ui,/\['pending','validated'\]\.includes\(data\.item\?\.validation_status\)/);
+ assert.match(ui,/sincronizada/);
+ assert.doesNotMatch(ui,/recebida\(s\) pela gestão para conferência/);
 });
