@@ -27,6 +27,8 @@ test('camera startup and model loading overlap, and offline capture can proceed 
  const prep=script.slice(script.indexOf('async function prepareTerminalOffline'),script.indexOf('function offlineSyncFailureMessage'));
  assert.ok(prep.indexOf('await saveTerminalOfflineFaceCache')<prep.indexOf('await loadFaceApi'));
  assert.match(script,/setOfflinePreparationStatus/);
+ assert.match(script,/Só aparecerão no espelho do colaborador depois da aprovação do horário/);
+ assert.match(script,/Date\.now\(\)>=terminalSyncRetryAt\)syncTerminalOfflineMarks\(\)/);
  assert.match(script,/objectStore\(OFFLINE_TEMPLATES\)\.put\(\{id:config\.device_id,iv:\[\.\.\.iv\],cipher\},config\.device_id\)/);
  assert.ok(script.indexOf('if(!matched)throw Error')<script.indexOf('await queueTerminalOfflineMark(queued)'));
 });
@@ -60,7 +62,8 @@ test('local offline storage is not reported as a successful server registration'
 
 test('queued punches sync automatically after real reconnection without manual confirmation',()=>{
  const home=script.slice(script.indexOf('function showHome'),script.indexOf('async function syncServerClock'));
- assert.doesNotMatch(home,/syncTerminalOfflineMarks|Enviar pendências|offline-status/);
+ const screen=home.slice(0,home.indexOf("root.querySelector('#terminal-settings')"));
+ assert.doesNotMatch(screen,/syncTerminalOfflineMarks|Enviar pendências|offline-status/);
  assert.match(script,/window\.addEventListener\('online',[\s\S]*?reconnectTerminalAndSync\(\)/);
  assert.match(script,/terminalOfflineTimer=setInterval\([\s\S]*?terminalWasOffline\|\|terminalNetworkLost\)[\s\S]*?reconnectTerminalAndSync/);
  assert.match(script,/document\.addEventListener\('visibilitychange',[\s\S]*?terminalWasOffline\|\|terminalNetworkLost[\s\S]*?reconnectTerminalAndSync/);

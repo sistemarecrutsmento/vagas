@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context[\s\S]*?saveTerminalOfflineFaceCache/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261125-offline-face-cache-quiet-v7/);
+ assert.match(page,/terminal\.js\?v=20261125-offline-sync-receipt-v8/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -40,6 +40,19 @@ test('face templates are saved before camera model download and preparation stat
  assert.match(prep,/setOfflinePreparationStatus\(`\$\{terminalFaceCache\.templates\.length\} cadastros faciais recebidos e guardados cifrados/);
  assert.match(prep,/setOfflinePreparationStatus\(''\);return true/);
  assert.doesNotMatch(prep,/Modo offline preparado com/);
+});
+
+test('successful offline transfer clearly says it is pending management review, not employee timesheet',()=>{
+ assert.match(ui,/Só aparecerão no espelho do colaborador depois da aprovação do horário/);
+ assert.match(ui,/function showTerminalSyncNotice/);
+ assert.match(ui,/pendingReview\?`\$\{sent\} marcação/);
+});
+
+test('sync failures stay visible and retry automatically without deleting queued mark',()=>{
+ assert.match(ui,/terminalSyncRetryAt=Date\.now\(\)\+\(e\?\.httpStatus>=400&&e\?\.httpStatus<500\?60000:15000\)/);
+ assert.match(ui,/terminalOfflineTimer=setInterval\([\s\S]*?Date\.now\(\)>=terminalSyncRetryAt\)syncTerminalOfflineMarks\(\)/);
+ assert.match(ui,/error=offlineSyncFailureMessage\(e\);[\s\S]*?showTerminalSyncNotice\(error,true\);break/);
+ assert.ok(ui.indexOf('showTerminalSyncNotice(error,true)')<ui.indexOf('await deleteTerminalOfflineMark(mark.id)') || ui.indexOf('await deleteTerminalOfflineMark(mark.id)')<ui.indexOf('showTerminalSyncNotice(error,true)'));
 });
 
 test('empty facial roster is not marked prepared; terminal retries and surfaces actionable setup error',()=>{
@@ -78,8 +91,8 @@ test('offline history presents saved marks with automatic sync status and no ret
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v62-offline-face-cache-quiet-20261125/);
- assert.match(sw,/terminal\.js\?v=20261125-offline-face-cache-quiet-v7/);
+ assert.match(sw,/certus-static-v63-offline-sync-receipt-20261125/);
+ assert.match(sw,/terminal\.js\?v=20261125-offline-sync-receipt-v8/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
@@ -96,7 +109,8 @@ test('offline UI confirms local registration without pretending the server has c
 
 test('home screen does not ask for a manual queue send; automatic sync is connection-driven',()=>{
  const home=ui.slice(ui.indexOf('function showHome'),ui.indexOf('async function syncServerClock'));
- assert.doesNotMatch(home,/Enviar pendências|syncTerminalOfflineMarks/);
+ const screen=home.slice(0,home.indexOf("root.querySelector('#terminal-settings')"));
+ assert.doesNotMatch(screen,/Enviar pendências|syncTerminalOfflineMarks/);
  assert.match(ui,/window\.addEventListener\('online',[\s\S]*?reconnectTerminalAndSync\(\)/);
  assert.match(ui,/\$\{pending\.length\} marcação\(ões\) offline salva\(s\) neste terminal; a sincronização é automática quando a conexão voltar/);
 });
