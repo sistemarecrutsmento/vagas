@@ -75,7 +75,7 @@ test('employee UI does not expose offline preparation, local-queue or review imp
 
 test('service worker registers on HTTPS and caches only the pinned public face assets, never API responses', () => {
   assert.match(pwa, /navigator\.serviceWorker\.register\('\.\/service-worker\.js'\)/);
-  assert.match(sw, /const VERSION='certus-static-v61-offline-face-cache-key-20261125'/);
+  assert.match(sw, /const VERSION='certus-static-v62-offline-face-cache-quiet-20261125'/);
   assert.match(sw, /certus-face-assets-v1\.7\.15/);
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);

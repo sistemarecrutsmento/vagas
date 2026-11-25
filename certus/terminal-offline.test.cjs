@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context[\s\S]*?saveTerminalOfflineFaceCache/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261125-offline-face-cache-key-v6/);
+ assert.match(page,/terminal\.js\?v=20261125-offline-face-cache-quiet-v7/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -38,7 +38,8 @@ test('face templates are saved before camera model download and preparation stat
  assert.ok(prep.indexOf('await saveTerminalOfflineFaceCache')<prep.indexOf('await loadFaceApi'));
  assert.match(ui,/id=\"offline-prep-status\"/);
  assert.match(prep,/setOfflinePreparationStatus\(`\$\{terminalFaceCache\.templates\.length\} cadastros faciais recebidos e guardados cifrados/);
- assert.match(prep,/Modo offline preparado com/);
+ assert.match(prep,/setOfflinePreparationStatus\(''\);return true/);
+ assert.doesNotMatch(prep,/Modo offline preparado com/);
 });
 
 test('empty facial roster is not marked prepared; terminal retries and surfaces actionable setup error',()=>{
@@ -77,8 +78,8 @@ test('offline history presents saved marks with automatic sync status and no ret
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v61-offline-face-cache-key-20261125/);
- assert.match(sw,/terminal\.js\?v=20261125-offline-face-cache-key-v6/);
+ assert.match(sw,/certus-static-v62-offline-face-cache-quiet-20261125/);
+ assert.match(sw,/terminal\.js\?v=20261125-offline-face-cache-quiet-v7/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
