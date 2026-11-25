@@ -94,7 +94,7 @@ test('offline history presents saved marks with automatic sync status and no ret
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v65-local-face-identity-sync-20261125/);
+ assert.match(sw,/certus-static-v66-employee-offline-record-visible-20261125/);
  assert.match(sw,/terminal\.js\?v=20261125-local-face-identity-sync-v10/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
