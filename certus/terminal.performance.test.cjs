@@ -27,6 +27,7 @@ test('camera startup and model loading overlap, and offline capture can proceed 
  const prep=script.slice(script.indexOf('async function prepareTerminalOffline'),script.indexOf('function offlineSyncFailureMessage'));
  assert.ok(prep.indexOf('await saveTerminalOfflineFaceCache')<prep.indexOf('await loadFaceApi'));
  assert.match(script,/setOfflinePreparationStatus/);
+ assert.match(script,/objectStore\(OFFLINE_TEMPLATES\)\.put\(\{id:config\.device_id,iv:\[\.\.\.iv\],cipher\},config\.device_id\)/);
  assert.ok(script.indexOf('if(!matched)throw Error')<script.indexOf('await queueTerminalOfflineMark(queued)'));
 });
 test('expired kiosk session renews safely and retry reuses the idempotency key',()=>{
