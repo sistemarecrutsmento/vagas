@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context[\s\S]*?saveTerminalOfflineFaceCache/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261125-offline-history-face-cache-v2/);
+ assert.match(page,/terminal\.js\?v=20261125-offline-local-identity-v3/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -23,6 +23,9 @@ test('shared-terminal queue and offline facial roster use encrypted IndexedDB wi
  assert.match(ui,/saveTerminalOfflineFaceCache\(payload\)[\s\S]*?crypto\.subtle\.encrypt/);
  assert.match(ui,/loadTerminalOfflineFaceCache\(\)[\s\S]*?crypto\.subtle\.decrypt/);
  assert.match(ui,/function matchOfflineFace\(descriptor,cache\)[\s\S]*?matches\[0\]\.distance>\.60[\s\S]*?\.08/);
+ assert.match(ui,/if\(!matched\)throw Error\('Não foi possível identificar o colaborador com segurança/);
+ assert.match(ui,/expected_employee_id:matched\.employee_id/);
+ assert.ok(ui.indexOf('if(!matched)throw Error')<ui.indexOf('await queueTerminalOfflineMark(queued)'));
 });
 
 test('offline terminal registers locally without a session token and keeps the timestamp for sync',()=>{
@@ -51,8 +54,8 @@ test('offline history presents saved marks with automatic sync status and no ret
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v57-offline-history-face-cache-20261125/);
- assert.match(sw,/terminal\.js\?v=20261125-offline-history-face-cache-v2/);
+ assert.match(sw,/certus-static-v58-offline-local-identity-20261125/);
+ assert.match(sw,/terminal\.js\?v=20261125-offline-local-identity-v3/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
@@ -76,6 +79,7 @@ test('home screen does not ask for a manual queue send; automatic sync is connec
 
 test('offline punch is shown immediately as a registered local mark and appears in local history',()=>{
  assert.match(ui,/async function showOfflinePunch\(mark,result\)[\s\S]*?Marcação registrada[\s\S]*?Offline, aguardando sincronização/);
+ assert.match(ui,/esc\(matched\.full_name\)\}\s*·\s*\$\{labels\[localType\]\|\|'Registro de ponto'/);
  assert.match(ui,/async function loadRecent\(\)[\s\S]*?local_employee_name[\s\S]*?localStamp\(local\.client_captured_at\)/);
  assert.match(ui,/async function showHistory\(\)[\s\S]*?Aguardando sincronização/);
  assert.match(ui,/await queueTerminalOfflineMark\(queued\)/);
