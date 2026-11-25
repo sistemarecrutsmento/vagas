@@ -40,8 +40,13 @@ test('narrow management timesheet places day details below the horizontally scro
 });
 
 
-test('employee mirror labels received offline marks without making display depend on review',()=>{
-  assert.match(ui,/m\.validationStatus==='pending'&&\(m\.source==='shared_terminal'\|\|m\.metadata\?\.offline_time_unverified===true\)/);
-  assert.match(ui,/Marcação offline aparece no espelho assim que recebida, sem depender de aprovação/);
-  assert.match(ui,/não entra nos totais apurados/);
+test('employee and management timesheets use a concise offline # marker',()=>{
+  assert.match(ui,/timesheetMarkSymbol\(m\)/);
+  assert.match(ui,/# Marcação offline/);
+  const rows=ui.slice(ui.indexOf('function timesheetRows'),ui.indexOf('function timesheetDocument'));
+  assert.doesNotMatch(rows,/Offline — horário não confirmado/);
+  const at=ui.indexOf('const dayRows=visibleDays.map');
+  const end=ui.indexOf('return `<section class=\"records-page\">',at);
+  assert.doesNotMatch(ui.slice(at,end),/Offline; horário não confirmado/);
 });
+

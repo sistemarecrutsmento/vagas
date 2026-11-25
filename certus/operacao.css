@@ -353,3 +353,6 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
 .records-daily-balance{padding:8px 10px;border-radius:8px;background:#f7f5f6}
 
 .offline-clock-notice{padding:1rem 1.1rem;border:1px solid #d8b74e;border-left:4px solid #a77a00;border-radius:12px;background:#fff8df;color:#352b11}.offline-clock-notice b{display:block;font-size:1rem}.offline-clock-notice p{margin:.55rem 0;line-height:1.5}.offline-clock-notice .offline-clock-error{color:#8e1b1b;font-weight:600}.offline-clock-notice button{min-height:42px;max-width:100%}@media(max-width:640px){.offline-clock-notice{padding:.85rem}.offline-clock-notice button{width:100%}}
+
+
+.timesheet-mark-symbol{font-size:.72em;line-height:0;vertical-align:super;font-weight:600;margin-left:1px}
