@@ -79,7 +79,7 @@ test('home screen does not ask for a manual queue send; automatic sync is connec
 
 test('offline punch is shown immediately as a registered local mark and appears in local history',()=>{
  assert.match(ui,/async function showOfflinePunch\(mark,result\)[\s\S]*?Marcação registrada[\s\S]*?Offline, aguardando sincronização/);
- assert.match(ui,/esc\(matched\.full_name\) \· \${labels\[localType\]\|\|'Registro de ponto'/);
+ assert.match(ui,/esc\(matched\.full_name\)\}\s*·\s*\$\{labels\[localType\]\|\|'Registro de ponto'/);
  assert.match(ui,/async function loadRecent\(\)[\s\S]*?local_employee_name[\s\S]*?localStamp\(local\.client_captured_at\)/);
  assert.match(ui,/async function showHistory\(\)[\s\S]*?Aguardando sincronização/);
  assert.match(ui,/await queueTerminalOfflineMark\(queued\)/);
