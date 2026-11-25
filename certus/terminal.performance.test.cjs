@@ -20,6 +20,9 @@ test('camera startup and model loading overlap, and offline capture can proceed 
  assert.match(script,/if\(!navigator\.onLine\)\{if\(!terminalOfflineContext\(\)\)throw Error/);
  assert.match(script,/if\(!matched\)throw Error\('Não foi possível identificar o colaborador com segurança/);
  assert.match(script,/expected_employee_id:matched\.employee_id/);
+ assert.match(script,/if\(!templates\.length\)throw Error/);
+ assert.match(script,/terminalOfflineReady=!!terminalFaceCache\?\.templates\?\.length/);
+ assert.match(script,/OFFLINE_FACE_REFRESH_MS=300000/);
  assert.ok(script.indexOf('if(!matched)throw Error')<script.indexOf('await queueTerminalOfflineMark(queued)'));
 });
 test('expired kiosk session renews safely and retry reuses the idempotency key',()=>{

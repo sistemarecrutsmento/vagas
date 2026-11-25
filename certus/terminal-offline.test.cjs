@@ -10,7 +10,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context[\s\S]*?saveTerminalOfflineFaceCache/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261125-offline-local-identity-v3/);
+ assert.match(page,/terminal\.js\?v=20261125-offline-roster-retry-v4/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -26,6 +26,15 @@ test('shared-terminal queue and offline facial roster use encrypted IndexedDB wi
  assert.match(ui,/if\(!matched\)throw Error\('Não foi possível identificar o colaborador com segurança/);
  assert.match(ui,/expected_employee_id:matched\.employee_id/);
  assert.ok(ui.indexOf('if(!matched)throw Error')<ui.indexOf('await queueTerminalOfflineMark(queued)'));
+});
+
+test('empty facial roster is not marked prepared; terminal retries and surfaces actionable setup error',()=>{
+ assert.match(ui,/if\(!templates\.length\)\{await clearTerminalOfflineFaceCache/);
+ assert.match(ui,/terminalOfflineReady=!!terminalFaceCache\?\.templates\?\.length/);
+ assert.match(ui,/face_template_count===0/);
+ assert.match(ui,/OFFLINE_FACE_REFRESH_MS=300000/);
+ assert.match(ui,/terminalOfflineTimer=setInterval\([\s\S]*?!terminalOfflineReady[\s\S]*?prepareTerminalOffline\(\)/);
+ assert.match(ui,/Não há rostos consentidos e ativos preparados para esta filial/);
 });
 
 test('offline terminal registers locally without a session token and keeps the timestamp for sync',()=>{
@@ -54,8 +63,8 @@ test('offline history presents saved marks with automatic sync status and no ret
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v58-offline-local-identity-20261125/);
- assert.match(sw,/terminal\.js\?v=20261125-offline-local-identity-v3/);
+ assert.match(sw,/certus-static-v59-offline-roster-retry-20261125/);
+ assert.match(sw,/terminal\.js\?v=20261125-offline-roster-retry-v4/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
