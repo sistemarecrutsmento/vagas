@@ -28,7 +28,7 @@ test('camera startup and model loading overlap, and offline capture can proceed 
  const prep=script.slice(script.indexOf('async function prepareTerminalOffline'),script.indexOf('function offlineSyncFailureMessage'));
  assert.ok(prep.indexOf('await saveTerminalOfflineFaceCache')<prep.indexOf('await loadFaceApi'));
  assert.match(script,/setOfflinePreparationStatus/);
- assert.match(script,/A marcação foi recebida pelo Certus e aparece no espelho como offline; o horário ainda não foi confirmado pelo servidor/);
+ assert.match(script,/O servidor não confirmou o recebimento para o colaborador identificado/);
  assert.match(script,/Date\.now\(\)>=terminalSyncRetryAt\)syncTerminalOfflineMarks\(\)/);
  assert.match(script,/objectStore\(OFFLINE_TEMPLATES\)\.put\(\{id:config\.device_id,iv:\[\.\.\.iv\],cipher\},config\.device_id\)/);
  assert.ok(script.indexOf('if(!matched)throw Error')<script.indexOf('await queueTerminalOfflineMark(queued)'));
@@ -55,8 +55,9 @@ test('local offline storage is not reported as a successful server registration'
  assert.match(script,/Marcação registrada/);
  assert.match(script,/esc\(matched\.full_name\)/);
  assert.doesNotMatch(script,/esc\(matched\?\.full_name\|\|'Colaborador'\)/);
- assert.match(script,/data\.requires_review===true&&data\.official_time_confirmed===false/);
- assert.match(script,/if\(!pending&&!alreadyRecorded\)throw/);
+ assert.match(script,/data\.item\?\.employee_id[\s\S]*?mark\.expected_employee_id/);
+ assert.match(script,/O servidor não confirmou o recebimento para o colaborador identificado/);
+ assert.match(script,/sincronizada\(s\) para o perfil/);
  assert.match(script,/error\.httpStatus=response\.status/);
  assert.match(script,/function offlineSyncFailureMessage\(error\)/);
 });
@@ -74,4 +75,10 @@ test('queued punches sync automatically after real reconnection without manual c
 test('preparation progress remains hidden and hidden status cards cannot produce empty gold dividers',()=>{
  assert.match(script,/state!=='error'\)\{el\.hidden=true;el\.textContent='';return\}/);
  assert.match(css,/\.result\[hidden\]\{display:none!important\}/);
+});
+
+test('offline sync never resends face vectors or blocks the rest of the queue on a 4xx item',()=>{
+ assert.match(script,/const\{face_descriptor,\.\.\.syncPayload\}=mark;if\(!syncPayload\.expected_employee_id&&syncPayload\.local_employee_id\)/);
+ assert.match(script,/if\(e\?\.httpStatus>=400&&e\?\.httpStatus<500\)continue;break/);
+ assert.match(script,/data\.item\?\.validation_status/);
 });
