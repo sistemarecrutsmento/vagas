@@ -11,7 +11,7 @@ test('shared terminal preloads pinned face assets and its branch context automat
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context[\s\S]*?saveTerminalOfflineFaceCache/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261125-local-face-identity-sync-v10/);
+ assert.match(page,/terminal\.js\?v=20261125-locked-clock-auto-confirm-v11/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -47,7 +47,7 @@ test('face templates are saved before camera model download; progress is silent 
 test('successful offline sync goes to the employee profile without waiting for managerial review of identity',()=>{
  assert.match(ui,/function showTerminalSyncNotice/);
  assert.match(ui,/sincronizada/);
- assert.match(ui,/horário capturado offline continua identificado como não confirmado pelo servidor/);
+ assert.match(ui,/official_time_confirmed===true/);assert.match(ui,/offline sincronizada\(s\) e confirmada\(s\)/);
  assert.doesNotMatch(ui,/recebida\(s\) pela gestão para conferência/);
 });
 
@@ -94,8 +94,8 @@ test('offline history presents saved marks with automatic sync status and no ret
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v67-employee-offline-report-mark-visible-20261125/);
- assert.match(sw,/terminal\.js\?v=20261125-local-face-identity-sync-v10/);
+ assert.match(sw,/certus-static-v68-offline-mark-hash-auto-confirm-20261125/);
+ assert.match(sw,/terminal\.js\?v=20261125-locked-clock-auto-confirm-v11/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
@@ -132,10 +132,11 @@ test('hidden status cards do not leave empty gold lines or reserve vertical spac
  assert.match(ui,/function setOfflinePreparationStatus\([\s\S]*?state!=='error'[\s\S]*?el\.hidden=true/);
 });
 
-test('sync reuses the employee match made offline, strips descriptor before upload, and accepts received pending-time marks',()=>{
+test('sync reuses the employee match made offline, strips descriptor before upload, and requires server-confirmed terminal marks',()=>{
  assert.match(ui,/const\{face_descriptor,\.\.\.syncPayload\}=mark;if\(!syncPayload\.expected_employee_id&&syncPayload\.local_employee_id\)syncPayload\.expected_employee_id=syncPayload\.local_employee_id/);
  assert.match(ui,/data\.item\?\.device_id===config\.device_id[\s\S]*?data\.item\?\.employee_id[\s\S]*?mark\.expected_employee_id/);
- assert.match(ui,/\['pending','validated'\]\.includes\(data\.item\?\.validation_status\)/);
+ assert.match(ui,/data\.item\?\.validation_status==='validated'&&data\.official_time_confirmed===true/);
  assert.match(ui,/sincronizada/);
  assert.doesNotMatch(ui,/recebida\(s\) pela gestão para conferência/);
 });
+
