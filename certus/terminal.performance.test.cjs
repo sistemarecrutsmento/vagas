@@ -38,7 +38,7 @@ test('recognition threshold and server-authoritative shared clock flow are not c
 
 test('local offline storage is not reported as a successful server registration',()=>{
  assert.doesNotMatch(script,/id=\"offline-status\"/);
- assert.match(script,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
+ assert.match(script,/Marcação registrada/);
  assert.match(script,/data\.requires_review===true&&data\.official_time_confirmed===false/);
  assert.match(script,/if\(!pending&&!alreadyRecorded\)throw/);
  assert.match(script,/error\.httpStatus=response\.status/);
