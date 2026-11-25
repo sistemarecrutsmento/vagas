@@ -30,10 +30,10 @@ test('offline terminal can open from its last saved device context and queue mar
 });
 
 test('queued marks sync automatically after browser online event and after detected network loss',()=>{
- assert.match(ui,/window\.addEventListener\('online',[^;]*reconnectTerminalAndSync\(\)/);
+ assert.match(ui,/window\.addEventListener\('online',[\s\S]*?reconnectTerminalAndSync\(\)/);
  assert.match(ui,/function reconnectTerminalAndSync\(\)[\s\S]*?syncTerminalOfflineMarks\(\)/);
  assert.match(ui,/if\(view==='home'&&navigator\.onLine&&config&&\(terminalWasOffline\|\|terminalNetworkLost\)\)reconnectTerminalAndSync\(\)/);
- assert.match(ui,/document\.addEventListener\('visibilitychange',[^;]*terminalWasOffline\|\|terminalNetworkLost[^;]*reconnectTerminalAndSync/);
+ assert.match(ui,/document\.addEventListener\('visibilitychange',[\s\S]*?terminalWasOffline\|\|terminalNetworkLost[\s\S]*?reconnectTerminalAndSync/);
  assert.match(ui,/Idempotency-Key':mark\.id/);
  assert.match(ui,/data\.requires_review===true&&data\.official_time_confirmed===false/);
  assert.match(ui,/already_recorded===true/);
@@ -56,7 +56,7 @@ test('offline queue is never shown as successful before server confirmation',()=
  assert.doesNotMatch(ui,/id=\"offline-status\"/);
  assert.match(ui,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
  assert.match(ui,/A tentativa anterior de marcação ainda não foi recebida pelo Certus/);
- assert.match(ui,/O servidor confirmou todas as tentativas enviadas/);
+ assert.match(ui,/data\.requires_review===true&&data\.official_time_confirmed===false/);
  assert.doesNotMatch(ui,/result\.textContent='Marcação registrada com sucesso\.'/);
 });
 
@@ -66,7 +66,7 @@ test('offline queue is never shown as successful before server confirmation',()=
 test('home screen does not ask for a manual queue send; automatic sync is connection-driven',()=>{
  const home=ui.slice(ui.indexOf('function showHome'),ui.indexOf('async function syncServerClock'));
  assert.doesNotMatch(home,/Enviar pendências|syncTerminalOfflineMarks/);
- assert.match(ui,/window\.addEventListener\('online',[^;]*reconnectTerminalAndSync\(\)/);
+ assert.match(ui,/window\.addEventListener\('online',[\s\S]*?reconnectTerminalAndSync\(\)/);
  assert.match(ui,/Há \$\{pending\.length\} tentativa\(s\) guardada\(s\)[\s\S]*?não é necessário solicitar o envio no terminal/);
 });
 

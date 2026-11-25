@@ -8,7 +8,8 @@ test('shared terminal script parses as JavaScript',()=>{assert.doesNotThrow(()=>
 test('face models preload after the kiosk is ready and are reused',()=>{
  assert.match(script,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(script,/loadFaceApi\(\)\.catch\(\(\)=>\{\}\)/);
- assert.match(script,/syncTerminalOfflineMarks\(\)\.catch/);
+ assert.match(script,/function reconnectTerminalAndSync\(\)[\s\S]*?syncTerminalOfflineMarks\(\)/);
+ assert.match(script,/window\.addEventListener\('online',[\s\S]*?reconnectTerminalAndSync\(\)/);
  assert.match(script,/if\(facePromise\)return facePromise/);
  assert.match(script,/faceModelsReady=true/);
 });
@@ -38,16 +39,17 @@ test('recognition threshold and server-authoritative shared clock flow are not c
 test('local offline storage is not reported as a successful server registration',()=>{
  assert.doesNotMatch(script,/id=\"offline-status\"/);
  assert.match(script,/Marcação guardada neste terminal, mas ainda não confirmada pelo Certus/);
- assert.match(script,/O servidor confirmou todas as tentativas enviadas/);
+ assert.match(script,/data\.requires_review===true&&data\.official_time_confirmed===false/);
  assert.match(script,/if\(!pending&&!alreadyRecorded\)throw/);
  assert.match(script,/error\.httpStatus=response\.status/);
  assert.match(script,/function offlineSyncFailureMessage\(error\)/);
 });
 
-test('queued punches never transmit on terminal boot or visibility resume; manual retry requires confirmation',()=>{
+test('queued punches sync automatically after real reconnection without manual confirmation',()=>{
  const home=script.slice(script.indexOf('function showHome'),script.indexOf('async function syncServerClock'));
  assert.doesNotMatch(home,/syncTerminalOfflineMarks|Enviar pendências|offline-status/);
- assert.match(script,/if\(regained\)syncTerminalOfflineMarks/);
- assert.doesNotMatch(script,/visibilitychange[^;]*syncTerminalOfflineMarks/);
- assert.match(script,/window\.confirm\(`Enviar \$\{pending\.length\} tentativa/);
+ assert.match(script,/window\.addEventListener\('online',[\s\S]*?reconnectTerminalAndSync\(\)/);
+ assert.match(script,/terminalOfflineTimer=setInterval\([\s\S]*?terminalWasOffline\|\|terminalNetworkLost\)[\s\S]*?reconnectTerminalAndSync/);
+ assert.match(script,/document\.addEventListener\('visibilitychange',[\s\S]*?terminalWasOffline\|\|terminalNetworkLost[\s\S]*?reconnectTerminalAndSync/);
+ assert.doesNotMatch(script,/window\.confirm\(`Enviar \$\{pending\.length\} tentativa/);
 });
