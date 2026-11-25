@@ -4,6 +4,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const script=fs.readFileSync('certus/terminal.js','utf8');
+const css=fs.readFileSync('certus/terminal-audit.css','utf8');
 test('shared terminal script parses as JavaScript',()=>{assert.doesNotThrow(()=>new vm.Script(script))});
 test('face models preload after the kiosk is ready and are reused',()=>{
  assert.match(script,/prepareTerminalOffline\(\)\.then\(ready/);
@@ -27,7 +28,7 @@ test('camera startup and model loading overlap, and offline capture can proceed 
  const prep=script.slice(script.indexOf('async function prepareTerminalOffline'),script.indexOf('function offlineSyncFailureMessage'));
  assert.ok(prep.indexOf('await saveTerminalOfflineFaceCache')<prep.indexOf('await loadFaceApi'));
  assert.match(script,/setOfflinePreparationStatus/);
- assert.match(script,/Só aparecerão no espelho do colaborador depois da aprovação do horário/);
+ assert.match(script,/A marcação foi recebida pelo Certus e aparece no espelho como offline; o horário ainda não foi confirmado pelo servidor/);
  assert.match(script,/Date\.now\(\)>=terminalSyncRetryAt\)syncTerminalOfflineMarks\(\)/);
  assert.match(script,/objectStore\(OFFLINE_TEMPLATES\)\.put\(\{id:config\.device_id,iv:\[\.\.\.iv\],cipher\},config\.device_id\)/);
  assert.ok(script.indexOf('if(!matched)throw Error')<script.indexOf('await queueTerminalOfflineMark(queued)'));
@@ -68,4 +69,9 @@ test('queued punches sync automatically after real reconnection without manual c
  assert.match(script,/terminalOfflineTimer=setInterval\([\s\S]*?terminalWasOffline\|\|terminalNetworkLost\)[\s\S]*?reconnectTerminalAndSync/);
  assert.match(script,/document\.addEventListener\('visibilitychange',[\s\S]*?terminalWasOffline\|\|terminalNetworkLost[\s\S]*?reconnectTerminalAndSync/);
  assert.doesNotMatch(script,/window\.confirm\(`Enviar \$\{pending\.length\} tentativa/);
+});
+
+test('preparation progress remains hidden and hidden status cards cannot produce empty gold dividers',()=>{
+ assert.match(script,/state!=='error'\)\{el\.hidden=true;el\.textContent='';return\}/);
+ assert.match(css,/\.result\[hidden\]\{display:none!important\}/);
 });

@@ -5,12 +5,13 @@ const fs=require('node:fs');
 const ui=fs.readFileSync('certus/terminal.js','utf8');
 const page=fs.readFileSync('certus/terminal.html','utf8');
 const sw=fs.readFileSync('certus/service-worker.js','utf8');
+const css=fs.readFileSync('certus/terminal-audit.css','utf8');
 
 test('shared terminal preloads pinned face assets and its branch context automatically while connected',()=>{
  assert.match(ui,/async function prepareTerminalOffline\(\)[\s\S]*?serviceWorker\.ready[\s\S]*?api\/terminal\/offline-context[\s\S]*?saveTerminalOfflineFaceCache/);
  assert.match(ui,/prepareTerminalOffline\(\)\.then\(ready/);
  assert.match(ui,/https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@1\.7\.15\/model/);
- assert.match(page,/terminal\.js\?v=20261125-offline-sync-receipt-v8/);
+ assert.match(page,/terminal\.js\?v=20261125-offline-quiet-preparation-v9/);
  assert.doesNotMatch(ui,/id="prepare-offline|Tentar enviar agora/);
 });
 
@@ -33,17 +34,18 @@ test('face template object store uses an explicit key when saving the encrypted 
  assert.match(ui,/objectStore\(OFFLINE_TEMPLATES\)\.put\(\{id:config\.device_id,iv:\[\.\.\.iv\],cipher\},config\.device_id\)/);
 });
 
-test('face templates are saved before camera model download and preparation status is visible',()=>{
+test('face templates are saved before camera model download; progress is silent but failures remain visible',()=>{
  const prep=ui.slice(ui.indexOf('async function prepareTerminalOffline'),ui.indexOf('function offlineSyncFailureMessage'));
  assert.ok(prep.indexOf('await saveTerminalOfflineFaceCache')<prep.indexOf('await loadFaceApi'));
  assert.match(ui,/id=\"offline-prep-status\"/);
  assert.match(prep,/setOfflinePreparationStatus\(`\$\{terminalFaceCache\.templates\.length\} cadastros faciais recebidos e guardados cifrados/);
+ assert.match(ui,/state!=='error'\)\{el\.hidden=true;el\.textContent='';return\}/);
  assert.match(prep,/setOfflinePreparationStatus\(''\);return true/);
  assert.doesNotMatch(prep,/Modo offline preparado com/);
 });
 
-test('successful offline transfer clearly says it is pending management review, not employee timesheet',()=>{
- assert.match(ui,/Só aparecerão no espelho do colaborador depois da aprovação do horário/);
+test('successful offline transfer is immediately visible in the employee mirror with its unconfirmed time label',()=>{
+ assert.match(ui,/A marcação foi recebida pelo Certus e aparece no espelho como offline; o horário ainda não foi confirmado pelo servidor/);
  assert.match(ui,/function showTerminalSyncNotice/);
  assert.match(ui,/pendingReview\?`\$\{sent\} marcação/);
 });
@@ -91,8 +93,8 @@ test('offline history presents saved marks with automatic sync status and no ret
 });
 
 test('service worker caches terminal bundle and the same version-pinned face assets without caching API responses',()=>{
- assert.match(sw,/certus-static-v63-offline-sync-receipt-20261125/);
- assert.match(sw,/terminal\.js\?v=20261125-offline-sync-receipt-v8/);
+ assert.match(sw,/certus-static-v64-offline-quiet-preparation-20261125/);
+ assert.match(sw,/terminal\.js\?v=20261125-offline-quiet-preparation-v9/);
  assert.match(sw,/face-api@1\.7\.15/);
  assert.match(sw,/url\.pathname\.includes\('\/api\/'\)/);
 });
@@ -122,4 +124,9 @@ test('offline punch is shown immediately as a registered local mark and appears 
  assert.match(ui,/async function showHistory\(\)[\s\S]*?Aguardando sincronização/);
  assert.match(ui,/await queueTerminalOfflineMark\(queued\)/);
  assert.match(ui,/data\.requires_review===true&&data\.official_time_confirmed===false/);
+});
+
+test('hidden status cards do not leave empty gold lines or reserve vertical space',()=>{
+ assert.match(css,/\.result\[hidden\]\{display:none!important\}/);
+ assert.match(ui,/function setOfflinePreparationStatus\([\s\S]*?state!=='error'[\s\S]*?el\.hidden=true/);
 });

@@ -38,3 +38,10 @@ test('narrow management timesheet places day details below the horizontally scro
     'selected non-abono day remains green');
   assert.match(css, /records-day-abono-hours\{background:#fff4c2\}/, 'abono yellow styling is preserved');
 });
+
+
+test('employee mirror labels received offline marks without making display depend on review',()=>{
+  assert.match(ui,/m\.validationStatus==='pending'&&\(m\.source==='shared_terminal'\|\|m\.metadata\?\.offline_time_unverified===true\)/);
+  assert.match(ui,/Marcação offline aparece no espelho assim que recebida, sem depender de aprovação/);
+  assert.match(ui,/não entra nos totais apurados/);
+});
