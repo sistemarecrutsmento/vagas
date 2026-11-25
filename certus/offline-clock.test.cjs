@@ -75,12 +75,12 @@ test('employee UI does not expose offline preparation, local-queue or review imp
 
 test('service worker registers on HTTPS and caches only the pinned public face assets, never API responses', () => {
   assert.match(pwa, /navigator\.serviceWorker\.register\('\.\/service-worker\.js'\)/);
-  assert.match(sw, /const VERSION='certus-static-v65-local-face-identity-sync-20261125'/);
+  assert.match(sw, /const VERSION='certus-static-v66-employee-offline-record-visible-20261125'/);
   assert.match(sw, /certus-face-assets-v1\.7\.15/);
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=offline-mark-status-v7-20261123/);
+  assert.match(html, /operacao\.js\?v=employee-offline-record-visible-v1-20261125/);
 });
 
 test('offline queue retries when connectivity returns and when the active app resumes', () => {
@@ -96,4 +96,5 @@ test('employee interface contains no banner exposing offline queue mechanics', (
   assert.match(ui, /function employeeOfflineQueueNotice\(items\)/);
   assert.match(ui, /queuedMarks=await readOfflineMarks\(\)/);
 });
+
 
