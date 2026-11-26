@@ -1,4 +1,4 @@
-/* Certus Academy V2 — reviewed step-by-step guides, FAQs and illustrative product captures. */
+/* Certus Academy V3 — deeper learning paths, troubleshooting, glossary and illustrative screenshots. */
 window.CERTUS_ACADEMY_DATA = [
   {
     "id": "primeiro-acesso",
@@ -83,7 +83,24 @@ window.CERTUS_ACADEMY_DATA = [
       "A empresa exibida no cabeçalho é a organização que você está consultando.",
       "O perfil controla os módulos e as ações que aparecem para a sua conta."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "A senha não funciona",
+        "check": "Confirme o e-mail e se está na área de gestão, não no Portal do Colaborador.",
+        "next": "Peça ao administrador titular para iniciar a redefinição oficial; não compartilhe sua senha por mensagem."
+      },
+      {
+        "symptom": "A conta pediu um código e recusou",
+        "check": "Verifique se o código tem seis dígitos e ainda está vigente no app autenticador vinculado.",
+        "next": "Use o código atual; se perdeu o autenticador, procure o responsável pela recuperação da conta."
+      },
+      {
+        "symptom": "A empresa no cabeçalho não é a esperada",
+        "check": "Pode haver mais de uma organização associada à sessão.",
+        "next": "Não faça alterações; encerre a sessão e entre na organização correta ou peça acesso ao titular."
+      }
+    ]
   },
   {
     "id": "navegar-perfis",
@@ -166,7 +183,19 @@ window.CERTUS_ACADEMY_DATA = [
       "abrir-chamado"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "Um módulo sumiu do menu",
+        "check": "A área pode estar restrita ao seu perfil ou às filiais autorizadas.",
+        "next": "Confirme o perfil da conta e solicite ao titular somente a permissão necessária."
+      },
+      {
+        "symptom": "O menu ficou aberto no celular",
+        "check": "A navegação móvel usa um painel lateral/drawer.",
+        "next": "Selecione a tela desejada ou feche o menu; confira se o cabeçalho continua mostrando a empresa correta."
+      }
+    ]
   },
   {
     "id": "cadastro-funcionario",
@@ -248,7 +277,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Revise a pessoa na busca antes de salvar.",
       "Não confunda uma ficha de funcionário com uma conta de acesso."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "A pessoa não aparece na busca",
+        "check": "A pesquisa pode estar limitada por filial, status ou termo digitado.",
+        "next": "Remova filtros, pesquise pela matrícula e confirme se a ficha já existe antes de criar outra."
+      },
+      {
+        "symptom": "Filial ou jornada necessária não aparece",
+        "check": "O cadastro relacionado pode não existir ou não estar disponível para seu perfil.",
+        "next": "Confirme primeiro a filial/jornada com RH; não selecione uma opção “parecida”."
+      }
+    ]
   },
   {
     "id": "editar-funcionario",
@@ -323,7 +364,19 @@ window.CERTUS_ACADEMY_DATA = [
       "seguranca-conta"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O campo que preciso corrigir não aparece",
+        "check": "Alguns dados têm fluxo específico ou são limitados por perfil.",
+        "next": "Não tente alterar outro campo como substituto; peça ao titular/RH o caminho autorizado."
+      },
+      {
+        "symptom": "A pessoa continua com acesso após mudar o status",
+        "check": "A ficha e a conta de acesso são objetos distintos.",
+        "next": "Confira Contas e acessos separadamente e siga o processo autorizado de desativação."
+      }
+    ]
   },
   {
     "id": "liberar-acesso",
@@ -401,7 +454,19 @@ window.CERTUS_ACADEMY_DATA = [
       "marcar-ponto"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "A opção Criar acesso não aparece",
+        "check": "Pode já haver conta vinculada, a ficha pode não estar ativa ou seu perfil não tem a permissão.",
+        "next": "Confira Acesso ao portal e o status; não crie uma segunda conta."
+      },
+      {
+        "symptom": "O colaborador não recebeu a credencial",
+        "check": "A senha temporária pode ter sido exibida uma única vez.",
+        "next": "Peça redefinição pelo fluxo oficial e entregue diretamente em canal privado seguro."
+      }
+    ]
   },
   {
     "id": "filiais-departamentos",
@@ -487,7 +552,19 @@ window.CERTUS_ACADEMY_DATA = [
       "CNPJ e endereço vêm de fonte oficial da empresa.",
       "A inicialização REP-A é separada e irreversível; confira antes de iniciar."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "Um Plus Code curto não é aceito",
+        "check": "O formulário precisa de referência completa próxima para resolver um código curto.",
+        "next": "Informe um Plus Code completo confirmado na mesma região e confira o ponto convertido."
+      },
+      {
+        "symptom": "O terminal marca fora da área",
+        "check": "A localização/raio da filial ou o aparelho pode não corresponder ao local correto.",
+        "next": "Confira o Plus Code, o raio e a filial autorizada; não aumente o raio somente para suprimir o alerta."
+      }
+    ]
   },
   {
     "id": "acessos-contas",
@@ -571,7 +648,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Atribua o menor escopo de acesso necessário.",
       "Nunca compartilhe uma conta entre pessoas."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O usuário vê filiais que não deveria",
+        "check": "O escopo autorizado da conta pode estar abrangente.",
+        "next": "Peça ao titular para revisar o perfil e as filiais e confirme o resultado depois da gravação."
+      },
+      {
+        "symptom": "Não posso editar a conta do titular",
+        "check": "A conta original tem ações reservadas ao próprio titular.",
+        "next": "Não use outra conta de administrador como substituto; peça a ação à identidade titular."
+      }
+    ]
   },
   {
     "id": "jornadas",
@@ -666,7 +755,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Carga semanal é líquida: duração diária menos intervalo.",
       "Descanso e horários podem ser diferentes em cada dia."
     ],
-    "note": "A prévia do portal ajuda a detectar inconsistências de preenchimento; a adequação ao contrato, à CLT e a instrumento coletivo deve ser confirmada pelo RH responsável."
+    "note": "A prévia do portal ajuda a detectar inconsistências de preenchimento; a adequação ao contrato, à CLT e a instrumento coletivo deve ser confirmada pelo RH responsável.",
+    "ifDifferent": [
+      {
+        "symptom": "Carga semanal ficou maior ou menor do que o esperado",
+        "check": "A soma líquida depende do horário de cada dia, intervalos e dias marcados como trabalho.",
+        "next": "Confira cada linha do formulário e a prévia; não altere intervalos apenas para igualar um total esperado."
+      },
+      {
+        "symptom": "Dia de descanso aparece como trabalhado",
+        "check": "A marcação Dia de trabalho ou o descanso configurado pode estar incorreto.",
+        "next": "Revise a jornada aprovada e só depois corrija o cadastro; confira um dia no espelho."
+      }
+    ]
   },
   {
     "id": "escala-12x36",
@@ -751,7 +852,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Confira a data âncora antes de salvar.",
       "Compare a prévia com a escala aprovada antes de vincular pessoas."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O ciclo parece começar no dia errado",
+        "check": "A data âncora e a hora de início definem a sequência.",
+        "next": "Não atribua ainda; compare a âncora e a prévia com o calendário aprovado."
+      },
+      {
+        "symptom": "A jornada está duplicada na lista",
+        "check": "Pode haver nomes diferentes para o mesmo ciclo.",
+        "next": "Confira âncora, grupo, horários e status antes de criar outra escala."
+      }
+    ]
   },
   {
     "id": "atribuir-jornada",
@@ -823,7 +936,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Confira o dia de descanso e a unidade antes de salvar.",
       "Verifique o resultado no espelho sem editar marcações originais."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "A jornada recém-criada não aparece na ficha",
+        "check": "A lista pode não ter sido recarregada ou a jornada pode não estar ativa/disponível.",
+        "next": "Atualize a tela e confirme cadastro, status e permissões; não duplique a jornada."
+      },
+      {
+        "symptom": "O espelho mostra outra previsão",
+        "check": "A pessoa pode estar vinculada a uma jornada diferente ou o período pode usar um vínculo histórico.",
+        "next": "Confira ficha, filial e data consultada; não presuma que editar a ficha reescreve o histórico."
+      }
+    ]
   },
   {
     "id": "marcar-ponto",
@@ -907,7 +1032,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Confirme a próxima ação antes de marcar.",
       "Aguarde o retorno da tela e confira o histórico."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "Não aparece a próxima ação esperada",
+        "check": "O sistema pode estar aguardando evento anterior, autenticação ou dados da jornada.",
+        "next": "Confira o histórico e a jornada; não force marcações repetidas."
+      },
+      {
+        "symptom": "A marcação está carregando há muito tempo",
+        "check": "A confirmação pode depender da conexão/aparelho.",
+        "next": "Confira primeiro o histórico; se não houver resultado, peça à gestão para verificar antes de tentar de novo."
+      }
+    ]
   },
   {
     "id": "cadastro-facial",
@@ -990,7 +1127,19 @@ window.CERTUS_ACADEMY_DATA = [
       "O consentimento deve ser da própria pessoa e independente da senha.",
       "Confira a mensagem de cadastro concluído antes de sair."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "A câmera fica bloqueada",
+        "check": "A permissão do navegador pode estar negada ou outro aplicativo está usando a câmera.",
+        "next": "Libere a câmera para o domínio correto, feche o outro app e recarregue uma vez."
+      },
+      {
+        "symptom": "A captura não conclui",
+        "check": "Iluminação, enquadramento ou movimento podem impedir a leitura.",
+        "next": "Siga a instrução visível; se falhar repetidamente, pare e solicite apoio em vez de usar a foto de outra pessoa."
+      }
+    ]
   },
   {
     "id": "terminal-compartilhado",
@@ -1075,7 +1224,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Confirme a filial e o status antes do primeiro uso.",
       "Use o fluxo do portal de gestão para desconectar ou substituir o terminal."
     ],
-    "note": "Não apague chaves ou vínculos locais do terminal. A gestão deve conduzir a desconexão em Terminais e dispositivos no portal autenticado."
+    "note": "Não apague chaves ou vínculos locais do terminal. A gestão deve conduzir a desconexão em Terminais e dispositivos no portal autenticado.",
+    "ifDifferent": [
+      {
+        "symptom": "O leitor fica em modo de configuração",
+        "check": "Confira se o dispositivo foi autorizado e se a página aberta é a do terminal.",
+        "next": "Peça à gestão para confirmar o cadastro e a filial; não entre com conta de gestor no aparelho compartilhado."
+      },
+      {
+        "symptom": "A pessoa não consegue registrar",
+        "check": "Pode haver erro de câmera, filial, localização ou identificação.",
+        "next": "Leia a mensagem, confira aparelho/filial e peça à pessoa que aguarde antes de repetir a marca."
+      }
+    ]
   },
   {
     "id": "terminais-dispositivos",
@@ -1153,7 +1314,19 @@ window.CERTUS_ACADEMY_DATA = [
       "uso-offline"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "Um dispositivo aparece como inativo",
+        "check": "Pode ter sido revogado ou substituído.",
+        "next": "Confira o status e o último uso antes de reutilizar; não apague a chave local."
+      },
+      {
+        "symptom": "Não há botão Autorizar dispositivo",
+        "check": "A ação depende do perfil autorizado.",
+        "next": "Peça ao administrador titular ou RH com permissão para realizar o cadastro."
+      }
+    ]
   },
   {
     "id": "ajustes-ponto",
@@ -1234,7 +1407,19 @@ window.CERTUS_ACADEMY_DATA = [
       "abrir-chamado"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "Escolhi retificação, mas a marca correta não aparece",
+        "check": "A lista é preenchida pelas batidas existentes no dia selecionado.",
+        "next": "Confira a data e escolha a marca original correta; se não houver marca, retificação pode não ser o tipo aplicável."
+      },
+      {
+        "symptom": "Anexo não é enviado",
+        "check": "O campo aceita imagem ou PDF até 5 MB.",
+        "next": "Reduza ou converta o arquivo conforme permitido e confirme se os dados de terceiros estão ocultos."
+      }
+    ]
   },
   {
     "id": "revisar-ajustes",
@@ -1318,7 +1503,19 @@ window.CERTUS_ACADEMY_DATA = [
       "A nota deve explicar a decisão.",
       "Registros originais devem permanecer auditáveis."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O pedido não está na fila esperada",
+        "check": "Filtros de status ou termo de busca podem ocultá-lo.",
+        "next": "Selecione Todos, limpe a busca e confirme a empresa/filial e a data."
+      },
+      {
+        "symptom": "A decisão não alterou o espelho",
+        "check": "A mudança depende do tipo de solicitação e da aprovação final.",
+        "next": "Reabra o pedido e confira o status, a nota e o período do espelho."
+      }
+    ]
   },
   {
     "id": "espelho-e-simbolos",
@@ -1412,7 +1609,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Estado de validação é outra informação.",
       "Não edite nem remova registro original para corrigir uma divergência."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O saldo diário está como pendente",
+        "check": "A jornada ou as marcações podem não permitir o fechamento do dia ainda.",
+        "next": "Confira se o dia está completo, se a jornada está vinculada e se há marca pendente."
+      },
+      {
+        "symptom": "Um horário # não entra no total confirmado",
+        "check": "# identifica origem offline, que pode aguardar validação separada.",
+        "next": "Abra detalhes do registro e leia o estado; não conte uma pendência como confirmada."
+      }
+    ]
   },
   {
     "id": "uso-offline",
@@ -1500,7 +1709,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Não apague armazenamento local para resolver pendência.",
       "Origem offline e confirmação são conceitos diferentes."
     ],
-    "note": "Use os estados mostrados pelo portal. A hora informada por aparelho offline não é, por si só, confirmação de horário pelo servidor."
+    "note": "Use os estados mostrados pelo portal. A hora informada por aparelho offline não é, por si só, confirmação de horário pelo servidor.",
+    "ifDifferent": [
+      {
+        "symptom": "A marca offline não apareceu depois de voltar a internet",
+        "check": "O dispositivo pode não ter concluído o envio ou a marca está aguardando validação.",
+        "next": "Mantenha o aparelho; peça à gestão para conferir fila e histórico antes de marcar novamente."
+      },
+      {
+        "symptom": "Aparelho mostra horário diferente do espelho",
+        "check": "O horário local informado pode diferir do horário recebido pelo servidor.",
+        "next": "Leia os campos de ocorrência/recebimento e o status; não altere o relógio do aparelho."
+      }
+    ]
   },
   {
     "id": "inconsistencias",
@@ -1583,7 +1804,19 @@ window.CERTUS_ACADEMY_DATA = [
       "A lista é um alerta para revisão, não uma decisão sobre a pessoa.",
       "Confira o dia no espelho antes de tomar qualquer ação."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O colaborador aparece com contagem ímpar",
+        "check": "A lista detecta uma sequência que merece revisão, não a causa da ocorrência.",
+        "next": "Abra o espelho do mesmo dia e confira jornada, abono, marca offline e solicitações."
+      },
+      {
+        "symptom": "A lista parece vazia",
+        "check": "Pode não haver ocorrências no escopo retornado ou a filial/permissão limita a consulta.",
+        "next": "Confirme o perfil/filial e atualize a página; consulte o espelho se recebeu relato específico."
+      }
+    ]
   },
   {
     "id": "banco-horas",
@@ -1674,7 +1907,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Confira o mês/ano.",
       "Horas pagas reduzem o saldo, não alteram marcações originais."
     ],
-    "note": "A tela informa que limites e prazos de compensação seguem o regime configurado para o vínculo. Confirme a regra e a autorização interna antes de registrar horas pagas."
+    "note": "A tela informa que limites e prazos de compensação seguem o regime configurado para o vínculo. Confirme a regra e a autorização interna antes de registrar horas pagas.",
+    "ifDifferent": [
+      {
+        "symptom": "Saldo mudou após registrar horas pagas",
+        "check": "Horas pagas são abatidas do acumulado e exibidas separadamente.",
+        "next": "Confira acumulado, horas pagas e saldo; procure o histórico/auditoria."
+      },
+      {
+        "symptom": "Não posso registrar horas pagas",
+        "check": "Essa ação exige confirmação de pagamento e pode estar restrita por perfil ou estado.",
+        "next": "Use somente após confirmação real; solicite a autorização e não registre como ajuste de saldo."
+      }
+    ]
   },
   {
     "id": "relatorios",
@@ -1762,7 +2007,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Revise filial e datas antes de exportar.",
       "Proteja arquivos com dados de funcionários."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "PDF mensal ainda não está disponível",
+        "check": "O relatório mensal coletivo depende do mês estar fechado.",
+        "next": "Selecione período fechado; ele fica disponível a partir do primeiro dia do mês seguinte."
+      },
+      {
+        "symptom": "PDF/CSV veio sem os registros esperados",
+        "check": "Período, filial, permissões ou status podem limitar os dados.",
+        "next": "Confirme filtros e depois compare com o espelho da pessoa/dia."
+      }
+    ]
   },
   {
     "id": "configuracoes-empresa",
@@ -1845,7 +2102,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Diferencie o dado geral da empresa do dado do estabelecimento.",
       "Use documentos oficiais antes de salvar."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "Não sei se edito Empresa ou Filial",
+        "check": "Dados gerais e dados específicos do estabelecimento estão em telas separadas.",
+        "next": "Confira qual campo/documento é alterado; evite copiar CNPJ de uma filial para outra."
+      },
+      {
+        "symptom": "Um valor legal está incorreto",
+        "check": "Dados da empresa/estabelecimento podem alimentar documentos e arquivos oficiais.",
+        "next": "Pare e obtenha o dado oficial antes de corrigir; depois valide o fluxo relacionado."
+      }
+    ]
   },
   {
     "id": "seguranca-conta",
@@ -1928,7 +2197,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Use uma senha exclusiva com pelo menos 14 caracteres.",
       "Nunca compartilhe senha, chave ou código de autenticação."
     ],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O código de dois fatores expirou",
+        "check": "Os códigos do autenticador são temporários.",
+        "next": "Use o código mais recente; não reutilize nem compartilhe o anterior."
+      },
+      {
+        "symptom": "A senha nova não é aceita",
+        "check": "A tela exige ao menos 14 caracteres e a senha deve ser exclusiva.",
+        "next": "Crie outra frase-senha com o tamanho exigido e sem reutilizar credenciais de outros serviços."
+      }
+    ]
   },
   {
     "id": "abrir-chamado",
@@ -2007,7 +2288,19 @@ window.CERTUS_ACADEMY_DATA = [
       "uso-offline"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O anexo é recusado",
+        "check": "Arquivo individual acima de 20 MB, mais de cinco arquivos ou total acima de 50 MB não passa pelo limite exibido.",
+        "next": "Reduza a quantidade/tamanho e retire dados sensíveis desnecessários."
+      },
+      {
+        "symptom": "Não consigo criar o chamado",
+        "check": "O portal libera a ação ao administrador titular e ao gerente.",
+        "next": "Confirme o perfil; peça a um usuário autorizado que abra o chamado com seu contexto."
+      }
+    ]
   },
   {
     "id": "senha-perdida",
@@ -2086,7 +2379,19 @@ window.CERTUS_ACADEMY_DATA = [
       "primeiro-acesso"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O link de redefinição não chegou",
+        "check": "A recuperação automática por e-mail ainda pode não estar configurada no fluxo de gestão.",
+        "next": "Peça ao administrador titular para iniciar a redefinição oficial."
+      },
+      {
+        "symptom": "Tenho senha mas perdi o autenticador",
+        "check": "Senha e segundo fator são controles diferentes.",
+        "next": "Não compartilhe código; procure o responsável para recuperação da identidade."
+      }
+    ]
   },
   {
     "id": "abono-manual",
@@ -2173,7 +2478,19 @@ window.CERTUS_ACADEMY_DATA = [
       "Abono direto entra imediatamente, sem aprovação pendente.",
       "Registre motivo e confirme os dados antes de salvar."
     ],
-    "note": "Use abono direto somente com autorização e documentação adequada da empresa. Este guia descreve a tela; não substitui decisão do RH nem regra legal aplicável."
+    "note": "Use abono direto somente com autorização e documentação adequada da empresa. Este guia descreve a tela; não substitui decisão do RH nem regra legal aplicável.",
+    "ifDifferent": [
+      {
+        "symptom": "Os campos de horário não aparecem",
+        "check": "Eles só surgem quando Abono de horas é selecionado.",
+        "next": "Escolha o tipo correto e informe início e fim antes de confirmar."
+      },
+      {
+        "symptom": "O lançamento foi aplicado imediatamente",
+        "check": "O abono direto não usa fila de aprovação.",
+        "next": "Confira o colaborador/dia no espelho e a auditoria; se incorreto, siga o fluxo autorizado de correção."
+      }
+    ]
   },
   {
     "id": "termos-espelho",
@@ -2254,7 +2571,19 @@ window.CERTUS_ACADEMY_DATA = [
       "revisar-ajustes"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "O símbolo e o status parecem contradizer um ao outro",
+        "check": "Símbolo representa a origem; status representa validação.",
+        "next": "Leia os dois campos e procure o histórico antes de interpretar."
+      },
+      {
+        "symptom": "Não entendo o saldo diário",
+        "check": "Saldo depende de jornada, sequência de marcas, abonos e apuração do dia.",
+        "next": "Abra os detalhes; se estiver pendente, aguarde dados completos em vez de concluir ausência."
+      }
+    ]
   },
   {
     "id": "troubleshooting-portal",
@@ -2335,7 +2664,19 @@ window.CERTUS_ACADEMY_DATA = [
       "primeiro-acesso"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "A página não responde após Salvar",
+        "check": "A gravação pode ter concluído mesmo sem atualizar o conteúdo.",
+        "next": "Confira lista/histórico antes de tentar novamente; assim você evita duplicar uma ação."
+      },
+      {
+        "symptom": "A ação aparece desabilitada",
+        "check": "Permissão, prazo, status do dia ou campo obrigatório podem estar bloqueando.",
+        "next": "Leia o texto junto do controle, verifique perfil/escopo e não tente contornar o bloqueio."
+      }
+    ]
   },
   {
     "id": "assinatura-faturas",
@@ -2419,6 +2760,422 @@ window.CERTUS_ACADEMY_DATA = [
       "abrir-chamado"
     ],
     "checks": [],
-    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela."
+    "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
+    "ifDifferent": [
+      {
+        "symptom": "A fatura ainda consta como aberta depois do checkout",
+        "check": "Abrir ou concluir uma etapa no provedor não é o mesmo que o Certus confirmar o recebimento.",
+        "next": "Não pague em duplicidade; atualize a tela e confira o status oficial com o titular/suporte."
+      },
+      {
+        "symptom": "O módulo não aparece para mim",
+        "check": "A assinatura é controlada pelo administrador titular original.",
+        "next": "Peça ao titular para consultar o plano; não use outra conta de administrador."
+      }
+    ]
+  },
+  {
+    "id": "marcas-manuais",
+    "category": "Registro de ponto",
+    "title": "Incluir, editar ou excluir uma marcação manual",
+    "summary": "Corrija somente lançamentos manuais elegíveis, respeite o prazo da tela e deixe justificativa rastreável em cada tratamento.",
+    "audience": [
+      "Administrador titular",
+      "Gerente",
+      "RH"
+    ],
+    "minutes": 7,
+    "flow": [
+      "Registros de ponto",
+      "Selecione pessoa e dia passado",
+      "Revise motivo e auditoria"
+    ],
+    "image": "./assets/academy/tour-registros-de-ponto.png",
+    "imageAlt": "Tela de Registros de Ponto",
+    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e horários não representam colaboradores reais.",
+    "before": [
+      "Tenha a correção documentada e confirme o dia no fuso da empresa. O portal só permite inclusão em dia anterior e exibe o prazo de ajustes do mês.",
+      "Marcações originais do relógio são imutáveis; apenas lançamentos incluídos manualmente podem ter Editar/Excluir."
+    ],
+    "sections": [
+      {
+        "title": "Passo a passo",
+        "steps": [
+          [
+            "Localize colaborador e data",
+            "Em Registros de ponto, selecione a pessoa, o período e o dia correto. Confirme nome, filial, data local e marcações existentes."
+          ],
+          [
+            "Confira elegibilidade e prazo",
+            "O botão de inclusão fica desativado para hoje/futuro e após o prazo mensal exibido. O prazo é visível junto do fluxo; não interprete indisponibilidade como falha do sistema."
+          ],
+          [
+            "Inclua uma marca somente quando houver justificativa",
+            "Selecione Adicionar marcação manual, informe data, horário, tipo (entrada, início/fim do intervalo ou saída final) e justificativa com pelo menos cinco caracteres. Para dia sem registros, o portal conduz uma sequência em ordem; siga a etapa indicada e confira a contagem."
+          ],
+          [
+            "Revise antes de confirmar",
+            "Confira colaborador, data, hora, tipo e motivo. A inclusão recebe * no espelho e fica registrada com responsável e histórico."
+          ],
+          [
+            "Edite apenas uma inclusão manual",
+            "Se a marca mostrar ações Editar/Excluir, confira que é lançamento manual. Para editar, informe a justificativa e revise hora/tipo; a data é exibida como somente leitura."
+          ],
+          [
+            "Exclua apenas uma inclusão manual incorreta",
+            "Selecione Excluir, leia a confirmação e informe a justificativa. A inclusão deixa de integrar cálculos, mas seu tratamento permanece na auditoria."
+          ],
+          [
+            "Valide o espelho e a auditoria",
+            "Depois de cada ação, atualize o espelho. Confira o saldo/total do dia e abra Histórico de tratamentos; confirme operação, antes/depois, responsável e motivo."
+          ]
+        ]
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Posso editar uma batida original do relógio?",
+        "answer": "Não. Batidas originais são imutáveis. Use o fluxo de solicitação/decisão quando precisar corrigir um registro original."
+      },
+      {
+        "question": "Por que o botão de inclusão está desativado?",
+        "answer": "Hoje e datas futuras não são elegíveis, e há um prazo mensal que o portal exibe. Confira o dia selecionado e a data-limite mostrada."
+      },
+      {
+        "question": "O que é a sequência de dia sem marcações?",
+        "answer": "Para um dia sem marcas, o portal conduz até quatro etapas em ordem: entrada, saída para intervalo, retorno e saída final. Siga a etapa apresentada; não escolha uma sequência arbitrária."
+      },
+      {
+        "question": "Excluir uma inclusão apaga o histórico?",
+        "answer": "Não. A tela informa que a inclusão deixa de integrar os cálculos, enquanto o evento e a justificativa permanecem na auditoria."
+      },
+      {
+        "question": "A marca manual conta como batida confirmada de relógio?",
+        "answer": "Não. Ela é identificada como lançamento manual/ajuste e deve ser interpretada conforme o estado e o histórico próprios."
+      }
+    ],
+    "keywords": [
+      "marca manual",
+      "adicionar marcação",
+      "editar lançamento",
+      "excluir marcação",
+      "prazo",
+      "auditoria",
+      "justificativa"
+    ],
+    "related": [
+      "espelho-e-simbolos",
+      "revisar-ajustes",
+      "abono-manual"
+    ],
+    "checks": [
+      "Data elegível e prazo ainda aberto.",
+      "Só altere uma inclusão manual, nunca uma batida original.",
+      "Justificativa e responsável ficam auditados."
+    ],
+    "note": "Esta orientação descreve controles do portal; faça alterações apenas dentro da autorização, documentação e processo interno da empresa.",
+    "ifDifferent": [
+      {
+        "symptom": "Botões Editar e Excluir não aparecem",
+        "check": "A linha pode ser uma batida original, um ajuste aprovado, o dia pode estar fora do prazo ou a data pode ser hoje/futura.",
+        "next": "Não tente alterar a batida original; confira o tipo e a data. Só uma inclusão manual elegível oferece esses controles."
+      },
+      {
+        "symptom": "Inclusão manual foi recusada",
+        "check": "Revise data passada, horário, tipo, justificativa de pelo menos cinco caracteres e a etapa da sequência do dia.",
+        "next": "Corrija o dado confirmado e reenvie uma vez; se o prazo exibido terminou, não contorne o bloqueio."
+      }
+    ]
+  },
+  {
+    "id": "decidir-offline",
+    "category": "Continuidade e sincronização",
+    "title": "Analisar uma marca offline pendente",
+    "summary": "Compare horário informado e recebido, confira a jornada e registre Aprovar/Rejeitar com justificativa; o status deve ser verificado depois.",
+    "audience": [
+      "Administrador titular",
+      "Gerente",
+      "RH",
+      "Supervisor"
+    ],
+    "minutes": 6,
+    "flow": [
+      "Inconsistências diárias",
+      "Marcações offline para análise",
+      "Decida e confira auditoria"
+    ],
+    "image": "./assets/academy/tour-inconsistencias.png",
+    "imageAlt": "Área de revisão de marcações pendentes",
+    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e horários não representam colaboradores reais.",
+    "before": [
+      "A fila mostra dados de origem, mas o horário informado pelo aparelho não é prova independente. A decisão deve seguir a conferência e a política da empresa."
+    ],
+    "sections": [
+      {
+        "title": "Passo a passo",
+        "steps": [
+          [
+            "Abra Inconsistências diárias",
+            "Na parte superior pode aparecer Marcações offline para análise. Se a lista não aparecer, pode não haver pendências no momento."
+          ],
+          [
+            "Compare os dados da linha",
+            "Confira nome, tipo de evento, horário informado e momento em que o sistema recebeu o registro. Não confunda o horário ocorrido no aparelho com o recebimento pelo servidor."
+          ],
+          [
+            "Confira o contexto antes de decidir",
+            "Abra o espelho da pessoa e do dia, confira jornada, sequência, filial e outros registros. Verifique se há duplicidade, pedido de ajuste ou contexto comunicado pela gestão."
+          ],
+          [
+            "Registre decisão com motivo",
+            "Escolha Aprovar ou Rejeitar. O portal solicita justificativa de no mínimo três caracteres; descreva objetivamente o que foi conferido, sem incluir dado pessoal desnecessário."
+          ],
+          [
+            "Confirme o resultado e a trilha",
+            "Após salvar, a lista é atualizada. Confira se o item saiu da pendência, abra o espelho e veja o status/origem; a decisão fica registrada em auditoria."
+          ],
+          [
+            "Se não houver evidência suficiente",
+            "Não aprove automaticamente por conveniência nem rejeite apenas pelo símbolo #. Peça contexto ao responsável/colaborador e use a política da empresa antes de concluir."
+          ]
+        ]
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Aprovar muda o horário informado?",
+        "answer": "A ação registra a decisão sobre a marca pendente; leia o horário e o status atualizado depois. Não interprete como edição do dado originalmente recebido."
+      },
+      {
+        "question": "A hora do aparelho é igual à hora de recebimento?",
+        "answer": "Não necessariamente. A página mostra campos separados para horário informado e recebido; registre essa diferença ao conferir."
+      },
+      {
+        "question": "O item voltou a aparecer após a decisão?",
+        "answer": "Atualize a lista e confira o histórico do colaborador. Se continuar pendente, evite repetir a decisão e abra chamado com data, protocolo/identificador visível e captura sem dados pessoais desnecessários."
+      },
+      {
+        "question": "O que significa #?",
+        "answer": "Marca origem offline; o estado de validação é separado e deve ser lido junto da decisão."
+      }
+    ],
+    "keywords": [
+      "aprovar marca offline",
+      "rejeitar offline",
+      "pendência offline",
+      "horário informado",
+      "horário recebido",
+      "decisão auditoria"
+    ],
+    "related": [
+      "uso-offline",
+      "espelho-e-simbolos",
+      "inconsistencias",
+      "marcas-manuais"
+    ],
+    "checks": [
+      "Compare hora informada e recebida.",
+      "Leia a jornada e a sequência antes de decidir.",
+      "Registre justificativa e valide o status depois."
+    ],
+    "note": "A decisão cabe à gestão autorizada e deve estar respaldada pelo processo da empresa; a interface não determina por si só a veracidade do horário.",
+    "ifDifferent": [
+      {
+        "symptom": "A fila de pendências está vazia",
+        "check": "A tela só mostra itens pendentes; a marca pode já ter decisão ou ainda não ter chegado ao servidor.",
+        "next": "Confira o histórico da pessoa e o aparelho; não conclua que a marca nunca ocorreu."
+      },
+      {
+        "symptom": "A decisão foi recusada",
+        "check": "Verifique se informou justificativa com pelo menos três caracteres e se o item ainda está pendente.",
+        "next": "Atualize a página uma vez e leia o status antes de tentar novamente."
+      }
+    ]
+  },
+  {
+    "id": "glossario-certus",
+    "category": "Primeiros passos",
+    "title": "Glossário rápido: termos e símbolos do Certus",
+    "summary": "Entenda os rótulos mais comuns da Academy, do espelho e dos cadastros antes de interpretar números e pedidos.",
+    "audience": [
+      "Colaborador",
+      "Administrador titular",
+      "Gerente",
+      "RH",
+      "Supervisor"
+    ],
+    "minutes": 5,
+    "flow": [
+      "Identifique o módulo",
+      "Leia o termo no contexto",
+      "Confira a orientação do fluxo"
+    ],
+    "image": "./assets/academy/tour-registros-de-ponto.png",
+    "imageAlt": "Espelho demonstrativo com símbolos",
+    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e horários não representam colaboradores reais.",
+    "before": [
+      "O mesmo termo pode ser usado em contextos de cadastro e de apuração; confira o módulo e a legenda da tela."
+    ],
+    "sections": [
+      {
+        "title": "Passo a passo",
+        "steps": [
+          [
+            "Filial",
+            "Unidade do estabelecimento associada à equipe, localização e escopo de acesso. CNPJ/endereço e geofence são específicos da filial quando solicitados."
+          ],
+          [
+            "Jornada e escala",
+            "Cadastro de horários/intervalos por dia ou ciclo de trabalho. A prévia de carga horária ajuda a revisar o preenchimento; não substitui validação do RH e documentos aplicáveis."
+          ],
+          [
+            "DSR",
+            "Descanso semanal remunerado indicado conforme o vínculo e a jornada configurados. Não presuma que o domingo é sempre o dia de descanso."
+          ],
+          [
+            "Marcação original e lançamento manual",
+            "Marca original vem do fluxo de registro; marca manual é incluída por processo autorizado e aparece com *. Marcação original não pode ser editada/excluída; inclusão manual elegível tem justificativa e auditoria."
+          ],
+          [
+            "#, *, pendente e validado",
+            "# indica origem offline; * marca lançamento manual ou ajuste aprovado. Pendente/validado descreve estado, não origem. Leia os dois elementos em conjunto."
+          ],
+          [
+            "Ajuste, retificação e abono",
+            "Ajuste pede análise de uma marca proposta; retificação aponta uma marca original específica para possível exclusão do cálculo se aprovada; abono registra tratamento de dia ou horas no fluxo aplicável."
+          ],
+          [
+            "Saldo, total trabalhado e horas pagas",
+            "Total trabalhado resume marcas consideradas; saldo compara dados apurados com a jornada/regra aplicável; horas pagas são abatimento separado no banco de horas e não reescrevem batidas."
+          ],
+          [
+            "CSV e PDF",
+            "CSV é arquivo tabular para análise/planilha; PDF é documento para leitura/impressão. Ambos refletem filtros, permissões e status disponíveis na consulta."
+          ],
+          [
+            "Plus Code e geofence",
+            "Plus Code representa uma localização; geofence é o raio de distância exibido para o local de marcação. Use endereço/local oficial e confira o ponto convertido."
+          ],
+          [
+            "REP-A e identificador da empresa",
+            "REP-A é citado em fluxos/documentos de registro eletrônico alternativo; identificadores oficiais devem ser reais e confirmados. Não inicialize ou altere configuração legal sem autorização."
+          ]
+        ]
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Pendente quer dizer recusado?",
+        "answer": "Não. Pendente indica que ainda há etapa de conferência; consulte o fluxo e aguarde decisão."
+      },
+      {
+        "question": "O * quer dizer que a marca é inválida?",
+        "answer": "Não por si só. Ele indica lançamento manual/ajuste aprovado. Confira motivo, responsável, validação e auditoria."
+      },
+      {
+        "question": "O saldo é igual ao total trabalhado?",
+        "answer": "Não necessariamente. Total trabalhado, jornada prevista, abono, saldo e horas pagas são campos diferentes; leia o cabeçalho e o período."
+      },
+      {
+        "question": "REP-A é o mesmo que ponto pelo celular?",
+        "answer": "Não use os termos como sinônimos. A configuração e os documentos seguem fluxos próprios do sistema; confira os dados da filial e a orientação oficial."
+      },
+      {
+        "question": "DSR é sempre no domingo?",
+        "answer": "Não. O descanso depende da jornada/escala e do contexto do vínculo."
+      }
+    ],
+    "keywords": [
+      "glossário",
+      "termos",
+      "siglas",
+      "DSR",
+      "REP-A",
+      "Plus Code",
+      "geofence",
+      "pendente",
+      "validado",
+      "#",
+      "*",
+      "saldo"
+    ],
+    "related": [
+      "primeiro-acesso",
+      "jornadas",
+      "espelho-e-simbolos",
+      "decidir-offline",
+      "marcas-manuais"
+    ],
+    "checks": [
+      "Leia status e origem separadamente.",
+      "Confira o módulo, a pessoa, o período e o fuso.",
+      "Consulte o guia detalhado do assunto antes de agir."
+    ],
+    "note": "Este glossário explica termos da interface; não é interpretação jurídica nem validação do enquadramento de um vínculo.",
+    "ifDifferent": [
+      {
+        "symptom": "O mesmo nome de campo aparece em duas telas",
+        "check": "Confirme se está em cadastro, espelho, solicitação ou relatório; os efeitos são diferentes.",
+        "next": "Abra o guia do módulo relacionado e confira o contexto antes de agir."
+      }
+    ],
+    "terms": [
+      {
+        "term": "Filial",
+        "meaning": "Unidade/estabelecimento que pode ter endereço, CNPJ, equipe e geofence próprios."
+      },
+      {
+        "term": "Jornada",
+        "meaning": "Horários, intervalos e descansos previstos para cada dia."
+      },
+      {
+        "term": "DSR",
+        "meaning": "Descanso semanal remunerado conforme jornada e vínculo; o dia não deve ser presumido."
+      },
+      {
+        "term": "Marcação original",
+        "meaning": "Registro recebido pelo fluxo do relógio; não é editável nem excluível como lançamento manual."
+      },
+      {
+        "term": "Lançamento manual",
+        "meaning": "Registro incluído pela gestão com justificativa e trilha de auditoria; pode ter controles próprios se elegível."
+      },
+      {
+        "term": "# e *",
+        "meaning": "# identifica origem offline; * sinaliza marca manual ou ajuste aprovado. O status de validação é consultado separadamente."
+      },
+      {
+        "term": "Ajuste",
+        "meaning": "Pedido que solicita análise de uma correção."
+      },
+      {
+        "term": "Retificação",
+        "meaning": "Pedido que identifica uma marca original para possível exclusão dos cálculos se aprovado."
+      },
+      {
+        "term": "Abono",
+        "meaning": "Tratamento de dia ou horas no fluxo aplicável; confirme se é pedido sujeito a análise ou lançamento direto."
+      },
+      {
+        "term": "Saldo diário",
+        "meaning": "Resultado apurado quando jornada e marcas permitem calcular; ausência não é debitada automaticamente."
+      },
+      {
+        "term": "Banco de horas",
+        "meaning": "Visão de acumulado, horas pagas e saldo, usando marcas validadas e jornada vinculada."
+      },
+      {
+        "term": "CSV / PDF",
+        "meaning": "CSV é tabular para análise em planilha; PDF é paginado para leitura/impressão. Ambos respeitam os filtros da consulta."
+      },
+      {
+        "term": "Plus Code / geofence",
+        "meaning": "Código de localização da filial e raio permitido ao redor do ponto configurado."
+      },
+      {
+        "term": "REP-A",
+        "meaning": "Regime de registro eletrônico alternativo, citado em fluxos próprios. Dados e configuração exigem confirmação documental."
+      }
+    ]
   }
 ];
