@@ -31,8 +31,8 @@ function loginVisualEffects(screen){
   const detail=Math.sin(nx*10.7+clock*.72-depth*4.3)*.32+Math.cos(nx*15.8-clock*.84+depth*5.1)*.13;
   const ripple=(Math.sin(phase)+detail)*amp;
   const parallax=height*.018*pointerY*(.25+depth)+height*.006*Math.sin(pointerX*2.2+depth*4.5);
-  const base=height*(.76+depth*.18);
-  const crest=Math.pow(Math.max(0,Math.sin(Math.PI*nx)),1.22)*height*.19*(.18+.82*depth);
+  const base=height*(.74+depth*.18);
+  const crest=Math.pow(Math.max(0,Math.sin(Math.PI*nx)),1.22)*height*.23*(.18+.82*depth);
   return base-crest+ripple+parallax;
  };
  const drawGlowStroke=(depth,clock,alpha,lineWidth,color)=>{
