@@ -202,3 +202,10 @@ test('company timesheet displays recorded vacation dates as Férias and keeps th
  assert.match(operational,/function reportSchedule\(d\)\{if\(d\.schedule\?\.leave===true\)return 'Férias'/);
  assert.match(operational,/d\.status==='leave'\|\|d\.schedule\?\.leave===true\)out\.push\('Férias'\)/);
 });
+
+test('company onboarding proceeds to the authenticated API after prior superadministrator authorization',()=>{
+ assert.match(script,/O superadministrador já autorizou esta criação/);
+ assert.match(script,/button\.disabled=true;button\.textContent='Criando…'/);
+ assert.match(script,/apiWrite\('\/api\/master\/companies','POST',payload\)/);
+ assert.doesNotMatch(script,/confirm\(`Criar \${d\.trade_name}/);
+});
