@@ -19,7 +19,7 @@ body:has(.login-screen){overflow-x:hidden;background:var(--login-deep)}
 .login-screen .login-benefit:first-child{padding-left:0}
 .login-screen .login-benefit+ .login-benefit{border-left:1px solid rgba(246,245,246,.2)}
 .login-screen .login-benefit:nth-child(2){animation-delay:.14s}.login-screen .login-benefit:nth-child(3){animation-delay:.22s}
-.login-screen .login-benefit svg{width:34px;height:34px;color:#bd3b70;transition:color .2s ease,filter .2s ease,transform .2s ease}
+.login-screen .login-benefit svg{width:34px;height:34px;color:#bd3b70;transition:color .2s ease,filter .2s ease,transform .2s ease}.login-screen .login-benefit .fingerprint-icon{display:block;width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 0 3px rgba(226,38,116,.22));transition:filter .2s ease,transform .2s ease}.login-screen .login-benefit:hover .fingerprint-icon{filter:drop-shadow(0 0 7px rgba(226,38,116,.42));transform:translateY(-2px)}
 .login-screen .login-benefit:hover svg{color:#e078a1;filter:drop-shadow(0 0 8px rgba(199,123,156,.45));transform:translateY(-2px)}
 .login-screen .login-access-area{display:grid;place-items:center;min-width:0;animation:login-rise .72s .16s both}
 .login-screen .login-auth-card{position:relative;width:min(100%,560px);max-width:560px;margin:0;padding:clamp(30px,3.6vw,54px);overflow:hidden;border:1px solid rgba(199,123,156,.28);border-radius:28px;background:linear-gradient(145deg,rgba(20,15,19,.93),rgba(11,8,11,.87) 65%,rgba(35,10,22,.82));box-shadow:0 30px 90px rgba(0,0,0,.52),0 0 45px rgba(123,6,54,.12),inset 0 1px 0 rgba(255,255,255,.07);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);color:var(--login-white)}
@@ -106,3 +106,59 @@ body:has(.login-screen){overflow-x:hidden;background:var(--login-deep)}
 @media(prefers-reduced-motion:reduce){.login.login-screen,.login-screen::before,.login-screen .login-photo,.login-screen .login-auth-card,.login-screen .login-input-wrap,.login-screen .login-support-close,.login-screen #login-support-form input,.login-screen #login-support-form select,.login-screen #login-support-form textarea,.login-screen .login-support-submit,.login-screen .login-submit,.login-screen .login-benefit{transition:none!important}.login-screen .login-wave{mix-blend-mode:normal}}
 @media(max-width:900px){.login-screen::before{background-position:center,calc(50% + var(--parallax-x)) calc(50% + var(--parallax-y))}.login-screen .login-wave{mix-blend-mode:screen}.login-screen .login-story,.login-screen .login-access-area{z-index:1}}
 @media(prefers-reduced-motion:reduce){.login-screen .login-wave{opacity:.7;mix-blend-mode:normal}}
+
+/* Reference match: compact centered login card, higher left content, visible office depth. */
+@media(min-width:901px){
+ .login.login-screen{grid-template-columns:minmax(0,.94fr) minmax(0,1.06fr);gap:clamp(24px,3vw,42px);padding-inline:clamp(28px,6.5vw,100px);background-image:radial-gradient(ellipse at 10% 13%,rgba(136,8,55,.46),transparent 37%),radial-gradient(ellipse at 32% 38%,rgba(95,4,38,.28),transparent 43%),radial-gradient(ellipse at var(--ambient-x) var(--ambient-y),rgba(123,6,54,.28),transparent 42%),linear-gradient(130deg,#080608 0%,#10080c 52%,#090709 100%)}
+ .login-screen::before{inset:0;background-image:linear-gradient(96deg,#3a0017 0%,rgba(50,0,20,.97) 19%,rgba(31,2,15,.92) 37%,rgba(16,5,12,.76) 52%,rgba(8,6,8,.27) 72%,rgba(8,6,8,.08) 100%),linear-gradient(0deg,rgba(8,6,8,.28),rgba(8,6,8,.02)),url("./login-office-bg.webp");background-size:cover;background-position:center right;opacity:.98;filter:brightness(1.2) saturate(1.12)}
+ .login-screen::after{background:radial-gradient(ellipse at 4% 5%,rgba(123,6,54,.26),transparent 38%),radial-gradient(ellipse at 23% 45%,rgba(85,4,33,.3),transparent 40%),linear-gradient(90deg,rgba(8,6,8,.05),transparent 46%,rgba(8,6,8,.08))}
+ .login-screen .login-story{min-height:0;padding-block:0;position:relative;top:clamp(-34px,-4vh,-18px);transform:none}
+ .login-screen .login-logo{width:min(100%,420px);margin-bottom:clamp(22px,3.4vw,44px);filter:drop-shadow(0 0 18px rgba(199,123,156,.13))}
+ .login-screen .login-copy h1{font-size:clamp(30px,3.05vw,43px);line-height:1.05;letter-spacing:-.04em}
+ .login-screen .login-copy p{margin-top:clamp(12px,1.4vw,19px);font-size:clamp(19px,2vw,26px);line-height:1.25}
+ .login-screen .login-benefits{margin-top:clamp(34px,3.8vw,44px);max-width:680px}
+ .login-screen .login-benefit{font-size:clamp(12px,1.15vw,16px);gap:clamp(9px,1vw,13px);padding-inline:clamp(10px,1.4vw,20px)}
+ .login-screen .login-benefit svg{width:clamp(36px,3.4vw,44px);height:clamp(36px,3.4vw,44px)}
+ #app .login-screen #login-form{width:min(42vw,560px)!important;max-width:560px!important;padding:clamp(32px,3.05vw,44px) clamp(34px,3.2vw,46px);border-radius:22px;transform:translateY(-5px)}
+ .login-screen .login-heading{gap:clamp(13px,1.4vw,19px);margin-bottom:clamp(15px,1.55vw,22px)}
+ .login-screen .login-heading-rule{height:clamp(38px,3.4vw,47px)}
+ .login-screen .login-heading h2{font-size:clamp(25px,2.05vw,29px);letter-spacing:-.03em}
+ .login-screen .login-heading p{margin-top:4px;font-size:clamp(14px,1.15vw,17px)}
+ .login-screen .login-field{gap:6px;margin-bottom:clamp(10px,1vw,14px);font-size:clamp(12px,.98vw,14px)}
+ .login-screen .login-input-wrap{height:clamp(39px,3.5vw,48px);border-radius:10px}
+ .login-screen .login-field:first-of-type .login-input-wrap{border-color:rgba(199,123,156,.53);box-shadow:0 0 13px rgba(123,6,54,.14)}
+ .login-screen .login-input-wrap>svg{width:18px;height:18px;margin-left:12px}
+ .login-screen .login-options{margin:0 0 2px;gap:4px}
+ .login-screen .remember-login{font-size:clamp(9px,.82vw,11px);gap:4px;letter-spacing:-.035em;white-space:nowrap}
+ .login-screen .text-button{min-height:31px;font-size:clamp(11px,.9vw,13px);text-decoration:underline;text-underline-offset:2px}
+ .login-screen .login-submit{min-height:clamp(48px,4vw,58px);margin-top:2px;border-radius:11px;font-size:clamp(14px,1.1vw,16px)}
+ .login-screen .login-support{justify-content:center;gap:clamp(9px,1vw,14px);margin-top:clamp(13px,1.25vw,17px);padding-top:clamp(12px,1.2vw,16px)}
+ .login-screen .support-icon{display:block;flex:none;width:23px;height:23px;color:#fff}
+ .login-screen .login-support p{font-size:clamp(11px,.88vw,13px)}
+ .login-screen .login-support p .login-support-open{text-decoration:underline;text-underline-offset:2px}
+ .login-screen .field-hint,.login-screen .remember-hint{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+ .login-screen .login-auth-card::after{content:"";position:absolute;inset:auto 7% 0;height:1px;background:linear-gradient(90deg,transparent,rgba(235,68,130,.9),transparent);box-shadow:0 0 13px rgba(235,68,130,.55);pointer-events:none}
+}
+@media(max-height:720px) and (min-width:901px){
+ .login.login-screen{gap:clamp(24px,3vw,32px);padding-block:18px}
+ .login-screen .login-story{top:clamp(-34px,-4vh,-18px)}
+ .login-screen .login-logo{margin-bottom:clamp(18px,2.5vw,27px)}
+ .login-screen .login-copy h1{font-size:clamp(30px,3vw,36px)}
+ .login-screen .login-copy p{margin-top:10px;font-size:clamp(17px,1.85vw,21px)}
+ .login-screen .login-benefits{margin-top:clamp(28px,3.6vw,38px)}
+ .login-screen .login-benefit{font-size:clamp(11px,1.03vw,13px)}
+ #app .login-screen #login-form{padding:32px clamp(30px,4.3vw,44px) 39px;border-radius:19px}
+ .login-screen .login-heading{margin-bottom:12px}
+ .login-screen .login-heading h2{font-size:clamp(23px,2.25vw,26px)}
+ .login-screen .login-heading p{font-size:clamp(13px,1.25vw,15px)}
+ .login-screen .login-field{gap:4px;margin-bottom:8px;font-size:12px}
+ .login-screen .login-input-wrap{height:35px;border-radius:9px}
+ .login-screen .login-input-wrap>svg{width:16px;height:16px;margin-left:10px}
+ .login-screen .login-input-wrap input{font-size:12px}
+ .login-screen .login-options{margin-bottom:0}
+ .login-screen .remember-login,.login-screen .text-button{font-size:11px}
+ .login-screen .login-submit{min-height:47px}
+ .login-screen .login-support{margin-top:11px;padding-top:10px}
+}
+@media(prefers-reduced-motion:reduce){.login-screen .login-story{transform:none!important}}
+@media(min-width:901px){.login-screen .login-logo{width:min(100%,33vw,420px);transform:translateX(5px)}}
