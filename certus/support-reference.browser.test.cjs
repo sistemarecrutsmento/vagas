@@ -36,8 +36,8 @@ assert.ok(await desktop.page.locator('[data-help-article^="academy:"]').count()>
  await desktop.page.screenshot({path:path.join(process.cwd(),'artifacts','certus-academy-v1-desktop.png'),fullPage:true});
  assert.equal(await desktop.page.locator('.academy-lesson-card').count(),10,'Academy lists the ten V1 step-by-step tutorials');
  assert.ok(await desktop.page.locator('.academy-track').count()>=7,'Academy provides topic filters');
- assert.ok(await desktop.page.getByText('Videoaulas e capturas',{exact:true}).count()===1,'Academy clearly reserves a section for future video lessons and reviewed captures');
- assert.ok(await desktop.page.getByText('Em preparação',{exact:true}).count()===1,'the page does not pretend unprovided videos are already published');
+ assert.ok(await desktop.page.locator('.academy-video-panel .academy-eyebrow').innerText().then(x=>/videoaulas e capturas/i.test(x)),'Academy clearly reserves a section for future video lessons and reviewed captures');
+ assert.ok(await desktop.page.locator('.academy-video-status').innerText().then(x=>/em preparação/i.test(x)),'the page does not pretend unprovided videos are already published');
  await desktop.page.locator('#academy-search').fill('carga líquida');
  assert.equal(await desktop.page.locator('.academy-lesson-card').count(),1,'search finds matching tutorials');
  await desktop.page.locator('.academy-lesson-card').click();
