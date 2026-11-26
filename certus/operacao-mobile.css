@@ -28,3 +28,10 @@ html,body{max-width:100%;overflow-x:hidden}#app,.layout,.main,#content{min-width
 .main .table-wrap th{white-space:nowrap;overflow-wrap:normal;word-break:normal}
 .main .table-wrap td,.main .records-calendar td{overflow-wrap:break-word;word-break:normal}
 .main .table-wrap table{table-layout:auto}
+
+/* Audit draft: replace the high-contrast native white menu scrollbar with a restrained, accessible wine-plum track/thumb. */
+.side{scrollbar-width:thin;scrollbar-color:#8d3a57 #50001f}
+.side::-webkit-scrollbar{width:8px;height:8px}
+.side::-webkit-scrollbar-track{background:#50001f}
+.side::-webkit-scrollbar-thumb{background:#8d3a57;border:2px solid #50001f;border-radius:999px}
+.side::-webkit-scrollbar-thumb:hover{background:#b1607a}
