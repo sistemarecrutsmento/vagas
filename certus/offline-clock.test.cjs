@@ -80,7 +80,7 @@ test('service worker registers on HTTPS and caches only the pinned public face a
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=offline-mark-hash-auto-confirm-v1-20261125/);
+  assert.match(html, /operacao\.js\?v=academy-v1-20261126/);
 });
 
 test('offline queue retries when connectivity returns and when the active app resumes', () => {
