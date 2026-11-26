@@ -229,3 +229,8 @@ test('company onboarding reports preparation errors instead of leaving an indefi
  assert.ok(handler.indexOf('try{')<handler.indexOf('const employees='));
  assert.match(handler,/catch\(err\)\{result\.className='notice';result\.textContent=`O cadastro não foi confirmado/);
 });
+
+test('Master onboarding reads collaborator fields from fieldsets without constructing FormData from a fieldset',()=>{
+ assert.match(script,/querySelectorAll\('input,select'\)\]\.filter\(el=>el\.name\)\.map\(el=>\[el\.name,el\.value\]\)/);
+ assert.doesNotMatch(script,/new FormData\(row\)/);
+});
