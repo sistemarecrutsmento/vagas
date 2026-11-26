@@ -77,12 +77,12 @@ test('employee UI does not expose offline preparation, local-queue or review imp
 
 test('service worker registers on HTTPS and caches only the pinned public face assets, never API responses', () => {
   assert.match(pwa, /navigator\.serviceWorker\.register\('\.\/service-worker\.js'\)/);
-  assert.match(sw, /const VERSION='certus-static-v75-login-motion-20261126'/);
+  assert.match(sw, /const VERSION='certus-static-v76-login-reference-20261126'/);
   assert.match(sw, /certus-face-assets-v1\.7\.15/);
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=certus-login-motion-20261126-2/);
+  assert.match(html, /operacao\.js\?v=certus-login-reference-20261126-3/);
 });
 
 test('offline queue retries when connectivity returns and when the active app resumes', () => {
@@ -123,4 +123,7 @@ test('login keeps real motion, touch parallax, hidden support mailbox, and reduc
   assert.match(loginCss,/support-modal-enter/);
   assert.match(loginCss,/login-field-sheen/);
   assert.match(supportCss,/panel-glint-x/);
+  assert.match(ui,/certus-logo-login-dark\.png/);
+  assert.match(ui,/support-icon/);
+  assert.doesNotMatch(ui,/support-rule/);
 });
