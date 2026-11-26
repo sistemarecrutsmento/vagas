@@ -192,3 +192,7 @@ test('Master page script parses with new company registration form and handlers'
  const vm=require('node:vm');
  assert.doesNotThrow(()=>new vm.Script(script),'Master page script must parse after adding company registration UI');
 });
+test('Master company onboarding lets the operator identify the physical branch separately',()=>{
+ assert.match(script,/name="branch_name" maxlength="120"/);
+ assert.match(script,/branch_name:d\.branch_name\.trim\(\)/);
+});
