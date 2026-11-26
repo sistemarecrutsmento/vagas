@@ -118,7 +118,7 @@ body:has(.login-screen){overflow-x:hidden;background:var(--login-deep)}
  .login-screen .login-copy p{margin-top:clamp(12px,1.4vw,19px);font-size:clamp(19px,2vw,26px);line-height:1.25}
  .login-screen .login-benefits{margin-top:clamp(34px,3.8vw,44px);max-width:680px}
  .login-screen .login-benefit{font-size:clamp(12px,1.15vw,16px);gap:clamp(9px,1vw,13px);padding-inline:clamp(10px,1.4vw,20px)}
- .login-screen .login-benefit svg{width:clamp(32px,3.2vw,43px);height:clamp(32px,3.2vw,43px)}
+ .login-screen .login-benefit svg{width:clamp(36px,3.4vw,44px);height:clamp(36px,3.4vw,44px)}
  #app .login-screen #login-form{width:min(42vw,560px)!important;max-width:560px!important;padding:clamp(32px,3.05vw,44px) clamp(34px,3.2vw,46px);border-radius:22px;transform:translateY(-5px)}
  .login-screen .login-heading{gap:clamp(13px,1.4vw,19px);margin-bottom:clamp(15px,1.55vw,22px)}
  .login-screen .login-heading-rule{height:clamp(38px,3.4vw,47px)}
