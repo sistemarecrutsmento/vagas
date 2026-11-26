@@ -5,6 +5,11 @@ on:
     paths:
       - 'certus/operacao.js'
       - 'certus/operacao.css'
+      - 'certus/academy.css'
+      - 'certus/academy-content.js'
+      - 'certus/service-worker.js'
+      - 'certus/assets/academy/**'
+      - 'certus/index.html'
       - 'certus/master.html'
       - 'certus/support-workflow.test.js'
       - 'certus/support-reference.browser.test.cjs'
@@ -13,6 +18,11 @@ on:
     paths:
       - 'certus/operacao.js'
       - 'certus/operacao.css'
+      - 'certus/academy.css'
+      - 'certus/academy-content.js'
+      - 'certus/service-worker.js'
+      - 'certus/assets/academy/**'
+      - 'certus/index.html'
       - 'certus/master.html'
       - 'certus/support-workflow.test.js'
       - 'certus/support-reference.browser.test.cjs'
