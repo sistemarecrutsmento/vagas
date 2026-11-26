@@ -123,7 +123,7 @@ test('login keeps real motion, touch parallax, hidden support mailbox, and reduc
   assert.match(loginCss,/support-modal-enter/);
   assert.match(loginCss,/login-field-sheen/);
   assert.match(supportCss,/panel-glint-x/);
-  assert.match(ui,/certus-logo-login-dark\.png/);
+  assert.match(ui,/certus-logo-white\.png/);
   assert.match(ui,/support-icon/);
   assert.doesNotMatch(ui,/support-rule/);
 });
