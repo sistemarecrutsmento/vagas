@@ -234,3 +234,23 @@ test('Master onboarding reads collaborator fields from fieldsets without constru
  assert.match(script,/querySelectorAll\('input,select'\)\]\.filter\(el=>el\.name\)\.map\(el=>\[el\.name,el\.value\]\)/);
  assert.doesNotMatch(script,/new FormData\(row\)/);
 });
+
+test('Master tables use accessible horizontal scrolling, stable columns, and Portuguese display formatting',()=>{
+ assert.ok(script.includes("function fmt(v,key='')"));
+ assert.match(script,/must_change_password\?\(v\?'Pendente':'Não pendente'\)/);
+ assert.match(script,/labels=\{active:'Ativo'.*in_progress:'Em andamento'/);
+ assert.match(script,/function tableCellClass\(key\)/);
+ assert.ok(script.includes('role="region" tabindex="0" aria-label="Tabela rolável:'));
+ assert.ok(script.includes("function cell(v,key='')"));
+ assert.match(script,/table-json/);
+ assert.doesNotMatch(script,/Dados retornados pela API autenticada/);
+ assert.ok(html.includes('.demo-table th{white-space:nowrap;word-break:normal;overflow-wrap:normal'));
+ assert.ok(html.includes('.demo-table{width:max-content;min-width:100%;table-layout:auto}'));
+});
+
+test('Master forms share responsive controls without changing transactional handlers',()=>{
+ assert.ok(html.includes('.demo-card form:not(.master-task-form),.demo-dialog form{display:grid'));
+ assert.ok(html.includes('min-width:0;max-width:100%;min-height:42px'));
+ assert.ok(html.includes('form input[type=checkbox]'));
+ assert.match(script,/apiWrite\(/);
+});
