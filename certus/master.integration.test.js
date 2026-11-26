@@ -179,7 +179,8 @@ test('Master company registration form creates a new organization with trade/leg
  assert.match(script,/name="leave_start_date"/);
  assert.match(script,/name="leave_end_date"/);
  assert.match(script,/apiWrite\('\/api\/master\/companies','POST',payload\)/);
- assert.match(script,/temporary_password=Array\.from\(bytes/);
+ assert.match(script,/const temporary_password=saved\.temporary_password/);
+ assert.doesNotMatch(script,/crypto\.getRandomValues\(bytes\)/);
  assert.match(script,/companyRegistrationCard\(\)\+statCards/);
 });
 test('company creation UI is explicit about default trial, no invoice and no employee password/email',()=>{
@@ -208,4 +209,14 @@ test('company onboarding proceeds to the authenticated API after prior superadmi
  assert.match(script,/button\.disabled=true;button\.textContent='Criando…'/);
  assert.match(script,/apiWrite\('\/api\/master\/companies','POST',payload\)/);
  assert.doesNotMatch(script,/confirm\(`Criar \${d\.trade_name}/);
+});
+
+test('company onboarding takes the one-time administrator password from the server response',()=>{
+ assert.doesNotMatch(script,/crypto\.getRandomValues\(bytes\)/);
+ assert.match(script,/const temporary_password=saved\.temporary_password/);
+});
+
+test('Master onboarding uses server-generated one-time administrator password',()=>{
+ assert.doesNotMatch(script,/crypto\.getRandomValues\(bytes\)/);
+ assert.match(script,/const temporary_password=saved\.temporary_password/);
 });
