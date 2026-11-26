@@ -165,3 +165,40 @@ test('Master page script parses with the manual payment form template',()=>{
  const vm=require('node:vm');
  assert.doesNotThrow(()=>new vm.Script(script),'Master page script must parse before publishing');
 });
+
+test('Master company registration form creates a new organization with trade/legal names and initial setup',()=>{
+ assert.match(script,/function companyRegistrationCard\(\)/);
+ assert.match(script,/master-company-create-form/);
+ assert.match(script,/name="trade_name"/);
+ assert.match(script,/name="legal_name"/);
+ assert.match(script,/name="cnpj"/);
+ assert.match(script,/name="admin_name"/);
+ assert.match(script,/name="representative_name"/);
+ assert.match(script,/master-add-initial-employee/);
+ assert.match(script,/schedule_name_\$\{g\}/);
+ assert.match(script,/name="leave_start_date"/);
+ assert.match(script,/name="leave_end_date"/);
+ assert.match(script,/apiWrite\('\/api\/master\/companies','POST',payload\)/);
+ assert.match(script,/temporary_password=Array\.from\(bytes/);
+ assert.match(script,/companyRegistrationCard\(\)\+statCards/);
+});
+test('company creation UI is explicit about default trial, no invoice and no employee password/email',()=>{
+ assert.match(script,/teste padrão de 15 dias; não cria fatura nem plano pago/);
+ assert.match(script,/Colaboradores cadastrados aqui não recebem acesso individual/);
+ assert.match(script,/nenhum e-mail será enviado/);
+ assert.match(script,/must_change_password/);
+});
+test('Master page script parses with new company registration form and handlers',()=>{
+ const vm=require('node:vm');
+ assert.doesNotThrow(()=>new vm.Script(script),'Master page script must parse after adding company registration UI');
+});
+test('Master company onboarding lets the operator identify the physical branch separately',()=>{
+ assert.match(script,/name="branch_name" maxlength="120"/);
+ assert.match(script,/branch_name:d\.branch_name\.trim\(\)/);
+});
+
+test('company timesheet displays recorded vacation dates as Férias and keeps them out of DSR labels',()=>{
+ const operational=fs.readFileSync('certus/operacao.js','utf8');
+ assert.match(operational,/function reportSchedule\(d\)\{if\(d\.schedule\?\.leave===true\)return 'Férias'/);
+ assert.match(operational,/d\.status==='leave'\|\|d\.schedule\?\.leave===true\)out\.push\('Férias'\)/);
+});
