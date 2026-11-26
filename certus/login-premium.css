@@ -19,7 +19,7 @@ body:has(.login-screen){overflow-x:hidden;background:var(--login-deep)}
 .login-screen .login-benefit:first-child{padding-left:0}
 .login-screen .login-benefit+ .login-benefit{border-left:1px solid rgba(246,245,246,.2)}
 .login-screen .login-benefit:nth-child(2){animation-delay:.14s}.login-screen .login-benefit:nth-child(3){animation-delay:.22s}
-.login-screen .login-benefit svg{width:34px;height:34px;color:#bd3b70;transition:color .2s ease,filter .2s ease,transform .2s ease}
+.login-screen .login-benefit svg{width:34px;height:34px;color:#bd3b70;transition:color .2s ease,filter .2s ease,transform .2s ease}.login-screen .login-benefit .fingerprint-icon path{stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;fill:none}
 .login-screen .login-benefit:hover svg{color:#e078a1;filter:drop-shadow(0 0 8px rgba(199,123,156,.45));transform:translateY(-2px)}
 .login-screen .login-access-area{display:grid;place-items:center;min-width:0;animation:login-rise .72s .16s both}
 .login-screen .login-auth-card{position:relative;width:min(100%,560px);max-width:560px;margin:0;padding:clamp(30px,3.6vw,54px);overflow:hidden;border:1px solid rgba(199,123,156,.28);border-radius:28px;background:linear-gradient(145deg,rgba(20,15,19,.93),rgba(11,8,11,.87) 65%,rgba(35,10,22,.82));box-shadow:0 30px 90px rgba(0,0,0,.52),0 0 45px rgba(123,6,54,.12),inset 0 1px 0 rgba(255,255,255,.07);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);color:var(--login-white)}
