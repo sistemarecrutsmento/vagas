@@ -64,7 +64,7 @@ assert.ok(await desktop.page.locator('[data-help-article^="academy:"]').count()>
  await desktop.page.locator('#academy-back').click();
  assert.equal(await desktop.page.locator('#academy-library').isVisible(),true,'reader can return to the filtered library');
  assert.ok(await desktop.page.locator('.academy-lesson-card').count()===1,'return preserves the search filter');
- await desktop.page.locator('#academy-search').fill('data âncora');
+ await desktop.page.locator('#academy-search').fill('desloca o ciclo inteiro');
  assert.equal(await desktop.page.locator('.academy-lesson-card').count(),1,'search indexes detailed FAQ and guide text');
  assert.match(await desktop.page.locator('.academy-lesson-card').innerText(),/12×36/i,'FAQ search finds the relevant article');
  await desktop.page.locator('#academy-search').fill('');
