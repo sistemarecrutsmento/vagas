@@ -14,6 +14,10 @@ on:
       - 'certus/master.html'
       - 'certus/support-workflow.test.js'
       - 'certus/support-reference.browser.test.cjs'
+      - 'certus/login-motion-e2e.browser.test.cjs'
+      - 'certus/login-premium.css'
+      - 'certus/login-support.css'
+      - 'certus/login-office-bg.webp'
       - '.github/workflows/support-workflow-tests.yml'
   pull_request:
     paths:
@@ -28,6 +32,10 @@ on:
       - 'certus/master.html'
       - 'certus/support-workflow.test.js'
       - 'certus/support-reference.browser.test.cjs'
+      - 'certus/login-motion-e2e.browser.test.cjs'
+      - 'certus/login-premium.css'
+      - 'certus/login-support.css'
+      - 'certus/login-office-bg.webp'
       - '.github/workflows/support-workflow-tests.yml'
 jobs:
   support-ui:
@@ -40,7 +48,7 @@ jobs:
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install --with-deps chromium
       - run: mkdir -p artifacts
-      - run: node --test certus/support-workflow.test.js certus/support-reference.browser.test.cjs
+      - run: node --test certus/support-workflow.test.js certus/support-reference.browser.test.cjs certus/login-motion-e2e.browser.test.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

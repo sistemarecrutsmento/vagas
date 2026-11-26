@@ -28,3 +28,18 @@
 .login-screen .login-support-submit[aria-busy=true]{cursor:wait;opacity:.84}
 @media(max-width:520px){.login-screen .login-support-dialog{width:calc(100vw - 22px);max-width:calc(100vw - 22px);max-height:calc(100dvh - max(12px,env(safe-area-inset-top)) - max(12px,env(safe-area-inset-bottom)));border-radius:18px}.login-screen .login-support-panel{max-height:calc(100dvh - max(12px,env(safe-area-inset-top)) - max(12px,env(safe-area-inset-bottom)));padding:23px 18px}.login-screen #login-support-form{gap:11px}.login-screen #login-support-form textarea{min-height:90px}}
 @media(prefers-reduced-motion:reduce){.login-screen .login-support-open,.login-screen .login-support-close,.login-screen #login-support-form input,.login-screen #login-support-form select,.login-screen #login-support-form textarea{transition:none!important}}
+
+/* Responsive live sheen in the dialog follows mouse and touch pointer coordinates. */
+.login-screen .login-support-intro{max-width:45ch;margin:0 42px 22px 0;color:#ddd3d9;font-size:14px;line-height:1.6}
+.login-screen .login-support-intro b{color:#f2c5d7}
+.login-screen .login-support-panel{background-position:var(--panel-glint-x,50%) var(--panel-glint-y,0%),center;background-size:125% 150%,auto}
+.login-screen .login-support-dialog[open]{animation:support-dialog-backdrop .25s ease-out both}
+.login-screen .login-support-dialog[open] .login-support-panel{box-shadow:0 28px 100px rgba(0,0,0,.68),0 0 48px rgba(123,6,54,.2),inset 0 1px 0 rgba(255,255,255,.07)}
+.login-screen .login-support-submit:focus-visible,.login-screen .login-support-close:focus-visible{outline:2px solid #f0a3bf;outline-offset:3px}
+.login-screen #login-support-form label{transition:color .18s ease}
+.login-screen #login-support-form label:focus-within{color:#f2c5d7}
+.login-screen .login-support-feedback.is-success,.login-screen .login-support-feedback.is-error{animation:support-feedback-enter .24s ease-out both}
+@keyframes support-dialog-backdrop{from{backdrop-filter:blur(0)}to{backdrop-filter:blur(8px)}}
+@keyframes support-feedback-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:520px){.login-screen .login-support-panel{background-size:160% 150%,auto}.login-screen .login-support-intro{margin-right:28px;font-size:13px}.login-screen .login-support-dialog[open] .login-support-panel{animation:support-modal-enter .26s cubic-bezier(.2,.75,.25,1) both}}
+@media(prefers-reduced-motion:reduce){.login-screen .login-support-dialog[open],.login-screen .login-support-dialog[open] .login-support-panel,.login-screen .login-support-feedback.is-success,.login-screen .login-support-feedback.is-error{animation:none!important}.login-screen .login-support-panel{background-position:center,center!important}}

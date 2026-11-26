@@ -71,3 +71,38 @@ body:has(.login-screen){overflow-x:hidden;background:var(--login-deep)}
 @media(max-height:720px) and (min-width:901px){.login.login-screen{padding-block:20px}.login-screen .login-story{min-height:0}.login-screen .login-logo{width:min(100%,330px);margin-bottom:30px}.login-screen .login-copy h1{font-size:clamp(34px,3.4vw,44px)}.login-screen .login-copy p{margin-top:12px;font-size:20px}.login-screen .login-benefits{margin-top:35px}.login-screen .login-auth-card{padding:28px 36px}.login-screen .login-heading{margin-bottom:17px}.login-screen .login-field{margin-bottom:12px}.login-screen .login-input-wrap{height:50px}.login-screen .remember-hint{margin-bottom:11px}.login-screen .login-submit{min-height:54px}.login-screen .login-support{margin-top:15px;padding-top:13px}}
 @media(orientation:landscape) and (max-width:900px) and (max-height:520px){.login.login-screen{grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);align-items:center;gap:18px;padding:14px 20px}.login-screen .login-story{margin:0;align-self:center}.login-screen .login-logo{width:min(75%,210px);margin:0 auto 12px}.login-screen .login-copy h1{font-size:24px}.login-screen .login-copy p{font-size:14px;margin-top:7px}.login-screen .login-auth-card{padding:17px 20px;border-radius:18px}.login-screen .login-heading{margin-bottom:11px}.login-screen .login-heading h2{font-size:22px}.login-screen .login-heading-rule{height:35px}.login-screen .login-field{gap:5px;margin-bottom:8px}.login-screen .login-input-wrap{height:43px}.login-screen .login-support{margin-top:10px;padding-top:9px}}
 @media(prefers-reduced-motion:reduce){.login-screen *, .login-screen *::before,.login-screen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.login-screen .login-wave{display:none}}
+
+/* Live ambient scene: layered parallax and particle crest remain lightweight on touch. */
+.login.login-screen{--ambient-x:50%;--ambient-y:52%;--parallax-x:0px;--parallax-y:0px;background-image:radial-gradient(ellipse at var(--ambient-x) var(--ambient-y),rgba(123,6,54,.43),transparent 42%),radial-gradient(ellipse at calc(100% - var(--ambient-x)) calc(100% - var(--ambient-y)),rgba(199,123,156,.08),transparent 31%),linear-gradient(130deg,#080608 0%,#100a0e 52%,#080608 100%);transition:background-position .28s ease-out}
+.login-screen::before{background-position:center,center,calc(50% + var(--parallax-x)) calc(50% + var(--parallax-y));transition:background-position .18s ease-out,opacity .25s ease}
+.login-screen .login-photo{background:radial-gradient(ellipse at var(--ambient-x) var(--ambient-y),rgba(191,30,92,.12),transparent 37%),linear-gradient(110deg,transparent 45%,rgba(8,6,8,.07) 100%);transition:background-position .22s ease-out}
+.login-screen .login-wave{z-index:0;height:min(49vh,470px);opacity:.98;mix-blend-mode:screen}
+.login-screen .login-story,.login-screen .login-access-area{z-index:1}
+.login-screen .login-auth-card{background:radial-gradient(ellipse at var(--card-glint-x,50%) var(--card-glint-y,0%),rgba(199,123,156,.12),transparent 43%),linear-gradient(145deg,rgba(20,15,19,.93),rgba(11,8,11,.87) 65%,rgba(35,10,22,.82));transition:transform .28s ease,box-shadow .28s ease,border-color .24s ease,background-position .25s ease}
+.login-screen .login-access-area:hover .login-auth-card{border-color:rgba(199,123,156,.42);box-shadow:0 34px 100px rgba(0,0,0,.55),0 0 56px rgba(123,6,54,.16),inset 0 1px 0 rgba(255,255,255,.08)}
+.login-screen .login-input-wrap::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 15%,rgba(255,255,255,.1) 48%,transparent 76%);background-size:220% 100%;background-position:120% 0;opacity:0;transition:opacity .2s ease}
+.login-screen .login-input-wrap:focus-within::before{opacity:.72;animation:login-field-sheen 1.2s ease-out both}
+.login-screen .login-submit{position:relative;isolation:isolate;overflow:hidden}
+.login-screen .login-submit::after,.login-screen .login-support-submit::after{content:"";position:absolute;z-index:-1;inset:-60% auto -60% -34%;width:24%;transform:translateX(-160%) skewX(-18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.24),transparent);pointer-events:none}
+.login-screen .login-submit:hover::after,.login-screen .login-support-submit:hover::after{animation:login-button-sheen .9s ease-out}
+.login-screen .login-benefit{transition:transform .22s ease,color .22s ease}
+.login-screen .login-benefit:hover{transform:translateY(-3px);color:#fff}
+.login-screen .login-support-dialog[open]{display:grid;place-items:center}
+.login-screen .login-support-panel{background:radial-gradient(ellipse at var(--panel-glint-x,50%) var(--panel-glint-y,0%),rgba(199,123,156,.14),transparent 48%),linear-gradient(145deg,rgba(25,19,22,.99),rgba(13,9,12,.98) 70%,rgba(48,9,27,.98));background-size:auto,auto}
+.login-screen .login-support-dialog[open] .login-support-panel{animation:support-modal-enter .3s cubic-bezier(.2,.75,.25,1) both}
+.login-screen .login-support-dialog[open]::backdrop{animation:support-backdrop-enter .24s ease-out both}
+.login-screen .login-support-close{transition:transform .2s ease,border-color .2s ease,background .2s ease,color .2s ease}
+.login-screen .login-support-close:hover{transform:rotate(90deg);border-color:rgba(199,123,156,.58);background:rgba(123,6,54,.23);color:#fff}
+.login-screen #login-support-form input:not([type=hidden]),.login-screen #login-support-form select,.login-screen #login-support-form textarea{transition:border-color .2s ease,box-shadow .2s ease,background-color .2s ease,transform .2s ease}
+.login-screen #login-support-form input:focus,.login-screen #login-support-form select:focus,.login-screen #login-support-form textarea:focus{transform:translateY(-1px);background:rgba(60,49,57,.91)}
+.login-screen .login-support-submit{position:relative;isolation:isolate;overflow:hidden;transition:transform .2s ease,filter .2s ease,box-shadow .2s ease}
+.login-screen .login-support-submit:hover{transform:translateY(-2px);filter:brightness(1.1);box-shadow:0 12px 28px rgba(123,6,54,.28)}
+.login-screen .login-support-submit:active{transform:translateY(0) scale(.99)}
+@keyframes login-field-sheen{0%{background-position:120% 0}100%{background-position:-120% 0}}
+@keyframes login-button-sheen{0%{transform:translateX(-160%) skewX(-18deg)}100%{transform:translateX(560%) skewX(-18deg)}}
+@keyframes support-modal-enter{from{opacity:0;transform:translateY(14px) scale(.975);filter:blur(3px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes support-backdrop-enter{from{opacity:0}to{opacity:1}}
+@media(max-width:900px){.login-screen .login-wave{height:min(40svh,320px);opacity:.8}.login-screen .login-access-area:hover .login-auth-card{transform:none}}
+@media(prefers-reduced-motion:reduce){.login.login-screen,.login-screen::before,.login-screen .login-photo,.login-screen .login-auth-card,.login-screen .login-input-wrap,.login-screen .login-support-close,.login-screen #login-support-form input,.login-screen #login-support-form select,.login-screen #login-support-form textarea,.login-screen .login-support-submit,.login-screen .login-submit,.login-screen .login-benefit{transition:none!important}.login-screen .login-wave{mix-blend-mode:normal}}
+@media(max-width:900px){.login-screen::before{background-position:center,calc(50% + var(--parallax-x)) calc(50% + var(--parallax-y))}.login-screen .login-wave{mix-blend-mode:screen}.login-screen .login-story,.login-screen .login-access-area{z-index:1}}
+@media(prefers-reduced-motion:reduce){.login-screen .login-wave{opacity:.7;mix-blend-mode:normal}}
