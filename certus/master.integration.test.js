@@ -200,5 +200,5 @@ test('Master company onboarding lets the operator identify the physical branch s
 test('company timesheet displays recorded vacation dates as Férias and keeps them out of DSR labels',()=>{
  const operational=fs.readFileSync('certus/operacao.js','utf8');
  assert.match(operational,/function reportSchedule\(d\)\{if\(d\.schedule\?\.leave===true\)return 'Férias'/);
- assert.match(operational,/d\.status==='leave'\|\|d\.schedule\?\.leave\)out\.push\('Férias'\)/);
+ assert.match(operational,/d\.status==='leave'\|\|d\.schedule\?\.leave===true\)out\.push\('Férias'\)/);
 });
