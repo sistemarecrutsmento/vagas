@@ -7,11 +7,22 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 
 const html=fs.readFileSync(process.env.CERTUS_MASTER_HTML||path.join(__dirname,'master.html'),'utf8');
+const managementUi=fs.readFileSync(path.join(__dirname,'operacao.js'),'utf8');
+const managementMobileCss=fs.readFileSync(path.join(__dirname,'operacao-mobile.css'),'utf8');
 const companies=[{id:'11111111-1111-4111-8111-111111111111',name:'Empresa de exemplo com nome extenso',slug:'empresa-exemplo',status:'active',users:2,employees:4,branches:1,clock_events:12,pending_adjustments:0}];
 const auditItems=[
  {created_at:'2026-11-26T18:31:36.745Z',actor_name:'Fabio Júnior',action:'master.login',entity_type:'user',entity_id:'774e0f31-6213-446c-b5c5-9457cb808331',details:{email:'audit@example.test',note:'Texto de auditoria longo para exercitar a expansão de detalhes sem estourar a largura da tabela. '.repeat(4)}},
  {created_at:'2026-11-25T09:05:00.000Z',actor_name:'Suporte Certus',action:'company.status.updated',entity_type:'company',entity_id:'11111111-1111-4111-8111-111111111111',details:{status:'active'}}
 ];
+
+
+test('management portal avoids word-by-word wrapping, uses readable status/date labels and styles its sidebar scrollbar',()=>{
+ assert.match(managementUi,/Status: \$\{esc\(statusLabel\(x\.status\)\)\}/);
+ assert.match(managementUi,/formatDateTime\(x\.password_changed_at\)/);
+ assert.match(managementMobileCss,/\.side\{scrollbar-width:thin;scrollbar-color:#8d3a57 #50001f\}/);
+ assert.match(managementMobileCss,/\.table-wrap th\{white-space:nowrap;overflow-wrap:normal;word-break:normal\}/);
+ assert.match(managementMobileCss,/\.table-wrap td,.main \.records-calendar td\{overflow-wrap:break-word;word-break:normal\}/);
+});
 
 test('Master pages render without viewport overflow and keep long table data readable on desktop and mobile',async()=>{
  let origin;
