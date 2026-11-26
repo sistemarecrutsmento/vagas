@@ -5,6 +5,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, 'operacao.js'), 'utf8');
+const indexHtml = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+const serviceWorker = fs.readFileSync(path.join(__dirname, 'service-worker.js'), 'utf8');
 
 test('12x36 schedule end time is derived from the 12-hour shift, including overnight shifts', () => {
   const start = source.indexOf('function schedule12x36End(');
@@ -39,4 +41,10 @@ test('12x36 editor accepts a known break duration without inventing fixed break 
   assert.match(source, /Boolean\(payload\.break_start\)!==Boolean\(payload\.break_end\)/);
   assert.doesNotMatch(source, /name="break_start" type="time"[^>]*required/);
   assert.doesNotMatch(source, /name="break_end" type="time"[^>]*required/);
+});
+
+test('published portal and PWA shell use the new 12x36 schedule asset version', () => {
+  assert.match(indexHtml, /operacao\.js\?v=12x36-schedule-20261126/);
+  assert.match(serviceWorker, /certus-static-v82-12x36-schedule-20261126/);
+  assert.match(serviceWorker, /operacao\.js\?v=12x36-schedule-20261126/);
 });
