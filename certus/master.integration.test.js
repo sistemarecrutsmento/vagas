@@ -196,3 +196,9 @@ test('Master company onboarding lets the operator identify the physical branch s
  assert.match(script,/name="branch_name" maxlength="120"/);
  assert.match(script,/branch_name:d\.branch_name\.trim\(\)/);
 });
+
+test('company timesheet displays recorded vacation dates as Férias and keeps them out of DSR labels',()=>{
+ const operational=fs.readFileSync('certus/operacao.js','utf8');
+ assert.match(operational,/function reportSchedule\(d\)\{if\(d\.schedule\?\.leave===true\)return 'Férias'/);
+ assert.match(operational,/d\.status==='leave'\|\|d\.schedule\?\.leave\)out\.push\('Férias'\)/);
+});
