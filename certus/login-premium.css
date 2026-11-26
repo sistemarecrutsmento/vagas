@@ -54,7 +54,7 @@ body:has(.login-screen){overflow-x:hidden;background:var(--login-deep)}
 .login-screen .login-submit:disabled{cursor:wait;opacity:.88}
 .login-screen .login-submit-arrow{width:21px;height:21px;transition:transform .2s ease}.login-screen .login-submit:hover .login-submit-arrow{transform:translateX(4px)}
 .login-screen .login-spinner{width:17px;height:17px;border:2px solid rgba(255,255,255,.42);border-top-color:#fff;border-radius:50%;animation:login-spin .8s linear infinite}
-.login-screen .login-support{display:flex;align-items:center;gap:16px;margin-top:23px;padding-top:19px;border-top:1px solid rgba(246,245,246,.13)}
+.login-screen .login-support{display:flex;align-items:center;gap:16px;margin-top:23px;padding-top:19px;border-top:1px solid rgba(246,245,246,.13)}.login-screen .support-icon{display:block;flex:none;width:23px;height:23px;color:#fff}
 .login-screen .support-rule{width:40px;height:1px;background:rgba(246,245,246,.18)}
 .login-screen .login-support p{margin:0;color:#ccc1c8;font-size:12px;line-height:1.45}
 .login-screen .login-support p span{color:#e283a8;font-weight:600}
