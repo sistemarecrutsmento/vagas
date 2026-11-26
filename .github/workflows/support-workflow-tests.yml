@@ -18,7 +18,6 @@ on:
       - 'certus/login-premium.css'
       - 'certus/login-support.css'
       - 'certus/login-office-bg.webp'
-      - 'certus/certus-logo-login-dark.png'
       - '.github/workflows/support-workflow-tests.yml'
   pull_request:
     paths:
@@ -37,7 +36,6 @@ on:
       - 'certus/login-premium.css'
       - 'certus/login-support.css'
       - 'certus/login-office-bg.webp'
-      - 'certus/certus-logo-login-dark.png'
       - '.github/workflows/support-workflow-tests.yml'
 jobs:
   support-ui:
