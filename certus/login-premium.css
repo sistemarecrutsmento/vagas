@@ -128,8 +128,8 @@ body:has(.login-screen){overflow-x:hidden;background:var(--login-deep)}
  .login-screen .login-input-wrap{height:clamp(39px,3.5vw,48px);border-radius:10px}
  .login-screen .login-field:first-of-type .login-input-wrap{border-color:rgba(199,123,156,.53);box-shadow:0 0 13px rgba(123,6,54,.14)}
  .login-screen .login-input-wrap>svg{width:18px;height:18px;margin-left:12px}
- .login-screen .login-options{margin:0 0 2px;gap:8px}
- .login-screen .remember-login{font-size:clamp(9px,.82vw,11px);gap:5px;white-space:nowrap}
+ .login-screen .login-options{margin:0 0 2px;gap:4px}
+ .login-screen .remember-login{font-size:clamp(9px,.82vw,11px);gap:4px;letter-spacing:-.035em;white-space:nowrap}
  .login-screen .text-button{min-height:31px;font-size:clamp(11px,.9vw,13px);text-decoration:underline;text-underline-offset:2px}
  .login-screen .login-submit{min-height:clamp(48px,4vw,58px);margin-top:2px;border-radius:11px;font-size:clamp(14px,1.1vw,16px)}
  .login-screen .login-support{justify-content:center;gap:clamp(9px,1vw,14px);margin-top:clamp(13px,1.25vw,17px);padding-top:clamp(12px,1.2vw,16px)}
