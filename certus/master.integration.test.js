@@ -237,7 +237,7 @@ test('Master onboarding reads collaborator fields from fieldsets without constru
 
 test('Master tables use accessible horizontal scrolling, stable columns, and Portuguese display formatting',()=>{
  assert.ok(script.includes("function fmt(v,key='')"));
- assert.match(script,/must_change_password\?\(v\?'Pendente':'Não pendente'\)/);
+ assert.ok(script.includes("key==='must_change_password'?(v?'Pendente':'Não pendente')"));
  assert.match(script,/labels=\{active:'Ativo'.*in_progress:'Em andamento'/);
  assert.match(script,/function tableCellClass\(key\)/);
  assert.ok(script.includes('role="region" tabindex="0" aria-label="Tabela rolável:'));
