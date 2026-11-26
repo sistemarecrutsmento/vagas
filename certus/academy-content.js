@@ -2681,10 +2681,7 @@ window.CERTUS_ACADEMY_DATA = [
     "title": "Consultar plano, faturas e período da empresa",
     "summary": "Veja quem pode acessar a assinatura, como conferir o ciclo e onde validar as informações antes de qualquer ação.",
     "audience": [
-      "Administrador titular",
-      "Gerente",
-      "RH",
-      "Supervisor"
+      "Administrador titular original"
     ],
     "minutes": 5,
     "flow": [
@@ -2696,7 +2693,7 @@ window.CERTUS_ACADEMY_DATA = [
     "imageAlt": "Tela demonstrativa de assinatura e cobrança",
     "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
-      "O módulo é reservado ao administrador titular original da empresa. Consulte documentos e valores somente na conta autorizada."
+      "A área de assinatura é reservada ao administrador titular original da empresa. Gerentes e outros perfis devem solicitar a consulta ou mudança a essa pessoa."
     ],
     "sections": [
       {
@@ -3052,10 +3049,6 @@ window.CERTUS_ACADEMY_DATA = [
           [
             "Localização e raio de marcação",
             "O Plus Code ajuda a indicar a localização. O raio de marcação define a área permitida; use o local confirmado pela empresa e confira o ponto apresentado no mapa."
-          ],
-          [
-            "REP-A e identificador da empresa",
-            "REP-A é citado em fluxos/documentos de registro eletrônico alternativo; identificadores oficiais devem ser reais e confirmados. Não inicialize ou altere configuração legal sem autorização."
           ]
         ]
       }
@@ -3074,10 +3067,6 @@ window.CERTUS_ACADEMY_DATA = [
         "answer": "Não necessariamente. Total trabalhado, jornada prevista, abono, saldo e horas pagas são campos diferentes; leia o cabeçalho e o período."
       },
       {
-        "question": "REP-A é o mesmo que ponto pelo celular?",
-        "answer": "Não use os termos como sinônimos. A configuração e os documentos seguem fluxos próprios do sistema; confira os dados da filial e a orientação oficial."
-      },
-      {
         "question": "DSR é sempre no domingo?",
         "answer": "Não. O descanso depende da jornada/escala e do contexto do vínculo."
       }
@@ -3087,7 +3076,6 @@ window.CERTUS_ACADEMY_DATA = [
       "termos",
       "siglas",
       "DSR",
-      "REP-A",
       "Plus Code",
       "geofence",
       "pendente",
@@ -3101,7 +3089,8 @@ window.CERTUS_ACADEMY_DATA = [
       "jornadas",
       "espelho-e-simbolos",
       "decidir-offline",
-      "marcas-manuais"
+      "marcas-manuais",
+      "filiais-departamentos"
     ],
     "checks": [
       "Leia status e origem separadamente.",
@@ -3168,10 +3157,6 @@ window.CERTUS_ACADEMY_DATA = [
       {
         "term": "Localização / raio de marcação",
         "meaning": "O Plus Code ajuda a indicar a localização; o raio define a área aceita para o registro de ponto."
-      },
-      {
-        "term": "REP-A",
-        "meaning": "Regime de registro eletrônico alternativo, citado em fluxos próprios. Dados e configuração exigem confirmação documental."
       }
     ]
   }
