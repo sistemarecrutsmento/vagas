@@ -5,6 +5,8 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const script=fs.readFileSync('certus/terminal.js','utf8');
 const css=fs.readFileSync('certus/terminal-audit.css','utf8');
+const terminalHtml=fs.readFileSync('certus/terminal.html','utf8');
+const serviceWorker=fs.readFileSync('certus/service-worker.js','utf8');
 test('shared terminal script parses as JavaScript',()=>{assert.doesNotThrow(()=>new vm.Script(script))});
 test('face models preload after the kiosk is ready and are reused',()=>{
  assert.match(script,/prepareTerminalOffline\(\)\.then\(ready/);
@@ -83,3 +85,14 @@ test('offline sync never resends face vectors or blocks the rest of the queue on
  assert.match(script,/data\.item\?\.validation_status/);
 });
 
+
+
+test('shared terminal header title remains high-contrast and legible on mobile',()=>{
+ assert.match(css,/\.topbar \.brand>div strong\{color:#fff!important;font-size:13px;font-weight:750;line-height:1\.2/);
+ assert.match(css,/\.topbar \.brand>div small\{color:#ffeaf1!important;font-size:11px;font-weight:650;line-height:1\.25/);
+ assert.match(css,/@media\(max-width:650px\)\{\.topbar \.brand>div strong\{font-size:11px;font-weight:750\}\.topbar \.brand>div small\{font-size:10px;font-weight:650\}\}/);
+ assert.match(css,/@media\(max-width:365px\)\{\.topbar \.brand>div strong\{font-size:10px\}\.topbar \.brand>div small\{font-size:9px\}\}/);
+ assert.match(terminalHtml,/terminal-audit\.css\?v=20261126-terminal-header-contrast-v1/);
+ assert.match(serviceWorker,/const VERSION='certus-static-v81-terminal-header-contrast-20261126'/);
+ assert.match(serviceWorker,/terminal-audit\.css\?v=20261126-terminal-header-contrast-v1/);
+});
