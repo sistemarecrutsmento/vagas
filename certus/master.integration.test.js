@@ -220,3 +220,12 @@ test('Master onboarding uses server-generated one-time administrator password',(
  assert.doesNotMatch(script,/crypto\.getRandomValues\(bytes\)/);
  assert.match(script,/const temporary_password=saved\.temporary_password/);
 });
+
+test('company onboarding reports preparation errors instead of leaving an indefinite validating state',()=>{
+ const start=script.indexOf('companyForm.onsubmit=async e=>');
+ const end=script.indexOf('const accountForm=',start);
+ const handler=script.slice(start,end);
+ assert.ok(handler.indexOf('textContent=\'Validando os dados')<handler.indexOf('try{'));
+ assert.ok(handler.indexOf('try{')<handler.indexOf('const employees='));
+ assert.match(handler,/catch\(err\)\{result\.className='notice';result\.textContent=`O cadastro não foi confirmado/);
+});
