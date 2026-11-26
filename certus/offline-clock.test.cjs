@@ -83,7 +83,7 @@ test('service worker registers on HTTPS and caches only the pinned public face a
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
   assert.match(html, /operacao\.js\?v=certus-login-fingerprint-vector-20261126-6/);
-  assert.match(sw, /login-fingerprint-reference\.png/);
+  assert.match(sw, /login-fingerprint\.svg/);
 });
 
 test('offline queue retries when connectivity returns and when the active app resumes', () => {
