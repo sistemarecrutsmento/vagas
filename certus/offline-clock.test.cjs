@@ -10,6 +10,8 @@ const sw = read('certus/service-worker.js');
 const pwa = read('certus/pwa.js');
 const html = read('certus/index.html');
 const css = read('certus/operacao.css');
+const loginCss = read('certus/login-premium.css');
+const supportCss = read('certus/login-support.css');
 
 test('offline queue stores only AES-GCM ciphertext and uses a non-extractable per-origin key', () => {
   assert.match(ui, /const OFFLINE_DB='certus-offline-v1',OFFLINE_STORE='queue',OFFLINE_KEY='crypto-key'/);
@@ -75,12 +77,12 @@ test('employee UI does not expose offline preparation, local-queue or review imp
 
 test('service worker registers on HTTPS and caches only the pinned public face assets, never API responses', () => {
   assert.match(pwa, /navigator\.serviceWorker\.register\('\.\/service-worker\.js'\)/);
-  assert.match(sw, /const VERSION='certus-static-v74-login-support-20261126'/);
+  assert.match(sw, /const VERSION='certus-static-v75-login-motion-20261126'/);
   assert.match(sw, /certus-face-assets-v1\.7\.15/);
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=certus-login-support-20261126-1/);
+  assert.match(html, /operacao\.js\?v=certus-login-motion-20261126-2/);
 });
 
 test('offline queue retries when connectivity returns and when the active app resumes', () => {
@@ -108,4 +110,17 @@ test('management timesheet uses a concise superscript # for offline marks',()=>{
   const at=ui.indexOf('const dayRows=visibleDays.map');
   const end=ui.indexOf('return `<section class=\"records-page\">',at);
   assert.doesNotMatch(ui.slice(at,end),/Offline; horário não confirmado/);
+});
+
+
+test('login keeps real motion, touch parallax, hidden support mailbox, and reduced-motion fallback',()=>{
+  assert.match(ui,/function loginVisualEffects\(screen\)[\s\S]*?surfaceY=/);
+  assert.match(ui,/drawGlowStroke\(\.58,clock,\.92,2\.2/);
+  assert.match(ui,/requestAnimationFrame\(draw\)/);
+  assert.match(ui,/pointerdown',setPointer/);
+  assert.match(ui,/prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(ui,/certusbyvagasio@gmail\.com/);
+  assert.match(loginCss,/support-modal-enter/);
+  assert.match(loginCss,/login-field-sheen/);
+  assert.match(supportCss,/panel-glint-x/);
 });
