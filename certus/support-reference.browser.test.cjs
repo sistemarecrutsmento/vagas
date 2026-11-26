@@ -97,7 +97,7 @@ assert.ok(await desktop.page.locator('[data-help-article^="academy:"]').count()>
  assert.match(await desktop.page.locator('.academy-article h2').innerText(),/marcação manual/i);
  assert.ok(await desktop.page.locator('.academy-triage').count()>=2,'manual-mark tutorial covers denied and unavailable operations');
  await desktop.page.locator('#academy-back').click();
- await desktop.page.locator('#academy-search').fill('equipe e geofence próprios');
+ await desktop.page.locator('#academy-search').fill('endereço equipe dados cadastrais próprios');
  assert.equal(await desktop.page.locator('.academy-lesson-card').count(),1,'glossary and article terms are searchable');
  await desktop.page.locator('.academy-lesson-card').click();
  assert.ok(await desktop.page.locator('.academy-term').count()>=10,'glossary displays scannable definitions');
