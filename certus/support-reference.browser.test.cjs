@@ -41,9 +41,14 @@ assert.ok(await desktop.page.locator('[data-help-article^="academy:"]').count()>
  await desktop.page.locator('.academy-page').waitFor({state:'visible'});
  await desktop.page.waitForFunction(()=>document.querySelector('.main').scrollTop===0);
  fs.mkdirSync(path.join(process.cwd(),'artifacts'),{recursive:true});
- await desktop.page.locator('.academy-page').screenshot({path:path.join(process.cwd(),'artifacts','certus-academy-v2-desktop.png')});
+ await desktop.page.locator('.main').screenshot({path:path.join(process.cwd(),'artifacts','certus-academy-v2-desktop-top.png')});
+ await desktop.page.locator('.main').evaluate(el=>el.scrollTo({top:850,behavior:'instant'}));
+ await desktop.page.waitForTimeout(100);
+ await desktop.page.locator('.main').screenshot({path:path.join(process.cwd(),'artifacts','certus-academy-v2-desktop-catalog.png')});
+ await desktop.page.locator('.main').evaluate(el=>el.scrollTo({top:0,behavior:'instant'}));
  assert.equal(await desktop.page.locator('.academy-lesson-card').count(),29,'Academy lists 29 expanded step-by-step tutorials');
- console.log('Academy desktop layout',JSON.stringify(await desktop.page.evaluate(()=>({docHeight:document.documentElement.scrollHeight,mainHeight:document.querySelector('.main').scrollHeight,page:document.querySelector('.academy-page').getBoundingClientRect().toJSON(),grid:document.querySelector('.academy-lesson-grid').getBoundingClientRect().toJSON(),cards:[...document.querySelectorAll('.academy-lesson-card')].slice(0,6).map(x=>({rect:x.getBoundingClientRect().toJSON(),height:getComputedStyle(x).height,visibility:getComputedStyle(x).visibility,opacity:getComputedStyle(x).opacity,title:x.querySelector('.academy-card-title')?.getBoundingClientRect().toJSON(),titleText:x.querySelector('.academy-card-title')?.innerText,titleColor:getComputedStyle(x.querySelector('.academy-card-title')).color}))}))));
+ const desktopCards=await desktop.page.locator('.academy-lesson-card').evaluateAll(cards=>cards.slice(0,6).map(card=>({height:card.getBoundingClientRect().height,title:card.querySelector('.academy-card-title')?.innerText,visibility:getComputedStyle(card).visibility})));
+ assert.ok(desktopCards.every(card=>card.height>220&&card.height<500&&card.title&&card.visibility==='visible'),`desktop cards remain readable and bounded: ${JSON.stringify(desktopCards)}`);
  assert.ok(await desktop.page.locator('.academy-track').count()>=7,'Academy provides topic filters');
  assert.ok(await desktop.page.locator('.academy-video-panel .academy-eyebrow').innerText().then(x=>/videoaulas e capturas/i.test(x)),'Academy clearly reserves a section for future video lessons and reviewed captures');
  assert.ok(await desktop.page.locator('.academy-video-status').innerText().then(x=>/em preparação/i.test(x)),'the page does not pretend unprovided videos are already published');
@@ -84,7 +89,7 @@ assert.equal(await mobile.page.locator('.side-academy').count(),0,'mobile sideba
  const academyMobile=await mobile.page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth,hero:document.querySelector('.academy-hero').getBoundingClientRect().width,grid:getComputedStyle(document.querySelector('.academy-lesson-grid')).gridTemplateColumns}));
  assert.ok(academyMobile.width<=academyMobile.viewport,`Academy does not overflow on mobile: ${JSON.stringify(academyMobile)}`);
  assert.ok(academyMobile.hero<=academyMobile.viewport,'Academy hero fits the mobile viewport');
- await mobile.page.locator('.academy-page').screenshot({path:path.join(process.cwd(),'artifacts','certus-academy-v2-mobile.png')});
+ await mobile.page.locator('.main').screenshot({path:path.join(process.cwd(),'artifacts','certus-academy-v2-mobile.png')});
  await mobile.page.locator('#menu-toggle').click();
  await mobile.page.locator('.side-help').click();
  await mobile.page.locator('.help-portal-topbar').waitFor({state:'visible'});
