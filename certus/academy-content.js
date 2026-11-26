@@ -1,4 +1,4 @@
-/* Certus Academy V3 — deeper learning paths, troubleshooting, glossary and illustrative screenshots. */
+/* Certus Academy V3 — customer-first clarity, safe troubleshooting and glossary. */
 window.CERTUS_ACADEMY_DATA = [
   {
     "id": "primeiro-acesso",
@@ -19,7 +19,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/gestao-desktop.png",
     "imageAlt": "Visão geral do Portal de Gestão",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Tenha o endereço oficial do Certus e as credenciais da sua própria conta. Se ainda não recebeu um acesso, procure o administrador titular da empresa."
     ],
@@ -121,7 +121,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/gestao-desktop.png",
     "imageAlt": "Visão geral do Portal de Gestão",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Entre no Portal de Gestão com seu usuário. A navegação mostra somente áreas e ações liberadas para o perfil atual."
     ],
@@ -214,7 +214,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-funcionarios.png",
     "imageAlt": "Tela de Funcionários",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Tenha os dados confirmados pela empresa e confira a lista antes de criar uma ficha nova. O cadastro de funcionários é permitido ao administrador titular e ao RH."
     ],
@@ -308,7 +308,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-funcionarios.png",
     "imageAlt": "Lista de funcionários",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Tenha a correção confirmada pela empresa. Alterações de identidade e status podem afetar processos e devem ser feitas por usuários autorizados."
     ],
@@ -395,7 +395,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-acessos.png",
     "imageAlt": "Tela de acessos de funcionários",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "O funcionário precisa ter ficha ativa. A criação de acesso a partir da ficha está disponível para quem tem permissão de gestão de funcionários."
     ],
@@ -485,7 +485,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-filiais.png",
     "imageAlt": "Tela de Filiais e Departamentos",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Use informações reais da unidade confirmadas pela empresa. Criar uma filial não inicializa automaticamente o REP-A e não substitui sua conferência documental."
     ],
@@ -585,7 +585,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-acessos.png",
     "imageAlt": "Tela de Contas e Acessos",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "A tela Contas e acessos é restrita conforme o perfil; criar contas é uma ação do administrador titular."
     ],
@@ -679,7 +679,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-jornadas.png",
     "imageAlt": "Tela de Jornadas",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Tenha a jornada aprovada pela empresa e os instrumentos formais aplicáveis ao vínculo. O sistema calcula uma prévia; não valida contrato ou convenção por conta própria."
     ],
@@ -786,7 +786,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-jornadas.png",
     "imageAlt": "Formulário de Jornadas",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "A escala deve estar formalmente confirmada para a pessoa e para a atividade. O sistema oferece um cadastro de ciclo, mas não verifica o instrumento legal."
     ],
@@ -883,7 +883,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-funcionarios.png",
     "imageAlt": "Lista de funcionários",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "A jornada já precisa existir e ter sido conferida. Selecione a pessoa e a filial corretas antes de alterar o vínculo."
     ],
@@ -969,7 +969,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-portal-colaborador.png",
     "imageAlt": "Tela móvel do Portal do Colaborador",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Tenha o identificador da empresa e suas próprias credenciais. O dispositivo precisa atender às permissões de câmera/localização que o fluxo mostrar."
     ],
@@ -995,7 +995,7 @@ window.CERTUS_ACADEMY_DATA = [
           ],
           [
             "Se estiver sem conexão, anote o que viu",
-            "O comportamento offline depende do fluxo e do aparelho. Leia a tela, preserve o acesso e confira a marca posteriormente; a hora local pode não estar confirmada pelo servidor."
+            "Siga a instrução exibida e confira depois o histórico e o status. Se a tentativa ficar pendente, avise a gestão antes de repetir; não considere o horário confirmado até o portal indicar a situação."
           ]
         ]
       }
@@ -1041,7 +1041,7 @@ window.CERTUS_ACADEMY_DATA = [
       },
       {
         "symptom": "A marcação está carregando há muito tempo",
-        "check": "A confirmação pode depender da conexão/aparelho.",
+        "check": "A marca pode estar aguardando atualização ou conferência.",
         "next": "Confira primeiro o histórico; se não houver resultado, peça à gestão para verificar antes de tentar de novo."
       }
     ]
@@ -1065,7 +1065,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-portal-colaborador.png",
     "imageAlt": "Tela demonstrativa do Portal do Colaborador",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Use o aparelho e a conta da própria pessoa. O fluxo depende de câmera compatível e consentimento; não faça o cadastro em nome de outra pessoa."
     ],
@@ -1158,7 +1158,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-terminal-compartilhado.png",
     "imageAlt": "Terminal compartilhado demonstrativo",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "O terminal deve ser um aparelho da empresa, autorizado para a filial correta. Não compartilhe credenciais de gestão com os colaboradores."
     ],
@@ -1188,7 +1188,7 @@ window.CERTUS_ACADEMY_DATA = [
           ],
           [
             "Se for substituir ou desconectar o aparelho",
-            "Use o fluxo oficial de Terminais e dispositivos no portal de gestão e siga a ação disponível. Não apague vínculo ou chave local pelo navegador para tentar resolver o problema; peça orientação ao titular se a opção exigir confirmação."
+            "Para substituir ou desconectar o aparelho: use apenas Terminais e dispositivos no Portal de Gestão e siga a ação exibida. Se a tela pedir confirmação ou você não encontrar a opção, consulte o administrador titular."
           ]
         ]
       }
@@ -1203,8 +1203,8 @@ window.CERTUS_ACADEMY_DATA = [
         "answer": "Confira a câmera, iluminação e posição do aparelho. Registre a mensagem de erro sem fotografar dados de terceiros e abra chamado se o problema persistir."
       },
       {
-        "question": "Posso limpar armazenamento do navegador para desconectar?",
-        "answer": "Não. Para desconectar/substituir, use Terminais e dispositivos no Portal de Gestão; apagar a chave ou vínculo local pode deixar o terminal em estado inconsistente."
+        "question": "Como desconecto ou substituo o terminal?",
+        "answer": "Faça isso somente pela tela Terminais e dispositivos no Portal de Gestão. Se não encontrar a ação adequada, peça orientação ao administrador titular."
       }
     ],
     "keywords": [
@@ -1212,8 +1212,7 @@ window.CERTUS_ACADEMY_DATA = [
       "dispositivo autorizado",
       "filial",
       "terminal",
-      "desconectar",
-      "chave local"
+      "desconectar"
     ],
     "related": [
       "filiais-departamentos",
@@ -1224,7 +1223,7 @@ window.CERTUS_ACADEMY_DATA = [
       "Confirme a filial e o status antes do primeiro uso.",
       "Use o fluxo do portal de gestão para desconectar ou substituir o terminal."
     ],
-    "note": "Não apague chaves ou vínculos locais do terminal. A gestão deve conduzir a desconexão em Terminais e dispositivos no portal autenticado.",
+    "note": "Para desconectar ou substituir o terminal, use apenas a tela Terminais e dispositivos no Portal de Gestão. Se a ação exigir confirmação, consulte o administrador titular.",
     "ifDifferent": [
       {
         "symptom": "O leitor fica em modo de configuração",
@@ -1255,7 +1254,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-terminais.png",
     "imageAlt": "Tela de dispositivos autorizados",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Faça mudanças somente nos aparelhos da empresa e nas filiais autorizadas. Ações disponíveis podem variar por perfil."
     ],
@@ -1273,11 +1272,11 @@ window.CERTUS_ACADEMY_DATA = [
           ],
           [
             "Revise o estado antes de agir",
-            "A lista diferencia dispositivos ativos e revogados e pode exibir ações como revogar ou criar senha de desconexão, dependendo do perfil. Leia exatamente o rótulo e o diálogo antes de confirmar."
+            "Leia o status e as ações disponíveis na tela. Antes de revogar ou substituir, confirme que é o aparelho correto e que você tem autorização."
           ],
           [
             "Remova acesso pelo fluxo do portal",
-            "Ao trocar aparelho, revogue/autorização conforme a orientação da empresa. Use a função oficial; não limpe chave ou armazenamento local por conta própria."
+            "Para desconectar ou substituir o terminal, use apenas as ações de Terminais e dispositivos no Portal de Gestão. Se a tela pedir confirmação ou a opção não estiver disponível, consulte o administrador titular."
           ],
           [
             "Confirme a mudança",
@@ -1292,8 +1291,8 @@ window.CERTUS_ACADEMY_DATA = [
         "answer": "Ações variam com o perfil; verifique se o botão está disponível para sua conta. Se não estiver, solicite ao administrador titular ou RH autorizado."
       },
       {
-        "question": "O que acontece se revogar?",
-        "answer": "O aparelho deixa de aparecer como ativo na gestão. Confira o status na lista e siga a instrução da tela para concluir a desconexão física, sem apagar dados locais manualmente."
+        "question": "Como confirmo a desconexão?",
+        "answer": "Confira o status na lista do Portal de Gestão e siga as instruções exibidas. Não volte a usar o aparelho até que a gestão confirme que ele está autorizado."
       },
       {
         "question": "Como troco a filial do terminal?",
@@ -1319,7 +1318,7 @@ window.CERTUS_ACADEMY_DATA = [
       {
         "symptom": "Um dispositivo aparece como inativo",
         "check": "Pode ter sido revogado ou substituído.",
-        "next": "Confira o status e o último uso antes de reutilizar; não apague a chave local."
+        "next": "Consulte o administrador titular antes de reutilizar; confirme que o aparelho está autorizado."
       },
       {
         "symptom": "Não há botão Autorizar dispositivo",
@@ -1347,7 +1346,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-ajustes.png",
     "imageAlt": "Tela de solicitações de ajuste",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Tenha a data, o tipo de ocorrência e a justificativa corretos. O pedido do colaborador não altera a marcação original até passar pelo fluxo de análise aplicável."
     ],
@@ -1425,7 +1424,7 @@ window.CERTUS_ACADEMY_DATA = [
     "id": "revisar-ajustes",
     "category": "Ajustes e justificativas",
     "title": "Analisar pedidos de ajuste com rastreabilidade",
-    "summary": "Filtre a fila, confira dados e anexos e registre uma decisão explicada; o histórico original é preservado.",
+    "summary": "Filtre a lista, confira dados e anexos e registre uma decisão explicada; o histórico original é preservado.",
     "audience": [
       "Administrador titular",
       "Gerente",
@@ -1438,8 +1437,8 @@ window.CERTUS_ACADEMY_DATA = [
       "Decida com nota"
     ],
     "image": "./assets/academy/tour-ajustes.png",
-    "imageAlt": "Fila de solicitações de ajuste",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageAlt": "Lista de solicitações de ajuste",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "A revisão é uma decisão da gestão. Separe evidência, jornada e marca original antes de escolher um resultado."
     ],
@@ -1506,7 +1505,7 @@ window.CERTUS_ACADEMY_DATA = [
     "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
     "ifDifferent": [
       {
-        "symptom": "O pedido não está na fila esperada",
+        "symptom": "O pedido não aparece na lista esperada",
         "check": "Filtros de status ou termo de busca podem ocultá-lo.",
         "next": "Selecione Todos, limpe a busca e confirme a empresa/filial e a data."
       },
@@ -1536,7 +1535,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-registros-de-ponto.png",
     "imageAlt": "Tela de Registros de Ponto",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "A gestão precisa ter permissão para consultar os colaboradores/filiais. Selecione o período antes de interpretar totais."
     ],
@@ -1625,9 +1624,9 @@ window.CERTUS_ACADEMY_DATA = [
   },
   {
     "id": "uso-offline",
-    "category": "Continuidade e sincronização",
-    "title": "O que acontece quando a internet cai",
-    "summary": "Diferencie os fluxos do terminal compartilhado e do celular, depois verifique o estado da marca antes de agir.",
+    "category": "Continuidade do registro",
+    "title": "Quando a conexão cai: como conferir uma marcação",
+    "summary": "Siga as instruções da tela e confira a situação da marca antes de tentar novamente.",
     "audience": [
       "Colaborador",
       "Administrador titular",
@@ -1636,15 +1635,15 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "minutes": 6,
     "flow": [
-      "Identifique o aparelho",
-      "Aguarde conexão",
-      "Confira sincronização e estado"
+      "Durante a queda, siga a tela",
+      "Quando a conexão voltar, consulte o histórico",
+      "Peça conferência se a marca ficar pendente"
     ],
     "image": "./assets/academy/tour-terminal-compartilhado.png",
     "imageAlt": "Terminal compartilhado demonstrativo",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
-      "Offline não significa automaticamente confirmado. Preserve o aparelho e anote a mensagem exibida."
+      "Uma tentativa sem conexão não deve ser tratada como confirmada até que o portal mostre a situação. Preserve o aparelho e siga a orientação da gestão."
     ],
     "sections": [
       {
@@ -1652,23 +1651,23 @@ window.CERTUS_ACADEMY_DATA = [
         "steps": [
           [
             "Identifique o fluxo usado",
-            "Anote se a tentativa ocorreu no terminal compartilhado autorizado ou no Portal do Colaborador em celular. Os processos offline são diferentes."
+            "Anote se a tentativa ocorreu no terminal compartilhado ou no Portal do Colaborador pelo celular. As mensagens e os próximos passos podem variar entre as telas."
           ],
           [
             "Durante a perda de conexão",
-            "Siga somente as instruções mostradas pelo fluxo. Não altere relógio, localização ou identificadores do aparelho e não limpe armazenamento local."
+            "Siga as instruções exibidas. Não altere o relógio nem a localização do aparelho para tentar registrar. Se a marca continuar pendente, não redefina o terminal nem limpe os dados do navegador; peça ajuda à gestão."
           ],
           [
             "Depois de recuperar a internet",
-            "Deixe o mesmo aparelho conectado e o portal aberto/retomado quando possível para o sistema tentar o envio previsto pelo fluxo. Aguarde a confirmação ou indicação de pendência."
+            "Retome o portal normalmente e leia a confirmação ou o aviso apresentado. Não conclua que a marca foi registrada apenas porque a conexão voltou."
           ],
           [
             "Confira o histórico e o espelho",
-            "Na gestão, veja se a marca apareceu e leia origem, horário informado/recebido e validação. # mostra origem offline; o estado continua sendo a fonte para saber se passou pelas verificações."
+            "Na gestão, consulte o histórico da mesma pessoa e data. Leia a origem, a hora mostrada e o status. O símbolo # indica que a tentativa ocorreu sem conexão; confira separadamente se a marca está pendente ou validada."
           ],
           [
             "Evite duplicar a tentativa",
-            "Se a marca não aparecer, faça uma captura da mensagem sem dados sensíveis e peça à gestão para conferir antes de marcar de novo. O colaborador deve receber orientação sobre o procedimento da empresa."
+            "Se a marca não aparecer, anote a data e a mensagem sem registrar outra batida. Peça à gestão para conferir o histórico e orientar o próximo passo."
           ]
         ]
       }
@@ -1679,22 +1678,21 @@ window.CERTUS_ACADEMY_DATA = [
         "answer": "Não necessariamente. O horário local pode aguardar validação. Confira o status no histórico e siga o fluxo do aparelho."
       },
       {
-        "question": "Posso apagar os dados do navegador para limpar a pendência?",
-        "answer": "Não. Isso pode apagar informação necessária à fila local. Preserve o aparelho e peça ajuda à gestão."
+        "question": "Posso redefinir o terminal ou limpar os dados do navegador?",
+        "answer": "Não faça isso enquanto uma marca estiver pendente. Peça à gestão que confira o registro e oriente o próximo passo."
       },
       {
         "question": "O que significa #?",
         "answer": "É o símbolo de origem offline. Consulte detalhes e estado para saber como a marca foi recebida e se ainda está pendente."
       },
       {
-        "question": "O terminal sincronizou sozinho?",
-        "answer": "Fluxos elegíveis tentam sincronizar quando a conexão retorna, mas a confirmação deve ser verificada no portal; não presuma que aconteceu sem conferir."
+        "question": "O que faço quando a conexão voltar?",
+        "answer": "Retome o portal e confira a confirmação ou o status no histórico. Se não encontrar a marca ou ela continuar pendente, procure a gestão antes de tentar novamente."
       }
     ],
     "keywords": [
       "internet caiu",
       "offline",
-      "sincronização",
       "pendente",
       "marca offline",
       "sem conexão"
@@ -1706,20 +1704,20 @@ window.CERTUS_ACADEMY_DATA = [
       "inconsistencias"
     ],
     "checks": [
-      "Não apague armazenamento local para resolver pendência.",
-      "Origem offline e confirmação são conceitos diferentes."
+      "Não tente registrar a mesma marca várias vezes.",
+      "Confira separadamente a origem offline e o status apresentado."
     ],
-    "note": "Use os estados mostrados pelo portal. A hora informada por aparelho offline não é, por si só, confirmação de horário pelo servidor.",
+    "note": "O símbolo # identifica a origem offline; o status do portal mostra se a marca está pendente ou validada.",
     "ifDifferent": [
       {
-        "symptom": "A marca offline não apareceu depois de voltar a internet",
-        "check": "O dispositivo pode não ter concluído o envio ou a marca está aguardando validação.",
-        "next": "Mantenha o aparelho; peça à gestão para conferir fila e histórico antes de marcar novamente."
+        "symptom": "A marca não aparece depois que a conexão volta",
+        "check": "A tentativa pode ainda não estar visível ou pode exigir conferência.",
+        "next": "Não registre novamente; anote a data e peça à gestão para conferir o histórico."
       },
       {
-        "symptom": "Aparelho mostra horário diferente do espelho",
-        "check": "O horário local informado pode diferir do horário recebido pelo servidor.",
-        "next": "Leia os campos de ocorrência/recebimento e o status; não altere o relógio do aparelho."
+        "symptom": "A hora mostrada não corresponde à lembrança do colaborador",
+        "check": "Confira a data, a origem e os horários exibidos no portal.",
+        "next": "Não altere o relógio do aparelho. Encaminhe a divergência à gestão para conferência."
       }
     ]
   },
@@ -1742,7 +1740,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-inconsistencias.png",
     "imageAlt": "Tela de inconsistências diárias",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "A página aponta dias com quantidade ímpar de marcações validadas. Isso indica que o dia merece revisão; não prova sozinho que houve falta ou fraude."
     ],
@@ -1764,7 +1762,7 @@ window.CERTUS_ACADEMY_DATA = [
           ],
           [
             "Escolha o fluxo adequado",
-            "Se for erro informado pelo colaborador, peça que abra solicitação de ajuste. Se o registro offline estiver na fila da gestão, analise esse fluxo específico. Não acrescente marca manual como substituição sem justificativa e permissão."
+            "Se for erro informado pelo colaborador, peça que abra solicitação de ajuste. Se houver uma marca offline aguardando revisão, abra o guia correspondente na Academy. Não acrescente marca manual como substituição sem justificativa e permissão."
           ],
           [
             "Documente o encaminhamento",
@@ -1837,7 +1835,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-banco-de-horas.png",
     "imageAlt": "Tabela do Banco de Horas",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Confirme o período e a regra de banco configurada para o vínculo. O saldo usa marcações validadas e jornada atribuída."
     ],
@@ -1940,7 +1938,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-relatorios.png",
     "imageAlt": "Tela de Relatórios",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Defina qual informação precisa e confirme que sua conta tem acesso às filiais selecionadas."
     ],
@@ -2039,7 +2037,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-configuracoes.png",
     "imageAlt": "Tela de Configurações",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Tenha documentação oficial e a autorização da empresa para alterar dados legais ou de localização."
     ],
@@ -2135,7 +2133,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-seguranca.png",
     "imageAlt": "Tela de Segurança",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Faça isso somente na sua própria conta e use um dispositivo confiável para seu aplicativo autenticador."
     ],
@@ -2228,7 +2226,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-ajuda.png",
     "imageAlt": "Portal de Ajuda e Base de Conhecimento",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Só o administrador titular e o gerente podem abrir e acompanhar chamados pelo portal de empresa, conforme a regra atual."
     ],
@@ -2321,7 +2319,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-seguranca.png",
     "imageAlt": "Tela de Segurança",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Não use links de redefinição recebidos de remetentes desconhecidos. O processo depende do perfil e da configuração da empresa."
     ],
@@ -2335,7 +2333,7 @@ window.CERTUS_ACADEMY_DATA = [
           ],
           [
             "Peça ajuda ao responsável correto",
-            "No fluxo de gestão, a recuperação automática por e-mail pode ainda não estar configurada; a tela orienta o usuário a pedir ao administrador titular para redefinir o acesso."
+            "Siga a opção de recuperação que aparecer na tela. Se ela não concluir o processo, peça ao administrador titular para iniciar a redefinição do seu acesso."
           ],
           [
             "Receba uma senha inicial por canal privado",
@@ -2354,8 +2352,8 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "faqs": [
       {
-        "question": "O botão Esqueci minha senha envia um e-mail?",
-        "answer": "A tela atual informa que a recuperação automática por e-mail ainda não está configurada e orienta pedir ajuda ao administrador titular."
+        "question": "O que faço se a recuperação de senha não concluir?",
+        "answer": "Siga as instruções apresentadas pelo portal. Se não conseguir concluir a recuperação, peça ao administrador titular para iniciar a redefinição do acesso."
       },
       {
         "question": "Meu gestor pode ver minha senha antiga?",
@@ -2382,9 +2380,9 @@ window.CERTUS_ACADEMY_DATA = [
     "note": "Os nomes dos botões e os recursos disponíveis podem variar conforme o perfil, as permissões da empresa e a versão do portal. Siga sempre os dados e confirmações apresentados na sua tela.",
     "ifDifferent": [
       {
-        "symptom": "O link de redefinição não chegou",
-        "check": "A recuperação automática por e-mail ainda pode não estar configurada no fluxo de gestão.",
-        "next": "Peça ao administrador titular para iniciar a redefinição oficial."
+        "symptom": "Não consigo concluir a recuperação de senha",
+        "check": "Confirme se está no portal correto e siga a instrução exibida na tela.",
+        "next": "Se o acesso continuar bloqueado, peça ao administrador titular para iniciar a redefinição."
       },
       {
         "symptom": "Tenho senha mas perdi o autenticador",
@@ -2411,7 +2409,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-ajustes.png",
     "imageAlt": "Tela de apoio a ajustes e conferência",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Um abono direto é aplicado imediatamente, sem etapa de aprovação do colaborador, e fica em auditoria. Confirme autorização interna, data, categoria e motivo antes de começar."
     ],
@@ -2429,7 +2427,7 @@ window.CERTUS_ACADEMY_DATA = [
           ],
           [
             "Escolha o tipo e o escopo",
-            "Selecione Abono de dia ou Abono de horas. Informe a data. Para horas, preencha início e fim; para dia, confira a data e o intervalo de datas solicitado pelo sistema."
+            "Selecione Abono de dia ou Abono de horas e confira a data. Para Abono de horas, preencha início e fim; para Abono de dia, confira a data indicada."
           ],
           [
             "Classifique e descreva o motivo",
@@ -2487,7 +2485,7 @@ window.CERTUS_ACADEMY_DATA = [
       },
       {
         "symptom": "O lançamento foi aplicado imediatamente",
-        "check": "O abono direto não usa fila de aprovação.",
+        "check": "O abono direto não aguarda etapa de aprovação.",
         "next": "Confira o colaborador/dia no espelho e a auditoria; se incorreto, siga o fluxo autorizado de correção."
       }
     ]
@@ -2511,7 +2509,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-registros-de-ponto.png",
     "imageAlt": "Espelho demonstrativo do Certus",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Este guia explica rótulos de interface; decisões de jornada e aprovação devem ser confirmadas pelos responsáveis."
     ],
@@ -2604,7 +2602,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-ajuda.png",
     "imageAlt": "Central de Ajuda",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Não compartilhe senha, CPF ou códigos para tentar diagnosticar o erro."
     ],
@@ -2637,8 +2635,8 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "faqs": [
       {
-        "question": "Posso limpar cache/dados do terminal?",
-        "answer": "Não faça isso em aparelho com terminal compartilhado ou marca offline pendente. Procure a gestão para usar o fluxo oficial."
+        "question": "Posso limpar os dados do navegador ou do terminal?",
+        "answer": "Evite fazer isso se o terminal estiver com problema ou houver uma marca pendente. Peça à gestão para conferir o histórico e orientar o procedimento seguro."
       },
       {
         "question": "A tela fica carregando depois de salvar.",
@@ -2646,7 +2644,7 @@ window.CERTUS_ACADEMY_DATA = [
       },
       {
         "question": "Que dados devo ocultar na captura?",
-        "answer": "Oculte senhas, tokens, códigos de autenticação, CPF, dados bancários e informações de outros colaboradores que não sejam necessárias ao chamado."
+        "answer": "Oculte senhas, códigos de acesso e autenticação, CPF, dados bancários e informações de outros colaboradores que não sejam necessárias ao chamado."
       }
     ],
     "keywords": [
@@ -2655,7 +2653,6 @@ window.CERTUS_ACADEMY_DATA = [
       "botão sumiu",
       "falha",
       "portal",
-      "cache",
       "chamado"
     ],
     "related": [
@@ -2697,7 +2694,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-assinatura.png",
     "imageAlt": "Tela demonstrativa de assinatura e cobrança",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e registros da imagem são exemplos; sua tela mostra os dados autorizados da sua empresa.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "O módulo é reservado ao administrador titular original da empresa. Consulte documentos e valores somente na conta autorizada."
     ],
@@ -2792,7 +2789,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-registros-de-ponto.png",
     "imageAlt": "Tela de Registros de Ponto",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e horários não representam colaboradores reais.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "Tenha a correção documentada e confirme o dia no fuso da empresa. O portal só permite inclusão em dia anterior e exibe o prazo de ajustes do mês.",
       "Marcações originais do relógio são imutáveis; apenas lançamentos incluídos manualmente podem ter Editar/Excluir."
@@ -2889,9 +2886,9 @@ window.CERTUS_ACADEMY_DATA = [
   },
   {
     "id": "decidir-offline",
-    "category": "Continuidade e sincronização",
+    "category": "Continuidade do registro",
     "title": "Analisar uma marca offline pendente",
-    "summary": "Compare horário informado e recebido, confira a jornada e registre Aprovar/Rejeitar com justificativa; o status deve ser verificado depois.",
+    "summary": "Compare os horários exibidos, confira a jornada e registre a decisão com um motivo claro.",
     "audience": [
       "Administrador titular",
       "Gerente",
@@ -2901,14 +2898,14 @@ window.CERTUS_ACADEMY_DATA = [
     "minutes": 6,
     "flow": [
       "Inconsistências diárias",
-      "Marcações offline para análise",
-      "Decida e confira auditoria"
+      "Confira os dados e a jornada",
+      "Decida e confirme o status"
     ],
     "image": "./assets/academy/tour-inconsistencias.png",
     "imageAlt": "Área de revisão de marcações pendentes",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e horários não representam colaboradores reais.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
-      "A fila mostra dados de origem, mas o horário informado pelo aparelho não é prova independente. A decisão deve seguir a conferência e a política da empresa."
+      "A data e o horário informados pelo aparelho podem ser diferentes dos exibidos como recebidos no portal. Confira o contexto e a política da empresa antes de decidir."
     ],
     "sections": [
       {
@@ -2920,7 +2917,7 @@ window.CERTUS_ACADEMY_DATA = [
           ],
           [
             "Compare os dados da linha",
-            "Confira nome, tipo de evento, horário informado e momento em que o sistema recebeu o registro. Não confunda o horário ocorrido no aparelho com o recebimento pelo servidor."
+            "Confira nome, tipo do evento, horário informado e data/hora de recebimento exibida no portal. Considere a diferença como um dado para conferência, não como prova isolada."
           ],
           [
             "Confira o contexto antes de decidir",
@@ -2928,15 +2925,15 @@ window.CERTUS_ACADEMY_DATA = [
           ],
           [
             "Registre decisão com motivo",
-            "Escolha Aprovar ou Rejeitar. O portal solicita justificativa de no mínimo três caracteres; descreva objetivamente o que foi conferido, sem incluir dado pessoal desnecessário."
+            "Escolha Aprovar ou Rejeitar, se estiver autorizado. Escreva em palavras claras o que foi conferido, sem incluir dados pessoais desnecessários."
           ],
           [
             "Confirme o resultado e a trilha",
-            "Após salvar, a lista é atualizada. Confira se o item saiu da pendência, abra o espelho e veja o status/origem; a decisão fica registrada em auditoria."
+            "Depois de salvar, confira a situação atualizada na lista e no espelho. A decisão e o motivo ficam disponíveis no histórico de alterações."
           ],
           [
             "Se não houver evidência suficiente",
-            "Não aprove automaticamente por conveniência nem rejeite apenas pelo símbolo #. Peça contexto ao responsável/colaborador e use a política da empresa antes de concluir."
+            "Não aprove automaticamente nem rejeite apenas pelo símbolo #. Peça contexto ao responsável ou colaborador e siga a política da empresa antes de concluir."
           ]
         ]
       }
@@ -2947,12 +2944,12 @@ window.CERTUS_ACADEMY_DATA = [
         "answer": "A ação registra a decisão sobre a marca pendente; leia o horário e o status atualizado depois. Não interprete como edição do dado originalmente recebido."
       },
       {
-        "question": "A hora do aparelho é igual à hora de recebimento?",
-        "answer": "Não necessariamente. A página mostra campos separados para horário informado e recebido; registre essa diferença ao conferir."
+        "question": "Por que há horários diferentes na tela?",
+        "answer": "A tela pode mostrar o horário informado pelo aparelho e a data/hora em que a marca apareceu no portal. Compare ambos com a jornada e com o relato antes de decidir."
       },
       {
-        "question": "O item voltou a aparecer após a decisão?",
-        "answer": "Atualize a lista e confira o histórico do colaborador. Se continuar pendente, evite repetir a decisão e abra chamado com data, protocolo/identificador visível e captura sem dados pessoais desnecessários."
+        "question": "A marca continua aparecendo como pendente. O que faço?",
+        "answer": "Atualize a página uma vez e confira o histórico. Se o status continuar pendente, evite repetir a decisão e abra um chamado com a data e o nome da tela, sem dados pessoais desnecessários."
       },
       {
         "question": "O que significa #?",
@@ -2974,20 +2971,20 @@ window.CERTUS_ACADEMY_DATA = [
       "marcas-manuais"
     ],
     "checks": [
-      "Compare hora informada e recebida.",
-      "Leia a jornada e a sequência antes de decidir.",
-      "Registre justificativa e valide o status depois."
+      "Compare os horários e a jornada.",
+      "Registre um motivo claro para a decisão.",
+      "Confira o status atualizado no espelho."
     ],
-    "note": "A decisão cabe à gestão autorizada e deve estar respaldada pelo processo da empresa; a interface não determina por si só a veracidade do horário.",
+    "note": "A decisão cabe à gestão autorizada e deve seguir o processo da empresa. Os horários exibidos ajudam na conferência, mas não substituem a análise do contexto.",
     "ifDifferent": [
       {
-        "symptom": "A fila de pendências está vazia",
-        "check": "A tela só mostra itens pendentes; a marca pode já ter decisão ou ainda não ter chegado ao servidor.",
-        "next": "Confira o histórico da pessoa e o aparelho; não conclua que a marca nunca ocorreu."
+        "symptom": "A lista de marcas pendentes está vazia",
+        "check": "A marca pode já ter sido analisada ou ainda não estar visível no histórico.",
+        "next": "Confira o espelho da pessoa e da data; se o problema persistir, peça ajuda à gestão."
       },
       {
         "symptom": "A decisão foi recusada",
-        "check": "Verifique se informou justificativa com pelo menos três caracteres e se o item ainda está pendente.",
+        "check": "Confira se a justificativa explica o que foi verificado e se a marca continua pendente.",
         "next": "Atualize a página uma vez e leia o status antes de tentar novamente."
       }
     ]
@@ -3012,7 +3009,7 @@ window.CERTUS_ACADEMY_DATA = [
     ],
     "image": "./assets/academy/tour-registros-de-ponto.png",
     "imageAlt": "Espelho demonstrativo com símbolos",
-    "imageCaption": "Captura demonstrativa do Certus com dados fictícios. Os nomes e horários não representam colaboradores reais.",
+    "imageCaption": "Captura demonstrativa com dados fictícios: nomes, jornadas, horários, valores e registros não representam uma empresa real. Os dados da sua conta podem ser diferentes.",
     "before": [
       "O mesmo termo pode ser usado em contextos de cadastro e de apuração; confira o módulo e a legenda da tela."
     ],
@@ -3022,7 +3019,7 @@ window.CERTUS_ACADEMY_DATA = [
         "steps": [
           [
             "Filial",
-            "Unidade do estabelecimento associada à equipe, localização e escopo de acesso. CNPJ/endereço e geofence são específicos da filial quando solicitados."
+            "Unidade da empresa associada a endereço, equipe e aos módulos disponíveis para aquela unidade."
           ],
           [
             "Jornada e escala",
@@ -3053,8 +3050,8 @@ window.CERTUS_ACADEMY_DATA = [
             "CSV é arquivo tabular para análise/planilha; PDF é documento para leitura/impressão. Ambos refletem filtros, permissões e status disponíveis na consulta."
           ],
           [
-            "Plus Code e geofence",
-            "Plus Code representa uma localização; geofence é o raio de distância exibido para o local de marcação. Use endereço/local oficial e confira o ponto convertido."
+            "Localização e raio de marcação",
+            "O Plus Code ajuda a indicar a localização. O raio de marcação define a área permitida; use o local confirmado pela empresa e confira o ponto apresentado no mapa."
           ],
           [
             "REP-A e identificador da empresa",
@@ -3122,7 +3119,7 @@ window.CERTUS_ACADEMY_DATA = [
     "terms": [
       {
         "term": "Filial",
-        "meaning": "Unidade/estabelecimento que pode ter endereço, CNPJ, equipe e geofence próprios."
+        "meaning": "Unidade da empresa que pode ter endereço, equipe e dados cadastrais próprios."
       },
       {
         "term": "Jornada",
@@ -3169,8 +3166,8 @@ window.CERTUS_ACADEMY_DATA = [
         "meaning": "CSV é tabular para análise em planilha; PDF é paginado para leitura/impressão. Ambos respeitam os filtros da consulta."
       },
       {
-        "term": "Plus Code / geofence",
-        "meaning": "Código de localização da filial e raio permitido ao redor do ponto configurado."
+        "term": "Localização / raio de marcação",
+        "meaning": "O Plus Code ajuda a indicar a localização; o raio define a área aceita para o registro de ponto."
       },
       {
         "term": "REP-A",

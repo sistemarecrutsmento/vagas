@@ -7,6 +7,22 @@ const http=require('node:http');
 const path=require('node:path');
 const { chromium }=require('playwright');
 const root=__dirname;
+test('Academy copy is customer-facing, protects internal implementation details, and marks every screenshot as fictitious',()=>{
+ const source=fs.readFileSync(path.join(root,'academy-content.js'),'utf8');
+ const match=source.match(/window\.CERTUS_ACADEMY_DATA\s*=\s*(\[.*\]);\s*$/s);
+ assert.ok(match,'Academy content bundle exposes its expected data array');
+ const guides=JSON.parse(match[1]);
+ assert.equal(guides.length,32,'all approved learning guides are included');
+ const copy=JSON.stringify(guides);
+ for(const internal of [/\bAPI\b/i,/\bbackend\b/i,/\bendpoint\b/i,/\bservidor\b/i,/fila local/i,/sincroniza/i,/chave local/i,/armazenamento local/i,/\bcache\b/i,/\btoken\b/i,/\bdebug\b/i]) assert.doesNotMatch(copy,internal,`customer content should not expose ${internal}`);
+ for(const guide of guides) assert.match(guide.imageCaption,/dados fictícios/i,`${guide.id} screenshot clearly identifies demonstration data`);
+ const terminal=guides.find(x=>x.id==='terminal-compartilhado');
+ assert.match(JSON.stringify(terminal),/Terminais e dispositivos no Portal de Gestão/i);
+ assert.doesNotMatch(JSON.stringify(terminal),/apagar.{0,35}(?:chave|vínculo) local/i);
+ const offline=guides.find(x=>x.id==='uso-offline');
+ assert.match(JSON.stringify(offline),/confira a situação da marca/i);
+ assert.doesNotMatch(JSON.stringify(offline),/sincroniza|fila local|servidor/i);
+});
 const mime={'.html':'text/html; charset=utf-8','.js':'application/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.json':'application/json'};
 const fakeUser={id:'visual-user',email:'manager@example.test',name:'Fabio Exemplo',role:'company_admin',status:'active',must_change_password:false,company:{id:'visual-company',name:'Empresa de Demonstração',slug:'empresa-demo',timezone:'America/Sao_Paulo'}};
 const tickets=[
