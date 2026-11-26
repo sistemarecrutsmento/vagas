@@ -209,3 +209,8 @@ test('company onboarding proceeds to the authenticated API after prior superadmi
  assert.match(script,/apiWrite\('\/api\/master\/companies','POST',payload\)/);
  assert.doesNotMatch(script,/confirm\(`Criar \${d\.trade_name}/);
 });
+
+test('company onboarding takes the one-time administrator password from the server response',()=>{
+ assert.doesNotMatch(script,/crypto\.getRandomValues\(bytes\)/);
+ assert.match(script,/const temporary_password=saved\.temporary_password/);
+});
