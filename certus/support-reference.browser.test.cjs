@@ -23,6 +23,8 @@ test('support center matches the supplied desktop/mobile composition and keeps k
  const browser=await chromium.launch({headless:true}),contexts=[];t.after(async()=>{for(const context of contexts)await context.close();await browser.close()});
  async function openSupport(width,height){const context=await browser.newContext({viewport:{width,height}});contexts.push(context);context.addInitScript(({user})=>{sessionStorage.setItem('certus_token','visual-only-test-token');sessionStorage.setItem('certus_user',JSON.stringify(user))},{user:fakeUser});const page=await context.newPage();page.on('pageerror',err=>{throw err});await page.goto(`${origin}/index.html`);if(width<=920)await page.locator('#menu-toggle').click();await page.locator('.side-help').waitFor({state:'visible'});await page.locator('.side-help').click();await page.locator('.help-portal-topbar').waitFor({state:'visible'});await page.locator('#help-ticket-list .help-ticket-row').first().waitFor({state:'visible'});return{context,page}}
  const desktop=await openSupport(1440,1000);
+ assert.equal(await desktop.page.locator('.side-academy').count(),0,'Certus Academy is no longer a sidebar shortcut');
+ assert.equal(await desktop.page.locator('#help-open-academy').count(),1,'Academy remains accessible from the Help screen');
 assert.ok(await desktop.page.locator('[data-help-article^="academy:"]').count()>=5,'empty backend knowledge base is filled by the first local Academy guides');
  const helpArticle=desktop.page.locator('[data-help-article="academy:jornadas"]');
  await helpArticle.click();
@@ -57,9 +59,8 @@ assert.ok(await desktop.page.locator('[data-help-article^="academy:"]').count()>
  assert.ok(await desktop.page.locator('.help-center svg.help-icon').count()>=25,'the help portal renders a coherent outline icon family');assert.equal(await desktop.page.locator('.help-center svg.help-icon:not([aria-hidden=\"true\"])').count(),0,'decorative icons are hidden from screen readers');assert.ok(layout.topbar.y>=0&&layout.topbar.height>=50,`top bar remains visible and unclipped: ${JSON.stringify(layout.topbar)}`);assert.ok(layout.form.x<layout.tickets.x,'new ticket form sits beside the company ticket list');assert.ok(layout.form.y<layout.tickets.y+40,'form and ticket list begin on the same horizontal band');assert.ok(layout.knowledge.y>layout.tickets.y,'knowledge base follows the ticket list');assert.ok(layout.contact.x<layout.tickets.x&&layout.contact.y>layout.form.y,'support contact sits below the form');assert.ok(layout.topbarColor.includes('80, 0, 31'),'top bar uses the Certus burgundy');assert.equal(layout.stats.filter(x=>x.display!=='none').length,4,'desktop shows four status summary cards');
  fs.mkdirSync(path.join(process.cwd(),'artifacts'),{recursive:true});await desktop.page.screenshot({path:path.join(process.cwd(),'artifacts','help-center-reference-desktop.png'),fullPage:true});
  const mobile=await openSupport(390,844);
-await mobile.page.locator('#menu-toggle').click();
- await mobile.page.locator('.side-academy').waitFor({state:'visible'});
- await mobile.page.locator('.side-academy').click();
+assert.equal(await mobile.page.locator('.side-academy').count(),0,'mobile sidebar also omits the Academy shortcut');
+ await mobile.page.locator('#help-open-academy').click();
  await mobile.page.locator('.academy-page').waitFor({state:'visible'});
  await mobile.page.waitForFunction(()=>document.querySelector('.main').scrollTop===0);
  await mobile.page.waitForFunction(()=>!document.querySelector('#company-sidebar').classList.contains('open'));
