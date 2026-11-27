@@ -90,7 +90,11 @@ test('management and employee report UI contains no generic Conferir batidas lab
 
 
 test('PWA refreshes the management script for the corrected MaxClean report',()=>{
- assert.match(sw,/certus-static-v86-maxclean-holiday-abono-20261127/);
- assert.match(sw,/operacao\.js\?v=maxclean-holiday-abono-20261127/);
- assert.match(html,/operacao\.js\?v=maxclean-holiday-abono-20261127/);
+ assert.match(sw,/certus-static-v87-maxclean-partial-calculation-20261127/);
+ assert.match(sw,/operacao\.js\?v=maxclean-partial-calculation-20261127/);
+ assert.match(html,/operacao\.js\?v=maxclean-partial-calculation-20261127/);
+});
+
+test('timesheet explicitly labels days calculated from incomplete punches as early departure',()=>{
+ assert.match(ui,/calculationBasis==='recorded_partial_as_early_departure'\)out\.push\('Saída antecipada'\)/);
 });
