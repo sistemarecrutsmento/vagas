@@ -5,6 +5,9 @@ on:
     paths:
       - 'certus/operacao.js'
       - 'certus/operacao.css'
+      - 'certus/operacao-mobile.css'
+      - 'certus/index.html'
+      - 'certus/calendar.browser.test.cjs'
       - '.github/workflows/certus-cycle-schedule-check.yml'
 jobs:
   syntax:
@@ -14,4 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --check certus/operacao.js
+      - run: node --check certus/operacao.js && node --check certus/calendar.browser.test.cjs
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install chromium
+      - run: node --test --test-reporter=spec certus/calendar.browser.test.cjs
