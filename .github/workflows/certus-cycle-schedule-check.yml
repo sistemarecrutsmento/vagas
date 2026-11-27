@@ -8,6 +8,8 @@ on:
       - 'certus/operacao-mobile.css'
       - 'certus/index.html'
       - 'certus/calendar.browser.test.cjs'
+      - 'certus/master.html'
+      - 'certus/master.browser.test.cjs'
       - '.github/workflows/certus-cycle-schedule-check.yml'
 jobs:
   syntax:
@@ -21,3 +23,4 @@ jobs:
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install chromium
       - run: node --test --test-reporter=spec certus/calendar.browser.test.cjs
+      - run: CERTUS_MASTER_HTML=certus/master.html node --test --test-reporter=spec certus/master.browser.test.cjs
