@@ -50,3 +50,9 @@ test('employee and management timesheets use a concise offline # marker',()=>{
   assert.doesNotMatch(ui.slice(at,end),/Offline; horário não confirmado/);
 });
 
+
+test('wide management timesheet preserves readable columns when the details panel reduces available width',()=>{
+ assert.match(css,/\.records-calendar\{width:100%;min-width:900px;border-collapse:collapse;table-layout:fixed;background:#fff\}/);
+ assert.match(css,/\.records-table-area \.table-wrap\{max-height:65vh;overflow:auto\}/);
+ assert.match(ui,/Espelho diário; deslize horizontalmente para consultar todas as colunas/);
+});
