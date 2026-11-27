@@ -24,7 +24,7 @@ test('management portal avoids word-by-word wrapping, uses readable status/date 
  assert.match(managementMobileCss,/\.table-wrap td,.main \.records-calendar td\{overflow-wrap:break-word;word-break:normal\}/);
  assert.match(html,/\.app-side\{scrollbar-width:thin;scrollbar-color:#b77a8f #3d0018\}/,'Master sidebar scrollbar uses coordinated wine/plum colors');
  assert.match(html,/\.access-identity-stats\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/,'identity cards use all three desktop columns');
- assert.match(html,/\.access-identity-stats \.demo-stat strong\{font-size:18px;line-height:1.25;overflow-wrap:anywhere;word-break:normal\}/,'long identity values stay readable');
+ assert.match(html,/\.access-identity-stats \.demo-stat strong\{font-size:16px;line-height:1.25;overflow-wrap:anywhere;word-break:normal\}/,'long identity values stay readable');
 });
 
 test('Master pages render without viewport overflow and keep long table data readable on desktop and mobile',async()=>{
