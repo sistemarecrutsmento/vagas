@@ -8,6 +8,7 @@ on:
       - 'certus/master.browser.test.cjs'
       - 'certus/master-visual-audit.browser.test.cjs'
       - 'certus/operacao.js'
+      - 'certus/management-menu-order.test.cjs'
       - 'certus/operacao.css'
       - 'certus/operacao-mobile.css'
       - 'certus/pwa.js'
@@ -29,4 +30,4 @@ jobs:
           node-version: 22
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install chromium
-      - run: node --test --test-reporter=spec certus/master.integration.test.js certus/master.browser.test.cjs certus/master-visual-audit.browser.test.cjs certus/subscription-management.browser.test.cjs certus/records-timesheet-layout.test.cjs certus/offline-clock.test.cjs certus/schedule-12x36-ui.test.cjs
+      - run: node --test --test-reporter=spec certus/master.integration.test.js certus/master.browser.test.cjs certus/master-visual-audit.browser.test.cjs certus/subscription-management.browser.test.cjs certus/records-timesheet-layout.test.cjs certus/offline-clock.test.cjs certus/schedule-12x36-ui.test.cjs certus/management-menu-order.test.cjs
