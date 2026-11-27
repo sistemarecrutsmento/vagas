@@ -74,9 +74,14 @@ test('MaxClean missing snapshots fall back to assigned workday; full-day abonos 
   const a=reportEffectiveDay(report,{date:'2026-11-02',schedule:{plannedMinutes:0,journeyUnknown:true},scheduleSource:'approved_day_abono',abonoType:'day',status:'aboned',marks:[]});
   const b=reportEffectiveDay(report,{date:'2026-11-20',schedule:{plannedMinutes:0,journeyUnknown:true},scheduleSource:'approved_day_abono',abonoType:'day',status:'aboned',marks:[]});
   assert.equal(a.approvedAbonoMinutes,480);assert.equal(b.approvedAbonoMinutes,480);assert.equal(a.creditedMinutes+b.creditedMinutes,960);
+  const holiday=reportEffectiveDay(report,{date:'2026-11-02',schedule:{plannedMinutes:0,holiday:true},scheduleSource:'special_holiday',abonoType:'day',status:'aboned',marks:[]});assert.equal(holiday.schedule.start,'08:00');assert.equal(holiday.plannedMinutes,480);assert.equal(holiday.approvedAbonoMinutes,480);assert.equal(holiday.creditedMinutes,480);
   const c=reportEffectiveDay(report,{date:'2026-11-03',schedule:null,scheduleSource:'missing',status:'unknown',occurrences:[],marks:[{type:'entry',timestamp:'2026-11-03T11:12:00Z'},{type:'break_start',timestamp:'2026-11-03T15:00:00Z'},{type:'break_end',timestamp:'2026-11-03T16:30:00Z'},{type:'exit',timestamp:'2026-11-03T20:30:00Z'}]});
   assert.equal(c.plannedMinutes,480);assert.equal(c.schedule.start,'08:00');assert.equal(c.workedMinutes,undefined);
   assert.equal(reportFallbackSchedule(report,'2026-11-08').restDay,true);
+});
+
+test('assigned-schedule fallback does not retain a stale missing-journey warning',()=>{
+ assert.match(ui,/if\(d\.scheduleSource==='assigned_schedule_fallback'\)continue/);
 });
 
 test('management and employee report UI contains no generic Conferir batidas label',()=>{
