@@ -1,0 +1,17 @@
+name: Certus cycle schedule UI syntax
+on:
+  push:
+    branches: [audit/engine-development-20261127]
+    paths:
+      - 'certus/operacao.js'
+      - 'certus/operacao.css'
+      - '.github/workflows/certus-cycle-schedule-check.yml'
+jobs:
+  syntax:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check certus/operacao.js
