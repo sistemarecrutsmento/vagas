@@ -9,17 +9,17 @@ const match = html.match(/<script>([\s\S]*?)<\/script>/);
 assert.ok(match, 'embedded Master script exists');
 const script = match[1];
 
-test('all 14 navigation screens route to a data view', () => {
+test('all 15 navigation screens route to a data view', () => {
   const start = script.indexOf('const nav=[');
   const end = script.indexOf('];', start);
   const nav = script.slice(start, end);
-  assert.equal((nav.match(/\['/g) || []).length, 14);
+  assert.equal((nav.match(/\['/g) || []).length, 15);
   assert.match(script, /b\.onclick=\(\)=>\{active=Number\(b\.dataset\.page\)/);
   assert.match(script, /loadData\(active\)/);
 });
 
 test('read routes match the Master API surface and requests carry auth/no-store', () => {
-  for (const route of ['/api/master/dashboard','/api/master/overview','/api/master/plans','/api/master/support/tickets','/api/master/monitoring','/api/master/devices','/api/master/onboarding','/api/master/settings','/api/master/features','/api/master/announcements','/api/master/me','/api/master/audit-log','/api/master/security/incidents']) assert.ok(script.includes(route), route);
+  for (const route of ['/api/master/dashboard','/api/master/overview','/api/master/plans','/api/master/support/tickets','/api/master/monitoring','/api/master/devices','/api/master/onboarding','/api/master/settings','/api/master/features','/api/master/announcements','/api/master/me','/api/master/audit-log','/api/master/security/incidents','/api/master/bank-hours']) assert.ok(script.includes(route), route);
   for (const suffix of ['/monitoring','contracts','invoices','subscriptions']) assert.ok(script.includes(suffix), suffix);
   assert.doesNotMatch(script,/apiGet\([^)]*\/api\/master\/companies\/[^)]*\/summary/,'must not call the nonexistent company summary endpoint');
   assert.match(script,/Authorization:'Bearer '\+token/);
