@@ -24,7 +24,7 @@ test('desktop e mobile usam a mesma navegação lateral renderizada', () => {
 });
 
 test('PWA atualiza o cache para a versão nova do menu', () => {
-  assert.match(index, /operacao\.js\?v=maxclean-timesheet-abono-20261127/);
-  assert.match(serviceWorker, /VERSION='certus-static-v85-maxclean-timesheet-abono-20261127'/);
-  assert.match(serviceWorker, /\.\/operacao\.js\?v=maxclean-timesheet-abono-20261127/);
+  assert.match(index, /operacao\.js\?v=maxclean-holiday-abono-20261127/);
+  assert.match(serviceWorker, /VERSION='certus-static-v86-maxclean-holiday-abono-20261127'/);
+  assert.match(serviceWorker, /\.\/operacao\.js\?v=maxclean-holiday-abono-20261127/);
 });
