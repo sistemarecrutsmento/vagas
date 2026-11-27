@@ -97,7 +97,7 @@ test('PWA refreshes the management script for the corrected MaxClean report',()=
 
 test('timesheet classifies daily result by signed balance, so early departure and overtime cannot coexist',()=>{
  const start=ui.indexOf('function reportObservations(d){'),end=ui.indexOf('\n',start);assert.ok(start>=0&&end>start);
- const context={};vm.runInNewContext(`${ui.slice(start,end)};globalThis.f=reportObservations;`,context);
+ const context={reportDuration:value=>`${String(Math.floor(Math.abs(value)/60)).padStart(2,'0')}h${String(Math.abs(value)%60).padStart(2,'0')}min`};vm.runInNewContext(`${ui.slice(start,end)};globalThis.f=reportObservations;`,context);
  const classify=context.f;
  assert.equal(classify({dailyBalanceMinutes:-240,extra50Minutes:0,extra100Minutes:0,calculationBasis:'recorded_partial_compared_with_schedule'}),'Saída antecipada');
  assert.equal(classify({dailyBalanceMinutes:0,extra50Minutes:0,extra100Minutes:0,calculationBasis:'recorded_partial_compared_with_schedule'}),'—');
