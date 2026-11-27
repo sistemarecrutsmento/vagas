@@ -95,6 +95,12 @@ test('PWA refreshes the management script for the corrected MaxClean report',()=
  assert.match(html,/operacao\.js\?v=maxclean-partial-calculation-20261127/);
 });
 
-test('timesheet explicitly labels days calculated from incomplete punches as early departure',()=>{
- assert.match(ui,/calculationBasis==='recorded_partial_as_early_departure'\)out\.push\('Saída antecipada'\)/);
+test('timesheet classifies daily result by signed balance, so early departure and overtime cannot coexist',()=>{
+ const start=ui.indexOf('function reportObservations(d){'),end=ui.indexOf('\n',start);assert.ok(start>=0&&end>start);
+ const context={};vm.runInNewContext(`${ui.slice(start,end)};globalThis.f=reportObservations;`,context);
+ const classify=context.f;
+ assert.equal(classify({dailyBalanceMinutes:-240,extra50Minutes:0,extra100Minutes:0,calculationBasis:'recorded_partial_compared_with_schedule'}),'Saída antecipada');
+ assert.equal(classify({dailyBalanceMinutes:0,extra50Minutes:0,extra100Minutes:0,calculationBasis:'recorded_partial_compared_with_schedule'}),'—');
+ assert.equal(classify({dailyBalanceMinutes:60,extra50Minutes:60,extra100Minutes:0}),'Extra 50%');
+ assert.equal(classify({dailyBalanceMinutes:0,extra50Minutes:60,extra100Minutes:0}),'—');
 });
