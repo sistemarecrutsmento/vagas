@@ -3,10 +3,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '..');
 const ui = fs.readFileSync(path.join(__dirname, 'operacao.js'), 'utf8');
 const css = fs.readFileSync(path.join(__dirname, 'operacao.css'), 'utf8');
+const sw = fs.readFileSync(path.join(__dirname, 'service-worker.js'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
 test('management timesheet renders every daily-balance column cell in the right place', () => {
   const table = ui.match(/<table class="records-calendar"><thead><tr>(.*?)<\/tr><\/thead>/s);
@@ -55,4 +58,34 @@ test('wide management timesheet preserves readable columns when the details pane
  assert.match(css,/\.records-calendar\{width:100%;min-width:900px;border-collapse:collapse;table-layout:fixed;background:#fff\}/);
  assert.match(css,/\.records-table-area \.table-wrap\{max-height:65vh;overflow:auto\}/);
  assert.match(ui,/Espelho diário; deslize horizontalmente para consultar todas as colunas/);
+});
+
+
+test('MaxClean missing snapshots fall back to assigned workday; full-day abonos credit full net hours',()=>{
+  const start=ui.indexOf('function reportFallbackSchedule(');
+  const end=ui.indexOf('function reportSchedule(',start);
+  assert.ok(start>=0&&end>start,'fallback helpers are present before report schedule rendering');
+  const context={};
+  vm.runInNewContext(`${ui.slice(start,end)};globalThis.helpers={reportFallbackSchedule,reportEffectiveDay};`,context);
+  const {reportFallbackSchedule,reportEffectiveDay}=context.helpers;
+  const schedule={name:'MaxClean 6x1 — 44h semanais',rules:{daily_schedule:{mon:{start:'08:00',end:'17:30',break_minutes:90},tue:{start:'08:00',end:'17:30',break_minutes:90},wed:{start:'08:00',end:'17:30',break_minutes:90},thu:{start:'08:00',end:'17:30',break_minutes:90},fri:{start:'08:00',end:'17:30',break_minutes:90},sat:{start:'08:00',end:'12:00',break_minutes:0},sun:{rest:true}},days:['mon','tue','wed','thu','fri','sat'],rest_day:'sun'}};
+  const report={companyName:'MaxClean soluções em limpeza e higiene Ltda',contractualSchedule:schedule};
+  assert.equal(reportFallbackSchedule(report,'2026-11-03').plannedMinutes,480);
+  const a=reportEffectiveDay(report,{date:'2026-11-02',schedule:{plannedMinutes:0,journeyUnknown:true},scheduleSource:'approved_day_abono',abonoType:'day',status:'aboned',marks:[]});
+  const b=reportEffectiveDay(report,{date:'2026-11-20',schedule:{plannedMinutes:0,journeyUnknown:true},scheduleSource:'approved_day_abono',abonoType:'day',status:'aboned',marks:[]});
+  assert.equal(a.approvedAbonoMinutes,480);assert.equal(b.approvedAbonoMinutes,480);assert.equal(a.creditedMinutes+b.creditedMinutes,960);
+  const c=reportEffectiveDay(report,{date:'2026-11-03',schedule:null,scheduleSource:'missing',status:'unknown',occurrences:[],marks:[{type:'entry',timestamp:'2026-11-03T11:12:00Z'},{type:'break_start',timestamp:'2026-11-03T15:00:00Z'},{type:'break_end',timestamp:'2026-11-03T16:30:00Z'},{type:'exit',timestamp:'2026-11-03T20:30:00Z'}]});
+  assert.equal(c.plannedMinutes,480);assert.equal(c.schedule.start,'08:00');assert.equal(c.workedMinutes,undefined);
+  assert.equal(reportFallbackSchedule(report,'2026-11-08').restDay,true);
+});
+
+test('management and employee report UI contains no generic Conferir batidas label',()=>{
+ assert.doesNotMatch(ui,/Conferir batidas/);
+});
+
+
+test('PWA refreshes the management script for the corrected MaxClean report',()=>{
+ assert.match(sw,/certus-static-v85-maxclean-timesheet-abono-20261127/);
+ assert.match(sw,/operacao\.js\?v=maxclean-timesheet-abono-20261127/);
+ assert.match(html,/operacao\.js\?v=maxclean-timesheet-abono-20261127/);
 });

@@ -82,10 +82,10 @@ test('service worker registers on HTTPS and caches only the pinned public face a
   assert.match(sw, /if\(isFaceAsset\(url\)\)/);
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
-  assert.match(html, /operacao\.js\?v=menu-order-20261127/);
+  assert.match(html, /operacao\.js\?v=maxclean-timesheet-abono-20261127/);
   assert.match(html, /operacao-mobile\.css\?v=visual-audit-20261126/);
   assert.match(sw, /operacao-mobile\.css\?v=visual-audit-20261126/);
-  assert.match(sw, /certus-static-v84-menu-order-20261127/);
+  assert.match(sw, /certus-static-v85-maxclean-timesheet-abono-20261127/);
   assert.match(sw, /login-fingerprint\.svg/);
 });
 
