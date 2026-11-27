@@ -356,3 +356,5 @@ body{background:#f5f4f5}.layout{background:#f5f4f5}.side{background:#50001f;colo
 
 
 .timesheet-mark-symbol{font-size:.72em;line-height:0;vertical-align:super;font-weight:600;margin-left:1px}
+
+.bank-positive{color:#146c43!important}.bank-negative{color:#b42318!important}.bank-neutral{color:#4a4650!important}
