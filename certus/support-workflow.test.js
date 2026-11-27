@@ -32,7 +32,7 @@ test('Master support inbox offers public response, private note and audited upda
   assert.match(masterHtml, /Respostas públicas ficam disponíveis no portal da empresa/);
 });
 test('company support shortcut is removed from primary navigation and placed in sidebar footer', () => {
-  assert.match(company, /\['dashboard','employees','records','requests','users'/);
+  assert.match(company, /\['dashboard','employees','records','requests','anomalies','users'/);
   assert.doesNotMatch(company, /\['dashboard','support','employees'/);
   assert.match(company, /data-view=\"support\" class=\"side-help\"/);
   assert.match(company, /<strong>Ajuda<\/strong><span>Abertura de chamados<\/span>/);
