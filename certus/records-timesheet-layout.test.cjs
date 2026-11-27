@@ -90,7 +90,7 @@ test('management and employee report UI contains no generic Conferir batidas lab
 
 
 test('PWA refreshes the management script for the corrected MaxClean report',()=>{
- assert.match(sw,/certus-static-v85-maxclean-timesheet-abono-20261127/);
- assert.match(sw,/operacao\.js\?v=maxclean-timesheet-abono-20261127/);
- assert.match(html,/operacao\.js\?v=maxclean-timesheet-abono-20261127/);
+ assert.match(sw,/certus-static-v86-maxclean-holiday-abono-20261127/);
+ assert.match(sw,/operacao\.js\?v=maxclean-holiday-abono-20261127/);
+ assert.match(html,/operacao\.js\?v=maxclean-holiday-abono-20261127/);
 });
