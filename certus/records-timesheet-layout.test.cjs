@@ -103,4 +103,6 @@ test('timesheet classifies daily result by signed balance, so early departure an
  assert.equal(classify({dailyBalanceMinutes:0,extra50Minutes:0,extra100Minutes:0,calculationBasis:'recorded_partial_compared_with_schedule'}),'—');
  assert.equal(classify({dailyBalanceMinutes:60,extra50Minutes:60,extra100Minutes:0}),'Extra 50%');
  assert.equal(classify({dailyBalanceMinutes:0,extra50Minutes:60,extra100Minutes:0}),'—');
+ const intervalPending=classify({dailyBalanceMinutes:null,extra50Minutes:null,extra100Minutes:null,warnings:['scheduled_break_without_recorded_or_prescribed_interval'],chronologicalElapsedMinutes:540});
+ assert.equal(intervalPending,'Intervalo pendente · 09h00min entre batidas');
 });
