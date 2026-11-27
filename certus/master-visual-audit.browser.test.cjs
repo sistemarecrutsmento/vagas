@@ -22,6 +22,9 @@ test('management portal avoids word-by-word wrapping, uses readable status/date 
  assert.match(managementMobileCss,/\.side\{scrollbar-width:thin;scrollbar-color:#8d3a57 #50001f\}/);
  assert.match(managementMobileCss,/\.table-wrap th\{white-space:nowrap;overflow-wrap:normal;word-break:normal\}/);
  assert.match(managementMobileCss,/\.table-wrap td,.main \.records-calendar td\{overflow-wrap:break-word;word-break:normal\}/);
+ assert.match(html,/\.app-side\{scrollbar-width:thin;scrollbar-color:#b77a8f #3d0018\}/,'Master sidebar scrollbar uses coordinated wine/plum colors');
+ assert.match(html,/\.access-identity-stats\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/,'identity cards use all three desktop columns');
+ assert.match(html,/\.access-identity-stats \.demo-stat strong\{font-size:18px;line-height:1.25;overflow-wrap:anywhere;word-break:normal\}/,'long identity values stay readable');
 });
 
 test('Master pages render without viewport overflow and keep long table data readable on desktop and mobile',async()=>{
@@ -35,7 +38,7 @@ test('Master pages render without viewport overflow and keep long table data rea
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));origin=`http://127.0.0.1:${server.address().port}`;
  const browser=await chromium.launch({headless:true});
  try{
-  for(const viewport of [{width:1440,height:900},{width:390,height:844}]){
+  for(const viewport of [{width:1440,height:900},{width:1024,height:768},{width:768,height:1024},{width:390,height:844}]){
    const page=await browser.newPage({viewport});
    await page.route('**/*',async route=>{
     const url=route.request().url();if(url.startsWith(origin+'/'))return route.continue();
@@ -72,6 +75,13 @@ test('Master pages render without viewport overflow and keep long table data rea
     const widths=await page.evaluate(()=>({viewport:innerWidth,doc:document.documentElement.scrollWidth,content:document.querySelector('#content')?.scrollWidth||0,client:document.querySelector('#content')?.clientWidth||0}));
     assert.ok(widths.doc<=widths.viewport+1,`${pages[i]} causes page-wide horizontal overflow at ${viewport.width}px: ${JSON.stringify(widths)}`);
     assert.ok(widths.content<=widths.client+1,`${pages[i]} content escapes its column at ${viewport.width}px: ${JSON.stringify(widths)}`);
+    if(pages[i]==='Acessos e Permissões'){
+     const layout=await page.locator('.access-identity-stats').evaluate(el=>({columns:getComputedStyle(el).gridTemplateColumns.split(' ').length,emailWrap:getComputedStyle(el.querySelectorAll('.demo-stat strong')[1]).overflowWrap,scrollbar:getComputedStyle(document.querySelector('.app-side')).scrollbarColor}));
+     const expectedColumns=viewport.width>1100?3:viewport.width>760?2:1;
+     assert.equal(layout.columns,expectedColumns,`identity cards reflow at ${viewport.width}px`);
+     assert.equal(layout.emailWrap,'anywhere','long email may wrap only when required by its card width');
+     assert.match(layout.scrollbar,/183, 122, 143/i,'Master sidebar scrollbar thumb matches its custom theme');
+    }
    }
    const table=page.locator('.demo-table-wrap').first();
    await table.waitFor();
