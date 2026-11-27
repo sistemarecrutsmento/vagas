@@ -45,6 +45,6 @@ test('12x36 editor accepts a known break duration without inventing fixed break 
 
 test('published portal and PWA shell use the new 12x36 schedule asset version', () => {
   assert.match(indexHtml, /operacao\.js\?v=12x36-schedule-20261126/);
-  assert.match(serviceWorker, /certus-static-v82-12x36-schedule-20261126/);
+  assert.match(serviceWorker, /certus-static-v83-visual-audit-20261126/);
   assert.match(serviceWorker, /operacao\.js\?v=12x36-schedule-20261126/);
 });

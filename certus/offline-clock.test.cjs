@@ -83,6 +83,9 @@ test('service worker registers on HTTPS and caches only the pinned public face a
   assert.match(sw, /url\.pathname\.includes\('\/api\/'\)/);
   assert.match(sw, /face-api@1\.7\.15/);
   assert.match(html, /operacao\.js\?v=12x36-schedule-20261126/);
+  assert.match(html, /operacao-mobile\.css\?v=visual-audit-20261126/);
+  assert.match(sw, /operacao-mobile\.css\?v=visual-audit-20261126/);
+  assert.match(sw, /certus-static-v83-visual-audit-20261126/);
   assert.match(sw, /login-fingerprint\.svg/);
 });
 
