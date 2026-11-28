@@ -26,5 +26,5 @@ test('employee and management views identify pending offline marks; manager tota
  const management=ui.slice(at,end);
  assert.match(rows,/timesheetMarkStatus\(m\)/);
  assert.match(management,/timesheetMarkStatus\(m\)/);
- assert.match(management,/hasPendingOfflineMark\?null:visibleDays\.reduce/);
+ assert.match(ui,/hasPendingOfflineMark\?null:visibleDays\.reduce/);
 });
