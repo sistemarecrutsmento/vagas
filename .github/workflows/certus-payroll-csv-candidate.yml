@@ -1,0 +1,30 @@
+name: Certus payroll CSV candidate regression
+
+on:
+  push:
+    branches:
+      - 'release/management-payroll-csv-*'
+    paths:
+      - 'certus/operacao.js'
+      - 'certus/monthly-payroll-csv.browser.test.cjs'
+      - '.github/workflows/certus-payroll-csv-candidate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  payroll-csv-browser-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright test dependency
+        run: npm install --no-save playwright@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run isolated payroll CSV browser regression
+        run: node --test certus/monthly-payroll-csv.browser.test.cjs
