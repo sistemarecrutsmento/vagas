@@ -60,3 +60,6 @@ test('native closure and exports retain audit reasons and official API routes',(
 test('employee actions stay readable in the responsive roster table',()=>{assert.match(ui,/employee-action-cell/);assert.match(ui,/employee-actions/);assert.match(css,/\.employee-actions\{display:flex;flex-wrap:wrap/);assert.match(css,/employee-action-cell \.small\{width:auto;min-width:max-content/)});
 
 test('employee action style is cache-busted in the Portal and PWA shell',()=>{assert.match(index,/operacao\.css\?v=offline-mark-symbol-20261125&employee-actions=nowrap-v1/);assert.match(serviceWorker,/operacao\.css\?v=offline-mark-symbol-20261125&employee-actions=nowrap-v1/)});
+
+
+test('calendar supports exact schedule-version scope and exports cache-busted canonical ledger client',()=>{assert.match(ui,/value=\"schedule\"/);assert.match(ui,/name=\"schedule_key\"/);assert.match(ui,/body\.schedule_id=schedule_id;body\.schedule_version=Number\(schedule_version\)/);assert.match(ui,/api\('/api/schedules'\)/);assert.match(index,/bank-calendar=canonical-movements-20261128-v1/);assert.match(serviceWorker,/bank-calendar=canonical-movements-20261128-v1/) });
