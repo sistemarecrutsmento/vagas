@@ -254,3 +254,5 @@ test('Master forms share responsive controls without changing transactional hand
  assert.ok(html.includes('form input[type=checkbox]'));
  assert.match(script,/apiWrite\(/);
 });
+
+test('bank-hours page exposes an all-company read-only historical reconciliation preview',()=>{assert.match(script,/master-reconciliation-preview/);assert.match(script,/master-reconciliation-result/);assert.match(script,/apiGet\('\/api\/master\/operations\/reconciliation-preview'\)/);assert.match(script,/Somente leitura/);assert.match(script,/Não altera dados/)});
