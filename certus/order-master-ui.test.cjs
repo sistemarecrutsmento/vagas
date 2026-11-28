@@ -22,7 +22,10 @@ test('Order Master uses the deployed tenant endpoints and authenticated company 
 });
 
 test('12x36 preview stays read-only and describes 12 work hours plus 36 rest hours', () => {
-  assert.match(ui, /work_minutes:720,rest_minutes:2160/);
+  assert.match(ui, /anchorDate:f\.elements\.from\.value/);
+  assert.match(ui, /positions:\[\{kind:'work',periods:\[\{start,end\}\]\},\{kind:'rest',periods:\[\]\}\]/);
+  assert.match(ui, /breakMinutes/);
+  assert.match(ui, /720-breakMinutes/);
   assert.match(ui, /nenhuma alteração persistida/i);
   assert.match(ui, /horário de intervalo opcional/i);
   assert.doesNotMatch(ui, /fetch\([^)]*\/api\/schedules\/cycle-preview/);
