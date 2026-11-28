@@ -27,6 +27,9 @@ test('former Order Master features now live in the authenticated native Certus m
  assert.ok(ui.includes("'monthly-timesheets.xlsx':'/api/management/monthly-timesheets.xlsx'"));
  assert.ok(ui.includes("'monthly-payroll.csv':'/api/management/monthly-payroll.csv'"));
  assert.match(ui,/calendar:'Calendário e eventos'/);
+ assert.ok(ui.includes('/api/schedule-assignments/migration-readiness'));
+ assert.match(ui,/data-regularize-schedule/);
+ assert.ok(ui.includes("form.elements.valid_from.value=''"));
  assert.match(ui,/name=\"schedule_valid_from\" type=\"date\"/);
  assert.match(ui,/name=\"schedule_audit_note\" minlength=\"8\"/);
  assert.ok(ui.includes("initialScheduleId&&(!body.schedule_valid_from||String(body.schedule_audit_note||'').trim().length<8)"));
