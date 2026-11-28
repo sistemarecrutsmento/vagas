@@ -1,0 +1,27 @@
+name: Certus management offline-review dashboard regression
+on:
+  push:
+    branches:
+      - release/management-offline-review-alert-20261128
+    paths:
+      - 'certus/operacao.js'
+      - 'certus/dashboard-offline-review.browser.test.cjs'
+      - '.github/workflows/certus-management-offline-review-alert.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'certus/operacao.js'
+      - 'certus/dashboard-offline-review.browser.test.cjs'
+      - '.github/workflows/certus-management-offline-review-alert.yml'
+jobs:
+  offline-review-dashboard:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - run: node --test --test-reporter=spec certus/dashboard-offline-review.browser.test.cjs
