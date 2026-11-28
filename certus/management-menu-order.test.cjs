@@ -13,7 +13,7 @@ test('Gestão mantém a ordem solicitada no menu principal em todas as empresas'
   const keys = [...match[1].matchAll(/'([^']+)'/g)].map((item) => item[1]);
   assert.deepEqual(keys, [
     'dashboard', 'employees', 'records', 'requests', 'anomalies', 'users',
-    'bank', 'schedules', 'branches', 'terminals', 'reports', 'password',
+    'bank', 'schedules', 'calendar', 'branches', 'terminals', 'reports', 'password',
     'settings', 'subscription',
   ]);
 });
