@@ -24,4 +24,13 @@ jobs:
           node-version: 22
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install --with-deps chromium
-      - run: node --test --test-reporter=spec certus/dashboard-offline-review.browser.test.cjs
+      - name: Run focused browser regression and expose failure details
+        shell: bash
+        run: |
+          set +e
+          node --test --test-reporter=spec certus/dashboard-offline-review.browser.test.cjs 2>&1 | tee /tmp/offline-review-test.log
+          result=${PIPESTATUS[0]}
+          if [ "$result" -ne 0 ]; then
+            while IFS= read -r line; do echo "::error::$line"; done < /tmp/offline-review-test.log
+            exit "$result"
+          fi
