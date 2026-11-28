@@ -1,4 +1,4 @@
-const VERSION='certus-static-v88-terminal-settings-nondestructive-20261128-bank-automation-v1';
+const VERSION='certus-static-v88-terminal-settings-nondestructive-20261128';
 const FACE_ASSET_CACHE='certus-face-assets-v1.7.15';
 const FACE_ASSET_PREFIX='/npm/@vladmandic/face-api@1.7.15/';
 function isFaceAsset(url){return url.origin==='https://cdn.jsdelivr.net'&&url.pathname.startsWith(FACE_ASSET_PREFIX)&&(/^\/npm\/@vladmandic\/face-api@1\.7\.15\/dist\/face-api\.js$/.test(url.pathname)||/^\/npm\/@vladmandic\/face-api@1\.7\.15\/model\/(?:ssd_mobilenetv1|face_landmark_68|face_recognition)_model(?:-weights_manifest\.json|\.bin)$/.test(url.pathname))}
