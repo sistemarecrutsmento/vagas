@@ -5,6 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const ui=fs.readFileSync(path.join(__dirname,'operacao.js'),'utf8');
 const legacy=fs.readFileSync(path.join(__dirname,'order-master.html'),'utf8');
+const css=fs.readFileSync(path.join(__dirname,'operacao.css'),'utf8');
 
 test('former Order Master features now live in the authenticated native Certus modules',()=>{
  for(const feature of [
@@ -46,3 +47,5 @@ test('native closure and exports retain audit reasons and official API routes',(
  assert.match(ui,/monthly-timesheets\.xlsx/);
  assert.match(ui,/monthly-payroll\.csv/);
 });
+
+test('employee actions stay readable in the responsive roster table',()=>{assert.match(ui,/employee-action-cell/);assert.match(ui,/employee-actions/);assert.match(css,/employee-action-cell \.employee-actions\{display:flex;flex-wrap:wrap/);assert.match(css,/employee-action-cell \.small\{width:auto;min-width:max-content/)});
