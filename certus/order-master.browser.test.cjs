@@ -1,0 +1,46 @@
+'use strict';
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const http=require('node:http');
+const {chromium}=require('playwright');
+const root=path.resolve(__dirname,'..');
+const COMPANY='00000000-0000-4000-8000-000000000401';
+const EMPLOYEE='00000000-0000-4000-8000-000000000201';
+const BRANCH='00000000-0000-4000-8000-000000000101';
+function serve(){return http.createServer((req,res)=>{const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);const file=path.join(root,pathname.replace(/^\//,''));if(!file.startsWith(root+path.sep)){res.writeHead(403).end();return}fs.readFile(file,(error,bytes)=>{if(error){res.writeHead(404).end();return}const ext=path.extname(file);res.writeHead(200,{'Content-Type':ext==='.html'?'text/html; charset=utf-8':ext==='.js'?'text/javascript; charset=utf-8':ext==='.css'?'text/css; charset=utf-8':'application/octet-stream'});res.end(bytes)})})}
+
+test('Order Master browser flow uses authenticated tenant routes and real export download',async t=>{
+ const server=serve();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));let browser;
+ t.after(async()=>{if(browser)await browser.close();await new Promise(resolve=>server.close(resolve))});
+ browser=await chromium.launch({headless:true});const context=await browser.newContext({acceptDownloads:true,viewport:{width:1365,height:900}}),page=await context.newPage(),calls=[],events=[];let closed=false;
+ await page.addInitScript(({company})=>{sessionStorage.setItem('certus_token','fixture-session-token');sessionStorage.setItem('certus_user',JSON.stringify({id:'fixture-user',name:'Fixture HR',role:'hr',branch_ids:null,company:{id:company,slug:'fixture',name:'Fixture Company',timezone:'America/Sao_Paulo'}}))},{company:COMPANY});
+ await page.route('https://certus-api.onrender.com/**',async route=>{const req=route.request(),url=new URL(req.url()),p=url.pathname,method=req.method(),body=req.postDataJSON?.()||{};const headers={'Access-Control-Allow-Origin':new URL(page.url()||'http://127.0.0.1').origin,'Access-Control-Allow-Headers':'Authorization,Content-Type','Access-Control-Allow-Methods':'GET,POST,PATCH,OPTIONS','Access-Control-Allow-Credentials':'true'};if(method==='OPTIONS')return route.fulfill({status:204,headers});calls.push({path:p,method,body,query:Object.fromEntries(url.searchParams),authorization:req.headers().authorization});const json=(data,status=200)=>route.fulfill({status,contentType:'application/json',headers,body:JSON.stringify(data)});
+  if(p==='/api/employees')return json({items:[{id:EMPLOYEE,full_name:'Fixture Employee',employee_number:'F-001',status:'active',branch_id:BRANCH}]});
+  if(p==='/api/schedules')return json({items:[{id:'00000000-0000-4000-8000-000000000301',name:'Escala 12×36',status:'active',version:2,rules:{template_type:'12x36',cycle_anchor_date:'2026-11-01',cycle_anchor_start:'07:00',work_minutes:720,rest_minutes:2160,break_minutes:0}}]});
+  if(p==='/api/branches')return json({items:[{id:BRANCH,name:'Fixture Branch',status:'active'}]});
+  if(p==='/api/departments')return json({items:[]});
+  if(p==='/api/schedule-policy')return json({item:{approval_mode:'direct',require_separate_approver:true,version:1}});
+  if(p==='/api/management/calendar-events'&&method==='GET')return json({items:events,from:url.searchParams.get('from'),to:url.searchParams.get('to')});
+  if(p==='/api/management/calendar-events'&&method==='POST'){const item={...body,id:`fixture-event-${events.length+1}`,status:'active',version:1};events.push(item);return json({item},201)}
+  if(p==='/api/company/labor-catalog')return json({policy:{catalog_version:1,effective_from:'2026-01-01',review_reference:'fixture source',catalog:[{rule_code:'night.urban',category:'night_work',legal_review_status:'reviewed',values:{start:'22:00',end:'05:00',premium_percent:20},company_configurable_fields:['premium_percent']}],overrides:[]},history:[]});
+  if(p==='/api/company/labor-catalog/overrides'&&method==='POST')return json({item:{id:'fixture-override',version:1}} ,201);
+  if(p==='/api/employees/'+EMPLOYEE+'/schedule-assignments'&&method==='POST')return json({item:{id:'fixture-assignment',...body},pending_independent_review:false},201);
+  if(p==='/api/schedules/cycle-preview'&&method==='POST')return json({item:{cycle_days:2,from:body.from,to:body.to,days:[{date:body.from,status:'work'}],notice:'Preview only.'}});
+  if(p==='/api/management/employee-timesheet/'+EMPLOYEE+'/closure')return json({item:closed?{action:'closed',version_no:1,created_at:'2026-11-28T12:00:00Z'}:null,closed});
+  if(p==='/api/management/employee-timesheet/'+EMPLOYEE+'/close'&&method==='POST'){closed=true;return json({item:{action:'closed',version_no:1}},201)}
+  if(p==='/api/management/employee-timesheet/'+EMPLOYEE+'/reopen'&&method==='POST'){closed=false;return json({item:{action:'reopened',version_no:2}},201)}
+  if(p==='/api/bank-hours/cycles')return json({items:[]});
+  if(p==='/api/management/monthly-timesheets.csv')return route.fulfill({status:200,contentType:'text/csv; charset=utf-8',headers:{...headers,'Content-Disposition':'attachment; filename="espelho.csv"'},body:'fixture'});
+  if(p==='/api/management/monthly-timesheets.xlsx')return route.fulfill({status:200,contentType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',headers:{...headers,'Content-Disposition':'attachment; filename="espelho.xlsx"'},body:Buffer.from('PK\x03\x04fixture')});
+  if(p==='/api/management/monthly-payroll.csv')return route.fulfill({status:200,contentType:'text/csv; charset=utf-8',headers:{...headers,'Content-Disposition':'attachment; filename="folha-quantidades.csv"'},body:'fixture'});
+  return json({error:`Unexpected fixture API call ${method} ${p}`},501);
+ });
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));await page.goto(`http://127.0.0.1:${server.address().port}/certus/order-master.html`);await page.getByRole('heading',{name:'Ordem Mestre'}).waitFor();
+ const assign=page.locator('#om-assignment-form');await assign.locator('[name=employee_id]').selectOption(EMPLOYEE);await assign.locator('[name=schedule_id]').selectOption('00000000-0000-4000-8000-000000000301');await assign.locator('[name=valid_from]').fill('2026-12-01');await assign.locator('[name=legal_basis]').fill('Acordo coletivo vigente 2026');await assign.locator('[name=audit_note]').fill('Teste funcional isolado em fixture.');await assign.getByRole('button',{name:'Registrar atribuição'}).click();assert.equal(calls.filter(x=>x.path.endsWith('/schedule-assignments')&&x.method==='POST').length,1);
+ const cal=page.locator('#om-calendar-form');await cal.locator('[name=title]').fill('Evento de teste');await cal.locator('[name=starts_on]').fill('2026-12-03');await cal.locator('[name=ends_on]').fill('2026-12-03');await cal.getByRole('button',{name:'Salvar evento'}).click();await page.getByText('Evento de teste').waitFor();assert.equal(calls.filter(x=>x.path==='/api/management/calendar-events'&&x.method==='POST').length,1);
+ const closure=page.locator('#om-closure-form');await closure.locator('[name=employee_id]').selectOption(EMPLOYEE);await closure.locator('[name=reason]').fill('Teste de fechamento em fixture.');await page.waitForFunction(()=>!document.querySelector('#om-closure-close').disabled);page.once('dialog',dialog=>dialog.accept());await closure.getByRole('button',{name:'Fechar competência'}).click();await page.waitForFunction(()=>document.querySelector('#om-closure-reopen').disabled===false);assert.equal(closed,true);page.once('dialog',dialog=>dialog.accept());await closure.getByRole('button',{name:'Reabrir competência'}).click();await page.waitForFunction(()=>document.querySelector('#om-closure-close').disabled===false);assert.equal(closed,false);
+ const exportButton=page.locator('[data-download="monthly-timesheets.xlsx"]');const downloadPromise=page.waitForEvent('download');await exportButton.click();const download=await downloadPromise;assert.equal(download.suggestedFilename(),'espelho.xlsx');
+ assert.ok(calls.some(x=>x.authorization==='Bearer fixture-session-token'));assert.deepEqual(errors,[]);await context.close();
+});

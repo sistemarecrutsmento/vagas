@@ -30,7 +30,7 @@ test('12x36 preview stays read-only and describes 12 work hours plus 36 rest hou
 
 test('monthly closure and exports call exact supported routes and send audit reasons', () => {
   assert.match(ui, /employee-timesheet\/\$\{encodeURIComponent\(employee\)\}\/\$\{action\}/);
-  assert.match(ui, /reason: f\.elements\.reason\.value\.trim\(\)/);
+  assert.match(ui, /body=\{year:Number\(f\.elements\.year\.value\),month:Number\(f\.elements\.month\.value\),reason:\s*f\.elements\.reason\.value\.trim\(\)\}/);
   assert.match(ui, /monthly-timesheets\.xlsx/);
   assert.match(ui, /monthly-payroll\.csv/);
   assert.match(ui, /Sem totais financeiros/);

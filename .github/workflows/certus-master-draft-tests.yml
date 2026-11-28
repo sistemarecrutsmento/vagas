@@ -10,6 +10,7 @@ on:
       - 'certus/order-master.js'
       - 'certus/order-master.css'
       - 'certus/order-master-ui.test.cjs'
+      - 'certus/order-master.browser.test.cjs'
       - 'certus/operacao.js'
       - 'certus/operacao.css'
       - '.github/workflows/certus-master-draft-tests.yml'
@@ -23,6 +24,7 @@ on:
       - 'certus/order-master.js'
       - 'certus/order-master.css'
       - 'certus/order-master-ui.test.cjs'
+      - 'certus/order-master.browser.test.cjs'
       - 'certus/operacao.js'
       - 'certus/operacao.css'
       - '.github/workflows/certus-master-draft-tests.yml'
@@ -36,4 +38,4 @@ jobs:
           node-version: 22
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install chromium
-      - run: node --test --test-reporter=spec certus/master.integration.test.js certus/master.browser.test.cjs certus/order-master-ui.test.cjs
+      - run: node --test --test-reporter=spec certus/master.integration.test.js certus/master.browser.test.cjs certus/order-master-ui.test.cjs certus/order-master.browser.test.cjs
