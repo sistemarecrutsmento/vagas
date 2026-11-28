@@ -27,7 +27,11 @@ test('former Order Master features now live in the authenticated native Certus m
  assert.ok(ui.includes("'monthly-timesheets.xlsx':'/api/management/monthly-timesheets.xlsx'"));
  assert.ok(ui.includes("'monthly-payroll.csv':'/api/management/monthly-payroll.csv'"));
  assert.match(ui,/calendar:'Calendário e eventos'/);
- assert.match(ui,/scheduleEmployeeId=employeeId;scheduleScheduleId=initialScheduleId;d\.dataset\.nextView='schedules'/);
+ assert.match(ui,/name=\"schedule_valid_from\" type=\"date\"/);
+ assert.match(ui,/name=\"schedule_audit_note\" minlength=\"8\"/);
+ assert.ok(ui.includes("initialScheduleId&&(!body.schedule_valid_from||String(body.schedule_audit_note||'').trim().length<8)"));
+ assert.ok(ui.includes("api('/api/employees',{method:'POST',body:JSON.stringify(body)})"));
+ assert.match(ui,/created\.item\.initial_schedule_assignment\?\.status==='pending_review'/);
  assert.match(ui,/data-open-employee-schedules/);
  assert.match(ui,/data-open-employee-schedules/);
  assert.doesNotMatch(ui,/nav-order-master|href="\.\/order-master\.html"/);
