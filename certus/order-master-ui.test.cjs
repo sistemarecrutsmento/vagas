@@ -50,6 +50,6 @@ test('native closure and exports retain audit reasons and official API routes',(
  assert.match(ui,/monthly-payroll\.csv/);
 });
 
-test('employee actions stay readable in the responsive roster table',()=>{assert.match(ui,/employee-action-cell/);assert.match(ui,/employee-actions/);assert.match(css,/employee-action-cell \.employee-actions\{display:flex;flex-wrap:wrap/);assert.match(css,/employee-action-cell \.small\{width:auto;min-width:max-content/)});
+test('employee actions stay readable in the responsive roster table',()=>{assert.match(ui,/employee-action-cell/);assert.match(ui,/employee-actions/);assert.match(css,/\.employee-actions\{display:flex;flex-wrap:wrap/);assert.match(css,/employee-action-cell \.small\{width:auto;min-width:max-content/)});
 
 test('employee action style is cache-busted in the Portal and PWA shell',()=>{assert.match(index,/operacao\.css\?v=offline-mark-symbol-20261125&employee-actions=nowrap-v1/);assert.match(serviceWorker,/operacao\.css\?v=offline-mark-symbol-20261125&employee-actions=nowrap-v1/)});
