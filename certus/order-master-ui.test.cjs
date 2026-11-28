@@ -6,6 +6,8 @@ const path=require('node:path');
 const ui=fs.readFileSync(path.join(__dirname,'operacao.js'),'utf8');
 const legacy=fs.readFileSync(path.join(__dirname,'order-master.html'),'utf8');
 const css=fs.readFileSync(path.join(__dirname,'operacao.css'),'utf8');
+const index=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+const serviceWorker=fs.readFileSync(path.join(__dirname,'service-worker.js'),'utf8');
 
 test('former Order Master features now live in the authenticated native Certus modules',()=>{
  for(const feature of [
@@ -49,3 +51,5 @@ test('native closure and exports retain audit reasons and official API routes',(
 });
 
 test('employee actions stay readable in the responsive roster table',()=>{assert.match(ui,/employee-action-cell/);assert.match(ui,/employee-actions/);assert.match(css,/employee-action-cell \.employee-actions\{display:flex;flex-wrap:wrap/);assert.match(css,/employee-action-cell \.small\{width:auto;min-width:max-content/)});
+
+test('employee action style is cache-busted in the Portal and PWA shell',()=>{assert.match(index,/operacao\.css\?v=offline-mark-symbol-20261125&employee-actions=nowrap-v1/);assert.match(serviceWorker,/operacao\.css\?v=offline-mark-symbol-20261125&employee-actions=nowrap-v1/)});
