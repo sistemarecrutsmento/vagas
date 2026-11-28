@@ -20,11 +20,13 @@ test('former Order Master features now live in the authenticated native Certus m
   '/api/management/monthly-timesheets.csv','/api/management/monthly-timesheets.xlsx','/api/management/monthly-payroll.csv',
   '/api/bank-hours/automation-settings'
  ])assert.ok(ui.includes(route),`native UI no longer calls ${route}`);
- assert.match(ui,/monthly-timesheets\.csv': '\/api\/management\/monthly-timesheets\.csv'/);
- assert.match(ui,/monthly-timesheets\.xlsx': '\/api\/management\/monthly-timesheets\.xlsx'/);
- assert.match(ui,/monthly-payroll\.csv': '\/api\/management\/monthly-payroll\.csv'/);
+ assert.ok(ui.includes("'monthly-timesheets.csv':'/api/management/monthly-timesheets.csv'"));
+ assert.ok(ui.includes("'monthly-timesheets.xlsx':'/api/management/monthly-timesheets.xlsx'"));
+ assert.ok(ui.includes("'monthly-payroll.csv':'/api/management/monthly-payroll.csv'"));
  assert.match(ui,/calendar:'Calendário e eventos'/);
  assert.match(ui,/data-open-employee-schedules/);
+ assert.match(ui,/scheduleEmployeeId=employeeId;d\.dataset\.nextView='schedules'/);
+ assert.match(ui,/delete body\.schedule_id/);
  assert.doesNotMatch(ui,/nav-order-master|href="\.\/order-master\.html"/);
  assert.match(legacy,/http-equiv="refresh"/i);
  assert.match(legacy,/location\.replace\('\.\/index\.html\?view=schedules'\)/);
@@ -32,7 +34,7 @@ test('former Order Master features now live in the authenticated native Certus m
 
 test('12x36 preview remains read-only and delegates the cycle projection to the API',()=>{
  assert.match(ui,/cycle_schedule:cycle,from,to/);
- assert.match(ui,/legal_review_required/);
+ assert.match(ui,/r\.item\.notice/);
  assert.match(ui,/Nenhuma jornada ou marcação é alterada pela prévia/);
 });
 
