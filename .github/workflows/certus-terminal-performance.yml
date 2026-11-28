@@ -5,6 +5,8 @@ on:
     paths:
       - 'certus/terminal.js'
       - 'certus/terminal.performance.test.cjs'
+      - 'certus/terminal-settings.test.cjs'
+      - 'certus/terminal-offline.test.cjs'
       - 'certus/terminal-offline.test.cjs'
       - 'certus/terminal-settings.test.cjs'
       - '.github/workflows/certus-terminal-performance.yml'
