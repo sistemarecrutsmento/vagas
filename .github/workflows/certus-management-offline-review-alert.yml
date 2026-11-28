@@ -31,6 +31,7 @@ jobs:
           node --test --test-reporter=spec certus/dashboard-offline-review.browser.test.cjs 2>&1 | tee /tmp/offline-review-test.log
           result=${PIPESTATUS[0]}
           if [ "$result" -ne 0 ]; then
-            while IFS= read -r line; do echo "::error::$line"; done < /tmp/offline-review-test.log
+            details=$(tail -n 18 /tmp/offline-review-test.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')
+            echo "::error title=Focused browser test failure::$details"
             exit "$result"
           fi
