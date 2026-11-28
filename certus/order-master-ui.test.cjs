@@ -28,6 +28,7 @@ test('former Order Master features now live in the authenticated native Certus m
  assert.match(ui,/data-open-employee-schedules/);
  assert.match(ui,/data-open-employee-schedules/);
  assert.doesNotMatch(ui,/nav-order-master|href="\.\/order-master\.html"/);
+ assert.doesNotMatch(legacy,/order-master\.(?:js|css)/);
  assert.match(legacy,/http-equiv="refresh"/i);
  assert.match(legacy,/location\.replace\('\.\/index\.html\?view=schedules'\)/);
 });
