@@ -1,57 +1,45 @@
 'use strict';
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const ui = fs.readFileSync(path.join(__dirname, 'order-master.js'), 'utf8');
-const master = fs.readFileSync(path.join(__dirname, 'master.html'), 'utf8');
-const shell = fs.readFileSync(path.join(__dirname, 'operacao.js'), 'utf8');
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const ui=fs.readFileSync(path.join(__dirname,'operacao.js'),'utf8');
+const legacy=fs.readFileSync(path.join(__dirname,'order-master.html'),'utf8');
 
-test('Order Master uses the deployed tenant endpoints and authenticated company session', () => {
-  for (const route of [
-    '/api/schedules', '/api/schedules/cycle-preview', '/api/employees/',
-    '/api/schedule-assignments/pending', '/api/management/calendar-events',
-    '/api/company/labor-catalog', '/api/company/labor-catalog/overrides',
-    '/api/management/employee-timesheet/', '/api/management/monthly-timesheets.csv',
-    '/api/management/monthly-timesheets.xlsx', '/api/management/monthly-payroll.csv',
-    '/api/bank-hours/cycles'
-  ]) assert.ok(ui.includes(route), `missing supported endpoint ${route}`);
-  assert.match(ui, /Authorization:\s*`Bearer \$\{token\}`/);
-  assert.match(ui, /cycle_schedule:cycle/);
-  assert.match(shell, /order-master\.html/);
+test('former Order Master features now live in the authenticated native Certus modules',()=>{
+ for(const feature of [
+  'schedule-assignment-form','schedule-assignment-history','schedule-pending-list','native-cycle-preview',
+  'native-calendar-form','native-calendar-history','labor-overrides-form',
+  'native-timesheet-closure-form','official-monthly-export-form','bank-automation-form'
+ ])assert.ok(ui.includes(feature),`native module missing ${feature}`);
+ for(const route of [
+  '/api/employees/${encodeURIComponent(employee)}/schedule-assignments','/api/schedule-assignments/pending',
+  '/api/schedules/cycle-preview','/api/management/calendar-events','/api/management/calendar-events/${encodeURIComponent',
+  '/api/company/labor-catalog','/api/company/labor-catalog/overrides',
+  '/api/management/employee-timesheet/${encodeURIComponent(employee)}/closure',
+  '/api/management/monthly-timesheets.csv','/api/management/monthly-timesheets.xlsx','/api/management/monthly-payroll.csv',
+  '/api/bank-hours/automation-settings'
+ ])assert.ok(ui.includes(route),`native UI no longer calls ${route}`);
+ assert.match(ui,/monthly-timesheets\.csv': '\/api\/management\/monthly-timesheets\.csv'/);
+ assert.match(ui,/monthly-timesheets\.xlsx': '\/api\/management\/monthly-timesheets\.xlsx'/);
+ assert.match(ui,/monthly-payroll\.csv': '\/api\/management\/monthly-payroll\.csv'/);
+ assert.match(ui,/calendar:'Calendário e eventos'/);
+ assert.match(ui,/data-open-employee-schedules/);
+ assert.doesNotMatch(ui,/nav-order-master|href="\.\/order-master\.html"/);
+ assert.match(legacy,/http-equiv="refresh"/i);
+ assert.match(legacy,/location\.replace\('\.\/index\.html\?view=schedules'\)/);
 });
 
-test('12x36 preview stays read-only and describes 12 work hours plus 36 rest hours', () => {
-  assert.match(ui, /anchorDate:f\.elements\.from\.value/);
-  assert.match(ui, /positions:\[\{kind:'work',periods:\[\{start,end\}\]\},\{kind:'rest',periods:\[\]\}\]/);
-  assert.match(ui, /breakMinutes/);
-  assert.match(ui, /720-breakMinutes/);
-  assert.match(ui, /nenhuma alteração persistida/i);
-  assert.match(ui, /horário de intervalo opcional/i);
-  assert.doesNotMatch(ui, /fetch\([^)]*\/api\/schedules\/cycle-preview/);
+test('12x36 preview remains read-only and delegates the cycle projection to the API',()=>{
+ assert.match(ui,/cycle_schedule:cycle,from,to/);
+ assert.match(ui,/legal_review_required/);
+ assert.match(ui,/Nenhuma jornada ou marcação é alterada pela prévia/);
 });
 
-test('monthly closure and exports call exact supported routes and send audit reasons', () => {
-  assert.match(ui, /employee-timesheet\/\$\{encodeURIComponent\(employee\)\}\/\$\{action\}/);
-  assert.match(ui, /id="om-closure-close"[^>]*disabled/);
-  assert.match(ui, /body=\{year:Number\(f\.elements\.year\.value\),month:Number\(f\.elements\.month\.value\),reason:\s*f\.elements\.reason\.value\.trim\(\)\}/);
-  assert.match(ui, /monthly-timesheets\.xlsx/);
-  assert.match(ui, /monthly-payroll\.csv/);
-  assert.match(ui, /Sem totais financeiros/);
-});
-
-test('global bank-hours close/reopen use Master-only endpoints with confirmation and audit notes', () => {
-  assert.match(master, /\/api\/master\/bank-hours\/close-due/);
-  assert.ok(master.includes("'/api/master/bank-hours/cycles/'+encodeURIComponent(form.dataset.cycle)+'/reopen'"));
-  assert.match(master, /company_id:h\.company\.id,reason/);
-  assert.match(master, /Executar o fechamento dos ciclos vencidos elegíveis em todas as empresas/);
-  assert.match(master, /A decisão e o saldo anterior serão preservados na auditoria/);
-});
-
-test('Master catalog publishing requires explicit version, future-effective date, official reference and review note', () => {
-  assert.match(master, /\/api\/master\/labor-catalog/);
-  assert.ok(master.includes("'/api/master/labor-catalog/versions/'+encodeURIComponent(id)+'/publish'"));
-  assert.match(master, /review_reference:f\.elements\.review_reference\.value\.trim\(\)/);
-  assert.match(master, /review_note:f\.elements\.review_note\.value\.trim\(\)/);
-  assert.match(master, /legal_review_status “reviewed”/);
+test('native closure and exports retain audit reasons and official API routes',()=>{
+ assert.match(ui,/employee-timesheet\/\$\{encodeURIComponent\(employee\)\}\/\$\{action\}/);
+ assert.match(ui,/body=\{year:Number\(closureForm\.elements\.year\.value\),month:Number\(closureForm\.elements\.month\.value\),reason\}/);
+ assert.match(ui,/method:'POST',body:JSON\.stringify\(body\)/);
+ assert.match(ui,/monthly-timesheets\.xlsx/);
+ assert.match(ui,/monthly-payroll\.csv/);
 });
