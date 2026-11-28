@@ -1,0 +1,37 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const http=require('node:http');
+const fs=require('node:fs');
+const path=require('node:path');
+const {chromium}=require('playwright');
+const ROOT=path.resolve(__dirname,'..');
+const EMPLOYEE='00000000-0000-4000-8000-000000000201';
+const BRANCH='00000000-0000-4000-8000-000000000101';
+const COMPANY='00000000-0000-4000-8000-000000000401';
+const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.svg':'image/svg+xml','.json':'application/json','.webmanifest':'application/manifest+json','.woff2':'font/woff2'};
+function staticServer(){return http.createServer((req,res)=>{let pathname;try{pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname)}catch{res.writeHead(400).end();return}const safe=path.resolve(ROOT,`.${pathname}`);if(!safe.startsWith(ROOT+path.sep)){res.writeHead(403).end();return}let file=safe;if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');fs.readFile(file,(e,data)=>{if(e){res.writeHead(404).end('not found');return}res.writeHead(200,{'Content-Type':MIME[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store'}).end(data)})})}
+function json(route,body,status=200){return route.fulfill({status,contentType:'application/json',body:JSON.stringify(body)})}
+test('Gestão Relatórios XLSX button sends authorized monthly filters and downloads OOXML file',async t=>{
+ const web=staticServer();await new Promise(r=>web.listen(0,'127.0.0.1',r));const port=web.address().port;let browser;const calls=[];const xlsx=Buffer.from('PK\x03\x04FAKE-DISPOSABLE-XLSX-FIXTURE');
+ t.after(async()=>{if(browser)await browser.close();await new Promise(r=>web.close(r))});browser=await chromium.launch({headless:true});
+ const context=await browser.newContext({acceptDownloads:true,viewport:{width:1365,height:900}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(({branch,employee,company})=>{sessionStorage.setItem('certus_token','fixture-session-token');sessionStorage.setItem('certus_user',JSON.stringify({id:'00000000-0000-4000-8000-000000000301',name:'Gestora de Fixture',role:'manager',company:{id:company,slug:'xlsx-fixture',name:'Empresa XLSX Fictícia',timezone:'America/Sao_Paulo'}}));}, {branch:BRANCH,employee:EMPLOYEE,company:COMPANY});
+ await page.route('https://certus-api.onrender.com/**',async route=>{const req=route.request(),url=new URL(req.url()),p=url.pathname,method=req.method();calls.push({path:p,method,query:Object.fromEntries(url.searchParams),authorization:req.headers().authorization||'',body:req.postDataJSON?.()||null});
+  if(p==='/api/subscription/access')return json(route,{unlocked:true,is_owner:false});
+  if(p==='/api/me')return json(route,{id:'00000000-0000-4000-8000-000000000301',role:'manager',employee_id:null,company:{id:COMPANY,slug:'xlsx-fixture',name:'Empresa XLSX Fictícia',timezone:'America/Sao_Paulo'}});
+  if(p==='/api/employees')return json(route,{items:[{id:EMPLOYEE,full_name:'Colaboradora Fixture',employee_number:'F-001',status:'active',branch_id:BRANCH}]});
+  if(p==='/api/branches')return json(route,{items:[{id:BRANCH,name:'Filial Fixture',status:'active'}]});
+  if(p==='/api/schedules')return json(route,{items:[]});
+  if(p==='/api/clock-events')return json(route,{items:[]});
+  if(p==='/api/adjustment-requests')return json(route,{items:[]});
+  if(p==='/api/management/overview')return json(route,{item:{rate_percent:0,weekly_overtime_status:'complete',absent_minutes:0,scheduled_minutes:0,weekly_overtime_additional_minutes:0,weekly_overtime_pending_employees:0}});
+  if(p==='/api/management/monthly-timesheets.xlsx'&&method==='GET')return route.fulfill({status:200,contentType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',headers:{'Content-Disposition':'attachment; filename="espelho-de-ponto-2026-10-colaborador-00000000-0000-4000-8000-000000000201.xlsx"'},body:xlsx});
+  return json(route,{error:`Unmocked fixture route ${method} ${p}`},501);
+ });
+ await page.goto(`http://127.0.0.1:${port}/certus/`);await page.waitForSelector('#company-sidebar');await page.locator('button[data-view="reports"]').click();await page.locator('#team-timesheet-pdf-form').waitFor();
+ const form=page.locator('#team-timesheet-pdf-form');await form.locator('[name=employee_id]').selectOption(EMPLOYEE);await form.locator('[name=month]').selectOption('10');await form.locator('[name=year]').fill('2026');
+ const responsePromise=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/management/monthly-timesheets.xlsx');const downloadPromise=page.waitForEvent('download');await page.locator('#team-timesheet-xlsx').click();const [response,download]=await Promise.all([responsePromise,downloadPromise]);
+ assert.equal(response.status(),200);assert.match(response.headers()['content-type'],/openxmlformats-officedocument\.spreadsheetml\.sheet/i);assert.equal(download.suggestedFilename(),'espelho-de-ponto-2026-10-colaborador-00000000-0000-4000-8000-000000000201.xlsx');
+ const call=calls.find(x=>x.path==='/api/management/monthly-timesheets.xlsx');assert.ok(call);assert.equal(call.method,'GET');assert.deepEqual(call.query,{month:'10',year:'2026',employee_id:EMPLOYEE});assert.equal(call.authorization,'Bearer fixture-session-token');await page.getByText('XLSX da apuração oficial baixado.').waitFor();assert.deepEqual(errors,[]);await context.close();
+});
