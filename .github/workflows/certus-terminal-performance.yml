@@ -6,9 +6,10 @@ on:
       - 'certus/terminal.js'
       - 'certus/terminal.performance.test.cjs'
       - 'certus/terminal-offline.test.cjs'
+      - 'certus/terminal-settings.test.cjs'
       - '.github/workflows/certus-terminal-performance.yml'
   push:
-    branches: ['zapia/certus-terminal-first-punch-performance-20261116']
+    branches: ['audit/engine-development-20261127']
     paths:
       - 'certus/terminal.js'
       - 'certus/terminal.performance.test.cjs'
@@ -21,4 +22,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test --test-reporter=spec certus/terminal.performance.test.cjs certus/terminal-offline.test.cjs
+      - run: node --test --test-reporter=spec certus/terminal.performance.test.cjs certus/terminal-offline.test.cjs certus/terminal-settings.test.cjs
