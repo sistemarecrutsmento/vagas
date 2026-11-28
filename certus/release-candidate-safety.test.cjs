@@ -30,7 +30,7 @@ test('pending offline marks remain visibly unconfirmed and validated marks remai
 
 test('shared-terminal settings are nondestructive and direct revocation to the Management portal', () => {
   const start = terminal.indexOf('function showSettings');
-  const end = terminal.indexOf('\nfunction loadFaceApi', start);
+  const end = terminal.indexOf('function loadFaceApi', start);
   assert.ok(start >= 0 && end > start, 'settings function should be present');
   const settings = terminal.slice(start, end);
   assert.match(settings, /Portal Gestão[\s\S]*Terminais e dispositivos/);
