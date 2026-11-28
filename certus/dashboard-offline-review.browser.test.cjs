@@ -77,10 +77,17 @@ async function openDashboard(browser, baseUrl, pendingMode) {
     sessionStorage.setItem('certus_user', JSON.stringify(user));
   }, manager);
   const pageErrors = [];
+  const diagnostics = [];
   page.on('pageerror', error => pageErrors.push(error.message));
+  page.on('console', msg => { if (msg.type() === 'error') diagnostics.push(`console: ${msg.text()}`); });
+  page.on('requestfailed', request => diagnostics.push(`request failed: ${request.url()} ${request.failure()?.errorText || ''}`));
   await page.goto(`${baseUrl}/index.html`);
-  await page.getByRole('heading', { name: 'Empresa Fictícia' }).waitFor();
-  await page.getByRole('heading', { name: 'Marcações recentes' }).waitFor();
+  try {
+    await page.getByRole('heading', { name: 'Empresa Fictícia' }).waitFor({ timeout: 7000 });
+    await page.getByRole('heading', { name: 'Marcações recentes' }).waitFor({ timeout: 7000 });
+  } catch (error) {
+    throw new Error(`${error.message}\nbody: ${(await page.locator('body').innerText()).slice(0, 1500)}\npage errors: ${pageErrors.join(' | ')}\ndiagnostics: ${diagnostics.join(' | ')}`);
+  }
   return { context, page, pageErrors };
 }
 
