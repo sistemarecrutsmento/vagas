@@ -1,0 +1,21 @@
+name: Certus offline mark status UI regression
+on:
+  push:
+    branches: [release/employee-offline-mark-status-20261128]
+    paths:
+      - 'certus/operacao.js'
+      - 'certus/operacao.css'
+      - 'certus/offline-report-mark-label.test.cjs'
+      - 'certus/offline-mark-status.browser.test.cjs'
+      - '.github/workflows/certus-offline-mark-status.yml'
+jobs:
+  offline-mark-status:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install chromium
+      - run: node --test --test-reporter=spec certus/offline-report-mark-label.test.cjs certus/offline-mark-status.browser.test.cjs
