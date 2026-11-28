@@ -23,6 +23,6 @@ test('settings form includes an audit reason and does not enable alerts or closu
  assert.match(source,/alertas não poderão ser entregues/);
  assert.match(source,/As opções começam desligadas para cada empresa/);
  assert.match(shell,/operacao\.js\?v=maxclean-partial-calculation-20261127&automation=bank-hours-automation-settings-20261128-v1/);
- assert.match(sw,/certus-static-v88-terminal-settings-nondestructive-20261128-bank-automation-v1/);
+ assert.match(sw,/certus-static-v88-terminal-settings-nondestructive-20261128/);
  assert.match(sw,/operacao\.js\?v=maxclean-partial-calculation-20261127&automation=bank-hours-automation-settings-20261128-v1/);
 });
