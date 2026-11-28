@@ -93,6 +93,6 @@ test('shared terminal header title remains high-contrast and legible on mobile',
  assert.match(css,/@media\(max-width:650px\)\{\.topbar \.brand>div strong\{font-size:11px;font-weight:750\}\.topbar \.brand>div small\{font-size:10px;font-weight:650\}\}/);
  assert.match(css,/@media\(max-width:365px\)\{\.topbar \.brand>div strong\{font-size:10px\}\.topbar \.brand>div small\{font-size:9px\}\}/);
  assert.match(terminalHtml,/terminal-audit\.css\?v=20261126-terminal-header-contrast-v1/);
- assert.match(serviceWorker,/const VERSION='certus-static-v81-terminal-header-contrast-20261126'/);
+ assert.match(serviceWorker,/const VERSION='certus-static-v88-terminal-settings-nondestructive-20261128'/);
  assert.match(serviceWorker,/terminal-audit\.css\?v=20261126-terminal-header-contrast-v1/);
 });
