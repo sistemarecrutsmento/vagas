@@ -36,11 +36,20 @@ function fixtureServer() {
 }
 
 function mockApi(context, pendingMode) {
+  const corsHeaders = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+    'access-control-allow-headers': 'authorization, content-type, accept'
+  };
   return context.route('https://certus-api.onrender.com/**', async route => {
+    if (route.request().method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: corsHeaders });
+      return;
+    }
     const url = new URL(route.request().url());
     const routePath = url.pathname;
     if (routePath === '/api/offline/clock-events/pending' && pendingMode === 'error') {
-      await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'fixture unavailable' }) });
+      await route.fulfill({ status: 503, contentType: 'application/json', headers: corsHeaders, body: JSON.stringify({ error: 'fixture unavailable' }) });
       return;
     }
     const responses = {
@@ -55,7 +64,7 @@ function mockApi(context, pendingMode) {
       '/api/offline/clock-events/pending': { items: pendingMode === 'two' ? pendingItems : [] },
       '/api/management/overview': { item: { rate_percent: 0, absent_minutes: 0, scheduled_minutes: 0 } }
     };
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(responses[routePath] || { items: [] }) });
+    await route.fulfill({ status: 200, contentType: 'application/json', headers: corsHeaders, body: JSON.stringify(responses[routePath] || { items: [] }) });
   });
 }
 
