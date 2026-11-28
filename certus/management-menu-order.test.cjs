@@ -25,6 +25,6 @@ test('desktop e mobile usam a mesma navegação lateral renderizada', () => {
 
 test('PWA atualiza o cache para a versão nova do menu', () => {
   assert.match(index, /operacao\.js\?v=maxclean-partial-calculation-20261127/);
-  assert.match(serviceWorker, /VERSION='certus-static-v87-maxclean-partial-calculation-20261127'/);
+  assert.match(serviceWorker, /VERSION='certus-static-v88-terminal-settings-nondestructive-20261128'/);
   assert.match(serviceWorker, /\.\/operacao\.js\?v=maxclean-partial-calculation-20261127/);
 });

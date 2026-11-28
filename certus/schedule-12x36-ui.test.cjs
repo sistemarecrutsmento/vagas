@@ -45,6 +45,6 @@ test('12x36 editor accepts a known break duration without inventing fixed break 
 
 test('published portal and PWA shell use the new 12x36 schedule asset version', () => {
   assert.match(indexHtml, /operacao\.js\?v=maxclean-partial-calculation-20261127/);
-  assert.match(serviceWorker, /certus-static-v87-maxclean-partial-calculation-20261127/);
+  assert.match(serviceWorker, /certus-static-v88-terminal-settings-nondestructive-20261128/);
   assert.match(serviceWorker, /operacao\.js\?v=maxclean-partial-calculation-20261127/);
 });
