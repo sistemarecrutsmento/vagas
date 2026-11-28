@@ -6,13 +6,18 @@ on:
       - 'certus/master.html'
       - 'certus/master.integration.test.js'
       - 'certus/master.browser.test.cjs'
+      - 'certus/operacao.js'
+      - 'certus/monthly-export.browser.test.cjs'
       - '.github/workflows/certus-master-draft-tests.yml'
+  workflow_dispatch:
   pull_request:
     branches: [main]
     paths:
       - 'certus/master.html'
       - 'certus/master.integration.test.js'
       - 'certus/master.browser.test.cjs'
+      - 'certus/operacao.js'
+      - 'certus/monthly-export.browser.test.cjs'
       - '.github/workflows/certus-master-draft-tests.yml'
 jobs:
   master-ui:
@@ -24,4 +29,4 @@ jobs:
           node-version: 22
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install chromium
-      - run: node --test --test-reporter=spec certus/master.integration.test.js certus/master.browser.test.cjs
+      - run: node --test --test-reporter=spec certus/master.integration.test.js certus/master.browser.test.cjs certus/monthly-export.browser.test.cjs
